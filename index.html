@@ -105,7 +105,7 @@
     /* MENU 3-LINE BUTTON */
     .menu-icon-btn { background: var(--badge-bg); border: 1px solid var(--badge-border); color: var(--primary); font-size: 1.15rem; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-    /* LEFT SIDE DRAWER MENU - FIXED POSITION INSIDE VIEWPORT & SOFTENED COLORS */
+    /* LEFT SIDE DRAWER MENU - FIXED WIDTH & SOFTENED COLORS */
     .left-drawer { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 10050; display: none; }
     .left-drawer.active { display: block; }
     .left-drawer-content { position: absolute; left: 0; top: 0; bottom: 0; width: 260px; background: var(--modal-bg); border-right: 1px solid var(--card-border); padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 4px 0 24px rgba(0,0,0,0.2); }
@@ -123,14 +123,6 @@
     .category-scroll { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 6px; touch-action: pan-x; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
     .cat-pill { flex-shrink: 0; background: var(--pill-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 7px 13px; border-radius: 18px; font-size: 0.73rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; transition: all 0.2s ease; }
     .cat-pill.active { background: var(--glass-pill-active) !important; border: 1px solid var(--glass-pill-border) !important; color: var(--glass-btn-text) !important; box-shadow: var(--glass-shadow) !important; }
-
-    /* CENTER ACCESSORIES QUICK CARDS */
-    .accessories-quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 12px; width: calc(100% - 24px); }
-    .acc-quick-box { background: var(--card-bg); border: 1.5px solid var(--card-border); border-radius: 22px; padding: 28px 16px; text-align: center; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.06); transition: transform 0.2s; }
-    .acc-quick-box:active { transform: scale(0.97); }
-    .acc-quick-box .acc-icon { font-size: 2.8rem; margin-bottom: 10px; }
-    .acc-quick-box .acc-title { font-weight: 950; font-size: 0.98rem; color: var(--text); }
-    .acc-quick-box .acc-sub { font-size: 0.74rem; color: var(--text-muted); margin-top: 4px; font-weight: 700; }
 
     .content-area { padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; width: 100%; }
     .glass-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 15px; box-shadow: 0 3px 12px rgba(0,0,0,0.03); position: relative; cursor: pointer; user-select: none; width: 100%; }
@@ -240,7 +232,7 @@
 
   <div id="toast" class="toast">Action Success!</div>
 
-  <!-- Left Side Drawer Menu - Properly Bound Inside App Viewport -->
+  <!-- Left Side Drawer Menu - Properly Bounded Inside App Viewport -->
   <div id="leftDrawer" class="left-drawer" onclick="toggleLeftDrawer(false)">
     <div class="left-drawer-content" onclick="event.stopPropagation()">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--card-border); padding-bottom:10px;">
@@ -2486,17 +2478,77 @@ POCO: Poco</textarea>
         document.getElementById('navHome')?.classList.add('active');
         if (searchRow) searchRow.style.display = 'none';
         if (catScroll) catScroll.style.display = 'none';
+        
+        // Modern Home Dashboard layout matching image reference 1
         container.innerHTML = `
-          <div class="accessories-quick-grid">
-            <div class="acc-quick-box" onclick="currentFilter='glass'; renderCards(); selectGlassPillInScroll(); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div class="acc-icon">🛡️</div>
-              <div class="acc-title">Tempered Glass</div>
-              <div class="acc-sub">View All Glass Stock</div>
+          <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1.5px solid #bfdbfe; border-radius: 20px; padding: 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <div>
+              <div style="font-size: 0.72rem; color: #3b82f6; font-weight: 800; text-transform: uppercase; margin-bottom: 2px;">Welcome to</div>
+              <div style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 950; color: #1e3a8a; line-height: 1.2;">SK Mobiles<br>Inventory Management</div>
+              <div style="font-size: 0.67rem; color: #64748b; margin-top: 4px; font-weight: 700;">Stay organized. Track stock.<br>Serve better.</div>
             </div>
-            <div class="acc-quick-box" onclick="currentFilter='combo'; renderCards(); selectComboPillInScroll(); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div class="acc-icon">📱</div>
-              <div class="acc-title">Display Accessories</div>
-              <div class="acc-sub">View Touch Folders</div>
+            <div style="font-size: 2.8rem; background: #ffffff; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(37,99,235,0.12);">📱</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+            <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(37,99,235,0.1); display: flex; align-items: center; justify-content: center; font-size: 1rem;">📦</div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">›</span>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Total Stock</div>
+              <div style="font-size: 1.1rem; font-weight: 950; color: var(--text); margin-top: 2px;">${inventory.reduce((acc, i) => acc + (i.stock || 0), 0)}</div>
+            </div>
+            
+            <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(239,68,68,0.1); display: flex; align-items: center; justify-content: center; font-size: 1rem;">⚠️</div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">›</span>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Low Stock</div>
+              <div style="font-size: 1.1rem; font-weight: 950; color: var(--danger); margin-top: 2px;">${inventory.filter(i => i.stock <= (parseInt(localStorage.getItem('sk_low_threshold')) || 3)).length}</div>
+            </div>
+
+            <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center; font-size: 1rem;">📋</div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">›</span>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Today's Orders</div>
+              <div style="font-size: 1.1rem; font-weight: 950; color: var(--success); margin-top: 2px;">${ordersList.length}</div>
+            </div>
+
+            <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(124,58,237,0.1); display: flex; align-items: center; justify-content: center; font-size: 1rem;">🧾</div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">›</span>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Saved Bills</div>
+              <div style="font-size: 1.1rem; font-weight: 950; color: #7c3aed; margin-top: 2px;">${savedBills.length}</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+            <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="currentFilter='glass'; renderCards(); selectGlassPillInScroll(); window.scrollTo({top: 0, behavior: 'smooth'});">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 14px; background: rgba(37,99,235,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🛡️</div>
+                <div>
+                  <div style="font-weight: 900; font-size: 0.92rem; color: var(--text);">Tempered Glass</div>
+                  <div style="font-size: 0.70rem; color: var(--text-muted); font-weight: 700;">View All Glass Stock</div>
+                </div>
+              </div>
+              <button style="background: var(--primary); color: #fff; border: none; padding: 6px 12px; border-radius: 12px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">View Stock →</button>
+            </div>
+
+            <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="currentFilter='combo'; renderCards(); selectComboPillInScroll(); window.scrollTo({top: 0, behavior: 'smooth'});">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 14px; background: rgba(234,88,12,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">📱</div>
+                <div>
+                  <div style="font-weight: 900; font-size: 0.92rem; color: var(--text);">Display Accessories</div>
+                  <div style="font-size: 0.70rem; color: var(--text-muted); font-weight: 700;">View Touch Folders</div>
+                </div>
+              </div>
+              <button style="background: #ea580c; color: #fff; border: none; padding: 6px 12px; border-radius: 12px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">View Display →</button>
             </div>
           </div>
         `;
@@ -2509,7 +2561,6 @@ POCO: Poco</textarea>
       if (searchRow) searchRow.style.display = 'flex';
       if (catScroll) {
         catScroll.style.display = 'flex';
-        // Highlight active top category pill & auto center
         Array.from(catScroll.querySelectorAll('.cat-pill')).forEach(p => {
           const fn = p.getAttribute('onclick') || '';
           if (fn.includes(`'${currentFilter}'`)) {
