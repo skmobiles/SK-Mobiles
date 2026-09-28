@@ -4401,14 +4401,17 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
       <div class="sk-login-sub">Choose your access and login</div>
       <div class="sk-role-grid">
         <button type="button" class="sk-role-btn active" data-role="admin">👑 Admin</button>
+        <button type="button" class="sk-role-btn" data-role="manager">👨‍💼 Manager</button>
         <button type="button" class="sk-role-btn" data-role="worker">👷 Worker</button>
       </div>
-      <label class="sk-login-label" for="skRolePin">PIN</label>
-      <input id="skRolePin" class="sk-login-input" type="password" inputmode="numeric" maxlength="12" autocomplete="off" placeholder="Admin PIN">
+      <label class="sk-login-label" for="skRoleEmail">Firebase Email</label>
+      <input id="skRoleEmail" class="sk-login-input" type="email" autocomplete="username" placeholder="your email">
+      <label class="sk-login-label" for="skRolePassword">Password</label>
+      <input id="skRolePassword" class="sk-login-input" type="password" autocomplete="current-password" placeholder="Firebase password">
       <select id="skWorkerLoginSelect" class="sk-worker-login-select" aria-label="Select Worker"></select>
-      <button id="skRoleLoginBtn" type="button" class="sk-login-btn">🔐 Login</button>
+      <button id="skRoleLoginBtn" type="button" class="sk-login-btn">🔐 Firebase Login</button>
       <div id="skRoleMsg" class="sk-login-msg"></div>
-      <div class="sk-login-hint">Admin = full access • Worker = limited editing access</div>
+      <div class="sk-login-hint">Your Firebase account role controls access • Admin / Manager / Worker</div>
     </div>
   </div>
   <div id="skAccessBadge" class="sk-access-badge">👷 Worker Mode</div>
@@ -4551,36 +4554,42 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
   <script id="sk-role-access-control-js">
   (function(){
     'use strict';
-    const ROLE_KEY='sk_current_role_v1', ADMIN_PIN_KEY='sk_admin_pin_v1', WORKER_PIN_KEY='sk_worker_pin_v1';
-    const DEFAULT_ADMIN_PIN='1234', DEFAULT_WORKER_PIN='1111';
+    const ROLE_KEY='sk_current_role_v1';
     let selectedRole='admin';
     function role(){return localStorage.getItem(ROLE_KEY)||'';}
     function admin(){return role()==='admin';}
-    function pinKey(r){return r==='admin'?ADMIN_PIN_KEY:WORKER_PIN_KEY;}
-    function pin(r){return localStorage.getItem(pinKey(r))||(r==='admin'?DEFAULT_ADMIN_PIN:DEFAULT_WORKER_PIN);}
+    function manager(){return role()==='manager';}
+    
     function toast(t){if(typeof showToast==='function')showToast(t);}
-    function setRole(r){localStorage.setItem(ROLE_KEY,r);document.body.classList.toggle('sk-worker-mode',r==='worker');}
+    function setRole(r){localStorage.setItem(ROLE_KEY,r);document.body.classList.toggle('sk-worker-mode',r==='worker');document.body.classList.toggle('sk-manager-mode',r==='manager');}
     function gate(show){const g=document.getElementById('skRoleGate');if(g)g.classList.toggle('sk-show',show);}
     function logo(){return localStorage.getItem('sk_custom_logo')||window.SK_MOBILES_EMBEDDED_LOGO||'Logo.png';}
     function message(t){const m=document.getElementById('skRoleMsg');if(m)m.textContent=t||'';}
-    function choose(r){selectedRole=r;document.querySelectorAll('.sk-role-btn').forEach(b=>b.classList.toggle('active',b.dataset.role===r));const p=document.getElementById('skRolePin');if(p){p.value='';p.placeholder=r==='admin'?'Admin PIN':'Worker PIN';p.focus();}message('');}
-    function login(){
-      const p=(document.getElementById('skRolePin')?.value||'').trim();
-      if(p!==pin(selectedRole)){message('❌ Wrong PIN');return;}
-      setRole(selectedRole);
-      gate(false);
-      document.getElementById('skRolePin')?.blur();
-      document.body.style.overflow='';
-      window.scrollTo(0,0);
-      applyRestrictions();
-      refreshAdminButton();
-      setTimeout(()=>{gate(false);applyRestrictions();},0);
-      toast(selectedRole==='admin'?'👑 Admin login successful':'👷 Worker login successful');
+    function choose(r){selectedRole=r;document.querySelectorAll('.sk-role-btn').forEach(b=>b.classList.toggle('active',b.dataset.role===r));const e=document.getElementById('skRoleEmail'),p=document.getElementById('skRolePassword');if(e&&localStorage.getItem('sk_firebase_cloud_email_v1'))e.value=localStorage.getItem('sk_firebase_cloud_email_v1')||'';if(p)p.value='';if(e)e.focus();message('');}
+    async function login(){
+      const email=(document.getElementById('skRoleEmail')?.value||'').trim();
+      const pw=document.getElementById('skRolePassword')?.value||'';
+      if(!email||!pw){message('❌ Firebase email + password required');return;}
+      if(typeof window.skV43CloudRoleLogin!=='function'){message('❌ Firebase cloud module is not ready. Open Settings → Firebase Cloud Sync once.');return;}
+      const btn=document.getElementById('skRoleLoginBtn');if(btn){btn.disabled=true;btn.textContent='⏳ Signing in...';}
+      try{
+        const result=await window.skV43CloudRoleLogin(email,pw,selectedRole);
+        setRole(result.role);
+        localStorage.setItem('sk_current_user_uid_v1',result.uid);
+        localStorage.setItem('sk_current_role_v1',result.role);
+        if(result.role==='worker')localStorage.setItem('sk_current_worker_id_v1',result.uid);else localStorage.removeItem('sk_current_worker_id_v1');
+        gate(false);
+        document.getElementById('skRolePassword')?.blur();document.body.style.overflow='';window.scrollTo(0,0);
+        applyRestrictions();refreshAdminButton();
+        setTimeout(()=>{gate(false);applyRestrictions();refreshAdminButton();},0);
+        toast(result.role==='admin'?'👑 Admin login successful':result.role==='manager'?'👨‍💼 Manager login successful':'👷 Worker login successful');
+      }catch(e){message('❌ '+(e?.message||e));}
+      finally{if(btn){btn.disabled=false;btn.textContent='🔐 Firebase Login';}}
     }
-    window.skLogout=function(){localStorage.removeItem(ROLE_KEY);document.querySelectorAll('.modal-overlay.active').forEach(m=>m.classList.remove('active'));document.getElementById('skAdminPanelModal')?.classList.remove('active');gate(true);choose('admin');};
+    window.skLogout=async function(){try{if(typeof window.skV43CloudLogout==='function')await window.skV43CloudLogout();}catch(e){}localStorage.removeItem(ROLE_KEY);localStorage.removeItem('sk_current_user_uid_v1');localStorage.removeItem('sk_current_worker_id_v1');document.querySelectorAll('.modal-overlay.active').forEach(m=>m.classList.remove('active'));document.getElementById('skAdminPanelModal')?.classList.remove('active');gate(true);choose('admin');};
     window.skOpenAdminPanel=function(){if(!admin()){toast('🔒 Admin access only');return;}document.getElementById('skAdminPanelModal')?.classList.add('active');};
     window.skCloseAdminPanel=function(){document.getElementById('skAdminPanelModal')?.classList.remove('active');};
-    window.skChangePin=function(r){if(!admin()){toast('🔒 Admin access only');return;}const id=r==='admin'?'skNewAdminPin':'skNewWorkerPin';const v=(document.getElementById(id)?.value||'').trim();if(!/^\d{4,12}$/.test(v)){toast('PIN must be 4-12 digits');return;}localStorage.setItem(pinKey(r),v);document.getElementById(id).value='';toast((r==='admin'?'Admin':'Worker')+' PIN updated');};
+    window.skChangePin=function(){toast('🔒 Login passwords are managed by Firebase Authentication.');};
 
     function mark(el){if(el&&!el.classList.contains('sk-worker-blocked'))el.classList.add('sk-worker-blocked');}
     function workerSettingAllowed(el){
@@ -4602,11 +4611,20 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
     const blockedWords=['add item','edit','delete','clear all orders','next status','save repair job','update repair job','backup','restore','stock adjustment','purchase','expense','supplier','used mobile'];
     function applyRestrictions(){
       if(!document.body)return;
-      document.body.classList.toggle('sk-worker-mode',role()==='worker');
-      if(role()!=='worker'){
-        document.querySelectorAll('.sk-worker-blocked').forEach(el=>el.classList.remove('sk-worker-blocked'));
-        return;
-      }
+      const rr=role();
+      document.body.classList.toggle('sk-worker-mode',rr==='worker');
+      document.body.classList.toggle('sk-manager-mode',rr==='manager');
+      document.querySelectorAll('.sk-worker-blocked').forEach(el=>el.classList.remove('sk-worker-blocked'));
+      if(rr==='admin')return;
+      const isMgr=rr==='manager';
+      const blockedForManager=['admin control','shop profile','logo','backup','restore','firebase cloud sync','app data folder','change admin','manage workers','worker management'];
+      document.querySelectorAll('button,a,[role="button"]').forEach(el=>{
+        if(el.closest('#skRoleGate')||el.closest('#skAdminPanelModal'))return;
+        const txt=(el.textContent||'').trim().toLowerCase(),title=(el.getAttribute('title')||'').toLowerCase(),id=(el.id||'').toLowerCase();
+        if(isMgr && (blockedForManager.some(x=>txt.includes(x)||title.includes(x))||id.includes('admincontrol')))mark(el);
+      });
+      if(isMgr)return;
+      if(rr!=='worker')return;
       document.querySelectorAll('button,a,[role="button"]').forEach(el=>{
         if(el.closest('#skRoleGate')||el.closest('#skAdminPanelModal'))return;
         if(el.closest('#settingsModal'))return;
@@ -4618,7 +4636,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
     }
     function guard(name){
       const fn=window[name];if(typeof fn!=='function'||fn.__skRoleGuard)return;
-      const w=function(){if(role()==='worker'){toast('🔒 Admin permission required');return false;}return fn.apply(this,arguments);};w.__skRoleGuard=true;window[name]=w;
+      const w=function(){if(role()!=='admin'){toast('🔒 Admin permission required');return false;}return fn.apply(this,arguments);};w.__skRoleGuard=true;window[name]=w;
     }
     function guardFunctions(){['saveInventory','saveOrders','saveManualInventoryItem','deleteInventoryItem','updateStock','clearAllOrders','saveUsedBill','deleteSavedBill','saveRepairSparesNote','triggerEditFromContext','triggerDeleteFromContext','skRjSaveJob','skRjDelete','skRjNext','exportAppDataBackup','importAppDataBackup','saveLowStockThreshold'].forEach(guard);}
     function addAdminButton(){
@@ -4637,11 +4655,12 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
     function init(){
       document.querySelectorAll('.sk-role-btn').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.role)));
       document.getElementById('skRoleLoginBtn')?.addEventListener('click',login);
-      document.getElementById('skRolePin')?.addEventListener('keydown',e=>{if(e.key==='Enter')login();});
-      const r=role();if(r==='admin'||r==='worker'){setRole(r);applyRestrictions();}else gate(true);
+      document.getElementById('skRoleEmail')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('skRolePassword')?.focus();});
+      document.getElementById('skRolePassword')?.addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+      const r=role();if(r==='admin'||r==='manager'||r==='worker'){setRole(r);applyRestrictions();}else gate(true);
       const img=document.getElementById('skLoginLogo');if(img)img.src=logo();
       addAdminButton();refreshAdminButton();guardFunctions();
-      const obs=new MutationObserver(()=>{guardFunctions();addAdminButton();refreshAdminButton();if(role()==='worker')applyRestrictions();});
+      const obs=new MutationObserver(()=>{guardFunctions();addAdminButton();refreshAdminButton();if(role()==='worker'||role()==='manager')applyRestrictions();});
       obs.observe(document.body,{childList:true,subtree:true});
     }
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
@@ -4788,7 +4807,7 @@ body.sk-worker-mode #settingsModal .sk-worker-blocked{pointer-events:none!import
     const r=localStorage.getItem('sk_current_role_v1');
     if((r==='admin'||r==='worker') && gate && gate.classList.contains('sk-show')){
       gate.classList.remove('sk-show');
-      document.body.classList.toggle('sk-worker-mode',r==='worker');
+      document.body.classList.toggle('sk-worker-mode',r==='worker');document.body.classList.toggle('sk-manager-mode',r==='manager');
       document.body.style.overflow='';
     }
 
@@ -7290,7 +7309,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const $=id=>document.getElementById(id);
   const toast=t=>{if(typeof window.showToast==='function')window.showToast(t);};
   function admin(){return localStorage.getItem('sk_current_role_v1')==='admin';}
-  function cfg(){try{return JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}catch(e){return {}}}
+  const DEFAULT_FIREBASE_CONFIG={apiKey:'AIzaSyDufQNy7l9M3ue_32u3gcH3TZUhPlrSILA',authDomain:'sk-mobiles-2d61d.firebaseapp.com',projectId:'sk-mobiles-2d61d',storageBucket:'sk-mobiles-2d61d.firebasestorage.app',messagingSenderId:'705961182597',appId:'1:705961182597:web:fa8238739d140b250df0ec'};
+  function cfg(){try{return {...DEFAULT_FIREBASE_CONFIG,...JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}}catch(e){return {...DEFAULT_FIREBASE_CONFIG}}}
   function shop(){return (localStorage.getItem(SHOP_KEY)||'SK-MOBILES').trim()||'SK-MOBILES';}
   function setStatus(t,ok){const e=$('skV43CloudStatus');if(e){e.textContent=t;e.style.color=ok?'#047857':'var(--text-muted)';}}
   function readAll(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&!k.startsWith('sk_firebase_'))o[k]=localStorage.getItem(k);}return o;}
@@ -7328,6 +7348,33 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     const email=($('skFbCloudEmail')?.value||'').trim(),pw=$('skFbCloudPassword')?.value||'';if(!email||!pw){toast('⚠️ Cloud email + password required');return;}
     try{await firebaseFns.signInWithEmailAndPassword(auth,email,pw);localStorage.setItem(EMAIL_KEY,email);toast('✅ Cloud login successful');}catch(e){toast('❌ Cloud login failed: '+(e.code||e.message));}
   }
+  async function cloudRoleLogin(email,pw,requestedRole){
+    const c=cfg();
+    if(!c.apiKey||!c.projectId||!c.appId){throw new Error('Firebase config not saved. Admin must save Firebase Web config first.');}
+    try{
+      const f=await loadSdk();
+      if(!app)app=f.getApps().length?f.getApp():f.initializeApp(c);
+      auth=f.getAuth(app);db=f.getFirestore(app);
+      const cred=await f.signInWithEmailAndPassword(auth,email,pw);
+      const u=cred.user;
+      const snap=await f.getDoc(f.doc(db,'users',u.uid));
+      if(!snap.exists()) throw new Error('Your Firebase account has no users profile in Firestore.');
+      const profile=snap.data()||{},r=String(profile.role||'').toLowerCase(),status=String(profile.status||'').toLowerCase();
+      if(status!=='active') throw new Error('This account is not active.');
+      if(!['admin','manager','worker'].includes(r)) throw new Error('Invalid user role in Firestore.');
+      if(requestedRole&&requestedRole!==r) throw new Error('Selected access does not match your account role.');
+      user=u;ready=true;renderAuth();
+      setStatus('☁️ Cloud connected • '+(u.email||u.uid),true);
+      await pullCloud();listenCloud();
+      localStorage.setItem(EMAIL_KEY,u.email||email);
+      return {uid:u.uid,email:u.email||email,role:r,profile};
+    }catch(e){
+      console.error(e);
+      try{if(auth&&auth.currentUser)await fSignOutSafe();}catch(x){}
+      throw e;
+    }
+  }
+  async function fSignOutSafe(){if(auth&&firebaseFns)await firebaseFns.signOut(auth);}
   async function cloudLogout(){try{if(auth)await firebaseFns.signOut(auth);if(unsub){unsub();unsub=null;}ready=false;toast('☁️ Cloud logged out');}catch(e){}}
   async function syncAll(){
     if(!ready||!db||!user){toast('⚠️ Cloud login first');return;}
@@ -7389,7 +7436,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     panel.appendChild(box);fillCfg();renderAuth();init();hookStorage();
   }
   window.skV43SaveFirebaseConfig=function(){if(!admin()){toast('🔒 Admin access only');return;}if(saveCfg()){toast('✅ Firebase config saved');init();}};
-  window.skV43CloudLogin=cloudLogin;window.skV43CloudLogout=cloudLogout;window.skV43CloudSync=syncAll;window.skV43CloudPull=pullCloud;window.skV43EnablePush=enablePush;window.skV43CheckUpdate=checkUpdate;
+  window.skV43CloudLogin=cloudLogin;window.skV43CloudRoleLogin=cloudRoleLogin;window.skV43CloudLogout=cloudLogout;window.skV43CloudSync=syncAll;window.skV43CloudPull=pullCloud;window.skV43EnablePush=enablePush;window.skV43CheckUpdate=checkUpdate;
   window.skV43CloudPublishVersion=async function(version,message){if(!admin()||!ready||!db){toast('⚠️ Admin cloud login required');return;}const f=firebaseFns;await f.setDoc(f.doc(db,'shops',shop(),'appConfig','current'),{version:String(version),message:message||('SK Mobiles new update '+version),title:'SK Mobiles Update',publishedAt:f.serverTimestamp(),publishedBy:user.uid},{merge:true});toast('📢 Update record published');};
   function boot(){addUI();setTimeout(addUI,500);setTimeout(addUI,1500);setInterval(addUI,1000);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
