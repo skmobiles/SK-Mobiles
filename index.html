@@ -541,7 +541,7 @@
      <button class="menu-drawer-btn logout" onclick="skLogout(); toggleLeftDrawer(false);">🔒 Logout</button>
     </div>
     <div style="margin-top:auto; font-size:0.68rem; color:var(--text-muted); text-align:center; border-top:1px solid var(--card-border); padding-top:8px;">
-     SK Mobiles Master • V4.9
+     SK Mobiles Master • V4.10
      <br>
      Dharmapuri, Tamil Nadu
     </div>
@@ -755,7 +755,8 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
      <button id="billTabBtnHistory" class="billing-tab-btn" onclick="switchBillTab('history')">📋 History <span id="billHistoryCount">0</span></button>
     </div>
     <div class="sk-v49-bill-type-tabs" aria-label="Bill type">
-     <button type="button" id="skV49UsedMobileTab" class="sk-v49-used-mobile-tab active" onclick="skV49SetBillType('Used Mobile')">📱 Used Mobile</button>
+     <button type="button" id="skV49NewMobileTab" class="sk-v49-bill-type-tab active" onclick="skV49SetBillType('New Mobile')">📱 New Mobile</button>
+     <button type="button" id="skV49UsedMobileTab" class="sk-v49-bill-type-tab" onclick="skV49SetBillType('Used Mobile')">📱 Used Mobile</button>
     </div>
     <div id="billNewView">
      <form id="usedMobileBillingForm" onsubmit="event.preventDefault();" style="display:flex;flex-direction:column;gap:10px;">
@@ -803,7 +804,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
        <div style="margin-top:8px;">
         <label class="form-label">Package</label> <select id="billPackage" class="form-input" onchange="saveDraft(); updateBillPreview()"> <option value="Full Kit (Box + Charger + Bill)">Full Kit (Box + Charger + Bill)</option> <option value="Box Only (Mobile + Box)">Box Only (Mobile + Box)</option> <option value="Mobile + Charger">Mobile + Charger</option> <option value="Mobile Only">Mobile Only</option> </select>
        </div>
-       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+       <div class="sk-v49-imei-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
         <div>
          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
           <label class="form-label" style="margin:0;">IMEI 1 *</label>
@@ -1034,7 +1035,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
       <img id="appHeaderLogo" src="Logo.png" alt="SK MOBILES" class="sk-logo-img" onclick="document.getElementById('logoFileInput').click()" title="Click to change logo">
       <div>
        <div class="app-name" id="appHeaderTitle">SK MOBILES</div>
-       <div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.9</span></div>
+       <div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.10</span></div>
       </div>
      </div>
     </div>
@@ -2330,6 +2331,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
           storage: document.getElementById('billStorage').value || '',
           color: document.getElementById('billColor').value || '',
           imei1: document.getElementById('billImei1').value || '',
+          billType: localStorage.getItem('sk_v49_current_bill_type') || 'New Mobile',
           payMode: currentPayMode,
           price: price,
           advance: parseFloat(document.getElementById('billAdvance').value) || 0,
@@ -6341,7 +6343,7 @@ var previousRenderCards=window.renderCards;if(typeof previousRenderCards==='func
   <div class="sk-v42-profile-box" style="text-align:center;margin-bottom:9px;"><div style="font-size:2.1rem;margin-bottom:4px;">👑</div><div style="font-size:1rem;font-weight:950;">SK MOBILES Admin</div><div style="font-size:.68rem;color:var(--text-muted);margin-top:3px;">Full Access Account</div></div>
   <div class="sk-v42-profile-grid">
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCOUNT</div><b>Admin</b></div>
-   <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.9</b></div>
+   <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.10</b></div>
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">WORKERS</div><b id="skAdminProfileWorkerCount">0</b></div>
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCESS</div><b>Full Access</b></div>
   </div>
@@ -7016,33 +7018,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     window.saveUsedBill=w;
   }
 
-  /* 4) Admin: re-download the exact completed bill shown in Bill Details. */
-  window.skAdminRedownloadSavedBill=function(idx){
-    if(!isAdmin()){toast('🔒 Admin access required');return;}
-    var b=(typeof savedBills!=='undefined')?savedBills[idx]:null;
-    if(!b){toast('Bill not found');return;}
-    if(typeof originalViewSavedBill==='function')originalViewSavedBill(idx);
-    else if(typeof window.viewSavedBill==='function')window.viewSavedBill(idx);
-
-    setTimeout(function(){
-      var source=document.getElementById('viewBillContent');
-      if(!source||typeof html2pdf==='undefined'){toast('PDF download is not available');return;}
-      var clone=source.cloneNode(true);
-      clone.querySelectorAll('button').forEach(function(x){x.remove();});
-      clone.style.width='750px';
-      clone.style.maxWidth='750px';
-      clone.style.margin='0 auto';
-      clone.style.background='#ffffff';
-      var holder=document.createElement('div');
-      holder.style.position='fixed';holder.style.left='-99999px';holder.style.top='0';holder.style.background='#fff';
-      holder.appendChild(clone);document.body.appendChild(holder);
-      var opt={margin:[15,15,15,15],filename:((b.id||'SK-Bill')+'.pdf'),image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true,backgroundColor:'#fff'},jsPDF:{unit:'pt',format:'a4',orientation:'portrait'}};
-      toast('Preparing bill PDF...');
-      html2pdf().set(opt).from(clone).save().then(function(){holder.remove();toast('✅ Bill PDF downloaded');}).catch(function(){holder.remove();toast('❌ Bill PDF download failed');});
-    },120);
-  };
-
-  /* 5) History controls: Admin + Manager get Edit; Admin also gets Re-download. */
+  /* 5) History controls: Admin + Manager get Edit. */
   function addAdminHistoryControls(){
     var c=document.getElementById('billHistoryContainer');
     if(!c)return;
@@ -7083,15 +7059,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       /* Important: do not inject the same controls again on every MutationObserver run. */
       if(!item.querySelector('.sk-v43-history-edit')) {
         var html='<button type="button" class="sk-v43-manager-edit sk-v43-history-edit" onclick="skAdminEditSavedBill('+actual+')" style="background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.25);color:var(--primary);border-radius:10px;width:34px;height:34px;cursor:pointer;" title="Edit Completed Bill">✏️</button>';
-        if(isAdmin()){
-          html+='<button type="button" class="sk-v43-admin-only sk-v43-history-edit" onclick="skAdminRedownloadSavedBill('+actual+')" style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:#059669;border-radius:10px;width:34px;height:34px;cursor:pointer;" title="Re-download Bill">⬇️</button>';
-        }
         del.insertAdjacentHTML('beforebegin',html);
       } else {
         var edit=item.querySelector('.sk-v43-manager-edit.sk-v43-history-edit');
         if(edit)edit.setAttribute('onclick','skAdminEditSavedBill('+actual+')');
-        var redl=item.querySelector('.sk-v43-admin-only.sk-v43-history-edit');
-        if(redl)redl.setAttribute('onclick','skAdminRedownloadSavedBill('+actual+')');
       }
     });
   }
@@ -7113,7 +7084,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         });
         if(canEditCompletedBill() && !box.querySelector('.sk-v43-view-history-edit')){
           var footer=document.createElement('div');footer.className='sk-v43-manager-edit sk-v43-view-history-edit';footer.style.cssText='display:flex;gap:8px;margin-top:10px;';
-          footer.innerHTML='<button type="button" class="submit-btn" style="flex:1;padding:9px;font-size:.74rem;background:var(--primary);color:#fff;" onclick="skAdminEditSavedBill('+idx+')">✏️ Edit Bill</button>'+(isAdmin()?'<button type="button" class="submit-btn" style="flex:1;padding:9px;font-size:.74rem;background:#059669;color:#fff;" onclick="skAdminRedownloadSavedBill('+idx+')">⬇️ Re-download PDF</button>':'');
+          footer.innerHTML='<button type="button" class="submit-btn" style="flex:1;padding:9px;font-size:.74rem;background:var(--primary);color:#fff;" onclick="skAdminEditSavedBill('+idx+')">✏️ Edit Bill</button>';
           box.appendChild(footer);
         }
       },20);
@@ -7260,7 +7231,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 <!-- /SK MOBILES UPDATE-SAFE DATA SNAPSHOT -->
 
-<!-- SK V4.9 ADDITIVE FIX: reliable logout + auto-login -->
+<!-- SK V4.10 ADDITIVE FIX: reliable logout + auto-login -->
 <style id="sk-v48-logout-autologin-fix-css">
   script, template { display:none !important; }
 </style>
@@ -7933,7 +7904,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 <!-- /SK V4.3 CLOUD SYNC + FCM UPDATE FOUNDATION -->
 
-<!-- SK MOBILES V4.9 SCOPE-ONLY FIXES -->
+<!-- SK MOBILES V4.10 SCOPE-ONLY FIXES -->
 <style id="sk-v49-billing-login-qr-css">
   .sk-v49-bill-type-tabs{
     display:flex;
@@ -7944,17 +7915,34 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     background:rgba(245,158,11,.10);
     border:1px solid rgba(245,158,11,.28);
   }
-  .sk-v49-used-mobile-tab{
+  .sk-v49-bill-type-tab{
     flex:1;
-    border:1px solid #f59e0b;
+    border:1px solid #cbd5e1;
     border-radius:10px;
     padding:9px 10px;
-    background:#f59e0b;
-    color:#fff;
+    background:#fff;
+    color:#475569;
     font-size:.76rem;
     font-weight:900;
     cursor:pointer;
+    min-width:0;
+  }
+  .sk-v49-bill-type-tab.active{
+    border-color:#f59e0b;
+    background:#f59e0b;
+    color:#fff;
     box-shadow:0 4px 12px rgba(245,158,11,.20);
+  }
+  /* Keep IMEI 1 and IMEI 2 exactly equal width on mobile and desktop. */
+  #billNewView .sk-v49-imei-grid{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    gap:8px !important;
+    width:100%;
+  }
+  #billNewView .sk-v49-imei-grid > div{
+    min-width:0;
+    width:100%;
   }
   .sk-v49-invoice-used-badge{
     display:inline-flex;
@@ -8167,13 +8155,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   async function v49SetPin(){
     var email=(document.getElementById('skRoleEmail')?.value||'').trim();
     var pw=(document.getElementById('skRolePassword')?.value||'');
-    if(!email||!pw){
-      v49SetMethod('firebase');
-      var msg=document.getElementById('skRoleMsg');
-      if(msg)msg.textContent='⚠️ First enter Gmail + Password, then set the 4-digit PIN.';
-      document.getElementById('skRoleEmail')?.focus();
-      return;
-    }
+    /*
+     * PIN setup is an optional quick-login feature. When the Gmail fields are
+     * hidden on the PIN tab, collect them explicitly instead of sending an
+     * empty value to Firebase (which caused auth/invalid-email).
+     */
+    if(!email)email=String(prompt('Enter your Gmail / Firebase email:')||'').trim();
+    if(!email){var m0=document.getElementById('skRoleMsg');if(m0)m0.textContent='⚠️ Gmail / Firebase email is required to set the PIN.';return;}
+    if(!pw)pw=String(prompt('Enter your Firebase password:')||'');
+    if(!pw){var m1=document.getElementById('skRoleMsg');if(m1)m1.textContent='⚠️ Firebase password is required to set the PIN.';return;}
     if(typeof window.skV43CloudRoleLogin!=='function'){
       var msg2=document.getElementById('skRoleMsg');if(msg2)msg2.textContent='❌ Firebase module is not ready.';
       return;
@@ -8268,24 +8258,34 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     localStorage.setItem(seqKey,String(seq));
     return 'SK-'+v49Pad(d.getDate())+v49Pad(d.getMonth()+1)+'-'+String(seq).padStart(3,'0');
   }
+  var V49_BILL_TYPE_KEY='sk_v49_current_bill_type';
+  var v49BillType='New Mobile';
+
+  function v49SetBillTypeUI(type){
+    v49BillType=(String(type||'New Mobile')==='Used Mobile')?'Used Mobile':'New Mobile';
+    localStorage.setItem(V49_BILL_TYPE_KEY,v49BillType);
+    var badge=document.getElementById('pvBillTypeBadge');
+    var newTab=document.getElementById('skV49NewMobileTab');
+    var usedTab=document.getElementById('skV49UsedMobileTab');
+    if(badge)badge.textContent='📱 '+v49BillType.toUpperCase();
+    if(newTab)newTab.classList.toggle('active',v49BillType==='New Mobile');
+    if(usedTab)usedTab.classList.toggle('active',v49BillType==='Used Mobile');
+  }
+  window.skV49SetBillType=function(type){v49SetBillTypeUI(type);};
+
   function v49SetBillNo(){
     var no=localStorage.getItem('sk_v49_current_bill_no')||v49NextBillNo();
     localStorage.setItem('sk_v49_current_bill_no',no);
     var el=document.getElementById('pvBillNo');if(el)el.textContent=no;
-    var badge=document.getElementById('pvBillTypeBadge');if(badge)badge.textContent='📱 USED MOBILE';
+    v49SetBillTypeUI(localStorage.getItem(V49_BILL_TYPE_KEY)||'New Mobile');
   }
-  window.skV49SetBillType=function(type){
-    var badge=document.getElementById('pvBillTypeBadge');
-    var tab=document.getElementById('skV49UsedMobileTab');
-    if(badge)badge.textContent='📱 '+String(type||'Used Mobile').toUpperCase();
-    if(tab)tab.classList.add('active');
-  };
 
   function v49WrapNewBill(){
     if(typeof window.handleNewBillClick!=='function'||window.handleNewBillClick.__skV49Wrapped)return;
     var original=window.handleNewBillClick;
     var wrapped=function(){
       localStorage.removeItem('sk_v49_current_bill_no');
+      localStorage.setItem(V49_BILL_TYPE_KEY,'New Mobile');
       var r=original.apply(this,arguments);
       v49SetBillNo();
       return r;
@@ -8361,12 +8361,22 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }
   };
 
+  var v49PageGuardTimer=null;
+  function v49KeepLoginGate(){
+    if(v49PageGuardTimer)return;
+    v49PageGuardTimer=setInterval(function(){
+      var role=localStorage.getItem('sk_current_role_v1')||'';
+      if(!role)v49Gate(true);
+    },250);
+  }
+
   function v49Init(){
     v49InjectLoginUI();
     v49SetMethod('firebase');
     v49DirectLogin();
     v49SetBillNo();
     v49WrapNewBill();
+    v49KeepLoginGate();
     var pin=document.getElementById('skV49PinInput');
     if(pin)pin.addEventListener('keydown',function(e){if(e.key==='Enter')v49PinLogin();});
   }
@@ -8379,6 +8389,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   window.addEventListener('pagehide',stopQrStream);
 })();
 </script>
-<!-- /SK MOBILES V4.9 SCOPE-ONLY FIXES -->
+<!-- /SK MOBILES V4.10 SCOPE-ONLY FIXES -->
 
 </html>
