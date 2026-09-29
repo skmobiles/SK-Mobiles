@@ -1,21 +1,21 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="ta" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#f8fafc" />
-    <meta name="description" content="SK Mobiles - Tempered Glass & Inventory Master" />
     <meta name="application-name" content="SK Mobiles" />
+    <meta name="description" content="SK Mobiles - Tempered Glass & Inventory Master" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="SK Mobiles" />
 
-    <title>SK Mobiles - Inventory Master</title>
+    <title>SK Mobiles - Glass & Inventory Master V4.14</title>
 
-    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="logo.png" />
     <link rel="shortcut icon" type="image/png" href="logo.png" />
-    <link rel="apple-touch-icon" type="image/png" href="logo.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="logo.png" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -32,19 +32,17 @@
   </head>
 
   <body>
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
-      Action completed
-    </div>
+    <!-- 🔔 TOAST NOTIFICATION -->
+    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-    <!-- AUTH GATE / LOGIN MODAL -->
-    <div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <!-- 🔐 AUTH GATE / LOGIN MODAL -->
+    <div id="authGate" class="auth-gate sk-show" role="dialog" aria-modal="true" aria-labelledby="authTitle">
       <div class="auth-card">
-        <img src="logo.png" alt="SK Mobiles" class="auth-logo" />
+        <img id="authLogo" src="logo.png" alt="SK Mobiles" class="auth-logo" />
         <h1 id="authTitle" class="auth-title">SK MOBILES</h1>
         <p id="authSubtitle" class="auth-subtitle">Enter credentials to proceed</p>
 
-        <!-- LOGIN STEP 1: EMAIL & PASSWORD -->
+        <!-- STEP 1: EMAIL & PASSWORD LOGIN -->
         <div id="loginStep1" class="auth-panel" data-step="email-password">
           <div class="form-group">
             <label for="emailInput" class="form-label">Gmail / Email Address</label>
@@ -73,7 +71,7 @@
           <button id="loginBtn" class="form-button" type="button">🔐 Verify & Login</button>
         </div>
 
-        <!-- LOGIN STEP 2: SET PIN -->
+        <!-- STEP 2: SET 4-DIGIT PIN -->
         <div id="loginStep2" class="auth-panel" data-step="set-pin" style="display: none">
           <div class="auth-banner">
             🔒 Set a 4-digit security PIN. After this, only this PIN is required to unlock the app!
@@ -110,7 +108,7 @@
           </button>
         </div>
 
-        <!-- LOGIN STEP 3: PIN ONLY -->
+        <!-- STEP 3: PIN-ONLY UNLOCK -->
         <div id="loginStep3" class="auth-panel" data-step="pin-only" style="display: none">
           <div class="form-group">
             <label for="pinInputQuick" class="form-label form-label-center">Enter 4-Digit Security PIN</label>
@@ -127,9 +125,8 @@
           </div>
 
           <button id="unlockBtn" class="form-button" type="button">🔓 Unlock App</button>
-
           <button id="resetPinBtn" class="form-button-text" type="button">
-            Forgot PIN? Login with Gmail
+            Forgot PIN / Login with Gmail
           </button>
         </div>
 
@@ -137,15 +134,15 @@
       </div>
     </div>
 
-    <!-- MAIN APP SHELL -->
+    <!-- 📱 MAIN APP SHELL -->
     <div id="appShell" class="app-shell" style="display: none">
       <!-- HEADER -->
       <header class="app-header">
-        <div class="header-content">
+        <div class="header-row">
           <div class="logo-section">
-            <img src="logo.png" alt="SK Mobiles" class="logo-image" />
+            <img id="headerLogo" src="logo.png" alt="SK MOBILES" class="logo-image" />
             <div>
-              <h1 class="app-title">SK MOBILES</h1>
+              <h1 class="app-name">SK MOBILES</h1>
               <p class="app-subtitle">Tempered Glass & Inventory Master</p>
             </div>
           </div>
@@ -160,7 +157,7 @@
       <main class="content-area">
         <section class="hero-section">
           <div class="hero-icon">📱</div>
-          <h2>SK Mobiles App</h2>
+          <h2>SK Mobiles App Ready</h2>
           <p>Secure PIN login configured successfully.</p>
         </section>
 
@@ -194,23 +191,23 @@
       </nav>
     </div>
 
-    <!-- THEME MODAL -->
-    <dialog id="themeModal" class="modal" aria-labelledby="themeTitle">
+    <!-- 🎨 THEME MODAL -->
+    <dialog id="themeModal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
           <h2 id="themeTitle">Select Theme</h2>
-          <button class="modal-close" type="button" aria-label="Close theme menu">✕</button>
+          <button class="modal-close" id="closeThemeBtn" type="button" aria-label="Close theme modal">✕</button>
         </div>
 
         <div class="theme-grid">
-          <button class="theme-option" type="button" data-theme="light">🛡️ Classic Blue</button>
-          <button class="theme-option" type="button" data-theme="ocean">🌊 Ocean</button>
-          <button class="theme-option" type="button" data-theme="royal">🔮 Royal</button>
-          <button class="theme-option" type="button" data-theme="sunset">🌅 Sunset</button>
-          <button class="theme-option" type="button" data-theme="emerald">🍃 Emerald</button>
-          <button class="theme-option" type="button" data-theme="rose">🌹 Rose</button>
-          <button class="theme-option" type="button" data-theme="midnight">🌌 Midnight</button>
-          <button class="theme-option" type="button" data-theme="dark">🌙 Dark</button>
+          <button class="theme-chip" type="button" data-theme="light">🛡️ Classic Blue</button>
+          <button class="theme-chip" type="button" data-theme="ocean">🌊 Ocean</button>
+          <button class="theme-chip" type="button" data-theme="royal">🔮 Royal</button>
+          <button class="theme-chip" type="button" data-theme="sunset">🌅 Sunset</button>
+          <button class="theme-chip" type="button" data-theme="emerald">🍃 Emerald</button>
+          <button class="theme-chip" type="button" data-theme="rose">🌹 Rose</button>
+          <button class="theme-chip" type="button" data-theme="midnight">🌌 Midnight</button>
+          <button class="theme-chip" type="button" data-theme="dark">🌙 Dark</button>
         </div>
       </div>
     </dialog>
