@@ -1,4 +1,4 @@
-[SK_app_V4.8_Clean_Mobile_Logout_AutoLogin.html](https://github.com/user-attachments/files/32801746/SK_app_V4.8_Clean_Mobile_Logout_AutoLogin.html)
+[SK_app_V4.9_Mobile_Login_Billing_QR_FIXED.html](https://github.com/user-attachments/files/32802552/SK_app_V4.9_Mobile_Login_Billing_QR_FIXED.html)
 <!doctype html>
 <html lang="ta" data-theme="light">
  <head>
@@ -542,7 +542,7 @@
      <button class="menu-drawer-btn logout" onclick="skLogout(); toggleLeftDrawer(false);">🔒 Logout</button>
     </div>
     <div style="margin-top:auto; font-size:0.68rem; color:var(--text-muted); text-align:center; border-top:1px solid var(--card-border); padding-top:8px;">
-     SK Mobiles Master • V4.8
+     SK Mobiles Master • V4.9
      <br>
      Dharmapuri, Tamil Nadu
     </div>
@@ -755,6 +755,9 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
      <button id="billTabBtnNew" class="billing-tab-btn active" onclick="handleNewBillClick()">➕ New Bill</button>
      <button id="billTabBtnHistory" class="billing-tab-btn" onclick="switchBillTab('history')">📋 History <span id="billHistoryCount">0</span></button>
     </div>
+    <div class="sk-v49-bill-type-tabs" aria-label="Bill type">
+     <button type="button" id="skV49UsedMobileTab" class="sk-v49-used-mobile-tab active" onclick="skV49SetBillType('Used Mobile')">📱 Used Mobile</button>
+    </div>
     <div id="billNewView">
      <form id="usedMobileBillingForm" onsubmit="event.preventDefault();" style="display:flex;flex-direction:column;gap:10px;">
       <div class="bill-section">
@@ -803,7 +806,11 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
        </div>
        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
         <div>
-         <label class="form-label">IMEI 1 *</label> <input type="text" id="billImei1" class="form-input" placeholder="15 digit IMEI" maxlength="16" onfocus="handleInputClear(this)" oninput="saveDraft(); updateBillPreview()" required>
+         <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+          <label class="form-label" style="margin:0;">IMEI 1 *</label>
+          <button type="button" class="sk-v49-qr-btn" onclick="skV49OpenQrScanner('billImei1')">📷 Scan QR</button>
+         </div>
+         <input type="text" id="billImei1" class="form-input" placeholder="15 digit IMEI" maxlength="16" onfocus="handleInputClear(this)" oninput="saveDraft(); updateBillPreview()" required>
         </div>
         <div>
          <label class="form-label">IMEI 2 (Optional)</label> <input type="text" id="billImei2" class="form-input" placeholder="Optional" maxlength="16" onfocus="handleInputClear(this)" oninput="saveDraft(); updateBillPreview()">
@@ -893,6 +900,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
            <strong>Date:</strong> <span id="pvBillDate">26-09-2026</span>
           </div>
          </div>
+         <div id="pvBillTypeBadge" class="sk-v49-invoice-used-badge">📱 USED MOBILE</div>
          <div style="font-size:.74rem;color:#1e293b;margin-bottom:12px;background:#f8fafc;padding:9px;border-radius:12px;border:1px solid #e2e8f0;">
           <div>
            <strong>Customer:</strong> <span id="pvCustName">---</span>
@@ -1027,7 +1035,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
       <img id="appHeaderLogo" src="Logo.png" alt="SK MOBILES" class="sk-logo-img" onclick="document.getElementById('logoFileInput').click()" title="Click to change logo">
       <div>
        <div class="app-name" id="appHeaderTitle">SK MOBILES</div>
-       <div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.8</span></div>
+       <div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.9</span></div>
       </div>
      </div>
     </div>
@@ -3501,7 +3509,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 
       html2pdf().set(opt).from(clone).outputPdf('blob').then((pdfBlob) => {
         holder.remove();
-        const pdfFile = new File([pdfBlob], "SK_Mobiles_Invoice.pdf", { type: "application/pdf" });
+        const pdfFile = new File([pdfBlob], ((document.getElementById('pvBillNo')?.innerText || 'SK-Bill') + '.pdf'), { type: 'application/pdf' });
         
         if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
           navigator.share({
@@ -5803,7 +5811,7 @@ var previousRenderCards=window.renderCards;if(typeof previousRenderCards==='func
           if(data && Array.isArray(data.files) && data.files.length){
             var files = data.files.map(function(file){
               try{
-                var safeName = 'SK_Mobiles_Invoice_' + billNo.replace(/[^\w-]/g,'_') + '.pdf';
+                var safeName = billNo.replace(/[^\w-]/g,'_') + '.pdf';
                 return new File([file], safeName, {type:file.type || 'application/pdf'});
               }catch(e){ return file; }
             });
@@ -6334,7 +6342,7 @@ var previousRenderCards=window.renderCards;if(typeof previousRenderCards==='func
   <div class="sk-v42-profile-box" style="text-align:center;margin-bottom:9px;"><div style="font-size:2.1rem;margin-bottom:4px;">👑</div><div style="font-size:1rem;font-weight:950;">SK MOBILES Admin</div><div style="font-size:.68rem;color:var(--text-muted);margin-top:3px;">Full Access Account</div></div>
   <div class="sk-v42-profile-grid">
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCOUNT</div><b>Admin</b></div>
-   <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.8</b></div>
+   <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.9</b></div>
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">WORKERS</div><b id="skAdminProfileWorkerCount">0</b></div>
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCESS</div><b>Full Access</b></div>
   </div>
@@ -7253,7 +7261,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 <!-- /SK MOBILES UPDATE-SAFE DATA SNAPSHOT -->
 
-<!-- SK V4.8 ADDITIVE FIX: reliable logout + auto-login -->
+<!-- SK V4.9 ADDITIVE FIX: reliable logout + auto-login -->
 <style id="sk-v48-logout-autologin-fix-css">
   script, template { display:none !important; }
 </style>
@@ -7925,4 +7933,453 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- /SK V4.3 CLOUD SYNC + FCM UPDATE FOUNDATION -->
+
+<!-- SK MOBILES V4.9 SCOPE-ONLY FIXES -->
+<style id="sk-v49-billing-login-qr-css">
+  .sk-v49-bill-type-tabs{
+    display:flex;
+    gap:6px;
+    margin:-2px 0 10px;
+    padding:3px;
+    border-radius:13px;
+    background:rgba(245,158,11,.10);
+    border:1px solid rgba(245,158,11,.28);
+  }
+  .sk-v49-used-mobile-tab{
+    flex:1;
+    border:1px solid #f59e0b;
+    border-radius:10px;
+    padding:9px 10px;
+    background:#f59e0b;
+    color:#fff;
+    font-size:.76rem;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(245,158,11,.20);
+  }
+  .sk-v49-invoice-used-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:max-content;
+    margin:0 0 12px;
+    padding:6px 11px;
+    border-radius:999px;
+    background:#f59e0b;
+    color:#fff;
+    border:1px solid #d97706;
+    font-size:.68rem;
+    font-weight:950;
+    letter-spacing:.4px;
+  }
+  .sk-v49-qr-btn{
+    border:1px solid rgba(37,99,235,.28);
+    border-radius:8px;
+    padding:4px 7px;
+    background:rgba(37,99,235,.08);
+    color:var(--primary);
+    font-size:.62rem;
+    font-weight:900;
+    cursor:pointer;
+  }
+  #skV49QrModal .sk-v49-qr-sheet{
+    width:min(430px,94vw);
+    background:var(--modal-bg);
+    color:var(--text);
+    border:1px solid var(--card-border);
+    border-radius:22px;
+    padding:14px;
+    box-shadow:0 22px 70px rgba(15,23,42,.28);
+  }
+  #skV49QrVideo{
+    width:100%;
+    aspect-ratio:1/1;
+    object-fit:cover;
+    background:#0f172a;
+    border-radius:16px;
+    display:block;
+  }
+  .sk-v49-qr-status{
+    margin-top:8px;
+    padding:8px 10px;
+    border-radius:10px;
+    background:var(--pill-bg);
+    color:var(--text-muted);
+    font-size:.70rem;
+    font-weight:800;
+    text-align:center;
+  }
+  .sk-v49-login-methods{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    margin:8px 0 10px;
+    padding:3px;
+    border:1px solid #dbe3ef;
+    border-radius:13px;
+    background:#f8fafc;
+  }
+  .sk-v49-login-method{
+    border:1px solid transparent;
+    border-radius:10px;
+    padding:8px 6px;
+    background:transparent;
+    color:#64748b;
+    font-size:.70rem;
+    font-weight:900;
+    cursor:pointer;
+  }
+  .sk-v49-login-method.active{
+    background:#4f46e5;
+    color:#fff;
+    border-color:#4338ca;
+  }
+  .sk-v49-pin-wrap{display:none;}
+  .sk-v49-pin-input{
+    width:100%;
+    box-sizing:border-box;
+    border:1px solid #cbd5e1;
+    border-radius:13px;
+    padding:13px;
+    font-size:1.25rem;
+    font-weight:950;
+    letter-spacing:.45em;
+    text-align:center;
+    outline:none;
+  }
+  .sk-v49-pin-note{
+    margin:5px 0 8px;
+    text-align:center;
+    color:#64748b;
+    font-size:.62rem;
+    line-height:1.35;
+  }
+</style>
+
+<div id="skV49QrModal" class="modal-overlay" style="z-index:2147483000;">
+  <div class="sk-v49-qr-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+      <div style="font-weight:950;font-size:.98rem;">📷 QR Scanner</div>
+      <button type="button" class="modal-close-btn" onclick="skV49CloseQrScanner()">✕</button>
+    </div>
+    <video id="skV49QrVideo" playsinline muted></video>
+    <div id="skV49QrStatus" class="sk-v49-qr-status">Camera opening...</div>
+    <button type="button" class="submit-btn" style="margin-top:9px;" onclick="skV49CloseQrScanner()">Close Scanner</button>
+  </div>
+</div>
+
+<script id="sk-v49-login-billing-qr-js">
+(function(){
+  'use strict';
+
+  /* ---------------- LOGIN: direct login screen + optional local 4-digit PIN ---------------- */
+  var PIN_HASH_KEY='sk_v49_login_pin_hash_v1';
+  var PIN_ROLE_KEY='sk_v49_login_pin_role_v1';
+  var loginMethod='firebase';
+
+  function v49Toast(t){
+    try{ if(typeof window.showToast==='function') window.showToast(t); }catch(e){}
+  }
+  function v49Gate(show){
+    var g=document.getElementById('skRoleGate');
+    if(g)g.classList.toggle('sk-show',!!show);
+  }
+  function v49ClearSession(){
+    try{localStorage.removeItem('sk_current_role_v1');}catch(e){}
+    try{localStorage.removeItem('sk_current_user_uid_v1');}catch(e){}
+    try{localStorage.removeItem('sk_current_worker_id_v1');}catch(e){}
+    try{localStorage.removeItem('sk_auto_login_v1');}catch(e){}
+    try{
+      document.body.classList.remove('sk-worker-mode','sk-manager-mode');
+      document.querySelectorAll('.modal-overlay.active').forEach(function(m){m.classList.remove('active');});
+      var a=document.getElementById('skAdminPanelModal');if(a)a.classList.remove('active');
+    }catch(e){}
+  }
+
+  async function v49HashPin(pin){
+    if(window.crypto&&crypto.subtle){
+      var data=new TextEncoder().encode(String(pin));
+      var hash=await crypto.subtle.digest('SHA-256',data);
+      return Array.from(new Uint8Array(hash)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    }
+    return btoa(unescape(encodeURIComponent(String(pin))));
+  }
+
+  function v49SetMethod(method){
+    loginMethod=method==='pin'?'pin':'firebase';
+    var p=document.getElementById('skV49PinMethod');
+    var b1=document.getElementById('skV49FirebaseTab');
+    var b2=document.getElementById('skV49PinTab');
+    var email=document.getElementById('skRoleEmail');
+    var password=document.getElementById('skRolePassword');
+    var emailLabel=document.querySelector('label[for="skRoleEmail"]');
+    var passwordLabel=document.querySelector('label[for="skRolePassword"]');
+    var hint=document.getElementById('skAutoRoleHint');
+    var links=document.querySelector('.sk-login-links');
+    var device=document.getElementById('skRoleDeviceBtn');
+    var firebaseBtn=document.getElementById('skRoleLoginBtn');
+    var firebaseShow=loginMethod==='firebase';
+    [email,password,emailLabel,passwordLabel,hint,links,device,firebaseBtn].forEach(function(el){
+      if(el)el.style.display=firebaseShow?'':'none';
+    });
+    if(p)p.style.display=loginMethod==='pin'?'block':'none';
+    if(b1)b1.classList.toggle('active',firebaseShow);
+    if(b2)b2.classList.toggle('active',!firebaseShow);
+    var msg=document.getElementById('skRoleMsg');if(msg)msg.textContent='';
+  }
+
+  function v49InjectLoginUI(){
+    var card=document.querySelector('#skRoleGate .sk-login-card');
+    if(!card || document.getElementById('skV49LoginMethods'))return;
+
+    var method=document.createElement('div');
+    method.id='skV49LoginMethods';
+    method.className='sk-v49-login-methods';
+    method.innerHTML=
+      '<button type="button" id="skV49FirebaseTab" class="sk-v49-login-method active">📧 Gmail + Password</button>'+
+      '<button type="button" id="skV49PinTab" class="sk-v49-login-method">🔢 4-Digit PIN</button>';
+
+    var select=document.getElementById('skRoleSelect');
+    if(select)select.insertAdjacentElement('afterend',method);
+    else card.insertBefore(method,card.firstChild);
+
+    var pin=document.createElement('div');
+    pin.id='skV49PinMethod';
+    pin.className='sk-v49-pin-wrap';
+    pin.innerHTML=
+      '<div class="sk-v49-pin-note">இந்த சாதனத்தில் மட்டும் 4 இலக்க PIN மூலம் விரைவாக login செய்யலாம்.</div>'+
+      '<input id="skV49PinInput" class="sk-v49-pin-input" type="password" inputmode="numeric" maxlength="4" autocomplete="one-time-code" placeholder="••••">'+
+      '<button type="button" class="sk-login-btn" id="skV49PinLoginBtn">🔓 PIN Login</button>'+
+      '<button type="button" class="submit-btn" id="skV49SetPinBtn" style="margin-top:8px;">⚙️ Set / Change 4-Digit PIN</button>';
+
+    var firebaseEmail=document.getElementById('skRoleEmail');
+    if(firebaseEmail){
+      var container=firebaseEmail.parentElement;
+      var parent=container||card;
+      parent.insertBefore(pin,firebaseEmail);
+    }else card.appendChild(pin);
+
+    document.getElementById('skV49FirebaseTab').addEventListener('click',function(){v49SetMethod('firebase');});
+    document.getElementById('skV49PinTab').addEventListener('click',function(){v49SetMethod('pin');});
+    document.getElementById('skV49PinLoginBtn').addEventListener('click',v49PinLogin);
+    document.getElementById('skV49SetPinBtn').addEventListener('click',v49SetPin);
+  }
+
+  async function v49SetPin(){
+    var email=(document.getElementById('skRoleEmail')?.value||'').trim();
+    var pw=(document.getElementById('skRolePassword')?.value||'');
+    if(!email||!pw){
+      v49SetMethod('firebase');
+      var msg=document.getElementById('skRoleMsg');
+      if(msg)msg.textContent='⚠️ First enter Gmail + Password, then set the 4-digit PIN.';
+      document.getElementById('skRoleEmail')?.focus();
+      return;
+    }
+    if(typeof window.skV43CloudRoleLogin!=='function'){
+      var msg2=document.getElementById('skRoleMsg');if(msg2)msg2.textContent='❌ Firebase module is not ready.';
+      return;
+    }
+    var btn=document.getElementById('skV49SetPinBtn');
+    if(btn){btn.disabled=true;btn.textContent='⏳ Verifying account...';}
+    try{
+      var selected=document.getElementById('skRoleSelect')?.value||'auto';
+      var result=await window.skV43CloudRoleLogin(email,pw,selected==='auto'?null:selected);
+      var pin=prompt('Set a new 4-digit PIN for this device:');
+      if(pin===null)return;
+      pin=String(pin).trim();
+      if(!/^\d{4}$/.test(pin))throw new Error('PIN must contain exactly 4 digits.');
+      var confirmPin=prompt('Confirm the 4-digit PIN:');
+      if(confirmPin===null)return;
+      if(String(confirmPin).trim()!==pin)throw new Error('PIN confirmation does not match.');
+      localStorage.setItem(PIN_HASH_KEY,await v49HashPin(pin));
+      localStorage.setItem(PIN_ROLE_KEY,result.role);
+      v49Toast('✅ 4-digit PIN set for this device');
+      v49SetMethod('pin');
+    }catch(e){
+      var msg3=document.getElementById('skRoleMsg');if(msg3)msg3.textContent='❌ '+(e?.message||e);
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent='⚙️ Set / Change 4-Digit PIN';}
+    }
+  }
+
+  async function v49PinLogin(){
+    var pin=(document.getElementById('skV49PinInput')?.value||'').trim();
+    var msg=document.getElementById('skRoleMsg');
+    if(!/^\d{4}$/.test(pin)){if(msg)msg.textContent='❌ Enter exactly 4 digits.';return;}
+    var saved=localStorage.getItem(PIN_HASH_KEY);
+    var savedRole=localStorage.getItem(PIN_ROLE_KEY);
+    if(!saved||!savedRole){if(msg)msg.textContent='⚠️ First set the 4-digit PIN using Gmail + Password.';return;}
+    var hash=await v49HashPin(pin);
+    if(hash!==saved){if(msg)msg.textContent='❌ Wrong 4-digit PIN.';return;}
+    try{
+      localStorage.setItem('sk_current_role_v1',savedRole);
+      localStorage.setItem('sk_current_user_uid_v1','PIN-'+savedRole);
+      if(typeof window.applyRestrictions==='function')window.applyRestrictions();
+      if(typeof window.refreshAdminButton==='function')window.refreshAdminButton();
+      v49Gate(false);
+      document.body.classList.toggle('sk-worker-mode',savedRole==='worker');
+      document.body.classList.toggle('sk-manager-mode',savedRole==='manager');
+      document.body.style.overflow='';
+      window.scrollTo(0,0);
+      if(typeof window.skUpdatePageStatus==='function')window.skUpdatePageStatus();
+      v49Toast('🔓 '+savedRole.charAt(0).toUpperCase()+savedRole.slice(1)+' PIN login successful');
+      var p=document.getElementById('skV49PinInput');if(p)p.value='';
+    }catch(e){if(msg)msg.textContent='❌ '+(e?.message||e);}
+  }
+
+  async function v49DirectLogin(){
+    /*
+     * Every fresh page load starts at login. The previous V4.7 auto-login
+     * layer is neutralized by clearing only the active session keys here.
+     */
+    v49ClearSession();
+    v49Gate(true);
+    var msg=document.getElementById('skRoleMsg');
+    if(msg)msg.textContent='';
+    try{if(typeof window.choose==='function')window.choose('auto');}catch(e){}
+  }
+
+  /* Replace logout entry point so both desktop and mobile use one reliable path. */
+  window.skLogout=async function(){
+    v49ClearSession();
+    v49Gate(true);
+    try{
+      if(typeof window.skV43CloudLogout==='function'){
+        await window.skV43CloudLogout();
+      }
+    }catch(e){}
+    try{
+      if(typeof window.choose==='function')window.choose('auto');
+    }catch(e){}
+    try{if(typeof window.updatePageStatus==='function')window.updatePageStatus();}catch(e){}
+    v49Toast('🔒 Logged out successfully');
+  };
+
+  /* ---------------- BILLING: Used Mobile badge + SK-DDMM-001 bill number ---------------- */
+  function v49Pad(n){return String(n).padStart(2,'0');}
+  function v49DateKey(){
+    var d=new Date();
+    return d.getFullYear()+v49Pad(d.getMonth()+1)+v49Pad(d.getDate());
+  }
+  function v49NextBillNo(){
+    var d=new Date();
+    var key=v49DateKey();
+    var seqKey='sk_v49_bill_seq_'+key;
+    var seq=parseInt(localStorage.getItem(seqKey)||'0',10)+1;
+    localStorage.setItem(seqKey,String(seq));
+    return 'SK-'+v49Pad(d.getDate())+v49Pad(d.getMonth()+1)+'-'+String(seq).padStart(3,'0');
+  }
+  function v49SetBillNo(){
+    var no=localStorage.getItem('sk_v49_current_bill_no')||v49NextBillNo();
+    localStorage.setItem('sk_v49_current_bill_no',no);
+    var el=document.getElementById('pvBillNo');if(el)el.textContent=no;
+    var badge=document.getElementById('pvBillTypeBadge');if(badge)badge.textContent='📱 USED MOBILE';
+  }
+  window.skV49SetBillType=function(type){
+    var badge=document.getElementById('pvBillTypeBadge');
+    var tab=document.getElementById('skV49UsedMobileTab');
+    if(badge)badge.textContent='📱 '+String(type||'Used Mobile').toUpperCase();
+    if(tab)tab.classList.add('active');
+  };
+
+  function v49WrapNewBill(){
+    if(typeof window.handleNewBillClick!=='function'||window.handleNewBillClick.__skV49Wrapped)return;
+    var original=window.handleNewBillClick;
+    var wrapped=function(){
+      localStorage.removeItem('sk_v49_current_bill_no');
+      var r=original.apply(this,arguments);
+      v49SetBillNo();
+      return r;
+    };
+    wrapped.__skV49Wrapped=true;
+    window.handleNewBillClick=wrapped;
+  }
+
+  /* ---------------- QR scanner: native BarcodeDetector, no extra scanner library ---------------- */
+  var qrStream=null, qrTimer=null, qrTarget='billImei1';
+
+  function qrStatus(t){
+    var el=document.getElementById('skV49QrStatus');if(el)el.textContent=t||'';
+  }
+  function stopQrStream(){
+    if(qrTimer){cancelAnimationFrame(qrTimer);qrTimer=null;}
+    if(qrStream){qrStream.getTracks().forEach(function(t){t.stop();});qrStream=null;}
+    var v=document.getElementById('skV49QrVideo');if(v)v.srcObject=null;
+  }
+  window.skV49CloseQrScanner=function(){
+    stopQrStream();
+    var m=document.getElementById('skV49QrModal');if(m)m.classList.remove('active');
+  };
+  async function qrScanLoop(video,detector){
+    if(!video||video.readyState<2){qrTimer=requestAnimationFrame(function(){qrScanLoop(video,detector);});return;}
+    try{
+      var codes=await detector.detect(video);
+      if(codes&&codes.length){
+        var value=String(codes[0].rawValue||'').trim();
+        if(value){
+          var input=document.getElementById(qrTarget)||document.getElementById('billImei1');
+          if(input){
+            input.value=value;
+            input.dispatchEvent(new Event('input',{bubbles:true}));
+            input.dispatchEvent(new Event('change',{bubbles:true}));
+          }
+          qrStatus('✅ QR detected: '+value);
+          setTimeout(function(){window.skV49CloseQrScanner();},450);
+          return;
+        }
+      }
+    }catch(e){}
+    qrTimer=requestAnimationFrame(function(){qrScanLoop(video,detector);});
+  }
+  window.skV49OpenQrScanner=async function(target){
+    qrTarget=target||'billImei1';
+    var modal=document.getElementById('skV49QrModal');
+    var video=document.getElementById('skV49QrVideo');
+    if(!modal||!video)return;
+    modal.classList.add('active');
+    qrStatus('Camera opening...');
+    stopQrStream();
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+      qrStatus('❌ Camera is not available in this browser.');
+      return;
+    }
+    if(!('BarcodeDetector' in window)){
+      qrStatus('❌ QR scanning is not supported by this browser. Use Chrome on Android.');
+      return;
+    }
+    try{
+      var supported=await BarcodeDetector.getSupportedFormats();
+      if(supported.indexOf('qr_code')===-1)throw new Error('QR format unavailable');
+      qrStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:1280}},audio:false});
+      video.srcObject=qrStream;
+      await video.play();
+      qrStatus('📷 Point the camera at the QR code...');
+      var detector=new BarcodeDetector({formats:['qr_code']});
+      qrScanLoop(video,detector);
+    }catch(e){
+      stopQrStream();
+      qrStatus('❌ Camera permission / QR scanner error. Allow camera access and try again.');
+    }
+  };
+
+  function v49Init(){
+    v49InjectLoginUI();
+    v49SetMethod('firebase');
+    v49DirectLogin();
+    v49SetBillNo();
+    v49WrapNewBill();
+    var pin=document.getElementById('skV49PinInput');
+    if(pin)pin.addEventListener('keydown',function(e){if(e.key==='Enter')v49PinLogin();});
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){setTimeout(v49Init,80);},{once:true});
+  }else{
+    setTimeout(v49Init,80);
+  }
+  window.addEventListener('pagehide',stopQrStream);
+})();
+</script>
+<!-- /SK MOBILES V4.9 SCOPE-ONLY FIXES -->
+
 </html>
