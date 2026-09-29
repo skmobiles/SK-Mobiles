@@ -7253,6 +7253,161 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- /SK MOBILES UPDATE-SAFE DATA SNAPSHOT -->
+
+<!-- SK V4.7 ADDITIVE FIX: reliable logout + auto-login -->
+<style id="sk-v47-logout-autologin-fix-css">
+  script, template { display:none !important; }
+</style>
+<script id="sk-v47-logout-autologin-fix-js">
+(function(){
+  'use strict';
+  if(window.__SK_V47_LOGOUT_AUTOLOGIN_FIX__) return;
+  window.__SK_V47_LOGOUT_AUTOLOGIN_FIX__=true;
+
+  const ROLE_KEY='sk_current_role_v1';
+  const UID_KEY='sk_current_user_uid_v1';
+  const WORKER_KEY='sk_current_worker_id_v1';
+  const AUTO_KEY='sk_auto_login_v1';
+
+  function getRole(){
+    const r=localStorage.getItem(ROLE_KEY)||'';
+    return (r==='admin'||r==='manager'||r==='worker') ? r : '';
+  }
+
+  function clearSession(){
+    try{localStorage.removeItem(ROLE_KEY);}catch(e){}
+    try{localStorage.removeItem(UID_KEY);}catch(e){}
+    try{localStorage.removeItem(WORKER_KEY);}catch(e){}
+    try{localStorage.removeItem(AUTO_KEY);}catch(e){}
+    try{
+      document.body.classList.remove('sk-worker-mode','sk-manager-mode');
+      document.querySelectorAll('.modal-overlay.active').forEach(function(m){
+        m.classList.remove('active');
+      });
+      const adminPanel=document.getElementById('skAdminPanelModal');
+      if(adminPanel)adminPanel.classList.remove('active');
+      const gate=document.getElementById('skRoleGate');
+      if(gate)gate.classList.add('sk-show');
+      const pin=document.getElementById('skRolePin');
+      if(pin)pin.value='';
+      const pass=document.getElementById('skRolePassword');
+      if(pass)pass.value='';
+      const msg=document.getElementById('skRoleMsg');
+      if(msg)msg.textContent='';
+      document.body.style.overflow='';
+      window.scrollTo(0,0);
+    }catch(e){}
+  }
+
+  function restoreAutoLogin(){
+    const r=getRole();
+    if(!r)return;
+    try{localStorage.setItem(AUTO_KEY,'1');}catch(e){}
+    const gate=document.getElementById('skRoleGate');
+    if(gate)gate.classList.remove('sk-show');
+    document.body.classList.toggle('sk-worker-mode',r==='worker');
+    document.body.classList.toggle('sk-manager-mode',r==='manager');
+    document.body.style.overflow='';
+    try{
+      if(typeof applyRestrictions==='function')applyRestrictions();
+      if(typeof refreshAdminButton==='function')refreshAdminButton();
+      if(typeof updatePageStatus==='function')updatePageStatus();
+      if(typeof renderCards==='function')renderCards();
+    }catch(e){}
+  }
+
+  function markLoggedIn(){
+    if(getRole()){
+      try{localStorage.setItem(AUTO_KEY,'1');}catch(e){}
+    }
+  }
+
+  /*
+   * Override only the logout entry point. The existing logout implementation
+   * is preserved; local session is cleared immediately so Firebase/network
+   * latency cannot keep the Manager/Admin/Worker session on screen.
+   */
+  function installLogout(){
+    if(typeof window.skLogout!=='function' || window.skLogout.__skV47Wrapped)return;
+    const original=window.skLogout;
+    const wrapped=async function(){
+      clearSession();
+      try{
+        const result=original.apply(this,arguments);
+        if(result && typeof result.catch==='function')result.catch(function(){});
+      }catch(e){}
+    };
+    wrapped.__skV47Wrapped=true;
+    window.skLogout=wrapped;
+  }
+
+  /*
+   * The drawer already has a Logout button. This capture handler makes sure
+   * that button always reaches the same logout path.
+   */
+  document.addEventListener('click',function(e){
+    const el=e.target && e.target.closest ? e.target.closest('button,a') : null;
+    if(!el)return;
+    const text=(el.textContent||'').trim().toLowerCase();
+    if(!text.includes('logout'))return;
+
+    try{e.preventDefault();e.stopImmediatePropagation();}catch(_){}
+    clearSession();
+
+    try{
+      if(typeof window.skV43CloudLogout==='function'){
+        Promise.resolve(window.skV43CloudLogout()).catch(function(){});
+      }
+    }catch(_){}
+
+    try{
+      if(typeof window.showToast==='function'){
+        window.showToast('🔒 Logged out successfully');
+      }
+    }catch(_){}
+  },true);
+
+  /*
+   * The original role system already stores the authenticated role in
+   * localStorage. This additive pass makes that stored role an explicit
+   * auto-login state, including Manager.
+   */
+  function boot(){
+    installLogout();
+    restoreAutoLogin();
+    markLoggedIn();
+
+    setTimeout(function(){
+      installLogout();
+      restoreAutoLogin();
+      markLoggedIn();
+    },100);
+
+    setTimeout(function(){
+      installLogout();
+      restoreAutoLogin();
+      markLoggedIn();
+    },700);
+
+    setTimeout(function(){
+      installLogout();
+      restoreAutoLogin();
+    },1500);
+
+    setInterval(function(){
+      installLogout();
+      markLoggedIn();
+    },1000);
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',boot,{once:true});
+  }else{
+    boot();
+  }
+})();
+</script>
+
 </body>
 
 
