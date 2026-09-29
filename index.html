@@ -2,12 +2,9 @@
 <html lang="ta" data-theme="light">
  <head>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v5/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="format-detection" content="telephone=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SK Mobiles - Glass &amp; Inventory Master</title>
   <meta name="theme-color" content="#f8fafc">
   <!-- SK MOBILES embedded app icon / home-screen branding -->
@@ -380,8 +377,7 @@
     ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.45); border-radius: 10px; transition: background 0.2s; }
     ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-    .app-viewport { width: 100%; max-width: 440px; min-height: 100vh; min-height: 100dvh; background: var(--bg); border-left: 1px solid var(--card-border); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; position: relative; box-shadow: 0 4px 30px rgba(0,0,0,0.08); padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; }
-    @media (max-width: 440px) { .app-viewport { max-width: none; border-left: 0; border-right: 0; box-shadow: none; } }
+    .app-viewport { width: 100%; max-width: 440px; min-height: 100vh; background: var(--bg); border-left: 1px solid var(--card-border); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; position: relative; box-shadow: 0 4px 30px rgba(0,0,0,0.08); padding-bottom: 74px; }
     
     .app-header { position: sticky; top: 0; z-index: 100; background: var(--header-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--card-border); padding: 8px 16px; min-height: 72px; display: flex; flex-direction: column; justify-content: center; }
     .header-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
@@ -545,7 +541,7 @@
      <button class="menu-drawer-btn logout" onclick="skLogout(); toggleLeftDrawer(false);">🔒 Logout</button>
     </div>
     <div style="margin-top:auto; font-size:0.68rem; color:var(--text-muted); text-align:center; border-top:1px solid var(--card-border); padding-top:8px;">
-     SK Mobiles Master • V4.2
+     SK Mobiles Master • V4.8
      <br>
      Dharmapuri, Tamil Nadu
     </div>
@@ -1030,7 +1026,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
       <img id="appHeaderLogo" src="Logo.png" alt="SK MOBILES" class="sk-logo-img" onclick="document.getElementById('logoFileInput').click()" title="Click to change logo">
       <div>
        <div class="app-name" id="appHeaderTitle">SK MOBILES</div>
-       <div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.2</span></div>
+       <div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.8</span></div>
       </div>
      </div>
     </div>
@@ -3432,9 +3428,8 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
       const container = document.getElementById('viewBillContent');
       container.innerHTML = `
         <div style="background:#fff; color:#1e293b; padding:20px; border-radius:18px; font-family:'Plus Jakarta Sans',sans-serif;">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; border-bottom:1.5px solid #edf0f6; padding-bottom:12px; margin-bottom:12px;">
-            <img src="${localStorage.getItem('sk_custom_logo') || window.SK_MOBILES_EMBEDDED_LOGO || 'Logo.png'}" alt="SK Mobiles logo" style="width:72px;height:72px;object-fit:contain;flex:0 0 72px;border-radius:50%;border:1px solid #edf0f6;background:#fff;">
-            <div style="flex:1;text-align:right;"><div style="font-weight:950; color:#d9166f; font-size:1.3rem;">${localStorage.getItem('sk_shop_name') || 'SK MOBILES'}</div><div style="font-size:.66rem;line-height:1.4;color:#475569;">${localStorage.getItem('sk_shop_address') || 'Shree Sai Complex, Salem Main Rd, Old Quarters Bus Stop, Old Quarters, Dharmapuri, Tamil Nadu 636705'}</div><div style="font-size:.7rem;font-weight:850;color:#e11d48;">☎ ${localStorage.getItem('sk_shop_phone') || '766 766 6362'}</div></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #edf0f6; padding-bottom:12px; margin-bottom:12px;">
+            <div style="font-weight:950; color:#d9166f; font-size:1.3rem;">SK MOBILES</div>
             <div style="text-align:right; font-size:0.75rem;"><strong>Bill No:</strong> ${b.id}<br><strong>Date:</strong> ${b.date}</div>
           </div>
           <div style="font-size:0.75rem; background:#f8fafc; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #e2e8f0;">
@@ -3453,26 +3448,12 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
           </table>
           ${b.emiHtml ? `<div style="font-size:0.72rem; font-weight:800; color:#92400e; margin-bottom:6px;">EMI Schedule Details:</div><div style="border:1px solid #fde047; border-radius:10px; overflow:hidden; font-size:0.68rem; margin-bottom:12px;"><table style="width:100%; border-collapse:collapse;">${b.emiHtml}</table></div>` : ''}
           <div style="display:flex; gap:8px; margin-top:14px;">
-            <button onclick="printSavedBill()" class="submit-btn sk-history-actions" style="flex:1; padding:8px; font-size:0.75rem;">🖨️ Print</button>
-            <button onclick="downloadInvoicePDF()" class="submit-btn sk-history-actions" style="flex:1; padding:8px; font-size:0.75rem;">📄 Download PDF</button>
+            <button onclick="downloadInvoicePDF()" class="submit-btn" style="flex:1; padding:8px; font-size:0.75rem;">📄 Download PDF</button>
+            <button onclick="sendBillToWhatsAppAsPDF()" class="submit-btn whatsapp-green" style="flex:1; padding:8px; font-size:0.75rem;">💬 WhatsApp PDF</button>
           </div>
         </div>
       `;
       toggleModal('viewBillModal', true);
-    }
-
-    function printSavedBill() {
-      const source = document.querySelector('#viewBillContent > div');
-      if (!source) return;
-      const clone = source.cloneNode(true);
-      clone.querySelectorAll('.sk-history-actions').forEach(el => el.remove());
-      const w = window.open('', '_blank');
-      if (!w) { showToast('Please allow popups to print!'); return; }
-      w.document.open();
-      w.document.write(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SK MOBILES - ${source.querySelector('strong')?.parentElement?.innerText || 'Invoice'}</title><style>@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;background:#fff;color:#1e293b}img{print-color-adjust:exact;-webkit-print-color-adjust:exact}table{page-break-inside:auto}tr{page-break-inside:avoid;page-break-after:auto}@media print{.sk-history-actions{display:none!important}}</style></head><body>${clone.outerHTML}</body></html>`);
-      w.document.close();
-      const imgs = Array.from(w.document.images);
-      Promise.all(imgs.map(img => img.decode ? img.decode().catch(() => {}) : Promise.resolve())).then(() => setTimeout(() => { w.focus(); w.print(); }, 150));
     }
 
     function deleteSavedBill(idx) {
@@ -3590,12 +3571,10 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
     }
 
     function downloadInvoicePDF() {
-      const historical = document.getElementById('viewBillModal')?.classList.contains('active');
-      const source = historical ? document.querySelector('#viewBillContent > div') : document.getElementById('printableInvoiceCard');
+      const source = document.getElementById('printableInvoiceCard');
       if (!source) return;
 
       const clone = source.cloneNode(true);
-      clone.querySelectorAll('.sk-history-actions').forEach(el => el.remove());
       clone.style.width = '750px';
       clone.style.maxWidth = '750px';
       clone.style.margin = '0 auto';
@@ -4629,6 +4608,14 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
       try{
         const result=await window.skV43CloudRoleLogin(email,pw,selectedRole==='auto'?null:selectedRole);
         await finishLogin(result);
+        localStorage.setItem('sk_current_user_uid_v1',result.uid);
+        localStorage.setItem('sk_current_role_v1',result.role);
+        if(result.role==='worker')localStorage.setItem('sk_current_worker_id_v1',result.uid);else localStorage.removeItem('sk_current_worker_id_v1');
+        gate(false);
+        document.getElementById('skRolePassword')?.blur();document.body.style.overflow='';window.scrollTo(0,0);
+        applyRestrictions();refreshAdminButton();
+        setTimeout(()=>{gate(false);applyRestrictions();refreshAdminButton();},0);
+        toast(result.role==='admin'?'👑 Admin login successful':result.role==='manager'?'👨‍💼 Manager login successful':'👷 Worker login successful');
       }catch(e){message('❌ '+(e?.message||e));}
       finally{if(btn){btn.disabled=false;btn.textContent='🔐 Firebase Login';}}
     }
@@ -6346,7 +6333,7 @@ var previousRenderCards=window.renderCards;if(typeof previousRenderCards==='func
   <div class="sk-v42-profile-box" style="text-align:center;margin-bottom:9px;"><div style="font-size:2.1rem;margin-bottom:4px;">👑</div><div style="font-size:1rem;font-weight:950;">SK MOBILES Admin</div><div style="font-size:.68rem;color:var(--text-muted);margin-top:3px;">Full Access Account</div></div>
   <div class="sk-v42-profile-grid">
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCOUNT</div><b>Admin</b></div>
-   <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.2</b></div>
+   <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.8</b></div>
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">WORKERS</div><b id="skAdminProfileWorkerCount">0</b></div>
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCESS</div><b>Full Access</b></div>
   </div>
@@ -7264,6 +7251,164 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- /SK MOBILES UPDATE-SAFE DATA SNAPSHOT -->
+
+<!-- SK V4.8 ADDITIVE FIX: reliable logout + auto-login -->
+<style id="sk-v48-logout-autologin-fix-css">
+  script, template { display:none !important; }
+</style>
+<script id="sk-v48-logout-autologin-fix-js">
+(function(){
+  'use strict';
+  if(window.__SK_V48_LOGOUT_AUTOLOGIN_FIX__) return;
+  window.__SK_V48_LOGOUT_AUTOLOGIN_FIX__=true;
+
+  const ROLE_KEY='sk_current_role_v1';
+  const UID_KEY='sk_current_user_uid_v1';
+  const WORKER_KEY='sk_current_worker_id_v1';
+  const AUTO_KEY='sk_auto_login_v1';
+
+  function getRole(){
+    const r=localStorage.getItem(ROLE_KEY)||'';
+    return (r==='admin'||r==='manager'||r==='worker') ? r : '';
+  }
+
+  function clearSession(){
+    try{localStorage.removeItem(ROLE_KEY);}catch(e){}
+    try{localStorage.removeItem(UID_KEY);}catch(e){}
+    try{localStorage.removeItem(WORKER_KEY);}catch(e){}
+    try{localStorage.removeItem(AUTO_KEY);}catch(e){}
+    try{
+      document.body.classList.remove('sk-worker-mode','sk-manager-mode');
+      document.querySelectorAll('.modal-overlay.active').forEach(function(m){
+        m.classList.remove('active');
+      });
+      const adminPanel=document.getElementById('skAdminPanelModal');
+      if(adminPanel)adminPanel.classList.remove('active');
+      const gate=document.getElementById('skRoleGate');
+      if(gate)gate.classList.add('sk-show');
+      const pin=document.getElementById('skRolePin');
+      if(pin)pin.value='';
+      const pass=document.getElementById('skRolePassword');
+      if(pass)pass.value='';
+      const msg=document.getElementById('skRoleMsg');
+      if(msg)msg.textContent='';
+      document.body.style.overflow='';
+      window.scrollTo(0,0);
+    }catch(e){}
+  }
+
+  function restoreAutoLogin(){
+    const r=getRole();
+    if(!r)return;
+    try{localStorage.setItem(AUTO_KEY,'1');}catch(e){}
+    const gate=document.getElementById('skRoleGate');
+    if(gate)gate.classList.remove('sk-show');
+    document.body.classList.toggle('sk-worker-mode',r==='worker');
+    document.body.classList.toggle('sk-manager-mode',r==='manager');
+    document.body.style.overflow='';
+    try{
+      if(typeof applyRestrictions==='function')applyRestrictions();
+      if(typeof refreshAdminButton==='function')refreshAdminButton();
+      if(typeof updatePageStatus==='function')updatePageStatus();
+      if(typeof renderCards==='function')renderCards();
+    }catch(e){}
+  }
+
+  function markLoggedIn(){
+    if(getRole()){
+      try{localStorage.setItem(AUTO_KEY,'1');}catch(e){}
+    }
+  }
+
+  /*
+   * Override only the logout entry point. The existing logout implementation
+   * is preserved; local session is cleared immediately so Firebase/network
+   * latency cannot keep the Manager/Admin/Worker session on screen.
+   */
+  function installLogout(){
+    if(typeof window.skLogout!=='function' || window.skLogout.__skV47Wrapped)return;
+    const original=window.skLogout;
+    const wrapped=async function(){
+      clearSession();
+      try{
+        const result=original.apply(this,arguments);
+        if(result && typeof result.catch==='function')result.catch(function(){});
+      }catch(e){}
+    };
+    wrapped.__skV47Wrapped=true;
+    window.skLogout=wrapped;
+  }
+
+  /*
+   * The drawer already has a Logout button. This capture handler makes sure
+   * that button always reaches the same logout path.
+   */
+  document.addEventListener('click',function(e){
+    const el=e.target && e.target.closest ? e.target.closest('button,a') : null;
+    if(!el)return;
+    const text=(el.textContent||'').trim().toLowerCase();
+    if(!text.includes('logout'))return;
+
+    try{e.preventDefault();e.stopImmediatePropagation();}catch(_){}
+    clearSession();
+    try{
+      if(typeof window.toggleLeftDrawer==='function')window.toggleLeftDrawer(false);
+    }catch(_){}
+
+    try{
+      if(typeof window.skV43CloudLogout==='function'){
+        Promise.resolve(window.skV43CloudLogout()).catch(function(){});
+      }
+    }catch(_){}
+
+    try{
+      if(typeof window.showToast==='function'){
+        window.showToast('🔒 Logged out successfully');
+      }
+    }catch(_){}
+  },true);
+
+  /*
+   * The original role system already stores the authenticated role in
+   * localStorage. This additive pass makes that stored role an explicit
+   * auto-login state, including Manager.
+   */
+  function boot(){
+    installLogout();
+    restoreAutoLogin();
+    markLoggedIn();
+
+    setTimeout(function(){
+      installLogout();
+      restoreAutoLogin();
+      markLoggedIn();
+    },100);
+
+    setTimeout(function(){
+      installLogout();
+      restoreAutoLogin();
+      markLoggedIn();
+    },700);
+
+    setTimeout(function(){
+      installLogout();
+      restoreAutoLogin();
+    },1500);
+
+    setInterval(function(){
+      installLogout();
+      markLoggedIn();
+    },1000);
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',boot,{once:true});
+  }else{
+    boot();
+  }
+})();
+</script>
+
 </body>
 
 
@@ -7779,94 +7924,4 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- /SK V4.3 CLOUD SYNC + FCM UPDATE FOUNDATION -->
-
-<script id="sk-multi-device-admin-login-patch">
-(function(){
-  'use strict';
-  /* ADDITIVE ONLY: mobile-safe Firebase Auth persistence and startup wait.
-     Existing app functions/UI are not changed. */
-  const SDK='https://www.gstatic.com/firebasejs/12.19.0/';
-  const CFG_KEY='sk_firebase_config_v1';
-  const DEFAULT_FIREBASE_CONFIG={
-    apiKey:'AIzaSyDufQNy7l9M3ue_32u3gcH3TZUhPlrSILA',
-    authDomain:'sk-mobiles-2d61d.firebaseapp.com',
-    projectId:'sk-mobiles-2d61d',
-    storageBucket:'sk-mobiles-2d61d.firebasestorage.app',
-    messagingSenderId:'705961182597',
-    appId:'1:705961182597:web:fa8238739d140b250df0ec'
-  };
-  let persistencePromise=null;
-
-  async function ensureDevicePersistence(){
-    if(persistencePromise)return persistencePromise;
-    persistencePromise=(async function(){
-      try{
-        let cfg={};
-        try{cfg=JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}catch(e){}
-        cfg={...DEFAULT_FIREBASE_CONFIG,...cfg};
-        try{localStorage.setItem(CFG_KEY,JSON.stringify(cfg))}catch(e){}
-        const [appm,authm]=await Promise.all([
-          import(SDK+'firebase-app.js'),
-          import(SDK+'firebase-auth.js')
-        ]);
-        const app=appm.getApps().length?appm.getApp():appm.initializeApp(cfg);
-        const auth=authm.getAuth(app);
-        if(typeof authm.setPersistence==='function'&&authm.browserLocalPersistence){
-          await authm.setPersistence(auth,authm.browserLocalPersistence);
-        }
-      }catch(e){
-        console.warn('SK mobile auth persistence:',e);
-      }
-    })();
-    return persistencePromise;
-  }
-
-  /* The Firebase cloud module is type="module", so slower mobile devices
-     can finish the login UI before that module has exposed its function.
-     Keep the existing login untouched; only wait for the existing function. */
-  const existingRoleLogin=window.skV43CloudRoleLogin;
-  if(typeof existingRoleLogin==='function'){
-    window.skV43CloudRoleLogin=async function(email,password,requestedRole){
-      await ensureDevicePersistence();
-      return existingRoleLogin(email,password,requestedRole);
-    };
-  }else{
-    const waitRoleLogin=async function(email,password,requestedRole){
-      await ensureDevicePersistence();
-      const deadline=Date.now()+15000;
-      while(Date.now()<deadline){
-        const fn=window.skV43CloudRoleLogin;
-        if(typeof fn==='function'&&fn!==waitRoleLogin){
-          return fn(email,password,requestedRole);
-        }
-        await new Promise(r=>setTimeout(r,150));
-      }
-      throw new Error('Firebase cloud module is still loading. Please try Login again.');
-    };
-    window.skV43CloudRoleLogin=waitRoleLogin;
-  }
-
-  const existingCloudLogin=window.skV43CloudLogin;
-  if(typeof existingCloudLogin==='function'){
-    window.skV43CloudLogin=async function(){
-      await ensureDevicePersistence();
-      return existingCloudLogin();
-    };
-  }else{
-    const waitCloudLogin=async function(){
-      await ensureDevicePersistence();
-      const deadline=Date.now()+15000;
-      while(Date.now()<deadline){
-        const fn=window.skV43CloudLogin;
-        if(typeof fn==='function'&&fn!==waitCloudLogin){
-          return fn();
-        }
-        await new Promise(r=>setTimeout(r,150));
-      }
-      throw new Error('Firebase cloud module is still loading. Please try Cloud Login again.');
-    };
-    window.skV43CloudLogin=waitCloudLogin;
-  }
-})();
-</script>
 </html>
