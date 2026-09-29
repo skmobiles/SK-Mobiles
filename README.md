@@ -1,10 +1,8 @@
-[SK_app_V4.8_LogoutFix_AutoLogin_FIXED.html](https://github.com/user-attachments/files/32800901/SK_app_V4.7_LogoutFix_AutoLogin_FIXED.html)
+[SK_app_V4.8_Clean_Mobile_Logout_AutoLogin.html](https://github.com/user-attachments/files/32801746/SK_app_V4.8_Clean_Mobile_Logout_AutoLogin.html)
 <!doctype html>
 <html lang="ta" data-theme="light">
  <head>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v5/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -541,10 +539,10 @@
      <button class="menu-drawer-btn" onclick="skOpenCreditLedger(); toggleLeftDrawer(false);">💳 Customer Credit</button>
      <button class="menu-drawer-btn" onclick="toggleModal('repairSparesModal', true); toggleLeftDrawer(false);">🔧 Repair Tools &amp; IC Notes</button>
      <button class="menu-drawer-btn" id="skProfileAccountMenuBtn" onclick="skOpenRoleProfile(); toggleLeftDrawer(false);">👤 My Profile / Account</button>
-     <button class="menu-drawer-btn logout" onclick="showToast('Logged out successfully'); toggleLeftDrawer(false);">🔒 Logout</button>
+     <button class="menu-drawer-btn logout" onclick="skLogout(); toggleLeftDrawer(false);">🔒 Logout</button>
     </div>
     <div style="margin-top:auto; font-size:0.68rem; color:var(--text-muted); text-align:center; border-top:1px solid var(--card-border); padding-top:8px;">
-     SK Mobiles Master • V4.2
+     SK Mobiles Master • V4.8
      <br>
      Dharmapuri, Tamil Nadu
     </div>
@@ -1029,7 +1027,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
       <img id="appHeaderLogo" src="Logo.png" alt="SK MOBILES" class="sk-logo-img" onclick="document.getElementById('logoFileInput').click()" title="Click to change logo">
       <div>
        <div class="app-name" id="appHeaderTitle">SK MOBILES</div>
-       <div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.2</span></div>
+       <div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.8</span></div>
       </div>
      </div>
     </div>
@@ -6336,7 +6334,7 @@ var previousRenderCards=window.renderCards;if(typeof previousRenderCards==='func
   <div class="sk-v42-profile-box" style="text-align:center;margin-bottom:9px;"><div style="font-size:2.1rem;margin-bottom:4px;">👑</div><div style="font-size:1rem;font-weight:950;">SK MOBILES Admin</div><div style="font-size:.68rem;color:var(--text-muted);margin-top:3px;">Full Access Account</div></div>
   <div class="sk-v42-profile-grid">
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCOUNT</div><b>Admin</b></div>
-   <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.2</b></div>
+   <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.8</b></div>
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">WORKERS</div><b id="skAdminProfileWorkerCount">0</b></div>
    <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCESS</div><b>Full Access</b></div>
   </div>
@@ -7255,15 +7253,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 <!-- /SK MOBILES UPDATE-SAFE DATA SNAPSHOT -->
 
-<!-- SK V4.7 ADDITIVE FIX: reliable logout + auto-login -->
-<style id="sk-v47-logout-autologin-fix-css">
+<!-- SK V4.8 ADDITIVE FIX: reliable logout + auto-login -->
+<style id="sk-v48-logout-autologin-fix-css">
   script, template { display:none !important; }
 </style>
-<script id="sk-v47-logout-autologin-fix-js">
+<script id="sk-v48-logout-autologin-fix-js">
 (function(){
   'use strict';
-  if(window.__SK_V47_LOGOUT_AUTOLOGIN_FIX__) return;
-  window.__SK_V47_LOGOUT_AUTOLOGIN_FIX__=true;
+  if(window.__SK_V48_LOGOUT_AUTOLOGIN_FIX__) return;
+  window.__SK_V48_LOGOUT_AUTOLOGIN_FIX__=true;
 
   const ROLE_KEY='sk_current_role_v1';
   const UID_KEY='sk_current_user_uid_v1';
@@ -7354,6 +7352,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
     try{e.preventDefault();e.stopImmediatePropagation();}catch(_){}
     clearSession();
+    try{
+      if(typeof window.toggleLeftDrawer==='function')window.toggleLeftDrawer(false);
+    }catch(_){}
 
     try{
       if(typeof window.skV43CloudLogout==='function'){
