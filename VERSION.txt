@@ -1,5 +1,0 @@
-SK MOBILES — V6 CLEAN CORE
-Version: 6.0.0
-Structure: index.html + css/style.css + js/app.js
-Data: local-first, single persisted state
-Cloud restore: intentionally not included in V6 core
