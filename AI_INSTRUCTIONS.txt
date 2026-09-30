@@ -66,3 +66,13 @@ IMPORTANT — DATA CONNECTION RULES FOR FUTURE MODIFICATIONS
 - Current-date defaults must use the user's local device date, not UTC date.
 - Before changing any Repair Jobs or Bill History function, trace: storage -> save/update -> render -> Home metric -> modal/detail -> action buttons -> refresh/sync.
 - Do not add duplicate CSS/JS files. The active files remain `css/style.css` and `js/app.js`.
+
+V5.4 DATA INTEGRITY RULES
+- Never auto-create a sale bill when switching tabs, closing a modal, navigating, or refreshing.
+- Never write window.savedBills back to sk_bills on beforeunload.
+- sk_bills persistent storage is the single source of truth for Bill History.
+- Never merge stale in-memory bill objects into localStorage.
+- Firebase must not automatically overwrite local business data after initialization.
+- Local -> Firebase sync is automatic after local changes; Firebase -> local restore is explicit only.
+- When deleting/replacing Firebase data, remove stale chunk documents as well as the manifest document.
+- Edit must update the existing Bill ID; it must never create a second bill.

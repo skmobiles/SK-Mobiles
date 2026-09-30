@@ -1,110 +1,36 @@
-========================================
-V4.12 - REQUESTED BUG FIXES
-DATE: 30-09-2026
-========================================
+SK MOBILES CHANGELOG
+
+VERSION V5.4 DATA-PERSISTENCE-LOCK
+
+BEFORE:
+- Opening Bill History could auto-save the current form.
+- Closing the billing modal could auto-save a partially completed bill.
+- beforeunload could write stale in-memory savedBills back to localStorage.
+- Bill History had a repair layer that could merge stale in-memory bills back into persistent storage.
+- Firebase login/realtime listener could pull an older cloud snapshot over a local delete/edit.
+- Firestore chunk documents could remain after a key was replaced/deleted, allowing stale data to return.
 
 MODIFIED:
-- Home > Repair Jobs card now opens the Repair Jobs modal reliably.
-- Urgent Repair Jobs card now opens its urgent list reliably.
-- Urgent/pending repair job cards are rendered at the top of the Repair Jobs Jobs tab so the saved job is immediately visible.
-- Billing now has 3 bill types: New Mobile, Used Mobile, Keypad Mobile.
-- Keypad Mobile hides RAM and Storage fields.
-- Keypad Mobile Package is restricted to Box Only (Mobile + Box).
-- Billing IMEI 1 / IMEI 2 fields were aligned to equal width and equal input height.
-- Closing a bill without pressing Save now auto-saves entered bill data to Bill History.
+1. Bill persistence is now explicit: Save Bill / Update Bill / Payment / Delete are the write actions.
+2. History tab is read-only navigation and no longer saves the form.
+3. Closing the billing modal saves only the draft, not a bill.
+4. Removed beforeunload persistence of savedBills.
+5. Bill History reads persisted sk_bills as the source of truth and never merges stale memory back.
+6. Firebase authority model:
+   - First empty device may restore cloud data once.
+   - Once initialized, local business data is authoritative.
+   - Automatic sync is local -> cloud.
+   - Cloud -> local is explicit Restore Cloud Data only.
+7. Authoritative cloud sync deletes stale Firestore data documents and old chunk documents before writing the current local snapshot.
+8. Key-level cloud sync removes stale chunk documents when a key is deleted or changes size.
+9. Realtime business-data listener is disabled to prevent deleted/edited records from being resurrected.
 
 NOT MODIFIED:
-- Existing Firebase logic.
-- Existing inventory/order/customer/repair data structures.
-- Existing payment/EMI calculation logic.
-- Existing billing history and invoice logic, except the requested auto-save behavior.
-- Existing login/access control.
-
-FILES MODIFIED:
-- index.html
+- index.html UI structure
 - css/style.css
-- js/app.js
+- existing business fields/storage keys
+- customer/bill/repair data formats unless required for persistence safety
 
-========================================
-
-SK MOBILES WEB APP - CHANGELOG
-
-========================================
-VERSION: V4.12
-DATE: 30-09-2026
-========================================
-
-BEFORE EDIT:
-- Existing V4.12 web app.
-- HTML, CSS and JavaScript separated into three working files.
-- Existing Firebase / Local Storage / application logic preserved.
-
-MODIFIED:
-- Project structure was separated into:
-  1. index.html
-  2. css/style.css
-  3. js/app.js
-
-NOT MODIFIED:
-- Existing app functionality.
-- Existing Firebase logic.
-- Existing Local Storage logic.
-- Existing UI/content logic.
-
-FILES MODIFIED:
-- Project structure only.
-
-========================================
-FUTURE CHANGE LOG FORMAT
-========================================
-
-VERSION: Vx.xx
-DATE:
-
-BEFORE EDIT:
-- What existed before the requested change.
-
-MODIFIED:
-- Exact change made.
-
-NOT MODIFIED:
-- Functions / data / systems intentionally left untouched.
-
-FILES MODIFIED:
-- List only files actually changed.
-
-========================================
-
-
-[CONNECTED DATA BUG FIX - 2026-09-30]
-FIXED:
-1. Home page Urgent Repair Jobs card/detail click — replaced unsafe inline ID handling with DOM-bound event handlers so every urgent job opens the correct repair detail.
-2. Home page Customer Credit amount — now reads the same customer credit ledger (`sk_credit_ledger_v1`) used by the Credit detail screen, so home total and detail total stay connected.
-3. Bill History — made bill normalization/filter/rendering tolerant of legacy/alternate field names so the count cannot show while the list silently fails because of missing fields. View/Delete/Payment actions remain connected to the actual bill index.
-4. Bill History count, list, Home Credit, and Urgent Repair UI now refresh from localStorage after relevant data changes and cloud/storage synchronization.
-5. Existing bills are preserved; this fix does not intentionally delete or deduplicate valid transactions.
-
-
-2026-09-30 — Connected Data / Interaction Fix 2
-- Repair Job Save: removed the unintended role guard from Save Repair Job and the worker UI block; Save Repair Job now persists to skx_repair_jobs_v2 and refreshes connected repair/home surfaces.
-- Saved Bills count: Home Saved Bills metric and Billing History count/list now use one canonical sk_bills dataset and reconcile live in-memory bills by bill ID to prevent count/list mismatch.
-- Saved Bill history: restored rendering of all saved bills with View, Edit (Admin/Manager), Credit Payment, and Admin Delete actions.
-- Bill Edit: fixed editor to read/write the live sk_bills store instead of relying on an inaccessible lexical savedBills variable; edits persist by bill ID.
-- Bill View/Delete: refreshed the original bill actions from the live sk_bills store before operating.
-- Existing business data and bill records are preserved; no intentional deletion or deduplication of valid distinct bills was added.
-
-V4.12 — Connected Fix 3 (2026-09-30)
--------------------------------------
-FIXED:
-1. Repair Jobs Save failure caused by date helper scope/availability. Repair save now uses stable global date helpers and directly persists to skx_repair_jobs_v2.
-2. Repair Jobs rendering, edit, next-status, delete, detail, history and Home metric are connected to the same repair-job storage.
-3. Repair Received Date defaults to the device's current local date.
-4. Repair History Starting Date and Ending Date default to the current local date when blank; they remain manually editable.
-5. EMI Start Date and Customer Credit Date default to the current local date when blank.
-6. Bill History View (eye) now resolves the selected bill by stable Bill ID instead of relying on a stale array index.
-7. Bill History rows carry a stable data-bill-id so View remains connected after refresh/filter/render.
-8. Repair/Home/urgent sections are refreshed after repair save/update/status/delete.
-
-NOT CHANGED:
-- Existing business data, localStorage keys, billing calculations, customer/credit logic and UI styling were not intentionally redesigned.
-- No existing valid bill or repair record is deleted by this fix.
+VALIDATION:
+- JavaScript syntax checked with Node --check.
+- index.html and css/style.css retained from the uploaded base project.

@@ -1,4 +1,10 @@
-Current App Version: V4.12
-Project Structure: 3-file GitHub structure
-Stable Project Folder: SK_Mobiles_V4.12_GitHub_Ready_FIXED_CONNECTED_ISSUES
-Latest Fix: Connected Repair Jobs + Bill History View + Current Date Defaults
+SK MOBILES
+Current Version: V5.4 DATA-PERSISTENCE-LOCK
+Stable project folder: SK-Mobiles-main
+
+V5.4 focus:
+- Explicit bill save/update only; no implicit bill creation on tab switch or modal close.
+- Local business data is authoritative after initialization.
+- Firebase cloud sync is local -> cloud automatic; cloud -> local is explicit Restore only.
+- Remote stale Firestore documents/chunks are removed during authoritative sync.
+- Bill history never merges stale in-memory records back into storage.
