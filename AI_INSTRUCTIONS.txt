@@ -1,0 +1,50 @@
+SK MOBILES WEB APP - AI EDITING INSTRUCTIONS
+
+IMPORTANT:
+This file is the project-specific instruction for future AI/ChatGPT edits.
+
+PROJECT FILES:
+- index.html = HTML/page structure
+- css/style.css = CSS/UI/design
+- js/app.js = JavaScript/application logic, including existing Firebase-related code
+
+EDITING RULES:
+1. Before editing, inspect all three project files.
+2. Make ONLY the change explicitly requested by the user.
+3. Do not delete existing code, functions, UI, data fields or features unless the user explicitly asks.
+4. Do not modify Firebase code unless the user explicitly requests a Firebase change.
+5. Do not modify Local Storage code unless the user explicitly requests a Local Storage change.
+6. For colour/UI/design requests, prefer css/style.css and do not change JavaScript unless technically required.
+7. For functionality/calculation requests, modify the smallest necessary part of js/app.js.
+8. For page structure/content requests, modify index.html only when necessary.
+9. Preserve existing IDs, class names, function names, storage keys, Firebase paths/collections and data formats unless the requested change requires otherwise.
+10. Do not rename project files or folders unless explicitly requested.
+11. Do not replace the project with a newly written simplified version.
+12. Preserve all existing functionality not related to the requested change.
+13. After every approved edit, update VERSION.txt.
+14. After every approved edit, add an entry to CHANGELOG.txt using:
+    BEFORE EDIT:
+    MODIFIED:
+    NOT MODIFIED:
+    FILES MODIFIED:
+15. Keep the changelog factual. Do not claim a file was changed if it was not.
+16. If a requested change requires touching multiple files, make only the necessary changes and record every changed file in CHANGELOG.txt.
+17. If the requested change is ambiguous or could affect existing functionality, ask before making a destructive change.
+18. Return the complete updated project, not partial snippets, when the user asks for the updated project.
+19. Do not delete VERSION.txt, CHANGELOG.txt or AI_INSTRUCTIONS.txt.
+20. The current project version is stored in VERSION.txt. Do not invent a version number.
+
+USER PREFERENCE:
+The user may describe changes in simple language such as:
+- "button colour change"
+- "this UI change"
+- "bug fix"
+- "add one field"
+Interpret the request conservatively and preserve everything else.
+
+VERSIONING:
+- Normal small UI/bug fix: increment the patch-style version by 0.01.
+  Example: V4.12 -> V4.13.
+- New feature: use the next appropriate version.
+- Major restructuring: use a major/minor version when appropriate.
+- Do not rename the project folder for every version.

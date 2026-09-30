@@ -1,0 +1,47 @@
+SK MOBILES WEB APP - CHANGELOG
+
+========================================
+VERSION: V4.12
+DATE: 30-09-2026
+========================================
+
+BEFORE EDIT:
+- Existing V4.12 web app.
+- HTML, CSS and JavaScript separated into three working files.
+- Existing Firebase / Local Storage / application logic preserved.
+
+MODIFIED:
+- Project structure was separated into:
+  1. index.html
+  2. css/style.css
+  3. js/app.js
+
+NOT MODIFIED:
+- Existing app functionality.
+- Existing Firebase logic.
+- Existing Local Storage logic.
+- Existing UI/content logic.
+
+FILES MODIFIED:
+- Project structure only.
+
+========================================
+FUTURE CHANGE LOG FORMAT
+========================================
+
+VERSION: Vx.xx
+DATE:
+
+BEFORE EDIT:
+- What existed before the requested change.
+
+MODIFIED:
+- Exact change made.
+
+NOT MODIFIED:
+- Functions / data / systems intentionally left untouched.
+
+FILES MODIFIED:
+- List only files actually changed.
+
+========================================
