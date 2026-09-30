@@ -598,8 +598,9 @@
     .sk-login-btn{width:100%;border:0;border-radius:14px;padding:12px;margin-top:10px;background:linear-gradient(135deg,#6366f1,#ec4899);color:#fff;font-size:.88rem;font-weight:900;cursor:pointer}
     .sk-login-msg{text-align:center;min-height:18px;margin-top:9px;font-size:.72rem;font-weight:750;color:#dc2626}
     .sk-login-hint{text-align:center;margin-top:8px;font-size:.64rem;color:#94a3b8}
-    .sk-access-badge{position:fixed;top:7px;right:9px;z-index:9999;background:rgba(15,23,42,.78);color:#fff;border-radius:20px;padding:4px 9px;font-size:.62rem;font-weight:850;backdrop-filter:blur(8px);display:none}
-    body.sk-worker-mode .sk-access-badge{display:block}
+    .sk-access-badge{position:fixed!important;top:8px!important;right:10px!important;left:auto!important;bottom:auto!important;z-index:2147483000!important;background:rgba(15,23,42,.82);color:#fff;border-radius:20px;padding:5px 10px;font-size:.62rem;font-weight:850;line-height:1.2;backdrop-filter:blur(8px);display:none!important;pointer-events:none!important;user-select:none}
+    body.sk-worker-mode .sk-access-badge{display:block!important}
+@media(max-width:600px){.sk-access-badge{top:8px!important;right:8px!important;left:auto!important;max-width:42vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
     .sk-worker-blocked{opacity:.48!important;pointer-events:none!important;filter:grayscale(.35)}
     #skAdminPanelModal .sk-admin-box{background:var(--model-bg);border:1px solid var(--card-border);border-radius:17px;padding:12px;margin-bottom:10px}
     #skAdminPanelModal .sk-admin-title{font-size:.74rem;color:var(--text-muted);font-weight:850;margin-bottom:7px}
