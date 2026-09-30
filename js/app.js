@@ -1206,8 +1206,9 @@
     }
 
     function handleBillingModalClose() {
-      // Closing a bill without pressing Save still preserves it in Bill History.
-      autoSaveCurrentFormSilently(true);
+      // Closing the billing form must NOT create/save a bill.
+      // Bills are persisted only through explicit Save/Update actions.
+      if (typeof saveDraft === 'function') saveDraft();
       toggleModal('billingModal', false);
     }
 
@@ -2150,7 +2151,7 @@
         viewNew.style.display = 'block';
         viewHist.style.display = 'none';
       } else {
-        autoSaveCurrentFormSilently();
+        // History is read-only navigation; never create a bill just by opening it.
         btnHist.classList.add('active');
         btnNew.classList.remove('active');
         viewHist.style.display = 'block';
@@ -6184,7 +6185,12 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       const f=await loadSdk();
       if(!app)app=f.getApps().length?f.getApp():f.initializeApp(c);
       auth=f.getAuth(app);db=f.getFirestore(app);
-      f.onAuthStateChanged(auth,async u=>{user=u||null;ready=!!u;renderAuth();if(u){setStatus('☁️ Cloud connected • '+(u.email||u.uid),true);await pullCloud();listenCloud();}});
+      f.onAuthStateChanged(auth,async u=>{
+        user=u||null;ready=!!u;renderAuth();
+        if(!u)return;
+        setStatus('☁️ Cloud connected • '+(u.email||u.uid),true);
+        try{await establishCloudAuthority();}catch(e){console.warn('SK cloud authority:',e);}
+      });
       if(auth.currentUser){user=auth.currentUser;ready=true;renderAuth();listenCloud();}
       setStatus('☁️ Firebase ready • Login required',true);
     }catch(e){console.error(e);setStatus('❌ Firebase setup error: '+(e.message||e),false);}
@@ -6216,8 +6222,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       user=u;ready=true;renderAuth();
       setStatus('☁️ Cloud connected • '+(u.email||u.uid),true);
       localStorage.setItem(EMAIL_KEY,u.email||email);
-      Promise.resolve().then(function(){return pullCloud();}).catch(function(e){console.warn('SK cloud pull after login:',e);});
-      try{listenCloud();}catch(e){console.warn('SK cloud listener:',e);}
+      Promise.resolve().then(function(){return establishCloudAuthority();}).catch(function(e){console.warn('SK cloud authority after login:',e);});
       return {uid:u.uid,email:u.email||email,role:r,profile};
     }catch(e){
       console.error(e);
@@ -6303,44 +6308,54 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }
     return committed;
   }
+  function hasLocalBusinessData(){
+    const keys=['sk_bills','sk_credit_ledger_v1','skx_repair_jobs_v2','sk_customers','sk_inventory','sk_orders'];
+    for(const k of keys){
+      const raw=localStorage.getItem(k);
+      if(raw==null||raw==='')continue;
+      try{const v=JSON.parse(raw);if(Array.isArray(v)&&v.length>0)return true;if(v&&typeof v==='object'&&Object.keys(v).length>0)return true;}catch(e){if(String(raw).trim())return true;}
+    }
+    return false;
+  }
+  async function establishCloudAuthority(){
+    if(!ready||!db||!user)return false;
+    const initialized=localStorage.getItem('sk_cloud_initialized_v2')==='1';
+    if(initialized || hasLocalBusinessData()){
+      localStorage.setItem('sk_cloud_initialized_v2','1');
+      try{if(unsub){unsub();unsub=null;}}catch(e){}
+      return await syncAll();
+    }
+    await pullCloud();
+    localStorage.setItem('sk_cloud_initialized_v2','1');
+    return await syncAll();
+  }
+
   async function syncAll(){
-    if(!ready||!db||!user){toast('⚠️ Cloud login first');setStatus('⚠️ Cloud login first',false);return;}
+    if(!ready||!db||!user)return false;
     const started=Date.now();
     try{
       const f=firebaseFns,all=readAll(),entries=Object.entries(all),base=f.collection(db,'shops',shop(),'data');
-      let ops=[],total=0,large=0;
+      // Authoritative local snapshot: remove all remote data documents first, including stale chunks.
+      const remote=await f.getDocs(base);
+      const refs=[];remote.forEach(d=>refs.push(d.ref));
+      for(let i=0;i<refs.length;i+=SK_FIRESTORE_BATCH_LIMIT){const b=f.writeBatch(db);refs.slice(i,i+SK_FIRESTORE_BATCH_LIMIT).forEach(ref=>b.delete(ref));await b.commit();}
+      const ops=[];let large=0;
       for(const [k,v] of entries){
-        const chunks=splitUtf8(v);
-        if(chunks.length>1)large++;
+        const chunks=splitUtf8(v);if(chunks.length>1)large++;
         const id=safeId(k);
-        ops.push(b=>b.set(f.doc(base,id),{
-          key:k,chunked:chunks.length>1,chunkCount:chunks.length>1?chunks.length:0,
-          ...(chunks.length===1?{value:chunks[0]}:{}),
-          updatedAt:f.serverTimestamp(),updatedBy:user.uid,
-          role:localStorage.getItem('sk_current_role_v1')||''
-        },{merge:true}));
-        chunks.forEach((chunk,i)=>{
-          if(chunks.length>1)ops.push(b=>b.set(f.doc(base,id+'__chunk_'+i),{
-            key:k,chunkedPart:true,chunkIndex:i,chunkCount:chunks.length,value:chunk,
-            updatedAt:f.serverTimestamp(),updatedBy:user.uid
-          },{merge:true}));
-        });
+        ops.push(b=>b.set(f.doc(base,id),{key:k,chunked:chunks.length>1,chunkCount:chunks.length>1?chunks.length:0,...(chunks.length===1?{value:chunks[0]}:{}),updatedAt:f.serverTimestamp(),updatedBy:user.uid,role:localStorage.getItem('sk_current_role_v1')||''}));
+        chunks.forEach((chunk,i)=>{if(chunks.length>1)ops.push(b=>b.set(f.doc(base,id+'__chunk_'+i),{key:k,chunkedPart:true,chunkIndex:i,chunkCount:chunks.length,value:chunk,updatedAt:f.serverTimestamp(),updatedBy:user.uid}));});
       }
-      setStatus('☁️ Sync started • '+entries.length+' local entries…',true);
-      for(let i=0;i<ops.length;i+=SK_FIRESTORE_BATCH_LIMIT){
-        const b=f.writeBatch(db),part=ops.slice(i,i+SK_FIRESTORE_BATCH_LIMIT);
-        part.forEach(fn=>fn(b));await b.commit();
-        const done=Math.min(i+part.length,ops.length);
-        setStatus('☁️ Syncing… '+done+'/'+ops.length+' cloud writes',true);
-      }
+      for(let i=0;i<ops.length;i+=SK_FIRESTORE_BATCH_LIMIT){const b=f.writeBatch(db),part=ops.slice(i,i+SK_FIRESTORE_BATCH_LIMIT);part.forEach(fn=>fn(b));await b.commit();}
       await f.setDoc(f.doc(db,'shops',shop()),{name:'SK Mobiles',updatedAt:f.serverTimestamp(),updatedBy:user.uid},{merge:true});
       const sec=((Date.now()-started)/1000).toFixed(1);
-      toast('☁️ '+entries.length+' data entries synced to cloud'+(large?' • '+large+' large item(s) chunked':''));
-      setStatus('☁️ Cloud sync completed • '+entries.length+' entries • '+sec+'s',true);
+      setStatus('☁️ Cloud sync completed • '+entries.length+' local entries • '+sec+'s',true);
+      return true;
     }catch(e){
       console.error('SK Cloud Sync failed:',e);
       const msg=e?.code?(e.code+': '+(e.message||'')):(e?.message||String(e));
       toast('❌ Cloud sync failed: '+msg);setStatus('❌ Cloud sync failed: '+msg,false);
+      return false;
     }
   }
   async function pullCloud(){
@@ -6369,25 +6384,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }catch(e){remoteApplying=false;console.error(e);setStatus('❌ Cloud restore failed: '+(e.message||e),false);}
   }
   function listenCloud(){
-    if(unsub||!ready||!db)return;const f=firebaseFns;
-    unsub=f.onSnapshot(f.collection(db,'shops',shop(),'data'),snap=>{
-      let changed=0;const pending={};remoteApplying=true;
-      snap.docChanges().forEach(ch=>{
-        if(ch.type==='removed')return;
-        const x=ch.doc.data()||{};if(!x.key)return;
-        if(x.chunkedPart===true){
-          if(!pending[x.key])pending[x.key]=[];
-          pending[x.key][Number(x.chunkIndex)||0]=String(x.value||'');
-        }else if(x.chunked!==true&&typeof x.value==='string'){
-          localStorage.setItem(x.key,x.value);changed++;
-        }
-      });
-      Object.entries(pending).forEach(([k,parts])=>{
-        if(parts.length&&parts.every(p=>typeof p==='string')){localStorage.setItem(k,parts.join(''));changed++;}
-      });
-      remoteApplying=false;
-      if(changed)setTimeout(()=>{try{if(typeof renderCards==='function')renderCards();if(typeof updateOrderBadge==='function')updateOrderBadge();if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();}catch(e){}},100);
-    });
+    // Disabled for business data. Explicit Restore Cloud Data is the only cloud -> local action.
+    try{if(unsub){unsub();unsub=null;}}catch(e){}
+    return null;
   }
   async function enablePush(){
     if(!ready||!user){toast('⚠️ Cloud login first');return;}
@@ -6423,15 +6422,22 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   async function syncKeys(keys){
     if(!ready||!db||!user)return;
     try{
-      const f=firebaseFns,ops=[],base=f.collection(db,'shops',shop(),'data');
-      keys.forEach(k=>{
-        if(!k||String(k).startsWith('sk_firebase_'))return;
+      const f=firebaseFns,base=f.collection(db,'shops',shop(),'data'),ops=[];
+      for(const k of keys){
+        if(!k||String(k).startsWith('sk_firebase_'))continue;
         const v=localStorage.getItem(k),id=safeId(k);
-        if(v===null){ops.push(b=>b.delete(f.doc(base,id)));return;}
+        // Delete manifest and all chunk documents when a key is removed.
+        if(v===null){
+          ops.push(b=>b.delete(f.doc(base,id)));
+          try{const snap=await f.getDocs(f.query(base,f.where('key','==',k)));snap.forEach(d=>ops.push(b=>b.delete(d.ref)));}catch(e){}
+          continue;
+        }
         const chunks=splitUtf8(v);
-        ops.push(b=>b.set(f.doc(base,id),{key:k,chunked:chunks.length>1,chunkCount:chunks.length>1?chunks.length:0,...(chunks.length===1?{value:chunks[0]}:{}),updatedAt:f.serverTimestamp(),updatedBy:user.uid},{merge:true}));
-        chunks.forEach((chunk,i)=>{if(chunks.length>1)ops.push(b=>b.set(f.doc(base,id+'__chunk_'+i),{key:k,chunkedPart:true,chunkIndex:i,chunkCount:chunks.length,value:chunk,updatedAt:f.serverTimestamp(),updatedBy:user.uid},{merge:true}));});
-      });
+        // Remove stale chunk documents before writing the current representation.
+        try{const snap=await f.getDocs(f.query(base,f.where('key','==',k)));snap.forEach(d=>{if(d.id!==id)ops.push(b=>b.delete(d.ref));});}catch(e){}
+        ops.push(b=>b.set(f.doc(base,id),{key:k,chunked:chunks.length>1,chunkCount:chunks.length>1?chunks.length:0,...(chunks.length===1?{value:chunks[0]}:{}),updatedAt:f.serverTimestamp(),updatedBy:user.uid},{merge:false}));
+        chunks.forEach((chunk,i)=>{if(chunks.length>1)ops.push(b=>b.set(f.doc(base,id+'__chunk_'+i),{key:k,chunkedPart:true,chunkIndex:i,chunkCount:chunks.length,value:chunk,updatedAt:f.serverTimestamp(),updatedBy:user.uid},{merge:false}));});
+      }
       for(let i=0;i<ops.length;i+=SK_FIRESTORE_BATCH_LIMIT){const b=f.writeBatch(db),part=ops.slice(i,i+SK_FIRESTORE_BATCH_LIMIT);part.forEach(fn=>fn(b));await b.commit();}
     }catch(e){console.warn('SK cloud key sync',e);setStatus('⚠️ Background cloud sync failed: '+(e.message||e),false);}
   }
@@ -6971,7 +6977,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
    setInterval(function(){try{window.savedBills=savedBills;patchBillHistory();patchSavedBillView();patchRepairUI();addResetButton();enforceAdminDelete();}catch(e){}},800);
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,350),{once:true});else setTimeout(init,350);
- window.addEventListener('beforeunload',function(){try{localStorage.setItem('sk_bills',JSON.stringify(savedBills));}catch(e){}});
+  /* Bills are persisted only by explicit save/update/delete/payment actions. */
 })();
 
 
@@ -7280,16 +7286,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   function skFixRenderBillHistory(){
     const container=document.getElementById('billHistoryContainer');
     if(!container) return;
+    // Persistent storage is the only source of truth for Bill History.
+    // Never merge stale in-memory bills back into localStorage.
     let bills=skFixBills();
-    /* If the live in-memory list has newer/extra bills than storage, preserve them by id. */
-    try{
-      const mem=Array.isArray(window.savedBills)?window.savedBills:[];
-      const byId=new Map(bills.map(b=>[String(b.id),b]));
-      mem.forEach(function(b){if(b&&b.id&&!byId.has(String(b.id)))byId.set(String(b.id),b);});
-      bills=Array.from(byId.values());
-      localStorage.setItem('sk_bills',JSON.stringify(bills));
-      window.savedBills=bills;
-    }catch(e){}
+    try{ window.savedBills=bills; }catch(e){}
     const search=(document.getElementById('billHistorySearch')?.value||'').trim().toLowerCase();
     const payFilter=document.getElementById('billHistoryPayFilter')?.value||'';
     const dateFilter=typeof skDateToISO==='function' ? skDateToISO(document.getElementById('billHistoryDateFilter')?.value||'') : '';
