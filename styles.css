@@ -590,7 +590,7 @@
     .sk-login-links{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
     .sk-login-links button{border:0;background:transparent;color:#4f46e5;font-size:.68rem;font-weight:850;padding:5px;cursor:pointer}
     .sk-device-btn{background:linear-gradient(135deg,#0f766e,#0891b2)!important;margin-top:7px!important}
-    .sk-page-status{position:fixed;top:7px;left:9px;z-index:10001;background:rgba(15,23,42,.78);color:#fff;border-radius:20px;padding:4px 9px;font-size:.60rem;font-weight:850;backdrop-filter:blur(8px);display:none;max-width:48vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sk-page-status{position:fixed;top:7px;right:9px;left:auto;z-index:10001;background:rgba(15,23,42,.78);color:#fff;border-radius:20px;padding:4px 9px;font-size:.60rem;font-weight:850;backdrop-filter:blur(8px);display:none;max-width:48vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .sk-page-status.show{display:block}
     .sk-login-label{display:block;font-size:.72rem;font-weight:800;color:#475569;margin:0 0 5px}
     .sk-login-input{width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:13px;padding:12px;font-size:1rem;outline:none;background:#fff;color:#0f172a}
@@ -986,3 +986,8 @@ script, template { display:none !important; }
 #skRoleGate .sk-login-logo{width:92px!important;height:92px!important;margin-bottom:11px!important}
 #skRoleGate .sk-login-card{width:min(370px,100%)!important}
 @media(max-width:600px){.sk-credit-filter-grid{grid-template-columns:1fr}.sk-credit-filter-box{padding:8px}}
+
+
+/* SK V4.13: keep the current role/page tag at the top-right. */
+.sk-page-status{left:auto !important;right:9px !important;top:7px !important;}
+@media(max-width:600px){.sk-page-status{left:auto !important;right:8px !important;top:7px !important;max-width:48vw;}}

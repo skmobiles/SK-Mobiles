@@ -1206,6 +1206,8 @@
     }
 
     function handleBillingModalClose() {
+      // Closing a bill without pressing Save still preserves it in Bill History.
+      autoSaveCurrentFormSilently(true);
       toggleModal('billingModal', false);
     }
 
@@ -1221,18 +1223,23 @@
       showToast("New bill opened!");
     }
 
-    function autoSaveCurrentFormSilently() {
+    function autoSaveCurrentFormSilently(allowCloseSave = false) {
       const custName = document.getElementById('billCustName').value.trim();
       const model = document.getElementById('billModel').value.trim();
       const price = parseFloat(document.getElementById('billTotalPrice').value) || 0;
-      
-      if (custName && model && price > 0) {
+      const phone = document.getElementById('billCustPhone').value.trim();
+      const brand = document.getElementById('billBrand').value.trim();
+      const hasBillData = custName || phone || brand || model || price > 0 ||
+        document.getElementById('billImei1').value.trim() ||
+        document.getElementById('billImei2').value.trim();
+
+      if ((custName && model && price > 0) || (allowCloseSave && hasBillData)) {
         const newEntry = {
           id: localStorage.getItem('sk_v49_current_bill_no') || `SK-B-${Date.now().toString().slice(-6)}`,
           billNo: localStorage.getItem('sk_v49_current_bill_no') || '',
           date: new Date().toLocaleDateString('en-IN'),
           custName,
-          phone: document.getElementById('billCustPhone').value || '9876543210',
+          phone: document.getElementById('billCustPhone').value || '',
           address: document.getElementById('billCustAddress').value || '',
           brand: document.getElementById('billBrand').value || '',
           model,
@@ -2783,7 +2790,7 @@
       <div><div style="font-size:12px;color:var(--text-muted);font-weight:700">Repair Jobs</div>
       <div class="sk-home-rj-count">${a.length}</div><div class="sk-home-rj-mini">${a.length?'Pending Jobs':'No Pending Jobs'}</div></div></div>
       <span style="font-size:14px;color:var(--text-muted);font-weight:700">›</span>`;
-    el.onclick=function(){skOpenRepairJobs()};
+    el.onclick=function(e){e?.preventDefault();e?.stopPropagation();if(typeof skOpenRepairJobs==='function')skOpenRepairJobs();};
     grid.appendChild(el);
     if(window.handleCardDragStart){
       el.addEventListener('dragstart',handleCardDragStart); el.addEventListener('dragover',handleCardDragOver);
@@ -2898,7 +2905,13 @@
   window.skCloseUrgentRepairModal=function(){const m=document.getElementById('skUrgentRepairModal');if(m){m.classList.remove('active');m.style.display='none'}document.body.classList.remove('modal-open')};
   window.skOpenAllUrgentRepairs=function(){
     skCloseUrgentRepairModal();
-    if(typeof skOpenRepairJobs==='function')skOpenRepairJobs();
+    if(typeof skOpenRepairJobs==='function'){
+      skOpenRepairJobs();
+      setTimeout(function(){
+        if(typeof skRjSwitchTab==='function') skRjSwitchTab('jobs');
+        if(typeof skRjRenderJobs==='function') skRjRenderJobs();
+      },30);
+    }
   };
   window.skUrgentOpenDetail=function(id){
     skCloseUrgentRepairModal();
@@ -2912,7 +2925,7 @@
     if(!card){
       card=document.createElement('div');card.id='skUrgentRepairCard';
       card.innerHTML='<div style="display:flex;align-items:center;gap:8px;min-width:0"><div class="sk-ur-icon">🚨</div><div style="min-width:0"><div class="sk-ur-title">Urgent Repair Jobs</div><div class="sk-ur-count" id="skUrgentRepairCount">0</div><div class="sk-ur-preview" id="skUrgentRepairPreview">No urgent jobs</div></div></div><span class="sk-ur-arrow">›</span>';
-      card.onclick=openUrgentModal;
+      card.onclick=function(e){e?.preventDefault();e?.stopPropagation();openUrgentModal();};
       grid.insertAdjacentElement('afterend',card);
     }
     const jobs=urgentJobs();
@@ -6631,14 +6644,37 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   var v49BillType='New Mobile';
 
   function v49SetBillTypeUI(type){
-    v49BillType=(String(type||'New Mobile')==='Used Mobile')?'Used Mobile':'New Mobile';
+    var requested=String(type||'New Mobile');
+    v49BillType=(requested==='Used Mobile'||requested==='Keypad Mobile')?requested:'New Mobile';
     localStorage.setItem(V49_BILL_TYPE_KEY,v49BillType);
     var badge=document.getElementById('pvBillTypeBadge');
     var newTab=document.getElementById('skV49NewMobileTab');
     var usedTab=document.getElementById('skV49UsedMobileTab');
-    if(badge)badge.textContent='📱 '+v49BillType.toUpperCase();
+    var keypadTab=document.getElementById('skV49KeypadMobileTab');
+    if(badge)badge.textContent=(v49BillType==='Keypad Mobile'?'☎️ ':'📱 ')+v49BillType.toUpperCase();
     if(newTab)newTab.classList.toggle('active',v49BillType==='New Mobile');
     if(usedTab)usedTab.classList.toggle('active',v49BillType==='Used Mobile');
+    if(keypadTab)keypadTab.classList.toggle('active',v49BillType==='Keypad Mobile');
+    var ramField=document.getElementById('billRamField');
+    var storageField=document.getElementById('billStorageField');
+    var packageSelect=document.getElementById('billPackage');
+    var keypad=v49BillType==='Keypad Mobile';
+    if(ramField)ramField.style.display=keypad?'none':'';
+    if(storageField)storageField.style.display=keypad?'none':'';
+    if(packageSelect){
+      var packageOptions=[
+        ['Full Kit (Box + Charger + Bill)','Full Kit (Box + Charger + Bill)'],
+        ['Box Only (Mobile + Box)','Box Only (Mobile + Box)'],
+        ['Mobile + Charger','Mobile + Charger'],
+        ['Mobile Only','Mobile Only']
+      ];
+      if(keypad){
+        packageSelect.innerHTML='<option value="Box Only (Mobile + Box)">Box Only (Mobile + Box)</option>';
+      }else if(packageSelect.options.length!==packageOptions.length){
+        packageSelect.innerHTML=packageOptions.map(function(o){return '<option value="'+o[0].replace(/"/g,'&quot;')+'">'+o[1]+'</option>';}).join('');
+      }
+      if(keypad) packageSelect.value='Box Only (Mobile + Box)';
+    }
   }
   window.skV49SetBillType=function(type){v49SetBillTypeUI(type);};
 
@@ -7145,4 +7181,60 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     Storage.prototype.__skV412PermissionWrapped=true;
   }
   savedRoot();
+})();
+
+
+/* SK V4.13 BILLING BUTTON CLICK FIX — only billing tab controls. */
+(function(){
+  'use strict';
+  function applyBillType(type){
+    var t=String(type||'New Mobile');
+    t=(t==='Used Mobile')?'Used Mobile':'New Mobile';
+    try{localStorage.setItem('sk_v49_current_bill_type',t);}catch(e){}
+    var newTab=document.getElementById('skV49NewMobileTab');
+    var usedTab=document.getElementById('skV49UsedMobileTab');
+    if(newTab){newTab.classList.toggle('active',t==='New Mobile');newTab.setAttribute('aria-pressed',t==='New Mobile'?'true':'false');}
+    if(usedTab){usedTab.classList.toggle('active',t==='Used Mobile');usedTab.setAttribute('aria-pressed',t==='Used Mobile'?'true':'false');}
+    var badge=document.getElementById('pvBillTypeBadge');
+    if(badge)badge.textContent='📱 '+t.toUpperCase();
+    var helper=document.getElementById('skBillTypeHelper');
+    if(helper)helper.textContent=t==='Used Mobile'?'Used Mobile: Enter the used mobile sale details.':'New Mobile: Enter the new mobile sale details.';
+    window.__skV49CurrentBillType=t;
+  }
+  function bind(){
+    applyBillType((function(){try{return localStorage.getItem('sk_v49_current_bill_type')||'New Mobile';}catch(e){return 'New Mobile';}})());
+    var n=document.getElementById('skV49NewMobileTab'),u=document.getElementById('skV49UsedMobileTab');
+    if(n)n.setAttribute('aria-pressed',n.classList.contains('active')?'true':'false');
+    if(u)u.setAttribute('aria-pressed',u.classList.contains('active')?'true':'false');
+    var nb=document.getElementById('billTabBtnNew'),hb=document.getElementById('billTabBtnHistory');
+    if(nb)nb.setAttribute('type','button');
+    if(hb)hb.setAttribute('type','button');
+  }
+  window.skV49SetBillType=function(type){
+    applyBillType(type);
+    return true;
+  };
+  document.addEventListener('click',function(e){
+    var el=e.target.closest && e.target.closest('#skV49NewMobileTab,#skV49UsedMobileTab,#billTabBtnNew,#billTabBtnHistory');
+    if(!el)return;
+    if(el.id==='skV49NewMobileTab'||el.id==='skV49UsedMobileTab'){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      applyBillType(el.id==='skV49UsedMobileTab'?'Used Mobile':'New Mobile');
+      return false;
+    }
+    if(el.id==='billTabBtnNew'){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if(typeof window.handleNewBillClick==='function')window.handleNewBillClick();
+      return false;
+    }
+    if(el.id==='billTabBtnHistory'){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if(typeof window.switchBillTab==='function')window.switchBillTab('history');
+      return false;
+    }
+  },true);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
 })();

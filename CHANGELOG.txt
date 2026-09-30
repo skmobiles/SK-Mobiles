@@ -1,3 +1,32 @@
+========================================
+V4.12 - REQUESTED BUG FIXES
+DATE: 30-09-2026
+========================================
+
+MODIFIED:
+- Home > Repair Jobs card now opens the Repair Jobs modal reliably.
+- Urgent Repair Jobs card now opens its urgent list reliably.
+- Urgent/pending repair job cards are rendered at the top of the Repair Jobs Jobs tab so the saved job is immediately visible.
+- Billing now has 3 bill types: New Mobile, Used Mobile, Keypad Mobile.
+- Keypad Mobile hides RAM and Storage fields.
+- Keypad Mobile Package is restricted to Box Only (Mobile + Box).
+- Billing IMEI 1 / IMEI 2 fields were aligned to equal width and equal input height.
+- Closing a bill without pressing Save now auto-saves entered bill data to Bill History.
+
+NOT MODIFIED:
+- Existing Firebase logic.
+- Existing inventory/order/customer/repair data structures.
+- Existing payment/EMI calculation logic.
+- Existing billing history and invoice logic, except the requested auto-save behavior.
+- Existing login/access control.
+
+FILES MODIFIED:
+- index.html
+- css/style.css
+- js/app.js
+
+========================================
+
 SK MOBILES WEB APP - CHANGELOG
 
 ========================================

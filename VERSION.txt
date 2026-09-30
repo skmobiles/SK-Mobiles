@@ -1,7 +1,7 @@
 SK MOBILES WEB APP
-CURRENT VERSION: V4.12
+CURRENT VERSION: V4.13
 
 VERSION RULE:
-- Normal bug fix / UI change: increase by 0.01 (example: V4.12 -> V4.13).
+- Normal bug fix / UI change: increase by 0.01 (example: V4.13 -> V4.14).
 - Major feature/restructure: increase major/minor version as appropriate.
 - Do not rename the project folder just because the version changes.

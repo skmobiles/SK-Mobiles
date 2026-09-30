@@ -7172,3 +7172,59 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   }
   savedRoot();
 })();
+
+
+/* SK V4.13 BILLING BUTTON CLICK FIX — only billing tab controls. */
+(function(){
+  'use strict';
+  function applyBillType(type){
+    var t=String(type||'New Mobile');
+    t=(t==='Used Mobile')?'Used Mobile':'New Mobile';
+    try{localStorage.setItem('sk_v49_current_bill_type',t);}catch(e){}
+    var newTab=document.getElementById('skV49NewMobileTab');
+    var usedTab=document.getElementById('skV49UsedMobileTab');
+    if(newTab){newTab.classList.toggle('active',t==='New Mobile');newTab.setAttribute('aria-pressed',t==='New Mobile'?'true':'false');}
+    if(usedTab){usedTab.classList.toggle('active',t==='Used Mobile');usedTab.setAttribute('aria-pressed',t==='Used Mobile'?'true':'false');}
+    var badge=document.getElementById('pvBillTypeBadge');
+    if(badge)badge.textContent='📱 '+t.toUpperCase();
+    var helper=document.getElementById('skBillTypeHelper');
+    if(helper)helper.textContent=t==='Used Mobile'?'Used Mobile: Enter the used mobile sale details.':'New Mobile: Enter the new mobile sale details.';
+    window.__skV49CurrentBillType=t;
+  }
+  function bind(){
+    applyBillType((function(){try{return localStorage.getItem('sk_v49_current_bill_type')||'New Mobile';}catch(e){return 'New Mobile';}})());
+    var n=document.getElementById('skV49NewMobileTab'),u=document.getElementById('skV49UsedMobileTab');
+    if(n)n.setAttribute('aria-pressed',n.classList.contains('active')?'true':'false');
+    if(u)u.setAttribute('aria-pressed',u.classList.contains('active')?'true':'false');
+    var nb=document.getElementById('billTabBtnNew'),hb=document.getElementById('billTabBtnHistory');
+    if(nb)nb.setAttribute('type','button');
+    if(hb)hb.setAttribute('type','button');
+  }
+  window.skV49SetBillType=function(type){
+    applyBillType(type);
+    return true;
+  };
+  document.addEventListener('click',function(e){
+    var el=e.target.closest && e.target.closest('#skV49NewMobileTab,#skV49UsedMobileTab,#billTabBtnNew,#billTabBtnHistory');
+    if(!el)return;
+    if(el.id==='skV49NewMobileTab'||el.id==='skV49UsedMobileTab'){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      applyBillType(el.id==='skV49UsedMobileTab'?'Used Mobile':'New Mobile');
+      return false;
+    }
+    if(el.id==='billTabBtnNew'){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if(typeof window.handleNewBillClick==='function')window.handleNewBillClick();
+      return false;
+    }
+    if(el.id==='billTabBtnHistory'){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if(typeof window.switchBillTab==='function')window.switchBillTab('history');
+      return false;
+    }
+  },true);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
+})();
