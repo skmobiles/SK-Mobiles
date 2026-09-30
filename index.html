@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<title>SK MOBILES — Mobile Sale Bill</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<header class="topbar">
+  <button class="icon-btn" id="menuBtn" aria-label="Menu">☰</button>
+  <div class="brand">
+    <div class="brand-mark">SK</div>
+    <div><strong>SK MOBILES</strong><small>Mobile Sale & Service</small></div>
+  </div>
+  <div class="top-actions">
+    <span id="saveStatus" class="status-pill">Ready</span>
+    <button class="icon-btn" id="settingsBtn" title="Settings">⚙️</button>
+  </div>
+</header>
+
+<aside id="drawer" class="drawer">
+  <div class="drawer-head"><strong>SK MOBILES</strong><button class="icon-btn" id="drawerClose">✕</button></div>
+  <nav>
+    <button data-page="home" class="nav-btn active">🏠 Home</button>
+    <button data-page="billing" class="nav-btn">🧾 Billing</button>
+    <button data-page="credit" class="nav-btn">💳 Customer Credit</button>
+    <button data-page="repair" class="nav-btn">🔧 Repair Jobs</button>
+    <button data-page="inventory" class="nav-btn">📦 Inventory</button>
+    <button data-page="backup" class="nav-btn">💾 Backup & Restore</button>
+  </nav>
+  <div class="drawer-foot">V6 Clean Core<br>Local-first data storage</div>
+</aside>
+<div id="drawerShade" class="drawer-shade"></div>
+
+<main id="app" class="app"></main>
+
+<div id="modalRoot"></div>
+
+<template id="homeTemplate">
+<section class="page">
+  <div class="page-title"><div><h1>Dashboard</h1><p>Sales, credit and repair activity</p></div><button class="primary" data-action="new-bill">＋ New Bill</button></div>
+  <div class="metric-grid">
+    <button class="metric" data-page="billing"><span>🧾</span><strong id="mBills">0</strong><small>Saved Bills</small></button>
+    <button class="metric" data-page="credit"><span>💳</span><strong id="mCredit">₹0</strong><small>Outstanding Credit</small></button>
+    <button class="metric" data-page="repair"><span>🔧</span><strong id="mRepair">0</strong><small>Pending Repairs</small></button>
+    <button class="metric" data-page="inventory"><span>📦</span><strong id="mStock">0</strong><small>Low Stock Items</small></button>
+  </div>
+  <div class="home-grid">
+    <article class="panel"><div class="panel-head"><h2>🚨 Urgent Repair Jobs</h2><button class="text-btn" data-page="repair">View all</button></div><div id="urgentList" class="list"></div></article>
+    <article class="panel"><div class="panel-head"><h2>🧾 Recent Bills</h2><button class="text-btn" data-page="billing">History</button></div><div id="recentBills" class="list"></div></article>
+  </div>
+</section>
+</template>
+
+<template id="billingTemplate">
+<section class="page">
+  <div class="page-title"><div><h1>SK MOBILES — Mobile Sale Bill</h1><p>Save one bill record and use the same record everywhere.</p></div><button class="primary" data-action="new-bill">＋ New Bill</button></div>
+  <div class="segmented">
+    <button class="seg active" data-bill-tab="new">＋ New Bill</button>
+    <button class="seg" data-bill-tab="history">📋 History <b id="historyCount">0</b></button>
+  </div>
+  <div id="billingNew"></div>
+  <div id="billingHistory" class="hidden"></div>
+</section>
+</template>
+
+<template id="creditTemplate">
+<section class="page">
+  <div class="page-title"><div><h1>💳 Customer Credit Ledger</h1><p>Credit is derived from saved bills and their payments.</p></div><div><button class="secondary" data-action="add-credit">＋ Credit</button><button class="primary" data-action="credit-payment">💰 Payment</button></div></div>
+  <div class="metric-grid three"><div class="metric"><strong id="cCustomers">0</strong><small>Customers</small></div><div class="metric"><strong id="cOutstanding">₹0</strong><small>Outstanding</small></div><div class="metric"><strong id="cDue">0</strong><small>EMI Due</small></div></div>
+  <div class="filterbar"><input id="creditSearch" placeholder="Search customer / phone..."><select id="creditStatus"><option value="outstanding" selected>Outstanding</option><option value="all">All</option><option value="paid">Paid</option><option value="emi">EMI</option></select></div>
+  <div id="creditList" class="card-list"></div>
+</section>
+</template>
+
+<template id="repairTemplate">
+<section class="page">
+  <div class="page-title"><div><h1>🔧 Repair Jobs</h1><p>Jobs are saved immediately and remain after refresh.</p></div><button class="primary" data-action="new-repair">＋ New Repair Job</button></div>
+  <div class="segmented"><button class="seg active" data-repair-tab="jobs">🔧 Jobs <b id="repairCount">0</b></button><button class="seg" data-repair-tab="history">📜 History</button></div>
+  <div id="repairJobsView"></div><div id="repairHistoryView" class="hidden"></div>
+</section>
+</template>
+
+<template id="inventoryTemplate">
+<section class="page">
+  <div class="page-title"><div><h1>📦 Inventory</h1><p>Simple stock master with persistent storage.</p></div><button class="primary" data-action="new-product">＋ Product</button></div>
+  <div class="filterbar"><input id="stockSearch" placeholder="Search product / model..."><select id="stockFilter"><option value="all">All Stock</option><option value="low">Low Stock</option><option value="out">Out of Stock</option></select></div>
+  <div id="inventoryList" class="card-list"></div>
+</section>
+</template>
+
+<template id="backupTemplate">
+<section class="page">
+  <div class="page-title"><div><h1>💾 Backup & Restore</h1><p>One JSON file contains all V6 application data.</p></div></div>
+  <div class="backup-grid">
+    <article class="panel"><h2>Export</h2><p>Download a complete JSON backup before major changes.</p><button class="primary wide" data-action="export-backup">⬇️ Download JSON Backup</button></article>
+    <article class="panel"><h2>Restore</h2><p>Restore a previously exported V6 JSON file. Existing data is replaced only after confirmation.</p><input id="restoreInput" type="file" accept=".json,application/json"><button class="danger wide" data-action="restore-backup">Restore Selected Backup</button></article>
+  </div>
+  <article class="panel"><h2>Data Safety</h2><ul class="safety"><li>Bill IDs and Bill Numbers are unique.</li><li>Delete is persistent and recorded in a delete ledger.</li><li>Credit and EMI totals are derived from bills, not duplicate ledger entries.</li><li>Refresh never creates or restores a bill.</li><li>No Firebase/cloud restore is included in this clean core, so stale cloud data cannot overwrite local data.</li></ul></article>
+</section>
+</template>
+
+<script src="js/app.js"></script>
+</body>
+</html>
