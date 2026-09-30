@@ -92,3 +92,19 @@ FIXED:
 - Bill Edit: fixed editor to read/write the live sk_bills store instead of relying on an inaccessible lexical savedBills variable; edits persist by bill ID.
 - Bill View/Delete: refreshed the original bill actions from the live sk_bills store before operating.
 - Existing business data and bill records are preserved; no intentional deletion or deduplication of valid distinct bills was added.
+
+V4.12 — Connected Fix 3 (2026-09-30)
+-------------------------------------
+FIXED:
+1. Repair Jobs Save failure caused by date helper scope/availability. Repair save now uses stable global date helpers and directly persists to skx_repair_jobs_v2.
+2. Repair Jobs rendering, edit, next-status, delete, detail, history and Home metric are connected to the same repair-job storage.
+3. Repair Received Date defaults to the device's current local date.
+4. Repair History Starting Date and Ending Date default to the current local date when blank; they remain manually editable.
+5. EMI Start Date and Customer Credit Date default to the current local date when blank.
+6. Bill History View (eye) now resolves the selected bill by stable Bill ID instead of relying on a stale array index.
+7. Bill History rows carry a stable data-bill-id so View remains connected after refresh/filter/render.
+8. Repair/Home/urgent sections are refreshed after repair save/update/status/delete.
+
+NOT CHANGED:
+- Existing business data, localStorage keys, billing calculations, customer/credit logic and UI styling were not intentionally redesigned.
+- No existing valid bill or repair record is deleted by this fix.

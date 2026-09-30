@@ -7312,6 +7312,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     filtered.forEach(function(b){
       const originalIdx=bills.findIndex(function(x){return String(x.id)===String(b.id)});
       const item=document.createElement('div');
+      item.dataset.billId=String(b.id||'');
       item.style.cssText='background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;';
       const price=Number(b.price)||0;
       let actions='';
@@ -7491,3 +7492,406 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     window.skOpenUrgentRepairModal=wrapped;
   }
 })();
+
+
+
+/* ============================================================
+   SK MOBILES V4.12 - FINAL CONNECTIVITY / REPAIR DATE FIX
+   - Restores globally available date helpers used by Repair Jobs.
+   - Makes Repair Jobs save/render/edit/delete/detail/home fully connected.
+   - Uses local device date (not UTC) for defaults.
+   - Makes Bill History View action resolve by stable Bill ID.
+   ============================================================ */
+(function(){
+  'use strict';
+
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function localTodayISO(){
+    const d=new Date();
+    return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+  }
+  function dmyFromISO(v){
+    const x=String(v||'').trim();
+    let m=x.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m) return pad2(m[3])+'/'+pad2(m[2])+'/'+m[1];
+    m=x.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    return m ? pad2(m[1])+'/'+pad2(m[2])+'/'+m[3] : x;
+  }
+  function isoFromDMY(v){
+    const x=String(v||'').trim();
+    let m=x.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    if(m) return m[3]+'-'+pad2(m[2])+'-'+pad2(m[1]);
+    m=x.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    return m ? m[1]+'-'+pad2(m[2])+'-'+pad2(m[3]) : x;
+  }
+  function dmyTimeFromISO(v){
+    const x=String(v||'').trim();
+    const m=x.match(/^(\d{4})-(\d{1,2})-(\d{1,2})T(\d{1,2}):(\d{2})/);
+    return m ? pad2(m[3])+'/'+pad2(m[2])+'/'+m[1]+' '+pad2(m[4])+':'+m[5] : x;
+  }
+  function isoTimeFromDMY(v){
+    const x=String(v||'').trim();
+    const m=x.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})(?:\s+|T)(\d{1,2}):(\d{2})$/);
+    return m ? m[3]+'-'+pad2(m[2])+'-'+pad2(m[1])+'T'+pad2(m[4])+':'+m[5] : x;
+  }
+  function normaliseDateInput(el){
+    if(!el)return;
+    const v=String(el.value||'').trim();
+    if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)) el.value=dmyFromISO(v);
+    else if(/^\d{1,2}[\/-]\d{1,2}[\/-]\d{4}$/.test(v)) el.value=dmyFromISO(v);
+  }
+
+  /* These aliases are required by the original Repair Jobs code.
+     The original helpers were scoped inside another IIFE. */
+  window.skISOToDMY=window.skISOToDMY||dmyFromISO;
+  window.skDateToISO=window.skDateToISO||isoFromDMY;
+  window.skISOToDMYTime=window.skISOToDMYTime||dmyTimeFromISO;
+  window.skDateTimeToISO=window.skDateTimeToISO||isoTimeFromDMY;
+  window.skNormaliseDateInput=window.skNormaliseDateInput||normaliseDateInput;
+
+  const RJ_KEY='skx_repair_jobs_v2';
+
+  function readJobs(){
+    try{
+      const a=JSON.parse(localStorage.getItem(RJ_KEY)||'[]');
+      return Array.isArray(a)?a:[];
+    }catch(e){ return []; }
+  }
+  function writeJobs(a){
+    localStorage.setItem(RJ_KEY,JSON.stringify(Array.isArray(a)?a:[]));
+    try{
+      localStorage.setItem('sk_repair_jobs_last_saved_v1',JSON.stringify({id:a[0]?.id||'',at:Date.now()}));
+    }catch(e){}
+  }
+  function toast(msg){ try{ if(typeof window.showToast==='function') window.showToast(msg); }catch(e){} }
+  function esc(v){
+    return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function refreshRepairConnected(){
+    try{ if(typeof window.skRjRenderJobs==='function') window.skRjRenderJobs(); }catch(e){}
+    try{ if(typeof window.skRjRenderHistory==='function') window.skRjRenderHistory(); }catch(e){}
+    try{ if(typeof window.skRjRenderHomeMetric==='function') window.skRjRenderHomeMetric(); }catch(e){}
+    try{ if(typeof window.skFixRepairUrgentSync==='function') window.skFixRepairUrgentSync(); }catch(e){}
+    try{ if(typeof window.renderCards==='function') window.renderCards(); }catch(e){}
+  }
+
+  function setRepairDateDefaults(){
+    const today=dmyFromISO(localTodayISO());
+    ['skRjDate','skRjFromDate','skRjToDate','skCreditDate','billEmiStartDate'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el && !String(el.value||'').trim()) el.value=today;
+      if(el && el.classList.contains('sk-dmy-date')) normaliseDateInput(el);
+    });
+    const filter=document.getElementById('billHistoryDateFilter');
+    /* Do not default bill-history filter: an empty filter must show all bills. */
+    if(filter) normaliseDateInput(filter);
+  }
+
+  function resetRepairFormSafe(){
+    const ids=['skRjCustomer','skRjPhone','skRjModel','skRjImei','skRjProblem','skRjEstimate','skRjNote'];
+    ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    const edit=document.getElementById('skRjEditId'); if(edit) edit.value='';
+    const date=document.getElementById('skRjDate'); if(date) date.value=dmyFromISO(localTodayISO());
+    const status=document.getElementById('skRjStatus'); if(status) status.value='Received';
+    const wt=document.getElementById('skRjWorkType'); if(wt) wt.value='Normal';
+    const sch=document.getElementById('skRjSchedule'); if(sch) sch.value='';
+    const wrap=document.getElementById('skRjScheduleWrap'); if(wrap) wrap.style.display='none';
+    const btn=document.getElementById('skRjSaveBtn'); if(btn) btn.textContent='💾 Save Repair Job';
+    const cancel=document.getElementById('skRjCancelEdit'); if(cancel) cancel.style.display='none';
+  }
+
+  function getRepairFormJob(existing){
+    const dateInput=document.getElementById('skRjDate');
+    const date=isoFromDMY(dateInput?.value||'') || localTodayISO();
+    const workType=document.getElementById('skRjWorkType')?.value||'Normal';
+    const schedule=isoTimeFromDMY(document.getElementById('skRjSchedule')?.value||'');
+    return {
+      id: existing?.id || ('RJ-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),
+      customer:String(document.getElementById('skRjCustomer')?.value||'').trim(),
+      phone:String(document.getElementById('skRjPhone')?.value||'').trim(),
+      model:String(document.getElementById('skRjModel')?.value||'').trim(),
+      imei:String(document.getElementById('skRjImei')?.value||'').trim(),
+      workType:workType,
+      schedule:schedule,
+      problem:String(document.getElementById('skRjProblem')?.value||'').trim(),
+      date:date,
+      estimate:Number(document.getElementById('skRjEstimate')?.value)||0,
+      status:String(document.getElementById('skRjStatus')?.value||'Received'),
+      note:String(document.getElementById('skRjNote')?.value||'').trim(),
+      createdAt:existing?.createdAt||new Date().toISOString(),
+      updatedAt:new Date().toISOString()
+    };
+  }
+
+  window.skRjSaveJob=function(e){
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    const editId=String(document.getElementById('skRjEditId')?.value||'');
+    const all=readJobs();
+    const existing=editId ? all.find(j=>String(j.id)===editId) : null;
+    const job=getRepairFormJob(existing);
+    if(!job.customer || !job.model || !job.problem){
+      toast('Customer, Model & Problem required');
+      return false;
+    }
+    if(existing){
+      const idx=all.findIndex(j=>String(j.id)===editId);
+      if(idx>=0) all[idx]=job; else all.unshift(job);
+    }else{
+      all.unshift(job);
+    }
+    writeJobs(all);
+    resetRepairFormSafe();
+    refreshRepairConnected();
+    toast(existing?'Repair job updated':'Repair job saved');
+    return false;
+  };
+
+  window.skRjResetForm=function(){
+    resetRepairFormSafe();
+    setRepairDateDefaults();
+  };
+
+  window.skRjEdit=function(id){
+    const j=readJobs().find(x=>String(x.id)===String(id));
+    if(!j)return;
+    if(typeof window.skRjSwitchTab==='function') window.skRjSwitchTab('jobs');
+    const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v??'';};
+    set('skRjEditId',j.id);
+    set('skRjCustomer',j.customer);
+    set('skRjPhone',j.phone);
+    set('skRjModel',j.model);
+    set('skRjImei',j.imei);
+    set('skRjWorkType',j.workType||'Normal');
+    set('skRjSchedule',j.schedule?dmyTimeFromISO(j.schedule):'');
+    set('skRjProblem',j.problem);
+    set('skRjDate',dmyFromISO(j.date||localTodayISO()));
+    set('skRjEstimate',j.estimate||'');
+    set('skRjStatus',j.status||'Received');
+    set('skRjNote',j.note);
+    const wrap=document.getElementById('skRjScheduleWrap');if(wrap)wrap.style.display=j.workType==='Scheduled'?'block':'none';
+    const btn=document.getElementById('skRjSaveBtn');if(btn)btn.textContent='✏️ Update Repair Job';
+    const cancel=document.getElementById('skRjCancelEdit');if(cancel)cancel.style.display='block';
+    document.getElementById('skRjCustomer')?.focus();
+  };
+
+  window.skRjNext=function(id){
+    const a=readJobs(),idx=a.findIndex(j=>String(j.id)===String(id));if(idx<0)return;
+    const order=['Received','Checking','Repairing','Ready'];
+    const old=a[idx].status;
+    const pos=order.indexOf(old);
+    a[idx].status=(old==='Ready'||pos<0)?'Delivered':order[Math.min(pos+1,order.length-1)];
+    a[idx].updatedAt=new Date().toISOString();
+    writeJobs(a);refreshRepairConnected();
+  };
+
+  window.skRjDelete=function(id){
+    if(!confirm('Delete this repair job?'))return;
+    writeJobs(readJobs().filter(j=>String(j.id)!==String(id)));
+    refreshRepairConnected();
+    toast('Repair job deleted');
+  };
+
+  window.skRjShowDetail=function(id){
+    const j=readJobs().find(x=>String(x.id)===String(id));if(!j)return;
+    const c=document.getElementById('skRepairDetailContent');if(!c)return;
+    c.innerHTML='<div style="background:var(--model-bg);border:1px solid var(--card-border);border-radius:15px;padding:12px">'+
+      '<div style="font-weight:900;font-size:.95rem">'+esc(j.customer)+' · '+esc(j.model)+'</div>'+
+      '<div style="font-size:.72rem;color:var(--text-muted);margin-top:5px;">📞 '+esc(j.phone||'—')+' · IMEI: '+esc(j.imei||'—')+'</div>'+
+      '<div style="margin-top:9px;font-size:.76rem"><b>Problem / Repair:</b><br>'+esc(j.problem)+'</div>'+
+      '<div style="margin-top:8px;font-size:.72rem;color:var(--text-muted)">📅 '+esc(dmyFromISO(j.date))+' · Status: <b>'+esc(j.status)+'</b> · Work: <b>'+esc(j.workType)+'</b></div>'+
+      (j.schedule?'<div style="margin-top:6px;font-size:.72rem">🗓️ Scheduled: <b>'+esc(dmyTimeFromISO(j.schedule))+'</b></div>':'')+
+      '<div style="margin-top:6px;font-size:.72rem">Estimate: <b>₹'+Number(j.estimate||0).toLocaleString('en-IN')+'</b></div>'+
+      (j.note?'<div style="margin-top:8px;font-size:.72rem"><b>Note:</b> '+esc(j.note)+'</div>':'')+
+      '</div>';
+    document.getElementById('skRepairDetailModal')?.classList.add('active');
+  };
+
+  window.skRjRenderJobs=function(){
+    const list=document.getElementById('skRjJobsList');if(!list)return;
+    const jobs=readJobs().filter(j=>j&&j.status!=='Delivered');
+    const count=document.getElementById('skRjPendingCount');if(count)count.textContent=String(jobs.length);
+    list.innerHTML='';
+    if(!jobs.length){
+      list.innerHTML='<div class="sk-rj-empty">No pending repair jobs.</div>';
+      return;
+    }
+    jobs.forEach(j=>{
+      const card=document.createElement('div');card.className='sk-rj-card';
+      const top=document.createElement('div');top.className='sk-rj-card-top';
+      const left=document.createElement('div');
+      const name=document.createElement('div');name.className='sk-rj-name';name.textContent=(j.customer||'Customer')+' · '+(j.model||'Model');
+      const meta=document.createElement('div');meta.className='sk-rj-meta';
+      meta.textContent=dmyFromISO(j.date)+' · IMEI: '+(j.imei||'—')+'\n'+(j.problem||'');
+      left.append(name,meta);
+      const right=document.createElement('div');
+      const status=document.createElement('span');status.className='sk-rj-status';status.textContent=j.status||'Received';
+      const priority=document.createElement('span');priority.className='sk-rj-priority '+String(j.workType||'Normal').toLowerCase();priority.textContent=j.workType||'Normal';
+      right.append(status,priority);top.append(left,right);card.appendChild(top);
+
+      const actions=document.createElement('div');actions.className='sk-rj-actions';
+      const next=document.createElement('button');next.type='button';next.className='sk-rj-next';next.textContent='Next Status';
+      next.onclick=e=>{e.stopPropagation();window.skRjNext(j.id);};
+      const edit=document.createElement('button');edit.type='button';edit.className='sk-rj-edit';edit.textContent='✏️ Edit';
+      edit.onclick=e=>{e.stopPropagation();window.skRjEdit(j.id);};
+      actions.append(next,edit);card.appendChild(actions);
+      const del=document.createElement('button');del.type='button';del.className='sk-rj-delete';del.style.cssText='width:100%;margin-top:6px;height:32px;border-radius:10px;border:1px solid rgba(239,68,68,.22)';del.textContent='🗑️ Delete';
+      del.onclick=e=>{e.stopPropagation();window.skRjDelete(j.id);};card.appendChild(del);
+      card.addEventListener('click',e=>{if(e.target.closest('button'))return;window.skRjShowDetail(j.id);});
+      list.appendChild(card);
+    });
+  };
+
+  window.skRjRenderHistory=function(){
+    const list=document.getElementById('skRjHistoryList');if(!list)return;
+    const from=isoFromDMY(document.getElementById('skRjFromDate')?.value||'');
+    const to=isoFromDMY(document.getElementById('skRjToDate')?.value||'');
+    const q=String(document.getElementById('skRjHistorySearch')?.value||'').trim().toLowerCase();
+    const all=readJobs().filter(j=>j.status==='Ready'||j.status==='Delivered');
+    const filtered=all.filter(j=>{
+      const d=String(j.date||'');
+      return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.imei,j.problem,j.status].join(' ').toLowerCase().includes(q));
+    });
+    const count=document.getElementById('skRjHistoryCount');if(count)count.textContent=String(all.length);
+    list.innerHTML='';
+    if(!filtered.length){list.innerHTML='<div class="sk-rj-empty">No repair history found.</div>';return;}
+    filtered.forEach(j=>{
+      const row=document.createElement('div');row.className='sk-rj-card';
+      row.innerHTML='<div class="sk-rj-card-top"><div><div class="sk-rj-name"></div><div class="sk-rj-meta"></div></div><div><span class="sk-rj-status"></span><span class="sk-rj-priority"></span></div></div><div class="sk-rj-actions"></div>';
+      row.querySelector('.sk-rj-name').textContent=(j.customer||'Customer')+' · '+(j.model||'Model');
+      row.querySelector('.sk-rj-meta').textContent=dmyFromISO(j.date)+' · IMEI: '+(j.imei||'—')+'\n'+(j.problem||'');
+      row.querySelector('.sk-rj-status').textContent=j.status||'';
+      row.querySelector('.sk-rj-priority').textContent=j.workType||'Normal';
+      const actions=row.querySelector('.sk-rj-actions');
+      const view=document.createElement('button');view.type='button';view.className='sk-rj-edit';view.textContent='👁️ View';view.onclick=e=>{e.stopPropagation();window.skRjShowDetail(j.id);};
+      actions.appendChild(view);
+      row.addEventListener('click',e=>{if(e.target.closest('button'))return;window.skRjShowDetail(j.id);});
+      list.appendChild(row);
+    });
+  };
+
+  /* Repair modal open: always prepare current date defaults before rendering. */
+  const oldOpenRepair=window.skOpenRepairJobs;
+  if(typeof oldOpenRepair==='function'&&!oldOpenRepair.__skFinalRepair){
+    const wrapped=function(){
+      setRepairDateDefaults();
+      const r=oldOpenRepair.apply(this,arguments);
+      setTimeout(()=>{setRepairDateDefaults();window.skRjRenderJobs?.();},0);
+      return r;
+    };
+    wrapped.__skFinalRepair=true;
+    window.skOpenRepairJobs=wrapped;
+  }
+
+  /* Home repair metric: use one source and make the whole card clickable. */
+  window.skRjRenderHomeMetric=function(){
+    const grid=document.getElementById('homeMetricGrid');if(!grid)return;
+    document.getElementById('skHomeRepairMetric')?.remove();
+    const jobs=readJobs().filter(j=>j&&j.status!=='Delivered');
+    const el=document.createElement('div');el.id='skHomeRepairMetric';el.className='draggable-card sk-home-rj-card';el.dataset.cardId='metric-repairs';el.draggable=true;
+    el.innerHTML='<div style="display:flex;align-items:center;gap:8px"><div style="width:38px;height:38px;border-radius:12px;background:rgba(239,68,68,.10);display:flex;align-items:center;justify-content:center;font-size:1.15rem">🔧</div><div><div style="font-size:12px;color:var(--text-muted);font-weight:700">Repair Jobs</div><div class="sk-home-rj-count">'+jobs.length+'</div><div class="sk-home-rj-mini">'+(jobs.length?'Pending Jobs':'No Pending Jobs')+'</div></div></div><span style="font-size:14px;color:var(--text-muted);font-weight:700">›</span>';
+    el.onclick=e=>{e.preventDefault();e.stopPropagation();window.skOpenRepairJobs?.();};
+    grid.appendChild(el);
+  };
+
+  /* Stable Bill History View: resolve by ID, never by a stale array index. */
+  window.skV412ViewBillById=function(id){
+    let bills=[];
+    try{bills=JSON.parse(localStorage.getItem('sk_bills')||'[]');}catch(e){}
+    if(!Array.isArray(bills))bills=[];
+    const b=bills.find(x=>String(x?.id)===String(id));
+    if(!b){toast('Bill not found');return;}
+    try{
+      window.savedBills=bills;
+      localStorage.setItem('sk_bills',JSON.stringify(bills));
+      const idx=bills.indexOf(b);
+      if(typeof window.viewSavedBill==='function'){
+        window.viewSavedBill(idx);
+        return;
+      }
+    }catch(e){}
+    const c=document.getElementById('viewBillContent');if(!c)return;
+    c.innerHTML='<div style="padding:16px"><b>'+esc(b.custName||'Customer')+'</b><br>📞 '+esc(b.phone||'—')+'<br>📅 '+esc(dmyFromISO(b.date))+'<br>Payment: '+esc(b.payMode||'Cash')+'<br><strong>₹ '+Number(b.price||0).toLocaleString('en-IN')+'</strong></div>';
+    if(typeof window.toggleModal==='function')window.toggleModal('viewBillModal',true);
+    else document.getElementById('viewBillModal')?.classList.add('active');
+  };
+
+  function bindBillHistoryView(){
+    const c=document.getElementById('billHistoryContainer');if(!c)return;
+    c.querySelectorAll('.sk-v412-view-btn').forEach(btn=>{
+      if(btn.__skFinalView)return;
+      btn.__skFinalView=true;
+      btn.onclick=function(e){
+        e.preventDefault();e.stopPropagation();
+        const id=this.closest('[data-bill-id]')?.dataset.billId;
+        if(id) window.skV412ViewBillById(id);
+      };
+    });
+    /* Also repair the original history buttons if the renderer produced inline onclick. */
+    c.querySelectorAll('button[title="View Bill"]').forEach(btn=>{
+      if(btn.__skFinalView)return;
+      btn.__skFinalView=true;
+      btn.onclick=function(e){
+        e.preventDefault();e.stopPropagation();
+        const item=this.closest('[data-bill-id]');
+        if(item) window.skV412ViewBillById(item.dataset.billId);
+      };
+    });
+  }
+
+  const oldRenderHistory=window.renderBillHistory;
+  if(typeof oldRenderHistory==='function'&&!oldRenderHistory.__skFinalHistory){
+    const wrapped=function(){
+      const r=oldRenderHistory.apply(this,arguments);
+      setTimeout(bindBillHistoryView,0);
+      return r;
+    };
+    wrapped.__skFinalHistory=true;
+    window.renderBillHistory=wrapped;
+  }
+
+  /* Make our own history renderer expose stable bill IDs on each row. */
+  const oldFixRender=window.skFixRenderBillHistory;
+  if(typeof oldFixRender==='function'&&!oldFixRender.__skFinalHistoryRows){
+    const wrapped=function(){
+      const r=oldFixRender.apply(this,arguments);
+      const c=document.getElementById('billHistoryContainer');
+      if(c){
+        const buttons=c.querySelectorAll('.sk-v412-view-btn');
+        buttons.forEach(btn=>{
+          const item=btn.closest('div[style*="justify-content:space-between"]');
+          if(!item)return;
+          const txt=item.textContent||'';
+          let bills=readJobs; /* keep closure valid without touching bill data */
+          try{
+            const all=JSON.parse(localStorage.getItem('sk_bills')||'[]');
+            const name=(item.querySelector('div[style*="font-weight:800"]')?.textContent||'').trim();
+            const m=name.match(/^(.*)\s+\((.*)\)$/);
+            const candidate=Array.isArray(all)?all.find(b=>m&&String(b.custName||'')===m[1]&&String(b.model||'')===m[2]):null;
+            if(candidate)item.dataset.billId=String(candidate.id);
+          }catch(e){}
+        });
+        bindBillHistoryView();
+      }
+      return r;
+    };
+    wrapped.__skFinalHistoryRows=true;
+    window.skFixRenderBillHistory=wrapped;
+    window.renderBillHistory=wrapped;
+  }
+
+  document.addEventListener('DOMContentLoaded',function(){
+    setRepairDateDefaults();
+    setTimeout(setRepairDateDefaults,100);
+    setTimeout(function(){
+      try{window.skRjRenderJobs?.();}catch(e){}
+      try{window.skRjRenderHomeMetric?.();}catch(e){}
+      try{bindBillHistoryView();}catch(e){}
+    },250);
+  },{once:true});
+
+  window.addEventListener('storage',function(e){
+    if(e.key===RJ_KEY){setRepairDateDefaults();refreshRepairConnected();}
+    if(e.key==='sk_bills'){setTimeout(bindBillHistoryView,20);}
+  });
+})();
+

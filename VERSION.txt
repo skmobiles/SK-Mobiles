@@ -1,3 +1,4 @@
-SK Mobiles
-Current Version: V4.12 + Connected Data / Interaction Fix 2
+Current App Version: V4.12
+Project Structure: 3-file GitHub structure
 Stable Project Folder: SK_Mobiles_V4.12_GitHub_Ready_FIXED_CONNECTED_ISSUES
+Latest Fix: Connected Repair Jobs + Bill History View + Current Date Defaults

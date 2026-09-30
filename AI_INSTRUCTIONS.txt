@@ -55,3 +55,14 @@ IMPORTANT CONNECTED-DATA RULES:
 - Bill History count and Bill History list must use the same normalized `sk_bills` dataset.
 - Urgent Repair Home cards must use DOM event listeners or safely bound IDs; do not put HTML-escaped IDs into inline JavaScript strings.
 - When modifying any of these modules, trace the complete data path: storage -> normalization -> render -> click/action -> detail screen -> save -> refresh/cloud sync.
+
+IMPORTANT — DATA CONNECTION RULES FOR FUTURE MODIFICATIONS
+-----------------------------------------------------------
+- Repair Jobs must use localStorage key `skx_repair_jobs_v2` as the single source of truth.
+- Do not create a second repair-job array/key.
+- Bill History must use `sk_bills` as the single source of truth.
+- Bill History actions must resolve bills by stable `id`, not a stale filtered-array index.
+- Repair date values are stored as ISO `YYYY-MM-DD`; UI may display `DD/MM/YYYY`.
+- Current-date defaults must use the user's local device date, not UTC date.
+- Before changing any Repair Jobs or Bill History function, trace: storage -> save/update -> render -> Home metric -> modal/detail -> action buttons -> refresh/sync.
+- Do not add duplicate CSS/JS files. The active files remain `css/style.css` and `js/app.js`.
