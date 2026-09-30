@@ -74,3 +74,21 @@ FILES MODIFIED:
 - List only files actually changed.
 
 ========================================
+
+
+[CONNECTED DATA BUG FIX - 2026-09-30]
+FIXED:
+1. Home page Urgent Repair Jobs card/detail click — replaced unsafe inline ID handling with DOM-bound event handlers so every urgent job opens the correct repair detail.
+2. Home page Customer Credit amount — now reads the same customer credit ledger (`sk_credit_ledger_v1`) used by the Credit detail screen, so home total and detail total stay connected.
+3. Bill History — made bill normalization/filter/rendering tolerant of legacy/alternate field names so the count cannot show while the list silently fails because of missing fields. View/Delete/Payment actions remain connected to the actual bill index.
+4. Bill History count, list, Home Credit, and Urgent Repair UI now refresh from localStorage after relevant data changes and cloud/storage synchronization.
+5. Existing bills are preserved; this fix does not intentionally delete or deduplicate valid transactions.
+
+
+2026-09-30 — Connected Data / Interaction Fix 2
+- Repair Job Save: removed the unintended role guard from Save Repair Job and the worker UI block; Save Repair Job now persists to skx_repair_jobs_v2 and refreshes connected repair/home surfaces.
+- Saved Bills count: Home Saved Bills metric and Billing History count/list now use one canonical sk_bills dataset and reconcile live in-memory bills by bill ID to prevent count/list mismatch.
+- Saved Bill history: restored rendering of all saved bills with View, Edit (Admin/Manager), Credit Payment, and Admin Delete actions.
+- Bill Edit: fixed editor to read/write the live sk_bills store instead of relying on an inaccessible lexical savedBills variable; edits persist by bill ID.
+- Bill View/Delete: refreshed the original bill actions from the live sk_bills store before operating.
+- Existing business data and bill records are preserved; no intentional deletion or deduplication of valid distinct bills was added.

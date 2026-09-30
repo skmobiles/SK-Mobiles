@@ -48,3 +48,10 @@ VERSIONING:
 - New feature: use the next appropriate version.
 - Major restructuring: use a major/minor version when appropriate.
 - Do not rename the project folder for every version.
+
+
+IMPORTANT CONNECTED-DATA RULES:
+- Home Customer Credit must derive from the same `sk_credit_ledger_v1` ledger used by the Credit screen. Do not calculate it independently from `sk_bills`.
+- Bill History count and Bill History list must use the same normalized `sk_bills` dataset.
+- Urgent Repair Home cards must use DOM event listeners or safely bound IDs; do not put HTML-escaped IDs into inline JavaScript strings.
+- When modifying any of these modules, trace the complete data path: storage -> normalization -> render -> click/action -> detail screen -> save -> refresh/cloud sync.
