@@ -1120,6 +1120,104 @@ const MASTER_INVENTORY = [
     let ordersList = [];
     let savedBills = [];
 
+    /* ================================================================
+       🔒 LOCKED BILL NUMBER FORMAT — DO NOT CHANGE THIS BLOCK.
+       User-requested format:
+       Invoice:     SK-DDMM-001
+       Bill Details: SK-B-DDMM-001
+       Keep internal `id` unchanged for Firebase/local sync compatibility.
+       Do not change any other app functionality while modifying this.
+       ================================================================ */
+    const SK_BILL_NUMBER_FORMAT_LOCKED = true;
+    const SK_BILL_PREFIX = 'SK';
+    const SK_BILL_DETAILS_PREFIX = 'SK-B';
+
+    function skBillDateKey(value) {
+      const s = String(value || '').trim();
+      let m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})/);
+      if (m) {
+        const y = String(m[3]).length === 2 ? '20' + m[3] : m[3];
+        return y + String(Number(m[2])).padStart(2, '0') + String(Number(m[1])).padStart(2, '0');
+      }
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) {
+        return String(d.getFullYear()) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+      }
+      const now = new Date();
+      return String(now.getFullYear()) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+    }
+
+    function skBillDDMM(value) {
+      const key = skBillDateKey(value);
+      return key.slice(6, 8) + key.slice(4, 6);
+    }
+
+    function skBillNumberFromDateSeq(dateValue, seq, details) {
+      const prefix = details ? SK_BILL_DETAILS_PREFIX : SK_BILL_PREFIX;
+      return `${prefix}-${skBillDDMM(dateValue)}-${String(Math.max(1, Number(seq) || 1)).padStart(3, '0')}`;
+    }
+
+    function skExistingBillSeq(bill) {
+      // Accept both the previous CURRENT format and the locked current format
+      // so old synced/local bills keep their sequence without changing internal IDs.
+      const n = String(bill?.billNo || '').match(/^(?:SK(?:-B)?(?:-CURRENT)?)[\s-]+\d{4}-(\d{3})$/i);
+      return n ? Number(n[1]) : 0;
+    }
+
+    function skIsCurrentBillNo(bill) {
+      return /^SK(?:-B)?-\d{4}-\d{3}$/i.test(String(bill?.billNo || '').trim());
+    }
+
+    function skNextBillSequence(dateValue, list) {
+      const dateKey = skBillDateKey(dateValue);
+      const bills = Array.isArray(list) ? list : (typeof savedBills !== 'undefined' ? savedBills : []);
+      let max = 0;
+      bills.forEach(function(b) {
+        if (skBillDateKey(b?.date) !== dateKey) return;
+        max = Math.max(max, skExistingBillSeq(b));
+      });
+      // Legacy bills without the new billNo are also counted so numbering
+      // does not reuse an already-existing daily number.
+      const legacyCount = bills.filter(function(b) {
+        return skBillDateKey(b?.date) === dateKey && !skExistingBillSeq(b);
+      }).length;
+      max = Math.max(max, legacyCount);
+      return max + 1;
+    }
+
+    function skNextBillNo(dateValue) {
+      return skBillNumberFromDateSeq(dateValue || new Date(), skNextBillSequence(dateValue || new Date(), savedBills), false);
+    }
+
+    function skEnsureBillNumbers(list) {
+      if (!Array.isArray(list)) return false;
+      let changed = false;
+      const counters = {};
+      // Reserve existing new-format numbers first.
+      list.forEach(function(b) {
+        const dateKey = skBillDateKey(b?.date);
+        const seq = skExistingBillSeq(b);
+        if (seq) counters[dateKey] = Math.max(counters[dateKey] || 0, seq);
+      });
+      // Normalize every stored invoice number to the locked SK-DDMM-001 format.
+      // Old SK-CURRENT... values are converted without changing the internal id.
+      list.forEach(function(b) {
+        if (!b) return;
+        const seq = skExistingBillSeq(b);
+        if (seq) {
+          const normalized = skBillNumberFromDateSeq(b.date, seq, false);
+          if (b.billNo !== normalized) { b.billNo = normalized; changed = true; }
+          return;
+        }
+        const dateKey = skBillDateKey(b.date);
+        counters[dateKey] = (counters[dateKey] || 0) + 1;
+        b.billNo = skBillNumberFromDateSeq(b.date, counters[dateKey], false);
+        changed = true;
+      });
+      return changed;
+    }
+
+
     window.addEventListener('DOMContentLoaded', () => {
       loadInitialData();
       applyShopConfig();
@@ -1155,6 +1253,7 @@ const MASTER_INVENTORY = [
           seen.add(key);
           return true;
         });
+        skEnsureBillNumbers(savedBills);
         localStorage.setItem('sk_bills', JSON.stringify(savedBills));
       }
     }
@@ -1220,9 +1319,12 @@ const MASTER_INVENTORY = [
       const price = parseFloat(document.getElementById('billTotalPrice').value) || 0;
       
       if (custName && model && price > 0) {
+        const billDate = new Date().toLocaleDateString('en-IN');
         const newEntry = {
+          // Internal id remains unchanged for sync compatibility.
           id: `SK-B-${Date.now().toString().slice(-6)}`,
-          date: new Date().toLocaleDateString('en-IN'),
+          billNo: skNextBillNo(billDate),
+          date: billDate,
           custName,
           phone: document.getElementById('billCustPhone').value || '9876543210',
           address: document.getElementById('billCustAddress').value || '',
@@ -2247,6 +2349,10 @@ const MASTER_INVENTORY = [
       const now = new Date();
       const dateStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
       document.getElementById('pvBillDate').innerText = dateStr;
+      // 🔒 LOCKED: Invoice number format is SK-DDMM-001. Do not change.
+      const previewBillNo = skNextBillNo(now);
+      const pvBillNo = document.getElementById('pvBillNo');
+      if (pvBillNo) pvBillNo.innerText = previewBillNo;
 
       document.getElementById('pvCustName').innerText = document.getElementById('billCustName').value || '---';
       document.getElementById('pvCustPhone').innerText = document.getElementById('billCustPhone').value || '---';
@@ -2320,7 +2426,7 @@ const MASTER_INVENTORY = [
       container.innerHTML = '';
 
       const filtered = savedBills.filter(b => {
-        const matchesQuery = b.custName.toLowerCase().includes(q) || b.phone.includes(q) || b.model.toLowerCase().includes(q) || b.id.toLowerCase().includes(q);
+        const matchesQuery = b.custName.toLowerCase().includes(q) || b.phone.includes(q) || b.model.toLowerCase().includes(q) || b.id.toLowerCase().includes(q) || String(b.billNo || '').toLowerCase().includes(q);
         const matchesPay = payFilter ? b.payMode === payFilter : true;
         let matchesDate = true;
         if (dateFilter) {
@@ -2365,7 +2471,7 @@ const MASTER_INVENTORY = [
         <div style="background:#fff; color:#1e293b; padding:20px; border-radius:18px; font-family:'Plus Jakarta Sans',sans-serif;">
           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #edf0f6; padding-bottom:12px; margin-bottom:12px;">
             <div style="font-weight:950; color:#d9166f; font-size:1.3rem;">SK MOBILES</div>
-            <div style="text-align:right; font-size:0.75rem;"><strong>Bill No:</strong> ${b.id}<br><strong>Date:</strong> ${b.date}</div>
+            <div style="text-align:right; font-size:0.75rem;"><strong>Bill No:</strong> ${skBillNumberFromDateSeq(b.date, skExistingBillSeq(b) || (idx + 1), true)}<br><strong>Date:</strong> ${b.date}</div>
           </div>
           <div style="font-size:0.75rem; background:#f8fafc; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #e2e8f0;">
             <div><strong>Customer:</strong> ${b.custName}</div>

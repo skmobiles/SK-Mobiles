@@ -1,0 +1,65 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function myUser() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return signedIn() && myUser().role == role && myUser().active != false;
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    function isManager() {
+      return hasRole('manager');
+    }
+
+    function isWorker() {
+      return hasRole('worker');
+    }
+
+    function isActiveStaff() {
+      return isAdmin() || isManager() || isWorker();
+    }
+
+    function allowedStaffEmail(email, role) {
+      return
+        (email == 'skmobilesdpi@gmail.com' && role == 'admin') ||
+        (email == 'lavanyam.com94@gmail.com' && role == 'manager') ||
+        (email == 'sriyogi6@gmail.com' && role == 'worker');
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow read: if isAdmin();
+
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && allowedStaffEmail(request.auth.token.email, request.resource.data.role)
+        && request.resource.data.email == request.auth.token.email;
+
+      allow update: if isAdmin()
+        || (signedIn()
+            && request.auth.uid == userId
+            && request.resource.data.role == resource.data.role
+            && request.resource.data.email == resource.data.email);
+
+      allow delete: if isAdmin();
+    }
+
+    match /shops/{shopId}/{document=**} {
+      allow read: if isActiveStaff() && shopId == 'SK-MOBILES';
+      allow create, update: if isActiveStaff() && shopId == 'SK-MOBILES';
+      allow delete: if (isAdmin() || isManager()) && shopId == 'SK-MOBILES';
+    }
+  }
+}

@@ -134,6 +134,17 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 <input accept=".json" id="importBackupInput" onchange="importAppDataBackup(this)" style="display:none;" type="file"/>
 </div>
+<!-- CLOUD BACKUP: Firebase Firestore app-data backup. Keep this block unchanged unless cloud-backup behavior is intentionally modified. -->
+<div id="skCloudBackupSection" style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">☁️ CLOUD BACKUP</div>
+<div id="skCloudBackupBox" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
+<div style="font-size:0.70rem;color:var(--text-muted);line-height:1.45;margin-bottom:9px;">Firebase Cloud Backup saves the app's local data to the SK-MOBILES cloud. Use Restore to bring the latest cloud backup back to this device.</div>
+<div id="skCloudBackupStatus" style="font-size:0.70rem;font-weight:800;color:var(--text);background:var(--pill-bg);border:1px solid var(--card-border);border-radius:10px;padding:8px;margin-bottom:8px;">Cloud backup not created</div>
+<div style="display:flex;gap:7px;">
+<button class="submit-btn" onclick="skCloudBackupNow()" style="flex:1;padding:8px;font-size:0.73rem;" type="button">☁️ Backup Now</button>
+<button class="submit-btn" onclick="skCloudRestoreLatest()" style="flex:1;padding:8px;font-size:0.73rem;background:var(--pill-bg);border:1px solid var(--card-border);color:var(--text);" type="button">☁️ Restore Latest</button>
+</div>
+<div style="font-size:0.64rem;color:var(--text-muted);margin-top:7px;line-height:1.4;">Cloud Backup is separate from the existing JSON backup and App Data Folder backup. Do not remove this section.</div>
+</div>
 <!-- APP DATA FOLDER: Admin only. Browser writes a user-selected folder with section-wise JSON files. -->
 <div id="skAppDataFolderSection" style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">📁 APP DATA FOLDER</div>
 <div id="skAppDataFolderBox" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
@@ -380,7 +391,8 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 <div class="invoice-meta-row">
 <div>
-<strong>Bill No:</strong> <span id="pvBillNo">SK-2409-001</span>
+<strong>Bill No:</strong> <!-- 🔒 LOCKED BILL NUMBER FORMAT: Do not change. Invoice = SK-DDMM-001; Bill Details = SK-B-DDMM-001. Do not modify unrelated app functionality. -->
+<span id="pvBillNo">SK-DDMM-001</span>
 </div>
 <div>
 <strong>Date:</strong> <span id="pvBillDate">26-09-2026</span>
@@ -886,5 +898,9 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 
-<script src="js/app.js"></script></body>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="js/app.js"></script>
+<script src="js/firebase-sync.js"></script></body>
 </html>
