@@ -41,7 +41,7 @@
 <button class="menu-drawer-btn logout" onclick="showToast('Logged out successfully'); toggleLeftDrawer(false);">🔒 Logout</button>
 </div>
 <div style="margin-top:auto; font-size:0.68rem; color:var(--text-muted); text-align:center; border-top:1px solid var(--card-border); padding-top:8px;">
-     SK Mobiles Master • V4.4
+     SK Mobiles Master • V4.5
      <br/>
      Dharmapuri, Tamil Nadu
     </div>
@@ -274,7 +274,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div style="margin-top:8px;">
-<!-- 🔒 SK V4.4 LOCKED: Customer Address box size is fixed; do not make it expandable. -->
+<!-- 🔒 SK V4.5 LOCKED: Customer Address box size is fixed; do not make it expandable. -->
 <label class="form-label">Customer Address</label> <textarea class="form-input" id="billCustAddress" oninput="saveDraft(); updateBillPreview()" placeholder="Door No, Street, Area, City, PIN" rows="2" style="height:56px;min-height:56px;max-height:56px;resize:none;overflow-y:auto;box-sizing:border-box;"></textarea>
 </div>
 </div>
@@ -503,7 +503,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 <div id="billHistoryView" style="display:none;">
 <div class="bill-filter-bar" style="display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:6px; margin-bottom:10px;">
-<input class="form-input" id="billHistorySearch" oninput="renderBillHistory()" placeholder="Search customer, phone, model..." type="text"/> <select class="form-input" id="billHistoryPayFilter" onchange="renderBillHistory()"> <option value="">All Payments</option> <option value="Cash">Cash</option> <option value="GPay">GPay / UPI</option> <option value="EMI">EMI</option> <option value="Credit">Credit</option> </select> <input class="form-input" id="billHistoryDateFilter" onchange="renderBillHistory()" title="Filter by bill date" type="date"/>
+<input class="form-input" id="billHistorySearch" oninput="renderBillHistory()" placeholder="Search customer, phone, model..." type="text"/> <select class="form-input" id="billHistoryPayFilter" onchange="renderBillHistory()"> <option value="">All Payments</option> <option value="Cash">Cash</option> <option value="GPay">GPay / UPI</option> <option value="EMI">EMI</option> <option value="Credit">Credit</option> </select> <input class="form-input" id="billHistoryDateFilter" onchange="renderBillHistory()" title="Filter by bill date" type="date"/ lang="en-GB">
 </div>
 <div id="billHistoryContainer" style="display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto;"></div>
 </div>
@@ -533,7 +533,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <img alt="SK MOBILES" class="sk-logo-img" id="appHeaderLogo" onclick="document.getElementById('logoFileInput').click()" src="Logo.png" title="Click to change logo"/>
 <div>
 <div class="app-name" id="appHeaderTitle">SK MOBILES</div>
-<div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.4</span></div>
+<div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.5</span></div>
 </div>
 </div>
 </div>
@@ -624,7 +624,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="form-group" id="skRjScheduleWrap" style="display:none"><label class="form-label">Scheduled Date &amp; Time</label><input class="form-input" id="skRjSchedule" type="datetime-local"/></div>
 <div class="form-group"><label class="form-label">Problem / Repair Details</label><textarea class="form-input" id="skRjProblem" required="" rows="3"></textarea></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-<div class="form-group"><label class="form-label">Received Date</label><input class="form-input" id="skRjDate" type="date"/></div>
+<div class="form-group"><label class="form-label">Received Date</label><input class="form-input" id="skRjDate" type="date"/ lang="en-GB"></div>
 <div class="form-group"><label class="form-label">Estimate</label><input class="form-input" id="skRjEstimate" min="0" type="number"/></div>
 </div>
 <div class="form-group"><label class="form-label">Status</label>
@@ -641,8 +641,8 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div id="skRjHistoryView" style="display:none">
 <div class="sk-rj-filters">
 <div style="grid-column:1/-1"><label class="sk-rj-filter-label">Search</label><input class="form-input" id="skRjHistorySearch" oninput="skRjRenderHistory()" placeholder="Customer / phone / model / IMEI"/></div>
-<div><label class="sk-rj-filter-label">Starting Date</label><input class="form-input" id="skRjFromDate" onchange="skRjRenderHistory()" type="date"/></div>
-<div><label class="sk-rj-filter-label">Ending Date</label><input class="form-input" id="skRjToDate" onchange="skRjRenderHistory()" type="date"/></div>
+<div><label class="sk-rj-filter-label">Starting Date</label><input class="form-input" id="skRjFromDate" onchange="skRjRenderHistory()" type="date"/ lang="en-GB"></div>
+<div><label class="sk-rj-filter-label">Ending Date</label><input class="form-input" id="skRjToDate" onchange="skRjRenderHistory()" type="date"/ lang="en-GB"></div>
 </div>
 <button class="submit-btn sk-rj-export" onclick="skRjExportHistory()" type="button">📊 Export Repair History Excel</button>
 <div id="skRjHistoryList" style="margin-top:9px"></div>
@@ -759,7 +759,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="sk-v42-profile-box" style="text-align:center;margin-bottom:9px;"><div style="font-size:2.1rem;margin-bottom:4px;">👑</div><div style="font-size:1rem;font-weight:950;">SK MOBILES Admin</div><div style="font-size:.68rem;color:var(--text-muted);margin-top:3px;">Full Access Account</div></div>
 <div class="sk-v42-profile-grid">
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCOUNT</div><b>Admin</b></div>
-<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.4</b></div>
+<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.5</b></div>
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">WORKERS</div><b id="skAdminProfileWorkerCount">0</b></div>
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCESS</div><b>Full Access</b></div>
 </div>
@@ -797,7 +797,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="form-group"><label class="form-label">Phone / WhatsApp</label><input class="form-input" id="skCreditPhone" placeholder="10 digit number"/></div>
 <div class="form-group"><label class="form-label">Amount *</label><input class="form-input" id="skCreditAmount" min="0" placeholder="Amount" type="number"/></div>
 <div class="form-group"><label class="form-label">Payment Mode / Received Mode</label><select class="form-select" id="skCreditMode"><option>Cash</option><option>GPay</option><option>Account</option><option>UPI</option><option>Other</option></select></div>
-<div class="form-group"><label class="form-label">Date</label><input class="form-input" id="skCreditDate" type="date"/></div>
+<div class="form-group"><label class="form-label">Date</label><input class="form-input" id="skCreditDate" type="date"/ lang="en-GB"></div>
 <div class="form-group"><label class="form-label">Purchase / Service / Details</label><textarea class="form-input" id="skCreditDetails" placeholder="Mobile purchase, service, accessory, etc." rows="3"></textarea></div>
 <button class="submit-btn" onclick="skSaveCreditEntry()">💾 Save Entry</button>
 </div>
@@ -828,7 +828,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 </div>
-<!-- Additive V4.4 Customer Credit / Google Keep layer -->
+<!-- Additive V4.5 Customer Credit / Google Keep layer -->
 <div class="modal-overlay" id="skKeepImportModal" style="z-index:2147482700!important;">
 <div class="modal-sheet" style="max-width:460px;max-height:90vh;">
 <div class="modal-title"><span>📥 Google Keep / Notes Import</span><button class="modal-close-btn" onclick="skCloseKeepImport()">✕</button></div>
@@ -846,7 +846,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 
-<!-- SK V4.4 Customer Credit Ledger Page / Bill-linked Credit & Payment layer -->
+<!-- SK V4.5 Customer Credit Ledger Page / Bill-linked Credit & Payment layer -->
 
 <div class="modal-overlay" id="skCreditLedgerPage" style="z-index:2147482800!important;">
 <div class="modal-sheet">
@@ -884,14 +884,14 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="form-group"><label class="form-label">Amount *</label><input class="form-input" id="skCPAmount" min="0" oninput="skCPRecalcForm()" type="number"/></div>
 <div class="form-group" id="skCPAdvanceGroup"><label class="form-label">Advance</label><input class="form-input" id="skCPAdvance" min="0" oninput="skCPRecalcForm()" type="number" value="0"/></div>
 <div class="form-group"><label class="form-label">Balance</label><input class="form-input skcp-readonly" id="skCPBalance" readonly=""/></div>
-<div class="form-group"><label class="form-label">Date</label><input class="form-input" id="skCPDate" type="date"/></div>
+<div class="form-group"><label class="form-label">Date</label><input class="form-input" id="skCPDate" type="date"/ lang="en-GB"></div>
 <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="skCPCategory"><option>Mobile Sale</option><option>Service / Repair</option><option>Accessory</option><option>Old Balance</option><option>Other</option></select></div>
 <div class="form-group" id="skCPPaymentModeGroup" style="display:none"><label class="form-label">Payment Mode</label><select class="form-select" id="skCPPaymentMode"><option>Cash</option><option>GPay</option><option>UPI</option><option>Account</option><option>Card</option><option>Other</option></select></div>
 <div class="form-group" id="skCPEmiGroup"><label class="form-label">EMI Options</label><select class="form-select" id="skCPEmiMode" onchange="skCPToggleEmi()"><option value="none">No EMI</option><option value="emi">EMI</option></select>
 <div id="skCPEmiFields" style="display:none;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
 <input class="form-input" id="skCPEmiMonths" max="60" min="1" placeholder="Months" type="number"/>
 <input class="form-input" id="skCPEmiInterest" min="0" placeholder="Interest %" step=".01" type="number"/>
-<input class="form-input" id="skCPEmiStart" placeholder="Start date" type="date"/>
+<input class="form-input" id="skCPEmiStart" placeholder="Start date" type="date"/ lang="en-GB">
 </div>
 </div>
 <div class="form-group"><label class="form-label">Note</label><textarea class="form-input" id="skCPNote" placeholder="Note" rows="3"></textarea></div>

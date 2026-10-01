@@ -4,7 +4,7 @@
   'use strict';
 
   const FB_CONFIG = {
-    apiKey: "AIzaSyDufQNy7lM9ue_32u3gcH3TZUhPlrSILA",
+    apiKey: "AIzaSyDufQNy7l9M3ue_32u3gcH3TZUhPlrSILA",
     authDomain: "sk-mobiles-2d61d.firebaseapp.com",
     projectId: "sk-mobiles-2d61d",
     storageBucket: "sk-mobiles-2d61d.firebasestorage.app",
@@ -172,40 +172,120 @@
   }
 
   function mergeRemote(remoteDocs){
-    const local = localBills().map(normalizeBill).filter(Boolean);
-    const byId = new Map(local.map(b=>[b.id,b]));
+    // Firestore is the Single Source of Truth for Bill History.
+    // Local bills are only a cache of the latest remote snapshot; they are
+    // never uploaded merely because the page was reloaded.
+    const remote = [];
     remoteDocs.forEach(d=>{
-      const r=d.data()||{};
-      const id=String(r.id||d.id);
-      const localBill=byId.get(id);
-      if(r._deleted){
-        if(localBill) byId.delete(id);
-        return;
-      }
-      const rt=Number(r._syncUpdatedAt)||0;
-      const lt=Number(localBill?._syncUpdatedAt)||0;
-      if(!localBill || rt >= lt){
-        const clean=Object.assign({},r);
-        delete clean._deleted; delete clean._syncUpdatedBy; delete clean._syncUpdatedAt;
-        clean._syncUpdatedAt=rt;
-        byId.set(id,clean);
-      }
+      const r = d.data() || {};
+      const id = String(r.id || d.id);
+      if(!id) return;
+      if(r.isDeleted === true || r._deleted === true) return;
+      const clean = Object.assign({}, r);
+      delete clean.isDeleted;
+      delete clean.deletedAt;
+      delete clean.deletedBy;
+      delete clean._deleted;
+      delete clean._syncUpdatedBy;
+      delete clean._syncUpdatedAt;
+      clean.id = id;
+      remote.push(clean);
     });
-    const merged=[...byId.values()];
-    setLocalBills(merged);
-    lastKnownBillIds=new Set(merged.map(b=>b.id));
+    setLocalBills(remote);
+    lastKnownBillIds = new Set(remote.map(b=>String(b.id)));
   }
+
+  /* ================================================================
+     🔒 V4.5 LOCKED BILL DELETE — SOFT DELETE ONLY FOR THE DELETE BUTTON.
+     Firestore is the single source of truth for Bill History.
+     Do not replace the visible Delete button with hard delete.
+     ================================================================ */
+  const CURRENT_DEVICE_ID = (function(){
+    try {
+      let id = localStorage.getItem("sk_current_device_id_v1");
+      if(!id){
+        id = "DEV-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,8);
+        localStorage.setItem("sk_current_device_id_v1", id);
+      }
+      return id;
+    } catch(e) {
+      return "WEB-DEVICE";
+    }
+  })();
+
+  function removeBillFromLocalStorage(billId){
+    const id = String(billId || "");
+    if(!id) return;
+    try {
+      const local = localBills().filter(function(b){
+        return String(b?.id || "") !== id &&
+               String(b?.billId || "") !== id &&
+               String(b?.billNo || "") !== id;
+      });
+      setLocalBills(local);
+    } catch(e) {
+      console.error("Local bill removal error", e);
+    }
+  }
+  window.removeBillFromLocalStorage = removeBillFromLocalStorage;
+
+  async function deleteBillSafely(billId){
+    if(!billId) return;
+    if(!confirm("இந்த பில்லை நிச்சயமாக நீக்க வேண்டுமா?")) return;
+    try {
+      const billRef = db.collection("shops").doc(SHOP_ID).collection("bills").doc(String(billId));
+      await billRef.set({
+        id: String(billId),
+        isDeleted: true,
+        _deleted: true,
+        deletedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        deletedBy: CURRENT_DEVICE_ID,
+        _syncUpdatedAt: Date.now(),
+        _syncUpdatedBy: auth.currentUser ? auth.currentUser.uid : CURRENT_DEVICE_ID
+      }, {merge:true});
+      removeBillFromLocalStorage(billId);
+      toast("🗑️ பில் வெற்றிகரமாக நீக்கப்பட்டது!");
+    } catch(error) {
+      console.error("Delete Error:", error);
+      toast("❌ பில் நீக்க முடியவில்லை");
+    }
+  }
+  window.deleteBillSafely = deleteBillSafely;
+
+  // Hard-delete utility retained only as an explicit utility; the visible Delete button never calls it.
+  async function hardDeleteBill(billId){
+    try {
+      await db.collection("shops").doc(SHOP_ID).collection("bills").doc(String(billId)).delete();
+      removeBillFromLocalStorage(billId);
+      toast("🗑️ பில் கிளவுட் மற்றும் சாதனத்திலிருந்து நீக்கப்பட்டது.");
+    } catch(err) {
+      console.error("Delete error:", err);
+      toast("❌ Hard delete failed");
+    }
+  }
+  window.hardDeleteBill = hardDeleteBill;
 
   async function startBillSync(){
     if(unsubscribeBills) unsubscribeBills();
     remoteReady=false;
     const ref=db.collection("shops").doc(SHOP_ID).collection("bills");
+
+    // 🔒 V4.5: On page reload, read Bills ONLY from Firestore.
+    // DO NOT loop localStorage bills and setDoc them here.
     const snap=await ref.get();
     mergeRemote(snap.docs);
     remoteReady=true;
-    await uploadBills();
+
     unsubscribeBills=ref.onSnapshot(snapshot=>{
       try {
+        // Soft-deleted/removed cloud bills disappear from the local cache immediately.
+        snapshot.docChanges().forEach(change=>{
+          const data=change.doc.data() || {};
+          const id=String(data.id || change.doc.id);
+          if(data.isDeleted === true || data._deleted === true || change.type === "removed"){
+            removeBillFromLocalStorage(id);
+          }
+        });
         mergeRemote(snapshot.docs);
         remoteReady=true;
       } catch(e){ console.error("Bill snapshot error",e); }
@@ -215,6 +295,7 @@
     });
   }
 
+  /* Local writes made by app actions may sync to Firebase; page reload never uploads localStorage. */
   function hookLocalBillWrites(){
     if(window.__skFirebaseStorageHook) return;
     window.__skFirebaseStorageHook=true;

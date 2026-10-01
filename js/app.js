@@ -1132,6 +1132,29 @@ const MASTER_INVENTORY = [
     const SK_BILL_PREFIX = 'SK';
     const SK_BILL_DETAILS_PREFIX = 'SK-B';
 
+    /* ================================================================
+       🔒 LOCKED DATE DISPLAY FORMAT — DO NOT CHANGE THIS BLOCK.
+       User-requested app-wide display format: DD-MM-YYYY.
+       Internal ISO dates may remain YYYY-MM-DD for native date inputs/sorting.
+       Do not change unrelated date logic while modifying this.
+       ================================================================ */
+    const SK_DATE_FORMAT_LOCKED = true;
+    function skDisplayDate(value) {
+      const s = String(value == null ? '' : value).trim();
+      if (!s) return '';
+      let m = s.match(/^(\\d{4})-(\\d{1,2})-(\\d{1,2})/);
+      if (m) return String(Number(m[3])).padStart(2,'0') + '-' + String(Number(m[2])).padStart(2,'0') + '-' + m[1];
+      m = s.match(/^(\\d{1,2})[\\/-](\\d{1,2})[\\/-](\\d{2,4})/);
+      if (m) {
+        const y = String(m[3]).length === 2 ? '20' + m[3] : m[3];
+        return String(Number(m[1])).padStart(2,'0') + '-' + String(Number(m[2])).padStart(2,'0') + '-' + y;
+      }
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) return String(d.getDate()).padStart(2,'0') + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + d.getFullYear();
+      return s;
+    }
+    window.skDisplayDate = skDisplayDate;
+
     function skBillDateKey(value) {
       const s = String(value || '').trim();
       let m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})/);
@@ -1319,7 +1342,7 @@ const MASTER_INVENTORY = [
       const price = parseFloat(document.getElementById('billTotalPrice').value) || 0;
       
       if (custName && model && price > 0) {
-        const billDate = new Date().toLocaleDateString('en-IN');
+        const billDate = skDisplayDate(new Date());
         const newEntry = {
           // Internal id remains unchanged for sync compatibility.
           id: `SK-B-${Date.now().toString().slice(-6)}`,
@@ -2324,7 +2347,7 @@ const MASTER_INVENTORY = [
       for (let i = 1; i <= tenure; i++) {
         const d = new Date(startDateObj);
         d.setMonth(d.getMonth() + (i - 1));
-        const dtStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        const dtStr = skDisplayDate(d);
         if (i === tenure) closeStr = dtStr;
 
         runningBalance = Math.max(0, runningBalance - monthly);
@@ -2347,7 +2370,7 @@ const MASTER_INVENTORY = [
 
     function updateBillPreview() {
       const now = new Date();
-      const dateStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+      const dateStr = skDisplayDate(now);
       document.getElementById('pvBillDate').innerText = dateStr;
       // 🔒 LOCKED: Invoice number format is SK-DDMM-001. Do not change.
       const previewBillNo = skNextBillNo(now);
@@ -2450,12 +2473,12 @@ const MASTER_INVENTORY = [
         item.innerHTML = `
           <div>
             <div style="font-weight:800; font-size:0.88rem; color:var(--text);">${b.custName} (${b.model})</div>
-            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">📞 ${b.phone} • ${b.date} • <span style="background:var(--pill-bg); padding:2px 6px; border-radius:6px; font-weight:700;">${b.payMode}</span></div>
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">📞 ${b.phone} • ${skDisplayDate(b.date)} • <span style="background:var(--pill-bg); padding:2px 6px; border-radius:6px; font-weight:700;">${b.payMode}</span></div>
             <div style="font-weight:900; color:var(--primary); font-size:0.84rem; margin-top:4px;">₹ ${b.price.toLocaleString('en-IN')}</div>
           </div>
           <div style="display:flex; gap:6px;">
             <button onclick="viewSavedBill(${idx})" style="background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text); border-radius:10px; width:34px; height:34px; cursor:pointer;" title="View Bill">👁️</button>
-            <button onclick="deleteSavedBill(${idx})" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:var(--danger); border-radius:10px; width:34px; height:34px; cursor:pointer;" title="Delete Bill">🗑️</button>
+            <button onclick="deleteBillSafely('${String(b.id).replace("'","\\'")}')" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:var(--danger); border-radius:10px; width:34px; height:34px; cursor:pointer;" title="Delete Bill from Cloud">🗑️</button>
           </div>
         `;
         container.appendChild(item);
@@ -2471,7 +2494,7 @@ const MASTER_INVENTORY = [
         <div style="background:#fff; color:#1e293b; padding:20px; border-radius:18px; font-family:'Plus Jakarta Sans',sans-serif;">
           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #edf0f6; padding-bottom:12px; margin-bottom:12px;">
             <div style="font-weight:950; color:#d9166f; font-size:1.3rem;">SK MOBILES</div>
-            <div style="text-align:right; font-size:0.75rem;"><strong>Bill No:</strong> ${skBillNumberFromDateSeq(b.date, skExistingBillSeq(b) || (idx + 1), true)}<br><strong>Date:</strong> ${b.date}</div>
+            <div style="text-align:right; font-size:0.75rem;"><strong>Bill No:</strong> ${skBillNumberFromDateSeq(b.date, skExistingBillSeq(b) || (idx + 1), true)}<br><strong>Date:</strong> ${skDisplayDate(b.date)}</div>
           </div>
           <div style="font-size:0.75rem; background:#f8fafc; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #e2e8f0;">
             <div><strong>Customer:</strong> ${b.custName}</div>
@@ -2499,6 +2522,12 @@ const MASTER_INVENTORY = [
     }
 
     function deleteSavedBill(idx) {
+      const b = savedBills[idx];
+      if (!b) return;
+      if (typeof window.deleteBillSafely === 'function') {
+        window.deleteBillSafely(b.id);
+        return;
+      }
       if (!confirm("Are you sure you want to delete this bill?")) return;
       savedBills.splice(idx, 1);
       localStorage.setItem('sk_bills', JSON.stringify(savedBills));
@@ -2789,7 +2818,7 @@ const MASTER_INVENTORY = [
       <div class="sk-rj-card" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${esc(j.date)} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div></div>
+          <div class="sk-rj-meta">${esc(skDisplayDate(j.date))} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div></div>
           <div><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span></div>
         </div>
         <div class="sk-rj-actions">
@@ -2815,7 +2844,7 @@ const MASTER_INVENTORY = [
       <div class="sk-rj-card" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${esc(j.date)} · ${esc(j.status)} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div></div>
+          <div class="sk-rj-meta">${esc(skDisplayDate(j.date))} · ${esc(j.status)} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div></div>
           <span class="sk-rj-status">${esc(j.status)}</span>
         </div>
         <div style="margin-top:7px;font-size:.65rem;color:var(--primary);font-weight:800">Tap to open full repair details →</div>
@@ -4789,7 +4818,7 @@ function todayISO(){return new Date().toISOString().slice(0,10)}
 function money(n){return '₹'+(Number(n)||0).toLocaleString('en-IN')}
 function customerKey(n,p){return String(n||'').trim().toLowerCase()+'|'+String(p||'').replace(/\D/g,'')}
 function parseDate(s){if(!s)return null;let x=String(s).trim(),m=x.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);m=x.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);let d=new Date(x);return isNaN(d)?null:d}
-function fmtDate(s){const d=parseDate(s);return d?d.toLocaleDateString('en-IN'):(s||'---')}
+function fmtDate(s){return (typeof window.skDisplayDate==='function'?window.skDisplayDate(s):String(s||'---'))||'---'}
 function normalize(e){return Object.assign({id:'',key:'',name:'',phone:'',type:'credit',amount:0,mode:'',date:todayISO(),details:'',source:'manual',billId:'',dueDate:''},e||{})}
 function addEntry(e){const a=ledger(),n=normalize(e);n.id=n.id||('CR-'+Date.now().toString().slice(-9)+'-'+Math.floor(Math.random()*100));n.key=n.key||customerKey(n.name,n.phone);n.amount=Math.max(0,Number(n.amount)||0);if(!n.name||n.amount<=0)return false;a.push(n);saveLedger(a);return true}
 function getCustomers(){
@@ -4828,7 +4857,7 @@ function customerHtml(c){
  const next=c.entries.filter(e=>e.type==='emi'&&e.dueDate&&parseDate(e.dueDate)).filter(e=>parseDate(e.dueDate)>=new Date(new Date().setHours(0,0,0,0))).sort((a,b)=>parseDate(a.dueDate)-parseDate(b.dueDate))[0];
  const k=encodeURIComponent(c.key),nextHtml=next?('<div class="sk-credit-sub">🔔 Next EMI: '+fmtDate(next.dueDate)+' • '+money(next.amount)+'</div>'):'';
  const contactHtml=c.phone?('<button class="sk-credit-btn wa" data-k="'+k+'" onclick="skWhatsAppFor(decodeURIComponent(this.dataset.k))">💬 WA</button><button class="sk-credit-btn" data-k="'+k+'" onclick="skCallFor(decodeURIComponent(this.dataset.k))">📞 Call</button>'):'';
- return '<div class="sk-credit-customer"><div class="sk-credit-avatar">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div><div class="sk-credit-main"><div class="sk-credit-name">'+esc(c.name)+'</div><div class="sk-credit-sub">📞 '+esc(c.phone||'No phone')+' • '+c.entries.length+' history entries</div>'+nextHtml+'<div class="sk-credit-actions"><button class="sk-credit-btn" data-k="'+k+'" onclick="skOpenCustomer(decodeURIComponent(this.dataset.k))">📜 History</button>'+ (c.balance>0?'<button class="sk-credit-btn pay" data-k="'+k+'" onclick="skOpenPaymentFor(decodeURIComponent(this.dataset.k))">💰 Payment</button>':'<span class="sk-credit-btn" style="color:#16a34a;">✓ Paid</span>') +'<button class="sk-credit-btn credit" data-k="'+k+'" onclick="skOpenCreditFor(decodeURIComponent(this.dataset.k))">➕ Credit</button>'+contactHtml+'</div></div><div><div class="sk-credit-balance">'+money(c.balance)+'</div><div style="font-size:.58rem;color:var(--text-muted);text-align:right;">BALANCE</div></div></div>';
+ return '<div class="sk-credit-customer"><div class="sk-credit-avatar">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div><div class="sk-credit-main"><div class="sk-credit-name">'+esc(c.name)+'</div><div class="sk-credit-sub">📞 '+esc(c.phone||'No phone')+' • '+c.entries.length+' history entries</div>'+nextHtml+'<div class="sk-credit-actions"><button class="sk-credit-btn" data-k="'+k+'" onclick="skOpenCustomer(decodeURIComponent(this.dataset.k))">📜 History</button>'+ (c.balance>0?'<button class="sk-credit-btn pay" data-k="'+k+'" onclick="skOpenPaymentFor(decodeURIComponent(this.dataset.k))">💰 Payment</button>':'<span class="sk-credit-btn" style="color:#16a34a;">✓ Paid</span>') +'<button class="sk-credit-btn credit" data-k="'+k+'" onclick="skOpenCreditFor(decodeURIComponent(this.dataset.k))">➕ Credit</button>'+contactHtml+'</div></div><div><div class="sk-credit-balance">'+money(c.balance)+'</div><div style="font-size:.58rem;color:var(--text-muted);text-align:right;">OUTSTANDING</div></div></div>';
 }
 window.skRenderCreditCustomers=function(){
  const box=document.getElementById('skCreditCustomerList');if(!box)return;const q=(document.getElementById('skCreditSearch')?.value||'').trim().toLowerCase(),all=getCustomers().filter(c=>c.balance>0||c.entries.some(e=>e.type==='emi')),filtered=all.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').toLowerCase().includes(q));
@@ -4941,7 +4970,7 @@ function skV43Date(s){
 }
 function skV43DateText(s){
   var x=skV43Date(s);if(!x)return '';
-  var a=x.split('-');return a[2]+'/'+a[1]+'/'+a[0].slice(-2)
+  var a=x.split('-');return a[2]+'-'+a[1]+'-'+a[0]
 }
 function skV43ParseAmount(s){
   var m=String(s||'').match(/(?:₹\s*)?(\d[\d,]*(?:\.\d+)?)/);
@@ -5176,7 +5205,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 (function(){
 'use strict';
-/* 🔒 SK V4.4 LOCKED CHANGE NOTE: Customer Credit uses OUTSTANDING, not Balance. Fully-paid bills must not open Payment. Payment receipts remain attached to the selected purchase bill. Customer address box is fixed-size. Do not alter these rules or unrelated app functions. */
+/* 🔒 SK V4.5 LOCKED CHANGE NOTE: Customer Credit uses OUTSTANDING, not Balance. Fully-paid bills must not open Payment. Payment receipts remain attached to the selected purchase bill. Customer address box is fixed-size. Do not alter these rules or unrelated app functions. */
 var skCPFilterMode='all', skCPSelectedKey='', skCPActionCustomer=null;
 function cpSafe(k,f){try{var v=JSON.parse(localStorage.getItem(k)||'');return v==null?f:v}catch(e){return f}}
 function cpBills(){var a=cpSafe('sk_bills',[]);return Array.isArray(a)?a:[]}
@@ -5186,7 +5215,7 @@ function cpDigits(v){return String(v||'').replace(/\D/g,'')}
 function cpKey(n,p){return String(n||'').trim().toLowerCase()+'|'+cpDigits(p)}
 function cpEsc(v){return String(v==null?'':v).replace(/[&<>'"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]})}
 function cpDate(){return new Date().toISOString().slice(0,10)}
-function cpDateText(v){if(!v)return '';var d=new Date(v);if(!isNaN(d))return d.toLocaleDateString('en-IN');return String(v)}
+function cpDateText(v){if(!v)return '';return typeof window.skDisplayDate==='function'?window.skDisplayDate(v):String(v)}
 function cpBillLast3(id){var x=String(id||'').replace(/\D/g,'');return x.slice(-3)||String(id||'').slice(-3)}
 function cpGetCustomers(){
  var map={}, bills=cpBills(), led=cpLedger();
@@ -5249,7 +5278,7 @@ function cpOpenDetail(c){
  var bills=c.bills.slice().sort(function(a,b){return b.idx-a.idx});
  var entries=c.entries.slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))});
  var html='<div class="skcp-page-head"><button class="skcp-back" onclick="skCPBackToList()">← Back</button><div><b>'+cpEsc(c.name)+'</b><div style="font-size:.6rem;color:var(--text-muted)">📞 '+cpEsc(c.phone||'No phone')+'</div></div></div>'+
- '<div class="skcp-detail-box"><div class="skcp-detail-grid"><div class="skcp-mini"><b>'+cpMoney(c.balance)+'</b><span>CURRENT BALANCE</span></div><div class="skcp-mini"><b>'+cpMoney(c.credits)+'</b><span>CREDIT / EMI</span></div><div class="skcp-mini"><b>'+cpMoney(c.payments)+'</b><span>PAYMENT</span></div></div>'+
+ '<div class="skcp-detail-box"><div class="skcp-detail-grid"><div class="skcp-mini"><b>'+cpMoney(c.balance)+'</b><span>CURRENT OUTSTANDING</span></div><div class="skcp-mini"><b>'+cpMoney(c.credits)+'</b><span>CREDIT / EMI</span></div><div class="skcp-mini"><b>'+cpMoney(c.payments)+'</b><span>PAYMENT</span></div></div>'+
  '<div class="skcp-bill-actions"><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(c.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ FULLY PAID</span>')+'</div></div>';
  if(bills.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">SALES BILL HISTORY</div>';html+=bills.map(function(x){var b=x.b;return '<div class="skcp-bill-card"><div class="skcp-bill-top"><div><b>'+cpEsc(b.id)+'</b> • '+cpEsc(b.model||'')+'<div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(b.date)+' • '+cpEsc(b.payMode||'')+'</div></div><b>'+cpMoney(b.balance||0)+'</b></div><div style="font-size:.63rem;margin-top:4px">Amount: '+cpMoney(b.price||0)+' • Advance: '+cpMoney(b.advance||0)+' • Balance: '+cpMoney(b.balance||0)+'</div><div class="skcp-bill-actions"><button class="skcp-btn" onclick="skCPViewBill('+x.idx+')">📄 Bill Details</button><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(b.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ PAID</span>')+'</div>'+
  (Array.isArray(b.paymentReceipts)&&b.paymentReceipts.length?'<div style="font-size:.59rem;color:var(--text-muted);margin-top:6px">Receipts: '+b.paymentReceipts.map(function(r){return '#'+cpEsc(String(r.id||'').slice(-6))+' '+cpMoney(r.amount)+' '+cpEsc(r.mode||'')+' '+cpDateText(r.date)}).join(' • ')+'</div>':'')+'</div>'}).join('')}
@@ -5292,7 +5321,7 @@ window.skCPRecalcForm=function(){
 }
 window.skCPToggleEmi=function(){document.getElementById('skCPEmiFields').style.display=document.getElementById('skCPEmiMode').value==='emi'?'grid':'none'}
 function cpSaveLedgerEntry(e){var a=cpLedger();e.id=e.id||'CP-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);e.key=cpKey(e.name,e.phone);a.push(e);localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(a))}
-/* 🔒 SK V4.4 LOCKED: Payment must reduce the selected purchase bill balance and create/retain its receipt attachment. Fully paid bills must not open the Payment form. */
+/* 🔒 SK V4.5 LOCKED: Payment must reduce the selected purchase bill balance and create/retain its receipt attachment. Fully paid bills must not open the Payment form. */
 function cpUpdateBill(idx,type,amount,advance,data){
  var bs=cpBills(),b=bs[idx];if(!b)return null;
  b.paymentReceipts=Array.isArray(b.paymentReceipts)?b.paymentReceipts:[];
