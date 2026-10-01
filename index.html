@@ -41,7 +41,7 @@
 <button class="menu-drawer-btn logout" onclick="showToast('Logged out successfully'); toggleLeftDrawer(false);">🔒 Logout</button>
 </div>
 <div style="margin-top:auto; font-size:0.68rem; color:var(--text-muted); text-align:center; border-top:1px solid var(--card-border); padding-top:8px;">
-     SK Mobiles Master • V4.3
+     SK Mobiles Master • V4.4
      <br/>
      Dharmapuri, Tamil Nadu
     </div>
@@ -274,7 +274,8 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div style="margin-top:8px;">
-<label class="form-label">Customer Address</label> <textarea class="form-input" id="billCustAddress" oninput="saveDraft(); updateBillPreview()" placeholder="Door No, Street, Area, City, PIN" rows="2"></textarea>
+<!-- 🔒 SK V4.4 LOCKED: Customer Address box size is fixed; do not make it expandable. -->
+<label class="form-label">Customer Address</label> <textarea class="form-input" id="billCustAddress" oninput="saveDraft(); updateBillPreview()" placeholder="Door No, Street, Area, City, PIN" rows="2" style="height:56px;min-height:56px;max-height:56px;resize:none;overflow-y:auto;box-sizing:border-box;"></textarea>
 </div>
 </div>
 <div class="bill-section">
@@ -532,7 +533,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <img alt="SK MOBILES" class="sk-logo-img" id="appHeaderLogo" onclick="document.getElementById('logoFileInput').click()" src="Logo.png" title="Click to change logo"/>
 <div>
 <div class="app-name" id="appHeaderTitle">SK MOBILES</div>
-<div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.3</span></div>
+<div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.4</span></div>
 </div>
 </div>
 </div>
@@ -758,7 +759,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="sk-v42-profile-box" style="text-align:center;margin-bottom:9px;"><div style="font-size:2.1rem;margin-bottom:4px;">👑</div><div style="font-size:1rem;font-weight:950;">SK MOBILES Admin</div><div style="font-size:.68rem;color:var(--text-muted);margin-top:3px;">Full Access Account</div></div>
 <div class="sk-v42-profile-grid">
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCOUNT</div><b>Admin</b></div>
-<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.3</b></div>
+<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.4</b></div>
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">WORKERS</div><b id="skAdminProfileWorkerCount">0</b></div>
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCESS</div><b>Full Access</b></div>
 </div>
@@ -827,7 +828,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 </div>
-<!-- Additive V4.3 Customer Credit / Google Keep layer -->
+<!-- Additive V4.4 Customer Credit / Google Keep layer -->
 <div class="modal-overlay" id="skKeepImportModal" style="z-index:2147482700!important;">
 <div class="modal-sheet" style="max-width:460px;max-height:90vh;">
 <div class="modal-title"><span>📥 Google Keep / Notes Import</span><button class="modal-close-btn" onclick="skCloseKeepImport()">✕</button></div>
@@ -845,7 +846,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 
-<!-- SK V4.3 Customer Credit Ledger Page / Bill-linked Credit & Payment layer -->
+<!-- SK V4.4 Customer Credit Ledger Page / Bill-linked Credit & Payment layer -->
 
 <div class="modal-overlay" id="skCreditLedgerPage" style="z-index:2147482800!important;">
 <div class="modal-sheet">
@@ -855,7 +856,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="skcp-stat"><b id="skCPAllCount">0</b><span>ALL CUSTOMERS</span></div>
 <div class="skcp-stat"><b id="skCPCreditCount">0</b><span>CREDIT</span></div>
 <div class="skcp-stat"><b id="skCPEmiCount">0</b><span>EMI</span></div>
-<div class="skcp-stat"><b id="skCPBalanceTotal">₹0</b><span>BALANCE</span></div>
+<div class="skcp-stat"><b id="skCPOutstandingTotal">₹0</b><span>OUTSTANDING</span></div>
 </div>
 <div class="skcp-toolbar">
 <input class="form-input" id="skCPSearch" oninput="skCPRender()" placeholder="Search name / phone / amount / bill last 3..."/>
@@ -865,7 +866,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <button class="skcp-filter active" data-f="all" onclick="skCPFilter('all',this)">All</button>
 <button class="skcp-filter" data-f="emi" onclick="skCPFilter('emi',this)">EMI</button>
 <button class="skcp-filter" data-f="credit" onclick="skCPFilter('credit',this)">Credit</button>
-<button class="skcp-filter" data-f="balance" onclick="skCPFilter('balance',this)">Balance</button>
+
 <button class="skcp-filter" data-f="complete" onclick="skCPFilter('complete',this)">Completed</button>
 </div>
 <div class="skcp-list" id="skCPList"></div>

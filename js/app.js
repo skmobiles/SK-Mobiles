@@ -1881,8 +1881,8 @@ const MASTER_INVENTORY = [
               <div style="display:flex; align-items:center; gap:8px;">
                 <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(14,165,233,0.12); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">💳</div>
                 <div>
-                  <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Customer Credit</div>
-                  <div style="font-size: 18px; font-weight: 950; color: #0284c7; line-height: 1.1;">${typeof getCustomers === 'function' ? getCustomers().filter(c => Number(c.balance) > 0).length : 0}</div>
+                  <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Outstanding</div>
+                  <div style="font-size: 18px; font-weight: 950; color: #0284c7; line-height: 1.1;">${typeof getCustomers === 'function' ? money(getCustomers().filter(c => Number(c.balance) > 0).reduce((s,c) => s + Number(c.balance || 0), 0)) : '₹0'}</div>
                 </div>
               </div>
               <span style="font-size: 14px; color: var(--text-muted); font-weight: 700;">›</span>
@@ -2488,6 +2488,7 @@ const MASTER_INVENTORY = [
             ${b.payMode === 'EMI' || b.payMode === 'Credit' ? `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px; color:#16a34a; font-weight:700;">Down Payment</td><td style="padding:7px; text-align:right; color:#16a34a; font-weight:700;">₹ ${b.advance?.toLocaleString('en-IN') || 0}</td></tr><tr style="border-bottom:2px solid #0f172a;"><td style="padding:7px; color:#dc2626; font-weight:700;">Balance Due</td><td style="padding:7px; text-align:right; color:#dc2626; font-weight:900;">₹ ${b.balance?.toLocaleString('en-IN') || 0}</td></tr>` : ''}
           </table>
           ${b.emiHtml ? `<div style="font-size:0.72rem; font-weight:800; color:#92400e; margin-bottom:6px;">EMI Schedule Details:</div><div style="border:1px solid #fde047; border-radius:10px; overflow:hidden; font-size:0.68rem; margin-bottom:12px;"><table style="width:100%; border-collapse:collapse;">${b.emiHtml}</table></div>` : ''}
+          ${Array.isArray(b.paymentReceipts) && b.paymentReceipts.length ? `<div style="margin-top:10px;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px;"><div style="font-size:0.72rem;font-weight:900;color:#166534;margin-bottom:6px;">🧾 PAYMENT RECEIPTS ATTACHED</div>${b.paymentReceipts.map(r => `<div style="font-size:0.68rem;padding:4px 0;border-bottom:1px solid #dcfce7;"><b>${r.id || ''}</b> • ₹ ${(Number(r.amount)||0).toLocaleString('en-IN')} • ${r.mode || ''} • ${r.date || ''}${r.note ? ' • '+r.note : ''}</div>`).join('')}</div>` : ''}
           <div style="display:flex; gap:8px; margin-top:14px;">
             <button onclick="downloadInvoicePDF()" class="submit-btn" style="flex:1; padding:8px; font-size:0.75rem;">📄 Download PDF</button>
             <button onclick="sendBillToWhatsAppAsPDF()" class="submit-btn whatsapp-green" style="flex:1; padding:8px; font-size:0.75rem;">💬 WhatsApp PDF</button>
@@ -4827,7 +4828,7 @@ function customerHtml(c){
  const next=c.entries.filter(e=>e.type==='emi'&&e.dueDate&&parseDate(e.dueDate)).filter(e=>parseDate(e.dueDate)>=new Date(new Date().setHours(0,0,0,0))).sort((a,b)=>parseDate(a.dueDate)-parseDate(b.dueDate))[0];
  const k=encodeURIComponent(c.key),nextHtml=next?('<div class="sk-credit-sub">🔔 Next EMI: '+fmtDate(next.dueDate)+' • '+money(next.amount)+'</div>'):'';
  const contactHtml=c.phone?('<button class="sk-credit-btn wa" data-k="'+k+'" onclick="skWhatsAppFor(decodeURIComponent(this.dataset.k))">💬 WA</button><button class="sk-credit-btn" data-k="'+k+'" onclick="skCallFor(decodeURIComponent(this.dataset.k))">📞 Call</button>'):'';
- return '<div class="sk-credit-customer"><div class="sk-credit-avatar">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div><div class="sk-credit-main"><div class="sk-credit-name">'+esc(c.name)+'</div><div class="sk-credit-sub">📞 '+esc(c.phone||'No phone')+' • '+c.entries.length+' history entries</div>'+nextHtml+'<div class="sk-credit-actions"><button class="sk-credit-btn" data-k="'+k+'" onclick="skOpenCustomer(decodeURIComponent(this.dataset.k))">📜 History</button><button class="sk-credit-btn pay" data-k="'+k+'" onclick="skOpenPaymentFor(decodeURIComponent(this.dataset.k))">💰 Payment</button><button class="sk-credit-btn credit" data-k="'+k+'" onclick="skOpenCreditFor(decodeURIComponent(this.dataset.k))">➕ Credit</button>'+contactHtml+'</div></div><div><div class="sk-credit-balance">'+money(c.balance)+'</div><div style="font-size:.58rem;color:var(--text-muted);text-align:right;">BALANCE</div></div></div>';
+ return '<div class="sk-credit-customer"><div class="sk-credit-avatar">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div><div class="sk-credit-main"><div class="sk-credit-name">'+esc(c.name)+'</div><div class="sk-credit-sub">📞 '+esc(c.phone||'No phone')+' • '+c.entries.length+' history entries</div>'+nextHtml+'<div class="sk-credit-actions"><button class="sk-credit-btn" data-k="'+k+'" onclick="skOpenCustomer(decodeURIComponent(this.dataset.k))">📜 History</button>'+ (c.balance>0?'<button class="sk-credit-btn pay" data-k="'+k+'" onclick="skOpenPaymentFor(decodeURIComponent(this.dataset.k))">💰 Payment</button>':'<span class="sk-credit-btn" style="color:#16a34a;">✓ Paid</span>') +'<button class="sk-credit-btn credit" data-k="'+k+'" onclick="skOpenCreditFor(decodeURIComponent(this.dataset.k))">➕ Credit</button>'+contactHtml+'</div></div><div><div class="sk-credit-balance">'+money(c.balance)+'</div><div style="font-size:.58rem;color:var(--text-muted);text-align:right;">BALANCE</div></div></div>';
 }
 window.skRenderCreditCustomers=function(){
  const box=document.getElementById('skCreditCustomerList');if(!box)return;const q=(document.getElementById('skCreditSearch')?.value||'').trim().toLowerCase(),all=getCustomers().filter(c=>c.balance>0||c.entries.some(e=>e.type==='emi')),filtered=all.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').toLowerCase().includes(q));
@@ -5175,6 +5176,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 (function(){
 'use strict';
+/* 🔒 SK V4.4 LOCKED CHANGE NOTE: Customer Credit uses OUTSTANDING, not Balance. Fully-paid bills must not open Payment. Payment receipts remain attached to the selected purchase bill. Customer address box is fixed-size. Do not alter these rules or unrelated app functions. */
 var skCPFilterMode='all', skCPSelectedKey='', skCPActionCustomer=null;
 function cpSafe(k,f){try{var v=JSON.parse(localStorage.getItem(k)||'');return v==null?f:v}catch(e){return f}}
 function cpBills(){var a=cpSafe('sk_bills',[]);return Array.isArray(a)?a:[]}
@@ -5219,7 +5221,6 @@ function cpMatch(c,q){
 function cpFilter(c){
  if(skCPFilterMode==='emi')return c.hasEmi;
  if(skCPFilterMode==='credit')return c.hasCredit;
- if(skCPFilterMode==='balance')return c.balance>0;
  if(skCPFilterMode==='complete')return c.balance<=0;
  return true;
 }
@@ -5232,7 +5233,7 @@ function cpRow(c){
 }
 window.skCPRender=function(){
  var all=cpGetCustomers(),q=document.getElementById('skCPSearch')?.value||'',arr=all.filter(cpFilter).filter(function(c){return cpMatch(c,q)});
- var ac=document.getElementById('skCPAllCount'),cc=document.getElementById('skCPCreditCount'),ec=document.getElementById('skCPEmiCount'),bt=document.getElementById('skCPBalanceTotal');
+ var ac=document.getElementById('skCPAllCount'),cc=document.getElementById('skCPCreditCount'),ec=document.getElementById('skCPEmiCount'),bt=document.getElementById('skCPOutstandingTotal');
  if(ac)ac.textContent=all.length;if(cc)cc.textContent=all.filter(function(c){return c.hasCredit}).length;if(ec)ec.textContent=all.filter(function(c){return c.hasEmi}).length;if(bt)bt.textContent=cpMoney(all.reduce(function(a,c){return a+c.balance},0));
  var box=document.getElementById('skCPList');if(box)box.innerHTML=arr.length?arr.map(cpRow).join(''):'<div style="text-align:center;color:var(--text-muted);padding:28px">No customers found.</div>';
 };
@@ -5249,8 +5250,8 @@ function cpOpenDetail(c){
  var entries=c.entries.slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))});
  var html='<div class="skcp-page-head"><button class="skcp-back" onclick="skCPBackToList()">← Back</button><div><b>'+cpEsc(c.name)+'</b><div style="font-size:.6rem;color:var(--text-muted)">📞 '+cpEsc(c.phone||'No phone')+'</div></div></div>'+
  '<div class="skcp-detail-box"><div class="skcp-detail-grid"><div class="skcp-mini"><b>'+cpMoney(c.balance)+'</b><span>CURRENT BALANCE</span></div><div class="skcp-mini"><b>'+cpMoney(c.credits)+'</b><span>CREDIT / EMI</span></div><div class="skcp-mini"><b>'+cpMoney(c.payments)+'</b><span>PAYMENT</span></div></div>'+
- '<div class="skcp-bill-actions"><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button><button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button></div></div>';
- if(bills.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">SALES BILL HISTORY</div>';html+=bills.map(function(x){var b=x.b;return '<div class="skcp-bill-card"><div class="skcp-bill-top"><div><b>'+cpEsc(b.id)+'</b> • '+cpEsc(b.model||'')+'<div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(b.date)+' • '+cpEsc(b.payMode||'')+'</div></div><b>'+cpMoney(b.balance||0)+'</b></div><div style="font-size:.63rem;margin-top:4px">Amount: '+cpMoney(b.price||0)+' • Advance: '+cpMoney(b.advance||0)+' • Balance: '+cpMoney(b.balance||0)+'</div><div class="skcp-bill-actions"><button class="skcp-btn" onclick="skCPViewBill('+x.idx+')">📄 Bill Details</button><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button><button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button></div>'+
+ '<div class="skcp-bill-actions"><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(c.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ FULLY PAID</span>')+'</div></div>';
+ if(bills.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">SALES BILL HISTORY</div>';html+=bills.map(function(x){var b=x.b;return '<div class="skcp-bill-card"><div class="skcp-bill-top"><div><b>'+cpEsc(b.id)+'</b> • '+cpEsc(b.model||'')+'<div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(b.date)+' • '+cpEsc(b.payMode||'')+'</div></div><b>'+cpMoney(b.balance||0)+'</b></div><div style="font-size:.63rem;margin-top:4px">Amount: '+cpMoney(b.price||0)+' • Advance: '+cpMoney(b.advance||0)+' • Balance: '+cpMoney(b.balance||0)+'</div><div class="skcp-bill-actions"><button class="skcp-btn" onclick="skCPViewBill('+x.idx+')">📄 Bill Details</button><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(b.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ PAID</span>')+'</div>'+
  (Array.isArray(b.paymentReceipts)&&b.paymentReceipts.length?'<div style="font-size:.59rem;color:var(--text-muted);margin-top:6px">Receipts: '+b.paymentReceipts.map(function(r){return '#'+cpEsc(String(r.id||'').slice(-6))+' '+cpMoney(r.amount)+' '+cpEsc(r.mode||'')+' '+cpDateText(r.date)}).join(' • ')+'</div>':'')+'</div>'}).join('')}
  if(entries.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">CREDIT / PAYMENT HISTORY</div>';html+=entries.map(function(e){return '<div class="skcp-bill-card"><b>'+(e.type==='payment'?'💰 PAYMENT':'🧾 CREDIT')+' • '+cpMoney(e.amount)+'</b><div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(e.date)+' • '+cpEsc(e.mode||'')+' • '+cpEsc(e.details||'')+(e.billId?' • Bill #'+cpEsc(cpBillLast3(e.billId)):'')+'</div></div>'}).join('')}
  document.getElementById('skCPDetailView').innerHTML=html;document.getElementById('skCPMainView').style.display='none';document.getElementById('skCPDetailView').style.display='block';
@@ -5272,7 +5273,15 @@ function cpResetForm(type,c,idx){
  skCPRecalcForm();document.getElementById('skCreditActionModal').classList.add('active');
 }
 window.skCPOpenAction=function(type){cpResetForm(type,null,'')}
-window.skCPOpenActionFor=function(k,type,idx){var c=cpGetCustomers().find(function(x){return x.key===k});if(c)cpResetForm(type,c,idx)}
+window.skCPOpenActionFor=function(k,type,idx){
+ var c=cpGetCustomers().find(function(x){return x.key===k});
+ if(!c)return;
+ if(type==='payment' && Number(c.balance||0)<=0){
+   if(typeof showToast==='function')showToast('✅ Payment completed — no outstanding amount');
+   return;
+ }
+ cpResetForm(type,c,idx);
+}
 window.skCPCloseAction=function(){document.getElementById('skCreditActionModal').classList.remove('active')}
 window.skCPRecalcForm=function(){
  var type=document.getElementById('skCPActionType').value,amt=Number(document.getElementById('skCPAmount').value)||0,adv=type==='credit'?(Number(document.getElementById('skCPAdvance').value)||0):0;
@@ -5283,6 +5292,7 @@ window.skCPRecalcForm=function(){
 }
 window.skCPToggleEmi=function(){document.getElementById('skCPEmiFields').style.display=document.getElementById('skCPEmiMode').value==='emi'?'grid':'none'}
 function cpSaveLedgerEntry(e){var a=cpLedger();e.id=e.id||'CP-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);e.key=cpKey(e.name,e.phone);a.push(e);localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(a))}
+/* 🔒 SK V4.4 LOCKED: Payment must reduce the selected purchase bill balance and create/retain its receipt attachment. Fully paid bills must not open the Payment form. */
 function cpUpdateBill(idx,type,amount,advance,data){
  var bs=cpBills(),b=bs[idx];if(!b)return null;
  b.paymentReceipts=Array.isArray(b.paymentReceipts)?b.paymentReceipts:[];
@@ -5307,6 +5317,10 @@ window.skCPSaveAction=function(){
  var mode=type==='payment'?document.getElementById('skCPPaymentMode').value:'Credit';
  var category=document.getElementById('skCPCategory').value,note=document.getElementById('skCPNote').value.trim(),emi=document.getElementById('skCPEmiMode').value==='emi';
  var net=type==='credit'?Math.max(0,amount-adv):amount;
+ if(type==='payment' && !bill && oldCustomer && oldCustomer.bills && oldCustomer.bills.some(function(x){return Number(x.b.balance||0)>0})){
+   if(typeof showToast==='function')showToast('Please select the customer purchase bill for this payment');
+   return;
+ }
  if(type==='payment'&&bill){var actual=Math.min(Math.max(0,Number(bill.balance)||0),amount);if(actual<=0){if(typeof showToast==='function')showToast('Selected bill has no pending balance');return}}
  if(type==='payment'&&bill){amount=Math.min(amount,Math.max(0,Number(bill.balance)||0));net=amount}
  if(type==='credit'&&bill){cpUpdateBill(billIdxNum,type,amount,adv,{date:date,category:category,note:note})}

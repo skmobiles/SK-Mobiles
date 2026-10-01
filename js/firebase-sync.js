@@ -4,7 +4,7 @@
   'use strict';
 
   const FB_CONFIG = {
-    apiKey: "AIzaSyDufQNy7l9M3ue_32u3gcH3TZUhPlrSILA",
+    apiKey: "AIzaSyDufQNy7lM9ue_32u3gcH3TZUhPlrSILA",
     authDomain: "sk-mobiles-2d61d.firebaseapp.com",
     projectId: "sk-mobiles-2d61d",
     storageBucket: "sk-mobiles-2d61d.firebasestorage.app",
