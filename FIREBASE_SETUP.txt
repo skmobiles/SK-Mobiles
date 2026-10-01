@@ -1,0 +1,28 @@
+# SK Mobiles - Firebase PC/Mobile Sync Setup
+
+## 1. Firebase Authentication
+In Firebase Console -> Authentication -> Sign-in method:
+- Enable Email/Password.
+
+Create these three users:
+- Admin: skmobilesdpi@gmail.com
+- Manager: lavanyam.com94@gmail.com
+- Worker: sriyogi6@gmail.com
+
+Set the passwords yourself in Firebase Console. Do not put passwords in the HTML.
+
+## 2. Firestore Rules
+Replace the current Firestore Rules with `firestore.rules` from this package and Publish.
+
+The rules use the authenticated user's `/users/{uid}` document for the role, so custom Firebase Auth claims are not required.
+
+## 3. First login
+On the first successful login, the app creates the user's own `/users/{uid}` profile with the fixed role mapped to the three approved email addresses.
+
+## 4. Bill History sync
+Bill History is synchronized at:
+`shops/SK-MOBILES/bills/{billId}`
+
+Existing local bills are merged with Firestore bills. Bills created on one PC/mobile are then available on another logged-in device.
+
+The existing app UI and non-bill functions are left intact.
