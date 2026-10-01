@@ -19,14 +19,10 @@ The rules use the authenticated user's `/users/{uid}` document for the role, so 
 ## 3. First login
 On the first successful login, the app creates the user's own `/users/{uid}` profile with the fixed role mapped to the three approved email addresses.
 
-## 4. Bill History sync — V4.5
+## 4. Bill History sync
 Bill History is synchronized at:
 `shops/SK-MOBILES/bills/{billId}`
 
-Firestore is the Single Source of Truth for Bill History. On page reload/login, Bills are read from Firestore; the app does not automatically upload the existing localStorage bill array back to Firestore.
-
-New/edited bill writes made by the app may sync to Firestore after the cloud listener is ready.
-
-The Bill History Delete button uses Soft Delete (`isDeleted: true`) and the real-time listener removes that bill from the local cache on every connected device. A hard-delete utility exists only for explicit developer use and is not connected to the visible Delete button.
+Existing local bills are merged with Firestore bills. Bills created on one PC/mobile are then available on another logged-in device.
 
 The existing app UI and non-bill functions are left intact.
