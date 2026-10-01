@@ -6,7 +6,7 @@
 
   const FB_CONFIG = {
     // 🔒 Firebase Web App config — matches the user's SK Mobiles Web console configuration exactly.
-    apiKey: "AIzaSyDufQNy7l9Mue_32u3gcH3TZUhPlrSILA",
+    apiKey: "AIzaSyDufQNy7l9M3ue_32u3gcH3TZUhPlrSILA",
     authDomain: "sk-mobiles-2d61d.firebaseapp.com",
     projectId: "sk-mobiles-2d61d",
     storageBucket: "sk-mobiles-2d61d.firebasestorage.app",
