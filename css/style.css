@@ -777,7 +777,7 @@ body.sk-worker-mode #settingsModal .sk-worker-blocked{pointer-events:none!import
 .modal-overlay.active{z-index:2147483000 !important;}
 .modal-overlay.active .modal-sheet{position:relative;z-index:2147483001 !important;}
 
-/* V4.14 direct category navigation: the old sliding category strip is removed.
+/* V4.15 direct category navigation: the old sliding category strip is removed.
    The selected bottom category is shown as a compact status above its list. */
 .category-scroll{display:none!important;}
 .active-category-notice{
