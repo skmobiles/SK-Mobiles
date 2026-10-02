@@ -151,17 +151,18 @@
       const batch = db.batch();
       local.forEach(b=>{
         const copy = Object.assign({}, b, {
-          _deleted: false,
           _syncUpdatedAt: Date.now(),
           _syncUpdatedBy: auth.currentUser.uid
         });
+        if(copy.isDeleted !== true && copy._deleted !== true){
+          copy._deleted = false;
+        }
         batch.set(billRef(b.id), copy, {merge:true});
       });
-      // Create tombstones for bills removed locally after the initial sync.
       for(const id of lastKnownBillIds){
         if(!localIds.has(id)){
           batch.set(billRef(id), {
-            id, _deleted:true, _syncUpdatedAt:Date.now(),
+            id, isDeleted:true, _deleted:true, _syncUpdatedAt:Date.now(),
             _syncUpdatedBy:auth.currentUser.uid
           }, {merge:true});
         }
@@ -174,23 +175,6 @@
     } finally {
       syncingLocal=false;
     }
-  }
-
-  function mergeRemote(remoteDocs){
-    // 🔒 V4.6: Firestore is the Single Source of Truth. The local bill list is
-    // replaced by the current non-deleted Firestore documents; local-only bills
-    // are never reintroduced during a snapshot/reload.
-    const remote=[];
-    remoteDocs.forEach(d=>{
-      const r=d.data()||{};
-      if(r.isDeleted === true || r._deleted === true) return;
-      const id=String(r.id||d.id);
-      const clean=Object.assign({},r,{id});
-      delete clean._deleted; delete clean._syncUpdatedBy; delete clean._syncUpdatedAt;
-      remote.push(clean);
-    });
-    setLocalBills(remote);
-    lastKnownBillIds=new Set(remote.map(b=>String(b.id)));
   }
 
   function replaceLocalBillsFromRemote(remoteDocs){
@@ -218,69 +202,89 @@
   }
   window.removeBillFromLocalStorage=removeBillFromLocalStorage;
 
-  // 🔒 V4.6 LOCKED: Visible Bill History Delete uses Soft Delete only.
-  window.deleteBillSafely=async function(billId){
+  // 1. Safe Delete Method (Soft Delete)
+  window.deleteBillSafely = async function(billId){
     if(!billId){ toast("❌ Bill ID not found"); return; }
-    if(!confirm("இந்த பில்லை நிச்சயமாக நீக்க வேண்டுமா?")) return;
+    if(!confirm("Are you sure you want to delete this bill?")) return;
     try{
-      if(!auth?.currentUser || !db) throw new Error("Firebase Login தேவை");
-      const ref=billRef(billId);
+      if(!auth?.currentUser || !db) throw new Error("Firebase Login required");
+      
+      const targetId = String(billId);
+      const ref = billRef(targetId);
+
       await ref.set({
-        id:String(billId),
-        isDeleted:true,
-        _deleted:true,
-        deletedAt:firebase.firestore.FieldValue.serverTimestamp(),
-        deletedBy:auth.currentUser.uid,
-        _syncUpdatedAt:Date.now(),
-        _syncUpdatedBy:auth.currentUser.uid
-      },{merge:true});
-      removeBillFromLocalStorage(billId);
-      lastKnownBillIds.delete(String(billId));
-      toast("✅ பில் வெற்றிகரமாக நீக்கப்பட்டது");
-    }catch(error){
-      console.error("Delete Error:",error);
-      toast("❌ Bill delete failed: "+(error.message||"Error"));
+        id: targetId,
+        isDeleted: true,
+        _deleted: true,
+        deletedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        deletedBy: auth.currentUser.uid,
+        _syncUpdatedAt: Date.now(),
+        _syncUpdatedBy: auth.currentUser.uid
+      }, { merge: true });
+
+      removeBillFromLocalStorage(targetId);
+      lastKnownBillIds.delete(targetId);
+      toast("✅ Bill deleted successfully");
+    } catch(error){
+      console.error("Delete Error:", error);
+      toast("❌ Bill delete failed: " + (error.message || "Error"));
     }
   };
 
-  // Optional hard-delete utility. The visible Delete button intentionally does NOT call this.
+  // Optional hard-delete utility
   window.hardDeleteBill=async function(billId){
     try{
-      if(!auth?.currentUser || !db) throw new Error("Firebase Login தேவை");
+      if(!auth?.currentUser || !db) throw new Error("Firebase Login required");
       await billRef(billId).delete();
       removeBillFromLocalStorage(billId);
       lastKnownBillIds.delete(String(billId));
-      toast("பில் கிளவுட் மற்றும் சாதனத்திலிருந்து நீக்கப்பட்டது.");
+      toast("Bill deleted from cloud and device.");
     }catch(err){
       console.error("Delete error:",err);
       toast("❌ Hard delete failed: "+(err.message||"Error"));
     }
   };
 
+  // 2. High-Speed Realtime Sync (ஒரே ஒரு முறை மட்டுமே இங்கு இருக்க வேண்டும்)
   async function startBillSync(){
     if(unsubscribeBills) unsubscribeBills();
-    remoteReady=false;
-    const ref=db.collection("shops").doc(SHOP_ID).collection("bills");
-    const snap=await ref.get();
-    // 🔒 V4.6: Firestore is the Single Source of Truth for Bill History.
-    // Never upload localStorage bills automatically during page load/login.
+    remoteReady = false;
+    const ref = db.collection("shops").doc(SHOP_ID).collection("bills");
+
+    const snap = await ref.get();
     replaceLocalBillsFromRemote(snap.docs);
-    remoteReady=true;
-    unsubscribeBills=ref.onSnapshot(snapshot=>{
+    remoteReady = true;
+
+    unsubscribeBills = ref.onSnapshot(snapshot => {
       try {
-        snapshot.docChanges().forEach(change=>{
-          const data=change.doc.data()||{};
-          const docId=String(change.doc.id);
+        snapshot.docChanges().forEach(change => {
+          const data = change.doc.data() || {};
+          const docId = String(change.doc.id);
+
+          // ஏதேனும் ஒரு சாதனத்தில் நீக்கப்பட்டால், உடனடியாக உள்ளூரிலும் நீக்கப்படும்
           if(data.isDeleted === true || data._deleted === true || change.type === "removed") {
             removeBillFromLocalStorage(docId);
+            lastKnownBillIds.delete(docId);
           }
         });
-        mergeRemote(snapshot.docs);
-        remoteReady=true;
-      } catch(e){ console.error("Bill snapshot error",e); }
-    },err=>{
+
+        // நீக்கப்படாத பில்களை மட்டுமே உள்ளூர் நினைவகத்தில் வைத்திருத்தல்
+        const activeRemote = [];
+        snapshot.docs.forEach(d => {
+          const r = d.data() || {};
+          if(r.isDeleted === true || r._deleted === true) return;
+          activeRemote.push(Object.assign({}, r, { id: String(r.id || d.id) }));
+        });
+
+        setLocalBills(activeRemote);
+        lastKnownBillIds = new Set(activeRemote.map(b => String(b.id)));
+        remoteReady = true;
+      } catch(e) {
+        console.error("Bill snapshot error", e);
+      }
+    }, err => {
       console.error(err);
-      toast("☁️ Firebase Bill History connection error");
+      toast("☁️ Firebase connection error");
     });
   }
 
@@ -331,11 +335,9 @@
 
   /* ================================================================
      🔒 CLOUD BACKUP — SETTINGS OPTION
-     Saves localStorage to Firestore under shops/SK-MOBILES/cloudBackups.
-     Keep this block unchanged unless the cloud-backup behavior is intentionally modified.
      ================================================================ */
   const CLOUD_BACKUP_ROOT = "cloudBackups";
-  const CLOUD_BACKUP_CHUNK = 650000; // stay safely below Firestore's 1 MiB document limit
+  const CLOUD_BACKUP_CHUNK = 650000;
 
   function cloudBackupStatus(text){
     const el=document.getElementById("skCloudBackupStatus");
@@ -346,7 +348,7 @@
     const role=String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
     return role === "admin" || role === "manager";
   }
-  /* 🔒 SK V4.8 LOCKED: Cloud Backup auto-sync, debounced to avoid repeated uploads. */
+
   function cloudAutoBackupKeyAllowed(key){
     const k=String(key||"");
     if(!k || cloudRestoreApplying || applyingRemote) return false;
@@ -514,9 +516,3 @@
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init,{once:true});
   else init();
 })();
-
-/* 🔒 SK V4.9 SOURCE-LOCK NOTE
-   Firebase config verified against the user-supplied SK Mobiles Web screenshot.
-   Source ZIP SHA-256: 11ab8fca362c4efc4da5e8256552e4652010cb26d88094f51efa450942123b46
-   No unrelated Firebase logic changed.
-*/

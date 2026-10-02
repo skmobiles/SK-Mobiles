@@ -2285,6 +2285,20 @@ const MASTER_INVENTORY = [
       return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
     }
 
+    // Local bill-history date formatter. Keep this independent of the Customer Credit IIFE.
+    function skBillUiDate(value) {
+      const s = String(value || '').trim();
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (m) return `${String(Number(m[3])).padStart(2, '0')}/${String(Number(m[2])).padStart(2, '0')}/${m[1]}`;
+      m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
+      if (m) {
+        const y = String(m[3]).length === 2 ? '20' + m[3] : m[3];
+        return `${String(Number(m[1])).padStart(2, '0')}/${String(Number(m[2])).padStart(2, '0')}/${y}`;
+      }
+      const d = new Date(value);
+      return isNaN(d.getTime()) ? (s || '---') : skFormatDmyDate(d);
+    }
+
     function setDefaultEmiStartDateIfNeeded() {
       const input = document.getElementById('billEmiStartDate');
       if (!input) return;
@@ -2498,7 +2512,7 @@ const MASTER_INVENTORY = [
         item.innerHTML = `
           <div style="min-width:0;">
             <div style="font-weight:800; font-size:0.88rem; color:var(--text);">${String(b.custName || 'Customer')} (${String(b.model || '---')})</div>
-            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">🧾 ${displayBillNo} • 📞 ${String(b.phone || '---')} • ${fmtDate(b.date || '---')} • <span style="background:var(--pill-bg); padding:2px 6px; border-radius:6px; font-weight:700;">${String(b.payMode || 'Cash')}</span></div>
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">🧾 ${displayBillNo} • 📞 ${String(b.phone || '---')} • ${skBillUiDate(b.date || '---')} • <span style="background:var(--pill-bg); padding:2px 6px; border-radius:6px; font-weight:700;">${String(b.payMode || 'Cash')}</span></div>
             <div style="font-weight:900; color:var(--primary); font-size:0.84rem; margin-top:4px;">₹ ${safePrice.toLocaleString('en-IN')}</div>
           </div>
           <div style="display:flex; gap:6px; flex-shrink:0;">
@@ -2519,7 +2533,7 @@ const MASTER_INVENTORY = [
         <div style="background:#fff; color:#1e293b; padding:20px; border-radius:18px; font-family:'Plus Jakarta Sans',sans-serif;">
           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #edf0f6; padding-bottom:12px; margin-bottom:12px;">
             <div style="font-weight:950; color:#d9166f; font-size:1.3rem;">SK MOBILES</div>
-            <div style="text-align:right; font-size:0.75rem;"><strong>Bill No:</strong> ${skBillNumberFromDateSeq(b.date, skExistingBillSeq(b) || (idx + 1), true)}<br><strong>Date:</strong> ${fmtDate(b.date)}</div>
+            <div style="text-align:right; font-size:0.75rem;"><strong>Bill No:</strong> ${skBillNumberFromDateSeq(b.date, skExistingBillSeq(b) || (idx + 1), true)}<br><strong>Date:</strong> ${skBillUiDate(b.date)}</div>
           </div>
           <div style="font-size:0.75rem; background:#f8fafc; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #e2e8f0;">
             <div><strong>Customer:</strong> ${b.custName}</div>
@@ -2536,7 +2550,7 @@ const MASTER_INVENTORY = [
             ${b.payMode === 'EMI' || b.payMode === 'Credit' ? `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px; color:#16a34a; font-weight:700;">Down Payment</td><td style="padding:7px; text-align:right; color:#16a34a; font-weight:700;">₹ ${b.advance?.toLocaleString('en-IN') || 0}</td></tr><tr style="border-bottom:2px solid #0f172a;"><td style="padding:7px; color:#dc2626; font-weight:700;">Balance Due</td><td style="padding:7px; text-align:right; color:#dc2626; font-weight:900;">₹ ${b.balance?.toLocaleString('en-IN') || 0}</td></tr>` : ''}
           </table>
           ${b.emiHtml ? `<div style="font-size:0.72rem; font-weight:800; color:#92400e; margin-bottom:6px;">EMI Schedule Details:</div><div style="border:1px solid #fde047; border-radius:10px; overflow:hidden; font-size:0.68rem; margin-bottom:12px;"><table style="width:100%; border-collapse:collapse;">${b.emiHtml}</table></div>` : ''}
-          ${Array.isArray(b.paymentReceipts) && b.paymentReceipts.length ? `<div style="margin-top:10px;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px;"><div style="font-size:0.72rem;font-weight:900;color:#166534;margin-bottom:6px;">🧾 PAYMENT RECEIPTS ATTACHED</div>${b.paymentReceipts.map(r => `<div style="font-size:0.68rem;padding:4px 0;border-bottom:1px solid #dcfce7;"><b>${r.id || ''}</b> • ₹ ${(Number(r.amount)||0).toLocaleString('en-IN')} • ${r.mode || ''} • ${fmtDate(r.date || '')}${r.note ? ' • '+r.note : ''}</div>`).join('')}</div>` : ''}
+          ${Array.isArray(b.paymentReceipts) && b.paymentReceipts.length ? `<div style="margin-top:10px;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px;"><div style="font-size:0.72rem;font-weight:900;color:#166534;margin-bottom:6px;">🧾 PAYMENT RECEIPTS ATTACHED</div>${b.paymentReceipts.map(r => `<div style="font-size:0.68rem;padding:4px 0;border-bottom:1px solid #dcfce7;"><b>${r.id || ''}</b> • ₹ ${(Number(r.amount)||0).toLocaleString('en-IN')} • ${r.mode || ''} • ${skBillUiDate(r.date || '')}${r.note ? ' • '+r.note : ''}</div>`).join('')}</div>` : ''}
           <div style="display:flex; gap:8px; margin-top:14px;">
             <button onclick="downloadInvoicePDF()" class="submit-btn" style="flex:1; padding:8px; font-size:0.75rem;">📄 Download PDF</button>
             <button onclick="sendBillToWhatsAppAsPDF()" class="submit-btn whatsapp-green" style="flex:1; padding:8px; font-size:0.75rem;">💬 WhatsApp PDF</button>
@@ -2703,6 +2717,15 @@ const MASTER_INVENTORY = [
   }
   function save(a){ localStorage.setItem(KEY,JSON.stringify(a)); }
   function today(){ return new Date().toISOString().slice(0,10); }
+  function rjFmtDate(value){
+    const s=String(value||'').trim();
+    let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if(m) return String(Number(m[3])).padStart(2,'0')+'/'+String(Number(m[2])).padStart(2,'0')+'/'+m[1];
+    m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
+    if(m){ const y=String(m[3]).length===2?'20'+m[3]:m[3]; return String(Number(m[1])).padStart(2,'0')+'/'+String(Number(m[2])).padStart(2,'0')+'/'+y; }
+    const d=new Date(value);
+    return isNaN(d.getTime())?(s||'---'):String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+  }
   function isPending(j){ return j.status!=='Delivered'; }
   function statusNext(s){
     const x=['Received','Checking','Repairing','Ready'];
@@ -2838,7 +2861,7 @@ const MASTER_INVENTORY = [
           <button type="button" class="submit-btn whatsapp-green" style="flex:1;min-width:135px" onclick="skRjWhatsAppReady('${esc(j.id||'')}')">💬 WhatsApp</button>
         </div>
         <div style="margin-top:9px;font-size:.76rem"><b>Problem / Repair:</b><br>${esc(j.problem)}</div>
-        <div style="margin-top:8px;font-size:.72rem;color:var(--text-muted)">📅 ${fmtDate(j.date)} · Status: <b>${esc(j.status)}</b> · Work: <b>${esc(j.workType)}</b></div>
+        <div style="margin-top:8px;font-size:.72rem;color:var(--text-muted)">📅 ${rjFmtDate(j.date)} · Status: <b>${esc(j.status)}</b> · Work: <b>${esc(j.workType)}</b></div>
         ${j.schedule?`<div style="margin-top:6px;font-size:.72rem">🗓️ Scheduled: <b>${esc(j.schedule)}</b></div>`:''}
         <div style="margin-top:6px;font-size:.72rem">Estimate: <b>₹${Number(j.estimate||0).toLocaleString('en-IN')}</b></div>
         ${j.note?`<div style="margin-top:8px;font-size:.72rem"><b>Note:</b> ${esc(j.note)}</div>`:''}
@@ -2854,7 +2877,7 @@ const MASTER_INVENTORY = [
       <div class="sk-rj-card" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${fmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div></div>
+          <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div></div>
           <div><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span></div>
         </div>
         <div class="sk-rj-actions">
@@ -2880,7 +2903,7 @@ const MASTER_INVENTORY = [
       <div class="sk-rj-card" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${fmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div></div>
+          <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div></div>
           <span class="sk-rj-status">${esc(j.status)}</span>
         </div>
         <div style="margin-top:7px;font-size:.65rem;color:var(--primary);font-weight:800">Tap to open full repair details →</div>
@@ -5272,9 +5295,13 @@ function cpGetCustomers(){
    c.credits=c.entries.filter(function(e){return e.type==='credit'||e.type==='emi'}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
    c.payments=c.entries.filter(function(e){return e.type==='payment'}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
    c.billBalance=c.bills.reduce(function(a,x){return a+Math.max(0,Number(x.b.balance)||0)},0);
+   c.creditBalance=c.bills.filter(function(x){return x.b.payMode==='Credit'}).reduce(function(a,x){return a+Math.max(0,Number(x.b.balance)||0)},0)
+     +c.entries.filter(function(e){return e.type==='credit'&&e.mode!=='EMI'&&!e.billId}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+   c.emiBalance=c.bills.filter(function(x){return x.b.payMode==='EMI'}).reduce(function(a,x){return a+Math.max(0,Number(x.b.balance)||0)},0)
+     +c.entries.filter(function(e){return (e.type==='emi'||e.mode==='EMI')&&!e.billId}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
    /* Use bill balance when available; ledger balance remains the source for manual/Keep records. */
    c.balance=Math.max(c.billBalance,Math.max(0,c.credits-c.payments));
-   c.hasCredit=c.bills.some(function(x){return x.b.payMode==='Credit'})||c.entries.some(function(e){return e.type==='credit'});
+   c.hasCredit=c.bills.some(function(x){return x.b.payMode==='Credit'})||c.entries.some(function(e){return e.type==='credit'&&e.mode!=='EMI'});
    c.hasEmi=c.bills.some(function(x){return x.b.payMode==='EMI'})||c.entries.some(function(e){return e.type==='emi'||e.mode==='EMI'});
    c.lastBill=c.bills.length?c.bills[0].b:null;
    return c;
@@ -5291,18 +5318,24 @@ function cpMatch(c,q){
  return vals.join(' ').toLowerCase().indexOf(q)!==-1;
 }
 function cpFilter(c){
- if(skCPFilterMode==='emi')return c.hasEmi;
- if(skCPFilterMode==='credit')return c.hasCredit;
+ if(skCPFilterMode==='emi')return c.hasEmi && Number(c.emiBalance||0)>0;
+ if(skCPFilterMode==='credit')return c.hasCredit && Number(c.creditBalance||0)>0;
  if(skCPFilterMode==='outstanding')return Number(c.balance||0)>0;
  if(skCPFilterMode==='complete')return c.balance<=0;
  return true;
 }
 function cpRow(c){
  var last=c.lastBill, last3=last?cpBillLast3(last.id):'---', mode=last?last.payMode:'Ledger';
+ var displayBalance=Number(c.balance||0);
+ if(skCPFilterMode==='emi')displayBalance=Number(c.emiBalance||0);
+ if(skCPFilterMode==='credit')displayBalance=Number(c.creditBalance||0);
+ var displayMode=skCPFilterMode==='emi'?'EMI':(skCPFilterMode==='credit'?'Credit':mode);
  return '<div class="skcp-row" data-k="'+encodeURIComponent(c.key)+'" onclick="skCPOpenCustomer(decodeURIComponent(this.dataset.k))">'+
  '<div class="sk-credit-avatar">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div>'+
- '<div class="skcp-row-main"><div class="skcp-name">'+cpEsc(c.name)+'</div><div class="skcp-sub">📞 '+cpEsc(c.phone||'No phone')+' • '+mode+' • Bill #'+cpEsc(last3)+'</div></div>'+
- '<div><div class="skcp-amt">'+cpMoney(c.balance)+'</div><div class="skcp-bill">'+(c.balance>0?'OUTSTANDING':'COMPLETED')+'</div></div></div>';
+ '<div class="skcp-row-main"><div class="skcp-name">'+cpEsc(c.name)+'</div><div class="skcp-sub">📞 '+cpEsc(c.phone||'No phone')+' • '+displayMode+' • Bill #'+cpEsc(last3)+'</div></div>'+
+ '<div><div class="skcp-amt">'+cpMoney(displayBalance)+'</div><div class="skcp-bill">'+(displayBalance>0?'OUTSTANDING':'COMPLETED')+'</div></div>'+
+ '<button type="button" class="skcp-btn" style="color:#dc2626;border-color:rgba(239,68,68,.25);flex:0 0 auto" title="Delete customer" onclick="event.stopPropagation();skCPDeleteCustomer(decodeURIComponent(this.dataset.k))" data-k="'+encodeURIComponent(c.key)+'">🗑️</button>'+
+ '</div>';
 }
 window.skCPRender=function(){
  var all=cpGetCustomers(),q=document.getElementById('skCPSearch')?.value||'',arr=all.filter(cpFilter).filter(function(c){return cpMatch(c,q)});
@@ -5329,6 +5362,44 @@ function cpOpenDetail(c){
  if(entries.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">CREDIT / PAYMENT HISTORY</div>';html+=entries.map(function(e){return '<div class="skcp-bill-card"><b>'+(e.type==='payment'?'💰 PAYMENT':'🧾 CREDIT')+' • '+cpMoney(e.amount)+'</b><div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(e.date)+' • '+cpEsc(e.mode||'')+' • '+cpEsc(e.details||'')+(e.billId?' • Bill #'+cpEsc(cpBillLast3(e.billId)):'')+'</div></div>'}).join('')}
  document.getElementById('skCPDetailView').innerHTML=html;document.getElementById('skCPMainView').style.display='none';document.getElementById('skCPDetailView').style.display='block';
 }
+window.skCPDeleteCustomer=async function(k){
+ var c=cpGetCustomers().find(function(x){return x.key===k});
+ if(!c)return;
+ var bills=c.bills.map(function(x){return x.b&&x.b.id?String(x.b.id):''}).filter(Boolean);
+ var msg='இந்த customer-ஐ நிரந்தரமாக delete செய்யவா?\n\nCustomer: '+c.name+'\nBills: '+bills.length+'\nLedger entries: '+c.entries.length+'\n\nஇந்த action-க்கு Restore option இருக்காது.';
+ if(!confirm(msg))return;
+ try{
+   // Remove bill records locally first so the customer disappears immediately.
+   var currentBills=cpBills();
+   var billSet=new Set(bills);
+   var filteredBills=currentBills.filter(function(b){return !billSet.has(String(b&&b.id||'')) && cpKey(b&&b.custName,b&&b.phone)!==k});
+   localStorage.setItem('sk_bills',JSON.stringify(filteredBills));
+   if(typeof savedBills!=='undefined')savedBills=filteredBills;
+   // Remove all customer ledger records permanently.
+   localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(cpLedger().filter(function(e){return (e.key||cpKey(e.name,e.phone))!==k})));
+   // Keep PC/mobile bill sync consistent. Mark deleted bills in Firestore so sync cannot restore them.
+   for(var i=0;i<bills.length;i++){
+     try{
+       if(window.firebase && firebase.auth && firebase.auth().currentUser && firebase.firestore){
+         await firebase.firestore().collection('shops').doc('SK-MOBILES').collection('bills').doc(String(bills[i])).set({
+           id:String(bills[i]), isDeleted:true, _deleted:true, deletedAt:firebase.firestore.FieldValue.serverTimestamp(),
+           deletedBy:firebase.auth().currentUser.uid, _syncUpdatedAt:Date.now(), _syncUpdatedBy:firebase.auth().currentUser.uid
+         },{merge:true});
+       } else if(typeof window.hardDeleteBill==='function') {
+         await window.hardDeleteBill(bills[i]);
+       }
+     }catch(e){ console.warn('Customer bill cloud delete failed',bills[i],e); }
+   }
+   if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
+   if(typeof renderBillHistory==='function')renderBillHistory();
+   if(typeof skImportFromBills==='function')skImportFromBills(true);
+   skCPRender();
+   if(typeof showToast==='function')showToast('🗑️ Customer permanently deleted');
+ }catch(e){
+   console.error('Customer delete failed',e);
+   if(typeof showToast==='function')showToast('❌ Customer delete failed');
+ }
+};
 window.skCPOpenCustomer=function(k){var c=cpGetCustomers().find(function(x){return x.key===k});if(c)cpOpenDetail(c);else if(typeof showToast==='function')showToast('Customer not found')}
 window.skCPBackToList=cpShowMain;
 window.skCPBackToHome=function(){document.getElementById('skCreditLedgerPage').classList.remove('active')}
@@ -5419,10 +5490,9 @@ function cpOpenPage(){
 window.skOpenCreditLedger=cpOpenPage;
 })();
 
-/* 🔒 SK V4.10 SOURCE-LOCK NOTE
-   This file was modified ONLY from the user-uploaded SK-Mobiles-V4.8-Home-Blank-Fix.zip.
-   Source SHA-256: 11ab8fca362c4efc4da5e8256552e4652010cb26d88094f51efa450942123b46
-   Only the explicitly requested V4.10 changes were applied to this uploaded V4.9 source.
+/* 🔒 SK V4.11 SOURCE-LOCK NOTE
+   This file is based only on the current user-uploaded SK-V4.11.zip.
+   Only the current-turn requested fixes are applied.
    Do not modify/delete unrelated app functionality.
 */
 
