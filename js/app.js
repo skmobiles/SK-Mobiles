@@ -5281,32 +5281,64 @@ function cpBillLast3(id){var x=String(id||'').replace(/\D/g,'');return x.slice(-
 function cpGetCustomers(){
  var map={}, bills=cpBills(), led=cpLedger();
  bills.forEach(function(b,i){
-   if(!b.custName)return; var k=cpKey(b.custName,b.phone);
+   if(!b.custName)return;
+   var k=cpKey(b.custName,b.phone);
    if(!map[k])map[k]={key:k,name:b.custName,phone:b.phone||'',bills:[],entries:[]};
    map[k].bills.push({b:b,idx:i});
  });
  led.forEach(function(e){
-   if(!e.name)return;var k=e.key||cpKey(e.name,e.phone);
+   if(!e.name)return;
+   var k=e.key||cpKey(e.name,e.phone);
    if(!map[k])map[k]={key:k,name:e.name,phone:e.phone||'',bills:[],entries:[]};
    map[k].entries.push(e);
  });
  return Object.keys(map).map(function(k){
    var c=map[k];
-   c.credits=c.entries.filter(function(e){return e.type==='credit'||e.type==='emi'}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
-   c.payments=c.entries.filter(function(e){return e.type==='payment'}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
-   c.billBalance=c.bills.reduce(function(a,x){return a+Math.max(0,Number(x.b.balance)||0)},0);
-   c.creditBalance=c.bills.filter(function(x){return x.b.payMode==='Credit'}).reduce(function(a,x){return a+Math.max(0,Number(x.b.balance)||0)},0)
-     +c.entries.filter(function(e){return e.type==='credit'&&e.mode!=='EMI'&&!e.billId}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
-   c.emiBalance=c.bills.filter(function(x){return x.b.payMode==='EMI'}).reduce(function(a,x){return a+Math.max(0,Number(x.b.balance)||0)},0)
-     +c.entries.filter(function(e){return (e.type==='emi'||e.mode==='EMI')&&!e.billId}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
-   /* Use bill balance when available; ledger balance remains the source for manual/Keep records. */
-   c.balance=Math.max(c.billBalance,Math.max(0,c.credits-c.payments));
-   c.hasCredit=c.bills.some(function(x){return x.b.payMode==='Credit'})||c.entries.some(function(e){return e.type==='credit'&&e.mode!=='EMI'});
-   c.hasEmi=c.bills.some(function(x){return x.b.payMode==='EMI'})||c.entries.some(function(e){return e.type==='emi'||e.mode==='EMI'});
+
+   /* Bill-linked ledger rows are informational mirrors of the bill.
+      They must not be added again to the bill balance, otherwise an EMI/Credit
+      purchase is counted twice (or more, once for every EMI schedule row). */
+   var manualEntries=c.entries.filter(function(e){
+     return String(e.source||'')!=='bill' && !e.billId;
+   });
+   var billBalance=c.bills.reduce(function(a,x){
+     return a+Math.max(0,Number(x.b.balance)||0);
+   },0);
+   var manualCredits=manualEntries.filter(function(e){
+     return e.type==='credit'||e.type==='emi';
+   }).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+   var payments=c.entries.filter(function(e){
+     return e.type==='payment';
+   }).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+
+   c.billBalance=billBalance;
+   /* For customers with sales bills, the bill balance is the single source
+      of truth. Ledger-only customers continue to use their manual ledger. */
+   c.credits=c.bills.length?billBalance:manualCredits;
+   c.payments=payments;
+
+   c.creditBalance=c.bills.filter(function(x){return x.b.payMode==='Credit'}).reduce(function(a,x){
+     return a+Math.max(0,Number(x.b.balance)||0);
+   },0)+manualEntries.filter(function(e){
+     return e.type==='credit'&&e.mode!=='EMI';
+   }).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+
+   c.emiBalance=c.bills.filter(function(x){return x.b.payMode==='EMI'}).reduce(function(a,x){
+     return a+Math.max(0,Number(x.b.balance)||0);
+   },0)+manualEntries.filter(function(e){
+     return (e.type==='emi'||e.mode==='EMI');
+   }).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+
+   c.balance=c.bills.length ? billBalance : Math.max(0,manualCredits-payments);
+   c.hasCredit=c.bills.some(function(x){return x.b.payMode==='Credit'})||
+     manualEntries.some(function(e){return e.type==='credit'&&e.mode!=='EMI'});
+   c.hasEmi=c.bills.some(function(x){return x.b.payMode==='EMI'})||
+     manualEntries.some(function(e){return e.type==='emi'||e.mode==='EMI'});
    c.lastBill=c.bills.length?c.bills[0].b:null;
    return c;
  });
 }
+
 /* 🔒 SK V4.8 LOCKED: Home Outstanding uses the same bill-linked Customer Credit calculation. */
 window.skOutstandingTotalForHome=function(){
  try{return cpGetCustomers().filter(function(c){return Number(c.balance||0)>0}).reduce(function(a,c){return a+Number(c.balance||0)},0)}
@@ -5353,7 +5385,12 @@ function cpBillOptions(c,selected){
 function cpOpenDetail(c){
  skCPSelectedKey=c.key;
  var bills=c.bills.slice().sort(function(a,b){return b.idx-a.idx});
- var entries=c.entries.slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))});
+ var entries=c.entries.filter(function(e){
+  /* Bill-sourced credit/EMI rows mirror the purchase and EMI schedule already
+     shown above. Do not show them as extra credit history rows. Keep actual
+     payment receipts and manual ledger entries visible. */
+  return String(e.source||'')!=='bill';
+}).sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))});
  var html='<div class="skcp-page-head"><button class="skcp-back" onclick="skCPBackToList()">← Back</button><div><b>'+cpEsc(c.name)+'</b><div style="font-size:.6rem;color:var(--text-muted)">📞 '+cpEsc(c.phone||'No phone')+'</div></div></div>'+
  '<div class="skcp-detail-box"><div class="skcp-detail-grid"><div class="skcp-mini"><b>'+cpMoney(c.balance)+'</b><span>CURRENT OUTSTANDING</span></div><div class="skcp-mini"><b>'+cpMoney(c.credits)+'</b><span>CREDIT / EMI</span></div><div class="skcp-mini"><b>'+cpMoney(c.payments)+'</b><span>PAYMENT</span></div></div>'+
  '<div class="skcp-bill-actions"><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(c.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ FULLY PAID</span>')+'</div></div>';
@@ -5842,5 +5879,470 @@ window.skOpenCreditLedger=cpOpenPage;
     normalizeRepairDateField();
     frontAllPopups();
   },300);
+})();
+
+
+
+/* ================================================================
+   🔒 V4.11 CURRENT-TURN TARGETED FIX PATCH
+   SOURCE: current uploaded SK-V4.11-Fixed(1).zip only.
+   Requested fixes:
+   1) Sales Bill History View/Edit must use the real savedBills array.
+   2) Bill-linked Credit/EMI ledger mirrors must not inflate Outstanding.
+   3) Payment calculator must use the selected bill's balance.
+   4) Payment Save must update the selected bill, receipt and ledger exactly once.
+   No unrelated functionality is changed.
+   ================================================================ */
+(function(){
+  'use strict';
+
+  /* The app uses a top-level `let savedBills`, not window.savedBills.
+     Existing targeted edit/view wrappers referenced window.savedBills and
+     therefore returned early. Expose the same live array safely. */
+  try{
+    if(!Object.prototype.hasOwnProperty.call(window,'savedBills')){
+      Object.defineProperty(window,'savedBills',{
+        configurable:true,
+        enumerable:false,
+        get:function(){ return savedBills; },
+        set:function(v){ savedBills=v; }
+      });
+    }
+  }catch(e){ console.warn('savedBills bridge unavailable',e); }
+
+  /* Payment calculator: selected bill balance is the source of truth. */
+  window.skCPRecalcForm=function(){
+    try{
+      var type=document.getElementById('skCPActionType')?.value||'payment';
+      var amountEl=document.getElementById('skCPAmount');
+      var balanceEl=document.getElementById('skCPBalance');
+      var advEl=document.getElementById('skCPAdvance');
+      var amount=Math.max(0,Number(amountEl?.value)||0);
+      var advance=type==='credit'?Math.max(0,Number(advEl?.value)||0):0;
+      if(type==='credit'){
+        advance=Math.min(advance,amount);
+        if(advEl)advEl.value=advance;
+      }
+
+      var idxRaw=document.getElementById('skCPBill')?.value||'';
+      var idx=idxRaw===''?null:Number(idxRaw);
+      var bills=cpBills();
+      var bill=idx!==null && Number.isInteger(idx) ? bills[idx] : null;
+
+      if(type==='payment' && bill){
+        var oldBal=Math.max(0,Number(bill.balance)||0);
+        var pay=Math.min(oldBal,amount);
+        var newBal=Math.max(0,oldBal-pay);
+        if(balanceEl)balanceEl.value=cpMoney(newBal)+' (bill balance after payment)';
+        return;
+      }
+
+      if(type==='credit' && bill){
+        var oldCreditBal=Math.max(0,Number(bill.balance)||0);
+        var net=Math.max(0,amount-advance);
+        if(balanceEl)balanceEl.value=cpMoney(oldCreditBal+net)+' (bill balance after credit)';
+        return;
+      }
+
+      var name=document.getElementById('skCPName')?.value||'';
+      var phone=document.getElementById('skCPPhone')?.value||'';
+      var customer=cpGetCustomers().find(function(c){
+        return c.key===cpKey(name,phone);
+      });
+      var oldCustomerBal=customer?Math.max(0,Number(customer.balance)||0):0;
+      var customerNet=type==='credit'?Math.max(0,amount-advance):Math.min(oldCustomerBal,amount);
+      var customerNewBal=type==='credit'
+        ? oldCustomerBal+customerNet
+        : Math.max(0,oldCustomerBal-customerNet);
+      if(balanceEl)balanceEl.value=cpMoney(customerNewBal)+' (customer balance after payment)';
+    }catch(e){
+      console.error('Payment calculator fix failed',e);
+    }
+  };
+
+  /* Payment Save: one bill update + one receipt + one payment ledger entry. */
+  var previousSaveAction=window.skCPSaveAction;
+  window.skCPSaveAction=function(){
+    try{
+      var type=document.getElementById('skCPActionType')?.value||'';
+      if(type!=='payment'){
+        return typeof previousSaveAction==='function'
+          ? previousSaveAction.apply(this,arguments)
+          : undefined;
+      }
+
+      var name=(document.getElementById('skCPName')?.value||'').trim();
+      var phone=(document.getElementById('skCPPhone')?.value||'').trim();
+      var idxRaw=document.getElementById('skCPBill')?.value||'';
+      var idx=idxRaw===''?null:Number(idxRaw);
+      var bills=cpBills();
+      var bill=(idx!==null && Number.isInteger(idx))?bills[idx]:null;
+      var amount=Math.max(0,Number(document.getElementById('skCPAmount')?.value)||0);
+      var date=document.getElementById('skCPDate')?.value||cpDate();
+      var mode=document.getElementById('skCPPaymentMode')?.value||'Cash';
+      var note=(document.getElementById('skCPNote')?.value||'').trim();
+
+      if(!name || !bill){
+        if(typeof showToast==='function')showToast('❌ Please select the purchase bill');
+        return;
+      }
+
+      var before=Math.max(0,Number(bill.balance)||0);
+      if(before<=0){
+        if(typeof showToast==='function')showToast('✅ This bill is already fully paid');
+        return;
+      }
+
+      amount=Math.min(before,amount);
+      if(amount<=0){
+        if(typeof showToast==='function')showToast('❌ Enter a valid payment amount');
+        return;
+      }
+
+      var amountEl=document.getElementById('skCPAmount');
+      if(amountEl)amountEl.value=amount;
+
+      var paid=cpUpdateBill(idx,'payment',amount,0,{
+        date:date,
+        mode:mode,
+        note:note
+      });
+      if(!(Number(paid)>0)){
+        if(typeof showToast==='function')showToast('❌ Payment could not be saved');
+        return;
+      }
+
+      /* Persisting sk_bills also activates the existing Firebase sync hook. */
+      localStorage.setItem('sk_bills',JSON.stringify(bills));
+      savedBills=bills;
+
+      cpSaveLedgerEntry({
+        name:name,
+        phone:phone,
+        type:'payment',
+        amount:Number(paid),
+        mode:mode,
+        date:date,
+        details:note||'Payment received',
+        source:'payment-receipt',
+        billId:bill.id
+      });
+
+      if(typeof skImportFromBills==='function')skImportFromBills(true);
+      if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
+      if(typeof renderBillHistory==='function')renderBillHistory();
+
+      if(typeof skCPCloseAction==='function')skCPCloseAction();
+      if(typeof skCPRender==='function')skCPRender();
+
+      var updatedCustomer=cpGetCustomers().find(function(c){
+        return c.key===cpKey(name,phone);
+      });
+      if(updatedCustomer && typeof cpOpenDetail==='function')cpOpenDetail(updatedCustomer);
+
+      if(typeof showToast==='function'){
+        showToast('✅ Payment saved • balance updated • receipt attached');
+      }
+    }catch(e){
+      console.error('V4.11 payment save failed',e);
+      if(typeof showToast==='function')showToast('❌ Payment could not be saved');
+    }
+  };
+
+  /* Recalculate immediately when the bill selector changes as well. */
+  document.addEventListener('change',function(e){
+    if(e.target && e.target.id==='skCPBill'){
+      setTimeout(function(){
+        try{ window.skCPRecalcForm(); }catch(_){}
+      },0);
+    }
+  },true);
+
+})();
+
+
+/* ================================================================
+   🔒 V4.12 CURRENT-TURN TARGETED FIX PATCH
+   SOURCE: current uploaded SK V4.12.zip only.
+   Requested fixes:
+   1) All active popup/modal windows must stay in front of every page/modal.
+   2) Customer Credit Ledger bill display must use SK-B-DDMM-001 without changing internal IDs.
+   3) Payment form must show NEW BALANCE and recalculate from the selected bill.
+   4) Payment save must generate/attach one receipt to the selected bill and persist the bill update.
+   No unrelated functionality is changed.
+   ================================================================ */
+(function(){
+  'use strict';
+
+  function v412BillDetailsNo(b){
+    try{
+      if(!b) return '---';
+      var seq=(typeof skExistingBillSeq==='function'?skExistingBillSeq(b):0)||0;
+      if(!seq && Array.isArray(savedBills)){
+        var sameDate=savedBills.filter(function(x){
+          return x && typeof skBillDateKey==='function' && skBillDateKey(x.date)===skBillDateKey(b.date);
+        });
+        var ix=sameDate.findIndex(function(x){return String(x.id||'')===String(b.id||'');});
+        seq=ix>=0?ix+1:1;
+      }
+      return typeof skBillNumberFromDateSeq==='function'
+        ? skBillNumberFromDateSeq(b.date,seq||1,true)
+        : 'SK-B-'+String(b.date||'').replace(/\D/g,'').slice(0,4)+'-'+String(seq||1).padStart(3,'0');
+    }catch(e){
+      return b.billNo || b.id || '---';
+    }
+  }
+  window.skV412BillDetailsNo=v412BillDetailsNo;
+
+  /* -------- 1. Force every active modal above every other active modal/page. -------- */
+  function v412BringActiveModalsFront(){
+    try{
+      var active=document.querySelectorAll('.modal-overlay.active');
+      active.forEach(function(m,i){
+        /* Inline !important z-index values exist on some older page overlays,
+           so use setProperty(...,'important') rather than normal style.zIndex. */
+        m.style.setProperty('z-index', String(2147483000+i), 'important');
+        var sheet=m.querySelector('.modal-sheet');
+        if(sheet) sheet.style.setProperty('z-index', String(2147483001+i), 'important');
+      });
+    }catch(e){}
+  }
+  window.skV412BringActiveModalsFront=v412BringActiveModalsFront;
+
+  document.addEventListener('click',function(e){
+    if(e.target && (e.target.closest('.modal-overlay') || e.target.closest('button') || e.target.closest('[onclick]'))){
+      setTimeout(v412BringActiveModalsFront,0);
+      setTimeout(v412BringActiveModalsFront,50);
+    }
+  },true);
+  document.addEventListener('DOMContentLoaded',v412BringActiveModalsFront);
+  setTimeout(v412BringActiveModalsFront,250);
+
+  /* -------- 2. Customer Credit Ledger: show Bill Details number, not internal ID. -------- */
+  function v412PatchCreditLedger(){
+    try{
+      var root=document.getElementById('skCPDetailView');
+      if(!root) return;
+      var cKey=typeof skCPSelectedKey!=='undefined'?skCPSelectedKey:'';
+      var c=typeof cpGetCustomers==='function'
+        ? cpGetCustomers().find(function(x){return x.key===cKey})
+        : null;
+      if(!c) return;
+
+      var bills=c.bills.slice().sort(function(a,b){return b.idx-a.idx});
+      var cards=root.querySelectorAll('.skcp-bill-card');
+      cards.forEach(function(card,i){
+        var item=bills[i];
+        if(!item || !item.b) return;
+        var b=item.b;
+        var top=card.querySelector('.skcp-bill-top');
+        if(top){
+          var first=top.querySelector('div');
+          var strong=first && first.querySelector('b');
+          if(strong) strong.textContent=v412BillDetailsNo(b);
+        }
+      });
+
+      /* Payment/credit history rows: replace Bill #572 style references with
+         the bill's locked Bill Details format when the referenced bill exists. */
+      root.querySelectorAll('.skcp-bill-card').forEach(function(card){
+        card.querySelectorAll('div').forEach(function(el){
+          var t=el.textContent||'';
+          var m=t.match(/Bill\s+#([^\s•]+)/i);
+          if(!m)return;
+          var digits=String(m[1]).replace(/\D/g,'');
+          var bill=(typeof cpBills==='function'?cpBills():[]).find(function(b){
+            return String(b.id||'').replace(/\D/g,'').slice(-3)===digits.slice(-3);
+          });
+          if(bill) el.textContent=t.replace(m[0],'Bill #'+v412BillDetailsNo(bill));
+        });
+      });
+    }catch(e){ console.warn('V4.12 bill display patch:',e); }
+  }
+
+  if(typeof window.cpOpenDetail==='function'){
+    var oldOpenDetail=window.cpOpenDetail;
+    window.cpOpenDetail=function(c){
+      var r=oldOpenDetail.apply(this,arguments);
+      setTimeout(v412PatchCreditLedger,0);
+      return r;
+    };
+  }
+  document.addEventListener('click',function(){
+    setTimeout(v412PatchCreditLedger,20);
+  },true);
+
+  /* -------- 3. Payment form: selected bill + NEW BALANCE. -------- */
+  function v412SelectPaymentBill(){
+    var type=document.getElementById('skCPActionType')?.value||'';
+    if(type!=='payment') return;
+    var sel=document.getElementById('skCPBill');
+    if(!sel) return;
+
+    /* If a specific bill was supplied by the bill-row Payment button, keep it.
+       Otherwise, when there is exactly one pending bill, select it automatically. */
+    if(sel.value==='' && typeof cpGetCustomers==='function'){
+      var name=document.getElementById('skCPName')?.value||'';
+      var phone=document.getElementById('skCPPhone')?.value||'';
+      var c=cpGetCustomers().find(function(x){return x.key===cpKey(name,phone)});
+      if(c){
+        var pending=c.bills.filter(function(x){return Number(x.b?.balance||0)>0});
+        if(pending.length===1) sel.value=String(pending[0].idx);
+      }
+    }
+  }
+
+  function v412RecalcPayment(){
+    try{
+      var type=document.getElementById('skCPActionType')?.value||'';
+      var amount=Math.max(0,Number(document.getElementById('skCPAmount')?.value)||0);
+      var balance=document.getElementById('skCPBalance');
+      if(!balance)return;
+
+      if(type==='payment'){
+        v412SelectPaymentBill();
+        var raw=document.getElementById('skCPBill')?.value||'';
+        var idx=raw===''?null:Number(raw);
+        var bills=typeof cpBills==='function'?cpBills():[];
+        var bill=(idx!==null && Number.isInteger(idx))?bills[idx]:null;
+        var oldBal=bill?Math.max(0,Number(bill.balance)||0):0;
+        var pay=Math.min(oldBal,amount);
+        var newBal=Math.max(0,oldBal-pay);
+        balance.value=cpMoney(newBal);
+        balance.setAttribute('placeholder','New balance after payment');
+        return;
+      }
+
+      /* Preserve the existing credit calculator for Credit mode. */
+      if(typeof window.skCPRecalcForm==='function' && window.skCPRecalcForm!==v412RecalcPayment){
+        /* The actual global function is wrapped below; do not recurse here. */
+      }
+    }catch(e){ console.warn('V4.12 payment calculator:',e); }
+  }
+
+  /* Preserve current calculator for Credit mode while making Payment mode deterministic. */
+  var oldCalc412=window.skCPRecalcForm;
+  window.skCPRecalcForm=function(){
+    try{
+      var type=document.getElementById('skCPActionType')?.value||'';
+      if(type==='payment'){
+        v412RecalcPayment();
+        return;
+      }
+    }catch(e){}
+    return typeof oldCalc412==='function' ? oldCalc412.apply(this,arguments) : undefined;
+  };
+
+  /* Change only the label requested by the user. */
+  document.addEventListener('DOMContentLoaded',function(){
+    var labels=document.querySelectorAll('#skCreditActionModal .form-label');
+    labels.forEach(function(l){
+      if(String(l.textContent||'').trim()==='Balance') l.textContent='New Balance';
+    });
+    v412BringActiveModalsFront();
+  });
+
+  /* Recalculate after customer/bill selection as well as typing amount. */
+  document.addEventListener('change',function(e){
+    if(e.target && (e.target.id==='skCPBill' || e.target.id==='skCPName' || e.target.id==='skCPPhone')){
+      setTimeout(function(){try{v412RecalcPayment();}catch(_){}},0);
+    }
+  },true);
+
+  document.addEventListener('input',function(e){
+    if(e.target && e.target.id==='skCPAmount'){
+      setTimeout(function(){try{v412RecalcPayment();}catch(_){}},0);
+    }
+  },true);
+
+  /* Ensure the form gets a bill selection when opened through a customer action. */
+  var oldOpenFor412=window.skCPOpenActionFor;
+  if(typeof oldOpenFor412==='function'){
+    window.skCPOpenActionFor=function(k,type,idx){
+      var r=oldOpenFor412.apply(this,arguments);
+      setTimeout(function(){
+        try{
+          v412SelectPaymentBill();
+          if(type==='payment')v412RecalcPayment();
+          v412BringActiveModalsFront();
+        }catch(_){}
+      },0);
+      return r;
+    };
+  }
+
+  /* -------- 4. Payment save: one receipt attached to the selected bill. -------- */
+  var oldSave412=window.skCPSaveAction;
+  window.skCPSaveAction=function(){
+    try{
+      var type=document.getElementById('skCPActionType')?.value||'';
+      if(type!=='payment'){
+        return typeof oldSave412==='function' ? oldSave412.apply(this,arguments) : undefined;
+      }
+
+      v412SelectPaymentBill();
+      var raw=document.getElementById('skCPBill')?.value||'';
+      var idx=raw===''?null:Number(raw);
+      var bills=typeof cpBills==='function'?cpBills():[];
+      var bill=(idx!==null && Number.isInteger(idx))?bills[idx]:null;
+      var name=(document.getElementById('skCPName')?.value||'').trim();
+      var phone=(document.getElementById('skCPPhone')?.value||'').trim();
+      var amount=Math.max(0,Number(document.getElementById('skCPAmount')?.value)||0);
+      var date=document.getElementById('skCPDate')?.value||cpDate();
+      var mode=document.getElementById('skCPPaymentMode')?.value||'Cash';
+      var note=(document.getElementById('skCPNote')?.value||'').trim();
+
+      if(!name || !bill){
+        if(typeof showToast==='function')showToast('❌ Please select the purchase bill');
+        return;
+      }
+      var before=Math.max(0,Number(bill.balance)||0);
+      var pay=Math.min(before,amount);
+      if(pay<=0){
+        if(typeof showToast==='function')showToast('❌ Enter a valid payment amount');
+        return;
+      }
+
+      /* Use the existing bill update routine once. It creates exactly one
+         receipt with billId and reduces that same bill's balance. */
+      if(typeof cpUpdateBill!=='function'){
+        if(typeof showToast==='function')showToast('❌ Payment function unavailable');
+        return;
+      }
+      var paid=cpUpdateBill(idx,'payment',pay,0,{date:date,mode:mode,note:note});
+      if(!(Number(paid)>0)){
+        if(typeof showToast==='function')showToast('❌ Payment could not be saved');
+        return;
+      }
+
+      localStorage.setItem('sk_bills',JSON.stringify(bills));
+      if(typeof savedBills!=='undefined')savedBills=bills;
+
+      if(typeof cpSaveLedgerEntry==='function'){
+        cpSaveLedgerEntry({
+          name:name,phone:phone,type:'payment',amount:Number(paid),
+          mode:mode,date:date,details:note||'Payment received',
+          source:'payment-receipt',billId:bill.id
+        });
+      }
+
+      if(typeof skImportFromBills==='function')skImportFromBills(true);
+      if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
+      if(typeof renderBillHistory==='function')renderBillHistory();
+
+      var receipt=bill.paymentReceipts && bill.paymentReceipts[bill.paymentReceipts.length-1];
+      if(typeof skCPCloseAction==='function')skCPCloseAction();
+      if(typeof skCPRender==='function')skCPRender();
+
+      if(typeof showToast==='function'){
+        showToast('✅ Payment saved • '+(receipt?.id||'Receipt')+' attached to '+v412BillDetailsNo(bill));
+      }
+    }catch(e){
+      console.error('V4.12 payment save failed',e);
+      if(typeof showToast==='function')showToast('❌ Payment could not be saved');
+    }
+  };
+
+  setTimeout(v412BringActiveModalsFront,500);
 })();
 
