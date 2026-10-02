@@ -23,7 +23,7 @@
   const WORKER_KEY = "sk_current_worker_id_v1";
   const SHOP_ID = "SK-MOBILES";
   const BILL_KEY = "sk_bills";
-  const REALTIME_KEYS = ["sk_inventory", "sk_job_cards"];
+  const REALTIME_KEYS = ["sk_inventory", "skx_repair_jobs_v2"];
 
   let auth, db, unsubscribeBills = null;
   let unsubscribeGlobal = [];
@@ -321,11 +321,10 @@
           applyingRemote = true;
           try {
             localStorage.setItem(key, cloudVal);
-            if (typeof renderInventory === "function") renderInventory();
             if (typeof renderJobCards === "function") renderJobCards();
-            if (typeof updateStats === "function") updateStats();
-            if (typeof loadAllData === "function") loadAllData();
-            if (typeof renderDashboard === "function") renderDashboard();
+			if (typeof renderJobs === "function") renderJobs();
+			if (typeof renderRepairJobs === "function") renderRepairJobs();
+			if (typeof renderDashboard === "function") renderDashboard();
           } finally {
             applyingRemote = false;
           }
