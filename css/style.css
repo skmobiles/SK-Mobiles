@@ -616,12 +616,11 @@ body.sk-worker-mode #settingsModal .sk-worker-blocked{pointer-events:none!import
 
 /* Center + enlarge Home button without changing the existing nav markup. */
   .bottom-nav{height:72px!important;align-items:flex-start!important;overflow:visible!important}
-  .bottom-nav .nav-item:nth-child(1){order:3}
-  .bottom-nav .nav-item:nth-child(2){order:1}
-  .bottom-nav .nav-item:nth-child(3){order:2}
-  .bottom-nav .nav-item:nth-child(4){order:4}
-  .bottom-nav .nav-item:nth-child(5){order:5}
-  .bottom-nav .nav-item:nth-child(6){order:6}
+  #navGlass{order:1}
+  #navCombo{order:2}
+  #navHome{order:3}
+  #navBilling{order:4}
+  #navOrders{order:5}
   #navHome{
     flex:0 0 62px!important;width:62px!important;height:62px!important;
     margin-top:-10px!important;border-radius:50%!important;
@@ -644,7 +643,7 @@ body.sk-worker-mode #settingsModal .sk-worker-blocked{pointer-events:none!import
   #skUrgentEnableBtn{display:none!important;}
 
   /* 4) Remove Settings from Home bottom navigation. Settings remains in Menu. */
-  #navSettings,.bottom-nav .nav-item:last-child{display:none!important;}
+  #navSettings{display:none!important;}
 
   /* 3) General permission controls */
   #skGeneralPermissionsBox{background:var(--model-bg);border:1px solid var(--card-border);border-radius:18px;padding:12px;margin-bottom:14px;}

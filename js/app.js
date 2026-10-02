@@ -2748,6 +2748,7 @@ const MASTER_INVENTORY = [
         ram: document.getElementById('billRam').value || '', storage: document.getElementById('billStorage').value || '',
         color: document.getElementById('billColor').value || '', imei1: document.getElementById('billImei1').value || '',
         imei2: document.getElementById('billImei2').value || '', package: document.getElementById('billPackage').value || '',
+        mobileType: currentMobileType,
         payMode: currentPayMode, price,
         advance: isCreditOrEmi ? (parseFloat(document.getElementById('billAdvance').value) || 0) : 0,
         balance: isCreditOrEmi ? Math.max(0, price - (parseFloat(document.getElementById('billAdvance').value) || 0)) : 0,
