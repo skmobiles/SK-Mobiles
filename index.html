@@ -187,10 +187,14 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div style="background:var(--badge-bg); border:1px solid var(--badge-border); padding:10px; border-radius:12px; font-size:0.72rem; color:var(--primary); margin-bottom:12px; line-height:1.4;">
 <strong>Excel Upload Info:</strong>
 <br/>
-     Excel file-il models mattum irunthal podhum. Title automatic-aaga first 4 models name-ai eduthukkum! Stock default-aaga 15 set aagum.
+     Upload the demo Excel format with Category, Item Title, Initial Stock and Compatible Models. Use Tempered Glass or Display in Category. Manual additions are also included in the current stock Excel file.
     </div>
 <div style="margin-bottom:14px;">
-<label class="form-label">📂 Upload Excel (.xlsx) / CSV File</label> <input accept=".xlsx, .xls, .csv" class="form-input" id="excelUploadInput" onchange="handleExcelFileUpload(this)" style="padding:7px;" type="file"/>
+<label class="form-label">📂 Upload Stock Excel (.xlsx) / CSV File</label> <input accept=".xlsx, .xls, .csv" class="form-input" id="excelUploadInput" onchange="handleExcelFileUpload(this)" style="padding:7px;" type="file"/>
+<div style="margin-top:8px;padding:9px;border:1px solid var(--card-border);border-radius:12px;background:var(--pill-bg);font-size:.68rem;color:var(--text-muted);line-height:1.45;">
+<strong style="color:var(--text);">Excel format:</strong> Use columns <b>Category</b>, <b>Item Title</b>, <b>Initial Stock</b>, <b>Compatible Models</b>. Category must be <b>Tempered Glass</b> or <b>Display</b>. Separate multiple models with comma or |.
+</div>
+<button type="button" class="submit-btn" onclick="downloadInventoryExcelTemplate()" style="width:100%;margin-top:8px;padding:8px;font-size:.72rem;">⬇️ Download Excel Format Demo</button>
 </div>
 <div style="text-align:center; font-size:0.75rem; color:var(--text-muted); margin:8px 0;">--- OR ADD MANUALLY ---</div>
 <form id="itemEditorForm" onsubmit="event.preventDefault(); saveManualInventoryItem();">

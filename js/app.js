@@ -1116,6 +1116,7 @@ const MASTER_INVENTORY = [
     let currentPayMode = 'Cash';
     let currentMobileType = 'New Mobile';
     let inventory = [];
+    window.inventory = inventory;
     let currentFilter = 'home';
     let currentSearchTerm = '';
     let ordersList = [];
@@ -1338,6 +1339,7 @@ const MASTER_INVENTORY = [
 
 
     function saveInventory() {
+      window.inventory = inventory;
       localStorage.setItem('sk_inventory', JSON.stringify(inventory));
       if(typeof window.skAutoAddLowStockOrders==='function')setTimeout(window.skAutoAddLowStockOrders,0);
     }
@@ -1609,71 +1611,94 @@ const MASTER_INVENTORY = [
     }
 
     function handleExcelFileUpload(input) {
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-            if (jsonRows.length < 1) {
-              showToast("Excel file is empty!");
-              return;
-            }
-
-            let addedCount = 0;
-            for (let i = 0; i < jsonRows.length; i++) {
-              const row = jsonRows[i];
-              if (!row || row.length === 0) continue;
-
-              let models = [];
-              row.forEach(cell => {
-                if (cell) {
-                  let val = String(cell).trim();
-                  if (val) {
-                    let parts = val.split(/,|\n|\|/);
-                    parts.forEach(p => {
-                      if (p.trim()) models.push(p.trim());
-                    });
-                  }
-                }
-              });
-
-              if (models.length > 0) {
-                let titleModels = models.slice(0, 4);
-                let title = titleModels.join(' / ');
-                if (models.length > 4) title += ' / ...';
-
-                const newItem = {
-                  id: `SK-EXC-${Date.now().toString().slice(-4)}_${i}`,
-                  title,
-                  category: "glass",
-                  subType: "11d",
-                  spec: "Universal",
-                  stock: 15,
-                  ordered: false,
-                  note: "Imported via Excel Models",
-                  models
-                };
-                inventory.unshift(newItem);
-                addedCount++;
-              }
-            }
-
-            saveInventory();
-            renderCards();
-            renderItemModalList(document.getElementById('editItemCategory')?.value || 'glass');
-            toggleModal('itemEditorModal', false);
-            showToast(`Successfully imported ${addedCount} items from Excel!`);
-          } catch (err) {
-            showToast("Failed to parse Excel file.");
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
+          if (!rows.length) {
+            showToast("Excel file is empty!");
+            return;
           }
-        };
-        reader.readAsArrayBuffer(file);
+
+          let addedCount = 0;
+          rows.forEach((row, index) => {
+            const categoryRaw = String(row['Category'] || row['category'] || '').trim().toLowerCase();
+            const category = categoryRaw === 'display' || categoryRaw === 'touch combo' || categoryRaw === 'combo' ? 'combo' :
+              categoryRaw === 'tempered glass' || categoryRaw === 'glass' ? 'glass' : '';
+            const title = String(row['Item Title'] || row['Title'] || row['item title'] || '').trim();
+            const stockValue = parseInt(row['Initial Stock'] || row['Stock'] || row['initial stock'], 10);
+            const modelsRaw = String(row['Compatible Models'] || row['Models'] || row['compatible models'] || '').trim();
+            const models = modelsRaw.split(/,|\n|\|/).map(v => v.trim()).filter(Boolean);
+
+            if (!category || !models.length) return;
+            const finalTitle = title || models.slice(0, 4).join(' / ') + (models.length > 4 ? ' / ...' : '');
+            const newItem = {
+              id: `SK-EXC-${Date.now().toString().slice(-5)}_${index}`,
+              title: finalTitle,
+              category,
+              subType: category === 'combo' ? 'combo' : '11d',
+              spec: 'Universal',
+              stock: Number.isFinite(stockValue) && stockValue >= 0 ? stockValue : 15,
+              ordered: false,
+              note: 'Imported via Excel Stock Format',
+              models
+            };
+            inventory.unshift(newItem);
+            addedCount++;
+          });
+
+          if (!addedCount) {
+            showToast("No valid rows found. Use the Download Excel Format Demo.");
+            return;
+          }
+          saveInventory();
+          renderCards();
+          renderItemModalList(document.getElementById('editItemCategory')?.value || 'glass');
+          toggleModal('itemEditorModal', false);
+          showToast(`Successfully imported ${addedCount} stock items from Excel!`);
+
+        } catch (err) {
+          showToast("Failed to parse Excel file. Use the Download Excel Format Demo.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function downloadInventoryExcelTemplate() {
+      try {
+        if (!window.XLSX) { showToast("Excel reader is unavailable."); return; }
+        const rows = [
+          ['Tempered Glass Compatible Models', 'Display Compatible Models'],
+          ['iPhone 16 | iPhone 17 | iPhone 18', 'Samsung A55 | Samsung A55 5G'],
+          ['Redmi Note 13 | Redmi Note 14', 'iPhone 15 | iPhone 16']
+        ];
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = [{wch:38},{wch:38}];
+        XLSX.utils.book_append_sheet(wb, ws, 'Stock Format');
+
+        // Use a direct Blob download so the demo works reliably on mobile and desktop browsers.
+        const data = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'SK_Mobiles_Stock_Import_Format.xlsx';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast("Excel format demo downloaded.");
+      } catch (e) {
+        console.error('Excel format download failed:', e);
+        showToast("Excel format download failed.");
       }
     }
 
@@ -1708,6 +1733,7 @@ const MASTER_INVENTORY = [
       };
       inventory.unshift(newItem);
       saveInventory();
+      if (typeof window.skSaveCurrentInventoryExcel === 'function') window.skSaveCurrentInventoryExcel();
       renderCards();
       renderItemModalList(category);
       toggleModal('itemEditorModal', false);
@@ -4254,6 +4280,181 @@ const MASTER_INVENTORY = [
       });
     });
   }
+
+  function saveCurrentInventoryExcel(){
+    try{
+      if(!window.XLSX || !Array.isArray(window.inventory)) return Promise.resolve();
+
+      return getUploadedExcel().then(function(rec){
+        if(!rec || !rec.data){
+          if(window.showToast) showToast('No uploaded Excel file found. Upload the stock Excel first.');
+          return;
+        }
+
+        var wb = XLSX.read(rec.data, {type:'array'});
+        var sheetName = wb.SheetNames[0];
+        if(!sheetName) throw new Error('Uploaded Excel has no worksheet.');
+
+        var ws = wb.Sheets[sheetName];
+        var matrix = XLSX.utils.sheet_to_json(ws, {header:1, defval:'', raw:false});
+        if(!matrix.length) throw new Error('Uploaded Excel is empty.');
+
+        var headers = (matrix[0] || []).map(function(v){ return String(v || '').trim().toLowerCase(); });
+        var isStockFormat =
+          headers.indexOf('category') !== -1 &&
+          headers.indexOf('item title') !== -1 &&
+          (headers.indexOf('initial stock') !== -1 || headers.indexOf('stock') !== -1) &&
+          (headers.indexOf('compatible models') !== -1 || headers.indexOf('models') !== -1);
+
+        var isCompactFormat =
+          headers.indexOf('tempered glass compatible models') !== -1 &&
+          headers.indexOf('display compatible models') !== -1;
+
+        if(!isStockFormat && !isCompactFormat){
+          if(window.showToast) showToast('Uploaded Excel format is not supported.');
+          return;
+        }
+
+        // Keep only real data rows from the uploaded workbook. Blank rows and
+        // accidental label-only rows must never be carried into the next save.
+        var existingRows = matrix.slice(1).filter(function(row){
+          var a = String(row[0] == null ? '' : row[0]).trim();
+          var b = String(row[1] == null ? '' : row[1]).trim();
+          if(!a && !b) return false;
+          // "Models" is a legacy/generated label, not inventory data.
+          if((a.toLowerCase() === 'models' && !b) || (b.toLowerCase() === 'models' && !a)) return false;
+          return true;
+        });
+
+        if(isStockFormat){
+          var catIdx = headers.indexOf('category');
+          var titleIdx = headers.indexOf('item title');
+          var stockIdx = headers.indexOf('initial stock') !== -1 ? headers.indexOf('initial stock') : headers.indexOf('stock');
+          var modelsIdx = headers.indexOf('compatible models') !== -1 ? headers.indexOf('compatible models') : headers.indexOf('models');
+
+          function norm(v){
+            return String(v == null ? '' : v).trim().toLowerCase().replace(/\s+/g,' ');
+          }
+
+          window.inventory.forEach(function(item){
+            if(!item) return;
+            var categoryName = item.category === 'combo' ? 'Display' : 'Tempered Glass';
+            var title = String(item.title || '').trim();
+            var models = Array.isArray(item.models) ? item.models.join(' | ') : String(item.models || '');
+            var exists = existingRows.some(function(row){
+              return norm(row[catIdx]) === norm(categoryName) &&
+                     norm(row[titleIdx]) === norm(title) &&
+                     norm(row[modelsIdx]) === norm(models);
+            });
+            if(!exists){
+              var row = [];
+              var width = Math.max(headers.length, 4);
+              for(var c=0;c<width;c++) row[c]='';
+              row[catIdx]=categoryName;
+              row[titleIdx]=title;
+              row[stockIdx]=Number(item.stock)||0;
+              row[modelsIdx]=models;
+              existingRows.push(row);
+            }
+          });
+
+          var output = [matrix[0]].concat(existingRows);
+          ws = XLSX.utils.aoa_to_sheet(output);
+          ws['!cols']=[{wch:20},{wch:28},{wch:15},{wch:55}];
+          wb.Sheets[sheetName]=ws;
+        } else {
+          var glassIdx = headers.indexOf('tempered glass compatible models');
+          var displayIdx = headers.indexOf('display compatible models');
+          var glassValues = [];
+          var displayValues = [];
+
+          existingRows.forEach(function(row){
+            glassValues.push(String(row[glassIdx] || '').trim());
+            displayValues.push(String(row[displayIdx] || '').trim());
+          });
+
+          function hasModelText(list, text){
+            var target=String(text||'').trim().toLowerCase();
+            if(!target || target === 'models') return true;
+            return list.some(function(v){ return String(v||'').trim().toLowerCase() === target; });
+          }
+
+          window.inventory.forEach(function(item){
+            if(!item) return;
+            var models = Array.isArray(item.models)
+              ? item.models.map(function(m){ return String(m||'').trim(); }).filter(Boolean).join(' | ')
+              : String(item.models || '').trim();
+            if(!models || models.toLowerCase() === 'models') return;
+
+            // Append only the actual model text. No automatic label,
+            // title, or placeholder is written into either column.
+            if(item.category === 'combo'){
+              if(!hasModelText(displayValues, models)){
+                var displayRow = [];
+                displayRow[glassIdx]='';
+                displayRow[displayIdx]=models;
+                existingRows.push(displayRow);
+                displayValues.push(models);
+                glassValues.push('');
+              }
+            }else{
+              if(!hasModelText(glassValues, models)){
+                var glassRow = [];
+                glassRow[glassIdx]=models;
+                glassRow[displayIdx]='';
+                existingRows.push(glassRow);
+                glassValues.push(models);
+                displayValues.push('');
+              }
+            }
+          });
+
+          // Compact the two-column worksheet: no blank rows between records.
+          existingRows = existingRows.filter(function(row){
+            return String(row[glassIdx] == null ? '' : row[glassIdx]).trim() ||
+                   String(row[displayIdx] == null ? '' : row[displayIdx]).trim();
+          }).map(function(row){
+            var clean=[];
+            clean[glassIdx]=String(row[glassIdx] == null ? '' : row[glassIdx]).trim();
+            clean[displayIdx]=String(row[displayIdx] == null ? '' : row[displayIdx]).trim();
+            return clean;
+          });
+
+          var compactOutput=[matrix[0]].concat(existingRows);
+          ws=XLSX.utils.aoa_to_sheet(compactOutput);
+          ws['!cols']=[{wch:38},{wch:38}];
+          wb.Sheets[sheetName]=ws;
+        }
+
+        var data=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+        return openExcelDB().then(function(db){
+          return new Promise(function(resolve,reject){
+            var tx=db.transaction(STORE_NAME,'readwrite');
+            tx.objectStore(STORE_NAME).put({
+              id:RECORD_KEY,
+              name:rec.name || 'SK_Mobiles_Inventory.xlsx',
+              type:rec.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+              size:data.byteLength,
+              updatedAt:new Date().toISOString(),
+              data:data
+            });
+            tx.oncomplete=function(){
+              db.close();
+              if(typeof ensureDownloadUI==='function') setTimeout(ensureDownloadUI,100);
+              resolve();
+            };
+            tx.onerror=function(){
+              db.close();
+              reject(tx.error||new Error('Save failed'));
+            };
+          });
+        });
+      });
+    }catch(e){
+      return Promise.reject(e);
+    }
+  }
+  window.skSaveCurrentInventoryExcel=saveCurrentInventoryExcel;
 
   function bootExcelBackup(){
     captureExcelUpload();
