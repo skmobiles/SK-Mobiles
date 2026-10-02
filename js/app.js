@@ -1736,6 +1736,9 @@ const MASTER_INVENTORY = [
       if (typeof window.skSaveCurrentInventoryExcel === 'function') window.skSaveCurrentInventoryExcel();
       renderCards();
       renderItemModalList(category);
+      document.getElementById('itemEditorForm')?.reset();
+      const editIdField = document.getElementById('editItemId');
+      if (editIdField) editIdField.value = '';
       toggleModal('itemEditorModal', false);
       showToast("New item added successfully!");
     }
@@ -3546,7 +3549,7 @@ const MASTER_INVENTORY = [
     };
     window.skDeleteWorker=function(index){if(!admin())return;const a=workers();if(!a[index])return;if(!confirm('Delete this worker?'))return;const id=a[index].id;a.splice(index,1);saveWorkers(a);if(localStorage.getItem(CURRENT_WORKER_KEY)===id)localStorage.removeItem(CURRENT_WORKER_KEY);populateLogin();renderAdminWorkers();toast('Worker deleted');};
     function renderAdminWorkers(){const box=document.getElementById('skWorkerAdminList');if(!box)return;const a=workers();box.innerHTML=a.length?a.map((w,i)=>'<div class="sk-worker-row"><img class="sk-worker-avatar" src="'+(w.photo||DEFAULT_PHOTO)+'"><div class="sk-worker-row-main"><div class="sk-worker-row-name">'+esc(w.name)+' <span style="font-size:.64rem;color:var(--text-muted)">('+esc(w.id)+')</span></div><div class="sk-worker-row-sub">'+esc(w.designation||'Worker')+' • '+esc(w.phone||'No phone')+'</div><div class="sk-worker-row-sub">🔑 Password: <span class="sk-password-view">'+esc(w.password)+'</span></div></div><div class="sk-worker-row-actions"><button class="sk-mini-btn" onclick="skOpenWorkerEdit('+i+')">✏️</button><button class="sk-mini-btn sk-mini-danger" onclick="skDeleteWorker('+i+')">🗑️</button></div></div>').join(''):'<div style="font-size:.74rem;color:var(--text-muted);padding:8px;text-align:center;">No workers added</div>';const c=document.getElementById('skWorkerCount');if(c)c.textContent=a.length;}
-    function addManager(){const panel=document.querySelector('#skAdminPanelModal .modal-sheet');if(!panel||document.getElementById('skWorkerAdminManager'))return;const box=document.createElement('div');box.id='skWorkerAdminManager';box.className='sk-worker-manager';box.innerHTML='<div class="sk-worker-manager-title">👷 WORKERS — <span id="skWorkerCount">0</span></div><button class="submit-btn" style="margin-bottom:8px;" onclick="skOpenWorkerEdit(-1)">➕ Add Worker</button><div id="skWorkerAdminList" class="sk-worker-list"></div>';const boxes=panel.querySelectorAll('.sk-admin-box');if(boxes.length)boxes[boxes.length-1].insertAdjacentElement('afterend',box);else panel.appendChild(box);renderAdminWorkers();}
+    function addManager(){ const box=document.getElementById('skWorkerAdminManager'); if(box) box.remove(); }
     function intercept(){
       document.addEventListener('click',function(e){const el=e.target.closest?.('button,a');if(!el)return;const t=(el.textContent||'').trim().toLowerCase();
         if(t.includes('logout')){localStorage.removeItem('sk_current_worker_id_v1');return;}
@@ -3613,9 +3616,33 @@ const MASTER_INVENTORY = [
       });
     }
     const blockedWords=['add item','edit','delete','clear all orders','next status','save repair job','update repair job','backup','restore','stock adjustment','purchase','expense','supplier','used mobile'];
+    function applyManagerRestrictions(){
+      if(role()!=='manager') return;
+      const settings=document.getElementById('settingsModal');
+      if(settings){
+        settings.querySelectorAll('div').forEach(function(el){
+          const t=(el.textContent||'').trim().toLowerCase();
+          if(t==='🏪 shop profile & address' || t==='📜 terms & conditions editor' || t==='shop brand logo'){
+            const parent=el.parentElement;
+            if(parent) parent.style.display='none';
+          }
+        });
+        const cloudTitle=settings.querySelector('#skCloudBackupSection');
+        if(cloudTitle && cloudTitle.parentElement){
+          const cloudBox=cloudTitle.parentElement;
+          const buttons=cloudBox.querySelectorAll('button');
+          buttons.forEach(function(b){ if((b.textContent||'').toLowerCase().includes('restore latest')) b.style.display='none'; });
+        }
+      }
+      document.getElementById('skAdminPanelModal')?.classList.remove('active');
+      const adminBtn=document.getElementById('skAdminControlBtn');
+      if(adminBtn) adminBtn.style.display='none';
+    }
+
     function applyRestrictions(){
       if(!document.body)return;
       document.body.classList.toggle('sk-worker-mode',role()==='worker');
+      applyManagerRestrictions();
       if(role()!=='worker'){
         document.querySelectorAll('.sk-worker-blocked').forEach(el=>el.classList.remove('sk-worker-blocked'));
         return;
@@ -4212,6 +4239,17 @@ const MASTER_INVENTORY = [
     });
   }
 
+  function deleteUploadedExcel(){
+    return openExcelDB().then(function(db){
+      return new Promise(function(resolve,reject){
+        var tx=db.transaction(STORE_NAME,'readwrite');
+        tx.objectStore(STORE_NAME).delete(RECORD_KEY);
+        tx.oncomplete=function(){db.close();resolve();};
+        tx.onerror=function(){db.close();reject(tx.error||new Error('Delete failed'));};
+      });
+    });
+  }
+
   function safeText(v){
     return String(v==null?'':v).replace(/[&<>"']/g,function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
@@ -4239,10 +4277,24 @@ const MASTER_INVENTORY = [
       }
       box.style.display='block';
       box.innerHTML=
-        '<div style="font-size:.72rem;font-weight:800;color:var(--text);margin-bottom:7px;">📊 Last uploaded Excel</div>'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;">'+
+        '<div style="font-size:.72rem;font-weight:800;color:var(--text);">📊 Last uploaded Excel</div>'+
+        '<button type="button" id="skDeleteLastExcelBtn" title="Delete uploaded Excel" style="width:30px;height:30px;padding:0;border-radius:8px;border:1px solid #fecaca;background:#fff1f2;color:#dc2626;font-weight:900;cursor:pointer;">🗑️</button>'+
+        '</div>'+
         '<div style="font-size:.68rem;color:var(--text-muted);margin-bottom:8px;word-break:break-word;">'+safeText(rec.name)+'</div>'+
         '<button type="button" id="skDownloadLastExcelBtn" class="submit-btn" style="width:100%;padding:8px;font-size:.72rem;">⬇️ Download Excel File</button>';
       document.getElementById('skDownloadLastExcelBtn').onclick=downloadLastExcel;
+      document.getElementById('skDeleteLastExcelBtn').onclick=function(){
+        if(!confirm('Latest uploaded Excel file-ஐ delete செய்யவா?')) return;
+        deleteUploadedExcel().then(function(){
+          box.style.display='none';
+          var inp=document.getElementById('excelUploadInput');
+          if(inp) inp.value='';
+          if(window.showToast) showToast('Latest uploaded Excel deleted.');
+        }).catch(function(){
+          if(window.showToast) showToast('Excel file delete failed.');
+        });
+      };
     }).catch(function(){
       box.style.display='none';
     });
@@ -5115,7 +5167,20 @@ window.skOpenCreditLedger=openLedger;
 window.skCloseCreditLedger=function(){document.getElementById('skCreditLedgerModal')?.classList.remove('active')};
 window.skOpenRoleProfile=function(){
  const role=localStorage.getItem('sk_current_role_v1');
- if(role==='admin'){const c=document.getElementById('skAdminProfileWorkerCount'),w=safeJson('sk_workers_v1',[]);if(c)c.textContent=Array.isArray(w)?w.length:0;document.getElementById('skAdminProfileModal')?.classList.add('active')}
+ if(role==='admin'){const c=document.getElementById('skAdminProfileWorkerCount'),w=safeJson('sk_workers_v1',[]);if(c)c.textContent=Array.isArray(w)?w.length:0;
+   document.getElementById('skAdminProfileTitle')?.replaceChildren(document.createTextNode('👑 My Admin Profile'));
+   document.getElementById('skAdminProfileName')?.replaceChildren(document.createTextNode('SK MOBILES Admin'));
+   document.getElementById('skAdminProfileAccount')?.replaceChildren(document.createTextNode('Admin'));
+   document.getElementById('skAdminProfileAccess')?.replaceChildren(document.createTextNode('Full Access'));
+   document.getElementById('skAdminProfileModal')?.classList.add('active')}
+ else if(role==='manager'){
+   document.getElementById('skAdminProfileTitle')?.replaceChildren(document.createTextNode('👔 My Manager Profile'));
+   document.getElementById('skAdminProfileName')?.replaceChildren(document.createTextNode('SK MOBILES Manager'));
+   document.getElementById('skAdminProfileAccount')?.replaceChildren(document.createTextNode('Manager'));
+   document.getElementById('skAdminProfileAccess')?.replaceChildren(document.createTextNode('Full Access'));
+   document.getElementById('skAdminProfileWorkerCount')?.replaceChildren(document.createTextNode('—'));
+   document.getElementById('skAdminProfileModal')?.classList.add('active');
+ }
  else if(role==='worker'){if(typeof window.skOpenWorkerProfile==='function'){window.skOpenWorkerProfile()}else{const id=localStorage.getItem('sk_current_worker_id_v1'),a=safeJson('sk_workers_v1',[]),w=Array.isArray(a)?a.find(x=>x.id===id):null;if(!w){toast('Worker profile not found');return}const set=(i,v)=>{const e=document.getElementById(i);if(e)e.value=v||''};const img=document.getElementById('skWorkerProfilePhoto');if(img)img.src=w.photo||'';set('skWorkerProfileName',w.name);set('skWorkerProfileId',w.id);set('skWorkerProfilePhone',w.phone);set('skWorkerProfileDesignation',w.designation);set('skWorkerProfileDetails',w.details);document.getElementById('skWorkerProfileModal')?.classList.add('active')}}
  else toast('🔐 Please login first')
 };

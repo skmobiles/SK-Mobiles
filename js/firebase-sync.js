@@ -455,7 +455,8 @@
 
   window.skCloudRestoreLatest = async function(){
     if(!auth?.currentUser || !db){ toast("❌ Firebase Login தேவை"); return; }
-    if(!cloudBackupAllowed()){ toast("🔒 Cloud Restore Admin/Manager-க்கு மட்டும்"); return; }
+    const currentRole = String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
+    if(currentRole !== "admin"){ toast("🔒 Cloud Restore Admin-க்கு மட்டும்"); return; }
     if(!confirm("Latest Cloud Backup-ஐ இந்த device-க்கு restore செய்யவா?")) return;
     try{
       cloudRestoreApplying = true;
