@@ -1114,7 +1114,6 @@ const MASTER_INVENTORY = [
     ];
 
     let currentPayMode = 'Cash';
-    let currentBillMobileType = 'New Mobile';
     let inventory = [];
     let currentFilter = 'home';
     let currentSearchTerm = '';
@@ -1350,7 +1349,6 @@ const MASTER_INVENTORY = [
       document.getElementById('billAdvance').value = "0";
       document.getElementById('billEmiMonths').value = "3";
       document.getElementById('billEmiInterest').value = "0";
-      selectBillMobileType('New Mobile');
       selectPayMode('Cash');
       clearDraft();
       updateBillPreview();
@@ -1373,7 +1371,7 @@ const MASTER_INVENTORY = [
           ram: document.getElementById('billRam').value || '', storage: document.getElementById('billStorage').value || '',
           color: document.getElementById('billColor').value || '', imei1: document.getElementById('billImei1').value || '',
           imei2: document.getElementById('billImei2').value || '', package: document.getElementById('billPackage').value || '',
-          payMode: currentPayMode, mobileType: currentBillMobileType, price,
+          payMode: currentPayMode, price,
           advance: parseFloat(document.getElementById('billAdvance').value) || 0,
           balance: parseFloat((document.getElementById('billBalanceDisplay')?.innerText || '').replace(/\D/g,'')) || 0,
           emiMonths: parseInt(document.getElementById('billEmiMonths').value,10) || 0,
@@ -1941,7 +1939,6 @@ const MASTER_INVENTORY = [
         imei1: document.getElementById('billImei1').value,
         imei2: document.getElementById('billImei2').value,
         payMode: currentPayMode,
-        mobileType: currentBillMobileType,
         price: document.getElementById('billTotalPrice').value,
         advance: document.getElementById('billAdvance').value,
         emiMonths: document.getElementById('billEmiMonths').value,
@@ -2395,7 +2392,11 @@ const MASTER_INVENTORY = [
 
             <div class="stock-control-panel" onclick="event.stopPropagation()">
               ${stockLabel}
-
+              <div class="stock-counter-group">
+                <button class="stock-btn" onclick="updateStock('${item.id}', -1)">-</button>
+                <input type="number" class="stock-number-input" value="${item.stock}" onfocus="handleInputClear(this)" onchange="setDirectStock('${item.id}', this.value)" min="0">
+                <button class="stock-btn" onclick="updateStock('${item.id}', 1)">+</button>
+              </div>
             </div>
 
             <div class="models-section" onclick="event.stopPropagation()">
@@ -2561,39 +2562,6 @@ const MASTER_INVENTORY = [
       }
     }
 
-    const BILL_TERMS = {
-      newMobile: `1. Sold items are not returnable.
-2. 7 Days Testing Warranty only.
-3. No warranty for physical or liquid damage.
-4. Customer has checked the IMEI and device condition before purchase.`,
-      usedMobile: `1. Used mobile is sold after customer inspection and approval.
-2. 3 Days testing warranty for functional issues only.
-3. No warranty for physical, liquid or accidental damage.
-4. Customer has checked the device condition, IMEI and accessories before purchase.`,
-      keypadMobile: `1. Sold items are not returnable.
-2. 7 Days Testing Warranty only.
-3. No warranty for physical or liquid damage.
-4. Customer has checked the IMEI and device condition before purchase.`
-    };
-
-    function selectBillMobileType(type) {
-      currentBillMobileType = type === 'Used Mobile' ? 'Used Mobile' : (type === 'Keypad Mobile' ? 'Keypad Mobile' : 'New Mobile');
-      ['New','Used','Keypad'].forEach(k => {
-        const btn = document.getElementById('billType' + k);
-        if (btn) btn.classList.toggle('active', (k === 'New' && currentBillMobileType === 'New Mobile') || (k === 'Used' && currentBillMobileType === 'Used Mobile') || (k === 'Keypad' && currentBillMobileType === 'Keypad Mobile'));
-      });
-      const pvType = document.getElementById('pvMobileType');
-      if (pvType) pvType.innerText = currentBillMobileType;
-      updateBillPreview();
-      saveDraft();
-    }
-
-    function getBillTermsByType() {
-      const key = currentBillMobileType === 'Used Mobile' ? 'usedMobile' : (currentBillMobileType === 'Keypad Mobile' ? 'keypadMobile' : 'newMobile');
-      const customKey = 'sk_terms_' + (key === 'usedMobile' ? 'used' : (key === 'keypadMobile' ? 'keypad' : 'new'));
-      return localStorage.getItem(customKey) || ((key !== 'usedMobile' && localStorage.getItem('sk_terms')) || BILL_TERMS[key]);
-    }
-
     function selectPayMode(mode) {
       currentPayMode = mode;
       document.querySelectorAll('.pay-mode-btn').forEach(btn => btn.classList.remove('active'));
@@ -2737,9 +2705,8 @@ const MASTER_INVENTORY = [
         pvCreditBox.style.display = 'none';
       }
 
-      const pvType = document.getElementById('pvMobileType');
-      if (pvType) pvType.innerText = currentBillMobileType;
-      document.getElementById('pvTerms').innerText = getBillTermsByType();
+      const terms = localStorage.getItem('sk_terms') || document.getElementById('cfgTermsConditions').value;
+      document.getElementById('pvTerms').innerText = terms;
     }
 
     function saveUsedBill() {
@@ -2753,7 +2720,6 @@ const MASTER_INVENTORY = [
         const set = (key,id) => { bill[key] = document.getElementById(id)?.value || ''; };
         set('custName','billCustName'); set('phone','billCustPhone'); set('address','billCustAddress'); set('brand','billBrand'); set('model','billModel');
         set('ram','billRam'); set('storage','billStorage'); set('color','billColor'); set('imei1','billImei1'); set('imei2','billImei2'); set('package','billPackage');
-        bill.mobileType=currentBillMobileType;
         bill.payMode=currentPayMode; bill.price=price; bill.advance=advance;
         bill.emiMonths=parseInt(document.getElementById('billEmiMonths').value,10)||0; bill.emiInterest=parseFloat(document.getElementById('billEmiInterest').value)||0;
         bill.emiStartDate=document.getElementById('billEmiStartDate').value||''; bill.creditDueDate=document.getElementById('billCreditDate').value||'';
@@ -2778,7 +2744,7 @@ const MASTER_INVENTORY = [
         ram: document.getElementById('billRam').value || '', storage: document.getElementById('billStorage').value || '',
         color: document.getElementById('billColor').value || '', imei1: document.getElementById('billImei1').value || '',
         imei2: document.getElementById('billImei2').value || '', package: document.getElementById('billPackage').value || '',
-        payMode: currentPayMode, mobileType: currentBillMobileType, price,
+        payMode: currentPayMode, price,
         advance: isCreditOrEmi ? (parseFloat(document.getElementById('billAdvance').value) || 0) : 0,
         balance: isCreditOrEmi ? Math.max(0, price - (parseFloat(document.getElementById('billAdvance').value) || 0)) : 0,
         emiMonths: parseInt(document.getElementById('billEmiMonths').value,10) || 0,
@@ -2834,9 +2800,7 @@ const MASTER_INVENTORY = [
       toggleModal('billingModal',true);
       switchBillTab('new');
       const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v==null?'':v;};
-      set('billCustName',b.custName);set('billCustPhone',b.phone);set('billCustAddress',b.address);set('billBrand',b.brand);set('billModel',b.model);set('billRam',b.ram);set('billStorage',b.storage);set('billColor',b.color);set('billImei1',b.imei1);set('billImei2',b.imei2);set('billPackage',b.package);set('billTotalPrice',b.price);
-      currentBillMobileType=b.mobileType||'New Mobile';
-      selectBillMobileType(currentBillMobileType);set('billAdvance',b.advance||0);set('billEmiMonths',b.emiMonths||3);set('billEmiInterest',b.emiInterest||0);set('billEmiStartDate',b.emiStartDate||'');set('billCreditDate',b.creditDueDate||'');
+      set('billCustName',b.custName);set('billCustPhone',b.phone);set('billCustAddress',b.address);set('billBrand',b.brand);set('billModel',b.model);set('billRam',b.ram);set('billStorage',b.storage);set('billColor',b.color);set('billImei1',b.imei1);set('billImei2',b.imei2);set('billPackage',b.package);set('billTotalPrice',b.price);set('billAdvance',b.advance||0);set('billEmiMonths',b.emiMonths||3);set('billEmiInterest',b.emiInterest||0);set('billEmiStartDate',b.emiStartDate||'');set('billCreditDate',b.creditDueDate||'');
       currentPayMode=b.payMode||'Cash';
       if(typeof selectPayMode==='function')selectPayMode(currentPayMode);
       if(typeof calculateBillMath==='function')calculateBillMath();
