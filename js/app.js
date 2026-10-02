@@ -2941,22 +2941,25 @@ const MASTER_INVENTORY = [
   <meta charset="utf-8">
   <title>SK MOBILES - Invoice</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
-  
+  <link href="${new URL('css/style.css', window.location.href).href}" rel="stylesheet">
+  <style>
+    html,body{margin:0;padding:0;background:#fff;color:#1e293b;font-family:'Plus Jakarta Sans',sans-serif;}
+    body{display:flex;justify-content:center;}
+    #printableInvoiceCard{width:100%;max-width:794px!important;margin:0 auto!important;background:#fff!important;box-shadow:none!important;border-radius:0!important;padding:22px!important;}
+    #printableInvoiceCard .invoice-logo-wrap{width:92px!important;height:92px!important;flex:0 0 92px!important;overflow:hidden!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;}
+    #printableInvoiceCard .invoice-logo{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;}
+    @page{size:A4 portrait;margin:10mm;}
+    @media print{body{display:block!important;}#printableInvoiceCard{max-width:none!important;width:100%!important;padding:0!important;}}
+  </style>
 </head>
 <body>
   ${clone.outerHTML}
-
-
-
-
 </body>
 </html>`);
       w.document.close();
-      setTimeout(() => {
-        w.focus();
-        w.print();
-        w.close();
-      }, 400);
+      const printLogo=w.document.querySelector('#invoiceLogoImg');
+      const doPrint=()=>{w.focus();w.print();w.close();};
+      if(printLogo && !printLogo.complete){printLogo.addEventListener('load',doPrint,{once:true});setTimeout(doPrint,1200);}else{setTimeout(doPrint,500);}
     }
 
     function downloadInvoicePDF() {
@@ -3572,10 +3575,39 @@ const MASTER_INVENTORY = [
     let selectedRole='admin';
     function role(){return localStorage.getItem(ROLE_KEY)||'';}
     function admin(){return role()==='admin';}
+    const MANAGER_POLICY_KEY='sk_manager_policy_v1';
+    function managerPolicy(){
+      const defaults={enabled:true,billing:true,inventory:true,credit:true,repair:true,backup:true,restore:false,shopSettings:false,userRoles:false};
+      try{const raw=JSON.parse(localStorage.getItem(MANAGER_POLICY_KEY)||'null');return Object.assign(defaults,raw&&typeof raw==='object'?raw:{})}catch(e){return defaults}
+    }
+    function updateRoleBadge(){
+      const b=document.getElementById('skAccessBadge');if(!b)return;
+      const r=role();
+      document.body.classList.toggle('sk-admin-mode',r==='admin');
+      document.body.classList.toggle('sk-manager-mode',r==='manager');
+      document.body.classList.toggle('sk-worker-mode',r==='worker');
+      b.textContent=r==='admin'?'👑 Admin':r==='manager'?'👔 Manager':r==='worker'?'👷 Worker':'';
+    }
+    function loadManagerPolicyUI(){
+      if(!admin())return;const p=managerPolicy();
+      [['skManagerEnabled','enabled'],['skMgrBilling','billing'],['skMgrInventory','inventory'],['skMgrCredit','credit'],['skMgrRepair','repair'],['skMgrBackup','backup'],['skMgrRestore','restore'],['skMgrShopSettings','shopSettings'],['skMgrUsers','userRoles']].forEach(([id,k])=>{const e=document.getElementById(id);if(e)e.checked=!!p[k]});
+    }
+    window.skSaveManagerPolicy=function(){
+      if(!admin()){toast('🔒 Admin access only');return;}
+      const p={enabled:!!document.getElementById('skManagerEnabled')?.checked,billing:!!document.getElementById('skMgrBilling')?.checked,inventory:!!document.getElementById('skMgrInventory')?.checked,credit:!!document.getElementById('skMgrCredit')?.checked,repair:!!document.getElementById('skMgrRepair')?.checked,backup:!!document.getElementById('skMgrBackup')?.checked,restore:!!document.getElementById('skMgrRestore')?.checked,shopSettings:!!document.getElementById('skMgrShopSettings')?.checked,userRoles:!!document.getElementById('skMgrUsers')?.checked};
+      localStorage.setItem(MANAGER_POLICY_KEY,JSON.stringify(p));applyRestrictions();toast('Manager permissions updated');
+    };
+    window.skAdminResetAllAppData=function(){
+      if(!admin()){toast('🔒 Admin access only');return;}
+      if(!confirm('Reset all app data on this device? This cannot be undone.'))return;
+      try{localStorage.clear();sessionStorage.clear();}catch(e){}
+      try{if(window.firebase?.auth)window.firebase.auth().signOut().catch(()=>{});}catch(e){}
+      location.reload();
+    };
     function pinKey(r){return r==='admin'?ADMIN_PIN_KEY:WORKER_PIN_KEY;}
     function pin(r){return localStorage.getItem(pinKey(r))||(r==='admin'?DEFAULT_ADMIN_PIN:DEFAULT_WORKER_PIN);}
     function toast(t){if(typeof showToast==='function')showToast(t);}
-    function setRole(r){localStorage.setItem(ROLE_KEY,r);document.body.classList.toggle('sk-worker-mode',r==='worker');}
+    function setRole(r){localStorage.setItem(ROLE_KEY,r);updateRoleBadge();}
     function gate(show){const g=document.getElementById('skRoleGate');if(g)g.classList.toggle('sk-show',show);}
     function logo(){return localStorage.getItem('sk_custom_logo')||window.SK_MOBILES_EMBEDDED_LOGO||'Logo.png';}
     function message(t){const m=document.getElementById('skRoleMsg');if(m)m.textContent=t||'';}
@@ -3583,6 +3615,7 @@ const MASTER_INVENTORY = [
     function login(){
       const p=(document.getElementById('skRolePin')?.value||'').trim();
       if(p!==pin(selectedRole)){message('❌ Wrong PIN');return;}
+      if(selectedRole==='manager' && !managerPolicy().enabled){message('❌ Manager access is disabled by Admin');return;}
       setRole(selectedRole);
       gate(false);
       document.getElementById('skRolePin')?.blur();
@@ -3594,7 +3627,7 @@ const MASTER_INVENTORY = [
       toast(selectedRole==='admin'?'👑 Admin login successful':'👷 Worker login successful');
     }
     window.skLogout=function(){localStorage.removeItem(ROLE_KEY);document.querySelectorAll('.modal-overlay.active').forEach(m=>m.classList.remove('active'));document.getElementById('skAdminPanelModal')?.classList.remove('active');gate(true);choose('admin');};
-    window.skOpenAdminPanel=function(){if(!admin()){toast('🔒 Admin access only');return;}document.getElementById('skAdminPanelModal')?.classList.add('active');};
+    window.skOpenAdminPanel=function(){if(!admin()){toast('🔒 Admin access only');return;}loadManagerPolicyUI();const r=document.getElementById('skAdminCurrentRole');if(r)r.textContent='👑 Admin — Full Access';document.getElementById('skAdminPanelModal')?.classList.add('active');};
     window.skCloseAdminPanel=function(){document.getElementById('skAdminPanelModal')?.classList.remove('active');};
     window.skChangePin=function(r){if(!admin()){toast('🔒 Admin access only');return;}const id=r==='admin'?'skNewAdminPin':'skNewWorkerPin';const v=(document.getElementById(id)?.value||'').trim();if(!/^\d{4,12}$/.test(v)){toast('PIN must be 4-12 digits');return;}localStorage.setItem(pinKey(r),v);document.getElementById(id).value='';toast((r==='admin'?'Admin':'Worker')+' PIN updated');};
 
@@ -3617,28 +3650,34 @@ const MASTER_INVENTORY = [
     }
     const blockedWords=['add item','edit','delete','clear all orders','next status','save repair job','update repair job','backup','restore','stock adjustment','purchase','expense','supplier','used mobile'];
     function applyManagerRestrictions(){
-      if(role()!=='manager') return;
+      const r=role();
+      if(r!=='manager') return;
+      const p=managerPolicy();
+      if(!p.enabled){document.querySelectorAll('button,a,[role="button"]').forEach(el=>{if(el.id!=='skRoleGate')el.classList.add('sk-worker-blocked')});return;}
       const settings=document.getElementById('settingsModal');
       if(settings){
         settings.querySelectorAll('div').forEach(function(el){
           const t=(el.textContent||'').trim().toLowerCase();
-          if(t==='🏪 shop profile & address' || t==='📜 terms & conditions editor' || t==='shop brand logo'){
-            const parent=el.parentElement;
-            if(parent) parent.style.display='none';
-          }
+          if(!p.shopSettings && (t==='🏪 shop profile & address' || t==='📜 terms & conditions editor' || t==='shop brand logo')){const parent=el.parentElement;if(parent)parent.style.display='none';}
         });
         const cloudTitle=settings.querySelector('#skCloudBackupSection');
         if(cloudTitle && cloudTitle.parentElement){
           const cloudBox=cloudTitle.parentElement;
-          const buttons=cloudBox.querySelectorAll('button');
-          buttons.forEach(function(b){ if((b.textContent||'').toLowerCase().includes('restore latest')) b.style.display='none'; });
+          cloudBox.querySelectorAll('button').forEach(function(b){const t=(b.textContent||'').toLowerCase();if(t.includes('restore latest'))b.style.display=p.restore?'':'none';if(t.includes('backup now'))b.style.display=p.backup?'':'none';});
         }
       }
-      document.getElementById('skAdminPanelModal')?.classList.remove('active');
-      const adminBtn=document.getElementById('skAdminControlBtn');
-      if(adminBtn) adminBtn.style.display='none';
+      const adminBtn=document.getElementById('skAdminControlBtn');if(adminBtn)adminBtn.style.display='none';
+      const userRoleEls=document.querySelectorAll('#skAdminPanelModal,#skWorkerEditModal,#skWorkerAdminList,[onclick*="skOpenWorkerEdit"],[onclick*="skSaveWorkerFromAdmin"]');
+      if(!p.userRoles)userRoleEls.forEach(el=>{if(el.style)el.style.display='none';});
+      const permissionMatchers=[];
+      if(!p.billing)permissionMatchers.push('new bill','save bill','billing','mobile sale');
+      if(!p.inventory)permissionMatchers.push('add item','inventory','stock','used mobile');
+      if(!p.credit)permissionMatchers.push('customer credit','credit ledger','payment','credit','add payment');
+      if(!p.repair)permissionMatchers.push('repair jobs','save repair job','update repair job');
+      if(!p.backup)permissionMatchers.push('backup now');
+      if(!p.restore)permissionMatchers.push('restore latest');
+      if(permissionMatchers.length){document.querySelectorAll('button,a,[role="button"]').forEach(el=>{if(el.closest('#skRoleGate'))return;const t=((el.textContent||'')+' '+(el.getAttribute('title')||'')+' '+(el.getAttribute('onclick')||'')).toLowerCase();if(permissionMatchers.some(x=>t.includes(x)))mark(el);});}
     }
-
     function applyRestrictions(){
       if(!document.body)return;
       document.body.classList.toggle('sk-worker-mode',role()==='worker');
@@ -3666,7 +3705,7 @@ const MASTER_INVENTORY = [
       const groups=drawer.children;let host=null;for(let i=0;i<groups.length;i++){if(groups[i].querySelector&&groups[i].querySelector('.logout')){host=groups[i];break;}}
       if(!host)return;const b=document.createElement('button');b.id='skAdminControlBtn';b.className='menu-drawer-btn';b.textContent='👑 Admin Control';b.onclick=function(){skOpenAdminPanel();toggleLeftDrawer(false);};host.insertBefore(b,host.querySelector('.logout')||null);b.style.display=admin()?'':'none';
     }
-    function refreshAdminButton(){const b=document.getElementById('skAdminControlBtn');if(b)b.style.display=admin()?'':'none';}
+    function refreshAdminButton(){const b=document.getElementById('skAdminControlBtn');if(b)b.style.display=admin()?'':'none';updateRoleBadge();}
     document.addEventListener('click',function(e){
       const el=e.target.closest?.('button,a');if(!el)return;
       const t=(el.textContent||'').trim().toLowerCase();
@@ -5751,44 +5790,76 @@ function cpUpdateBill(idx,type,amount,advance,data){
  return net;
 }
 window.skCPSaveAction=function(){
- var type=document.getElementById('skCPActionType').value,name=document.getElementById('skCPName').value.trim(),phone=document.getElementById('skCPPhone').value.trim(),amount=Number(document.getElementById('skCPAmount').value)||0,adv=type==='credit'?(Number(document.getElementById('skCPAdvance').value)||0):0,date=document.getElementById('skCPDate').value||cpDate(),billIdx=document.getElementById('skCPBill').value;
- if(!name||amount<=0){if(typeof showToast==='function')showToast('Customer name and amount required');return}
- if(type==='credit'&&adv>amount){if(typeof showToast==='function')showToast('Advance cannot be more than amount');return}
- var billIdxNum=billIdx===''?null:Number(billIdx),bills=cpBills(),bill=billIdxNum!==null?bills[billIdxNum]:null;
- var oldCustomer=cpGetCustomers().find(function(c){return c.key===cpKey(name,phone)}),oldBal=oldCustomer?oldCustomer.balance:0;
- if(!bill && oldCustomer && oldCustomer.bills && oldCustomer.bills.length){
-   var pendingBill=oldCustomer.bills.find(function(x){return Number(x.b.balance||0)>0;})||oldCustomer.bills[0];
-   billIdxNum=pendingBill.idx; bill=bills[billIdxNum];
-   var billSelect=document.getElementById('skCPBill'); if(billSelect)billSelect.value=String(billIdxNum);
- }
- var mode=type==='payment'?document.getElementById('skCPPaymentMode').value:'Credit';
- var category=document.getElementById('skCPCategory').value,note=document.getElementById('skCPNote').value.trim(),emi=document.getElementById('skCPEmiMode').value==='emi';
- var net=type==='credit'?Math.max(0,amount-adv):amount;
- if((type==='payment'||type==='credit') && !bill && oldCustomer && oldCustomer.bills && oldCustomer.bills.some(function(x){return Number(x.b.balance||0)>0})){
-   if(typeof showToast==='function')showToast('Please select the customer purchase bill');
-   return;
- }
- if((type==='payment'||type==='credit') && !bill && oldCustomer && oldCustomer.bills && oldCustomer.bills.length===0){
-   if(typeof showToast==='function')showToast('No sales bill is available for this customer');
-   return;
- }
- if(type==='payment'&&bill){var actual=Math.min(Math.max(0,Number(bill.balance)||0),amount);if(actual<=0){if(typeof showToast==='function')showToast('Selected bill has no pending balance');return}}
- if(type==='payment'&&bill){amount=Math.min(amount,Math.max(0,Number(bill.balance)||0));net=amount}
- if(type==='credit'&&bill){cpUpdateBill(billIdxNum,type,amount,adv,{date:date,category:category,note:note})}
- if(type==='payment'&&bill){cpUpdateBill(billIdxNum,type,amount,0,{date:date,mode:mode,note:note})}
- if(bill){localStorage.setItem('sk_bills',JSON.stringify(bills));}
- if(type==='credit'){
-   cpSaveLedgerEntry({name:name,phone:phone,type:'credit',amount:net,mode:emi?'EMI':'Credit',date:date,details:'['+category+'] '+(note||'Credit entry')+(adv?' • Advance '+cpMoney(adv):''),source:'manual-credit-page',billId:bill?bill.id:'',dueDate:''});
-   if(emi){var months=Math.max(1,Number(document.getElementById('skCPEmiMonths').value)||1),interest=Number(document.getElementById('skCPEmiInterest').value)||0,start=document.getElementById('skCPEmiStart').value||date;cpSaveLedgerEntry({name:name,phone:phone,type:'emi',amount:net,mode:'EMI',date:date,details:'EMI '+months+' months • '+interest+'% • '+(note||''),source:'manual-credit-page',billId:bill?bill.id:'',dueDate:start})}
- }else{
-   cpSaveLedgerEntry({name:name,phone:phone,type:'payment',amount:amount,mode:mode,date:date,details:(note||'Payment received'),source:'payment-receipt',billId:bill?bill.id:''});
- }
- if(typeof skImportFromBills==='function')skImportFromBills(true);
- if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
- if(typeof renderBillHistory==='function')renderBillHistory();
- skCPCloseAction();skCPRender();
- var c=cpGetCustomers().find(function(x){return x.key===cpKey(name,phone)});if(c)cpOpenDetail(c);
- if(typeof showToast==='function')showToast(type==='payment'?'Payment saved • receipt attached to bill':'Credit saved • balance updated');
+  const notify=(m)=>{if(typeof showToast==='function')showToast(m);else if(typeof window.showToast==='function')window.showToast(m);};
+  const type=document.getElementById('skCPActionType')?.value||'';
+  const name=(document.getElementById('skCPName')?.value||'').trim();
+  const phone=(document.getElementById('skCPPhone')?.value||'').trim();
+  const amount=Number(document.getElementById('skCPAmount')?.value)||0;
+  const advance=type==='credit'?(Number(document.getElementById('skCPAdvance')?.value)||0):0;
+  const date=document.getElementById('skCPDate')?.value||cpDate();
+  const billValue=document.getElementById('skCPBill')?.value||'';
+  const bills=cpBills();
+  if(!name){notify('Customer name is required');return false;}
+  if(amount<=0){notify('Enter a valid amount');return false;}
+  if(type==='credit' && advance>amount){notify('Advance cannot be more than amount');return false;}
+
+  let billIndex=billValue===''?null:Number(billValue);
+  let bill=billIndex!==null && Number.isInteger(billIndex)?bills[billIndex]:null;
+  const customer=cpGetCustomers().find(c=>c.key===cpKey(name,phone));
+
+  if(!bill && customer?.bills?.length){
+    const pending=customer.bills.find(x=>Number(x.b?.balance||0)>0)||customer.bills[0];
+    billIndex=pending.idx;
+    bill=bills[billIndex];
+    const select=document.getElementById('skCPBill');
+    if(select)select.value=String(billIndex);
+  }
+
+  if(!bill){notify('Select a sales bill');return false;}
+
+  const currentBalance=Math.max(0,Number(bill.balance)||0);
+  if(type==='payment' && currentBalance<=0){notify('Selected bill is already fully paid');return false;}
+
+  const note=(document.getElementById('skCPNote')?.value||'').trim();
+  const category=document.getElementById('skCPCategory')?.value||'Mobile Sale';
+  const mode=type==='payment'?(document.getElementById('skCPPaymentMode')?.value||'Cash'):'Credit';
+  const emi=document.getElementById('skCPEmiMode')?.value==='emi';
+  const actualPayment=type==='payment'?Math.min(amount,currentBalance):0;
+  const actualCredit=type==='credit'?Math.max(0,amount-advance):0;
+
+  try{
+    if(type==='payment'){
+      cpUpdateBill(billIndex,'payment',actualPayment,0,{date,mode,note});
+      cpSaveLedgerEntry({name,phone,type:'payment',amount:actualPayment,mode,date,details:note||'Payment received',source:'payment-receipt',billId:bill.id});
+    }else if(type==='credit'){
+      cpUpdateBill(billIndex,'credit',amount,advance,{date,category,note});
+      cpSaveLedgerEntry({name,phone,type:'credit',amount:actualCredit,mode:emi?'EMI':'Credit',date,details:'['+category+'] '+(note||'Credit entry')+(advance?' • Advance '+cpMoney(advance):''),source:'manual-credit-page',billId:bill.id,dueDate:''});
+      if(emi){
+        const months=Math.max(1,Number(document.getElementById('skCPEmiMonths')?.value)||1);
+        const interest=Number(document.getElementById('skCPEmiInterest')?.value)||0;
+        const start=document.getElementById('skCPEmiStart')?.value||date;
+        cpSaveLedgerEntry({name,phone,type:'emi',amount:actualCredit,mode:'EMI',date,details:'EMI '+months+' months • '+interest+'% • '+(note||''),source:'manual-credit-page',billId:bill.id,dueDate:start});
+      }
+    }else{
+      notify('Invalid entry type');return false;
+    }
+
+    localStorage.setItem('sk_bills',JSON.stringify(bills));
+    if(typeof skImportFromBills==='function')skImportFromBills(true);
+    if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
+    if(typeof renderBillHistory==='function')renderBillHistory();
+    if(typeof refreshAllUI==='function')refreshAllUI();
+    skCPCloseAction();
+    skCPRender();
+    const updated=cpGetCustomers().find(c=>c.key===cpKey(name,phone));
+    if(updated)cpOpenDetail(updated);
+    notify(type==='payment'?'Payment saved • receipt attached to selected bill':'Credit saved • balance updated');
+    return true;
+  }catch(error){
+    console.error('Credit/Payment save failed:',error);
+    notify('Save failed. Please try again.');
+    return false;
+  }
 };
 function cpOpenPage(){
  if(typeof skImportFromBills==='function')skImportFromBills(true);
