@@ -1,11 +1,10 @@
-/* SK MOBILES - Firebase Email Login + PC/Mobile Bill Sync
-   This module intentionally leaves the existing app functions intact.
-   🔒 V4.6 LOCKED: Firestore is the Bill History Single Source of Truth; page-load must never auto-upload local bills; visible delete is Soft Delete. */
+/* SK MOBILES - Firebase Email Login + PC/Mobile Realtime Sync
+   (Bills, Inventory & Job Cards Full Realtime Synchronization)
+   🔒 V5.0 LOCKED: Single Source of Truth + Instant Multi-Device Sync */
 (function(){
   'use strict';
 
   const FB_CONFIG = {
-    // 🔒 Firebase Web App config — matches the user's SK Mobiles Web console configuration exactly.
     apiKey: "AIzaSyDufQNy7l9M3ue_32u3gcH3TZUhPlrSILA",
     authDomain: "sk-mobiles-2d61d.firebaseapp.com",
     projectId: "sk-mobiles-2d61d",
@@ -24,12 +23,16 @@
   const WORKER_KEY = "sk_current_worker_id_v1";
   const SHOP_ID = "SK-MOBILES";
   const BILL_KEY = "sk_bills";
+  const REALTIME_KEYS = ["sk_inventory", "sk_job_cards"];
+
   let auth, db, unsubscribeBills = null;
+  let unsubscribeGlobal = [];
   let remoteReady = false;
   let applyingRemote = false;
   let syncingLocal = false;
   let lastKnownBillIds = new Set();
   let syncTimer = null;
+  const syncKeyTimers = {};
   let cloudAutoBackupTimer = null;
   let cloudAutoBackupRunning = false;
   let cloudRestoreApplying = false;
@@ -54,6 +57,8 @@
       if(typeof savedBills !== "undefined") savedBills = a;
       if(typeof updateBillHistoryCount === "function") updateBillHistoryCount();
       if(typeof renderBillHistory === "function") renderBillHistory();
+      if(typeof loadSavedBills === "function") loadSavedBills();
+      if(typeof displayBills === "function") displayBills();
     } catch(e){}
   }
   function normalizeBill(b){
@@ -202,7 +207,6 @@
   }
   window.removeBillFromLocalStorage=removeBillFromLocalStorage;
 
-  // 1. Safe Delete Method (Soft Delete)
   window.deleteBillSafely = async function(billId){
     if(!billId){ toast("❌ Bill ID not found"); return; }
     if(!confirm("Are you sure you want to delete this bill?")) return;
@@ -231,7 +235,6 @@
     }
   };
 
-  // Optional hard-delete utility
   window.hardDeleteBill=async function(billId){
     try{
       if(!auth?.currentUser || !db) throw new Error("Firebase Login required");
@@ -245,7 +248,6 @@
     }
   };
 
-  // 2. High-Speed Realtime Sync (ஒரே ஒரு முறை மட்டுமே இங்கு இருக்க வேண்டும்)
   async function startBillSync(){
     if(unsubscribeBills) unsubscribeBills();
     remoteReady = false;
@@ -261,14 +263,12 @@
           const data = change.doc.data() || {};
           const docId = String(change.doc.id);
 
-          // ஏதேனும் ஒரு சாதனத்தில் நீக்கப்பட்டால், உடனடியாக உள்ளூரிலும் நீக்கப்படும்
           if(data.isDeleted === true || data._deleted === true || change.type === "removed") {
             removeBillFromLocalStorage(docId);
             lastKnownBillIds.delete(docId);
           }
         });
 
-        // நீக்கப்படாத பில்களை மட்டுமே உள்ளூர் நினைவகத்தில் வைத்திருத்தல்
         const activeRemote = [];
         snapshot.docs.forEach(d => {
           const r = d.data() || {};
@@ -288,15 +288,67 @@
     });
   }
 
+  /* ================================================================
+     ⚡ REALTIME STOCK & JOB CARD SYNC
+     ================================================================ */
+  function syncKeyToCloud(key) {
+    if (!auth?.currentUser || !db || applyingRemote || !remoteReady) return;
+    try {
+      const rawData = localStorage.getItem(key);
+      if (rawData === null) return;
+      const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
+      ref.set({
+        data: rawData,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedBy: auth.currentUser.uid
+      }, { merge: true });
+    } catch(e) {
+      console.error(key + " cloud sync failed", e);
+    }
+  }
+
+  function startGlobalSync() {
+    unsubscribeGlobal.forEach(unsub => { try { unsub(); } catch(e){} });
+    unsubscribeGlobal = [];
+
+    REALTIME_KEYS.forEach(key => {
+      const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
+      const unsub = ref.onSnapshot(docSnap => {
+        if (!docSnap.exists || applyingRemote) return;
+        const cloudVal = (docSnap.data() || {}).data;
+        const localVal = localStorage.getItem(key);
+        if (cloudVal && cloudVal !== localVal) {
+          applyingRemote = true;
+          try {
+            localStorage.setItem(key, cloudVal);
+            if (typeof renderInventory === "function") renderInventory();
+            if (typeof renderJobCards === "function") renderJobCards();
+            if (typeof updateStats === "function") updateStats();
+            if (typeof loadAllData === "function") loadAllData();
+            if (typeof renderDashboard === "function") renderDashboard();
+          } finally {
+            applyingRemote = false;
+          }
+        }
+      }, err => console.error(key + " sync error", err));
+      unsubscribeGlobal.push(unsub);
+    });
+  }
+
   function hookLocalBillWrites(){
     if(window.__skFirebaseStorageHook) return;
-    window.__skFirebaseStorageHook=true;
-    const original=Storage.prototype.setItem;
-    Storage.prototype.setItem=function(key,value){
-      const result=original.apply(this,arguments);
-      if(this===localStorage && key===BILL_KEY && !applyingRemote && auth?.currentUser && remoteReady){
-        clearTimeout(syncTimer);
-        syncTimer=setTimeout(uploadBills,50);
+    window.__skFirebaseStorageHook = true;
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(key, value){
+      const result = original.apply(this, arguments);
+      if(this === localStorage && !applyingRemote && auth?.currentUser && remoteReady){
+        if(key === BILL_KEY){
+          clearTimeout(syncTimer);
+          syncTimer = setTimeout(uploadBills, 50);
+        } else if(REALTIME_KEYS.includes(key)){
+          clearTimeout(syncKeyTimers[key]);
+          syncKeyTimers[key] = setTimeout(() => syncKeyToCloud(key), 100);
+        }
       }
       return result;
     };
@@ -304,93 +356,96 @@
 
   async function handleUser(user){
     if(!user){ 
-      if(unsubscribeBills){unsubscribeBills();unsubscribeBills=null;}
-      remoteReady=false;
+      if(unsubscribeBills){ unsubscribeBills(); unsubscribeBills = null; }
+      unsubscribeGlobal.forEach(unsub => { try { unsub(); } catch(e){} });
+      unsubscribeGlobal = [];
+      remoteReady = false;
       localStorage.removeItem(ROLE_KEY);
       localStorage.removeItem(WORKER_KEY);
       gate(true);
       return;
     }
     try {
-      const role=await ensureUserProfile(user);
-      localStorage.setItem(ROLE_KEY,role);
-      if(role==="worker") localStorage.setItem(WORKER_KEY,user.uid);
+      const role = await ensureUserProfile(user);
+      localStorage.setItem(ROLE_KEY, role);
+      if(role === "worker") localStorage.setItem(WORKER_KEY, user.uid);
       else localStorage.removeItem(WORKER_KEY);
-      document.body.classList.toggle("sk-worker-mode",role==="worker");
+      document.body.classList.toggle("sk-worker-mode", role === "worker");
       gate(false);
       msg("");
-      try { if(typeof applyRestrictions==="function") applyRestrictions(); } catch(e){}
-      try { if(typeof refreshAdminButton==="function") refreshAdminButton(); } catch(e){}
+      try { if(typeof applyRestrictions === "function") applyRestrictions(); } catch(e){}
+      try { if(typeof refreshAdminButton === "function") refreshAdminButton(); } catch(e){}
       await startBillSync();
+      startGlobalSync();
       hookCloudAutoBackup();
       scheduleCloudAutoBackup("login");
-      toast("☁️ "+role.toUpperCase()+" login • PC/Mobile sync connected");
+      toast("☁️ " + role.toUpperCase() + " login • PC/Mobile sync connected");
     } catch(e) {
       console.error(e);
-      msg("❌ "+e.message);
+      msg("❌ " + e.message);
       await auth.signOut().catch(()=>{});
       gate(true);
     }
   }
 
   /* ================================================================
-     🔒 CLOUD BACKUP — SETTINGS OPTION
+     🔒 CLOUD BACKUP & RESTORE
      ================================================================ */
   const CLOUD_BACKUP_ROOT = "cloudBackups";
   const CLOUD_BACKUP_CHUNK = 650000;
 
   function cloudBackupStatus(text){
-    const el=document.getElementById("skCloudBackupStatus");
-    if(el) el.textContent=text || "";
+    const el = document.getElementById("skCloudBackupStatus");
+    if(el) el.textContent = text || "";
   }
 
   function cloudBackupAllowed(){
-    const role=String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
+    const role = String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
     return role === "admin" || role === "manager";
   }
 
   function cloudAutoBackupKeyAllowed(key){
-    const k=String(key||"");
+    const k = String(key||"");
     if(!k || cloudRestoreApplying || applyingRemote) return false;
-    if(k.indexOf("sk_current_")===0 || k==="sk_bill_draft" || k==="sk_theme" || k==="sk_theme_depth" || k.indexOf("sk_recovery_backup_")===0) return false;
+    if(k.indexOf("sk_current_") === 0 || k === "sk_bill_draft" || k === "sk_theme" || k === "sk_theme_depth" || k.indexOf("sk_recovery_backup_") === 0) return false;
     return true;
   }
   function scheduleCloudAutoBackup(key){
     if(!cloudAutoBackupKeyAllowed(key)) return;
     if(!auth?.currentUser || !db || !cloudBackupAllowed()) return;
     clearTimeout(cloudAutoBackupTimer);
-    cloudAutoBackupTimer=setTimeout(async function(){
+    cloudAutoBackupTimer = setTimeout(async function(){
       if(cloudAutoBackupRunning || cloudRestoreApplying || !auth?.currentUser || !db || !cloudBackupAllowed()) return;
-      cloudAutoBackupRunning=true;
+      cloudAutoBackupRunning = true;
       try{
         await window.skCloudBackupNow(true);
         toast("☁️ Cloud Sync ✓");
       }catch(e){ console.error("Auto cloud backup failed",e); }
-      finally{ cloudAutoBackupRunning=false; }
-    },5000);
+      finally{ cloudAutoBackupRunning = false; }
+    }, 5000);
   }
   function hookCloudAutoBackup(){
     if(window.__skCloudAutoBackupHook) return;
-    window.__skCloudAutoBackupHook=true;
-    const original=Storage.prototype.setItem;
-    const originalRemove=Storage.prototype.removeItem;
-    Storage.prototype.setItem=function(key,value){
-      const result=original.apply(this,arguments);
-      if(this===localStorage) scheduleCloudAutoBackup(key);
+    window.__skCloudAutoBackupHook = true;
+    const original = Storage.prototype.setItem;
+    const originalRemove = Storage.prototype.removeItem;
+    Storage.prototype.setItem = function(key,value){
+      const result = original.apply(this,arguments);
+      if(this === localStorage) scheduleCloudAutoBackup(key);
       return result;
     };
-    Storage.prototype.removeItem=function(key){
-      const result=originalRemove.apply(this,arguments);
-      if(this===localStorage) scheduleCloudAutoBackup(key);
+    Storage.prototype.removeItem = function(key){
+      const result = originalRemove.apply(this,arguments);
+      if(this === localStorage) scheduleCloudAutoBackup(key);
       return result;
     };
   }
 
   function cloudBackupStorage(){
-    const out={};
-    for(let i=0;i<localStorage.length;i++){
-      const key=localStorage.key(i);
-      if(key!==null) out[key]=localStorage.getItem(key);
+    const out = {};
+    for(let i=0; i<localStorage.length; i++){
+      const key = localStorage.key(i);
+      if(key !== null) out[key] = localStorage.getItem(key);
     }
     return out;
   }
@@ -400,9 +455,9 @@
   }
 
   async function cloudWriteBatches(writes){
-    for(let i=0;i<writes.length;i+=450){
-      const batch=db.batch();
-      writes.slice(i,i+450).forEach(w=>batch.set(w.ref,w.data,w.options||{}));
+    for(let i=0; i<writes.length; i+=450){
+      const batch = db.batch();
+      writes.slice(i, i+450).forEach(w => batch.set(w.ref, w.data, w.options||{}));
       await batch.commit();
     }
   }
@@ -412,42 +467,42 @@
     if(!cloudBackupAllowed()){ toast("🔒 Cloud Backup Admin / Manager-க்கு மட்டும்"); return; }
     try{
       cloudBackupStatus(silent ? "⏳ Auto cloud sync..." : "⏳ Cloud backup உருவாக்கப்படுகிறது...");
-      const data=cloudBackupStorage();
-      const backupId="backup_"+Date.now();
-      const backupRef=db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT).doc(backupId);
-      const itemRefs=db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT).doc(backupId).collection("items");
-      const writes=[];
-      let itemCount=0, chunkCount=0;
+      const data = cloudBackupStorage();
+      const backupId = "backup_" + Date.now();
+      const backupRef = db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT).doc(backupId);
+      const itemRefs = db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT).doc(backupId).collection("items");
+      const writes = [];
+      let itemCount = 0, chunkCount = 0;
       Object.keys(data).forEach(key=>{
-        const raw=String(data[key] ?? "");
-        const ref=itemRefs.doc(cloudDocId(key));
-        const chunks=[];
-        for(let i=0;i<raw.length;i+=CLOUD_BACKUP_CHUNK) chunks.push(raw.slice(i,i+CLOUD_BACKUP_CHUNK));
-        writes.push({ref,data:{key,chunkCount:chunks.length,bytes:raw.length},options:{merge:true}});
+        const raw = String(data[key] ?? "");
+        const ref = itemRefs.doc(cloudDocId(key));
+        const chunks = [];
+        for(let i=0; i<raw.length; i+=CLOUD_BACKUP_CHUNK) chunks.push(raw.slice(i, i+CLOUD_BACKUP_CHUNK));
+        writes.push({ref, data:{key, chunkCount:chunks.length, bytes:raw.length}, options:{merge:true}});
         chunks.forEach((chunk,index)=>{
-          writes.push({ref:ref.collection("chunks").doc(String(index).padStart(6,"0")),data:{value:chunk},options:{merge:true}});
+          writes.push({ref:ref.collection("chunks").doc(String(index).padStart(6,"0")), data:{value:chunk}, options:{merge:true}});
           chunkCount++;
         });
         itemCount++;
       });
       await cloudWriteBatches(writes);
       await backupRef.set({
-        app:"SK Mobiles",
-        version:1,
-        status:"complete",
-        createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-        createdAtMs:Date.now(),
-        createdBy:auth.currentUser.uid,
-        createdByEmail:auth.currentUser.email || "",
+        app: "SK Mobiles",
+        version: 1,
+        status: "complete",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdAtMs: Date.now(),
+        createdBy: auth.currentUser.uid,
+        createdByEmail: auth.currentUser.email || "",
         itemCount,
         chunkCount
-      },{merge:true});
-      cloudBackupStatus("✅ Cloud backup saved • "+itemCount+" data items");
+      }, {merge:true});
+      cloudBackupStatus("✅ Cloud backup saved • " + itemCount + " data items");
       if(!silent) toast("☁️ Cloud Backup completed");
     }catch(e){
-      console.error("Cloud backup failed",e);
+      console.error("Cloud backup failed", e);
       cloudBackupStatus("❌ Cloud backup failed");
-      toast("❌ Cloud Backup failed: "+(e.message||"Error"));
+      toast("❌ Cloud Backup failed: " + (e.message||"Error"));
     }
   };
 
@@ -456,44 +511,46 @@
     if(!cloudBackupAllowed()){ toast("🔒 Cloud Restore Admin / Manager-க்கு மட்டும்"); return; }
     if(!confirm("Latest Cloud Backup-ஐ இந்த device-ன் current local data-க்கு restore செய்யவா?")) return;
     try{
-      cloudRestoreApplying=true;
+      cloudRestoreApplying = true;
       cloudBackupStatus("⏳ Latest cloud backup தேடப்படுகிறது...");
-      const base=db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT);
-      const snaps=await base.orderBy("createdAtMs","desc").limit(20).get();
-      const latest=snaps.docs.find(d=>(d.data()||{}).status==="complete");
+      const base = db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT);
+      const snaps = await base.orderBy("createdAtMs","desc").limit(20).get();
+      const latest = snaps.docs.find(d => (d.data()||{}).status === "complete");
       if(!latest) throw new Error("Cloud backup கிடைக்கவில்லை");
-      const itemsSnap=await latest.ref.collection("items").get();
-      const restored={};
+      const itemsSnap = await latest.ref.collection("items").get();
+      const restored = {};
       for(const itemDoc of itemsSnap.docs){
-        const meta=itemDoc.data()||{};
-        const chunkSnap=await itemDoc.ref.collection("chunks").orderBy(firebase.firestore.FieldPath.documentId()).get();
+        const meta = itemDoc.data() || {};
+        const chunkSnap = await itemDoc.ref.collection("chunks").orderBy(firebase.firestore.FieldPath.documentId()).get();
         if(chunkSnap.empty){
-          restored[meta.key]=String(meta.value||"");
+          restored[meta.key] = String(meta.value||"");
         }else{
-          restored[meta.key]=chunkSnap.docs.map(d=>String((d.data()||{}).value||"")).join("");
+          restored[meta.key] = chunkSnap.docs.map(d => String((d.data()||{}).value||"")).join("");
         }
       }
-      const keys=Object.keys(restored);
+      const keys = Object.keys(restored);
       if(!keys.length) throw new Error("Cloud backup empty");
-      keys.forEach(key=>localStorage.setItem(key,restored[key]));
-      cloudBackupStatus("✅ Latest cloud backup restored • "+keys.length+" data items");
+      keys.forEach(key => localStorage.setItem(key, restored[key]));
+      cloudBackupStatus("✅ Latest cloud backup restored • " + keys.length + " data items");
       toast("☁️ Cloud Restore completed. App reload ஆகிறது...");
-      setTimeout(()=>location.reload(),700);
+      setTimeout(() => location.reload(), 700);
     }catch(e){
-      console.error("Cloud restore failed",e);
+      console.error("Cloud restore failed", e);
       cloudBackupStatus("❌ Cloud restore failed");
-      toast("❌ Cloud Restore failed: "+(e.message||"Error"));
+      toast("❌ Cloud Restore failed: " + (e.message||"Error"));
     }finally{
-      cloudRestoreApplying=false;
+      cloudRestoreApplying = false;
     }
   };
 
   function patchLogout(){
-    const old=window.skLogout;
-    window.skLogout=async function(){
+    const old = window.skLogout;
+    window.skLogout = async function(){
       try { if(unsubscribeBills) unsubscribeBills(); } catch(e){}
+      unsubscribeGlobal.forEach(unsub => { try { unsub(); } catch(e){} });
+      unsubscribeGlobal = [];
       try { await auth.signOut(); } catch(e){}
-      if(typeof old==="function"){ try{ old(); }catch(e){} }
+      if(typeof old === "function"){ try{ old(); }catch(e){} }
       gate(true);
     };
   }
@@ -513,6 +570,6 @@
     }
   }
 
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init,{once:true});
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, {once:true});
   else init();
 })();

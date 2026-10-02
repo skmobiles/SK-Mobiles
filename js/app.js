@@ -1533,7 +1533,34 @@ const MASTER_INVENTORY = [
     }
 
     function openItemEditor() {
+      const category = currentFilter === 'combo' ? 'combo' : 'glass';
+      const categoryField = document.getElementById('editItemCategory');
+      if (categoryField) categoryField.value = category;
+      const title = document.getElementById('itemModalTitle');
+      if (title) title.textContent = category === 'combo' ? '📱 Add Touch Combo Item' : '🛡️ Add Tempered Glass Item';
+      renderItemModalList(category);
       toggleModal('itemEditorModal', true);
+    }
+
+    function renderItemModalList(category) {
+      const target = document.getElementById('itemModalListContent');
+      if (!target) return;
+
+      const items = inventory.filter(item => item && item.category === category);
+      if (!items.length) {
+        target.innerHTML = '<div style="padding:10px;border:1px dashed var(--card-border);border-radius:10px;color:var(--text-muted);font-size:.72rem;">No items added yet.</div>';
+        return;
+      }
+
+      target.innerHTML = items.map(item => `
+        <div style="padding:9px 10px;border:1px solid var(--card-border);border-radius:11px;background:var(--card-bg);margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
+            <div style="font-weight:850;font-size:.78rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.title}</div>
+            <div style="font-size:.68rem;font-weight:800;color:var(--primary);white-space:nowrap;">${item.stock} pcs</div>
+          </div>
+          <div style="font-size:.66rem;color:var(--text-muted);margin-top:3px;line-height:1.35;">${item.models.join(' • ')}</div>
+        </div>
+      `).join('');
     }
 
     function handleExcelFileUpload(input) {
@@ -1594,6 +1621,7 @@ const MASTER_INVENTORY = [
 
             saveInventory();
             renderCards();
+            renderItemModalList(document.getElementById('editItemCategory')?.value || 'glass');
             toggleModal('itemEditorModal', false);
             showToast(`Successfully imported ${addedCount} items from Excel!`);
           } catch (err) {
@@ -1636,6 +1664,7 @@ const MASTER_INVENTORY = [
       inventory.unshift(newItem);
       saveInventory();
       renderCards();
+      renderItemModalList(category);
       toggleModal('itemEditorModal', false);
       showToast("New item added successfully!");
     }
@@ -1649,8 +1678,187 @@ const MASTER_INVENTORY = [
       showToast("Item deleted!");
     }
 
+    // Direct inventory long-press selection logic for Tempered Glass and Touch Combo.
+    // This is the single implementation used by both categories; no wrapper patch is used.
     let longPressTimer = null;
+    let inventorySelectionTimer = null;
+    let inventorySelectionMode = false;
+    let inventorySelectedIds = new Set();
+    let inventorySuppressClickUntil = 0;
+
+    function isInventorySelectionCategory() {
+      return currentFilter === 'glass' || currentFilter === 'combo';
+    }
+
+    function getInventoryCardId(card) {
+      if (!card) return '';
+      const onclick = card.getAttribute('onclick') || '';
+      const match = onclick.match(/openModelsPopup\(['"]([^'"]+)['"]\)/);
+      return match ? match[1] : '';
+    }
+
+    function clearInventorySelectionChecks() {
+      document.querySelectorAll('#cardsContainer .sk-tempered-check-wrap').forEach(el => el.remove());
+    }
+
+    function addInventorySelectionChecks() {
+      const container = document.getElementById('cardsContainer');
+      if (!container || !inventorySelectionMode || !isInventorySelectionCategory()) return;
+      clearInventorySelectionChecks();
+
+      container.querySelectorAll('.glass-card').forEach(card => {
+        const id = getInventoryCardId(card);
+        if (!id) return;
+
+        const wrap = document.createElement('label');
+        wrap.className = 'sk-tempered-check-wrap';
+        wrap.title = 'Select box';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'sk-tempered-check';
+        checkbox.checked = inventorySelectedIds.has(id);
+        checkbox.dataset.id = id;
+
+        checkbox.addEventListener('click', event => event.stopPropagation());
+        checkbox.addEventListener('change', event => {
+          event.stopPropagation();
+          if (checkbox.checked) inventorySelectedIds.add(id);
+          else inventorySelectedIds.delete(id);
+          card.classList.toggle('sk-tempered-selected', checkbox.checked);
+          updateInventorySelectAllLabel();
+        });
+
+        wrap.appendChild(checkbox);
+        wrap.addEventListener('click', event => event.stopPropagation());
+        card.appendChild(wrap);
+        card.classList.toggle('sk-tempered-selected', inventorySelectedIds.has(id));
+      });
+
+      updateInventorySelectAllLabel();
+    }
+
+    function updateInventorySelectAllLabel() {
+      const button = document.getElementById('skTemperedSelectAllBtn');
+      const container = document.getElementById('cardsContainer');
+      if (!button || !container) return;
+      const ids = Array.from(container.querySelectorAll('.glass-card'))
+        .map(getInventoryCardId)
+        .filter(Boolean);
+      button.textContent =
+        ids.length > 0 && ids.every(id => inventorySelectedIds.has(id))
+          ? '☑️ Deselect All'
+          : '☑️ Select All';
+    }
+
+    function placeInventorySelectionBar() {
+      const container = document.getElementById('cardsContainer');
+      const bar = document.getElementById('skTemperedSelectBar');
+      if (!container || !bar || !inventorySelectionMode || !isInventorySelectionCategory()) return;
+
+      const first = container.firstElementChild;
+      if (first && first !== bar) first.insertAdjacentElement('afterend', bar);
+      bar.classList.add('sk-active');
+      container.classList.add('sk-tempered-selection-mode');
+    }
+
+    function enterInventorySelectionMode() {
+      if (!isInventorySelectionCategory()) return;
+
+      inventorySelectionMode = true;
+      inventorySelectedIds.clear();
+      inventorySuppressClickUntil = Date.now() + 1200;
+
+      const container = document.getElementById('cardsContainer');
+      if (container) container.classList.add('sk-tempered-selection-mode');
+
+      const bar = document.getElementById('skTemperedSelectBar');
+      if (bar) bar.classList.add('sk-active');
+
+      toggleModal('longPressMenuModal', false);
+      placeInventorySelectionBar();
+      addInventorySelectionChecks();
+
+      if (navigator.vibrate) navigator.vibrate(70);
+    }
+
+    window.skCancelTemperedSelection = function() {
+      inventorySelectionMode = false;
+      inventorySelectedIds.clear();
+      clearTimeout(inventorySelectionTimer);
+      clearInventorySelectionChecks();
+
+      const container = document.getElementById('cardsContainer');
+      const bar = document.getElementById('skTemperedSelectBar');
+
+      if (container) {
+        container.classList.remove('sk-tempered-selection-mode');
+        container.querySelectorAll('.glass-card.sk-tempered-selected')
+          .forEach(card => card.classList.remove('sk-tempered-selected'));
+      }
+
+      if (bar) {
+        bar.classList.remove('sk-active');
+        if (bar.parentElement === container) document.body.appendChild(bar);
+      }
+
+      const selectAll = document.getElementById('skTemperedSelectAllBtn');
+      if (selectAll) selectAll.textContent = '☑️ Select All';
+    };
+
+    window.skToggleSelectAllTempered = function() {
+      if (!inventorySelectionMode || !isInventorySelectionCategory()) return;
+
+      const container = document.getElementById('cardsContainer');
+      if (!container) return;
+
+      const ids = Array.from(container.querySelectorAll('.glass-card'))
+        .map(getInventoryCardId)
+        .filter(Boolean);
+
+      const allSelected = ids.length > 0 && ids.every(id => inventorySelectedIds.has(id));
+      if (allSelected) inventorySelectedIds.clear();
+      else ids.forEach(id => inventorySelectedIds.add(id));
+
+      addInventorySelectionChecks();
+    };
+
+    window.skDeleteSelectedTempered = function() {
+      const ids = Array.from(inventorySelectedIds);
+      if (!ids.length) {
+        showToast('Select at least one box!');
+        return;
+      }
+
+      inventory = inventory.filter(item => !ids.includes(item.id));
+      saveInventory();
+      window.skCancelTemperedSelection();
+      renderCards();
+      showToast(ids.length === 1 ? 'Box deleted!' : `${ids.length} boxes deleted!`);
+    };
+
+    function syncInventorySelectionUI() {
+      if (!isInventorySelectionCategory()) {
+        if (inventorySelectionMode) window.skCancelTemperedSelection();
+        return;
+      }
+      if (inventorySelectionMode) {
+        placeInventorySelectionBar();
+        addInventorySelectionChecks();
+      }
+    }
+
     function handleCardTouchStart(id) {
+      clearTimeout(longPressTimer);
+      clearTimeout(inventorySelectionTimer);
+
+      if (isInventorySelectionCategory()) {
+        inventorySelectionTimer = setTimeout(() => {
+          enterInventorySelectionMode();
+        }, 600);
+        return;
+      }
+
       longPressTimer = setTimeout(() => {
         if (navigator.vibrate) navigator.vibrate(80);
         document.getElementById('selectedContextId').value = id;
@@ -1660,7 +1868,36 @@ const MASTER_INVENTORY = [
 
     function handleCardTouchEnd() {
       clearTimeout(longPressTimer);
+      clearTimeout(inventorySelectionTimer);
     }
+
+    document.addEventListener('click', function(event) {
+      const card = event.target.closest && event.target.closest('#cardsContainer .glass-card');
+
+      if (Date.now() < inventorySuppressClickUntil && card) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        inventorySuppressClickUntil = 0;
+        return;
+      }
+
+      if (!inventorySelectionMode || !card) return;
+      if (event.target.closest && event.target.closest('.sk-tempered-check-wrap')) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      const id = getInventoryCardId(card);
+      if (!id) return;
+
+      if (inventorySelectedIds.has(id)) inventorySelectedIds.delete(id);
+      else inventorySelectedIds.add(id);
+
+      const checkbox = card.querySelector('.sk-tempered-check');
+      if (checkbox) checkbox.checked = inventorySelectedIds.has(id);
+      card.classList.toggle('sk-tempered-selected', inventorySelectedIds.has(id));
+      updateInventorySelectAllLabel();
+    }, true);
 
     function triggerEditFromContext() {
       const id = document.getElementById('selectedContextId').value;
@@ -2054,6 +2291,7 @@ const MASTER_INVENTORY = [
           });
         }, 50);
 
+        syncInventorySelectionUI();
         return;
       }
 
@@ -2102,6 +2340,7 @@ const MASTER_INVENTORY = [
 
       if (filtered.length === 0) {
         container.innerHTML = cardsHTML;
+        syncInventorySelectionUI();
         return;
       }
 
@@ -2120,7 +2359,7 @@ const MASTER_INVENTORY = [
         const isTitleMatch = q !== '' && item.title.toLowerCase().includes(q);
 
         cardsHTML += `
-          <div class="glass-card ${stockClass}" onclick="openModelsPopup('${item.id}')" onmousedown="handleCardTouchStart('${item.id}')" onmouseup="handleCardTouchEnd()" onttouchstart="handleCardTouchStart('${item.id}')" onttouchend="handleCardTouchEnd()">
+          <div class="glass-card ${stockClass}" onclick="openModelsPopup('${item.id}')" onmousedown="handleCardTouchStart('${item.id}')" onmouseup="handleCardTouchEnd()" ontouchstart="handleCardTouchStart('${item.id}')" ontouchend="handleCardTouchEnd()">
             <div class="card-header">
               <div class="card-title-group">
                 <div class="card-sku-name ${isTitleMatch ? 'highlight-title' : ''}">${item.title}</div>
@@ -2158,6 +2397,7 @@ const MASTER_INVENTORY = [
         `;
       });
       container.innerHTML = cardsHTML;
+      syncInventorySelectionUI();
     }
 
     function handleSearch(input) {
@@ -2805,7 +3045,7 @@ const MASTER_INVENTORY = [
     const digits=String(j.phone||'').replace(/\\D/g,'');
     if(!digits){ if(typeof showToast==='function')showToast('Repair phone number not available'); return; }
     const name=String(j.customer||'Customer').trim();
-    const msg=`Dear Mr./Mrs. ${name}, your mobile is ready. உங்கள் மொபைல் ரெடி ஆகிவிட்டது. தயவுசெய்து கடைக்கு வந்து பெற்றுக்கொள்ளுங்கள். நன்றி - SK MOBILES.`;
+    const msg=`Dear Mr./Mrs. ${name}, your mobile is ready. Your mobile is ready. Please visit the shop and collect it. Thank you - SK MOBILES.`;
     window.open('https://wa.me/'+(digits.length===10?'91'+digits:digits)+'?text='+encodeURIComponent(msg),'_blank');
   };
 
@@ -3843,14 +4083,14 @@ const MASTER_INVENTORY = [
   /* 3) General -> Camera + Notification permission controls. */
   function notificationStatus(){
     try{
-      if(!('Notification' in window))return 'Browser notification support இல்லை';
+      if(!('Notification' in window))return 'Browser notification support is unavailable';
       return 'Status: '+(Notification.permission==='granted'?'Allowed':Notification.permission==='denied'?'Blocked':'Not allowed yet');
     }catch(e){return 'Status: Unknown';}
   }
   function cameraStatus(){
     try{
-      if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return 'Browser camera support இல்லை';
-      return 'Status: Chrome permission கேட்கும்';
+      if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return 'Browser camera support is unavailable';
+      return 'Status: Chrome will request permission';
     }catch(e){return 'Status: Unknown';}
   }
   function updatePermissionStatus(){
@@ -3862,26 +4102,26 @@ const MASTER_INVENTORY = [
 
   window.skFinalAllowNotification=function(){
     try{
-      if(!('Notification' in window)){if(typeof showToast==='function')showToast('Notification support இல்லை');return;}
+      if(!('Notification' in window)){if(typeof showToast==='function')showToast('Notification support is unavailable');return;}
       Notification.requestPermission().then(function(p){
         updatePermissionStatus();
-        if(typeof showToast==='function')showToast(p==='granted'?'🔔 Notification permission allowed':'🔔 Notification permission allow செய்யப்படவில்லை');
+        if(typeof showToast==='function')showToast(p==='granted'?'🔔 Notification permission allowed':'🔔 Notification permission was not allowed');
       });
-    }catch(e){if(typeof showToast==='function')showToast('Notification permission available இல்லை');}
+    }catch(e){if(typeof showToast==='function')showToast('Notification permission is unavailable');}
   };
 
   window.skFinalAllowCamera=function(){
     try{
-      if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){if(typeof showToast==='function')showToast('Camera permission support இல்லை');return;}
+      if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){if(typeof showToast==='function')showToast('Camera permission support is unavailable');return;}
       navigator.mediaDevices.getUserMedia({video:true}).then(function(stream){
         try{stream.getTracks().forEach(function(track){track.stop();});}catch(e){}
         updatePermissionStatus();
         if(typeof showToast==='function')showToast('📷 Camera permission allowed');
       }).catch(function(){
         updatePermissionStatus();
-        if(typeof showToast==='function')showToast('📷 Camera permission allow செய்யப்படவில்லை');
+        if(typeof showToast==='function')showToast('📷 Camera permission was not allowed');
       });
-    }catch(e){if(typeof showToast==='function')showToast('Camera permission available இல்லை');}
+    }catch(e){if(typeof showToast==='function')showToast('Camera permission is unavailable');}
   };
 
   function installGeneralPermissions(){
@@ -4073,12 +4313,6 @@ const MASTER_INVENTORY = [
     ensureDownloadUI();
   }
 
-  var oldOpen=window.openItemEditor;
-  window.openItemEditor=function(){
-    if(typeof oldOpen==='function') oldOpen.apply(this,arguments);
-    setTimeout(bootExcelBackup,120);
-  };
-
   if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded',bootExcelBackup,{once:true});
   }else{
@@ -4091,30 +4325,6 @@ const MASTER_INVENTORY = [
   if(document.body) observer.observe(document.body,{childList:true,subtree:true});
 })();
 
-(function(){
-'use strict';
-var skMode=false,skSelectedIds=new Set(),skTimer=null,skIgnoreMouseUntil=0,skSuppressClickUntil=0;
-var skOriginalStart=window.handleCardTouchStart,skOriginalEnd=window.handleCardTouchEnd;
-function isTempered(){return typeof currentFilter!=='undefined'&&currentFilter==='glass';}
-function getCardId(card){if(!card)return '';var oc=card.getAttribute('onclick')||'';var m=oc.match(/openModelsPopup\(['"]([^'"]+)['"]\)/);return m?m[1]:'';}
-function clearChecks(){document.querySelectorAll('#cardsContainer .sk-tempered-check-wrap').forEach(function(w){w.remove();});}
-function addChecks(){var c=document.getElementById('cardsContainer');if(!c||!skMode||!isTempered())return;clearChecks();c.querySelectorAll('.glass-card').forEach(function(card){var id=getCardId(card);if(!id)return;var wrap=document.createElement('label');wrap.className='sk-tempered-check-wrap';wrap.title='Select box';var cb=document.createElement('input');cb.type='checkbox';cb.className='sk-tempered-check';cb.checked=skSelectedIds.has(id);cb.dataset.id=id;cb.addEventListener('click',function(e){e.stopPropagation();});cb.addEventListener('change',function(e){e.stopPropagation();if(cb.checked)skSelectedIds.add(id);else skSelectedIds.delete(id);card.classList.toggle('sk-tempered-selected',cb.checked);var btn=document.getElementById('skTemperedSelectAllBtn');if(btn){var ids=Array.prototype.slice.call(c.querySelectorAll('.glass-card')).map(getCardId).filter(Boolean);btn.textContent=(ids.length>0&&ids.every(function(x){return skSelectedIds.has(x);}))?'☑️ Deselect All':'☑️ Select All';}});wrap.appendChild(cb);wrap.addEventListener('click',function(e){e.stopPropagation();});card.appendChild(wrap);card.classList.toggle('sk-tempered-selected',skSelectedIds.has(id));});var btn=document.getElementById('skTemperedSelectAllBtn');if(btn){var ids=Array.prototype.slice.call(c.querySelectorAll('.glass-card')).map(getCardId).filter(Boolean);btn.textContent=(ids.length>0&&ids.every(function(x){return skSelectedIds.has(x);}))?'☑️ Deselect All':'☑️ Select All';}}
-function placeBar(){var c=document.getElementById('cardsContainer'),b=document.getElementById('skTemperedSelectBar');if(!c||!b||!skMode||!isTempered())return;var first=c.firstElementChild;if(first&&first!==b)first.insertAdjacentElement('afterend',b);b.classList.add('sk-active');c.classList.add('sk-tempered-selection-mode');}
-function enterSelection(){if(!isTempered())return;skMode=true;skSelectedIds.clear();skSuppressClickUntil=Date.now()+1200;var c=document.getElementById('cardsContainer');if(c)c.classList.add('sk-tempered-selection-mode');var b=document.getElementById('skTemperedSelectBar');if(b)b.classList.add('sk-active');var m=document.getElementById('longPressMenuModal');if(m)m.classList.add('sk-disabled-by-tempered-select');placeBar();addChecks();if(navigator.vibrate)navigator.vibrate(70);}
-window.skCancelTemperedSelection=function(){skMode=false;skSelectedIds.clear();clearTimeout(skTimer);clearChecks();var c=document.getElementById('cardsContainer'),b=document.getElementById('skTemperedSelectBar');if(c){c.classList.remove('sk-tempered-selection-mode');c.querySelectorAll('.glass-card.sk-tempered-selected').forEach(function(x){x.classList.remove('sk-tempered-selected');});}if(b){b.classList.remove('sk-active');if(b.parentElement===c)document.body.appendChild(b);}var sb=document.getElementById('skTemperedSelectAllBtn');if(sb)sb.textContent='☑️ Select All';var m=document.getElementById('longPressMenuModal');if(m)m.classList.remove('sk-disabled-by-tempered-select');};
-window.skToggleSelectAllTempered=function(){if(!skMode||!isTempered())return;var c=document.getElementById('cardsContainer');if(!c)return;var ids=Array.prototype.slice.call(c.querySelectorAll('.glass-card')).map(getCardId).filter(Boolean);var allSelected=ids.length>0&&ids.every(function(id){return skSelectedIds.has(id);});if(allSelected){skSelectedIds.clear();}else{ids.forEach(function(id){skSelectedIds.add(id);});}addChecks();};
-window.skDeleteSelectedTempered=function(){var ids=Array.from(skSelectedIds);if(!ids.length){if(typeof showToast==='function')showToast('Select at least one box!');return;}inventory=inventory.filter(function(item){return !ids.includes(item.id);});saveInventory();window.skCancelTemperedSelection();renderCards();if(typeof showToast==='function')showToast(ids.length===1?'Box deleted!':ids.length+' boxes deleted!');};
-window.handleCardTouchStart=function(id){clearTimeout(skTimer);if(!isTempered()){if(typeof skOriginalStart==='function')skOriginalStart.call(this,id);return;}skTimer=setTimeout(enterSelection,600);};
-window.handleCardTouchEnd=function(){clearTimeout(skTimer);if(!isTempered()&&typeof skOriginalEnd==='function')skOriginalEnd.call(this);};
-document.addEventListener('touchstart',function(e){if(!isTempered()||skMode)return;var card=e.target.closest&&e.target.closest('#cardsContainer .glass-card');if(!card||(e.target.closest&&e.target.closest('button,input,textarea,select,a')))return;var id=getCardId(card);if(!id)return;skIgnoreMouseUntil=Date.now()+1200;clearTimeout(skTimer);skTimer=setTimeout(enterSelection,600);},{passive:true});
-document.addEventListener('touchend',function(){clearTimeout(skTimer);},{passive:true});
-document.addEventListener('touchcancel',function(){clearTimeout(skTimer);},{passive:true});
-document.addEventListener('pointerdown',function(e){if(!isTempered()||skMode)return;var card=e.target.closest&&e.target.closest('#cardsContainer .glass-card');if(!card||(e.target.closest&&e.target.closest('button,input,textarea,select,a')))return;var id=getCardId(card);if(!id)return;clearTimeout(skTimer);skTimer=setTimeout(enterSelection,600);},{passive:true});
-document.addEventListener('pointerup',function(){clearTimeout(skTimer);},{passive:true});
-document.addEventListener('pointercancel',function(){clearTimeout(skTimer);},{passive:true});
-document.addEventListener('click',function(e){if(Date.now()<skSuppressClickUntil){var card=e.target.closest&&e.target.closest('#cardsContainer .glass-card');if(card){e.preventDefault();e.stopImmediatePropagation();skSuppressClickUntil=0;return;}}if(!skMode)return;var card=e.target.closest&&e.target.closest('#cardsContainer .glass-card');if(!card)return;if(e.target.closest&&e.target.closest('.sk-tempered-check-wrap'))return;e.preventDefault();e.stopImmediatePropagation();var id=getCardId(card);if(!id)return;if(skSelectedIds.has(id))skSelectedIds.delete(id);else skSelectedIds.add(id);var cb=card.querySelector('.sk-tempered-check');if(cb)cb.checked=skSelectedIds.has(id);card.classList.toggle('sk-tempered-selected',skSelectedIds.has(id));},true);
-var previousRenderCards=window.renderCards;if(typeof previousRenderCards==='function'){window.renderCards=function(){previousRenderCards.apply(this,arguments);if(skMode&&isTempered())setTimeout(function(){placeBar();addChecks();},0);else if(skMode&&!isTempered())window.skCancelTemperedSelection();};}
-})();
 
 (function(){
   'use strict';
@@ -4140,23 +4350,8 @@ var previousRenderCards=window.renderCards;if(typeof previousRenderCards==='func
     }catch(e){}
   }
 
-  function skEnsureSelectionCleanup(){
-    if(typeof window.skCancelTemperedSelection !== 'function') return;
-    var originalCancel=window.skCancelTemperedSelection;
-    if(originalCancel.__skFixed) return;
-    var fixed=function(){
-      try{
-        document.querySelectorAll('#cardsContainer .sk-tempered-check-wrap').forEach(function(el){el.remove();});
-      }catch(e){}
-      return originalCancel.apply(this,arguments);
-    };
-    fixed.__skFixed=true;
-    window.skCancelTemperedSelection=fixed;
-  }
-
   function skBootFix(){
     skFixShopBrand();
-    skEnsureSelectionCleanup();
   }
 
   if(document.readyState === 'loading'){
@@ -4167,7 +4362,6 @@ var previousRenderCards=window.renderCards;if(typeof previousRenderCards==='func
 
   window.addEventListener('load',function(){
     skFixShopBrand();
-    skEnsureSelectionCleanup();
   },{once:true});
 })();
 
@@ -5362,7 +5556,7 @@ window.skCPDeleteCustomer=async function(k){
  var c=cpGetCustomers().find(function(x){return x.key===k});
  if(!c)return;
  var bills=c.bills.map(function(x){return x.b&&x.b.id?String(x.b.id):''}).filter(Boolean);
- var msg='இந்த customer-ஐ நிரந்தரமாக delete செய்யவா?\n\nCustomer: '+c.name+'\nBills: '+bills.length+'\nLedger entries: '+c.entries.length+'\n\nஇந்த action-க்கு Restore option இருக்காது.';
+ var msg='Delete this customer permanently?\n\nCustomer: '+c.name+'\nBills: '+bills.length+'\nLedger entries: '+c.entries.length+'\n\nThis action cannot be restored.';
  if(!confirm(msg))return;
  try{
    // Remove bill records locally first so the customer disappears immediately.

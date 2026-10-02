@@ -211,6 +211,10 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 <button class="submit-btn" style="margin-top:6px;" type="submit">💾 Save Item to Inventory</button>
 </form>
+<div id="itemModalList" style="margin-top:14px; border-top:1px solid var(--card-border); padding-top:12px;">
+  <div style="font-size:.75rem; font-weight:900; color:var(--text); margin-bottom:8px;">Current Items</div>
+  <div id="itemModalListContent"></div>
+</div>
 </div>
 </div>
 <div class="modal-overlay" id="longPressMenuModal" style="z-index: 10050 !important;">
@@ -835,7 +839,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="modal-title"><span>📥 Google Keep / Notes Import</span><button class="modal-close-btn" onclick="skCloseKeepImport()">✕</button></div>
 <div class="sk-v43-keep-box">
 <div class="sk-v43-keep-title">Google Keep data → Customer Credit</div>
-<div class="sk-v43-keep-help">Google Keep-ல் இருக்கும் customer notes-ஐ export/download செய்து இங்கே select செய்தால், customer name, credit items, balance, paid amount/date போன்ற readable details-ஐ ledger-ஆக மாற்றும். Original note-ஐ delete/modify செய்யாது.</div>
+<div class="sk-v43-keep-help">If you select customer notes from Google Keep after exporting/downloading them here, customer name, credit items, balance, and paid amount/date will be converted into readable ledger details. The original note will not be deleted or modified.</div>
 <div class="sk-v43-keep-actions">
 <button onclick="document.getElementById('skKeepFiles').click()">📂 Select Keep Files</button>
 <button onclick="skOpenKeepHelp()">ℹ️ Format Help</button>
@@ -922,5 +926,5 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="js/app.js"></script>
-<script src="js/firebase-sync.js?v=2.1"></script>
+<script src="js/firebase-sync.js?v=5.0"></script>
 </html>
