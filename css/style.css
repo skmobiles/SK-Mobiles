@@ -777,3 +777,49 @@ body.sk-worker-mode #settingsModal .sk-worker-blocked{pointer-events:none!import
 /* 🔒 SK V4.10 TARGETED FIX: active popups must always remain in front. */
 .modal-overlay.active{z-index:2147483000 !important;}
 .modal-overlay.active .modal-sheet{position:relative;z-index:2147483001 !important;}
+
+/* V4.13 direct category navigation: the old sliding category strip is removed.
+   The selected bottom category is shown as a compact status above its list. */
+.category-scroll{display:none!important;}
+.active-category-notice{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  width:100%;
+  box-sizing:border-box;
+  min-height:30px;
+  padding:6px 10px;
+  margin-bottom:2px;
+  background:var(--pill-bg);
+  border:1px solid var(--card-border);
+  border-radius:12px;
+  color:var(--text);
+  font-size:.72rem;
+  font-weight:850;
+}
+.mobile-type-tabs{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  margin:8px 0 2px;
+}
+.mobile-type-btn{
+  min-height:34px;
+  padding:7px 6px;
+  border:1px solid var(--card-border);
+  border-radius:10px;
+  background:var(--pill-bg);
+  color:var(--text-muted);
+  font-size:.70rem;
+  font-weight:850;
+  cursor:pointer;
+}
+.mobile-type-btn.active{
+  background:var(--primary);
+  border-color:var(--primary);
+  color:#fff;
+  box-shadow:0 4px 12px rgba(37,99,235,.18);
+}
+@media (max-width:360px){
+  .mobile-type-btn{font-size:.62rem;padding-left:3px;padding-right:3px;}
+}

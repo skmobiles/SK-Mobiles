@@ -1114,11 +1114,50 @@ const MASTER_INVENTORY = [
     ];
 
     let currentPayMode = 'Cash';
+    let currentMobileType = 'New Mobile';
     let inventory = [];
     let currentFilter = 'home';
     let currentSearchTerm = '';
     let ordersList = [];
     let savedBills = [];
+
+    const MOBILE_TERMS = {
+      'New Mobile': [
+        '1. New mobile is sold with the package and accessories selected on this bill.',
+        '2. Customer must verify model, IMEI, accessories and device condition before accepting delivery.',
+        '3. Manufacturer warranty, if applicable, is subject to the manufacturer warranty terms.',
+        '4. Physical or liquid damage is not covered unless specifically covered by the applicable warranty.'
+      ].join('\n'),
+      'Keypad Mobile': [
+        '1. Keypad mobile is sold with the package and accessories selected on this bill.',
+        '2. Customer must verify model, IMEI, accessories and device condition before accepting delivery.',
+        '3. Manufacturer/service warranty, if applicable, is subject to the stated warranty terms.',
+        '4. Physical or liquid damage is not covered unless specifically covered by the applicable warranty.'
+      ].join('\n'),
+      'Used Mobile': [
+        '1. Used mobile is sold in the condition inspected and accepted by the customer at the time of delivery.',
+        '2. Customer is advised to verify display, touch, camera, speaker, microphone, charging, network, IMEI and accessories before accepting delivery.',
+        '3. Return or exchange is not applicable after delivery unless specifically agreed by the shop in writing.',
+        '4. Any warranty for a used mobile applies only if it is specifically stated on this bill.'
+      ].join('\n')
+    };
+
+    function getMobileTerms(type) {
+      return MOBILE_TERMS[type] || MOBILE_TERMS['New Mobile'];
+    }
+
+    function selectMobileType(type) {
+      currentMobileType = ['New Mobile','Used Mobile','Keypad Mobile'].includes(type) ? type : 'New Mobile';
+      document.querySelectorAll('.mobile-type-btn').forEach(btn => btn.classList.remove('active'));
+      const id = currentMobileType === 'New Mobile' ? 'mobileTypeNew' : currentMobileType === 'Used Mobile' ? 'mobileTypeUsed' : 'mobileTypeKeypad';
+      document.getElementById(id)?.classList.add('active');
+      const typeEl = document.getElementById('pvMobileType');
+      if (typeEl) typeEl.innerText = currentMobileType;
+      const termsEl = document.getElementById('pvTerms');
+      if (termsEl) termsEl.innerText = getMobileTerms(currentMobileType);
+      saveDraft();
+      updateBillPreview();
+    }
 
     /* ================================================================
        🔒 LOCKED BILL NUMBER FORMAT — DO NOT CHANGE THIS BLOCK.
@@ -1349,6 +1388,7 @@ const MASTER_INVENTORY = [
       document.getElementById('billAdvance').value = "0";
       document.getElementById('billEmiMonths').value = "3";
       document.getElementById('billEmiInterest').value = "0";
+      selectMobileType('New Mobile');
       selectPayMode('Cash');
       clearDraft();
       updateBillPreview();
@@ -1364,7 +1404,7 @@ const MASTER_INVENTORY = [
         const billDate = `${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
         const newEntry = {
           id: `SK-B-${Date.now().toString().slice(-6)}`,
-          billNo: skNextBillNo(billDate), date: billDate, custName,
+          billNo: skNextBillNo(billDate), date: billDate, mobileType: currentMobileType, custName,
           phone: document.getElementById('billCustPhone').value || '9876543210',
           address: document.getElementById('billCustAddress').value || '',
           brand: document.getElementById('billBrand').value || '', model,
@@ -1939,6 +1979,7 @@ const MASTER_INVENTORY = [
         imei1: document.getElementById('billImei1').value,
         imei2: document.getElementById('billImei2').value,
         payMode: currentPayMode,
+        mobileType: currentMobileType,
         price: document.getElementById('billTotalPrice').value,
         advance: document.getElementById('billAdvance').value,
         emiMonths: document.getElementById('billEmiMonths').value,
@@ -1973,6 +2014,7 @@ const MASTER_INVENTORY = [
         document.getElementById('billEmiStartDate').dataset.autoDefault = d.emiStartDate ? '0' : '1';
         document.getElementById('billCreditDate').value = d.creditDate || '';
 
+        if (d.mobileType) selectMobileType(d.mobileType);
         if (d.payMode) selectPayMode(d.payMode);
         calculateBillMath();
       } catch (e) {}
@@ -2037,32 +2079,6 @@ const MASTER_INVENTORY = [
       container.innerHTML = item.models.map(m => `<span class="model-chip" style="font-size:0.75rem; padding:5px 10px;">${m}</span>`).join('');
       
       toggleModal('modelsModal', true);
-    }
-
-    function selectPillCenter(btn) {
-      const scrollContainer = document.getElementById('catScroll');
-      if (scrollContainer && btn) {
-        scrollContainer.scrollTo({
-          left: btn.offsetLeft - scrollContainer.offsetWidth / 2 + btn.offsetWidth / 2,
-          behavior: 'smooth'
-        });
-      }
-    }
-
-    function selectGlassPillInScroll() {
-      const scrollContainer = document.getElementById('catScroll');
-      if (scrollContainer) {
-        const glassPill = Array.from(scrollContainer.querySelectorAll('.cat-pill')).find(p => p.getAttribute('onclick')?.includes("'glass'"));
-        if (glassPill) selectPillCenter(glassPill);
-      }
-    }
-
-    function selectComboPillInScroll() {
-      const scrollContainer = document.getElementById('catScroll');
-      if (scrollContainer) {
-        const comboPill = Array.from(scrollContainer.querySelectorAll('.cat-pill')).find(p => p.getAttribute('onclick')?.includes("'combo'"));
-        if (comboPill) selectPillCenter(comboPill);
-      }
     }
 
     /* UNIVERSAL DRAG AND DROP HANDLERS FOR ALL BOXES & CARDS */
@@ -2212,7 +2228,7 @@ const MASTER_INVENTORY = [
 
         const actionCardsMap = {
           'card-glass': `
-            <div class="draggable-card" data-card-id="card-glass" draggable="true" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='glass'; renderCards(); selectGlassPillInScroll(); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div class="draggable-card" data-card-id="card-glass" draggable="true" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='glass'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
               <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
                 <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(37,99,235,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">🛡️</div>
                 <div style="min-width: 0;">
@@ -2224,7 +2240,7 @@ const MASTER_INVENTORY = [
             </div>
           `,
           'card-display': `
-            <div class="draggable-card" data-card-id="card-display" draggable="true" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='combo'; renderCards(); selectComboPillInScroll(); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div class="draggable-card" data-card-id="card-display" draggable="true" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='combo'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
               <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
                 <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(234,88,12,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">📱</div>
                 <div style="min-width: 0;">
@@ -2236,7 +2252,7 @@ const MASTER_INVENTORY = [
             </div>
           `,
           'card-accessories': `
-            <div class="draggable-card" data-card-id="card-accessories" draggable="true" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='combo'; renderCards(); selectComboPillInScroll(); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div class="draggable-card" data-card-id="card-accessories" draggable="true" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='combo'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
               <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
                 <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(16,185,129,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">⚡</div>
                 <div style="min-width: 0;">
@@ -2316,22 +2332,20 @@ const MASTER_INVENTORY = [
       else if (currentFilter === 'combo') document.getElementById('navCombo')?.classList.add('active');
 
       if (searchRow) searchRow.style.display = 'flex';
-      if (catScroll) {
-        catScroll.style.display = 'flex';
-        Array.from(catScroll.querySelectorAll('.cat-pill')).forEach(p => {
-          const fn = p.getAttribute('onclick') || '';
-          if (fn.includes(`'${currentFilter}'`)) {
-            p.classList.add('active');
-            selectPillCenter(p);
-          } else {
-            p.classList.remove('active');
-          }
-        });
-      }
+      if (catScroll) catScroll.style.display = 'none';
+
+      const selectedCategoryLabel = currentFilter === 'glass' ? '🛡️ Tempered Glass' :
+        currentFilter === 'combo' ? '📱 Display' :
+        currentFilter === 'low' ? '⚠️ Low Stock' :
+        currentFilter === '11d' ? '🔥 11D Full Glue' :
+        currentFilter === 'privacy' ? '👁️ Privacy Glass' :
+        currentFilter === 'matte' ? '✨ Matte Glass' :
+        currentFilter === 'uv' ? '💧 UV Curved' :
+        currentFilter === 'camera' ? '📷 Camera Glass' : '📦 Inventory';
 
       let cardsHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--model-bg); padding:6px 10px; border-radius:12px; border:1px solid var(--card-border); margin-bottom:2px;">
-          <span style="font-size:0.72rem; font-weight:800; color:var(--text-muted);">📦 Total Items: <span id="totalItemsCountBadge">${inventory.length}</span></span>
+        <div class="active-category-notice" role="status">
+          <span>${selectedCategoryLabel}</span>
         </div>
       `;
 
@@ -2392,11 +2406,6 @@ const MASTER_INVENTORY = [
 
             <div class="stock-control-panel" onclick="event.stopPropagation()">
               ${stockLabel}
-              <div class="stock-counter-group">
-                <button class="stock-btn" onclick="updateStock('${item.id}', -1)">-</button>
-                <input type="number" class="stock-number-input" value="${item.stock}" onfocus="handleInputClear(this)" onchange="setDirectStock('${item.id}', this.value)" min="0">
-                <button class="stock-btn" onclick="updateStock('${item.id}', 1)">+</button>
-              </div>
             </div>
 
             <div class="models-section" onclick="event.stopPropagation()">
@@ -2434,21 +2443,14 @@ const MASTER_INVENTORY = [
       renderCards();
     }
 
-    function filterCategory(cat, btn) {
+    function filterCategory(cat) {
       currentFilter = cat;
-      document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
-      if (btn) {
-        btn.classList.add('active');
-        selectPillCenter(btn);
-      }
-
       document.querySelectorAll('.bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
-      if (cat === 'all') document.getElementById('navHome')?.classList.add('active');
+      if (cat === 'all' || cat === 'home') document.getElementById('navHome')?.classList.add('active');
       if (cat === 'glass') document.getElementById('navGlass')?.classList.add('active');
       if (cat === 'combo') document.getElementById('navCombo')?.classList.add('active');
-
       renderCards();
-      if(typeof window.skAppHistoryFilter==='function')window.skAppHistoryFilter(cat);
+      if (typeof window.skAppHistoryFilter === 'function') window.skAppHistoryFilter(cat);
     }
 
     function updateStock(id, delta) {
@@ -2705,8 +2707,10 @@ const MASTER_INVENTORY = [
         pvCreditBox.style.display = 'none';
       }
 
-      const terms = localStorage.getItem('sk_terms') || document.getElementById('cfgTermsConditions').value;
-      document.getElementById('pvTerms').innerText = terms;
+      const mobileTypeEl = document.getElementById('pvMobileType');
+      if (mobileTypeEl) mobileTypeEl.innerText = currentMobileType;
+      const termsEl = document.getElementById('pvTerms');
+      if (termsEl) termsEl.innerText = getMobileTerms(currentMobileType);
     }
 
     function saveUsedBill() {
@@ -2720,7 +2724,7 @@ const MASTER_INVENTORY = [
         const set = (key,id) => { bill[key] = document.getElementById(id)?.value || ''; };
         set('custName','billCustName'); set('phone','billCustPhone'); set('address','billCustAddress'); set('brand','billBrand'); set('model','billModel');
         set('ram','billRam'); set('storage','billStorage'); set('color','billColor'); set('imei1','billImei1'); set('imei2','billImei2'); set('package','billPackage');
-        bill.payMode=currentPayMode; bill.price=price; bill.advance=advance;
+        bill.mobileType=currentMobileType; bill.payMode=currentPayMode; bill.price=price; bill.advance=advance;
         bill.emiMonths=parseInt(document.getElementById('billEmiMonths').value,10)||0; bill.emiInterest=parseFloat(document.getElementById('billEmiInterest').value)||0;
         bill.emiStartDate=document.getElementById('billEmiStartDate').value||''; bill.creditDueDate=document.getElementById('billCreditDate').value||'';
         bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-advance):0;
@@ -2800,6 +2804,7 @@ const MASTER_INVENTORY = [
       toggleModal('billingModal',true);
       switchBillTab('new');
       const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v==null?'':v;};
+      selectMobileType(b.mobileType || 'New Mobile');
       set('billCustName',b.custName);set('billCustPhone',b.phone);set('billCustAddress',b.address);set('billBrand',b.brand);set('billModel',b.model);set('billRam',b.ram);set('billStorage',b.storage);set('billColor',b.color);set('billImei1',b.imei1);set('billImei2',b.imei2);set('billPackage',b.package);set('billTotalPrice',b.price);set('billAdvance',b.advance||0);set('billEmiMonths',b.emiMonths||3);set('billEmiInterest',b.emiInterest||0);set('billEmiStartDate',b.emiStartDate||'');set('billCreditDate',b.creditDueDate||'');
       currentPayMode=b.payMode||'Cash';
       if(typeof selectPayMode==='function')selectPayMode(currentPayMode);
@@ -2811,7 +2816,7 @@ const MASTER_INVENTORY = [
     function viewSavedBill(idx) {
       const b=savedBills[idx]; if(!b)return; const container=document.getElementById('viewBillContent');
       const displayNo=b.billNo||skBillNumberFromDateSeq(b.date,skExistingBillSeq(b)||(idx+1),true); const safeId=String(b.id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      container.innerHTML=`<div style="background:#fff;color:#1e293b;padding:20px;border-radius:18px;font-family:'Plus Jakarta Sans',sans-serif;"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid #edf0f6;padding-bottom:12px;margin-bottom:12px;gap:8px;"><button type="button" onclick="closeViewedBillAndReturn()" style="border:1px solid #e2e8f0;background:#f8fafc;border-radius:10px;padding:7px 10px;font-weight:800;cursor:pointer;">← Back</button><div style="font-weight:950;color:#d9166f;font-size:1.3rem;">SK MOBILES</div><div style="text-align:right;font-size:.75rem;"><strong>Bill No:</strong> ${displayNo}<br><strong>Date:</strong> ${skBillUiDate(b.date)}</div></div><div style="font-size:.75rem;background:#f8fafc;padding:10px;border-radius:12px;margin-bottom:12px;border:1px solid #e2e8f0;"><div><strong>Customer:</strong> ${b.custName}</div><div><strong>Phone:</strong> ${b.phone}</div><div><strong>Address:</strong> ${b.address||'---'}</div></div><table style="width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:12px;"><tr style="background:#f1f5f9;border-bottom:1px solid #cbd5e1;"><th style="padding:7px;text-align:left;">Description</th><th style="padding:7px;text-align:right;">Details</th></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">Device Model</td><td style="padding:7px;text-align:right;font-weight:800;">${b.brand||''} ${b.model}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">RAM / Storage / Colour</td><td style="padding:7px;text-align:right;">${[b.ram,b.storage,b.color].filter(Boolean).join(' / ')||'---'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">IMEI 1</td><td style="padding:7px;text-align:right;font-family:monospace;font-weight:700;">${b.imei1||'---'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">Payment Mode</td><td style="padding:7px;text-align:right;font-weight:800;">${b.payMode||'Cash'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;background:#f8fafc;"><td style="padding:7px;font-weight:700;">Total Amount</td><td style="padding:7px;text-align:right;font-weight:900;color:#2563eb;">₹ ${(Number(b.price)||0).toLocaleString('en-IN')}</td></tr>${b.payMode==='EMI'||b.payMode==='Credit'?`<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#16a34a;font-weight:700;">Down Payment</td><td style="padding:7px;text-align:right;color:#16a34a;font-weight:700;">₹ ${(Number(b.advance)||0).toLocaleString('en-IN')}</td></tr><tr style="border-bottom:2px solid #0f172a;"><td style="padding:7px;color:#dc2626;font-weight:700;">Balance Due</td><td style="padding:7px;text-align:right;color:#dc2626;font-weight:900;">₹ ${(Number(b.balance)||0).toLocaleString('en-IN')}</td></tr>`:''}</table>${b.emiHtml?`<div style="font-size:.72rem;font-weight:800;color:#92400e;margin-bottom:6px;">EMI Schedule Details:</div><div style="border:1px solid #fde047;border-radius:10px;overflow:hidden;font-size:.68rem;margin-bottom:12px;"><table style="width:100%;border-collapse:collapse;">${b.emiHtml}</table></div>`:''}${Array.isArray(b.paymentReceipts)&&b.paymentReceipts.length?`<div style="margin-top:10px;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px;"><div style="font-size:.72rem;font-weight:900;color:#166534;margin-bottom:6px;">🧾 PAYMENT RECEIPTS ATTACHED</div>${b.paymentReceipts.map(r=>`<div style="font-size:.68rem;padding:4px 0;border-bottom:1px solid #dcfce7;"><b>${r.id||''}</b> • ₹ ${(Number(r.amount)||0).toLocaleString('en-IN')} • ${r.mode||''} • ${skBillUiDate(r.date||'')}${r.note?' • '+r.note:''}</div>`).join('')}</div>`:''}<div style="display:flex;gap:8px;margin-top:14px;"><button onclick="toggleModal('viewBillModal',false);setTimeout(()=>editSavedBill(savedBills.findIndex(x=>x&&x.id==='${safeId}')),0);" class="submit-btn" style="flex:1;padding:8px;font-size:.75rem;">✏️ Edit Bill</button><button onclick="downloadInvoicePDF()" class="submit-btn" style="flex:1;padding:8px;font-size:.75rem;">📄 Download PDF</button><button onclick="sendBillToWhatsAppAsPDF()" class="submit-btn whatsapp-green" style="flex:1;padding:8px;font-size:.75rem;">💬 WhatsApp PDF</button></div></div>`;
+      container.innerHTML=`<div style="background:#fff;color:#1e293b;padding:20px;border-radius:18px;font-family:'Plus Jakarta Sans',sans-serif;"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid #edf0f6;padding-bottom:12px;margin-bottom:12px;gap:8px;"><button type="button" onclick="closeViewedBillAndReturn()" style="border:1px solid #e2e8f0;background:#f8fafc;border-radius:10px;padding:7px 10px;font-weight:800;cursor:pointer;">← Back</button><div style="font-weight:950;color:#d9166f;font-size:1.3rem;">SK MOBILES</div><div style="text-align:right;font-size:.75rem;"><strong>Bill No:</strong> ${displayNo}<br><strong>Date:</strong> ${skBillUiDate(b.date)}</div></div><div style="font-size:.75rem;background:#f8fafc;padding:10px;border-radius:12px;margin-bottom:12px;border:1px solid #e2e8f0;"><div><strong>Customer:</strong> ${b.custName}</div><div><strong>Phone:</strong> ${b.phone}</div><div><strong>Address:</strong> ${b.address||'---'}</div></div><table style="width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:12px;"><tr style="background:#f1f5f9;border-bottom:1px solid #cbd5e1;"><th style="padding:7px;text-align:left;">Description</th><th style="padding:7px;text-align:right;">Details</th></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">Device Model</td><td style="padding:7px;text-align:right;font-weight:800;">${b.brand||''} ${b.model}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">Mobile Type</td><td style="padding:7px;text-align:right;font-weight:800;">${b.mobileType||'New Mobile'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">RAM / Storage / Colour</td><td style="padding:7px;text-align:right;">${[b.ram,b.storage,b.color].filter(Boolean).join(' / ')||'---'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">IMEI 1</td><td style="padding:7px;text-align:right;font-family:monospace;font-weight:700;">${b.imei1||'---'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">Payment Mode</td><td style="padding:7px;text-align:right;font-weight:800;">${b.payMode||'Cash'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;background:#f8fafc;"><td style="padding:7px;font-weight:700;">Total Amount</td><td style="padding:7px;text-align:right;font-weight:900;color:#2563eb;">₹ ${(Number(b.price)||0).toLocaleString('en-IN')}</td></tr>${b.payMode==='EMI'||b.payMode==='Credit'?`<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#16a34a;font-weight:700;">Down Payment</td><td style="padding:7px;text-align:right;color:#16a34a;font-weight:700;">₹ ${(Number(b.advance)||0).toLocaleString('en-IN')}</td></tr><tr style="border-bottom:2px solid #0f172a;"><td style="padding:7px;color:#dc2626;font-weight:700;">Balance Due</td><td style="padding:7px;text-align:right;color:#dc2626;font-weight:900;">₹ ${(Number(b.balance)||0).toLocaleString('en-IN')}</td></tr>`:''}</table><div style="font-size:.65rem;color:#64748b;line-height:1.4;border-top:1px dashed #cbd5e1;padding-top:8px;margin-top:8px;"><strong>Terms & Conditions:</strong><div style="white-space:pre-line;margin-top:3px;">${getMobileTerms(b.mobileType||'New Mobile')}</div></div>${b.emiHtml?`<div style="font-size:.72rem;font-weight:800;color:#92400e;margin-bottom:6px;">EMI Schedule Details:</div><div style="border:1px solid #fde047;border-radius:10px;overflow:hidden;font-size:.68rem;margin-bottom:12px;"><table style="width:100%;border-collapse:collapse;">${b.emiHtml}</table></div>`:''}${Array.isArray(b.paymentReceipts)&&b.paymentReceipts.length?`<div style="margin-top:10px;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px;"><div style="font-size:.72rem;font-weight:900;color:#166534;margin-bottom:6px;">🧾 PAYMENT RECEIPTS ATTACHED</div>${b.paymentReceipts.map(r=>`<div style="font-size:.68rem;padding:4px 0;border-bottom:1px solid #dcfce7;"><b>${r.id||''}</b> • ₹ ${(Number(r.amount)||0).toLocaleString('en-IN')} • ${r.mode||''} • ${skBillUiDate(r.date||'')}${r.note?' • '+r.note:''}</div>`).join('')}</div>`:''}<div style="display:flex;gap:8px;margin-top:14px;"><button onclick="toggleModal('viewBillModal',false);setTimeout(()=>editSavedBill(savedBills.findIndex(x=>x&&x.id==='${safeId}')),0);" class="submit-btn" style="flex:1;padding:8px;font-size:.75rem;">✏️ Edit Bill</button><button onclick="downloadInvoicePDF()" class="submit-btn" style="flex:1;padding:8px;font-size:.75rem;">📄 Download PDF</button><button onclick="sendBillToWhatsAppAsPDF()" class="submit-btn whatsapp-green" style="flex:1;padding:8px;font-size:.75rem;">💬 WhatsApp PDF</button></div></div>`;
       toggleModal('viewBillModal',true);
     }
 
