@@ -41,7 +41,7 @@
 <button class="menu-drawer-btn logout" onclick="showToast('Logged out successfully'); toggleLeftDrawer(false);">🔒 Logout</button>
 </div>
 <div style="margin-top:auto; font-size:0.68rem; color:var(--text-muted); text-align:center; border-top:1px solid var(--card-border); padding-top:8px;">
-     SK Mobiles Master • V4.13
+     SK Mobiles Master • V4.14
      <br/>
      Dharmapuri, Tamil Nadu
     </div>
@@ -121,10 +121,6 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <button class="submit-btn" onclick="document.getElementById('logoFileInput').click()" style="flex:1; padding:8px; font-size:0.76rem;">📁 Choose Image</button>
 <button class="submit-btn" onclick="resetShopLogo()" style="flex:1; padding:8px; font-size:0.76rem; background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text);">↺ Reset Default</button>
 </div>
-</div>
-<div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">⚠️ LOW STOCK LIMIT</div>
-<div style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
-<span style="font-size:0.76rem; font-weight:700;">Low stock alert limit:</span> <input class="form-input" id="cfgLowStockThreshold" max="20" min="1" onchange="saveLowStockThreshold(this.value)" style="width:60px; text-align:center;" type="number" value="3"/>
 </div>
 <div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">💾 DATA BACKUP &amp; RESTORE</div>
 <div style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
@@ -550,7 +546,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <img alt="SK MOBILES" class="sk-logo-img" id="appHeaderLogo" onclick="document.getElementById('logoFileInput').click()" src="Logo.png" title="Click to change logo"/>
 <div>
 <div class="app-name" id="appHeaderTitle">SK MOBILES</div>
-<div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.13</span></div>
+<div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V4.14</span></div>
 </div>
 </div>
 </div>
@@ -723,9 +719,9 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="modal-sheet" style="max-width:430px;max-height:86vh;">
 <div class="modal-title"><span>👑 Admin Control</span><button class="modal-close-btn" onclick="skCloseAdminPanel()">✕</button></div>
 <div class="sk-admin-box"><div class="sk-admin-title">CURRENT LOGIN</div><div id="skAdminCurrentRole" style="font-size:.88rem;font-weight:900;color:var(--text);">👑 Admin — Full Access</div></div>
-<div class="sk-admin-box"><div class="sk-admin-title">CHANGE ADMIN PIN</div><input class="form-input" id="skNewAdminPin" inputmode="numeric" maxlength="12" placeholder="New Admin PIN" type="password"/><button class="submit-btn" onclick="skChangePin('admin')" style="margin-top:8px;">💾 Save Admin PIN</button></div>
-<div class="sk-admin-box"><div class="sk-admin-title">CHANGE WORKER PIN</div><input class="form-input" id="skNewWorkerPin" inputmode="numeric" maxlength="12" placeholder="New Worker PIN" type="password"/><button class="submit-btn" onclick="skChangePin('worker')" style="margin-top:8px;">💾 Save Worker PIN</button></div>
-<div class="sk-admin-box"><div class="sk-admin-title">WORKER ACCESS</div><div style="font-size:.72rem;line-height:1.5;color:var(--text-muted);">Worker can use the app for normal viewing and permitted work. Worker can change only Theme, Logo, Shop Name and Terms &amp; Conditions in Settings. Inventory editing, delete, stock changes, repair-job editing, backup/restore and other admin controls are blocked.</div></div>
+
+
+</div>
 <button class="submit-btn" onclick="skLogout()" style="background:#dc2626;color:#fff;border:none;">🔒 Logout</button>
 </div>
 </div>
@@ -746,13 +742,13 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <!-- SK MOBILES V4.0 additive layer: low-stock auto orders + JSON backup + configurable App Data Folder auto-sync -->
 <div class="modal-overlay" id="skAdminProfileModal" style="z-index:2147482200!important;">
 <div class="modal-sheet" style="max-width:430px;">
-<div class="modal-title"><span>👑 My Admin Profile</span><button class="modal-close-btn" onclick="skCloseAdminProfile()">✕</button></div>
-<div class="sk-v42-profile-box" style="text-align:center;margin-bottom:9px;"><div style="font-size:2.1rem;margin-bottom:4px;">👑</div><div style="font-size:1rem;font-weight:950;">SK MOBILES Admin</div><div style="font-size:.68rem;color:var(--text-muted);margin-top:3px;">Full Access Account</div></div>
+<div class="modal-title"><span id="skAdminProfileTitle">👑 My Admin Profile</span><button class="modal-close-btn" onclick="skCloseAdminProfile()">✕</button></div>
+<div class="sk-v42-profile-box" style="text-align:center;margin-bottom:9px;"><div style="font-size:2.1rem;margin-bottom:4px;">👑</div><div id="skAdminProfileName" style="font-size:1rem;font-weight:950;">SK MOBILES Admin</div><div style="font-size:.68rem;color:var(--text-muted);margin-top:3px;">Full Access Account</div></div>
 <div class="sk-v42-profile-grid">
-<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCOUNT</div><b>Admin</b></div>
-<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.13</b></div>
+<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCOUNT</div><b id="skAdminProfileAccount">Admin</b></div>
+<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V4.14</b></div>
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">WORKERS</div><b id="skAdminProfileWorkerCount">0</b></div>
-<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCESS</div><b>Full Access</b></div>
+<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCESS</div><b id="skAdminProfileAccess">Full Access</b></div>
 </div>
 <button class="submit-btn" onclick="skOpenAdminPanel();skCloseAdminProfile();" style="margin-top:9px;">👑 Open Admin Control</button>
 </div>
