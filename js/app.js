@@ -1341,8 +1341,10 @@ const MASTER_INVENTORY = [
     }
 
     function handleNewBillClick() {
+      window.__skEditingBillId='';
       autoSaveCurrentFormSilently();
       document.getElementById('usedMobileBillingForm').reset();
+      const saveBtn=document.querySelector('.bill-action-save'); if(saveBtn){const sp=saveBtn.querySelector('span:last-child');if(sp)sp.textContent='Save Bill';}
       document.getElementById('billAdvance').value = "0";
       document.getElementById('billEmiMonths').value = "3";
       document.getElementById('billEmiInterest').value = "0";
@@ -1357,37 +1359,27 @@ const MASTER_INVENTORY = [
       const custName = document.getElementById('billCustName').value.trim();
       const model = document.getElementById('billModel').value.trim();
       const price = parseFloat(document.getElementById('billTotalPrice').value) || 0;
-      
       if (custName && model && price > 0) {
         const billDate = `${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
         const newEntry = {
-          // Internal id remains unchanged for sync compatibility.
           id: `SK-B-${Date.now().toString().slice(-6)}`,
-          billNo: skNextBillNo(billDate),
-          date: billDate,
-          custName,
+          billNo: skNextBillNo(billDate), date: billDate, custName,
           phone: document.getElementById('billCustPhone').value || '9876543210',
           address: document.getElementById('billCustAddress').value || '',
-          brand: document.getElementById('billBrand').value || '',
-          model,
-          ram: document.getElementById('billRam').value || '',
-          storage: document.getElementById('billStorage').value || '',
-          color: document.getElementById('billColor').value || '',
-          imei1: document.getElementById('billImei1').value || '',
-          payMode: currentPayMode,
-          price: price,
+          brand: document.getElementById('billBrand').value || '', model,
+          ram: document.getElementById('billRam').value || '', storage: document.getElementById('billStorage').value || '',
+          color: document.getElementById('billColor').value || '', imei1: document.getElementById('billImei1').value || '',
+          imei2: document.getElementById('billImei2').value || '', package: document.getElementById('billPackage').value || '',
+          payMode: currentPayMode, price,
           advance: parseFloat(document.getElementById('billAdvance').value) || 0,
-          balance: parseFloat(document.getElementById('billBalanceDisplay')?.innerText.replace(/\D/g,'')) || 0,
+          balance: parseFloat((document.getElementById('billBalanceDisplay')?.innerText || '').replace(/\D/g,'')) || 0,
+          emiMonths: parseInt(document.getElementById('billEmiMonths').value,10) || 0,
+          emiInterest: parseFloat(document.getElementById('billEmiInterest').value) || 0,
+          emiStartDate: document.getElementById('billEmiStartDate').value || '', creditDueDate: document.getElementById('billCreditDate').value || '',
           emiHtml: currentPayMode === 'EMI' ? document.getElementById('pvEmiScheduleTbody').innerHTML : ''
         };
-
         const exists = savedBills.some(b => b.custName === newEntry.custName && b.model === newEntry.model && b.price === newEntry.price && b.phone === newEntry.phone);
-        if (!exists) {
-          savedBills.unshift(newEntry);
-          localStorage.setItem('sk_bills', JSON.stringify(savedBills));
-          updateBillHistoryCount();
-          clearDraft();
-        }
+        if (!exists) { savedBills.unshift(newEntry); localStorage.setItem('sk_bills', JSON.stringify(savedBills)); updateBillHistoryCount(); clearDraft(); }
       }
     }
 
@@ -1483,26 +1475,22 @@ const MASTER_INVENTORY = [
       if (previewLogo) previewLogo.src = savedLogo;
     }
 
+    function bringModalToFront(modal) {
+      if(!modal)return;
+      const active=Array.from(document.querySelectorAll('.modal-overlay.active'));
+      active.forEach((m,i)=>{m.style.setProperty('z-index',String(20000+i),'important');const sheet=m.querySelector('.modal-sheet');if(sheet)sheet.style.setProperty('z-index',String(20001+i),'important');});
+      modal.style.setProperty('position','fixed','important'); modal.style.setProperty('inset','0','important'); modal.style.setProperty('z-index',String(22000+active.length),'important');
+      const sheet=modal.querySelector('.modal-sheet'); if(sheet){sheet.style.setProperty('position','relative','important');sheet.style.setProperty('z-index',String(22001+active.length),'important');}
+    }
+
     function toggleModal(modalId, show) {
-      const modal = document.getElementById(modalId);
-      if (!modal) return;
-      if (show) {
-        modal.classList.add('active');
-        document.body.classList.add('modal-open');
-        if (modalId === 'orderModal') renderOrders();
-        if (modalId === 'repairSparesModal') loadRepairSparesNote();
-        if (modalId === 'billingModal') {
-          switchBillTab('new');
-          restoreDraft();
-          updateBillPreview();
-        }
-      } else {
-        modal.classList.remove('active');
-        document.body.classList.remove('modal-open');
-        if (modalId === 'viewBillModal') {
-          toggleModal('billingModal', true);
-        }
-      }
+      const modal=document.getElementById(modalId); if(!modal)return;
+      if(show){
+        modal.classList.add('active'); document.body.classList.add('modal-open');
+        if(modalId==='orderModal')renderOrders(); if(modalId==='repairSparesModal')loadRepairSparesNote();
+        if(modalId==='billingModal'){switchBillTab('new');restoreDraft();updateBillPreview();}
+        bringModalToFront(modal); requestAnimationFrame(()=>bringModalToFront(modal));
+      }else{modal.classList.remove('active');document.body.classList.remove('modal-open');if(modalId==='viewBillModal')toggleModal('billingModal',true);}
     }
 
     function toggleLeftDrawer(show) {
@@ -2462,9 +2450,26 @@ const MASTER_INVENTORY = [
     }
 
     function saveUsedBill() {
-      autoSaveCurrentFormSilently();
-      showToast("Bill successfully saved!");
-      switchBillTab('history');
+      const editId = String(window.__skEditingBillId || '');
+      if (editId) {
+        const bill = savedBills.find(b => b && String(b.id) === editId);
+        if (!bill) { window.__skEditingBillId=''; showToast('❌ Bill not found'); return; }
+        const price = parseFloat(document.getElementById('billTotalPrice').value) || 0;
+        const advance = parseFloat(document.getElementById('billAdvance').value) || 0;
+        if (!document.getElementById('billCustName').value.trim() || !document.getElementById('billModel').value.trim() || price <= 0) { showToast('❌ Customer, model and sale price are required'); return; }
+        const set = (key,id) => { bill[key] = document.getElementById(id)?.value || ''; };
+        set('custName','billCustName'); set('phone','billCustPhone'); set('address','billCustAddress'); set('brand','billBrand'); set('model','billModel');
+        set('ram','billRam'); set('storage','billStorage'); set('color','billColor'); set('imei1','billImei1'); set('imei2','billImei2'); set('package','billPackage');
+        bill.payMode=currentPayMode; bill.price=price; bill.advance=advance;
+        bill.emiMonths=parseInt(document.getElementById('billEmiMonths').value,10)||0; bill.emiInterest=parseFloat(document.getElementById('billEmiInterest').value)||0;
+        bill.emiStartDate=document.getElementById('billEmiStartDate').value||''; bill.creditDueDate=document.getElementById('billCreditDate').value||'';
+        bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-advance):0;
+        bill.emiHtml=currentPayMode==='EMI'?document.getElementById('pvEmiScheduleTbody').innerHTML:'';
+        localStorage.setItem('sk_bills',JSON.stringify(savedBills)); window.__skEditingBillId='';
+        const btn=document.querySelector('.bill-action-save'); if(btn){const sp=btn.querySelector('span:last-child');if(sp)sp.textContent='Save Bill';}
+        updateBillHistoryCount(); renderBillHistory(); updateBillPreview(); showToast('✅ Bill updated successfully'); switchBillTab('history'); return;
+      }
+      autoSaveCurrentFormSilently(); showToast('Bill successfully saved!'); switchBillTab('history');
     }
 
     function updateBillHistoryCount() {
@@ -2473,95 +2478,49 @@ const MASTER_INVENTORY = [
 
     // 🔒 SK V4.8 LOCKED: Bill History must render every synced bill safely and keep Delete visible.
     // Do not remove the Delete action or change the locked bill-number formats.
+    // Core Bill History renderer: View / Edit / Delete are implemented directly here.
     function renderBillHistory() {
-      const container = document.getElementById('billHistoryContainer');
-      if (!container) return;
-      const q = (document.getElementById('billHistorySearch')?.value || '').trim().toLowerCase();
-      const payFilter = document.getElementById('billHistoryPayFilter')?.value || '';
-      const dateFilter = document.getElementById('billHistoryDateFilter')?.value || '';
-
-      container.innerHTML = '';
-      const source = Array.isArray(savedBills) ? savedBills : [];
-      const filtered = source.filter(b => {
-        if (!b) return false;
-        const values = [b.custName,b.phone,b.model,b.id,b.billNo].map(v => String(v || ''));
-        const matchesQuery = !q || values.join(' ').toLowerCase().includes(q);
-        const matchesPay = payFilter ? String(b.payMode || '') === payFilter : true;
-        let matchesDate = true;
-        if (dateFilter) {
-          const dParts = dateFilter.split('-');
-          if (dParts.length === 3) {
-            const wantedKey = dParts[0] + dParts[1].padStart(2,'0') + dParts[2].padStart(2,'0');
-            matchesDate = skBillDateKey(b.date) === wantedKey;
-          }
-        }
-        return matchesQuery && matchesPay && matchesDate;
+      const container=document.getElementById('billHistoryContainer'); if(!container)return;
+      const q=(document.getElementById('billHistorySearch')?.value||'').trim().toLowerCase();
+      const payFilter=document.getElementById('billHistoryPayFilter')?.value||''; const dateFilter=document.getElementById('billHistoryDateFilter')?.value||'';
+      container.innerHTML=''; const source=Array.isArray(savedBills)?savedBills:[];
+      const filtered=source.filter(b=>{
+        if(!b)return false; const values=[b.custName,b.phone,b.model,b.id,b.billNo].map(v=>String(v||''));
+        const matchesQuery=!q||values.join(' ').toLowerCase().includes(q); const matchesPay=payFilter?String(b.payMode||'')===payFilter:true; let matchesDate=true;
+        if(dateFilter){const p=dateFilter.split('-');if(p.length===3){const wanted=p[0]+p[1].padStart(2,'0')+p[2].padStart(2,'0');matchesDate=skBillDateKey(b.date)===wanted;}}
+        return matchesQuery&&matchesPay&&matchesDate;
       });
-
-      if (filtered.length === 0) {
-        container.innerHTML = `<div class="empty-state">${source.length ? 'No saved billing history matches this filter.' : 'No saved billing history found.'}</div>`;
-        return;
-      }
-
-      filtered.forEach((b) => {
-        const item = document.createElement('div');
-        item.style.cssText = "background:var(--card-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
-        const safePrice = Number(b.price) || 0;
-        const displayBillNo = b.billNo || skBillNumberFromDateSeq(b.date, skExistingBillSeq(b) || 1, false);
-        const billId = String(b.id || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-        item.innerHTML = `
-          <div style="min-width:0;">
-            <div style="font-weight:800; font-size:0.88rem; color:var(--text);">${String(b.custName || 'Customer')} (${String(b.model || '---')})</div>
-            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">🧾 ${displayBillNo} • 📞 ${String(b.phone || '---')} • ${skBillUiDate(b.date || '---')} • <span style="background:var(--pill-bg); padding:2px 6px; border-radius:6px; font-weight:700;">${String(b.payMode || 'Cash')}</span></div>
-            <div style="font-weight:900; color:var(--primary); font-size:0.84rem; margin-top:4px;">₹ ${safePrice.toLocaleString('en-IN')}</div>
-          </div>
-          <div style="display:flex; gap:6px; flex-shrink:0;">
-            <button onclick="viewSavedBill(savedBills.findIndex(x => x && x.id === '${billId}'))" style="background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text); border-radius:10px; width:34px; height:34px; cursor:pointer;" title="View Bill">👁️</button>
-            <button onclick="deleteBillSafely('${billId}')" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:var(--danger); border-radius:10px; width:34px; height:34px; cursor:pointer;" title="Delete Bill">🗑️</button>
-          </div>
-        `;
+      if(!filtered.length){container.innerHTML=`<div class="empty-state">${source.length?'No saved billing history matches this filter.':'No saved billing history found.'}</div>`;return;}
+      filtered.forEach(b=>{
+        const item=document.createElement('div'); item.style.cssText="background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;";
+        const billId=String(b.id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); const displayBillNo=b.billNo||skBillNumberFromDateSeq(b.date,skExistingBillSeq(b)||1,false); const safePrice=Number(b.price)||0;
+        item.innerHTML=`<div style="min-width:0;"><div style="font-weight:800;font-size:.88rem;color:var(--text);">${String(b.custName||'Customer')} (${String(b.model||'---')})</div><div style="font-size:.72rem;color:var(--text-muted);margin-top:2px;">🧾 ${displayBillNo} • 📞 ${String(b.phone||'---')} • ${skBillUiDate(b.date||'---')} • <span style="background:var(--pill-bg);padding:2px 6px;border-radius:6px;font-weight:700;">${String(b.payMode||'Cash')}</span></div><div style="font-weight:900;color:var(--primary);font-size:.84rem;margin-top:4px;">₹ ${safePrice.toLocaleString('en-IN')}</div></div><div style="display:flex;gap:6px;flex-shrink:0;"><button onclick="viewSavedBill(savedBills.findIndex(x=>x&&x.id==='${billId}'))" style="background:var(--pill-bg);border:1px solid var(--card-border);color:var(--text);border-radius:10px;width:34px;height:34px;cursor:pointer;" title="View Bill">👁️</button><button onclick="editSavedBill(savedBills.findIndex(x=>x&&x.id==='${billId}'))" style="background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.25);color:var(--primary);border-radius:10px;width:34px;height:34px;cursor:pointer;" title="Edit Bill">✏️</button><button onclick="deleteBillSafely('${billId}')" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:var(--danger);border-radius:10px;width:34px;height:34px;cursor:pointer;" title="Delete Bill">🗑️</button></div>`;
         container.appendChild(item);
       });
     }
 
-    function viewSavedBill(idx) {
-      const b = savedBills[idx];
-      if (!b) return;
-
-      const container = document.getElementById('viewBillContent');
-      container.innerHTML = `
-        <div style="background:#fff; color:#1e293b; padding:20px; border-radius:18px; font-family:'Plus Jakarta Sans',sans-serif;">
-          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #edf0f6; padding-bottom:12px; margin-bottom:12px;">
-            <div style="font-weight:950; color:#d9166f; font-size:1.3rem;">SK MOBILES</div>
-            <div style="text-align:right; font-size:0.75rem;"><strong>Bill No:</strong> ${skBillNumberFromDateSeq(b.date, skExistingBillSeq(b) || (idx + 1), true)}<br><strong>Date:</strong> ${skBillUiDate(b.date)}</div>
-          </div>
-          <div style="font-size:0.75rem; background:#f8fafc; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #e2e8f0;">
-            <div><strong>Customer:</strong> ${b.custName}</div>
-            <div><strong>Phone:</strong> ${b.phone}</div>
-            <div><strong>Address:</strong> ${b.address || '---'}</div>
-          </div>
-          <table style="width:100%; border-collapse:collapse; font-size:0.75rem; margin-bottom:12px;">
-            <tr style="background:#f1f5f9; border-bottom:1px solid #cbd5e1;"><th style="padding:7px; text-align:left;">Description</th><th style="padding:7px; text-align:right;">Details</th></tr>
-            <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px; color:#475569;">Device Model</td><td style="padding:7px; text-align:right; font-weight:800;">${b.brand || ''} ${b.model}</td></tr>
-            <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px; color:#475569;">RAM / Storage / Colour</td><td style="padding:7px; text-align:right;">${[b.ram, b.storage, b.color].filter(Boolean).join(' / ') || '---'}</td></tr>
-            <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px; color:#475569;">IMEI 1</td><td style="padding:7px; text-align:right; font-family:monospace; font-weight:700;">${b.imei1 || '---'}</td></tr>
-            <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px; color:#475569;">Payment Mode</td><td style="padding:7px; text-align:right; font-weight:800;">${b.payMode || 'Cash'}</td></tr>
-            <tr style="border-bottom:1px solid #e2e8f0; background:#f8fafc;"><td style="padding:7px; font-weight:700;">Total Amount</td><td style="padding:7px; text-align:right; font-weight:900; color:#2563eb;">₹ ${b.price.toLocaleString('en-IN')}</td></tr>
-            ${b.payMode === 'EMI' || b.payMode === 'Credit' ? `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px; color:#16a34a; font-weight:700;">Down Payment</td><td style="padding:7px; text-align:right; color:#16a34a; font-weight:700;">₹ ${b.advance?.toLocaleString('en-IN') || 0}</td></tr><tr style="border-bottom:2px solid #0f172a;"><td style="padding:7px; color:#dc2626; font-weight:700;">Balance Due</td><td style="padding:7px; text-align:right; color:#dc2626; font-weight:900;">₹ ${b.balance?.toLocaleString('en-IN') || 0}</td></tr>` : ''}
-          </table>
-          ${b.emiHtml ? `<div style="font-size:0.72rem; font-weight:800; color:#92400e; margin-bottom:6px;">EMI Schedule Details:</div><div style="border:1px solid #fde047; border-radius:10px; overflow:hidden; font-size:0.68rem; margin-bottom:12px;"><table style="width:100%; border-collapse:collapse;">${b.emiHtml}</table></div>` : ''}
-          ${Array.isArray(b.paymentReceipts) && b.paymentReceipts.length ? `<div style="margin-top:10px;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px;"><div style="font-size:0.72rem;font-weight:900;color:#166534;margin-bottom:6px;">🧾 PAYMENT RECEIPTS ATTACHED</div>${b.paymentReceipts.map(r => `<div style="font-size:0.68rem;padding:4px 0;border-bottom:1px solid #dcfce7;"><b>${r.id || ''}</b> • ₹ ${(Number(r.amount)||0).toLocaleString('en-IN')} • ${r.mode || ''} • ${skBillUiDate(r.date || '')}${r.note ? ' • '+r.note : ''}</div>`).join('')}</div>` : ''}
-          <div style="display:flex; gap:8px; margin-top:14px;">
-            <button onclick="downloadInvoicePDF()" class="submit-btn" style="flex:1; padding:8px; font-size:0.75rem;">📄 Download PDF</button>
-            <button onclick="sendBillToWhatsAppAsPDF()" class="submit-btn whatsapp-green" style="flex:1; padding:8px; font-size:0.75rem;">💬 WhatsApp PDF</button>
-          </div>
-        </div>
-      `;
-      toggleModal('viewBillModal', true);
+    function editSavedBill(idx) {
+      const b=savedBills[idx];
+      if(!b){showToast('❌ Bill not found');return;}
+      window.__skEditingBillId=String(b.id||'');
+      toggleModal('billingModal',true);
+      switchBillTab('new');
+      const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v==null?'':v;};
+      set('billCustName',b.custName);set('billCustPhone',b.phone);set('billCustAddress',b.address);set('billBrand',b.brand);set('billModel',b.model);set('billRam',b.ram);set('billStorage',b.storage);set('billColor',b.color);set('billImei1',b.imei1);set('billImei2',b.imei2);set('billPackage',b.package);set('billTotalPrice',b.price);set('billAdvance',b.advance||0);set('billEmiMonths',b.emiMonths||3);set('billEmiInterest',b.emiInterest||0);set('billEmiStartDate',b.emiStartDate||'');set('billCreditDate',b.creditDueDate||'');
+      currentPayMode=b.payMode||'Cash';
+      if(typeof selectPayMode==='function')selectPayMode(currentPayMode);
+      if(typeof calculateBillMath==='function')calculateBillMath();
+      if(typeof updateBillPreview==='function')updateBillPreview();
+      setTimeout(()=>{const btn=document.querySelector('.bill-action-save');if(btn){const sp=btn.querySelector('span:last-child');if(sp)sp.textContent='Update Bill';}},30);
     }
 
-    // 🔒 V4.6 LOCKED: Bill History Delete button must use Firebase Soft Delete.
-    // Do not replace with local-only deletion; PC/Mobile realtime deletion depends on Firebase.
+    function viewSavedBill(idx) {
+      const b=savedBills[idx]; if(!b)return; const container=document.getElementById('viewBillContent');
+      const displayNo=skBillNumberFromDateSeq(b.date,skExistingBillSeq(b)||(idx+1),true); const safeId=String(b.id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      container.innerHTML=`<div style="background:#fff;color:#1e293b;padding:20px;border-radius:18px;font-family:'Plus Jakarta Sans',sans-serif;"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid #edf0f6;padding-bottom:12px;margin-bottom:12px;"><div style="font-weight:950;color:#d9166f;font-size:1.3rem;">SK MOBILES</div><div style="text-align:right;font-size:.75rem;"><strong>Bill No:</strong> ${displayNo}<br><strong>Date:</strong> ${skBillUiDate(b.date)}</div></div><div style="font-size:.75rem;background:#f8fafc;padding:10px;border-radius:12px;margin-bottom:12px;border:1px solid #e2e8f0;"><div><strong>Customer:</strong> ${b.custName}</div><div><strong>Phone:</strong> ${b.phone}</div><div><strong>Address:</strong> ${b.address||'---'}</div></div><table style="width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:12px;"><tr style="background:#f1f5f9;border-bottom:1px solid #cbd5e1;"><th style="padding:7px;text-align:left;">Description</th><th style="padding:7px;text-align:right;">Details</th></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">Device Model</td><td style="padding:7px;text-align:right;font-weight:800;">${b.brand||''} ${b.model}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">RAM / Storage / Colour</td><td style="padding:7px;text-align:right;">${[b.ram,b.storage,b.color].filter(Boolean).join(' / ')||'---'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">IMEI 1</td><td style="padding:7px;text-align:right;font-family:monospace;font-weight:700;">${b.imei1||'---'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">Payment Mode</td><td style="padding:7px;text-align:right;font-weight:800;">${b.payMode||'Cash'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;background:#f8fafc;"><td style="padding:7px;font-weight:700;">Total Amount</td><td style="padding:7px;text-align:right;font-weight:900;color:#2563eb;">₹ ${(Number(b.price)||0).toLocaleString('en-IN')}</td></tr>${b.payMode==='EMI'||b.payMode==='Credit'?`<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#16a34a;font-weight:700;">Down Payment</td><td style="padding:7px;text-align:right;color:#16a34a;font-weight:700;">₹ ${(Number(b.advance)||0).toLocaleString('en-IN')}</td></tr><tr style="border-bottom:2px solid #0f172a;"><td style="padding:7px;color:#dc2626;font-weight:700;">Balance Due</td><td style="padding:7px;text-align:right;color:#dc2626;font-weight:900;">₹ ${(Number(b.balance)||0).toLocaleString('en-IN')}</td></tr>`:''}</table>${b.emiHtml?`<div style="font-size:.72rem;font-weight:800;color:#92400e;margin-bottom:6px;">EMI Schedule Details:</div><div style="border:1px solid #fde047;border-radius:10px;overflow:hidden;font-size:.68rem;margin-bottom:12px;"><table style="width:100%;border-collapse:collapse;">${b.emiHtml}</table></div>`:''}${Array.isArray(b.paymentReceipts)&&b.paymentReceipts.length?`<div style="margin-top:10px;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px;"><div style="font-size:.72rem;font-weight:900;color:#166534;margin-bottom:6px;">🧾 PAYMENT RECEIPTS ATTACHED</div>${b.paymentReceipts.map(r=>`<div style="font-size:.68rem;padding:4px 0;border-bottom:1px solid #dcfce7;"><b>${r.id||''}</b> • ₹ ${(Number(r.amount)||0).toLocaleString('en-IN')} • ${r.mode||''} • ${skBillUiDate(r.date||'')}${r.note?' • '+r.note:''}</div>`).join('')}</div>`:''}<div style="display:flex;gap:8px;margin-top:14px;"><button onclick="toggleModal('viewBillModal',false);setTimeout(()=>editSavedBill(savedBills.findIndex(x=>x&&x.id==='${safeId}')),0);" class="submit-btn" style="flex:1;padding:8px;font-size:.75rem;">✏️ Edit Bill</button><button onclick="downloadInvoicePDF()" class="submit-btn" style="flex:1;padding:8px;font-size:.75rem;">📄 Download PDF</button><button onclick="sendBillToWhatsAppAsPDF()" class="submit-btn whatsapp-green" style="flex:1;padding:8px;font-size:.75rem;">💬 WhatsApp PDF</button></div></div>`;
+      toggleModal('viewBillModal',true);
+    }
+
     function deleteSavedBill(idx) {
       const b = savedBills[idx];
       if (b && typeof window.deleteBillSafely === 'function') return window.deleteBillSafely(b.id);
@@ -5275,7 +5234,7 @@ function cpMoney(n){return '₹'+(Number(n)||0).toLocaleString('en-IN')}
 function cpDigits(v){return String(v||'').replace(/\D/g,'')}
 function cpKey(n,p){return String(n||'').trim().toLowerCase()+'|'+cpDigits(p)}
 function cpEsc(v){return String(v==null?'':v).replace(/[&<>'"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]})}
-function cpDate(){return new Date().toISOString().slice(0,10)}
+function cpDate(){var d=new Date();return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()}
 function cpDateText(v){if(!v)return '';var d=new Date(v);if(!isNaN(d))return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;var s=String(v);var m=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);return m?`${String(Number(m[1])).padStart(2,'0')}/${String(Number(m[2])).padStart(2,'0')}/${m[3]}`:s}
 function cpBillLast3(id){var x=String(id||'').replace(/\D/g,'');return x.slice(-3)||String(id||'').slice(-3)}
 function cpGetCustomers(){
@@ -5465,12 +5424,15 @@ window.skCPOpenActionFor=function(k,type,idx){
 }
 window.skCPCloseAction=function(){document.getElementById('skCreditActionModal').classList.remove('active')}
 window.skCPRecalcForm=function(){
- var type=document.getElementById('skCPActionType').value,amt=Number(document.getElementById('skCPAmount').value)||0,adv=type==='credit'?(Number(document.getElementById('skCPAdvance').value)||0):0;
- adv=Math.min(adv,amt);document.getElementById('skCPAdvance').value=adv;
- var c=cpGetCustomers().find(function(x){return x.key===cpKey(document.getElementById('skCPName').value,document.getElementById('skCPPhone').value)});
- var old=c?c.balance:0,net=Math.max(0,amt-adv),newBal=type==='payment'?Math.max(0,old-amt):old+net;
- document.getElementById('skCPBalance').value=cpMoney(type==='credit'?net:newBal)+' '+(type==='credit'?'(new credit balance)':'(customer balance after payment)');
-}
+ var type=document.getElementById('skCPActionType').value, amt=Math.max(0,Number(document.getElementById('skCPAmount').value)||0), adv=type==='credit'?Math.max(0,Number(document.getElementById('skCPAdvance').value)||0):0;
+ if(type==='credit'){adv=Math.min(adv,amt);document.getElementById('skCPAdvance').value=adv;}
+ var name=(document.getElementById('skCPName').value||'').trim(),phone=(document.getElementById('skCPPhone').value||'').trim(),customer=cpGetCustomers().find(x=>x.key===cpKey(name,phone))||null;
+ var sel=document.getElementById('skCPBill'),bill=null;if(sel&&sel.value!==''&&/^\d+$/.test(String(sel.value))){var bs=cpBills();bill=bs[Number(sel.value)]||null;}
+ var old=bill?Math.max(0,Number(bill.balance)||0):(customer?Math.max(0,Number(customer.balance)||0):0),next=old;
+ if(type==='credit')next=old+Math.max(0,amt-adv); else if(type==='payment')next=Math.max(0,old-Math.min(old,amt));
+ var out=document.getElementById('skCPBalance');if(out)out.value=cpMoney(next);
+};
+
 window.skCPToggleEmi=function(){document.getElementById('skCPEmiFields').style.display=document.getElementById('skCPEmiMode').value==='emi'?'grid':'none'}
 function cpSaveLedgerEntry(e){var a=cpLedger();e.id=e.id||'CP-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);e.key=cpKey(e.name,e.phone);a.push(e);localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(a))}
 /* 🔒 SK V4.4 LOCKED: Payment must reduce the selected purchase bill balance and create/retain its receipt attachment. Fully paid bills must not open the Payment form. */
@@ -5526,823 +5488,3 @@ function cpOpenPage(){
 }
 window.skOpenCreditLedger=cpOpenPage;
 })();
-
-/* 🔒 SK V4.11 SOURCE-LOCK NOTE
-   This file is based only on the current user-uploaded SK-V4.11.zip.
-   Only the current-turn requested fixes are applied.
-   Do not modify/delete unrelated app functionality.
-*/
-
-
-/* ================================================================
-   🔒 SK V4.10 TARGETED FIX PATCH
-   SOURCE LOCK: This patch is applied ONLY to the currently uploaded
-   SK-Mobiles-V4.9-Outstanding-Date-Repair-WhatsApp-PaymentReceipt-APIKey-Fix.zip.
-   No unrelated source file/function is to be modified or deleted.
-   Fixes requested in the current turn only:
-   1) Payment Save reliability + bill-linked receipt
-   2) Repair Phone label + DD/MM/YYYY received date
-   3) Bill Details opening + correct SK-B-DDMM-001 display
-   4) Bill Edit button
-   5) Bill-level payment calculator
-   6) Popup front/z-index
-================================================================ */
-(function(){
-  'use strict';
-
-  function v410Toast(t){
-    try{ if(typeof showToast==='function') showToast(t); }catch(e){}
-  }
-  function v410DmyToIso(v){
-    v=String(v||'').trim();
-    let m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
-    if(!m)return '';
-    const dd=String(m[1]).padStart(2,'0'), mm=String(m[2]).padStart(2,'0'), yy=m[3];
-    return yy+'-'+mm+'-'+dd;
-  }
-  function v410IsoToDmy(v){
-    v=String(v||'').trim();
-    let m=v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-    if(m)return String(m[3]).padStart(2,'0')+'/'+String(m[2]).padStart(2,'0')+'/'+m[1];
-    m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
-    return m?String(m[1]).padStart(2,'0')+'/'+String(m[2]).padStart(2,'0')+'/'+m[3]:'';
-  }
-  function v410BillDisplayNo(b,details){
-    try{
-      const seq=(typeof skExistingBillSeq==='function' ? skExistingBillSeq(b) : 0) || 1;
-      return typeof skBillNumberFromDateSeq==='function'
-        ? skBillNumberFromDateSeq(b.date,seq,!!details)
-        : (details?'SK-B':'SK')+'-'+String(b.date||'').replace(/\D/g,'').slice(0,4)+'-'+String(seq).padStart(3,'0');
-    }catch(e){return b?.billNo||b?.id||'---'}
-  }
-
-  /* ---------------- Repair received date ---------------- */
-  function normalizeRepairDateField(){
-    const el=document.getElementById('skRjDate');
-    if(!el)return;
-    const d=v410IsoToDmy(el.value);
-    if(d)el.value=d;
-  }
-  function wrapRepairFunctions(){
-    if(window.__skV410RepairWrapped)return;
-    if(typeof window.skRjSaveJob==='function'){
-      const oldSave=window.skRjSaveJob;
-      window.skRjSaveJob=function(e){
-        const el=document.getElementById('skRjDate');
-        const original=el?.value||'';
-        if(el){
-          const iso=v410DmyToIso(original);
-          if(iso)el.value=iso;
-        }
-        const result=oldSave.apply(this,arguments);
-        setTimeout(normalizeRepairDateField,0);
-        return result;
-      };
-      window.skRjSaveJob.__skV410=true;
-    }
-    if(typeof window.skRjResetForm==='function'){
-      const oldReset=window.skRjResetForm;
-      window.skRjResetForm=function(){
-        const r=oldReset.apply(this,arguments);
-        setTimeout(normalizeRepairDateField,0);
-        return r;
-      };
-    }
-    if(typeof window.skRjEdit==='function'){
-      const oldEdit=window.skRjEdit;
-      window.skRjEdit=function(id){
-        const r=oldEdit.apply(this,arguments);
-        setTimeout(normalizeRepairDateField,0);
-        return r;
-      };
-    }
-    window.__skV410RepairWrapped=true;
-  }
-
-  /* ---------------- Bill Details + Edit ---------------- */
-  function populateBillForEdit(idx){
-    const b=(Array.isArray(window.savedBills)?window.savedBills:[])[idx];
-    if(!b)return;
-    window.__skV410EditingBillId=String(b.id||'');
-    try{
-      const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v==null?'':v;};
-      set('billCustName',b.custName);
-      set('billCustPhone',b.phone);
-      set('billCustAddress',b.address);
-      set('billBrand',b.brand);
-      set('billModel',b.model);
-      set('billRam',b.ram);
-      set('billStorage',b.storage);
-      set('billColor',b.color);
-      set('billImei1',b.imei1);
-      set('billImei2',b.imei2);
-      set('billPackage',b.package||b.packageName||'Full Kit (Box + Charger + Bill)');
-      if(typeof selectPayMode==='function')selectPayMode(b.payMode||'Cash');
-      set('billTotalPrice',b.price);
-      set('billAdvance',b.advance||0);
-      set('billEmiMonths',b.emiMonths||3);
-      set('billEmiInterest',b.emiInterest||0);
-      set('billEmiStartDate',b.emiStartDate||'');
-      set('billCreditDate',b.creditDueDate||'');
-      if(typeof toggleModal==='function')toggleModal('billingModal',true);
-      if(typeof switchBillTab==='function')switchBillTab('new');
-      if(typeof calculateBillMath==='function')calculateBillMath();
-      if(typeof updateBillPreview==='function')updateBillPreview();
-      setTimeout(function(){
-        const btn=document.querySelector('.bill-action-save');
-        if(btn)btn.querySelector('span:last-child').textContent='Update Bill';
-        v410Toast('✏️ Bill edit mode');
-      },50);
-    }catch(e){console.error('Bill edit open failed',e);v410Toast('❌ Unable to open bill for editing');}
-  }
-  window.skV410EditBill=function(idx){populateBillForEdit(Number(idx));};
-
-  /* Make Bill Details reliably frontmost and ensure the displayed number is SK-B-DDMM-001. */
-  if(typeof window.viewSavedBill==='function'){
-    const oldView=window.viewSavedBill;
-    window.viewSavedBill=function(idx){
-      try{
-        const b=(Array.isArray(window.savedBills)?window.savedBills:[])[idx];
-        if(!b)return;
-        const billing=document.getElementById('billingModal');
-        if(billing)billing.classList.remove('active');
-        oldView.apply(this,arguments);
-        setTimeout(function(){
-          const c=document.getElementById('viewBillContent');
-          if(!c)return;
-          const title=c.querySelector('strong');
-          // Replace only the bill-number value in the rendered header when possible.
-          c.querySelectorAll('strong').forEach(function(s){
-            if(String(s.textContent||'').trim()==='Bill No:'){
-              const parent=s.parentElement;
-              if(parent)parent.innerHTML='<strong>Bill No:</strong> '+v410BillDisplayNo(b,true)+'<br><strong>Date:</strong> '+(typeof fmtDate==='function'?fmtDate(b.date):v410IsoToDmy(b.date));
-            }
-          });
-          if(!c.querySelector('[data-sk-v410-edit]')){
-            const bar=document.createElement('div');
-            bar.setAttribute('data-sk-v410-edit','1');
-            bar.style.cssText='display:flex;gap:8px;margin-top:10px;';
-            const eb=document.createElement('button');
-            eb.className='submit-btn'; eb.style.flex='1'; eb.type='button';
-            eb.textContent='✏️ Edit Bill';
-            eb.onclick=function(){const i=(Array.isArray(window.savedBills)?window.savedBills:[]).findIndex(x=>x&&String(x.id)===String(b.id)); if(i>=0){ if(typeof toggleModal==='function')toggleModal('viewBillModal',false); setTimeout(function(){populateBillForEdit(i)},40); }};
-            bar.appendChild(eb); c.firstElementChild?.appendChild(bar);
-          }
-        },30);
-      }catch(e){console.error('Bill Details fix failed',e);oldView.apply(this,arguments);}
-    };
-  }
-
-  /* ---------------- Save Bill in edit mode ---------------- */
-  if(typeof window.saveUsedBill==='function'){
-    const oldSaveBill=window.saveUsedBill;
-    window.saveUsedBill=function(){
-      const editId=String(window.__skV410EditingBillId||'');
-      if(!editId){return oldSaveBill.apply(this,arguments);}
-      try{
-        if(typeof calculateBillMath==='function')calculateBillMath();
-        const arr=Array.isArray(window.savedBills)?window.savedBills:[];
-        const idx=arr.findIndex(b=>b&&String(b.id)===editId);
-        if(idx<0){window.__skV410EditingBillId='';return oldSaveBill.apply(this,arguments);}
-        const b=arr[idx];
-        const num=id=>document.getElementById(id)?.value||'';
-        const price=Number(num('billTotalPrice'))||0;
-        const advance=Number(num('billAdvance'))||0;
-        if(!num('billCustName').trim()||!num('billModel').trim()||price<=0){
-          v410Toast('Customer, Model and Price are required');return;
-        }
-        b.custName=num('billCustName').trim();
-        b.phone=num('billCustPhone').trim();
-        b.address=num('billCustAddress');
-        b.brand=num('billBrand');
-        b.model=num('billModel');
-        b.ram=num('billRam');
-        b.storage=num('billStorage');
-        b.color=num('billColor');
-        b.imei1=num('billImei1');
-        b.imei2=num('billImei2');
-        b.package=num('billPackage');
-        b.payMode=window.currentPayMode||b.payMode||'Cash';
-        b.price=price;
-        b.advance=advance;
-        b.balance=Math.max(0,price-advance);
-        b.emiMonths=Number(num('billEmiMonths'))||b.emiMonths||3;
-        b.emiInterest=Number(num('billEmiInterest'))||0;
-        b.emiStartDate=num('billEmiStartDate');
-        b.creditDueDate=num('billCreditDate');
-        if(b.payMode==='EMI'){
-          const tb=document.getElementById('pvEmiScheduleTbody');
-          b.emiHtml=tb?tb.innerHTML:(b.emiHtml||'');
-        }
-        // Preserve payment receipts and credit adjustments already attached to this bill.
-        b.paymentReceipts=Array.isArray(b.paymentReceipts)?b.paymentReceipts:[];
-        b.creditAdjustments=Array.isArray(b.creditAdjustments)?b.creditAdjustments:[];
-        localStorage.setItem('sk_bills',JSON.stringify(arr));
-        savedBills=arr;
-        if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
-        if(typeof renderBillHistory==='function')renderBillHistory();
-        window.__skV410EditingBillId='';
-        const btn=document.querySelector('.bill-action-save');
-        if(btn)btn.querySelector('span:last-child').textContent='Save Bill';
-        if(typeof toggleModal==='function')toggleModal('billingModal',false);
-        v410Toast('✅ Bill updated successfully');
-      }catch(e){console.error('Bill update failed',e);v410Toast('❌ Bill update failed');}
-    };
-  }
-
-
-  /* Add Edit action to each Sales Bill card in Customer Credit Ledger. */
-  if(typeof window.skCPOpenCustomer==='function'){
-    const oldOpenCustomer=window.skCPOpenCustomer;
-    window.skCPOpenCustomer=function(k){
-      const r=oldOpenCustomer.apply(this,arguments);
-      setTimeout(function(){
-        try{
-          const c=(typeof cpGetCustomers==='function')?cpGetCustomers().find(x=>x.key===k):null;
-          if(!c)return;
-          const bills=c.bills.slice().sort(function(a,b){return b.idx-a.idx});
-          document.querySelectorAll('#skCPDetailView .skcp-bill-card').forEach(function(card,i){
-            if(!bills[i] || card.querySelector('[data-sk-v410-bill-edit]'))return;
-            const actions=card.querySelector('.skcp-bill-actions');
-            if(!actions)return;
-            const btn=document.createElement('button');
-            btn.type='button'; btn.className='skcp-btn'; btn.setAttribute('data-sk-v410-bill-edit','1');
-            btn.textContent='✏️ Edit';
-            btn.onclick=function(ev){ev.stopPropagation();skV410EditBill(bills[i].idx);};
-            actions.appendChild(btn);
-          });
-        }catch(e){console.error('Customer bill edit button failed',e);}
-      },40);
-      return r;
-    };
-  }
-
-  /* ---------------- Bill-level payment calculator ---------------- */
-  if(typeof window.skCPRecalcForm==='function'){
-    window.skCPRecalcForm=function(){
-      const type=document.getElementById('skCPActionType')?.value||'payment';
-      const amt=Math.max(0,Number(document.getElementById('skCPAmount')?.value)||0);
-      const adv=type==='credit'?Math.max(0,Number(document.getElementById('skCPAdvance')?.value)||0):0;
-      const name=document.getElementById('skCPName')?.value||'';
-      const phone=document.getElementById('skCPPhone')?.value||'';
-      const c=(typeof cpGetCustomers==='function')?cpGetCustomers().find(x=>x.key===cpKey(name,phone)):null;
-      const idxRaw=document.getElementById('skCPBill')?.value||'';
-      const idx=idxRaw===''?null:Number(idxRaw);
-      const bills=(typeof cpBills==='function')?cpBills():[];
-      const bill=idx!==null && bills[idx]?bills[idx]:null;
-      if(type==='payment' && bill){
-        const old=Math.max(0,Number(bill.balance)||0);
-        const pay=Math.min(old,amt);
-        const nb=Math.max(0,old-pay);
-        const el=document.getElementById('skCPBalance');
-        if(el)el.value='₹'+nb.toLocaleString('en-IN')+' (bill balance after payment)';
-        const amountEl=document.getElementById('skCPAmount');
-        if(amountEl && amt>old)amountEl.value=old;
-        return;
-      }
-      if(type==='credit' && bill){
-        const old=Math.max(0,Number(bill.balance)||0);
-        const net=Math.max(0,amt-Math.min(adv,amt));
-        const el=document.getElementById('skCPBalance');
-        if(el)el.value='₹'+(old+net).toLocaleString('en-IN')+' (bill balance after credit)';
-        return;
-      }
-      const old=c?Math.max(0,Number(c.balance)||0):0;
-      const net=type==='credit'?Math.max(0,amt-Math.min(adv,amt)):Math.min(old,amt);
-      const nb=type==='credit'?old+net:Math.max(0,old-net);
-      const el=document.getElementById('skCPBalance');
-      if(el)el.value='₹'+nb.toLocaleString('en-IN')+' (customer balance after payment)';
-    };
-  }
-
-  /* ---------------- Payment save reliability + receipt attachment ---------------- */
-  if(typeof window.skCPSaveAction==='function'){
-    const oldSavePayment=window.skCPSaveAction;
-    window.skCPSaveAction=function(){
-      try{
-        const type=document.getElementById('skCPActionType')?.value||'';
-        if(type!=='payment')return oldSavePayment.apply(this,arguments);
-        const idxRaw=document.getElementById('skCPBill')?.value||'';
-        const idx=idxRaw===''?null:Number(idxRaw);
-        const bills=(typeof cpBills==='function')?cpBills():[];
-        const bill=idx!==null?bills[idx]:null;
-        if(!bill){
-          v410Toast('❌ Please select the purchase bill');
-          return;
-        }
-        const before=Math.max(0,Number(bill.balance)||0);
-        if(before<=0){
-          v410Toast('✅ This bill is already fully paid');
-          return;
-        }
-        let amount=Math.max(0,Number(document.getElementById('skCPAmount')?.value)||0);
-        amount=Math.min(before,amount);
-        if(amount<=0){v410Toast('❌ Enter a valid payment amount');return;}
-        // Let the original routine perform the single ledger write + receipt attachment.
-        const amountEl=document.getElementById('skCPAmount');
-        if(amountEl)amountEl.value=amount;
-        oldSavePayment.apply(this,arguments);
-        // Force the in-memory bill list to reflect the saved receipt immediately.
-        const latest=JSON.parse(localStorage.getItem('sk_bills')||'[]');
-        if(Array.isArray(latest)){
-          savedBills=latest;
-          if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
-          if(typeof renderBillHistory==='function')renderBillHistory();
-        }
-      }catch(e){
-        console.error('Payment save fix failed',e);
-        v410Toast('❌ Payment could not be saved');
-      }
-    };
-  }
-
-  /* ---------------- Make payment/bill details popups frontmost ---------------- */
-  function frontAllPopups(){
-    document.querySelectorAll('.modal-overlay.active').forEach(function(m){
-      m.style.zIndex='2147483000';
-      const sheet=m.querySelector('.modal-sheet');
-      if(sheet)sheet.style.zIndex='2147483001';
-    });
-    normalizeRepairDateField();
-  }
-  document.addEventListener('click',function(e){
-    const t=e.target.closest?.('.modal-overlay,.modal-close-btn,button');
-    if(t)setTimeout(frontAllPopups,0);
-  },true);
-  document.addEventListener('DOMContentLoaded',function(){
-    wrapRepairFunctions();
-    normalizeRepairDateField();
-    frontAllPopups();
-  });
-  setTimeout(function(){
-    wrapRepairFunctions();
-    normalizeRepairDateField();
-    frontAllPopups();
-  },300);
-})();
-
-
-
-/* ================================================================
-   🔒 V4.11 CURRENT-TURN TARGETED FIX PATCH
-   SOURCE: current uploaded SK-V4.11-Fixed(1).zip only.
-   Requested fixes:
-   1) Sales Bill History View/Edit must use the real savedBills array.
-   2) Bill-linked Credit/EMI ledger mirrors must not inflate Outstanding.
-   3) Payment calculator must use the selected bill's balance.
-   4) Payment Save must update the selected bill, receipt and ledger exactly once.
-   No unrelated functionality is changed.
-   ================================================================ */
-(function(){
-  'use strict';
-
-  /* The app uses a top-level `let savedBills`, not window.savedBills.
-     Existing targeted edit/view wrappers referenced window.savedBills and
-     therefore returned early. Expose the same live array safely. */
-  try{
-    if(!Object.prototype.hasOwnProperty.call(window,'savedBills')){
-      Object.defineProperty(window,'savedBills',{
-        configurable:true,
-        enumerable:false,
-        get:function(){ return savedBills; },
-        set:function(v){ savedBills=v; }
-      });
-    }
-  }catch(e){ console.warn('savedBills bridge unavailable',e); }
-
-  /* Payment calculator: selected bill balance is the source of truth. */
-  window.skCPRecalcForm=function(){
-    try{
-      var type=document.getElementById('skCPActionType')?.value||'payment';
-      var amountEl=document.getElementById('skCPAmount');
-      var balanceEl=document.getElementById('skCPBalance');
-      var advEl=document.getElementById('skCPAdvance');
-      var amount=Math.max(0,Number(amountEl?.value)||0);
-      var advance=type==='credit'?Math.max(0,Number(advEl?.value)||0):0;
-      if(type==='credit'){
-        advance=Math.min(advance,amount);
-        if(advEl)advEl.value=advance;
-      }
-
-      var idxRaw=document.getElementById('skCPBill')?.value||'';
-      var idx=idxRaw===''?null:Number(idxRaw);
-      var bills=cpBills();
-      var bill=idx!==null && Number.isInteger(idx) ? bills[idx] : null;
-
-      if(type==='payment' && bill){
-        var oldBal=Math.max(0,Number(bill.balance)||0);
-        var pay=Math.min(oldBal,amount);
-        var newBal=Math.max(0,oldBal-pay);
-        if(balanceEl)balanceEl.value=cpMoney(newBal)+' (bill balance after payment)';
-        return;
-      }
-
-      if(type==='credit' && bill){
-        var oldCreditBal=Math.max(0,Number(bill.balance)||0);
-        var net=Math.max(0,amount-advance);
-        if(balanceEl)balanceEl.value=cpMoney(oldCreditBal+net)+' (bill balance after credit)';
-        return;
-      }
-
-      var name=document.getElementById('skCPName')?.value||'';
-      var phone=document.getElementById('skCPPhone')?.value||'';
-      var customer=cpGetCustomers().find(function(c){
-        return c.key===cpKey(name,phone);
-      });
-      var oldCustomerBal=customer?Math.max(0,Number(customer.balance)||0):0;
-      var customerNet=type==='credit'?Math.max(0,amount-advance):Math.min(oldCustomerBal,amount);
-      var customerNewBal=type==='credit'
-        ? oldCustomerBal+customerNet
-        : Math.max(0,oldCustomerBal-customerNet);
-      if(balanceEl)balanceEl.value=cpMoney(customerNewBal)+' (customer balance after payment)';
-    }catch(e){
-      console.error('Payment calculator fix failed',e);
-    }
-  };
-
-  /* Payment Save: one bill update + one receipt + one payment ledger entry. */
-  var previousSaveAction=window.skCPSaveAction;
-  window.skCPSaveAction=function(){
-    try{
-      var type=document.getElementById('skCPActionType')?.value||'';
-      if(type!=='payment'){
-        return typeof previousSaveAction==='function'
-          ? previousSaveAction.apply(this,arguments)
-          : undefined;
-      }
-
-      var name=(document.getElementById('skCPName')?.value||'').trim();
-      var phone=(document.getElementById('skCPPhone')?.value||'').trim();
-      var idxRaw=document.getElementById('skCPBill')?.value||'';
-      var idx=idxRaw===''?null:Number(idxRaw);
-      var bills=cpBills();
-      var bill=(idx!==null && Number.isInteger(idx))?bills[idx]:null;
-      var amount=Math.max(0,Number(document.getElementById('skCPAmount')?.value)||0);
-      var date=document.getElementById('skCPDate')?.value||cpDate();
-      var mode=document.getElementById('skCPPaymentMode')?.value||'Cash';
-      var note=(document.getElementById('skCPNote')?.value||'').trim();
-
-      if(!name || !bill){
-        if(typeof showToast==='function')showToast('❌ Please select the purchase bill');
-        return;
-      }
-
-      var before=Math.max(0,Number(bill.balance)||0);
-      if(before<=0){
-        if(typeof showToast==='function')showToast('✅ This bill is already fully paid');
-        return;
-      }
-
-      amount=Math.min(before,amount);
-      if(amount<=0){
-        if(typeof showToast==='function')showToast('❌ Enter a valid payment amount');
-        return;
-      }
-
-      var amountEl=document.getElementById('skCPAmount');
-      if(amountEl)amountEl.value=amount;
-
-      var paid=cpUpdateBill(idx,'payment',amount,0,{
-        date:date,
-        mode:mode,
-        note:note
-      });
-      if(!(Number(paid)>0)){
-        if(typeof showToast==='function')showToast('❌ Payment could not be saved');
-        return;
-      }
-
-      /* Persisting sk_bills also activates the existing Firebase sync hook. */
-      localStorage.setItem('sk_bills',JSON.stringify(bills));
-      savedBills=bills;
-
-      cpSaveLedgerEntry({
-        name:name,
-        phone:phone,
-        type:'payment',
-        amount:Number(paid),
-        mode:mode,
-        date:date,
-        details:note||'Payment received',
-        source:'payment-receipt',
-        billId:bill.id
-      });
-
-      if(typeof skImportFromBills==='function')skImportFromBills(true);
-      if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
-      if(typeof renderBillHistory==='function')renderBillHistory();
-
-      if(typeof skCPCloseAction==='function')skCPCloseAction();
-      if(typeof skCPRender==='function')skCPRender();
-
-      var updatedCustomer=cpGetCustomers().find(function(c){
-        return c.key===cpKey(name,phone);
-      });
-      if(updatedCustomer && typeof cpOpenDetail==='function')cpOpenDetail(updatedCustomer);
-
-      if(typeof showToast==='function'){
-        showToast('✅ Payment saved • balance updated • receipt attached');
-      }
-    }catch(e){
-      console.error('V4.11 payment save failed',e);
-      if(typeof showToast==='function')showToast('❌ Payment could not be saved');
-    }
-  };
-
-  /* Recalculate immediately when the bill selector changes as well. */
-  document.addEventListener('change',function(e){
-    if(e.target && e.target.id==='skCPBill'){
-      setTimeout(function(){
-        try{ window.skCPRecalcForm(); }catch(_){}
-      },0);
-    }
-  },true);
-
-})();
-
-
-/* ================================================================
-   🔒 V4.12 CURRENT-TURN TARGETED FIX PATCH
-   SOURCE: current uploaded SK V4.12.zip only.
-   Requested fixes:
-   1) All active popup/modal windows must stay in front of every page/modal.
-   2) Customer Credit Ledger bill display must use SK-B-DDMM-001 without changing internal IDs.
-   3) Payment form must show NEW BALANCE and recalculate from the selected bill.
-   4) Payment save must generate/attach one receipt to the selected bill and persist the bill update.
-   No unrelated functionality is changed.
-   ================================================================ */
-(function(){
-  'use strict';
-
-  function v412BillDetailsNo(b){
-    try{
-      if(!b) return '---';
-      var seq=(typeof skExistingBillSeq==='function'?skExistingBillSeq(b):0)||0;
-      if(!seq && Array.isArray(savedBills)){
-        var sameDate=savedBills.filter(function(x){
-          return x && typeof skBillDateKey==='function' && skBillDateKey(x.date)===skBillDateKey(b.date);
-        });
-        var ix=sameDate.findIndex(function(x){return String(x.id||'')===String(b.id||'');});
-        seq=ix>=0?ix+1:1;
-      }
-      return typeof skBillNumberFromDateSeq==='function'
-        ? skBillNumberFromDateSeq(b.date,seq||1,true)
-        : 'SK-B-'+String(b.date||'').replace(/\D/g,'').slice(0,4)+'-'+String(seq||1).padStart(3,'0');
-    }catch(e){
-      return b.billNo || b.id || '---';
-    }
-  }
-  window.skV412BillDetailsNo=v412BillDetailsNo;
-
-  /* -------- 1. Force every active modal above every other active modal/page. -------- */
-  function v412BringActiveModalsFront(){
-    try{
-      var active=document.querySelectorAll('.modal-overlay.active');
-      active.forEach(function(m,i){
-        /* Inline !important z-index values exist on some older page overlays,
-           so use setProperty(...,'important') rather than normal style.zIndex. */
-        m.style.setProperty('z-index', String(2147483000+i), 'important');
-        var sheet=m.querySelector('.modal-sheet');
-        if(sheet) sheet.style.setProperty('z-index', String(2147483001+i), 'important');
-      });
-    }catch(e){}
-  }
-  window.skV412BringActiveModalsFront=v412BringActiveModalsFront;
-
-  document.addEventListener('click',function(e){
-    if(e.target && (e.target.closest('.modal-overlay') || e.target.closest('button') || e.target.closest('[onclick]'))){
-      setTimeout(v412BringActiveModalsFront,0);
-      setTimeout(v412BringActiveModalsFront,50);
-    }
-  },true);
-  document.addEventListener('DOMContentLoaded',v412BringActiveModalsFront);
-  setTimeout(v412BringActiveModalsFront,250);
-
-  /* -------- 2. Customer Credit Ledger: show Bill Details number, not internal ID. -------- */
-  function v412PatchCreditLedger(){
-    try{
-      var root=document.getElementById('skCPDetailView');
-      if(!root) return;
-      var cKey=typeof skCPSelectedKey!=='undefined'?skCPSelectedKey:'';
-      var c=typeof cpGetCustomers==='function'
-        ? cpGetCustomers().find(function(x){return x.key===cKey})
-        : null;
-      if(!c) return;
-
-      var bills=c.bills.slice().sort(function(a,b){return b.idx-a.idx});
-      var cards=root.querySelectorAll('.skcp-bill-card');
-      cards.forEach(function(card,i){
-        var item=bills[i];
-        if(!item || !item.b) return;
-        var b=item.b;
-        var top=card.querySelector('.skcp-bill-top');
-        if(top){
-          var first=top.querySelector('div');
-          var strong=first && first.querySelector('b');
-          if(strong) strong.textContent=v412BillDetailsNo(b);
-        }
-      });
-
-      /* Payment/credit history rows: replace Bill #572 style references with
-         the bill's locked Bill Details format when the referenced bill exists. */
-      root.querySelectorAll('.skcp-bill-card').forEach(function(card){
-        card.querySelectorAll('div').forEach(function(el){
-          var t=el.textContent||'';
-          var m=t.match(/Bill\s+#([^\s•]+)/i);
-          if(!m)return;
-          var digits=String(m[1]).replace(/\D/g,'');
-          var bill=(typeof cpBills==='function'?cpBills():[]).find(function(b){
-            return String(b.id||'').replace(/\D/g,'').slice(-3)===digits.slice(-3);
-          });
-          if(bill) el.textContent=t.replace(m[0],'Bill #'+v412BillDetailsNo(bill));
-        });
-      });
-    }catch(e){ console.warn('V4.12 bill display patch:',e); }
-  }
-
-  if(typeof window.cpOpenDetail==='function'){
-    var oldOpenDetail=window.cpOpenDetail;
-    window.cpOpenDetail=function(c){
-      var r=oldOpenDetail.apply(this,arguments);
-      setTimeout(v412PatchCreditLedger,0);
-      return r;
-    };
-  }
-  document.addEventListener('click',function(){
-    setTimeout(v412PatchCreditLedger,20);
-  },true);
-
-  /* -------- 3. Payment form: selected bill + NEW BALANCE. -------- */
-  function v412SelectPaymentBill(){
-    var type=document.getElementById('skCPActionType')?.value||'';
-    if(type!=='payment') return;
-    var sel=document.getElementById('skCPBill');
-    if(!sel) return;
-
-    /* If a specific bill was supplied by the bill-row Payment button, keep it.
-       Otherwise, when there is exactly one pending bill, select it automatically. */
-    if(sel.value==='' && typeof cpGetCustomers==='function'){
-      var name=document.getElementById('skCPName')?.value||'';
-      var phone=document.getElementById('skCPPhone')?.value||'';
-      var c=cpGetCustomers().find(function(x){return x.key===cpKey(name,phone)});
-      if(c){
-        var pending=c.bills.filter(function(x){return Number(x.b?.balance||0)>0});
-        if(pending.length===1) sel.value=String(pending[0].idx);
-      }
-    }
-  }
-
-  function v412RecalcPayment(){
-    try{
-      var type=document.getElementById('skCPActionType')?.value||'';
-      var amount=Math.max(0,Number(document.getElementById('skCPAmount')?.value)||0);
-      var balance=document.getElementById('skCPBalance');
-      if(!balance)return;
-
-      if(type==='payment'){
-        v412SelectPaymentBill();
-        var raw=document.getElementById('skCPBill')?.value||'';
-        var idx=raw===''?null:Number(raw);
-        var bills=typeof cpBills==='function'?cpBills():[];
-        var bill=(idx!==null && Number.isInteger(idx))?bills[idx]:null;
-        var oldBal=bill?Math.max(0,Number(bill.balance)||0):0;
-        var pay=Math.min(oldBal,amount);
-        var newBal=Math.max(0,oldBal-pay);
-        balance.value=cpMoney(newBal);
-        balance.setAttribute('placeholder','New balance after payment');
-        return;
-      }
-
-      /* Preserve the existing credit calculator for Credit mode. */
-      if(typeof window.skCPRecalcForm==='function' && window.skCPRecalcForm!==v412RecalcPayment){
-        /* The actual global function is wrapped below; do not recurse here. */
-      }
-    }catch(e){ console.warn('V4.12 payment calculator:',e); }
-  }
-
-  /* Preserve current calculator for Credit mode while making Payment mode deterministic. */
-  var oldCalc412=window.skCPRecalcForm;
-  window.skCPRecalcForm=function(){
-    try{
-      var type=document.getElementById('skCPActionType')?.value||'';
-      if(type==='payment'){
-        v412RecalcPayment();
-        return;
-      }
-    }catch(e){}
-    return typeof oldCalc412==='function' ? oldCalc412.apply(this,arguments) : undefined;
-  };
-
-  /* Change only the label requested by the user. */
-  document.addEventListener('DOMContentLoaded',function(){
-    var labels=document.querySelectorAll('#skCreditActionModal .form-label');
-    labels.forEach(function(l){
-      if(String(l.textContent||'').trim()==='Balance') l.textContent='New Balance';
-    });
-    v412BringActiveModalsFront();
-  });
-
-  /* Recalculate after customer/bill selection as well as typing amount. */
-  document.addEventListener('change',function(e){
-    if(e.target && (e.target.id==='skCPBill' || e.target.id==='skCPName' || e.target.id==='skCPPhone')){
-      setTimeout(function(){try{v412RecalcPayment();}catch(_){}},0);
-    }
-  },true);
-
-  document.addEventListener('input',function(e){
-    if(e.target && e.target.id==='skCPAmount'){
-      setTimeout(function(){try{v412RecalcPayment();}catch(_){}},0);
-    }
-  },true);
-
-  /* Ensure the form gets a bill selection when opened through a customer action. */
-  var oldOpenFor412=window.skCPOpenActionFor;
-  if(typeof oldOpenFor412==='function'){
-    window.skCPOpenActionFor=function(k,type,idx){
-      var r=oldOpenFor412.apply(this,arguments);
-      setTimeout(function(){
-        try{
-          v412SelectPaymentBill();
-          if(type==='payment')v412RecalcPayment();
-          v412BringActiveModalsFront();
-        }catch(_){}
-      },0);
-      return r;
-    };
-  }
-
-  /* -------- 4. Payment save: one receipt attached to the selected bill. -------- */
-  var oldSave412=window.skCPSaveAction;
-  window.skCPSaveAction=function(){
-    try{
-      var type=document.getElementById('skCPActionType')?.value||'';
-      if(type!=='payment'){
-        return typeof oldSave412==='function' ? oldSave412.apply(this,arguments) : undefined;
-      }
-
-      v412SelectPaymentBill();
-      var raw=document.getElementById('skCPBill')?.value||'';
-      var idx=raw===''?null:Number(raw);
-      var bills=typeof cpBills==='function'?cpBills():[];
-      var bill=(idx!==null && Number.isInteger(idx))?bills[idx]:null;
-      var name=(document.getElementById('skCPName')?.value||'').trim();
-      var phone=(document.getElementById('skCPPhone')?.value||'').trim();
-      var amount=Math.max(0,Number(document.getElementById('skCPAmount')?.value)||0);
-      var date=document.getElementById('skCPDate')?.value||cpDate();
-      var mode=document.getElementById('skCPPaymentMode')?.value||'Cash';
-      var note=(document.getElementById('skCPNote')?.value||'').trim();
-
-      if(!name || !bill){
-        if(typeof showToast==='function')showToast('❌ Please select the purchase bill');
-        return;
-      }
-      var before=Math.max(0,Number(bill.balance)||0);
-      var pay=Math.min(before,amount);
-      if(pay<=0){
-        if(typeof showToast==='function')showToast('❌ Enter a valid payment amount');
-        return;
-      }
-
-      /* Use the existing bill update routine once. It creates exactly one
-         receipt with billId and reduces that same bill's balance. */
-      if(typeof cpUpdateBill!=='function'){
-        if(typeof showToast==='function')showToast('❌ Payment function unavailable');
-        return;
-      }
-      var paid=cpUpdateBill(idx,'payment',pay,0,{date:date,mode:mode,note:note});
-      if(!(Number(paid)>0)){
-        if(typeof showToast==='function')showToast('❌ Payment could not be saved');
-        return;
-      }
-
-      localStorage.setItem('sk_bills',JSON.stringify(bills));
-      if(typeof savedBills!=='undefined')savedBills=bills;
-
-      if(typeof cpSaveLedgerEntry==='function'){
-        cpSaveLedgerEntry({
-          name:name,phone:phone,type:'payment',amount:Number(paid),
-          mode:mode,date:date,details:note||'Payment received',
-          source:'payment-receipt',billId:bill.id
-        });
-      }
-
-      if(typeof skImportFromBills==='function')skImportFromBills(true);
-      if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
-      if(typeof renderBillHistory==='function')renderBillHistory();
-
-      var receipt=bill.paymentReceipts && bill.paymentReceipts[bill.paymentReceipts.length-1];
-      if(typeof skCPCloseAction==='function')skCPCloseAction();
-      if(typeof skCPRender==='function')skCPRender();
-
-      if(typeof showToast==='function'){
-        showToast('✅ Payment saved • '+(receipt?.id||'Receipt')+' attached to '+v412BillDetailsNo(bill));
-      }
-    }catch(e){
-      console.error('V4.12 payment save failed',e);
-      if(typeof showToast==='function')showToast('❌ Payment could not be saved');
-    }
-  };
-
-  setTimeout(v412BringActiveModalsFront,500);
-})();
-
