@@ -23,7 +23,14 @@
   const WORKER_KEY = "sk_current_worker_id_v1";
   const SHOP_ID = "SK-MOBILES";
   const BILL_KEY = "sk_bills";
-  const REALTIME_KEYS = ["sk_inventory", "skx_repair_jobs_v2"];
+  // அனைத்து முக்கிய தரவுகளுக்குமான முழுமையான ஒத்திசைவுப் பட்டியல்
+	const REALTIME_KEYS = [
+	"sk_inventory",
+	"skx_repair_jobs_v2",
+	"sk_emi_reminder_v1",
+	"sk_workers_v1",
+	"sk_shop_phone"
+	];
 
   let auth, db, unsubscribeBills = null;
   let unsubscribeGlobal = [];
@@ -321,10 +328,15 @@
           applyingRemote = true;
           try {
             localStorage.setItem(key, cloudVal);
-            if (typeof renderJobCards === "function") renderJobCards();
-			if (typeof renderJobs === "function") renderJobs();
+            // startGlobalSync உள்ளே UI ரெண்டர் அழைப்புகள்:
+			if (typeof renderInventory === "function") renderInventory();
+			if (typeof renderJobCards === "function") renderJobCards();
 			if (typeof renderRepairJobs === "function") renderRepairJobs();
+			if (typeof renderCreditList === "function") renderCreditList();
+			if (typeof renderDueList === "function") renderDueList();
 			if (typeof renderDashboard === "function") renderDashboard();
+			if (typeof updateStats === "function") updateStats();
+			if (typeof loadAllData === "function") loadAllData();
           } finally {
             applyingRemote = false;
           }
