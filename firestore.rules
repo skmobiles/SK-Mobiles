@@ -57,9 +57,9 @@ service cloud.firestore {
     }
 
     match /shops/{shopId}/{document=**} {
-      allow read: if isActiveStaff() && shopId == 'SK-MOBILES';
-      allow create, update: if isActiveStaff() && shopId == 'SK-MOBILES';
-      allow delete: if (isAdmin() || isManager()) && shopId == 'SK-MOBILES';
-    }
+  allow read: if isActiveStaff() && shopId == 'SK-MOBILES';
+  allow create, update: if isActiveStaff() && shopId == 'SK-MOBILES';
+  allow delete: if (isAdmin() || isManager()) && shopId == 'SK-MOBILES';
+	}
   }
 }
