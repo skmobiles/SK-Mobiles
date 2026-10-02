@@ -719,8 +719,26 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="modal-sheet" style="max-width:430px;max-height:86vh;">
 <div class="modal-title"><span>👑 Admin Control</span><button class="modal-close-btn" onclick="skCloseAdminPanel()">✕</button></div>
 <div class="sk-admin-box"><div class="sk-admin-title">CURRENT LOGIN</div><div id="skAdminCurrentRole" style="font-size:.88rem;font-weight:900;color:var(--text);">👑 Admin — Full Access</div></div>
-
-
+<div class="sk-admin-box" id="skManagerAccessControlBox">
+<div class="sk-admin-title">MANAGER ACCESS &amp; PERMISSIONS</div>
+<label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.76rem;font-weight:850;margin-bottom:8px;"><span>Manager Access / Promotion</span><input id="skManagerEnabled" type="checkbox" checked onchange="skSaveManagerPolicy()"/></label>
+<div style="font-size:.68rem;color:var(--text-muted);margin-bottom:8px;">Admin can enable/disable Manager access and choose the Manager's app permissions below.</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+<label class="sk-manager-perm"><input id="skMgrBilling" type="checkbox" checked onchange="skSaveManagerPolicy()"/> Sales Billing &amp; Edit</label>
+<label class="sk-manager-perm"><input id="skMgrInventory" type="checkbox" checked onchange="skSaveManagerPolicy()"/> Inventory</label>
+<label class="sk-manager-perm"><input id="skMgrCredit" type="checkbox" checked onchange="skSaveManagerPolicy()"/> Credit &amp; Payments</label>
+<label class="sk-manager-perm"><input id="skMgrRepair" type="checkbox" checked onchange="skSaveManagerPolicy()"/> Repair Jobs</label>
+<label class="sk-manager-perm"><input id="skMgrBackup" type="checkbox" checked onchange="skSaveManagerPolicy()"/> Cloud Backup Now</label>
+<label class="sk-manager-perm"><input id="skMgrRestore" type="checkbox" onchange="skSaveManagerPolicy()"/> Cloud Restore Latest</label>
+<label class="sk-manager-perm"><input id="skMgrShopSettings" type="checkbox" onchange="skSaveManagerPolicy()"/> Shop Profile / Bill Settings</label>
+<label class="sk-manager-perm"><input id="skMgrUsers" type="checkbox" onchange="skSaveManagerPolicy()"/> User Role Management</label>
+</div>
+</div>
+<div class="sk-admin-box" id="skAdminResetBox">
+<div class="sk-admin-title">DANGER ZONE</div>
+<div style="font-size:.68rem;color:var(--text-muted);margin-bottom:8px;">Admin only. This resets the app's local data and returns the app to a fresh local state.</div>
+<button class="submit-btn" type="button" onclick="skAdminResetAllAppData()" style="background:#dc2626;color:#fff;border:none;">🗑️ Reset All App Data</button>
+</div>
 </div>
 <button class="submit-btn" onclick="skLogout()" style="background:#dc2626;color:#fff;border:none;">🔒 Logout</button>
 </div>
