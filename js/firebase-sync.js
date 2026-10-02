@@ -296,7 +296,7 @@
       const result=original.apply(this,arguments);
       if(this===localStorage && key===BILL_KEY && !applyingRemote && auth?.currentUser && remoteReady){
         clearTimeout(syncTimer);
-        syncTimer=setTimeout(uploadBills,250);
+        syncTimer=setTimeout(uploadBills,50);
       }
       return result;
     };
