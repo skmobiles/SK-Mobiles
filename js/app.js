@@ -5867,3 +5867,37 @@ function cpOpenPage(){
 }
 window.skOpenCreditLedger=cpOpenPage;
 })();
+
+
+/* SK V4.15 HOME DISPLAY RECOVERY — only restores Home content if the existing
+   startup render left cardsContainer empty. No existing functions are replaced. */
+(function(){
+  'use strict';
+  function skV415EnsureHomeVisible(){
+    try{
+      var box=document.getElementById('cardsContainer');
+      if(!box || box.children.length>0) return;
+      if(typeof window.renderCards==='function'){
+        if(typeof window.currentFilter==='string') window.currentFilter='home';
+        else if(typeof currentFilter!=='undefined') currentFilter='home';
+        window.renderCards();
+      }else if(typeof renderCards==='function'){
+        currentFilter='home';
+        renderCards();
+      }
+    }catch(e){
+      try{
+        if(typeof renderCards==='function'){
+          currentFilter='home';
+          renderCards();
+        }
+      }catch(_){}
+    }
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){setTimeout(skV415EnsureHomeVisible,120);},{once:true});
+  }else{
+    setTimeout(skV415EnsureHomeVisible,120);
+  }
+  window.addEventListener('load',function(){setTimeout(skV415EnsureHomeVisible,80);},{once:true});
+})();
