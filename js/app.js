@@ -1270,6 +1270,9 @@ const MASTER_INVENTORY = [
         if (!Array.isArray(savedBills)) savedBills = [];
       }
 
+      // Apply the saved theme before the first Home render to avoid a light→dark repaint flash.
+      try { setTheme(localStorage.getItem('sk_theme') || 'light', true); } catch (e) { console.error('SK theme startup:', e); }
+
       // Render Home before optional UI restoration so the page cannot remain blank.
       try { renderCards(); } catch (e) {
         console.error('SK Home render error:', e);
@@ -1282,10 +1285,6 @@ const MASTER_INVENTORY = [
       try { updateOrderBadge(); } catch (e) { console.error('SK order badge startup:', e); }
       try { updateBillHistoryCount(); } catch (e) { console.error('SK bill count startup:', e); }
 
-      try {
-        const currentTheme = localStorage.getItem('sk_theme') || 'light';
-        setTheme(currentTheme);
-      } catch (e) { console.error('SK theme startup:', e); }
     });
 
     function loadInitialData() {
@@ -1598,6 +1597,34 @@ const MASTER_INVENTORY = [
         navBilling: '<path d="M6 3h9l3 3v15H6z"></path><path d="m15 3 3 3h-3zM9 11h6M9 15h6M9 18h4"></path>',
         navOrders: '<path d="M3 5h3l2 11h10l3-8H7"></path><path d="M10 9h7M12 12h4"></path><circle cx="9" cy="20" r="1.3"></circle><circle cx="18" cy="20" r="1.3"></circle>'
       },
+      prism: {
+        navGlass:'<path d="M12 3 20 8v8l-8 5-8-5V8z"></path><path d="M8 10h8M8 14h8"></path>',
+        navCombo:'<path d="M7 3h10l3 3v12l-3 3H7l-3-3V6z"></path><path d="M8 8h8M8 12h8M8 16h5"></path>',
+        navHome:'<path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path><path d="m8 11 4-3 4 3"></path>',
+        navBilling:'<path d="M6 3h9l3 3v15H6z"></path><path d="M15 3v4h3M9 11h6M9 15h6M9 18h3"></path><circle cx="17" cy="16" r="1"></circle>',
+        navOrders:'<path d="M3 5h3l2 11h10l3-8H7"></path><path d="m11 9 2 2 4-4"></path><circle cx="9" cy="20" r="1.3"></circle><circle cx="18" cy="20" r="1.3"></circle>'
+      },
+      pulse: {
+        navGlass:'<rect x="5" y="4" width="14" height="16" rx="5"></rect><path d="M8 9h8M8 13h5M8 17h8"></path>',
+        navCombo:'<rect x="5" y="3" width="14" height="18" rx="5"></rect><path d="M8 7h8M8 11h8M8 15h5"></path><circle cx="16.5" cy="17" r="1"></circle>',
+        navHome:'<path d="m3 11 9-8 9 8"></path><path d="M5 10v11h14V10"></path><path d="M9 21v-6h6v6"></path><path d="M8 12h2M14 12h2"></path>',
+        navBilling:'<rect x="6" y="3" width="12" height="18" rx="3"></rect><path d="M9 8h6M9 12h6M9 16h4"></path>',
+        navOrders:'<path d="M3 6h3l2 10h10l2.5-7H7"></path><path d="M9 9h8"></path><circle cx="9" cy="20" r="1.2"></circle><circle cx="18" cy="20" r="1.2"></circle>'
+      },
+      leaf: {
+        navGlass:'<path d="M12 21C7 18 5 14 6 8c4 0 8 2 9 6-2 0-4-1-6-3"></path><path d="M12 21c0-5 2-9 7-12"></path>',
+        navCombo:'<rect x="6" y="4" width="12" height="16" rx="4"></rect><path d="M9 8h6M9 12h6M9 16h4"></path><path d="M16 16c-1.2-1.2-2.8-1.2-4 0"></path>',
+        navHome:'<path d="m3 11 9-8 9 8"></path><path d="M5 10v11h14V10"></path><path d="M9 21v-6h6v6"></path><path d="M8 13c1-1 2-1 3 0s2 1 3 0 2-1 3 0"></path>',
+        navBilling:'<path d="M6 4h9l3 3v14H6z"></path><path d="M15 4v4h3M9 12h6M9 16h4"></path><path d="M15 18c-2-2-4-2-6 0"></path>',
+        navOrders:'<path d="M3 6h3l2 10h10l2-7H7"></path><path d="M11 10c1-1 2-1 3 0s2 1 3 0"></path><circle cx="9" cy="20" r="1.2"></circle><circle cx="18" cy="20" r="1.2"></circle>'
+      },
+      retro: {
+        navGlass:'<path d="M5 4h14v16H5z"></path><path d="M8 8h8M8 12h8M8 16h5"></path><path d="M7 4v-1h10v1"></path>',
+        navCombo:'<path d="M5 3h14v18H5z"></path><path d="M8 7h8M8 11h8M8 15h5"></path><path d="M16 18h2"></path>',
+        navHome:'<path d="M3 11 12 3l9 8"></path><path d="M5 10v11h14V10"></path><path d="M9 21v-6h6v6"></path><path d="M7 13h2M15 13h2"></path>',
+        navBilling:'<path d="M6 3h9l3 3v15H6z"></path><path d="M15 3v4h3M9 11h6M9 15h6M9 18h3"></path><path d="M8 7h5"></path>',
+        navOrders:'<path d="M3 5h3l2 11h10l3-8H7"></path><path d="M9 8h8M11 12h5"></path><circle cx="9" cy="20" r="1.3"></circle><circle cx="18" cy="20" r="1.3"></circle>'
+      },
       neon: {
         navGlass: '<rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8M8 11h5M8 15h8"></path><path d="m15 15 1.5 1.5L19 13"></path>',
         navCombo: '<rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8M8 11h8M8 15h4"></path><path d="m15 17 1.5 1.5L19 16"></path>',
@@ -1607,10 +1634,10 @@ const MASTER_INVENTORY = [
       }
     };
 
-    const THEME_ICON_PACK = { light:'classic', dark:'classic', ocean:'wave', emerald:'wave', royal:'luxury', obsidian:'luxury', sunset:'soft', rose:'soft', midnight:'orbit', cyber:'neon', graphite:'angular', lime:'angular' };
+    const THEME_ICON_PACK = { light:'classic', dark:'classic', ocean:'wave', emerald:'wave', royal:'luxury', obsidian:'luxury', sunset:'soft', rose:'soft', midnight:'orbit', cyber:'neon', graphite:'angular', lime:'angular', aurora:'prism', crimson:'pulse', mint:'leaf', solar:'retro' };
 
-    function setTheme(theme) {
-      const allowedThemes = ['light','ocean','royal','sunset','emerald','rose','midnight','graphite','lime','dark','cyber','obsidian'];
+    function setTheme(theme, silent) {
+      const allowedThemes = ['light','ocean','royal','sunset','emerald','rose','midnight','graphite','lime','dark','cyber','obsidian','aurora','crimson','mint','solar'];
       if (!allowedThemes.includes(theme)) theme = 'light';
       document.documentElement.setAttribute('data-theme', theme);
       const iconPack = THEME_ICON_PACK[theme] || 'classic';
@@ -1625,7 +1652,7 @@ const MASTER_INVENTORY = [
       });
       localStorage.setItem('sk_theme', theme);
       localStorage.setItem('sk_icon_pack', iconPack);
-      showToast("Theme applied: " + theme.toUpperCase());
+      if(!silent) showToast("Theme applied: " + theme.toUpperCase());
     }
 
     function adjustThemeDepth(val) {
@@ -3142,6 +3169,14 @@ img{max-width:100%!important}
   }
   function save(a){ localStorage.setItem(KEY,JSON.stringify(a)); }
   function today(){ return new Date().toISOString().slice(0,10); }
+  function rjToISODate(value){
+    const s=String(value||'').trim();
+    let m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);
+    if(m){ const y=String(m[3]).length===2?'20'+m[3]:m[3]; const d=Number(m[1]),mo=Number(m[2]); if(mo>=1&&mo<=12&&d>=1&&d<=31)return y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0'); return ''; }
+    m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if(m)return m[1]+'-'+String(Number(m[2])).padStart(2,'0')+'-'+String(Number(m[3])).padStart(2,'0');
+    return '';
+  }
   function rjFmtDate(value){
     const s=String(value||'').trim();
     let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
@@ -3162,7 +3197,8 @@ img{max-width:100%!important}
   function clearForm(){
     document.getElementById('skRjForm')?.reset();
     document.getElementById('skRjEditId').value='';
-    document.getElementById('skRjDate').value=today();
+    document.getElementById('skRjCustomer').value='Walk-in Customer';
+    document.getElementById('skRjDate').value=rjFmtDate(today());
     document.getElementById('skRjStatus').value='Received';
     document.getElementById('skRjWorkType').value='Normal';
     document.getElementById('skRjScheduleWrap').style.display='none';
@@ -3201,18 +3237,21 @@ img{max-width:100%!important}
   window.skRjSaveJob=function(e){
     e?.preventDefault();
     const id=document.getElementById('skRjEditId').value;
+    const enteredDate=document.getElementById('skRjDate').value.trim();
+    const normalizedDate=rjToISODate(enteredDate);
+    if(!normalizedDate){ showToast('Received Date must be DD/MM/YYYY'); return false; }
     const a=load();
     const existing=id?a.find(x=>x.id===id):null;
     const job={
       id:id||('RJ-'+Date.now()),
-      customer:document.getElementById('skRjCustomer').value.trim(),
+      customer:document.getElementById('skRjCustomer').value.trim()||'Walk-in Customer',
       phone:document.getElementById('skRjPhone').value.trim(),
       model:document.getElementById('skRjModel').value.trim(),
       imei:document.getElementById('skRjImei').value.trim(),
       workType:document.getElementById('skRjWorkType').value,
       schedule:document.getElementById('skRjSchedule').value,
       problem:document.getElementById('skRjProblem').value.trim(),
-      date:document.getElementById('skRjDate').value||today(),
+      date:rjToISODate(document.getElementById('skRjDate').value)||today(),
       estimate:Number(document.getElementById('skRjEstimate').value)||0,
       status:document.getElementById('skRjStatus').value,
       note:document.getElementById('skRjNote').value.trim(),
@@ -3236,14 +3275,14 @@ img{max-width:100%!important}
     const j=load().find(x=>x.id===id); if(!j)return;
     skRjSwitchTab('jobs');
     document.getElementById('skRjEditId').value=j.id;
-    document.getElementById('skRjCustomer').value=j.customer||'';
+    document.getElementById('skRjCustomer').value=j.customer||'Walk-in Customer';
     document.getElementById('skRjPhone').value=j.phone||'';
     document.getElementById('skRjModel').value=j.model||'';
     document.getElementById('skRjImei').value=j.imei||'';
     document.getElementById('skRjWorkType').value=j.workType||'Normal';
     document.getElementById('skRjSchedule').value=j.schedule||'';
     document.getElementById('skRjProblem').value=j.problem||'';
-    document.getElementById('skRjDate').value=j.date||today();
+    document.getElementById('skRjDate').value=rjFmtDate(j.date||today());
     document.getElementById('skRjEstimate').value=j.estimate||'';
     document.getElementById('skRjStatus').value=j.status||'Received';
     document.getElementById('skRjNote').value=j.note||'';
@@ -3505,7 +3544,12 @@ img{max-width:100%!important}
 
   window.skUrgentRepairInstall=install;
   const target=document.getElementById('cardsContainer');
-  if(target)new MutationObserver(()=>{if(document.getElementById('homeMetricGrid'))setTimeout(renderCard,0)}).observe(target,{childList:true,subtree:true});
+  let urgentRenderQueued=false;
+  if(target)new MutationObserver(()=>{
+    if(urgentRenderQueued || !document.getElementById('homeMetricGrid')) return;
+    urgentRenderQueued=true;
+    requestAnimationFrame(()=>{ urgentRenderQueued=false; if(document.getElementById('homeMetricGrid')) renderCard(); });
+  }).observe(target,{childList:true,subtree:true});
   document.getElementById('skUrgentRepairModal')?.addEventListener('click',function(e){if(e.target===this)skCloseUrgentRepairModal()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')skCloseUrgentRepairModal()});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(install,180),{once:true});else setTimeout(install,180);

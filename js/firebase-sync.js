@@ -33,6 +33,7 @@
   let cloudAutoBackupTimer = null;
   let cloudAutoBackupRunning = false;
   let cloudRestoreApplying = false;
+  let refreshUiFrame = 0;
 
   // தானாகவே அனைத்து sk_ மற்றும் skx_ விசைகளையும் கண்டறியும் அமைப்பு
   function isSyncableKey(key) {
@@ -68,24 +69,32 @@
 
   // தரவு மாறியவுடன் அனைத்து UI பகுதிகளையும் உடனுக்குடன் புதுப்பித்தல்
   function refreshAllUI(){
-    try {
-      if(typeof savedBills !== "undefined") savedBills = localBills();
-      if(typeof updateBillHistoryCount === "function") updateBillHistoryCount();
-      if(typeof renderBillHistory === "function") renderBillHistory();
-      if(typeof loadSavedBills === "function") loadSavedBills();
-      if(typeof displayBills === "function") displayBills();
-      if(typeof renderInventory === "function") renderInventory();
-      if(typeof renderJobCards === "function") renderJobCards();
-      if(typeof renderJobs === "function") renderJobs();
-      if(typeof renderRepairJobs === "function") renderRepairJobs();
-      if(typeof renderCreditList === "function") renderCreditList();
-      if(typeof renderDueList === "function") renderDueList();
-      if(typeof renderCustomerLedger === "function") renderCustomerLedger();
-      if(typeof renderLedgerList === "function") renderLedgerList();
-      if(typeof renderDashboard === "function") renderDashboard();
-      if(typeof updateStats === "function") updateStats();
-      if(typeof loadAllData === "function") loadAllData();
-    } catch(e){}
+    /* Coalesce bursts of Firebase/localStorage updates into one paint.
+       This prevents visible page flicker when several synced keys arrive together. */
+    if(refreshUiFrame) return;
+    const run = function(){
+      refreshUiFrame = 0;
+      try {
+        if(typeof savedBills !== "undefined") savedBills = localBills();
+        if(typeof updateBillHistoryCount === "function") updateBillHistoryCount();
+        if(typeof renderBillHistory === "function") renderBillHistory();
+        if(typeof loadSavedBills === "function") loadSavedBills();
+        if(typeof displayBills === "function") displayBills();
+        if(typeof renderInventory === "function") renderInventory();
+        if(typeof renderJobCards === "function") renderJobCards();
+        if(typeof renderJobs === "function") renderJobs();
+        if(typeof renderRepairJobs === "function") renderRepairJobs();
+        if(typeof renderCreditList === "function") renderCreditList();
+        if(typeof renderDueList === "function") renderDueList();
+        if(typeof renderCustomerLedger === "function") renderCustomerLedger();
+        if(typeof renderLedgerList === "function") renderLedgerList();
+        if(typeof renderDashboard === "function") renderDashboard();
+        if(typeof updateStats === "function") updateStats();
+        if(typeof loadAllData === "function") loadAllData();
+      } catch(e){}
+    };
+    if(typeof requestAnimationFrame === "function") refreshUiFrame=requestAnimationFrame(run);
+    else refreshUiFrame=setTimeout(run,0);
   }
 
   function normalizeBill(b){
