@@ -23,6 +23,15 @@
 
 <link href="css/style.css" rel="stylesheet"/></head>
 <body>
+<!-- SK V4.16: Firebase-safe Recycle Bin -->
+<div id="skRecycleBinModal" class="modal-overlay" style="z-index:2147483000!important;">
+<div class="modal-sheet" style="max-width:460px;max-height:90vh;">
+<div class="modal-title"><span>🗑️ Recycle Bin (Trash)</span><button class="modal-close-btn" type="button" onclick="toggleModal('skRecycleBinModal', false)">✕</button></div>
+<p style="font-size:.72rem;color:var(--text-muted);margin-bottom:10px;">Deleted items will be automatically purged after 30 days. Restore re-syncs the original record through Firebase.</p>
+<div id="recycleBinItemsContainer" style="display:flex;flex-direction:column;gap:8px;max-height:55vh;overflow-y:auto;"></div>
+<button id="btnEmptyRecycleBin" class="submit-btn" type="button" style="background:#ef4444;margin-top:12px;">⚠ Empty All Trash</button>
+</div>
+</div>
 <div class="toast" id="toast">Action Success!</div>
 <!-- LEFT DRAWER MENU -->
 <div class="left-drawer" id="leftDrawer" onclick="toggleLeftDrawer(false)">
@@ -65,6 +74,9 @@
 </button>
 <button class="menu-drawer-btn" onclick="skOpenAdminPanel(); toggleLeftDrawer(false);">
 <span class="menu-icon-pod menu-icon-admin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 7.8-7 10-4-2.2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span><span class="menu-btn-label">Admin Control</span><span class="menu-arrow">›</span>
+</button>
+<button class="menu-drawer-btn" id="btnOpenRecycleBin" type="button" onclick="skOpenRecycleBin(); toggleLeftDrawer(false);">
+<span class="menu-icon-pod menu-icon-admin" aria-hidden="true">🗑️</span><span class="menu-btn-label">Recycle Bin (Trash)</span><span class="menu-arrow">›</span>
 </button>
 </div>
 
@@ -761,6 +773,11 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
   </label>
   <div style="font-size:.64rem;color:var(--text-muted);margin-bottom:8px;">Manager Firebase login can be enabled/disabled here.</div>
   <div id="skManagerPermissionList" style="display:grid;gap:6px;"></div>
+</div>
+<div class="sk-admin-box" style="margin-top:10px;">
+  <div class="sk-admin-title">RECYCLE BIN</div>
+  <button class="submit-btn" type="button" onclick="skOpenRecycleBin()">🗑️ Open Recycle Bin</button>
+  <div style="font-size:.62rem;color:var(--text-muted);margin-top:6px;">Deleted records are retained for 30 days. Restore or permanently delete from here.</div>
 </div>
 <div class="sk-admin-box" style="margin-top:10px;">
   <div class="sk-admin-title">ADMIN ONLY</div>

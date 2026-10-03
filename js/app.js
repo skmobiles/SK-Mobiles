@@ -1812,6 +1812,8 @@ const MASTER_INVENTORY = [
 
     function deleteInventoryItem(id) {
       if (!confirm("Are you sure you want to delete this inventory item?")) return;
+      const trashItem = Array.isArray(inventory) ? inventory.find(i => String(i.id) === String(id)) : null;
+      if (trashItem && typeof window.moveToTrash === 'function') window.moveToTrash(trashItem, 'inventory', trashItem.title || trashItem.id);
       inventory = inventory.filter(i => i.id !== id);
       saveInventory();
       renderCards();
@@ -1971,6 +1973,8 @@ const MASTER_INVENTORY = [
         return;
       }
 
+      const trashItems = inventory.filter(item => ids.includes(item.id));
+      if (trashItems.length && typeof window.moveToTrash === 'function') window.moveToTrash(trashItems, 'inventory-batch', `${trashItems.length} inventory item(s)`);
       inventory = inventory.filter(item => !ids.includes(item.id));
       saveInventory();
       window.skCancelTemperedSelection();
@@ -2910,8 +2914,9 @@ window.deleteBillSafely=async function(billId){
   const bill=list[idx];
   const displayNo=bill.billNo||bill.id||id;
   const customer=bill.custName||'Customer';
-  if(!confirm('Delete this saved bill?\\n\\nBill: '+displayNo+'\\nCustomer: '+customer+'\\n\\nThis will remove it from Bill History.'))return;
+  if(!confirm('Delete this saved bill?\\n\\nBill: '+displayNo+'\\nCustomer: '+customer+'\\n\\nThis will move it to Recycle Bin for 30 days.'))return;
   try{
+    if(typeof window.moveToTrash==='function') window.moveToTrash(bill,'bill',displayNo);
     const next=list.filter(function(_,i){return i!==idx});
     savedBills=next;
     localStorage.setItem('sk_bills',JSON.stringify(next));
@@ -3256,8 +3261,10 @@ img{max-width:100%!important}
   };
 
   window.skRjDelete=function(id){
-    if(!confirm('Delete this repair job?'))return;
-    save(load().filter(x=>x.id!==id)); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
+    if(!confirm('Delete this repair job?\n\nThe job will be moved to Recycle Bin for 30 days.'))return;
+    const current=load(), item=current.find(x=>String(x.id)===String(id));
+    if(item && typeof window.moveToTrash==='function') window.moveToTrash(item,'repair',item.customer||item.id);
+    save(current.filter(x=>x.id!==id)); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
   };
 
   window.skRjCallPhone=function(phone){
@@ -3664,7 +3671,7 @@ img{max-width:100%!important}
       const base=idx>=0?a[idx]:{photo:DEFAULT_PHOTO};Object.assign(base,{name,id,password,phone:document.getElementById('skWorkerEditPhone').value.trim(),designation:document.getElementById('skWorkerEditDesignation').value.trim()||'Worker',details:document.getElementById('skWorkerEditDetails').value.trim()});
       const f=document.getElementById('skWorkerEditPhoto').files[0];fileToData(f,data=>{if(data)base.photo=data;if(idx>=0)a[idx]=base;else a.push(base);saveWorkers(a);populateLogin();renderAdminWorkers();toast(idx>=0?'Worker updated':'Worker added');skCloseWorkerEdit();});
     };
-    window.skDeleteWorker=function(index){if(!admin())return;const a=workers();if(!a[index])return;if(!confirm('Delete this worker?'))return;const id=a[index].id;a.splice(index,1);saveWorkers(a);if(localStorage.getItem(CURRENT_WORKER_KEY)===id)localStorage.removeItem(CURRENT_WORKER_KEY);populateLogin();renderAdminWorkers();toast('Worker deleted');};
+    window.skDeleteWorker=function(index){if(!admin())return;const a=workers();if(!a[index])return;if(!confirm('Delete this worker?\n\nThe worker will be moved to Recycle Bin for 30 days.'))return;const removed=a[index];if(typeof window.moveToTrash==='function')window.moveToTrash(removed,'worker',removed.name||removed.id);const id=removed.id;a.splice(index,1);saveWorkers(a);if(localStorage.getItem(CURRENT_WORKER_KEY)===id)localStorage.removeItem(CURRENT_WORKER_KEY);populateLogin();renderAdminWorkers();toast('Worker moved to Recycle Bin');};
     function renderAdminWorkers(){const box=document.getElementById('skWorkerAdminList');if(!box)return;const a=workers();box.innerHTML=a.length?a.map((w,i)=>'<div class="sk-worker-row"><img class="sk-worker-avatar" src="'+(w.photo||DEFAULT_PHOTO)+'"><div class="sk-worker-row-main"><div class="sk-worker-row-name">'+esc(w.name)+' <span style="font-size:.64rem;color:var(--text-muted)">('+esc(w.id)+')</span></div><div class="sk-worker-row-sub">'+esc(w.designation||'Worker')+' • '+esc(w.phone||'No phone')+'</div><div class="sk-worker-row-sub">🔑 Password: <span class="sk-password-view">'+esc(w.password)+'</span></div></div><div class="sk-worker-row-actions"><button class="sk-mini-btn" onclick="skOpenWorkerEdit('+i+')">✏️</button><button class="sk-mini-btn sk-mini-danger" onclick="skDeleteWorker('+i+')">🗑️</button></div></div>').join(''):'<div style="font-size:.74rem;color:var(--text-muted);padding:8px;text-align:center;">No workers added</div>';const c=document.getElementById('skWorkerCount');if(c)c.textContent=a.length;}
     function addManager(){ const box=document.getElementById('skWorkerAdminManager'); if(box) box.remove(); }
     function intercept(){
@@ -4977,6 +4984,8 @@ img{max-width:100%!important}
         remove.addEventListener('click', function(){
           var idx = list.findIndex(function(o){ return String(o.id) === String(order.id); });
           if(idx !== -1){
+            const removedOrder=list[idx];
+            if(typeof window.moveToTrash==='function')window.moveToTrash(removedOrder,'order',removedOrder.title||removedOrder.id);
             list.splice(idx,1);
             ordersList = list;
             localStorage.setItem('sk_orders', JSON.stringify(list));
@@ -5020,7 +5029,8 @@ img{max-width:100%!important}
       return;
     }
 
-    if(!confirm('Clear all orders?')) return;
+    if(!confirm('Clear all orders?\n\nAll current orders will be moved to Recycle Bin for 30 days.')) return;
+    if(typeof window.moveToTrash==='function') window.moveToTrash(list.slice(),'order-batch',`${list.length} order(s)`);
 
     /* Keep inventory's existing ordered flags in sync. */
     list.forEach(function(order){
@@ -5884,12 +5894,14 @@ window.skCPDeleteCustomer=async function(k){
  var c=cpGetCustomers().find(function(x){return x.key===k});
  if(!c)return;
  var bills=c.bills.map(function(x){return x.b&&x.b.id?String(x.b.id):''}).filter(Boolean);
- var msg='Delete this customer permanently?\n\nCustomer: '+c.name+'\nBills: '+bills.length+'\nLedger entries: '+c.entries.length+'\n\nThis action cannot be restored.';
+ var msg='Delete this customer?\n\nCustomer: '+c.name+'\nBills: '+bills.length+'\nLedger entries: '+c.entries.length+'\n\nThe customer and linked records will be moved to Recycle Bin for 30 days.';
  if(!confirm(msg))return;
  try{
-   // Remove bill records locally first so the customer disappears immediately.
    var currentBills=cpBills();
    var billSet=new Set(bills);
+   var customerSnapshot={customer:{name:c.name,phone:c.phone,key:c.key},bills:currentBills.filter(function(b){return billSet.has(String(b&&b.id||'')) || cpKey(b&&b.custName,b&&b.phone)===k}),ledger:cpLedger().filter(function(e){return (e.key||cpKey(e.name,e.phone))===k})};
+   if(typeof window.moveToTrash==='function') window.moveToTrash(customerSnapshot,'customer',c.name);
+   // Remove bill records locally first so the customer disappears immediately.
    var filteredBills=currentBills.filter(function(b){return !billSet.has(String(b&&b.id||'')) && cpKey(b&&b.custName,b&&b.phone)!==k});
    localStorage.setItem('sk_bills',JSON.stringify(filteredBills));
    if(typeof savedBills!=='undefined')savedBills=filteredBills;
@@ -6113,4 +6125,62 @@ function cpOpenPage(){
  document.getElementById('skCreditLedgerPage').classList.add('active');cpShowMain();
 }
 window.skOpenCreditLedger=cpOpenPage;
+})();
+
+
+// ==========================================
+// SK V4.16 FIREBASE-SAFE RECYCLE BIN ENGINE
+// ==========================================
+(function(){
+  'use strict';
+  const RECYCLE_KEY='sk_recycle_bin_v1';
+  const THIRTY_DAYS_MS=30*24*60*60*1000;
+  function readRecycle(){try{const a=JSON.parse(localStorage.getItem(RECYCLE_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
+  function saveRecycle(list){localStorage.setItem(RECYCLE_KEY,JSON.stringify(Array.isArray(list)?list:[]));}
+  // Compatibility helpers from the supplied integration text, scoped only to Recycle Bin data.
+  window.getStoredData=function(){return {recycleBin:readRecycle()};};
+  window.saveStoredData=function(data){saveRecycle(data&&Array.isArray(data.recycleBin)?data.recycleBin:[]);};
+  window.moveToTrash=function(itemData,itemType,displayName){
+    if(itemData===undefined||itemData===null)return null;
+    const appData=getStoredData();
+    appData.recycleBin.push({trashId:'TRASH_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),type:String(itemType||'item'),title:String(displayName||itemType||'Deleted item'),data:itemData,deletedAt:new Date().toISOString()});
+    saveStoredData(appData); try{showToast('🗑️ Moved to Recycle Bin')}catch(e){} return appData.recycleBin[appData.recycleBin.length-1];
+  };
+  function purgeExpiredTrash(){
+    const list=readRecycle(),now=Date.now(); if(!list.length)return;
+    const kept=list.filter(item=>{const t=new Date(item?.deletedAt||0).getTime();return Number.isFinite(t)&&(now-t)<THIRTY_DAYS_MS;});
+    if(kept.length!==list.length)saveStoredData({recycleBin:kept});
+  }
+  window.purgeExpiredTrash=purgeExpiredTrash;
+  function esc(v){return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
+  window.renderRecycleBinUI=function(){
+    const c=document.getElementById('recycleBinItemsContainer');if(!c)return;purgeExpiredTrash();const list=readRecycle();
+    if(!list.length){c.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:.85rem;">Trash is empty.</div>';return;}
+    c.innerHTML=list.slice().reverse().map(item=>{const d=new Date(item.deletedAt),valid=!isNaN(d.getTime()),days=valid?Math.max(0,30-Math.floor((Date.now()-d.getTime())/86400000)):0;return `<div class="sk-trash-row"><div style="min-width:0"><div style="font-weight:800;font-size:.85rem">${esc(item.title||item.type)}</div><div style="font-size:.68rem;color:var(--text-muted)">${esc(item.type)} • Deleted: ${valid?d.toLocaleDateString('en-GB'):'Unknown'} • ${days} day(s) remaining</div></div><div class="sk-trash-actions"><button type="button" onclick="restoreFromTrash('${esc(item.trashId)}')" style="background:var(--primary);color:#fff">🔄 Restore</button><button type="button" onclick="permanentlyDeleteTrash('${esc(item.trashId)}')" style="background:rgba(239,68,68,.12);color:#dc2626">🗑️ Delete</button></div></div>`}).join('');
+  };
+  async function restoreCloudBill(id){try{if(window.firebase?.auth&&firebase.auth().currentUser&&firebase.firestore){await firebase.firestore().collection('shops').doc('SK-MOBILES').collection('bills').doc(String(id)).set({id:String(id),isDeleted:false,_deleted:false,deletedAt:null,_syncUpdatedAt:Date.now(),_syncUpdatedBy:firebase.auth().currentUser.uid},{merge:true});}}catch(e){console.warn('Recycle Bin cloud bill restore failed:',e);}}
+  window.restoreFromTrash=async function(trashId){
+    purgeExpiredTrash();const list=readRecycle(),index=list.findIndex(x=>String(x.trashId)===String(trashId));if(index<0){showToast?.('❌ Recycle item not found');return;}const item=list[index];
+    try{
+      if(item.type==='bill'){
+        const bill=item.data,bills=Array.isArray(savedBills)?savedBills.slice():[];if(!bills.some(b=>String(b?.id||'')===String(bill?.id||'')))bills.push(bill);savedBills=bills;localStorage.setItem('sk_bills',JSON.stringify(bills));await restoreCloudBill(bill?.id);updateBillHistoryCount?.();renderBillHistory?.();loadSavedBills?.();updateBillPreview?.();
+      }else if(item.type==='credit'){
+        const entry=item.data,a=(()=>{try{const x=JSON.parse(localStorage.getItem('sk_credit_ledger_v1')||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}})();if(!a.some(x=>String(x?.id||'')===String(entry?.id||'')))a.push(entry);localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(a));window.skCPRender?.();
+      }else if(item.type==='inventory'||item.type==='inventory-batch'){
+        const items=Array.isArray(item.data)?item.data:[item.data],a=Array.isArray(inventory)?inventory.slice():[];items.forEach(x=>{if(x&&!a.some(i=>String(i?.id)===String(x?.id)))a.push(x)});inventory=a;saveInventory?.();renderCards?.();
+      }else if(item.type==='order'||item.type==='order-batch'){
+        const items=Array.isArray(item.data)?item.data:[item.data],a=Array.isArray(ordersList)?ordersList.slice():[];items.forEach(x=>{if(x&&!a.some(o=>String(o?.id)===String(x?.id)))a.push(x)});ordersList=a;saveOrders?.();window.renderOrders?.();updateOrderBadge?.();renderCards?.();
+      }else if(item.type==='repair'){
+        let a=[];try{a=JSON.parse(localStorage.getItem('skx_repair_jobs_v2')||'[]')}catch(e){}if(!a.some(x=>String(x?.id)===String(item.data?.id)))a.push(item.data);localStorage.setItem('skx_repair_jobs_v2',JSON.stringify(a));window.skRjRenderJobs?.();window.skRjRenderHistory?.();window.skRjRenderHomeMetric?.();
+      }else if(item.type==='worker'){
+        const a=(()=>{try{const x=JSON.parse(localStorage.getItem('sk_workers_v1')||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}})();if(!a.some(x=>String(x?.id)===String(item.data?.id)))a.push(item.data);localStorage.setItem('sk_workers_v1',JSON.stringify(a));window.populateLogin?.();window.renderAdminWorkers?.();
+      }else if(item.type==='customer'){
+        const snap=item.data||{},bills=Array.isArray(snap.bills)?snap.bills:[],ledger=Array.isArray(snap.ledger)?snap.ledger:[];const current=(()=>{try{const x=JSON.parse(localStorage.getItem('sk_bills')||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}})();bills.forEach(b=>{if(b&&!current.some(x=>String(x?.id)===String(b?.id)))current.push(b)});localStorage.setItem('sk_bills',JSON.stringify(current));if(typeof savedBills!=='undefined')savedBills=current;const led=(()=>{try{const x=JSON.parse(localStorage.getItem('sk_credit_ledger_v1')||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}})();ledger.forEach(e=>{if(e&&!led.some(x=>String(x?.id)===String(e?.id)))led.push(e)});localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(led));for(const b of bills)await restoreCloudBill(b?.id);updateBillHistoryCount?.();renderBillHistory?.();loadSavedBills?.();window.skCPRender?.();renderCards?.();
+      }
+      list.splice(index,1);saveStoredData({recycleBin:list});renderRecycleBinUI();showToast?.('✅ Successfully restored');
+    }catch(err){console.error('Recycle Bin restore failed:',err);showToast?.('❌ Restore failed');}
+  };
+  window.permanentlyDeleteTrash=function(trashId){const list=readRecycle(),idx=list.findIndex(x=>String(x.trashId)===String(trashId));if(idx<0)return;if(!confirm('Permanently delete this Recycle Bin item? This cannot be undone.'))return;list.splice(idx,1);saveStoredData({recycleBin:list});renderRecycleBinUI();showToast?.('🗑️ Permanently deleted');};
+  window.skOpenRecycleBin=function(){const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();if(role&&role!=='admin'){showToast?.('🔒 Admin access only');return;}purgeExpiredTrash();renderRecycleBinUI();document.getElementById('skRecycleBinModal')?.classList.add('active');};
+  document.addEventListener('DOMContentLoaded',function(){purgeExpiredTrash();const empty=document.getElementById('btnEmptyRecycleBin');if(empty)empty.addEventListener('click',function(){const list=readRecycle();if(!list.length){showToast?.('Trash is already empty');return;}if(!confirm('Permanently clear all items in Recycle Bin? This cannot be undone.'))return;saveStoredData({recycleBin:[]});renderRecycleBinUI();showToast?.('🗑️ Trash cleared');});setInterval(purgeExpiredTrash,6*60*60*1000);});
 })();

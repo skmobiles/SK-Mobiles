@@ -1359,3 +1359,9 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
     0 12px 28px color-mix(in srgb,var(--primary) 13%,rgba(15,23,42,.14)),
     inset 0 1px 0 rgba(255,255,255,.96) !important;
 }
+
+/* SK V4.16 Firebase-safe Recycle Bin */
+#skRecycleBinModal:not(.active){display:none!important;}
+#recycleBinItemsContainer .sk-trash-row{background:var(--pill-bg);border:1px solid var(--card-border);border-radius:12px;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+#recycleBinItemsContainer .sk-trash-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
+#recycleBinItemsContainer .sk-trash-actions button{border:1px solid var(--card-border);border-radius:8px;padding:6px 9px;font-weight:800;cursor:pointer;}
