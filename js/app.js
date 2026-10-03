@@ -1556,8 +1556,15 @@ const MASTER_INVENTORY = [
     }
 
     function setTheme(theme) {
+      const allowedThemes = ['light','ocean','royal','sunset','emerald','rose','midnight','graphite','lime','dark','cyber','obsidian'];
+      if (!allowedThemes.includes(theme)) theme = 'light';
       document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.setAttribute('data-icon-pack', theme);
+      document.querySelectorAll('.theme-card-btn[data-theme-choice]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-theme-choice') === theme);
+      });
       localStorage.setItem('sk_theme', theme);
+      localStorage.setItem('sk_icon_pack', theme);
       showToast("Theme applied: " + theme.toUpperCase());
     }
 
