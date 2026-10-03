@@ -1156,7 +1156,6 @@ const MASTER_INVENTORY = [
       if (typeEl) typeEl.innerText = currentMobileType;
       const termsEl = document.getElementById('pvTerms');
       if (termsEl) termsEl.innerText = getMobileTerms(currentMobileType);
-      skApplyKeypadFields();
       saveDraft();
       updateBillPreview();
     }
@@ -1811,38 +1810,13 @@ const MASTER_INVENTORY = [
       showToast("New item added successfully!");
     }
 
-    /* SK V4.16 RECYCLE BIN: additive 30-day soft-delete layer. */
-const SK_RECYCLE_KEY='sk_recycle_bin_v1',SK_RECYCLE_DAYS=30;
-function skRecycleRead(){try{const a=JSON.parse(localStorage.getItem(SK_RECYCLE_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return [];}}
-function skRecycleWrite(a){localStorage.setItem(SK_RECYCLE_KEY,JSON.stringify(Array.isArray(a)?a:[]));}
-function skRecyclePurge(){const cut=Date.now()-SK_RECYCLE_DAYS*86400000,a=skRecycleRead(),k=a.filter(x=>Number(x?.deletedAt||0)>cut);if(k.length!==a.length)skRecycleWrite(k);return k;}
-function skRecycleAdd(type,data,label){if(data==null)return;const a=skRecyclePurge();a.unshift({id:'RB-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),type:String(type||'item'),label:String(label||type||'Deleted item'),deletedAt:Date.now(),data:data});skRecycleWrite(a);}
-function skRecycleEscape(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-window.skOpenRecycleBin=function(){if(typeof admin==='function'&&!admin()){showToast?.('🔒 Admin access only');return;}skRecyclePurge();document.getElementById('skRecycleBinModal')?.classList.add('active');skRecycleRender();};
-window.skCloseRecycleBin=function(){document.getElementById('skRecycleBinModal')?.classList.remove('active');};
-window.skRecycleRender=function(){const box=document.getElementById('skRecycleList'),count=document.getElementById('skRecycleCount'),a=skRecyclePurge();if(count)count.textContent=a.length;if(!box)return;if(!a.length){box.innerHTML='<div class="empty-state" style="display:block;">♻️ Recycle Bin is empty.</div>';return;}box.innerHTML=a.map(x=>{const days=Math.max(0,SK_RECYCLE_DAYS-Math.floor((Date.now()-Number(x.deletedAt||Date.now()))/86400000));return '<div class="sk-recycle-item"><div class="sk-recycle-main"><div class="sk-recycle-title">'+skRecycleEscape(x.label)+'</div><div class="sk-recycle-meta">'+skRecycleEscape(x.type)+' • '+days+' day(s) remaining</div></div><div class="sk-recycle-actions"><button type="button" class="sk-recycle-restore" onclick="skRecycleRestore(\''+x.id+'\')">↩️ Restore</button><button type="button" class="sk-recycle-delete" onclick="skRecyclePermanentDelete(\''+x.id+'\')">🗑️ Delete</button></div></div>';}).join('');};
-async function billsRestoreToCloud(bills){try{if(!(window.firebase?.auth?.currentUser&&window.firebase.firestore))return;for(const b of bills){if(!b?.id)continue;await firebase.firestore().collection('shops').doc('SK-MOBILES').collection('bills').doc(String(b.id)).set({...b,isDeleted:false,_deleted:false,_restoredAt:Date.now(),_syncUpdatedAt:Date.now()},{merge:true});}}catch(e){console.warn('Recycle customer cloud restore failed',e);}}
-window.skRecycleRestore=function(id){if(typeof admin==='function'&&!admin()){showToast?.('🔒 Admin access only');return;}const a=skRecyclePurge(),i=a.findIndex(x=>x.id===id);if(i<0)return;const x=a[i];let ok=false;try{
-if(x.type==='bill'){const l=Array.isArray(savedBills)?savedBills.slice():[];if(!l.some(b=>String(b?.id||'')===String(x.data?.id||''))){l.push(x.data);savedBills=l;localStorage.setItem('sk_bills',JSON.stringify(l));}try{if(window.firebase?.auth?.currentUser&&window.firebase.firestore)firebase.firestore().collection('shops').doc('SK-MOBILES').collection('bills').doc(String(x.data.id)).set({...x.data,isDeleted:false,_deleted:false,_restoredAt:Date.now(),_syncUpdatedAt:Date.now()},{merge:true});}catch(e){}updateBillHistoryCount?.();renderBillHistory?.();loadSavedBills?.();ok=true;
-}else if(x.type==='inventory'){const l=Array.isArray(inventory)?inventory.slice():[];if(!l.some(z=>String(z?.id||'')===String(x.data?.id||''))){l.push(x.data);inventory=l;window.inventory=inventory;saveInventory();renderCards();}ok=true;
-}else if(x.type==='repair'){const l=typeof load==='function'?load():[];if(!l.some(z=>String(z?.id||'')===String(x.data?.id||''))){l.push(x.data);save(l);skRjRenderJobs?.();skRjRenderHistory?.();skRjRenderHomeMetric?.();}ok=true;
-}else if(x.type==='order'){const l=Array.isArray(ordersList)?ordersList.slice():[];if(!l.some(z=>String(z?.id||'')===String(x.data?.id||''))){l.push(x.data);ordersList=l;localStorage.setItem('sk_orders',JSON.stringify(l));updateOrderBadge?.();renderOrders?.();}ok=true;
-}else if(x.type==='worker'){const l=typeof workers==='function'?workers():[];if(!l.some(z=>String(z?.id||'')===String(x.data?.id||''))){l.push(x.data);saveWorkers(l);populateLogin?.();renderAdminWorkers?.();}ok=true;
-}else if(x.type==='customer'){const d=x.data||{},bs=Array.isArray(d.bills)?d.bills.map(v=>v.b||v).filter(Boolean):[],es=Array.isArray(d.entries)?d.entries:[],cb=cpBills(),mb=cb.slice();bs.forEach(b=>{if(!mb.some(z=>String(z?.id||'')===String(b.id||'')))mb.push(b);});localStorage.setItem('sk_bills',JSON.stringify(mb));savedBills=mb;const le=cpLedger(),ml=le.slice();es.forEach(e=>{if(!ml.some(z=>String(z?.id||'')===String(e.id||'')))ml.push(e);});localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(ml));
-      billsRestoreToCloud(bs);
-      updateBillHistoryCount?.();renderBillHistory?.();skCPRender?.();ok=true;
-}}catch(e){console.error('Recycle restore failed',e);}if(ok){a.splice(i,1);skRecycleWrite(a);skRecycleRender();showToast?.('↩️ Restored successfully');}else showToast?.('❌ Restore failed');};
-window.skRecyclePermanentDelete=function(id){if(typeof admin==='function'&&!admin()){showToast?.('🔒 Admin access only');return;}const a=skRecyclePurge(),i=a.findIndex(x=>x.id===id);if(i<0)return;const x=a[i];if(!confirm('Permanently delete this recycled item?\n\n'+x.label+'\n\nThis cannot be restored.'))return;a.splice(i,1);skRecycleWrite(a);skRecycleRender();showToast?.('🗑️ Permanently deleted');};
-setInterval(function(){try{skRecyclePurge();}catch(e){}},3600000);
-
-function deleteInventoryItem(id) {
+    function deleteInventoryItem(id) {
       if (!confirm("Are you sure you want to delete this inventory item?")) return;
-      const removed=inventory.find(i=>String(i?.id)===String(id));
-      if(!removed){showToast("Item not found!");return;}
-      skRecycleAdd('inventory',removed,'Inventory: '+(removed.name||removed.model||removed.id||'Item'));
-      inventory=inventory.filter(i=>String(i?.id)!==String(id));
-      saveInventory(); renderCards(); toggleModal('longPressMenuModal',false);
-      showToast("Item moved to Recycle Bin!");
+      inventory = inventory.filter(i => i.id !== id);
+      saveInventory();
+      renderCards();
+      toggleModal('longPressMenuModal', false);
+      showToast("Item deleted!");
     }
 
     // Direct inventory long-press selection logic for Tempered Glass and Touch Combo.
@@ -1997,11 +1971,11 @@ function deleteInventoryItem(id) {
         return;
       }
 
-      if(!confirm(ids.length===1?'Delete this box? It will move to Recycle Bin.':'Delete '+ids.length+' selected boxes? They will move to Recycle Bin.')) return;
-      inventory.filter(item=>ids.includes(item.id)).forEach(item=>skRecycleAdd('inventory',item,'Inventory: '+(item.name||item.model||item.id||'Item')));
-      inventory=inventory.filter(item=>!ids.includes(item.id));
-      saveInventory(); window.skCancelTemperedSelection(); renderCards();
-      showToast(ids.length===1?'Box moved to Recycle Bin!':`${ids.length} boxes moved to Recycle Bin!`);
+      inventory = inventory.filter(item => !ids.includes(item.id));
+      saveInventory();
+      window.skCancelTemperedSelection();
+      renderCards();
+      showToast(ids.length === 1 ? 'Box deleted!' : `${ids.length} boxes deleted!`);
     };
 
     function syncInventorySelectionUI() {
@@ -2791,9 +2765,8 @@ function deleteInventoryItem(id) {
       const ram = document.getElementById('billRam').value;
       const storage = document.getElementById('billStorage').value;
       const color = document.getElementById('billColor').value;
-      const comboSpecs = currentMobileType === 'Keypad Mobile' ? '' : [ram, storage, color].filter(Boolean).join(' / ');
+      const comboSpecs = [ram, storage, color].filter(Boolean).join(' / ');
       document.getElementById('pvStorage').innerText = comboSpecs || '---';
-      skApplyKeypadFields();
 
       document.getElementById('pvImei1').innerText = document.getElementById('billImei1').value || '---';
 
@@ -2901,20 +2874,16 @@ function deleteInventoryItem(id) {
     // 🔒 SK V4.8 LOCKED: Bill History must render every synced bill safely and keep Delete visible.
     // Do not remove the Delete action or change the locked bill-number formats.
     // Core Bill History renderer: View / Edit / Delete are implemented directly here.
-    let skBillHistoryTypeFilter = '';
-window.setBillHistoryTypeFilter=function(type,btn){skBillHistoryTypeFilter=String(type||'');document.querySelectorAll('#billHistoryTypeFilters .bill-history-type-filter').forEach(function(b){b.classList.toggle('active',b===btn);});renderBillHistory?.();};
-function skApplyKeypadFields(){const keypad=currentMobileType==='Keypad Mobile',g=document.getElementById('billRamStorageGroup'),r=document.getElementById('pvStorageRow'),ram=document.getElementById('billRam'),st=document.getElementById('billStorage');if(g)g.style.display=keypad?'none':'grid';if(r)r.style.display=keypad?'none':'table-row';if(keypad){if(ram)ram.value='';if(st)st.value='';}if(ram)ram.disabled=keypad;if(st)st.disabled=keypad;}
-function renderBillHistory() {
+    function renderBillHistory() {
       const container=document.getElementById('billHistoryContainer'); if(!container)return;
       const q=(document.getElementById('billHistorySearch')?.value||'').trim().toLowerCase();
       const payFilter=document.getElementById('billHistoryPayFilter')?.value||''; const dateFilter=document.getElementById('billHistoryDateFilter')?.value||'';
-      const typeFilter=String(skBillHistoryTypeFilter||'');
       container.innerHTML=''; const source=Array.isArray(savedBills)?savedBills:[];
       const filtered=source.filter(b=>{
         if(!b)return false; const values=[b.custName,b.phone,b.model,b.id,b.billNo].map(v=>String(v||''));
-        const matchesQuery=!q||values.join(' ').toLowerCase().includes(q); const matchesPay=payFilter?String(b.payMode||'')===payFilter:true; const matchesType=typeFilter?String(b.mobileType||'New Mobile')===typeFilter:true; let matchesDate=true;
+        const matchesQuery=!q||values.join(' ').toLowerCase().includes(q); const matchesPay=payFilter?String(b.payMode||'')===payFilter:true; let matchesDate=true;
         if(dateFilter){const p=dateFilter.split('-');if(p.length===3){const wanted=p[0]+p[1].padStart(2,'0')+p[2].padStart(2,'0');matchesDate=skBillDateKey(b.date)===wanted;}}
-        return matchesQuery&&matchesPay&&matchesType&&matchesDate;
+        return matchesQuery&&matchesPay&&matchesDate;
       });
       if(!filtered.length){container.innerHTML=`<div class="empty-state">${source.length?'No saved billing history matches this filter.':'No saved billing history found.'}</div>`;return;}
       filtered.forEach(b=>{
@@ -2941,9 +2910,8 @@ window.deleteBillSafely=async function(billId){
   const bill=list[idx];
   const displayNo=bill.billNo||bill.id||id;
   const customer=bill.custName||'Customer';
-  if(!confirm('Delete this saved bill?\\n\\nBill: '+displayNo+'\\nCustomer: '+customer+'\\n\\nIt will move to Recycle Bin for 30 days.'))return;
+  if(!confirm('Delete this saved bill?\\n\\nBill: '+displayNo+'\\nCustomer: '+customer+'\\n\\nThis will remove it from Bill History.'))return;
   try{
-    skRecycleAdd('bill',bill,'Bill: '+displayNo+' • '+customer);
     const next=list.filter(function(_,i){return i!==idx});
     savedBills=next;
     localStorage.setItem('sk_bills',JSON.stringify(next));
@@ -3288,10 +3256,8 @@ img{max-width:100%!important}
   };
 
   window.skRjDelete=function(id){
-    const current=load(),job=current.find(x=>String(x?.id)===String(id)); if(!job)return;
-    if(!confirm('Delete this repair job? It will move to Recycle Bin for 30 days.'))return;
-    skRecycleAdd('repair',job,'Repair: '+(job.customer||job.model||job.id||'Job'));
-    save(current.filter(x=>x.id!==id)); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
+    if(!confirm('Delete this repair job?'))return;
+    save(load().filter(x=>x.id!==id)); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
   };
 
   window.skRjCallPhone=function(phone){
@@ -3698,7 +3664,7 @@ img{max-width:100%!important}
       const base=idx>=0?a[idx]:{photo:DEFAULT_PHOTO};Object.assign(base,{name,id,password,phone:document.getElementById('skWorkerEditPhone').value.trim(),designation:document.getElementById('skWorkerEditDesignation').value.trim()||'Worker',details:document.getElementById('skWorkerEditDetails').value.trim()});
       const f=document.getElementById('skWorkerEditPhoto').files[0];fileToData(f,data=>{if(data)base.photo=data;if(idx>=0)a[idx]=base;else a.push(base);saveWorkers(a);populateLogin();renderAdminWorkers();toast(idx>=0?'Worker updated':'Worker added');skCloseWorkerEdit();});
     };
-    window.skDeleteWorker=function(index){if(!admin())return;const a=workers();if(!a[index])return;const removed=a[index];if(!confirm('Delete this worker? It will move to Recycle Bin for 30 days.'))return;skRecycleAdd('worker',removed,'Worker: '+(removed.name||removed.id||'Worker'));const id=removed.id;a.splice(index,1);saveWorkers(a);if(localStorage.getItem(CURRENT_WORKER_KEY)===id)localStorage.removeItem(CURRENT_WORKER_KEY);populateLogin();renderAdminWorkers();toast('Worker moved to Reycle Bin');};
+    window.skDeleteWorker=function(index){if(!admin())return;const a=workers();if(!a[index])return;if(!confirm('Delete this worker?'))return;const id=a[index].id;a.splice(index,1);saveWorkers(a);if(localStorage.getItem(CURRENT_WORKER_KEY)===id)localStorage.removeItem(CURRENT_WORKER_KEY);populateLogin();renderAdminWorkers();toast('Worker deleted');};
     function renderAdminWorkers(){const box=document.getElementById('skWorkerAdminList');if(!box)return;const a=workers();box.innerHTML=a.length?a.map((w,i)=>'<div class="sk-worker-row"><img class="sk-worker-avatar" src="'+(w.photo||DEFAULT_PHOTO)+'"><div class="sk-worker-row-main"><div class="sk-worker-row-name">'+esc(w.name)+' <span style="font-size:.64rem;color:var(--text-muted)">('+esc(w.id)+')</span></div><div class="sk-worker-row-sub">'+esc(w.designation||'Worker')+' • '+esc(w.phone||'No phone')+'</div><div class="sk-worker-row-sub">🔑 Password: <span class="sk-password-view">'+esc(w.password)+'</span></div></div><div class="sk-worker-row-actions"><button class="sk-mini-btn" onclick="skOpenWorkerEdit('+i+')">✏️</button><button class="sk-mini-btn sk-mini-danger" onclick="skDeleteWorker('+i+')">🗑️</button></div></div>').join(''):'<div style="font-size:.74rem;color:var(--text-muted);padding:8px;text-align:center;">No workers added</div>';const c=document.getElementById('skWorkerCount');if(c)c.textContent=a.length;}
     function addManager(){ const box=document.getElementById('skWorkerAdminManager'); if(box) box.remove(); }
     function intercept(){
@@ -5054,8 +5020,7 @@ img{max-width:100%!important}
       return;
     }
 
-    if(!confirm('Clear all orders? They will move to Recycle Bin for 30 days.')) return;
-    list.forEach(function(order){skRecycleAdd('order',order,'Order: '+(order.name||order.model||order.id||'Order'));});
+    if(!confirm('Clear all orders?')) return;
 
     /* Keep inventory's existing ordered flags in sync. */
     list.forEach(function(order){
@@ -5071,7 +5036,7 @@ img{max-width:100%!important}
     if(typeof updateOrderBadge === 'function') updateOrderBadge();
     if(typeof renderCards === 'function') renderCards();
     window.renderOrders();
-    if(typeof showToast === 'function') showToast('All orders moved to Recycle Bin.');
+    if(typeof showToast === 'function') showToast('All orders cleared.');
   };
 
   /* Ensure the modal renders whenever it is opened, including existing callers. */
@@ -5919,10 +5884,9 @@ window.skCPDeleteCustomer=async function(k){
  var c=cpGetCustomers().find(function(x){return x.key===k});
  if(!c)return;
  var bills=c.bills.map(function(x){return x.b&&x.b.id?String(x.b.id):''}).filter(Boolean);
- var msg='Delete this customer?\n\nCustomer: '+c.name+'\nBills: '+bills.length+'\nLedger entries: '+c.entries.length+'\n\nIt will move to Recycle Bin for 30 days.';
+ var msg='Delete this customer permanently?\n\nCustomer: '+c.name+'\nBills: '+bills.length+'\nLedger entries: '+c.entries.length+'\n\nThis action cannot be restored.';
  if(!confirm(msg))return;
  try{
-   skRecycleAdd('customer',c,'Customer: '+c.name);
    // Remove bill records locally first so the customer disappears immediately.
    var currentBills=cpBills();
    var billSet=new Set(bills);
@@ -5948,7 +5912,7 @@ window.skCPDeleteCustomer=async function(k){
    if(typeof renderBillHistory==='function')renderBillHistory();
    if(typeof skImportFromBills==='function')skImportFromBills(true);
    skCPRender();
-   if(typeof showToast==='function')showToast('♻️ Customer moved to Recycle Bin');
+   if(typeof showToast==='function')showToast('🗑️ Customer permanently deleted');
  }catch(e){
    console.error('Customer delete failed',e);
    if(typeof showToast==='function')showToast('❌ Customer delete failed');

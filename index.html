@@ -335,7 +335,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <label class="form-label">Model *</label> <input class="form-input" id="billModel" onfocus="handleInputClear(this)" oninput="saveDraft(); updateBillPreview()" placeholder="Galaxy A55 / iPhone 13" required="" type="text"/>
 </div>
 </div>
-<div id="billRamStorageGroup" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;">
 <div>
 <label class="form-label">RAM</label> <input class="form-input" id="billRam" onfocus="handleInputClear(this)" oninput="saveDraft(); updateBillPreview()" placeholder="8GB" type="text"/>
 </div>
@@ -463,7 +463,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <td style="padding:7px;color:#475569;">Device Model</td>
 <td id="pvDevice" style="padding:7px;text-align:right;font-weight:800;color:#0f172a;">---</td>
 </tr>
-<tr id="pvStorageRow" style="border-bottom:1px solid #e2e8f0;">
+<tr style="border-bottom:1px solid #e2e8f0;">
 <td style="padding:7px;color:#475569;">RAM / Storage / Colour</td>
 <td id="pvStorage" style="padding:7px;text-align:right;">---</td>
 </tr>
@@ -548,13 +548,8 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </form>
 </div>
 <div id="billHistoryView" style="display:none;">
-<div class="bill-filter-bar" style="display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:6px; margin-bottom:8px;">
+<div class="bill-filter-bar" style="display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:6px; margin-bottom:10px;">
 <input class="form-input" id="billHistorySearch" oninput="renderBillHistory()" placeholder="Search customer, phone, model..." type="text"/> <select class="form-input" id="billHistoryPayFilter" onchange="renderBillHistory()"> <option value="">All Payments</option> <option value="Cash">Cash</option> <option value="GPay">GPay / UPI</option> <option value="EMI">EMI</option> <option value="Credit">Credit</option> </select> <input class="form-input" id="billHistoryDateFilter" onchange="renderBillHistory()" title="Filter by bill date" type="date" lang="en-GB">
-</div><div id="billHistoryTypeFilters" class="bill-history-type-filters" aria-label="Mobile type filter">
-<button type="button" class="bill-history-type-filter active" data-type="" onclick="setBillHistoryTypeFilter('',this)">All</button>
-<button type="button" class="bill-history-type-filter" data-type="New Mobile" onclick="setBillHistoryTypeFilter('New Mobile',this)">📱 New Mobile</button>
-<button type="button" class="bill-history-type-filter" data-type="Used Mobile" onclick="setBillHistoryTypeFilter('Used Mobile',this)">♻️ Used Mobile</button>
-<button type="button" class="bill-history-type-filter" data-type="Keypad Mobile" onclick="setBillHistoryTypeFilter('Keypad Mobile',this)">⌨️ Keypad Mobile</button>
 </div>
 <div id="billHistoryContainer" style="display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto;"></div>
 </div>
@@ -768,23 +763,11 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
   <div id="skManagerPermissionList" style="display:grid;gap:6px;"></div>
 </div>
 <div class="sk-admin-box" style="margin-top:10px;">
-  <div class="sk-admin-title">RECYCLE BIN</div>
-  <button class="submit-btn" type="button" onclick="skOpenRecycleBin()" style="background:var(--pill-bg);color:var(--text);border:1px solid var(--card-border);">♻️ Open Recycle Bin</button>
-  <div style="font-size:.62rem;color:var(--text-muted);margin-top:6px;">Deleted records are kept for 30 days. Restore or permanently delete them from here.</div>
-</div>
-<div class="sk-admin-box" style="margin-top:10px;">
   <div class="sk-admin-title">ADMIN ONLY</div>
   <button class="submit-btn" type="button" onclick="skAdminResetAllData()" style="background:#dc2626;color:#fff;border:none;">🗑️ Reset All App Data</button>
   <div style="font-size:.62rem;color:var(--text-muted);margin-top:6px;">Local app data only. This action cannot be undone.</div>
 </div>
 <button class="submit-btn" onclick="skLogout()" style="background:#dc2626;color:#fff;border:none;">🔒 Logout</button>
-</div>
-</div>
-<div class="modal-overlay" id="skRecycleBinModal" style="z-index:2147483200!important;">
-<div class="modal-sheet" style="max-width:460px;max-height:88vh;overflow:auto;">
-<div class="modal-title"><span>♻️ Recycle Bin</span><button class="modal-close-btn" onclick="skCloseRecycleBin()" type="button">✕</button></div>
-<div class="sk-recycle-toolbar"><div><b id="skRecycleCount">0</b> deleted item(s)</div><div style="font-size:.64rem;color:var(--text-muted);">Auto-delete after 30 days</div></div>
-<div id="skRecycleList"></div>
 </div>
 </div>
 <!-- SK MOBILES SCOPE-ONLY FIXES: additive layer for login, data-folder picker, settings shortcut and centered home -->
