@@ -1152,7 +1152,7 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
 
 
 /* =========================================================
-   V4.15 REQUESTED BUTTON / GLASS POLISH — SCOPED ADDITIVE
+   V4.16 REQUESTED BUTTON / GLASS POLISH — SCOPED ADDITIVE
    ========================================================= */
 
 /* Theme gradients used by primary/action buttons. */
@@ -1294,21 +1294,8 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
   transform:scale(.96);
 }
 
-/* Home matrix cards: match the Welcome banner's active theme family without
-   changing the rest of the application's card system. */
-.sk-home-metric-card,
-.sk-home-action-row{
-  background:
-    linear-gradient(135deg,
-      color-mix(in srgb,var(--primary) 16%,#ffffff 84%),
-      color-mix(in srgb,var(--primary) 5%,#ffffff 95%)) !important;
-  border-color:color-mix(in srgb,var(--primary) 18%,#ffffff 82%) !important;
-  box-shadow:
-    0 12px 28px color-mix(in srgb,var(--primary) 12%,transparent),
-    inset 0 1px 0 rgba(255,255,255,.78) !important;
-}
-.sk-home-metric-card > div,
-.sk-home-action-row > div{color:var(--text);}
+/* Home metric/action matrix cards: lift the dark background slightly while
+   retaining the active theme's hue. */
 [data-theme="dark"] .sk-home-metric-card,
 [data-theme="midnight"] .sk-home-metric-card,
 [data-theme="obsidian"] .sk-home-metric-card,
@@ -1319,16 +1306,56 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
 [data-theme="obsidian"] .sk-home-action-row,
 [data-theme="graphite"] .sk-home-action-row,
 [data-theme="cyber"] .sk-home-action-row{
-  background:
-    linear-gradient(135deg,
-      color-mix(in srgb,var(--primary) 28%,#0f172a 72%),
-      color-mix(in srgb,var(--primary) 12%,#1e293b 88%)) !important;
-  border-color:color-mix(in srgb,var(--primary) 28%,rgba(148,163,184,.28)) !important;
-  box-shadow:
-    0 14px 32px color-mix(in srgb,var(--primary) 18%,transparent),
-    inset 0 1px 0 rgba(255,255,255,.16) !important;
+  background:color-mix(in srgb,var(--card-bg) 82%,#ffffff 18%) !important;
 }
 
 /* Remove the duplicate Home Repair Jobs matrix card; keep the main metric
    and the separate Urgent Repair Jobs alert card. */
 #skHomeRepairMetric{display:none !important;}
+
+
+/* =========================================================
+   SK V6 FIX — HOME MATRIX SURFACE
+   Replace the dark theme-filled matrix background with the
+   light frosted surface shown in the requested reference.
+   Theme identity remains on the banner, border and glow.
+   Scoped only to Home metric/action cards.
+   ========================================================= */
+#homeMetricGrid .sk-home-metric-card,
+#homeActionCardsContainer .sk-home-action-row{
+  background:
+    linear-gradient(145deg,
+      color-mix(in srgb,#ffffff 94%,var(--primary) 6%),
+      color-mix(in srgb,#f8fafc 88%,var(--primary) 12%)) !important;
+  border:1px solid color-mix(in srgb,var(--primary) 24%,#ffffff 76%) !important;
+  box-shadow:
+    0 10px 24px color-mix(in srgb,var(--primary) 8%,rgba(15,23,42,.10)),
+    inset 0 1px 0 rgba(255,255,255,.92) !important;
+  color:var(--text) !important;
+}
+#homeMetricGrid .sk-home-metric-card:hover,
+#homeActionCardsContainer .sk-home-action-row:hover{
+  border-color:color-mix(in srgb,var(--primary) 38%,#ffffff 62%) !important;
+  box-shadow:
+    0 14px 30px color-mix(in srgb,var(--primary) 12%,rgba(15,23,42,.12)),
+    inset 0 1px 0 rgba(255,255,255,.96) !important;
+}
+[data-theme="dark"] #homeMetricGrid .sk-home-metric-card,
+[data-theme="midnight"] #homeMetricGrid .sk-home-metric-card,
+[data-theme="obsidian"] #homeMetricGrid .sk-home-metric-card,
+[data-theme="graphite"] #homeMetricGrid .sk-home-metric-card,
+[data-theme="cyber"] #homeMetricGrid .sk-home-metric-card,
+[data-theme="dark"] #homeActionCardsContainer .sk-home-action-row,
+[data-theme="midnight"] #homeActionCardsContainer .sk-home-action-row,
+[data-theme="obsidian"] #homeActionCardsContainer .sk-home-action-row,
+[data-theme="graphite"] #homeActionCardsContainer .sk-home-action-row,
+[data-theme="cyber"] #homeActionCardsContainer .sk-home-action-row{
+  background:
+    linear-gradient(145deg,
+      color-mix(in srgb,#ffffff 92%,var(--primary) 8%),
+      color-mix(in srgb,#eef2ff 84%,var(--primary) 16%)) !important;
+  border-color:color-mix(in srgb,var(--primary) 34%,#ffffff 66%) !important;
+  box-shadow:
+    0 12px 28px color-mix(in srgb,var(--primary) 13%,rgba(15,23,42,.14)),
+    inset 0 1px 0 rgba(255,255,255,.96) !important;
+}

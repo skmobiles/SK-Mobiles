@@ -2820,15 +2820,10 @@ const MASTER_INVENTORY = [
         const set = (key,id) => { bill[key] = document.getElementById(id)?.value || ''; };
         set('custName','billCustName'); set('phone','billCustPhone'); set('address','billCustAddress'); set('brand','billBrand'); set('model','billModel');
         set('ram','billRam'); set('storage','billStorage'); set('color','billColor'); set('imei1','billImei1'); set('imei2','billImei2'); set('package','billPackage');
-        bill.mobileType=currentMobileType; bill.payMode=currentPayMode; bill.price=price;
-        bill.paymentReceipts=Array.isArray(bill.paymentReceipts)?bill.paymentReceipts:[];
-        var linkedPaid=bill.paymentReceipts.filter(function(r){return String(r.type||'payment')==='payment';}).reduce(function(s,r){return s+Math.max(0,Number(r.amount)||0)},0);
-        var linkedCredit=bill.creditAdjustments&&Array.isArray(bill.creditAdjustments)?bill.creditAdjustments.reduce(function(s,r){return s+Math.max(0,Number(r.balance)||0)},0):0;
-        bill.paymentBaseAdvance=Number.isFinite(Number(bill.paymentBaseAdvance))?Math.max(0,Number(bill.paymentBaseAdvance)):advance;
-        bill.advance=advance;
+        bill.mobileType=currentMobileType; bill.payMode=currentPayMode; bill.price=price; bill.advance=advance;
         bill.emiMonths=parseInt(document.getElementById('billEmiMonths').value,10)||0; bill.emiInterest=parseFloat(document.getElementById('billEmiInterest').value)||0;
         bill.emiStartDate=document.getElementById('billEmiStartDate').value||''; bill.creditDueDate=document.getElementById('billCreditDate').value||'';
-        bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-bill.paymentBaseAdvance+linkedCredit-linkedPaid):0;
+        bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-advance):0;
         bill.emiHtml=currentPayMode==='EMI'?document.getElementById('pvEmiScheduleTbody').innerHTML:'';
         localStorage.setItem('sk_bills',JSON.stringify(savedBills)); window.__skEditingBillId='';
         const btn=document.querySelector('.bill-action-save'); if(btn){const sp=btn.querySelector('span:last-child');if(sp)sp.textContent='Save Bill';}
@@ -2899,7 +2894,50 @@ const MASTER_INVENTORY = [
       });
     }
 
-    function editSavedBill(idx) {
+    
+/* SK V6 FIX: Saved Bill History delete action.
+   The existing History button already calls deleteBillSafely(id), but the
+   handler was missing in this source. Keep the operation explicit,
+   confirmed, and synchronized without touching unrelated bill fields. */
+window.deleteBillSafely=async function(billId){
+  const id=String(billId||'').trim();
+  if(!id){showToast?.('❌ Bill ID not found');return}
+  const list=Array.isArray(savedBills)?savedBills:[];
+  const idx=list.findIndex(function(b){
+    return String(b?.id||'')===id || String(b?.billId||'')===id || String(b?.billNo||'')===id;
+  });
+  if(idx<0){showToast?.('❌ Bill not found');return}
+  const bill=list[idx];
+  const displayNo=bill.billNo||bill.id||id;
+  const customer=bill.custName||'Customer';
+  if(!confirm('Delete this saved bill?\\n\\nBill: '+displayNo+'\\nCustomer: '+customer+'\\n\\nThis will remove it from Bill History.'))return;
+  try{
+    const next=list.filter(function(_,i){return i!==idx});
+    savedBills=next;
+    localStorage.setItem('sk_bills',JSON.stringify(next));
+    if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
+    if(typeof renderBillHistory==='function')renderBillHistory();
+    if(typeof loadSavedBills==='function')loadSavedBills();
+    if(typeof updateBillPreview==='function')updateBillPreview();
+
+    /* Explicitly mark the same bill deleted in Firebase when the signed-in
+       Firebase SDK is available. The normal sync hook also handles this. */
+    try{
+      if(window.firebase?.auth && firebase.auth().currentUser && firebase.firestore){
+        await firebase.firestore().collection('shops').doc('SK-MOBILES').collection('bills')
+          .doc(id).set({id:id,isDeleted:true,_deleted:true,deletedAt:Date.now(),
+            deletedBy:firebase.auth().currentUser.uid,_syncUpdatedAt:Date.now(),
+            _syncUpdatedBy:firebase.auth().currentUser.uid},{merge:true});
+      }
+    }catch(cloudErr){console.warn('Saved bill cloud delete sync failed:',cloudErr)}
+    showToast?.('🗑️ Bill deleted');
+  }catch(err){
+    console.error('Saved bill delete failed:',err);
+    showToast?.('❌ Bill delete failed');
+  }
+};
+
+function editSavedBill(idx) {
       const b=savedBills[idx];
       if(!b){showToast('❌ Bill not found');return;}
       window.__skEditingBillId=String(b.id||'');
@@ -5359,10 +5397,33 @@ window.skOpenCreditEntry=function(){openEntry('credit',null)}
 window.skOpenPaymentEntry=function(){openEntry('payment',null)}
 window.skCloseCreditEntry=function(){document.getElementById('skCreditEntryModal')?.classList.remove('active')}
 window.skSaveCreditEntry=function(){
- const type=document.getElementById('skCreditEntryType').value,name=document.getElementById('skCreditName').value.trim(),phone=document.getElementById('skCreditPhone').value.trim(),amount=Number(document.getElementById('skCreditAmount').value)||0;
+ const btn=document.querySelector('#skCreditEntryModal .submit-btn');
+ if(btn && btn.dataset.skSaving==='1')return;
+ const type=document.getElementById('skCreditEntryType')?.value||'credit';
+ const name=(document.getElementById('skCreditName')?.value||'').trim();
+ const phone=(document.getElementById('skCreditPhone')?.value||'').trim();
+ const amount=Number(document.getElementById('skCreditAmount')?.value)||0;
  if(!name||amount<=0){toast('Customer name and amount required');return}
- const ok=addEntry({name,phone,type,amount,mode:document.getElementById('skCreditMode').value,date:document.getElementById('skCreditDate').value||todayISO(),details:document.getElementById('skCreditDetails').value.trim(),source:'manual'});
- if(!ok)return;skCloseCreditEntry();skRenderCreditCustomers();skOpenCustomer(encodeURIComponent(customerKey(name,phone)));toast(type==='payment'?'Payment added • balance reduced':'Credit added • balance increased')
+ if(type!=='credit'&&type!=='payment'){toast('Invalid credit/payment type');return}
+ if(btn){btn.dataset.skSaving='1';btn.disabled=true}
+ try{
+   const entry={name,phone,type,amount,mode:document.getElementById('skCreditMode')?.value||'Cash',
+     date:document.getElementById('skCreditDate')?.value||todayISO(),
+     details:(document.getElementById('skCreditDetails')?.value||'').trim(),source:'manual'};
+   const ok=addEntry(entry);
+   if(!ok)throw new Error('Ledger entry was not saved');
+   const saved=ledger().some(e=>e.name===name&&e.phone===phone&&e.type===type&&Number(e.amount)===Number(amount));
+   if(!saved)throw new Error('Saved ledger entry could not be verified');
+   skCloseCreditEntry();
+   skRenderCreditCustomers();
+   skOpenCustomer(encodeURIComponent(customerKey(name,phone)));
+   toast(type==='payment'?'Payment added • balance reduced':'Credit added • balance increased');
+ }catch(err){
+   console.error('Customer credit/payment save failed:',err);
+   toast('❌ Save failed. Please try again');
+ }finally{
+   if(btn){btn.disabled=false;delete btn.dataset.skSaving}
+ }
 };
 function customerHtml(c){
  const next=c.entries.filter(e=>e.type==='emi'&&e.dueDate&&parseDate(e.dueDate)).filter(e=>parseDate(e.dueDate)>=new Date(new Date().setHours(0,0,0,0))).sort((a,b)=>parseDate(a.dueDate)-parseDate(b.dueDate))[0];
@@ -5687,76 +5748,6 @@ function cpSafe(k,f){try{var v=JSON.parse(localStorage.getItem(k)||'');return v=
 function cpBills(){var a=cpSafe('sk_bills',[]);return Array.isArray(a)?a:[]}
 function cpLedger(){var a=cpSafe('sk_credit_ledger_v1',[]);return Array.isArray(a)?a:[]}
 function cpMoney(n){return '₹'+(Number(n)||0).toLocaleString('en-IN')}
-
-/* V4.15 payment integrity repair: older Customer Credit saves could create the
-   payment ledger row without applying that payment to the selected sales bill.
-   Reconcile those existing rows once, attach them as bill receipts, and keep
-   the original down payment separate from later payments. */
-function cpRepairBillPaymentLinks(){
- var bills=cpBills(), entries=cpLedger(), changed=false;
- if(!Array.isArray(bills)||!Array.isArray(entries))return false;
- bills.forEach(function(b){
-   if(!b||!b.id||String(b.payMode||'')==='Cash')return;
-   b.paymentReceipts=Array.isArray(b.paymentReceipts)?b.paymentReceipts:[];
-   var linked=entries.filter(function(e){
-     if(!e||e.type!=='payment')return false;
-     var ref=String(e.billId||'');
-     var billNo=String(b.billNo||'');
-     var details=String(e.details||'');
-     return ref===String(b.id) || (billNo&&ref===billNo) || (billNo&&details.indexOf(billNo)!==-1);
-   });
-   if(!linked.length&&b.paymentReceipts.length===0)return;
-
-   var receiptChanged=false;
-   linked.forEach(function(e){
-     var exists=b.paymentReceipts.some(function(r){
-       return (e.id&&r.ledgerId&&String(r.ledgerId)===String(e.id)) ||
-         (Number(r.amount||0)===Number(e.amount||0)&&String(r.date||'')===String(e.date||'')&&String(r.mode||'')===String(e.mode||''));
-     });
-     if(!exists){
-       b.paymentReceipts.push({
-         id:'RCP-LINK-'+String(e.id||Date.now()).slice(-12),
-         ledgerId:e.id||'',billId:b.id,date:e.date||cpDate(),
-         amount:Math.max(0,Number(e.amount)||0),mode:e.mode||'Cash',
-         note:e.details||'',type:'payment'
-       });
-       receiptChanged=true;
-     }
-   });
-
-   var paymentSum=b.paymentReceipts.filter(function(r){return String(r.type||'payment')==='payment';})
-     .reduce(function(a,r){return a+Math.max(0,Number(r.amount)||0)},0);
-   var price=Math.max(0,Number(b.price)||0);
-   var advance=Math.max(0,Number(b.advance)||0);
-   var balance=Math.max(0,Number(b.balance)||0);
-   var baseAdvance=Number(b.paymentBaseAdvance);
-
-   if(!Number.isFinite(baseAdvance)){
-     /* If the stored balance still equals price - advance, payments were not
-        applied to the bill yet. Otherwise, if advance includes the linked
-        payments, remove those payments to recover the original down payment. */
-     if(Math.abs(balance-Math.max(0,price-advance))<0.01){
-       baseAdvance=advance;
-     }else if(paymentSum>0 && advance>=paymentSum && Math.abs(balance-Math.max(0,price-advance+paymentSum))<0.01){
-       baseAdvance=Math.max(0,advance-paymentSum);
-     }else{
-       baseAdvance=Math.max(0,Math.min(price,advance));
-     }
-     b.paymentBaseAdvance=baseAdvance;
-     changed=true;
-   }
-
-   var creditNet=Array.isArray(b.creditAdjustments)?b.creditAdjustments.reduce(function(a,x){
-     return a+Math.max(0,Number(x.balance)||0);
-   },0):0;
-   var expected=Math.max(0,price-baseAdvance+creditNet-paymentSum);
-   if(Math.abs(balance-expected)>0.01){b.balance=expected;changed=true;}
-   if(b.advance!==baseAdvance){b.advance=baseAdvance;changed=true;}
-   if(receiptChanged)changed=true;
- });
- if(changed)localStorage.setItem('sk_bills',JSON.stringify(bills));
- return changed;
-}
 function cpDigits(v){return String(v||'').replace(/\D/g,'')}
 function cpKey(n,p){return String(n||'').trim().toLowerCase()+'|'+cpDigits(p)}
 function cpEsc(v){return String(v==null?'':v).replace(/[&<>'"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]})}
@@ -5765,8 +5756,6 @@ function cpDateText(v){if(!v)return '';var d=new Date(v);if(!isNaN(d))return `${
 function cpBillLast3(id){var x=String(id||'').replace(/\D/g,'');return x.slice(-3)||String(id||'').slice(-3)}
 function cpGetCustomers(){
  var map={}, bills=cpBills(), led=cpLedger();
- cpRepairBillPaymentLinks();
- bills=cpBills();
  bills.forEach(function(b,i){
    if(!b.custName)return;
    var k=cpKey(b.custName,b.phone);
@@ -5969,13 +5958,12 @@ window.skCPRecalcForm=function(){
 window.skCPToggleEmi=function(){document.getElementById('skCPEmiFields').style.display=document.getElementById('skCPEmiMode').value==='emi'?'grid':'none'}
 function cpSaveLedgerEntry(e){var a=cpLedger();e.id=e.id||'CP-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);e.key=cpKey(e.name,e.phone);a.push(e);localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(a))}
 /* 🔒 SK V4.4 LOCKED: Payment must reduce the selected purchase bill balance and create/retain its receipt attachment. Fully paid bills must not open the Payment form. */
-function cpUpdateBill(idx,type,amount,advance,data){
- var bs=cpBills(),b=bs[idx];if(!b)return null;
+function cpUpdateBill(idx,type,amount,advance,data,bsOverride){
+ var bs=Array.isArray(bsOverride)?bsOverride:cpBills(),b=bs[idx];if(!b)return null;
  b.paymentReceipts=Array.isArray(b.paymentReceipts)?b.paymentReceipts:[];
  if(type==='payment'){
    var before=Math.max(0,Number(b.balance)||0),pay=Math.min(before,amount);
-   b.paymentBaseAdvance=Number.isFinite(Number(b.paymentBaseAdvance))?Number(b.paymentBaseAdvance):Math.max(0,Number(b.advance)||0);
-   b.balance=Math.max(0,before-pay);
+   b.balance=Math.max(0,before-pay);b.advance=(Number(b.advance)||0)+pay;
    b.paymentReceipts.push({id:'RCP-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),billId:b.id,date:data.date,amount:pay,mode:data.mode,note:data.note||'',type:'payment'});
    return pay;
  }
@@ -5986,10 +5974,7 @@ function cpUpdateBill(idx,type,amount,advance,data){
  b.paymentReceipts.push({id:'RCP-CR-'+Date.now().toString().slice(-8),billId:b.id,date:data.date,amount:net,mode:'Credit',note:data.note||'',type:'credit'});
  return net;
 }
-window.skCPSaveAction=function(ev){
- if(ev&&typeof ev.preventDefault==='function')ev.preventDefault();
- var saveButton=document.querySelector('#skCreditActionModal .sk-cp-save-btn');
- if(saveButton&&saveButton.dataset.saving==='1')return;
+window.skCPSaveAction=function(){
  var type=(document.getElementById('skCPActionType')?.value||'').trim();
  var name=(document.getElementById('skCPName')?.value||'').trim();
  var phone=(document.getElementById('skCPPhone')?.value||'').trim();
@@ -6005,28 +5990,97 @@ window.skCPSaveAction=function(ev){
  var bill=billIndex!==null?bills[billIndex]:null;
  var customer=cpGetCustomers().find(function(c){return c.key===cpKey(name,phone)})||null;
 
+ /* A customer without a selected sales bill is a valid ledger-only entry.
+    Keep bill-linked behaviour unchanged; only branch to the manual ledger path
+    when the form explicitly has no bill. */
  if(!bill&&customer&&customer.bills&&customer.bills.length){
-   var pending=customer.bills.find(function(x){return Number(x.b.balance||0)>0;})||customer.bills[0];
-   billIndex=pending.idx;bill=bills[billIndex];
-   const select=document.getElementById('skCPBill');if(select)select.value=String(billIndex);
- }
- if(!bill){
-   showToast?.('Please select the customer purchase bill');
-   return;
+   var pending=customer.bills.find(function(x){return Number(x.b.balance||0)>0;});
+   if(pending){
+     billIndex=pending.idx;bill=bills[billIndex];
+     var select=document.getElementById('skCPBill');if(select)select.value=String(billIndex);
+   }
  }
 
  var note=(document.getElementById('skCPNote')?.value||'').trim();
  var category=document.getElementById('skCPCategory')?.value||'Mobile Sale';
  var mode=type==='payment'?(document.getElementById('skCPPaymentMode')?.value||'Cash'):'Credit';
+
+ /* Ledger-only path: "No sales bill — ledger only" is intentionally supported.
+    Credit creates only the net outstanding after advance.
+    Payment reduces the existing manual-ledger outstanding and creates its receipt/history row. */
+ if(!bill){
+   try{
+     var ledgerEntries=cpLedger();
+     var manualEntries=ledgerEntries.filter(function(e){
+       return String(e.source||'')!=='bill' && !e.billId &&
+         cpKey(e.name,e.phone)===cpKey(name,phone);
+     });
+     var manualCredits=manualEntries.filter(function(e){
+       return e.type==='credit'||e.type==='emi';
+     }).reduce(function(sum,e){return sum+(Number(e.amount)||0)},0);
+     var manualPayments=manualEntries.filter(function(e){
+       return e.type==='payment';
+     }).reduce(function(sum,e){return sum+(Number(e.amount)||0)},0);
+     var manualBalance=Math.max(0,manualCredits-manualPayments);
+
+     if(type==='payment'){
+       if(manualBalance<=0){
+         showToast?.('No outstanding ledger balance for this customer');
+         return;
+       }
+       var payment=Math.min(manualBalance,amount);
+       if(payment<=0){showToast?.('Payment could not be applied');return;}
+       cpSaveLedgerEntry({
+         name:name,phone:phone,type:'payment',amount:payment,mode:mode,date:date,
+         details:(note||'Payment received')+' • Ledger only',
+         source:'manual-payment-page',billId:'',dueDate:''
+       });
+       if(typeof skImportFromBills==='function')skImportFromBills(true);
+       if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
+       if(typeof renderBillHistory==='function')renderBillHistory();
+       if(typeof loadSavedBills==='function')loadSavedBills();
+       skCPCloseAction();skCPRender();
+       var refreshedPay=cpGetCustomers().find(function(c){return c.key===cpKey(name,phone)});
+       if(refreshedPay)cpOpenDetail(refreshedPay);
+       showToast?.('Payment saved • ledger receipt created');
+       return;
+     }
+
+     var netCredit=Math.max(0,amount-advance);
+     if(netCredit<=0){
+       showToast?.('Credit amount after advance must be greater than zero');
+       return;
+     }
+     cpSaveLedgerEntry({
+       name:name,phone:phone,type:'credit',amount:netCredit,mode:'Credit',date:date,
+       details:(note||'Credit entry')+' • Ledger only'+(advance>0?' • Advance '+cpMoney(advance):''),
+       source:'manual-credit-page',billId:'',dueDate:'',category:category,
+       originalAmount:amount,advance:advance
+     });
+     if(typeof skImportFromBills==='function')skImportFromBills(true);
+     if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
+     if(typeof renderBillHistory==='function')renderBillHistory();
+     if(typeof loadSavedBills==='function')loadSavedBills();
+     skCPCloseAction();skCPRender();
+     var refreshedCredit=cpGetCustomers().find(function(c){return c.key===cpKey(name,phone)});
+     if(refreshedCredit)cpOpenDetail(refreshedCredit);
+     showToast?.('Credit saved • ledger balance updated');
+     return;
+   }catch(err){
+     console.error('Ledger-only credit/payment save failed:',err);
+     showToast?.('❌ Save failed. Please try again.');
+     return;
+   }
+ }
+
  var currentBalance=Math.max(0,Number(bill.balance)||0);
  if(currentBalance<=0){showToast?.('Selected bill has no pending balance');return;}
 
  var applied=type==='payment'?Math.min(currentBalance,amount):Math.max(0,amount-advance);
  if(type==='credit' && applied<=0){showToast?.('Credit amount after advance must be greater than zero');return;}
- if(saveButton)saveButton.dataset.saving='1';
 
  try{
-   var update=cpUpdateBill(billIndex,type,amount,advance,{date:date,mode:mode,note:note,category:category});
+   var update=cpUpdateBill(billIndex,type,amount,advance,{date:date,mode:mode,note:note,category:category},bills);
    if(type==='payment'&&update<=0){showToast?.('Payment could not be applied');return;}
 
    localStorage.setItem('sk_bills',JSON.stringify(bills));
@@ -6052,8 +6106,6 @@ window.skCPSaveAction=function(ev){
  }catch(err){
    console.error('Credit/Payment save failed:',err);
    showToast?.('❌ Save failed. Please try again.');
- }finally{
-   if(saveButton)saveButton.dataset.saving='0';
  }
 };
 function cpOpenPage(){
