@@ -1635,14 +1635,21 @@ const MASTER_INVENTORY = [
       }
     };
 
-    const THEME_ICON_PACK = { light:'classic', dark:'classic', ocean:'wave', emerald:'wave', royal:'luxury', obsidian:'luxury', sunset:'soft', rose:'soft', midnight:'orbit', cyber:'neon', graphite:'angular', lime:'angular', aurora:'prism', crimson:'pulse', mint:'leaf', solar:'retro' };
+    const THEME_ICON_PACK = { light:'classic', dark:'classic', ocean:'wave', emerald:'wave', royal:'luxury', obsidian:'luxury', sunset:'soft', rose:'soft', midnight:'orbit', cyber:'neon', graphite:'angular', lime:'angular', aurora:'prism', crimson:'pulse', mint:'leaf', solar:'retro', nebula:'orbit', forest:'leaf', glacier:'wave', magenta:'neon' };
 
-    const SK_THEME_STATUS_COLORS = {light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',sunset:'#ffedd5',emerald:'#d1fae5',rose:'#ffe4e6',midnight:'#111827',graphite:'#111827',lime:'#0f1a05',dark:'#050811',cyber:'#03040a',obsidian:'#000000',aurora:'#cffafe',crimson:'#ffe4e6',mint:'#ccfbf1',solar:'#000000'};
+    const SK_THEME_STATUS_COLORS = {light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',sunset:'#ffedd5',emerald:'#d1fae5',rose:'#ffe4e6',midnight:'#111827',graphite:'#111827',lime:'#0f1a05',dark:'#050811',cyber:'#03040a',obsidian:'#000000',aurora:'#cffafe',crimson:'#ffe4e6',mint:'#ccfbf1',solar:'#000000',nebula:'#17102f',forest:'#062e1c',glacier:'#e0f2fe',magenta:'#2b092f'};
     const SK_APP_FONTS = {
       jakarta:"'Plus Jakarta Sans', sans-serif", inter:"'Inter', sans-serif", poppins:"'Poppins', sans-serif",
       nunito:"'Nunito', sans-serif", rubik:"'Rubik', sans-serif", manrope:"'Manrope', sans-serif",
       dm:"'DM Sans', sans-serif", space:"'Space Grotesk', sans-serif", lato:"'Lato', sans-serif",
-      outfit:"'Outfit', sans-serif", serif:"Georgia, 'Times New Roman', serif", mono:"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+      outfit:"'Outfit', sans-serif", roboto:"'Roboto', sans-serif", montserrat:"'Montserrat', sans-serif",
+      opensans:"'Open Sans', sans-serif", raleway:"'Raleway', sans-serif", quicksand:"'Quicksand', sans-serif",
+      fira:"'Fira Sans', sans-serif", work:"'Work Sans', sans-serif", lexend:"'Lexend', sans-serif",
+      sora:"'Sora', sans-serif", urbanist:"'Urbanist', sans-serif", barlow:"'Barlow', sans-serif",
+      archivo:"'Archivo', sans-serif", mulish:"'Mulish', sans-serif", karla:"'Karla', sans-serif",
+      cabin:"'Cabin', sans-serif", source:"'Source Sans 3', sans-serif", ibmplex:"'IBM Plex Sans', sans-serif",
+      josefin:"'Josefin Sans', sans-serif", playfair:"'Playfair Display', serif",
+      serif:"Georgia, 'Times New Roman', serif", mono:"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
     };
     function skUpdateThemeChrome(theme){
       try{
@@ -1662,20 +1669,33 @@ const MASTER_INVENTORY = [
     }
     window.setAppFont=setAppFont;
     function openAppFontPicker(){
-      const body=document.getElementById('skThemeIconPanelBody');
-      const btn=document.getElementById('skThemePanelToggle');
-      if(body && body.getAttribute('data-collapsed')==='1'){
-        body.setAttribute('data-collapsed','0');
-        if(btn){btn.setAttribute('aria-expanded','true');btn.textContent='⌃ Minimise';}
-        localStorage.setItem('sk_theme_panel_collapsed','0');
-      }
-      const sel=document.getElementById('skFontFamilySelect');
-      if(sel){
-        sel.scrollIntoView({behavior:'smooth',block:'center'});
-        setTimeout(()=>{try{sel.focus({preventScroll:true});}catch(e){sel.focus();}},180);
-      }
+      const modal=document.getElementById('skFontPickerModal');
+      if(!modal) return;
+      renderAppFontPicker();
+      toggleModal('skFontPickerModal', true);
     }
     window.openAppFontPicker=openAppFontPicker;
+    function renderAppFontPicker(){
+      const grid=document.getElementById('skFontPickerGrid');
+      if(!grid) return;
+      const labels={
+        jakarta:'Plus Jakarta Sans',inter:'Inter',poppins:'Poppins',nunito:'Nunito',rubik:'Rubik',
+        manrope:'Manrope',dm:'DM Sans',space:'Space Grotesk',lato:'Lato',outfit:'Outfit',
+        roboto:'Roboto',montserrat:'Montserrat',opensans:'Open Sans',raleway:'Raleway',quicksand:'Quicksand',
+        fira:'Fira Sans',work:'Work Sans',lexend:'Lexend',sora:'Sora',urbanist:'Urbanist',
+        barlow:'Barlow',archivo:'Archivo',mulish:'Mulish',karla:'Karla',cabin:'Cabin',
+        source:'Source Sans 3',ibmplex:'IBM Plex Sans',josefin:'Josefin Sans',playfair:'Playfair Display',
+        serif:'Classic Serif',mono:'Clean Mono'
+      };
+      const current=localStorage.getItem('sk_font_family')||'jakarta';
+      grid.innerHTML=Object.keys(labels).map(k=>`<button type="button" class="sk-font-choice${k===current?' active':''}" data-font-key="${k}" style="font-family:${SK_APP_FONTS[k]}" onclick="selectAppFontCard('${k}',this)"><span>${labels[k]}</span><small>SK MOBILES • 12345</small></button>`).join('');
+    }
+    function selectAppFontCard(fontKey, el){
+      setAppFont(fontKey, false);
+      document.querySelectorAll('.sk-font-choice').forEach(x=>x.classList.remove('active'));
+      if(el) el.classList.add('active');
+    }
+    window.selectAppFontCard=selectAppFontCard;
     function toggleThemeIconPanel(){
       const body=document.getElementById('skThemeIconPanelBody'),btn=document.getElementById('skThemePanelToggle');
       if(!body)return;
@@ -1694,7 +1714,7 @@ const MASTER_INVENTORY = [
     }
 
     function setTheme(theme, silent) {
-      const allowedThemes = ['light','ocean','royal','sunset','emerald','rose','midnight','graphite','lime','dark','cyber','obsidian','aurora','crimson','mint','solar'];
+      const allowedThemes = ['light','ocean','royal','sunset','emerald','rose','midnight','graphite','lime','dark','cyber','obsidian','aurora','crimson','mint','solar','nebula','forest','glacier','magenta'];
       if (!allowedThemes.includes(theme)) theme = 'light';
       document.documentElement.setAttribute('data-theme', theme);
       const iconPack = THEME_ICON_PACK[theme] || 'classic';
@@ -6321,4 +6341,24 @@ window.skOpenCreditLedger=cpOpenPage;
   window.permanentlyDeleteTrash=function(trashId){const list=readRecycle(),idx=list.findIndex(x=>String(x.trashId)===String(trashId));if(idx<0)return;if(!confirm('Permanently delete this Recycle Bin item? This cannot be undone.'))return;list.splice(idx,1);saveStoredData({recycleBin:list});renderRecycleBinUI();showToast?.('🗑️ Permanently deleted');};
   window.skOpenRecycleBin=function(){const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();if(role&&role!=='admin'){showToast?.('🔒 Admin access only');return;}purgeExpiredTrash();renderRecycleBinUI();document.getElementById('skRecycleBinModal')?.classList.add('active');};
   document.addEventListener('DOMContentLoaded',function(){purgeExpiredTrash();const empty=document.getElementById('btnEmptyRecycleBin');if(empty)empty.addEventListener('click',function(){const list=readRecycle();if(!list.length){showToast?.('Trash is already empty');return;}if(!confirm('Permanently clear all items in Recycle Bin? This cannot be undone.'))return;saveStoredData({recycleBin:[]});renderRecycleBinUI();showToast?.('🗑️ Trash cleared');});setInterval(purgeExpiredTrash,6*60*60*1000);});
+})();
+
+/* SK REQUEST: Repair Tools / IC Spares note grows with its content. */
+(function(){
+  function resizeRepairSparesNote(){
+    const el=document.getElementById('repairSparesNoteInput');
+    if(!el) return;
+    el.style.setProperty('height','auto','important');
+    el.style.setProperty('height',Math.max(180,el.scrollHeight)+'px','important');
+  }
+  function initRepairSparesNote(){
+    const el=document.getElementById('repairSparesNoteInput');
+    if(!el || el.dataset.skAutoGrowBound==='1') return;
+    el.dataset.skAutoGrowBound='1';
+    el.addEventListener('input',resizeRepairSparesNote,{passive:true});
+    setTimeout(resizeRepairSparesNote,0);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initRepairSparesNote);
+  else initRepairSparesNote();
+  window.skResizeRepairSparesNote=resizeRepairSparesNote;
 })();
