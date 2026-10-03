@@ -1294,8 +1294,21 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
   transform:scale(.96);
 }
 
-/* Home metric/action matrix cards: lift the dark background slightly while
-   retaining the active theme's hue. */
+/* Home matrix cards: match the Welcome banner's active theme family without
+   changing the rest of the application's card system. */
+.sk-home-metric-card,
+.sk-home-action-row{
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb,var(--primary) 16%,#ffffff 84%),
+      color-mix(in srgb,var(--primary) 5%,#ffffff 95%)) !important;
+  border-color:color-mix(in srgb,var(--primary) 18%,#ffffff 82%) !important;
+  box-shadow:
+    0 12px 28px color-mix(in srgb,var(--primary) 12%,transparent),
+    inset 0 1px 0 rgba(255,255,255,.78) !important;
+}
+.sk-home-metric-card > div,
+.sk-home-action-row > div{color:var(--text);}
 [data-theme="dark"] .sk-home-metric-card,
 [data-theme="midnight"] .sk-home-metric-card,
 [data-theme="obsidian"] .sk-home-metric-card,
@@ -1306,7 +1319,14 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
 [data-theme="obsidian"] .sk-home-action-row,
 [data-theme="graphite"] .sk-home-action-row,
 [data-theme="cyber"] .sk-home-action-row{
-  background:color-mix(in srgb,var(--card-bg) 82%,#ffffff 18%) !important;
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb,var(--primary) 28%,#0f172a 72%),
+      color-mix(in srgb,var(--primary) 12%,#1e293b 88%)) !important;
+  border-color:color-mix(in srgb,var(--primary) 28%,rgba(148,163,184,.28)) !important;
+  box-shadow:
+    0 14px 32px color-mix(in srgb,var(--primary) 18%,transparent),
+    inset 0 1px 0 rgba(255,255,255,.16) !important;
 }
 
 /* Remove the duplicate Home Repair Jobs matrix card; keep the main metric
