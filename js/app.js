@@ -1660,12 +1660,59 @@ const MASTER_INVENTORY = [
     }
     function setAppFont(fontKey, silent){
       if(!SK_APP_FONTS[fontKey]) fontKey='jakarta';
+      const family=SK_APP_FONTS[fontKey];
+      const labelMap={
+        jakarta:'Plus Jakarta Sans',inter:'Inter',poppins:'Poppins',nunito:'Nunito',rubik:'Rubik',
+        manrope:'Manrope',dm:'DM Sans',space:'Space Grotesk',lato:'Lato',outfit:'Outfit',
+        roboto:'Roboto',montserrat:'Montserrat',opensans:'Open Sans',raleway:'Raleway',quicksand:'Quicksand',
+        fira:'Fira Sans',work:'Work Sans',lexend:'Lexend',sora:'Sora',urbanist:'Urbanist',
+        barlow:'Barlow',archivo:'Archivo',mulish:'Mulish',karla:'Karla',cabin:'Cabin',
+        source:'Source Sans 3',ibmplex:'IBM Plex Sans',josefin:'Josefin Sans',playfair:'Playfair Display',
+        serif:'Classic Serif',mono:'Clean Mono'
+      };
       document.documentElement.setAttribute('data-font-family',fontKey);
-      document.documentElement.style.setProperty('--app-font',SK_APP_FONTS[fontKey]);
+      document.documentElement.style.setProperty('--app-font',family);
       localStorage.setItem('sk_font_family',fontKey);
-      const sel=document.getElementById('skFontFamilySelect'); if(sel) sel.value=fontKey;
-      const preview=document.getElementById('skFontPreview'); if(preview) preview.style.fontFamily=SK_APP_FONTS[fontKey];
-      if(!silent && typeof showToast==='function') showToast('Font applied: '+fontKey.toUpperCase());
+
+      /* Force the selected family onto the rendered app, including elements
+         that previously had their own fixed font-family declaration. */
+      try{
+        document.body.style.setProperty('font-family',family,'important');
+        const viewport=document.querySelector('.app-viewport');
+        if(viewport) viewport.style.setProperty('font-family',family,'important');
+      }catch(e){}
+
+      const sel=document.getElementById('skFontFamilySelect');
+      if(sel) sel.value=fontKey;
+
+      const preview=document.getElementById('skFontPreview');
+      if(preview){
+        preview.style.setProperty('font-family',family,'important');
+        preview.innerHTML='<strong>'+labelMap[fontKey]+'</strong><span>SK MOBILES — Sample Text 12345</span><small>Regular • Medium • Bold</small>';
+      }
+
+      /* Update the selectable font cards immediately so the chosen typeface
+         is visible before the user closes the picker. */
+      document.querySelectorAll('.sk-font-choice').forEach(function(card){
+        const key=card.getAttribute('data-font-key');
+        card.classList.toggle('active',key===fontKey);
+        if(SK_APP_FONTS[key]) card.style.setProperty('font-family',SK_APP_FONTS[key],'important');
+      });
+
+      /* Ask the browser to load the requested web font, then re-apply the
+         family so a cached/fallback face cannot remain visually stuck. */
+      try{
+        if(document.fonts && document.fonts.load){
+          document.fonts.load('400 16px '+family).then(function(){
+            document.documentElement.style.setProperty('--app-font',family);
+            document.body.style.setProperty('font-family',family,'important');
+            if(viewport) viewport.style.setProperty('font-family',family,'important');
+            if(preview) preview.style.setProperty('font-family',family,'important');
+          }).catch(function(){});
+        }
+      }catch(e){}
+
+      if(!silent && typeof showToast==='function') showToast('Font applied: '+(labelMap[fontKey]||fontKey));
     }
     window.setAppFont=setAppFont;
     function openAppFontPicker(){
@@ -1688,7 +1735,11 @@ const MASTER_INVENTORY = [
         serif:'Classic Serif',mono:'Clean Mono'
       };
       const current=localStorage.getItem('sk_font_family')||'jakarta';
-      grid.innerHTML=Object.keys(labels).map(k=>`<button type="button" class="sk-font-choice${k===current?' active':''}" data-font-key="${k}" style="font-family:${SK_APP_FONTS[k]}" onclick="selectAppFontCard('${k}',this)"><span>${labels[k]}</span><small>SK MOBILES • 12345</small></button>`).join('');
+      grid.innerHTML=Object.keys(labels).map(k=>`<button type="button" class="sk-font-choice${k===current?' active':''}" data-font-key="${k}" onclick="selectAppFontCard('${k}',this)"><span>${labels[k]}</span><small>SK MOBILES • 12345</small></button>`).join('');
+      grid.querySelectorAll('.sk-font-choice').forEach(function(card){
+        const key=card.getAttribute('data-font-key');
+        if(SK_APP_FONTS[key]) card.style.setProperty('font-family',SK_APP_FONTS[key],'important');
+      });
     }
     function selectAppFontCard(fontKey, el){
       setAppFont(fontKey, false);
