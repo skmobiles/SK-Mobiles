@@ -569,16 +569,28 @@
     .bill-emi-schedule-preview th { background: #fef3c7; color: #92400e; padding: 6px 8px; text-align: left; font-weight: 800; }
     .bill-emi-schedule-preview td { padding: 6px 8px; border-top: 1px solid #fef9c3; color: #1e293b; }
 
-    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; height: 72px; background: var(--bottom-nav-bg); border-top: 1px solid var(--card-border); display: flex; justify-content: space-evenly; align-items: center; gap: 2px; z-index: 100; padding: 7px 6px max(7px, env(safe-area-inset-bottom)); box-sizing: border-box; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 -10px 28px rgba(15,23,42,0.08); }
-    .nav-item { position: relative; flex: 1 1 0; min-width: 0; height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--text-muted); font-size: 10.5px; font-weight: 750; border: none; background: transparent; cursor: pointer; text-align: center; border-radius: 15px; transition: color .2s ease, transform .18s ease, background .2s ease; }
-    .nav-item::before { content: ''; position: absolute; top: 3px; left: 50%; width: 0; height: 3px; border-radius: 99px; background: var(--primary); transform: translateX(-50%); opacity: 0; transition: width .2s ease, opacity .2s ease; }
-    .nav-item:hover { background: var(--badge-bg); color: var(--primary); }
+    .bottom-nav { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); width: calc(100% - 20px); max-width: 420px; height: 70px; background: color-mix(in srgb, var(--bottom-nav-bg) 76%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--card-border)); border-radius: 30px; display: flex; justify-content: space-evenly; align-items: center; gap: 2px; z-index: 100; padding: 6px 7px; box-sizing: border-box; backdrop-filter: blur(28px) saturate(155%); -webkit-backdrop-filter: blur(28px) saturate(155%); box-shadow: 0 18px 42px rgba(15,23,42,.18), 0 5px 16px rgba(15,23,42,.10), inset 0 1px 0 rgba(255,255,255,.28); overflow: visible; }
+    .bottom-nav::before { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(120deg, rgba(255,255,255,.20), transparent 35%, rgba(168,85,247,.08) 68%, rgba(255,255,255,.12)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.10); }
+    .nav-item { position: relative; flex: 1 1 0; min-width: 0; height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-muted); font-size: 10.5px; font-weight: 750; border: none; background: transparent; cursor: pointer; text-align: center; border-radius: 18px; transition: color .24s ease, transform .18s cubic-bezier(.2,.9,.25,1.25), background .24s ease, filter .24s ease; -webkit-tap-highlight-color: transparent; z-index: 1; }
+    .nav-item::before { content: ''; position: absolute; top: 3px; left: 50%; width: 0; height: 3px; border-radius: 99px; background: var(--primary); box-shadow: 0 0 10px color-mix(in srgb, var(--primary) 75%, transparent); transform: translateX(-50%); opacity: 0; transition: width .24s ease, opacity .24s ease; }
+    .nav-item::after { content: ''; position: absolute; inset: 9px 7px 7px; border-radius: 17px; background: color-mix(in srgb, var(--primary) 10%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 16%, transparent); opacity: 0; transform: scale(.88); transition: opacity .24s ease, transform .24s ease; pointer-events: none; }
+    .nav-item:hover { background: color-mix(in srgb, var(--primary) 7%, transparent); color: var(--primary); }
     .nav-item:active { transform: scale(.92); }
     .nav-item.active { color: var(--primary) !important; font-weight: 900; }
     .nav-item.active::before { width: 22px; opacity: 1; }
-    .nav-item svg { width: 22px; height: 22px; stroke-width: 2.2; flex-shrink: 0; transition: transform .2s ease, filter .2s ease; }
-    .nav-item.active svg { transform: translateY(-1px); filter: drop-shadow(0 4px 8px rgba(37,99,235,.22)); }
-    .nav-item span { line-height: 1; }
+    .nav-item.active::after { opacity: 1; transform: scale(1); }
+    .nav-item svg { width: 22px; height: 22px; stroke-width: 1.9; flex-shrink: 0; transition: transform .24s cubic-bezier(.2,.9,.25,1.25), filter .24s ease, stroke-width .24s ease; position: relative; z-index: 2; }
+    .nav-item.active svg { transform: translateY(-1px) scale(1.06); stroke-width: 2.25; filter: drop-shadow(0 0 7px color-mix(in srgb, var(--primary) 55%, transparent)); }
+    .nav-item span { line-height: 1; position: relative; z-index: 2; transition: transform .24s ease; }
+    .nav-item.active span { transform: translateY(-1px); }
+    #navHome { flex: 0 0 66px; height: 66px; margin-top: -27px; border-radius: 50%; color: #fff !important; background: linear-gradient(145deg, color-mix(in srgb, #c4b5fd 92%, var(--primary)), #6d28d9 58%, #4c1d95); border: 2px solid rgba(255,255,255,.62); box-shadow: 0 0 0 4px color-mix(in srgb, #8b5cf6 18%, transparent), 0 10px 22px rgba(91,33,182,.38), 0 18px 32px rgba(76,29,149,.22), inset 0 2px 4px rgba(255,255,255,.40), inset 0 -5px 9px rgba(35,15,75,.25); }
+    #navHome::before { top: auto; bottom: -9px; width: 38px; height: 7px; background: #8b5cf6; opacity: .38; filter: blur(7px); box-shadow: 0 7px 18px rgba(124,58,237,.65); }
+    #navHome::after { inset: 4px; border-radius: 50%; opacity: 1; transform: none; background: linear-gradient(145deg, rgba(255,255,255,.20), transparent 45%, rgba(0,0,0,.08)); border: 1px solid rgba(255,255,255,.20); }
+    #navHome svg { width: 27px; height: 27px; stroke-width: 2.25; filter: drop-shadow(0 2px 3px rgba(0,0,0,.20)); }
+    #navHome span { font-size: 9px; margin-top: -1px; }
+    #navHome:active { transform: translateY(-3px) scale(.92); }
+    #navHome.active svg { transform: translateY(-1px) scale(1.08); filter: drop-shadow(0 0 8px rgba(255,255,255,.38)); }
+    @media (prefers-reduced-motion: reduce) { .bottom-nav, .nav-item, .nav-item svg, .nav-item span, .nav-item::before, .nav-item::after { transition: none !important; } }
     #navHome { flex: 0 0 62px; width: 62px; height: 62px; margin-top: -16px; border-radius: 50%; background: var(--primary-gradient); color: #fff !important; border: 2px solid var(--card-bg); box-shadow: 0 10px 25px -3px rgba(37,99,235,.35), 0 0 0 1px var(--primary); z-index: 5; gap: 2px; }
     #navHome::before { display: none; }
     #navHome svg { width: 26px; height: 26px; stroke-width: 2.2; }
