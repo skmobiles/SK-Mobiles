@@ -1149,3 +1149,166 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
   .sk-home-action-btn{width:100px !important;font-size:11px !important;}
   .sk-home-action-row{padding:0 9px !important;}
 }
+
+
+/* =========================================================
+   V4.15 REQUESTED BUTTON / GLASS POLISH — SCOPED ADDITIVE
+   ========================================================= */
+
+/* Theme gradients used by primary/action buttons. */
+:root[data-theme="ocean"]{
+  --primary-gradient:linear-gradient(135deg,#38bdf8 0%,#0ea5e9 100%);
+}
+:root[data-theme="royal"]{
+  --primary-gradient:linear-gradient(135deg,#a78bfa 0%,#7c3aed 100%);
+}
+:root[data-theme="cyber"]{
+  --primary-gradient:linear-gradient(135deg,#d946ef 0%,#22d3ee 100%);
+}
+:root[data-theme="obsidian"]{
+  --primary-gradient:linear-gradient(135deg,#fbbf24 0%,#d97706 100%);
+}
+/* Dark-theme glow stays color-adaptive instead of black. */
+:root[data-theme="dark"]{
+  --glass-shadow:0 8px 24px rgba(96,165,250,.24),0 0 18px rgba(59,130,246,.12);
+}
+
+/* Primary/action buttons: theme gradient + ambient theme glow. */
+.submit-btn,
+.btn-primary,
+.sk-login-btn,
+.bill-action-save,
+.bill-action-pdf,
+.bill-action-print,
+.sk-rj-next,
+.sk-home-action-btn{
+  background:var(--primary-gradient) !important;
+  color:#fff !important;
+  border-color:color-mix(in srgb,var(--primary) 58%,#fff 42%) !important;
+  border-radius:16px !important;
+  box-shadow:var(--glass-shadow),inset 0 1px 0 rgba(255,255,255,.28) !important;
+  transition:transform .18s ease,box-shadow .18s ease,filter .18s ease,background .22s ease !important;
+  will-change:transform,filter;
+}
+.submit-btn:hover,
+.btn-primary:hover,
+.sk-login-btn:hover,
+.bill-action-save:hover,
+.bill-action-pdf:hover,
+.bill-action-print:hover,
+.sk-rj-next:hover,
+.sk-home-action-btn:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.08);
+  box-shadow:var(--glass-shadow),inset 0 1px 0 rgba(255,255,255,.34) !important;
+}
+.submit-btn:active,
+.btn-primary:active,
+.sk-login-btn:active,
+.bill-action-save:active,
+.bill-action-pdf:active,
+.bill-action-print:active,
+.sk-rj-next:active,
+.sk-home-action-btn:active{
+  transform:scale(.96);
+  filter:brightness(.99);
+}
+
+/* WhatsApp remains action-specific emerald. */
+.submit-btn.whatsapp-green,
+.bill-action-wa{
+  background:linear-gradient(135deg,#34d399 0%,#059669 100%) !important;
+  border-color:rgba(52,211,153,.62) !important;
+  color:#fff !important;
+  box-shadow:0 8px 24px rgba(16,185,129,.28),0 0 16px rgba(52,211,153,.12) !important;
+}
+
+/* Glass Ghost / Outline controls. */
+.sk-rj-edit,
+#skRjCancelEdit,
+.btn-secondary,
+.billing-tab-btn,
+.pay-mode-btn,
+.sk-rj-tab,
+.sk-v43-entry-type button,
+.sk-v43-keep-actions button{
+  background:var(--badge-bg) !important;
+  border:1px solid var(--badge-border) !important;
+  color:var(--primary) !important;
+  border-radius:14px;
+  box-shadow:0 5px 14px color-mix(in srgb,var(--primary) 8%,transparent);
+  transition:transform .18s ease,background .22s ease,border-color .22s ease,
+             box-shadow .22s ease,color .22s ease,filter .18s ease;
+}
+.sk-rj-edit:hover,
+#skRjCancelEdit:hover,
+.btn-secondary:hover,
+.billing-tab-btn:hover,
+.pay-mode-btn:hover,
+.sk-rj-tab:hover,
+.sk-v43-entry-type button:hover,
+.sk-v43-keep-actions button:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.05);
+  box-shadow:var(--glass-shadow);
+}
+.sk-rj-edit:active,
+#skRjCancelEdit:active,
+.btn-secondary:active,
+.billing-tab-btn:active,
+.pay-mode-btn:active,
+.sk-rj-tab:active,
+.sk-v43-entry-type button:active,
+.sk-v43-keep-actions button:active{
+  transform:scale(.96);
+}
+/* Active tab/type state becomes the full theme gradient. */
+.billing-tab-btn.active,
+.pay-mode-btn.active,
+.sk-rj-tab.active,
+.sk-v43-entry-type button.active{
+  background:var(--primary-gradient) !important;
+  border-color:color-mix(in srgb,var(--primary) 58%,#fff 42%) !important;
+  color:#fff !important;
+  box-shadow:var(--glass-shadow) !important;
+}
+
+/* Delete / Logout: frosted glass with restrained coral-red edge. */
+.sk-rj-delete,
+.menu-drawer-btn.logout{
+  background:color-mix(in srgb,var(--badge-bg) 70%,rgba(251,113,133,.12)) !important;
+  border-color:rgba(251,113,133,.38) !important;
+  color:var(--danger) !important;
+  box-shadow:0 5px 16px rgba(251,113,133,.10),inset 0 1px 0 rgba(255,255,255,.16);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.sk-rj-delete:hover,
+.menu-drawer-btn.logout:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.05);
+  box-shadow:0 8px 20px rgba(251,113,133,.16),inset 0 1px 0 rgba(255,255,255,.22);
+}
+.sk-rj-delete:active,
+.menu-drawer-btn.logout:active{
+  transform:scale(.96);
+}
+
+/* Home metric/action matrix cards: lift the dark background slightly while
+   retaining the active theme's hue. */
+[data-theme="dark"] .sk-home-metric-card,
+[data-theme="midnight"] .sk-home-metric-card,
+[data-theme="obsidian"] .sk-home-metric-card,
+[data-theme="graphite"] .sk-home-metric-card,
+[data-theme="cyber"] .sk-home-metric-card,
+[data-theme="dark"] .sk-home-action-row,
+[data-theme="midnight"] .sk-home-action-row,
+[data-theme="obsidian"] .sk-home-action-row,
+[data-theme="graphite"] .sk-home-action-row,
+[data-theme="cyber"] .sk-home-action-row{
+  background:color-mix(in srgb,var(--card-bg) 82%,#ffffff 18%) !important;
+}
+
+/* Remove the duplicate Home Repair Jobs matrix card; keep the main metric
+   and the separate Urgent Repair Jobs alert card. */
+#skHomeRepairMetric{display:none !important;}
