@@ -1359,3 +1359,27 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
     0 12px 28px color-mix(in srgb,var(--primary) 13%,rgba(15,23,42,.14)),
     inset 0 1px 0 rgba(255,255,255,.96) !important;
 }
+
+/* V4.16 requested mobile history filters + Recycle Bin UI + popup layering */
+.bill-history-type-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.bill-history-type-filter{min-height:34px;padding:6px 8px;border-radius:12px;border:1px solid var(--card-border);background:var(--pill-bg);color:var(--text);font-size:.68rem;font-weight:850;cursor:pointer;box-shadow:var(--glass-shadow);transition:transform .16s ease,filter .16s ease,background .16s ease}
+.bill-history-type-filter:hover{transform:translateY(-1px);filter:brightness(1.04)}
+.bill-history-type-filter:active{transform:scale(.97)}
+.bill-history-type-filter.active{background:var(--primary-gradient);color:#fff;border-color:transparent}
+.sk-recycle-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;margin-bottom:9px;border:1px solid var(--card-border);background:var(--pill-bg);border-radius:12px;color:var(--text);font-size:.72rem}
+.sk-recycle-item{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:10px;margin-bottom:7px;border:1px solid var(--card-border);background:var(--card-bg);border-radius:14px;box-shadow:var(--glass-shadow)}
+.sk-recycle-main{min-width:0;flex:1}
+.sk-recycle-title{font-size:.75rem;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sk-recycle-meta{font-size:.62rem;color:var(--text-muted);margin-top:3px}
+.sk-recycle-actions{display:flex;gap:5px;flex-shrink:0}
+.sk-recycle-actions button{border-radius:9px;padding:7px 8px;font-size:.62rem;font-weight:850;cursor:pointer}
+.sk-recycle-restore{background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--text)}
+.sk-recycle-delete{background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.25);color:var(--danger)}
+#skRecycleBinModal.active{z-index:2147483500!important}
+#skRecycleBinModal.active .modal-sheet{z-index:2147483501!important}
+.modal-overlay.active{z-index:2147483000!important}
+.modal-overlay.active .modal-sheet{z-index:2147483001!important}
+#toast.toast{z-index:2147483600!important}
+#skUrgentNotifyBar{z-index:2147483550!important}
+.context-menu-sheet{position:relative;z-index:2147483002!important}
+@media(max-width:600px){.bill-history-type-filters{grid-template-columns:repeat(2,1fr)}.sk-recycle-item{align-items:flex-start;flex-direction:column}.sk-recycle-actions{width:100%}.sk-recycle-actions button{flex:1}}
