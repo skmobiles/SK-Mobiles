@@ -1555,16 +1555,76 @@ const MASTER_INVENTORY = [
       setTimeout(() => { toast.classList.remove('show'); }, 2200);
     }
 
+    const NAV_ICON_PACKS = {
+      classic: {
+        navGlass: '<rect x="4.2" y="3.2" width="15.6" height="17.6" rx="3"></rect><path d="M7.4 8.1h9.2M7.4 11.8h9.2M7.4 15.5h5.2"></path><path d="m15.2 15.1 1.3 1.3 2.2-2.6"></path>',
+        navCombo: '<rect x="4.2" y="2.8" width="15.6" height="18.4" rx="3"></rect><path d="M7.7 6.5h8.6M7.7 10.2h8.6M7.7 13.9h5.2"></path><path d="M15.7 17.4h1.6"></path>',
+        navHome: '<path d="m3.2 10.7 8.8-7.2 8.8 7.2"></path><path d="M5.5 9.6V20.5h13V9.6"></path><path d="M9.1 20.5v-5.7h5.8v5.7"></path>',
+        navBilling: '<path d="M6.2 3.4h8.4l3.2 3.2v14H6.2z"></path><path d="M14.6 3.4v4h4"></path><path d="M9.1 12.1h5.8M9.1 15.7h5.8"></path>',
+        navOrders: '<path d="M3.5 5.5h2l2.1 10.1h10.6l2.6-7H6.7"></path><circle cx="9.2" cy="19.5" r="1.35"></circle><circle cx="18" cy="19.5" r="1.35"></circle>'
+      },
+      wave: {
+        navGlass: '<rect x="5" y="3" width="14" height="18" rx="3"></rect><path d="M8 8c1.4-1.4 2.8 1.4 4.2 0S15 6.6 16 8M8 12c1.4-1.4 2.8 1.4 4.2 0S15 10.6 16 12M8 16c1.4-1.4 2.8 1.4 4.2 0"></path>',
+        navCombo: '<rect x="5" y="3" width="14" height="18" rx="3"></rect><path d="M8 7h8M8 10.5c1.5-1.2 2.8 1.2 4.2 0s2.8-1.2 3.8 0M8 14c1.5-1.2 2.8 1.2 4.2 0s2.8-1.2 3.8 0M10 17h4"></path>',
+        navHome: '<path d="M3.5 11 12 4l8.5 7"></path><path d="M5.5 10v10h13V10"></path><path d="M9 20v-5h6v5"></path><path d="M7.5 11.5c1.2-1.2 2.5 1.2 3.8 0s2.5-1.2 3.7 0 2.2 1.2 3.5 0"></path>',
+        navBilling: '<path d="M6 4h9l3 3v13H6z"></path><path d="M15 4v4h3M9 12h6M9 15h4"></path><path d="M8.5 9.2c1.2-1 2.3 1 3.5 0s2.3-1 3.5 0"></path>',
+        navOrders: '<path d="M3.5 6h2l2.2 10h10.2l2.5-7H6.4"></path><path d="M8 12c1.3-1 2.5 1 3.8 0s2.5-1 3.8 0"></path><circle cx="9" cy="19.5" r="1.3"></circle><circle cx="18" cy="19.5" r="1.3"></circle>'
+      },
+      luxury: {
+        navGlass: '<rect x="5" y="4" width="14" height="16" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path><path d="m15.5 14.5 1 1 2-2.5"></path>',
+        navCombo: '<rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8M8 11h8M8 15h5"></path><path d="M15 18h2"></path>',
+        navHome: '<path d="m3.5 10.8 8.5-6.8 8.5 6.8"></path><path d="M5.5 9.8v10.7h13V9.8"></path><path d="M9 20.5v-5.8h6v5.8"></path><path d="M9.2 11.2h.01M14.8 11.2h.01"></path>',
+        navBilling: '<path d="M6 4h8.5l3.5 3.5V20H6z"></path><path d="M14.5 4v4h3.5M9 12h6M9 15h6"></path>',
+        navOrders: '<path d="M4 6h2l2 9.5h9.8L20 8H6.8"></path><path d="M9 6h7"></path><circle cx="9.2" cy="19" r="1.2"></circle><circle cx="18" cy="19" r="1.2"></circle>'
+      },
+      soft: {
+        navGlass: '<rect x="4" y="3" width="16" height="18" rx="4"></rect><path d="M7.5 8.5h9M7.5 12h9M7.5 15.5h5"></path><circle cx="16.8" cy="15.5" r="1.2"></circle>',
+        navCombo: '<rect x="4" y="3" width="16" height="18" rx="4"></rect><path d="M7.5 7.5h9M7.5 11h9M7.5 14.5h5"></path><path d="M15.5 17.5h2"></path>',
+        navHome: '<path d="m3.5 11 8.5-7 8.5 7"></path><path d="M5.5 10v10h13V10"></path><path d="M9 20v-5.5h6V20"></path><circle cx="8.3" cy="11.5" r=".8"></circle><circle cx="15.7" cy="11.5" r=".8"></circle>',
+        navBilling: '<path d="M6 4h9l3 3v13H6z"></path><path d="M15 4v4h3M9 11.5h6M9 15h5"></path>',
+        navOrders: '<path d="M3.5 5.5h2l2.2 10h10.5l2.3-7H6.5"></path><circle cx="9.2" cy="19.2" r="1.3"></circle><circle cx="18" cy="19.2" r="1.3"></circle><path d="M12 9.5h4"></path>'
+      },
+      orbit: {
+        navGlass: '<rect x="5" y="4" width="14" height="16" rx="2.5"></rect><ellipse cx="12" cy="12" rx="5.5" ry="2.5"></ellipse><circle cx="12" cy="12" r="1.2"></circle>',
+        navCombo: '<rect x="5" y="3" width="14" height="18" rx="2.5"></rect><ellipse cx="12" cy="11" rx="5" ry="2.2"></ellipse><circle cx="12" cy="11" r="1"></circle>',
+        navHome: '<path d="m3.5 11 8.5-7 8.5 7"></path><path d="M5.5 10v10h13V10"></path><path d="M9 20v-5.5h6V20"></path><ellipse cx="12" cy="11.5" rx="5" ry="2"></ellipse>',
+        navBilling: '<path d="M6 4h9l3 3v13H6z"></path><path d="M15 4v4h3"></path><ellipse cx="12" cy="13" rx="4.5" ry="2"></ellipse><circle cx="12" cy="13" r=".8"></circle>',
+        navOrders: '<path d="M3.5 6h2l2 9.5h10.5l2.5-7H6.5"></path><ellipse cx="13.5" cy="10.5" rx="4" ry="1.8"></ellipse><circle cx="9" cy="19" r="1.2"></circle><circle cx="18" cy="19" r="1.2"></circle>'
+      },
+      angular: {
+        navGlass: '<path d="M6 3h12l3 3v12l-3 3H6l-3-3V6z"></path><path d="m8 8 8 8M16 8l-8 8M8 12h8"></path>',
+        navCombo: '<path d="M6 3h12l3 3v12l-3 3H6l-3-3V6z"></path><path d="M8 8h8M8 12h8M8 16h5"></path><path d="m16 15 2 2-2 2"></path>',
+        navHome: '<path d="m3 11 9-8 9 8-3 0v9H6v-9z"></path><path d="M9 20v-6h6v6"></path><path d="m8 11 4-3 4 3"></path>',
+        navBilling: '<path d="M6 3h9l3 3v15H6z"></path><path d="m15 3 3 3h-3zM9 11h6M9 15h6M9 18h4"></path>',
+        navOrders: '<path d="M3 5h3l2 11h10l3-8H7"></path><path d="M10 9h7M12 12h4"></path><circle cx="9" cy="20" r="1.3"></circle><circle cx="18" cy="20" r="1.3"></circle>'
+      },
+      neon: {
+        navGlass: '<rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8M8 11h5M8 15h8"></path><path d="m15 15 1.5 1.5L19 13"></path>',
+        navCombo: '<rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8M8 11h8M8 15h4"></path><path d="m15 17 1.5 1.5L19 16"></path>',
+        navHome: '<path d="m3 11 9-8 9 8"></path><path d="M5 10v11h14V10"></path><path d="M9 21v-6h6v6"></path><path d="M8 12h2M14 12h2"></path>',
+        navBilling: '<path d="M6 3h9l3 3v15H6z"></path><path d="M15 3v4h3M9 11h6M9 15h6M9 18h3"></path>',
+        navOrders: '<path d="M3 5h3l2 11h10l3-8H7"></path><path d="M10 10h7M11 13h5"></path><circle cx="9" cy="20" r="1.3"></circle><circle cx="18" cy="20" r="1.3"></circle>'
+      }
+    };
+
+    const THEME_ICON_PACK = { light:'classic', dark:'classic', ocean:'wave', emerald:'wave', royal:'luxury', obsidian:'luxury', sunset:'soft', rose:'soft', midnight:'orbit', cyber:'neon', graphite:'angular', lime:'angular' };
+
     function setTheme(theme) {
       const allowedThemes = ['light','ocean','royal','sunset','emerald','rose','midnight','graphite','lime','dark','cyber','obsidian'];
       if (!allowedThemes.includes(theme)) theme = 'light';
       document.documentElement.setAttribute('data-theme', theme);
-      document.documentElement.setAttribute('data-icon-pack', theme);
+      const iconPack = THEME_ICON_PACK[theme] || 'classic';
+      document.documentElement.setAttribute('data-icon-pack', iconPack);
+      const pack = NAV_ICON_PACKS[iconPack];
+      document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => {
+        const svg = nav.querySelector('svg');
+        if (svg && pack[nav.id]) svg.innerHTML = pack[nav.id];
+      });
       document.querySelectorAll('.theme-card-btn[data-theme-choice]').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-theme-choice') === theme);
       });
       localStorage.setItem('sk_theme', theme);
-      localStorage.setItem('sk_icon_pack', theme);
+      localStorage.setItem('sk_icon_pack', iconPack);
       showToast("Theme applied: " + theme.toUpperCase());
     }
 
@@ -2198,9 +2258,9 @@ const MASTER_INVENTORY = [
         
         const metricCardsMap = {
           'metric-stock': `
-            <div class="draggable-card" data-card-id="metric-stock" draggable="true" style="min-height: 82px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 10px 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="currentFilter='all'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div class="draggable-card sk-home-metric-card sk-home-metric-stock" data-card-id="metric-stock" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="currentFilter='all'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
               <div style="display:flex; align-items:center; gap:8px;">
-                <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(37,99,235,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">📦</div>
+                <div class="sk-home-metric-icon stock" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">📦</div>
                 <div>
                   <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Total Stock</div>
                   <div style="font-size: 18px; font-weight: 950; color: var(--primary); line-height: 1.1;">${inventory.reduce((acc, i) => acc + (i.stock || 0), 0)}</div>
@@ -2210,9 +2270,9 @@ const MASTER_INVENTORY = [
             </div>
           `,
           'metric-credit': `
-            <div class="draggable-card" data-card-id="metric-credit" draggable="true" style="min-height: 82px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 10px 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="skOpenCreditLedger(); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div class="draggable-card sk-home-metric-card sk-home-metric-credit" data-card-id="metric-credit" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="skOpenCreditLedger(); window.scrollTo({top: 0, behavior: 'smooth'});">
               <div style="display:flex; align-items:center; gap:8px;">
-                <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(14,165,233,0.12); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">💳</div>
+                <div class="sk-home-metric-icon credit" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">💳</div>
                 <div>
                   <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Outstanding</div>
                   <div style="font-size: 18px; font-weight: 950; color: #0284c7; line-height: 1.1;">${typeof window.skOutstandingTotalForHome === 'function' ? ('₹' + Number(window.skOutstandingTotalForHome() || 0).toLocaleString('en-IN')) : (typeof getCustomers === 'function' ? ('₹' + getCustomers().filter(c => Number(c.balance) > 0).reduce((s,c) => s + Number(c.balance || 0), 0).toLocaleString('en-IN')) : '₹0')}</div>
@@ -2221,20 +2281,20 @@ const MASTER_INVENTORY = [
               <span style="font-size: 14px; color: var(--text-muted); font-weight: 700;">›</span>
             </div>
           `,
-          'metric-orders': `
-            <div class="draggable-card" data-card-id="metric-orders" draggable="true" style="min-height: 82px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 10px 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="toggleModal('orderModal', true); window.scrollTo({top: 0, behavior: 'smooth'});">
+          'metric-repair': `
+            <div class="draggable-card sk-home-metric-card sk-home-metric-repair" data-card-id="metric-repair" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="skOpenRepairJobs(); window.scrollTo({top: 0, behavior: 'smooth'});">
               <div style="display:flex; align-items:center; gap:8px;">
-                <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">🛒</div>
+                <div class="sk-home-metric-icon repair" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">🔧</div>
                 <div>
-                  <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Today's Orders</div>
-                  <div style="font-size: 18px; font-weight: 950; color: #10b981; line-height: 1.1;">${ordersList.length}</div>
+                  <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Repair Jobs</div>
+                  <div style="font-size: 18px; font-weight: 950; color: #e11d48; line-height: 1.1;">${(() => { try { const r=JSON.parse(localStorage.getItem('skx_repair_jobs_v2')||'[]'); return Array.isArray(r)?r.length:0; } catch(e){ return 0; } })()}</div>
                 </div>
               </div>
               <span style="font-size: 14px; color: var(--text-muted); font-weight: 700;">›</span>
             </div>
           `,
           'metric-bills': `
-            <div class="draggable-card" data-card-id="metric-bills" draggable="true" style="min-height: 82px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 10px 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="toggleModal('billingModal', true); switchBillTab('history'); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div class="draggable-card sk-home-metric-card sk-home-metric-bills" data-card-id="metric-bills" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="toggleModal('billingModal', true); switchBillTab('history'); window.scrollTo({top: 0, behavior: 'smooth'});">
               <div style="display:flex; align-items:center; gap:8px;">
                 <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(124,58,237,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">🧾</div>
                 <div>
@@ -2247,14 +2307,14 @@ const MASTER_INVENTORY = [
           `
         };
 
-        const defaultMetricOrder = ['metric-stock', 'metric-credit', 'metric-orders', 'metric-bills'];
+        const defaultMetricOrder = ['metric-stock', 'metric-credit', 'metric-repair', 'metric-bills'];
         let savedMetricOrder = defaultMetricOrder;
         try {
           const storedM = localStorage.getItem('sk_order_homeMetricGrid');
           if (storedM) {
             const p = JSON.parse(storedM);
             if (Array.isArray(p) && p.length > 0) {
-              savedMetricOrder = p.map(id => id === 'metric-low' ? 'metric-credit' : id);
+              savedMetricOrder = p.map(id => id === 'metric-low' ? 'metric-credit' : (id === 'metric-orders' ? 'metric-repair' : id));
               if (!savedMetricOrder.includes('metric-credit')) savedMetricOrder.splice(1, 0, 'metric-credit');
               savedMetricOrder = savedMetricOrder.filter((id, idx, arr) => arr.indexOf(id) === idx);
             }
@@ -2264,51 +2324,51 @@ const MASTER_INVENTORY = [
 
         const actionCardsMap = {
           'card-glass': `
-            <div class="draggable-card" data-card-id="card-glass" draggable="true" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='glass'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div data-card-id="card-glass" draggable="true" class="draggable-card sk-home-action-row sk-home-action-glass" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='glass'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
               <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-                <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(37,99,235,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">🛡️</div>
+                <div class="sk-home-action-icon glass" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">🛡️</div>
                 <div style="min-width: 0;">
                   <div style="font-weight: 850; font-size: 14px; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tempered Glass</div>
                   <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">View All Glass Stock</div>
                 </div>
               </div>
-              <button style="width: 115px; height: 34px; background: var(--primary); color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Stock →</button>
+              <button class="sk-home-action-btn glass" style="width: 115px; height: 34px; background: var(--primary); color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Stock →</button>
             </div>
           `,
           'card-display': `
-            <div class="draggable-card" data-card-id="card-display" draggable="true" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='combo'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div data-card-id="card-display" draggable="true" class="draggable-card sk-home-action-row sk-home-action-display" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='combo'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
               <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-                <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(234,88,12,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">📱</div>
+                <div class="sk-home-action-icon display" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">📱</div>
                 <div style="min-width: 0;">
                   <div style="font-weight: 850; font-size: 14px; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">1. Display</div>
                   <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">View Touch Folders</div>
                 </div>
               </div>
-              <button style="width: 115px; height: 34px; background: #ea580c; color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Display →</button>
+              <button class="sk-home-action-btn display" style="width: 115px; height: 34px; background: #ea580c; color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Display →</button>
             </div>
           `,
           'card-accessories': `
-            <div class="draggable-card" data-card-id="card-accessories" draggable="true" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='combo'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div data-card-id="card-accessories" draggable="true" class="draggable-card sk-home-action-row sk-home-action-accessories" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='combo'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
               <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-                <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(16,185,129,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">⚡</div>
+                <div class="sk-home-action-icon accessories" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">⚡</div>
                 <div style="min-width: 0;">
                   <div style="font-weight: 850; font-size: 14px; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">2. Accessories</div>
                   <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">View OCA &amp; Spares</div>
                 </div>
               </div>
-              <button style="width: 115px; height: 34px; background: #059669; color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Accessories →</button>
+              <button class="sk-home-action-btn accessories" style="width: 115px; height: 34px; background: #059669; color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Accessories →</button>
             </div>
           `,
           'card-tools': `
-            <div class="draggable-card" data-card-id="card-tools" draggable="true" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="toggleModal('repairSparesModal', true);">
+            <div data-card-id="card-tools" draggable="true" class="draggable-card sk-home-action-row sk-home-action-tools" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="toggleModal('repairSparesModal', true);">
               <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-                <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(225,29,72,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">🛠️</div>
+                <div class="sk-home-action-icon tools" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">🛠️</div>
                 <div style="min-width: 0;">
                   <div style="font-weight: 850; font-size: 14px; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">3. Tools &amp; Others</div>
                   <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">View Tools Stock</div>
                 </div>
               </div>
-              <button style="width: 115px; height: 34px; background: #e11d48; color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Tools →</button>
+              <button class="sk-home-action-btn tools" style="width: 115px; height: 34px; background: #e11d48; color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Tools →</button>
             </div>
           `
         };
@@ -2326,15 +2386,15 @@ const MASTER_INVENTORY = [
 
         container.innerHTML = `
           <!-- Compact Welcome Card (Fits in single view) -->
-          <div style="width: 100%; min-height: 100px; background: linear-gradient(135deg, #eef6ff 0%, #dbeafe 100%); border: 1.5px solid #bfdbfe; border-radius: 18px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(37,99,235,0.06); box-sizing: border-box;">
+          <div class="sk-home-welcome-banner" style="width: 100%; min-height: 100px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;">
             <div>
-              <div style="font-size: 10px; color: #3b82f6; font-weight: 800; text-transform: uppercase; margin-bottom: 2px;">Welcome to</div>
-              <div style="font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 950; line-height: 1.15;">
+              <div class="sk-home-welcome-kicker" style="font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 2px;">Welcome to</div>
+              <div class="sk-home-welcome-title" style="font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 950; line-height: 1.15;">
                 <span style="background:var(--sk-shop-brand-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">SK Mobiles</span> Master
               </div>
-              <div style="font-size: 11.5px; color: #64748b; margin-top: 3px; font-weight: 600;">Stay organized. Track stock.</div>
+              <div class="sk-home-welcome-sub" style="font-size: 11.5px; margin-top: 3px; font-weight: 600;">Stay organized. Track stock.</div>
             </div>
-            <div style="font-size: 2.2rem; background: #ffffff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(37,99,235,0.12); flex-shrink: 0;">📱</div>
+            <div class="sk-home-welcome-icon" style="font-size: 2.2rem; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">📱</div>
           </div>
 
           <!-- 4 Metric Cards Grid: All boxes are draggable and reorderable -->
