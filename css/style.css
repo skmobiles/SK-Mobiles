@@ -1439,6 +1439,27 @@ html[data-font-family="lato"]{--app-font:'Lato',sans-serif;}
 html[data-font-family="outfit"]{--app-font:'Outfit',sans-serif;}
 html[data-font-family="serif"]{--app-font:Georgia,'Times New Roman',serif;}
 html[data-font-family="mono"]{--app-font:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;}
+
+html[data-font-family="roboto"]{--app-font:'Roboto',sans-serif;}
+html[data-font-family="montserrat"]{--app-font:'Montserrat',sans-serif;}
+html[data-font-family="opensans"]{--app-font:'Open Sans',sans-serif;}
+html[data-font-family="raleway"]{--app-font:'Raleway',sans-serif;}
+html[data-font-family="quicksand"]{--app-font:'Quicksand',sans-serif;}
+html[data-font-family="fira"]{--app-font:'Fira Sans',sans-serif;}
+html[data-font-family="work"]{--app-font:'Work Sans',sans-serif;}
+html[data-font-family="lexend"]{--app-font:'Lexend',sans-serif;}
+html[data-font-family="sora"]{--app-font:'Sora',sans-serif;}
+html[data-font-family="urbanist"]{--app-font:'Urbanist',sans-serif;}
+html[data-font-family="barlow"]{--app-font:'Barlow',sans-serif;}
+html[data-font-family="archivo"]{--app-font:'Archivo',sans-serif;}
+html[data-font-family="mulish"]{--app-font:'Mulish',sans-serif;}
+html[data-font-family="karla"]{--app-font:'Karla',sans-serif;}
+html[data-font-family="cabin"]{--app-font:'Cabin',sans-serif;}
+html[data-font-family="source"]{--app-font:'Source Sans 3',sans-serif;}
+html[data-font-family="ibmplex"]{--app-font:'IBM Plex Sans',sans-serif;}
+html[data-font-family="josefin"]{--app-font:'Josefin Sans',sans-serif;}
+html[data-font-family="playfair"]{--app-font:'Playfair Display',serif;}
+
 body{font-family:var(--app-font);}
 .app-viewport,.app-viewport *{font-family:var(--app-font);}
 .app-name,.drawer-title,.sk-home-welcome-title{font-family:var(--app-font) !important;}
@@ -1520,3 +1541,63 @@ input[data-dmy-date]{letter-spacing:.02em;}
 @media(max-width:420px){
   #skFontQuickBtn{padding:4px 7px;font-size:.64rem;}
 }
+
+
+/* SK REQUEST: additional theme styles */
+:root[data-theme="nebula"]{
+  --bg:#100a1f;--page-bg:#070313;--card-bg:rgba(26,17,49,.9);--card-border:rgba(167,139,250,.30);
+  --primary:#a855f7;--primary-gradient:linear-gradient(135deg,#7c3aed 0%,#ec4899 100%);
+  --text:#f8f7ff;--text-muted:#b9add2;--input-bg:rgba(24,15,44,.82);--pill-bg:rgba(168,85,247,.10);--model-bg:rgba(20,12,38,.82);--chip-bg:rgba(236,72,153,.14);
+  --bottom-nav-bg:rgba(9,5,20,.88);--header-bg:rgba(7,3,19,.92);--modal-bg:#130a25;--danger:#fb7185;--warning:#fbbf24;--success:#34d399;
+  --badge-bg:rgba(168,85,247,.12);--badge-border:rgba(168,85,247,.30);--low-stock-bg:rgba(251,191,36,.12);--low-stock-border:rgba(251,191,36,.30);--low-stock-text:#fbbf24;
+  --glass-btn-bg:#7c3aed;--glass-btn-border:#a855f7;--glass-btn-text:#fff;--glass-pill-active:#a855f7;--glass-pill-border:#a855f7;
+  --glass-shadow:0 5px 20px rgba(168,85,247,.24),0 0 20px rgba(236,72,153,.12);--search-match-bg:#10b981;--search-match-text:#fff;--card-elevation:0 10px 28px rgba(0,0,0,.28);
+}
+:root[data-theme="forest"]{
+  --bg:#07150f;--page-bg:#03100a;--card-bg:rgba(12,39,27,.90);--card-border:rgba(52,211,153,.28);
+  --primary:#10b981;--primary-gradient:linear-gradient(135deg,#059669 0%,#84cc16 100%);
+  --text:#f3fff8;--text-muted:#a7c8b5;--input-bg:rgba(7,28,18,.84);--pill-bg:rgba(16,185,129,.10);--model-bg:rgba(7,27,17,.84);--chip-bg:rgba(132,204,22,.12);
+  --bottom-nav-bg:rgba(2,15,9,.90);--header-bg:rgba(3,16,10,.94);--modal-bg:#082116;--danger:#fb7185;--warning:#fbbf24;--success:#34d399;
+  --badge-bg:rgba(16,185,129,.12);--badge-border:rgba(16,185,129,.28);--low-stock-bg:rgba(251,191,36,.12);--low-stock-border:rgba(251,191,36,.28);--low-stock-text:#fbbf24;
+  --glass-btn-bg:#059669;--glass-btn-border:#34d399;--glass-btn-text:#fff;--glass-pill-active:#10b981;--glass-pill-border:#34d399;
+  --glass-shadow:0 5px 20px rgba(16,185,129,.22),0 0 18px rgba(132,204,22,.10);--search-match-bg:#10b981;--search-match-text:#fff;--card-elevation:0 10px 28px rgba(0,0,0,.28);
+}
+:root[data-theme="glacier"]{
+  --bg:#071421;--page-bg:#04101a;--card-bg:rgba(12,35,53,.90);--card-border:rgba(125,211,252,.30);
+  --primary:#38bdf8;--primary-gradient:linear-gradient(135deg,#0ea5e9 0%,#6366f1 100%);
+  --text:#f4fbff;--text-muted:#a9c2d3;--input-bg:rgba(7,28,43,.84);--pill-bg:rgba(56,189,248,.10);--model-bg:rgba(7,27,42,.84);--chip-bg:rgba(99,102,241,.12);
+  --bottom-nav-bg:rgba(2,15,25,.90);--header-bg:rgba(3,16,26,.94);--modal-bg:#082033;--danger:#fb7185;--warning:#fbbf24;--success:#34d399;
+  --badge-bg:rgba(56,189,248,.12);--badge-border:rgba(56,189,248,.30);--low-stock-bg:rgba(251,191,36,.12);--low-stock-border:rgba(251,191,36,.28);--low-stock-text:#fbbf24;
+  --glass-btn-bg:#0284c7;--glass-btn-border:#38bdf8;--glass-btn-text:#fff;--glass-pill-active:#38bdf8;--glass-pill-border:#38bdf8;
+  --glass-shadow:0 5px 20px rgba(56,189,248,.22),0 0 18px rgba(99,102,241,.10);--search-match-bg:#10b981;--search-match-text:#fff;--card-elevation:0 10px 28px rgba(0,0,0,.28);
+}
+:root[data-theme="magenta"]{
+  --bg:#160817;--page-bg:#09030b;--card-bg:rgba(38,13,43,.90);--card-border:rgba(232,121,249,.30);
+  --primary:#d946ef;--primary-gradient:linear-gradient(135deg,#c026d3 0%,#7c3aed 100%);
+  --text:#fff7ff;--text-muted:#d2b8d5;--input-bg:rgba(28,8,32,.84);--pill-bg:rgba(217,70,239,.10);--model-bg:rgba(29,8,34,.84);--chip-bg:rgba(124,58,237,.12);
+  --bottom-nav-bg:rgba(10,3,12,.90);--header-bg:rgba(9,3,11,.94);--modal-bg:#1d0a21;--danger:#fb7185;--warning:#fbbf24;--success:#34d399;
+  --badge-bg:rgba(217,70,239,.12);--badge-border:rgba(217,70,239,.30);--low-stock-bg:rgba(251,191,36,.12);--low-stock-border:rgba(251,191,36,.28);--low-stock-text:#fbbf24;
+  --glass-btn-bg:#c026d3;--glass-btn-border:#e879f9;--glass-btn-text:#fff;--glass-pill-active:#d946ef;--glass-pill-border:#e879f9;
+  --glass-shadow:0 5px 20px rgba(217,70,239,.24),0 0 20px rgba(124,58,237,.12);--search-match-bg:#10b981;--search-match-text:#fff;--card-elevation:0 10px 28px rgba(0,0,0,.28);
+}
+/* SK REQUEST: Repair Tools / IC Spares is the one intentional long-note field. */
+#repairSparesNoteInput{
+  min-height:180px !important;
+  height:180px !important;
+  max-height:none !important;
+  overflow-y:hidden !important;
+  overflow-x:hidden !important;
+  resize:none !important;
+  white-space:pre-wrap !important;
+  line-height:1.45 !important;
+}
+/* SK REQUEST: full-page font chooser */
+.sk-font-picker-page{max-width:760px!important;max-height:92vh!important;}
+.sk-font-picker-page-sub{font-size:.76rem;color:var(--text-muted);margin:-2px 0 12px;line-height:1.4;}
+.sk-font-picker-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:68vh;overflow-y:auto;padding:2px;}
+.sk-font-choice{appearance:none;width:100%;text-align:left;border:1px solid var(--card-border);background:var(--model-bg);color:var(--text);border-radius:14px;padding:11px 12px;cursor:pointer;transition:.18s ease;display:flex;flex-direction:column;gap:5px;}
+.sk-font-choice span{font-size:.88rem;font-weight:800;line-height:1.1;}
+.sk-font-choice small{font-size:.66rem;color:var(--text-muted);opacity:.9;}
+.sk-font-choice:hover,.sk-font-choice.active{border-color:var(--primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 18%,transparent),0 8px 20px color-mix(in srgb,var(--primary) 15%,transparent);transform:translateY(-1px);}
+.sk-font-choice.active{background:var(--badge-bg);}
+@media(max-width:560px){.sk-font-picker-grid{grid-template-columns:1fr;max-height:70vh;}}
