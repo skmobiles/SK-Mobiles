@@ -1661,6 +1661,21 @@ const MASTER_INVENTORY = [
       if(!silent && typeof showToast==='function') showToast('Font applied: '+fontKey.toUpperCase());
     }
     window.setAppFont=setAppFont;
+    function openAppFontPicker(){
+      const body=document.getElementById('skThemeIconPanelBody');
+      const btn=document.getElementById('skThemePanelToggle');
+      if(body && body.getAttribute('data-collapsed')==='1'){
+        body.setAttribute('data-collapsed','0');
+        if(btn){btn.setAttribute('aria-expanded','true');btn.textContent='⌃ Minimise';}
+        localStorage.setItem('sk_theme_panel_collapsed','0');
+      }
+      const sel=document.getElementById('skFontFamilySelect');
+      if(sel){
+        sel.scrollIntoView({behavior:'smooth',block:'center'});
+        setTimeout(()=>{try{sel.focus({preventScroll:true});}catch(e){sel.focus();}},180);
+      }
+    }
+    window.openAppFontPicker=openAppFontPicker;
     function toggleThemeIconPanel(){
       const body=document.getElementById('skThemeIconPanelBody'),btn=document.getElementById('skThemePanelToggle');
       if(!body)return;
