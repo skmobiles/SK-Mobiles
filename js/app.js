@@ -1271,7 +1271,7 @@ const MASTER_INVENTORY = [
       }
 
       // Apply the saved theme before the first Home render to avoid a light→dark repaint flash.
-      try { setTheme(localStorage.getItem('sk_theme') || 'light', true); } catch (e) { console.error('SK theme startup:', e); }
+      try { setTheme(localStorage.getItem('sk_theme') || 'light', true); skInitThemeSettingsUI(); } catch (e) { console.error('SK theme startup:', e); }
 
       // Render Home before optional UI restoration so the page cannot remain blank.
       try { renderCards(); } catch (e) {
@@ -1284,6 +1284,7 @@ const MASTER_INVENTORY = [
       try { loadRepairSparesNote(); } catch (e) { console.error('SK repair note startup:', e); }
       try { updateOrderBadge(); } catch (e) { console.error('SK order badge startup:', e); }
       try { updateBillHistoryCount(); } catch (e) { console.error('SK bill count startup:', e); }
+      try { skInitDmyDateInputs(document); } catch (e) { console.error('SK date input startup:', e); }
 
     });
 
@@ -1636,6 +1637,47 @@ const MASTER_INVENTORY = [
 
     const THEME_ICON_PACK = { light:'classic', dark:'classic', ocean:'wave', emerald:'wave', royal:'luxury', obsidian:'luxury', sunset:'soft', rose:'soft', midnight:'orbit', cyber:'neon', graphite:'angular', lime:'angular', aurora:'prism', crimson:'pulse', mint:'leaf', solar:'retro' };
 
+    const SK_THEME_STATUS_COLORS = {light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',sunset:'#ffedd5',emerald:'#d1fae5',rose:'#ffe4e6',midnight:'#111827',graphite:'#111827',lime:'#0f1a05',dark:'#050811',cyber:'#03040a',obsidian:'#000000',aurora:'#cffafe',crimson:'#ffe4e6',mint:'#ccfbf1',solar:'#000000'};
+    const SK_APP_FONTS = {
+      jakarta:"'Plus Jakarta Sans', sans-serif", inter:"'Inter', sans-serif", poppins:"'Poppins', sans-serif",
+      nunito:"'Nunito', sans-serif", rubik:"'Rubik', sans-serif", manrope:"'Manrope', sans-serif",
+      dm:"'DM Sans', sans-serif", space:"'Space Grotesk', sans-serif", lato:"'Lato', sans-serif",
+      outfit:"'Outfit', sans-serif", serif:"Georgia, 'Times New Roman', serif", mono:"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+    };
+    function skUpdateThemeChrome(theme){
+      try{
+        const meta=document.getElementById('skThemeColorMeta');
+        if(meta) meta.setAttribute('content',SK_THEME_STATUS_COLORS[theme]||SK_THEME_STATUS_COLORS.light);
+        document.documentElement.style.setProperty('--app-status-color',SK_THEME_STATUS_COLORS[theme]||SK_THEME_STATUS_COLORS.light);
+      }catch(e){}
+    }
+    function setAppFont(fontKey, silent){
+      if(!SK_APP_FONTS[fontKey]) fontKey='jakarta';
+      document.documentElement.setAttribute('data-font-family',fontKey);
+      document.documentElement.style.setProperty('--app-font',SK_APP_FONTS[fontKey]);
+      localStorage.setItem('sk_font_family',fontKey);
+      const sel=document.getElementById('skFontFamilySelect'); if(sel) sel.value=fontKey;
+      const preview=document.getElementById('skFontPreview'); if(preview) preview.style.fontFamily=SK_APP_FONTS[fontKey];
+      if(!silent && typeof showToast==='function') showToast('Font applied: '+fontKey.toUpperCase());
+    }
+    window.setAppFont=setAppFont;
+    function toggleThemeIconPanel(){
+      const body=document.getElementById('skThemeIconPanelBody'),btn=document.getElementById('skThemePanelToggle');
+      if(!body)return;
+      const collapsed=body.getAttribute('data-collapsed')==='1';
+      body.setAttribute('data-collapsed',collapsed?'0':'1');
+      if(btn){btn.setAttribute('aria-expanded',collapsed?'true':'false');btn.textContent=collapsed?'⌃ Minimise':'⌄ Expand';}
+      localStorage.setItem('sk_theme_panel_collapsed',collapsed?'0':'1');
+    }
+    window.toggleThemeIconPanel=toggleThemeIconPanel;
+    function skInitThemeSettingsUI(){
+      try{
+        const savedFont=localStorage.getItem('sk_font_family')||'jakarta'; setAppFont(savedFont,true);
+        const body=document.getElementById('skThemeIconPanelBody'),btn=document.getElementById('skThemePanelToggle');
+        if(body){const collapsed=localStorage.getItem('sk_theme_panel_collapsed')==='1';body.setAttribute('data-collapsed',collapsed?'1':'0');if(btn){btn.setAttribute('aria-expanded',collapsed?'false':'true');btn.textContent=collapsed?'⌄ Expand':'⌃ Minimise';}}
+      }catch(e){}
+    }
+
     function setTheme(theme, silent) {
       const allowedThemes = ['light','ocean','royal','sunset','emerald','rose','midnight','graphite','lime','dark','cyber','obsidian','aurora','crimson','mint','solar'];
       if (!allowedThemes.includes(theme)) theme = 'light';
@@ -1652,6 +1694,7 @@ const MASTER_INVENTORY = [
       });
       localStorage.setItem('sk_theme', theme);
       localStorage.setItem('sk_icon_pack', iconPack);
+      skUpdateThemeChrome(theme);
       if(!silent) showToast("Theme applied: " + theme.toUpperCase());
     }
 
@@ -2194,6 +2237,42 @@ const MASTER_INVENTORY = [
       const formatted = parseSmartDate(input.value);
       if (formatted) input.value = formatted;
     }
+
+    function skDmyToISO(value){
+      const s=String(value||'').trim();
+      if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)){const p=s.split('-');return p[0]+'-'+String(Number(p[1])).padStart(2,'0')+'-'+String(Number(p[2])).padStart(2,'0');}
+      const m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);
+      if(!m)return '';
+      let y=Number(m[3]); if(y<100)y+=2000; const d=Number(m[1]),mo=Number(m[2]);
+      if(d<1||d>31||mo<1||mo>12||y<1900)return '';
+      return y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    }
+    function skISOToDmy(value){
+      const s=String(value||'').trim();
+      let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if(m)return String(Number(m[3])).padStart(2,'0')+'/'+String(Number(m[2])).padStart(2,'0')+'/'+m[1];
+      return parseSmartDate(s);
+    }
+    function skNormalizeDmyInput(input){
+      if(!input)return;
+      const iso=skDmyToISO(input.value);
+      if(iso) input.value=skISOToDmy(iso);
+    }
+    function skInitDmyDateInputs(root){
+      (root||document).querySelectorAll('input[data-dmy-date]').forEach(function(input){
+        if(input.dataset.dmyBound==='1')return;
+        input.dataset.dmyBound='1'; input.type='text'; input.inputMode='numeric'; input.autocomplete='off'; input.placeholder='DD/MM/YYYY';
+        skNormalizeDmyInput(input);
+        input.addEventListener('input',function(){
+          const digits=this.value.replace(/\D/g,'').slice(0,8);
+          if(digits.length<=2)this.value=digits;
+          else if(digits.length<=4)this.value=digits.slice(0,2)+'/'+digits.slice(2);
+          else this.value=digits.slice(0,2)+'/'+digits.slice(2,4)+'/'+digits.slice(4);
+        });
+        input.addEventListener('blur',function(){skNormalizeDmyInput(this)});
+      });
+    }
+    window.skDmyToISO=skDmyToISO; window.skISOToDmy=skISOToDmy; window.skInitDmyDateInputs=skInitDmyDateInputs;
 
     function openModelsPopup(id) {
       const item = inventory.find(i => i.id === id);
@@ -2908,7 +2987,7 @@ const MASTER_INVENTORY = [
     function renderBillHistory() {
       const container=document.getElementById('billHistoryContainer'); if(!container)return;
       const q=(document.getElementById('billHistorySearch')?.value||'').trim().toLowerCase();
-      const payFilter=document.getElementById('billHistoryPayFilter')?.value||''; const dateFilter=document.getElementById('billHistoryDateFilter')?.value||'';
+      const payFilter=document.getElementById('billHistoryPayFilter')?.value||''; const dateFilter=skDmyToISO(document.getElementById('billHistoryDateFilter')?.value||'')||'';
       container.innerHTML=''; const source=Array.isArray(savedBills)?savedBills:[];
       const filtered=source.filter(b=>{
         if(!b)return false; const values=[b.custName,b.phone,b.model,b.id,b.billNo].map(v=>String(v||''));
@@ -3361,8 +3440,8 @@ img{max-width:100%!important}
 
   window.skRjRenderHistory=function(){
     const list=document.getElementById('skRjHistoryList'); if(!list)return;
-    const from=document.getElementById('skRjFromDate').value||'';
-    const to=document.getElementById('skRjToDate').value||'';
+    const from=skDmyToISO(document.getElementById('skRjFromDate').value||'')||'';
+    const to=skDmyToISO(document.getElementById('skRjToDate').value||'')||'';
     const q=(document.getElementById('skRjHistorySearch').value||'').toLowerCase();
     let a=load().filter(j=>j.status==='Ready'||j.status==='Delivered');
     a=a.filter(j=>{
@@ -3382,7 +3461,7 @@ img{max-width:100%!important}
   };
 
   window.skRjExportHistory=function(){
-    const from=document.getElementById('skRjFromDate').value||'', to=document.getElementById('skRjToDate').value||'', q=(document.getElementById('skRjHistorySearch').value||'').toLowerCase();
+    const from=skDmyToISO(document.getElementById('skRjFromDate').value||'')||'', to=skDmyToISO(document.getElementById('skRjToDate').value||'')||'', q=(document.getElementById('skRjHistorySearch').value||'').toLowerCase();
     const rows=load().filter(j=>['Ready','Delivered'].includes(j.status)).filter(j=>{
       const d=j.date||'';
       return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.imei,j.problem,j.status].join(' ').toLowerCase().includes(q));
@@ -5441,7 +5520,7 @@ window.skOpenRoleProfile=function(){
 };
 window.skCloseAdminProfile=function(){document.getElementById('skAdminProfileModal')?.classList.remove('active')};
 
-function clearEntryForm(){['skCreditName','skCreditPhone','skCreditAmount','skCreditDetails'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});const d=document.getElementById('skCreditDate');if(d)d.value=todayISO();const m=document.getElementById('skCreditMode');if(m)m.value='Cash'}
+function clearEntryForm(){['skCreditName','skCreditPhone','skCreditAmount','skCreditDetails'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});const d=document.getElementById('skCreditDate');if(d)d.value=skISOToDmy(todayISO());const m=document.getElementById('skCreditMode');if(m)m.value='Cash'}
 function openEntry(type,c){
  document.getElementById('skCreditEntryType').value=type;document.getElementById('skCreditEntryTitle').textContent=type==='payment'?'💰 Add Payment':'➕ Add Credit';clearEntryForm();
  if(c){document.getElementById('skCreditName').value=c.name||'';document.getElementById('skCreditPhone').value=c.phone||''}
@@ -5462,7 +5541,7 @@ window.skSaveCreditEntry=function(){
  if(btn){btn.dataset.skSaving='1';btn.disabled=true}
  try{
    const entry={name,phone,type,amount,mode:document.getElementById('skCreditMode')?.value||'Cash',
-     date:document.getElementById('skCreditDate')?.value||todayISO(),
+     date:skDmyToISO(document.getElementById('skCreditDate')?.value||'')||todayISO(),
      details:(document.getElementById('skCreditDetails')?.value||'').trim(),source:'manual'};
    const ok=addEntry(entry);
    if(!ok)throw new Error('Ledger entry was not saved');
@@ -5757,7 +5836,7 @@ function skV43EnhanceCreditEntry(){
   var save=sheet.querySelector('.submit-btn');if(save)save.textContent='💾 Save Credit / Payment';
   // Add due date only for EMI/credit notes.
   var dg=document.createElement('div');dg.className='form-group';dg.id='skV43DueGroup';
-  dg.innerHTML='<label class="form-label">EMI / Due Date (optional)</label><input id="skCreditDueDateV43" class="form-input" type="date">';
+  dg.innerHTML='<label class="form-label">EMI / Due Date (optional)</label><input id="skCreditDueDateV43" class="form-input" type="text" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY" data-dmy-date="1">';
   var btn=sheet.querySelector('.submit-btn');if(btn)sheet.insertBefore(dg,btn);
 }
 function skV43AddKeepButton(){
@@ -6036,7 +6115,7 @@ window.skCPSaveAction=function(){
  var phone=(document.getElementById('skCPPhone')?.value||'').trim();
  var amount=Math.max(0,Number(document.getElementById('skCPAmount')?.value)||0);
  var advance=type==='credit'?Math.max(0,Number(document.getElementById('skCPAdvance')?.value)||0):0;
- var date=document.getElementById('skCPDate')?.value||cpDate();
+ var date=document.getElementById('skCPDate')?.value||cpDate(); date=skDmyToISO(date)||todayISO();
  var billValue=document.getElementById('skCPBill')?.value||'';
  if(!name||amount<=0){showToast?.('Customer name and amount required');return;}
  if(type!=='payment'&&type!=='credit'){showToast?.('Invalid credit/payment action');return;}
