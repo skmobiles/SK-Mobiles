@@ -21,6 +21,9 @@
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 
+<script>
+(function(){try{var t=localStorage.getItem('sk_theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
 <link href="css/style.css" rel="stylesheet"/></head>
 <body>
 <!-- SK V4.16: Firebase-safe Recycle Bin -->
@@ -119,6 +122,10 @@
 <button class="theme-card-btn" data-theme-choice="dark" onclick="setTheme('dark')" type="button"><span class="theme-card-icon">◐</span><span class="theme-card-copy"><strong>Dark</strong><small>Navy • Cyan</small></span></button>
 <button class="theme-card-btn" data-theme-choice="cyber" onclick="setTheme('cyber')" type="button"><span class="theme-card-icon">✦</span><span class="theme-card-copy"><strong>Cyber</strong><small>Neon • Magenta</small></span></button>
 <button class="theme-card-btn" data-theme-choice="obsidian" onclick="setTheme('obsidian')" type="button"><span class="theme-card-icon">⬢</span><span class="theme-card-copy"><strong>Obsidian</strong><small>AMOLED • Gold</small></span></button>
+<button class="theme-card-btn" data-theme-choice="aurora" onclick="setTheme('aurora')" type="button"><span class="theme-card-icon">🌌</span><span class="theme-card-copy"><strong>Aurora</strong><small>Teal • Indigo</small></span></button>
+<button class="theme-card-btn" data-theme-choice="crimson" onclick="setTheme('crimson')" type="button"><span class="theme-card-icon">🩸</span><span class="theme-card-copy"><strong>Crimson</strong><small>Ruby • Ember</small></span></button>
+<button class="theme-card-btn" data-theme-choice="mint" onclick="setTheme('mint')" type="button"><span class="theme-card-icon">🍃</span><span class="theme-card-copy"><strong>Mint</strong><small>Mint • Aqua</small></span></button>
+<button class="theme-card-btn" data-theme-choice="solar" onclick="setTheme('solar')" type="button"><span class="theme-card-icon">☀️</span><span class="theme-card-copy"><strong>Solar</strong><small>Gold • Coral</small></span></button>
 </div>
 <!-- COLOR DEPTH ADJUSTMENT SLIDER -->
 <div style="border-top:1px dashed var(--card-border); padding-top:8px; margin-top:6px;">
@@ -641,7 +648,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div id="skRjJobsView">
 <form id="skRjForm" onsubmit="return skRjSaveJob(event);">
 <input id="skRjEditId" type="hidden"/>
-<div class="form-group"><label class="form-label">Customer Name</label><input class="form-input" id="skRjCustomer" required=""/></div>
+<div class="form-group"><label class="form-label">Customer Name</label><input class="form-input" id="skRjCustomer" value="Walk-in Customer" onfocus="if(this.value==='Walk-in Customer')this.select()" placeholder="Walk-in Customer / Customer name" required=""/></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
 <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" id="skRjPhone" inputmode="tel" autocomplete="tel"/></div>
 <div class="form-group"><label class="form-label">Model</label><input class="form-input" id="skRjModel" required=""/></div>
