@@ -1420,3 +1420,65 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
 .form-select{min-height:42px;line-height:1.2;box-sizing:border-box;}
 .form-group > textarea.form-input:not(#cfgShopAddress):not(#cfgTermsConditions){height:42px !important;min-height:42px !important;max-height:42px !important;resize:none !important;overflow:hidden !important;white-space:nowrap !important;line-height:1.2 !important;}
 #skRepairJobsModal textarea.form-input{height:42px !important;min-height:42px !important;max-height:42px !important;resize:none !important;overflow:hidden !important;white-space:nowrap !important;}
+
+
+/* =========================================================
+   SK V4.16 REQUESTED UI POLISH — THEME / FONT / DATE / STATUS BAR
+   ========================================================= */
+html,body{overscroll-behavior-x:none;}
+:root{--app-font:'Plus Jakarta Sans',sans-serif;}
+html[data-font-family="jakarta"]{--app-font:'Plus Jakarta Sans',sans-serif;}
+html[data-font-family="inter"]{--app-font:'Inter',sans-serif;}
+html[data-font-family="poppins"]{--app-font:'Poppins',sans-serif;}
+html[data-font-family="nunito"]{--app-font:'Nunito',sans-serif;}
+html[data-font-family="rubik"]{--app-font:'Rubik',sans-serif;}
+html[data-font-family="manrope"]{--app-font:'Manrope',sans-serif;}
+html[data-font-family="dm"]{--app-font:'DM Sans',sans-serif;}
+html[data-font-family="space"]{--app-font:'Space Grotesk',sans-serif;}
+html[data-font-family="lato"]{--app-font:'Lato',sans-serif;}
+html[data-font-family="outfit"]{--app-font:'Outfit',sans-serif;}
+html[data-font-family="serif"]{--app-font:Georgia,'Times New Roman',serif;}
+html[data-font-family="mono"]{--app-font:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;}
+body{font-family:var(--app-font);}
+.app-viewport,.app-viewport *{font-family:var(--app-font);}
+.app-name,.drawer-title,.sk-home-welcome-title{font-family:var(--app-font) !important;}
+.invoice-emi-schedule-preview,.invoice-shop-name,#printableInvoiceCard{font-family:'Plus Jakarta Sans',sans-serif;}
+
+/* Android/browser status-bar area follows the active theme instead of staying white. */
+html,body{background:var(--page-bg);}
+.app-viewport{padding-top:env(safe-area-inset-top,0px);}
+.app-header{top:env(safe-area-inset-top,0px);}
+
+/* Make the Welcome banner belong to the same colour family as the Home matrix cards. */
+.sk-home-welcome-banner{
+  background:linear-gradient(135deg,
+    color-mix(in srgb,var(--primary) 24%,var(--page-bg) 76%),
+    color-mix(in srgb,var(--primary) 10%,var(--card-bg) 90%)) !important;
+  border-color:color-mix(in srgb,var(--primary) 38%,#ffffff 62%) !important;
+  box-shadow:0 14px 34px color-mix(in srgb,var(--primary) 13%,transparent),0 3px 10px color-mix(in srgb,var(--primary) 8%,transparent) !important;
+}
+.sk-home-welcome-kicker{color:color-mix(in srgb,var(--primary) 88%,#4338ca 12%) !important;}
+.sk-home-welcome-icon{border-color:color-mix(in srgb,var(--primary) 30%,#ffffff 70%) !important;box-shadow:0 0 0 5px color-mix(in srgb,var(--primary) 10%,transparent),0 0 22px color-mix(in srgb,var(--primary) 22%,transparent),0 10px 20px color-mix(in srgb,var(--primary) 12%,transparent) !important;}
+
+/* Matrix cards inherit each theme's own primary hue instead of one fixed white/dark treatment. */
+#homeMetricGrid .sk-home-metric-card,#homeActionCardsContainer .sk-home-action-row{
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--card-bg) 90%,var(--primary) 10%),
+    color-mix(in srgb,var(--page-bg) 78%,var(--primary) 22%)) !important;
+  border-color:color-mix(in srgb,var(--primary) 34%,var(--card-border) 66%) !important;
+  box-shadow:0 10px 24px color-mix(in srgb,var(--primary) 10%,rgba(15,23,42,.10)),inset 0 1px 0 rgba(255,255,255,.72) !important;
+}
+#homeMetricGrid .sk-home-metric-card [style*="color: var(--text-muted)"],#homeActionCardsContainer .sk-home-action-row [style*="color: var(--text-muted)"]{color:color-mix(in srgb,var(--text) 68%,var(--text-muted) 32%) !important;}
+#homeMetricGrid .sk-home-metric-card [style*="color: var(--text)"],#homeActionCardsContainer .sk-home-action-row [style*="color: var(--text)"]{color:var(--text) !important;}
+
+/* Collapsible Themes & Icon Packs section. */
+.sk-settings-collapse-btn{background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);padding:3px 8px;border-radius:8px;font-size:.68rem;font-weight:850;cursor:pointer;white-space:nowrap;}
+#skThemeIconPanelBody[data-collapsed="1"]{display:none !important;}
+.sk-font-picker{margin-top:10px;padding-top:10px;border-top:1px dashed var(--card-border);}
+.sk-font-picker-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px;color:var(--text);font-size:.72rem;font-weight:900;}
+.sk-font-picker-head small{color:var(--text-muted);font-size:.58rem;font-weight:700;}
+#skFontFamilySelect{width:100%;min-height:40px;}
+.sk-font-preview{margin-top:7px;padding:8px 10px;border:1px solid var(--card-border);background:var(--pill-bg);border-radius:10px;font-size:.78rem;font-weight:800;color:var(--text);}
+
+/* Consistent visible date entry format. */
+input[data-dmy-date]{letter-spacing:.02em;}
