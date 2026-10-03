@@ -103,7 +103,7 @@
 <!-- THEME CUSTOMIZER WITH DEPTH SLIDER & MATCHING ICON PACKS -->
 <div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
 <span>🎨 THEME &amp; ICON PACKS</span>
-<div style="display:flex;align-items:center;gap:5px;"><button id="skThemePanelToggle" class="sk-settings-collapse-btn" type="button" aria-expanded="true" onclick="toggleThemeIconPanel()">⌃ Minimise</button><button onclick="resetThemeToDefault()" style="background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text); padding:3px 8px; border-radius:8px; font-size:0.68rem; font-weight:800; cursor:pointer;" type="button">↺ Default Reset</button></div>
+<div style="display:flex;align-items:center;gap:5px;"><button id="skFontQuickBtn" class="sk-settings-collapse-btn" type="button" onclick="openAppFontPicker()">🔤 Change Font</button><button id="skThemePanelToggle" class="sk-settings-collapse-btn" type="button" aria-expanded="true" onclick="toggleThemeIconPanel()">⌃ Minimise</button><button onclick="resetThemeToDefault()" style="background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text); padding:3px 8px; border-radius:8px; font-size:0.68rem; font-weight:800; cursor:pointer;" type="button">↺ Default Reset</button></div>
 </div>
 <div id="skThemeIconPanelBody" class="sk-theme-icon-panel-body" data-collapsed="0" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
 <div style="font-size:0.71rem; color:var(--text-muted); margin-bottom:8px; line-height:1.35;">
@@ -798,11 +798,6 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
   </label>
   <div style="font-size:.64rem;color:var(--text-muted);margin-bottom:8px;">Manager Firebase login can be enabled/disabled here.</div>
   <div id="skManagerPermissionList" style="display:grid;gap:6px;"></div>
-</div>
-<div class="sk-admin-box" style="margin-top:10px;">
-  <div class="sk-admin-title">RECYCLE BIN</div>
-  <button class="submit-btn" type="button" onclick="skOpenRecycleBin()">🗑️ Open Recycle Bin</button>
-  <div style="font-size:.62rem;color:var(--text-muted);margin-top:6px;">Deleted records are retained for 30 days. Restore or permanently delete from here.</div>
 </div>
 <div class="sk-admin-box" style="margin-top:10px;">
   <div class="sk-admin-title">ADMIN ONLY</div>
