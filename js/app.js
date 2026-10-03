@@ -2820,10 +2820,15 @@ const MASTER_INVENTORY = [
         const set = (key,id) => { bill[key] = document.getElementById(id)?.value || ''; };
         set('custName','billCustName'); set('phone','billCustPhone'); set('address','billCustAddress'); set('brand','billBrand'); set('model','billModel');
         set('ram','billRam'); set('storage','billStorage'); set('color','billColor'); set('imei1','billImei1'); set('imei2','billImei2'); set('package','billPackage');
-        bill.mobileType=currentMobileType; bill.payMode=currentPayMode; bill.price=price; bill.advance=advance;
+        bill.mobileType=currentMobileType; bill.payMode=currentPayMode; bill.price=price;
+        bill.paymentReceipts=Array.isArray(bill.paymentReceipts)?bill.paymentReceipts:[];
+        var linkedPaid=bill.paymentReceipts.filter(function(r){return String(r.type||'payment')==='payment';}).reduce(function(s,r){return s+Math.max(0,Number(r.amount)||0)},0);
+        var linkedCredit=bill.creditAdjustments&&Array.isArray(bill.creditAdjustments)?bill.creditAdjustments.reduce(function(s,r){return s+Math.max(0,Number(r.balance)||0)},0):0;
+        bill.paymentBaseAdvance=Number.isFinite(Number(bill.paymentBaseAdvance))?Math.max(0,Number(bill.paymentBaseAdvance)):advance;
+        bill.advance=advance;
         bill.emiMonths=parseInt(document.getElementById('billEmiMonths').value,10)||0; bill.emiInterest=parseFloat(document.getElementById('billEmiInterest').value)||0;
         bill.emiStartDate=document.getElementById('billEmiStartDate').value||''; bill.creditDueDate=document.getElementById('billCreditDate').value||'';
-        bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-advance):0;
+        bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-bill.paymentBaseAdvance+linkedCredit-linkedPaid):0;
         bill.emiHtml=currentPayMode==='EMI'?document.getElementById('pvEmiScheduleTbody').innerHTML:'';
         localStorage.setItem('sk_bills',JSON.stringify(savedBills)); window.__skEditingBillId='';
         const btn=document.querySelector('.bill-action-save'); if(btn){const sp=btn.querySelector('span:last-child');if(sp)sp.textContent='Save Bill';}
@@ -5682,6 +5687,76 @@ function cpSafe(k,f){try{var v=JSON.parse(localStorage.getItem(k)||'');return v=
 function cpBills(){var a=cpSafe('sk_bills',[]);return Array.isArray(a)?a:[]}
 function cpLedger(){var a=cpSafe('sk_credit_ledger_v1',[]);return Array.isArray(a)?a:[]}
 function cpMoney(n){return '₹'+(Number(n)||0).toLocaleString('en-IN')}
+
+/* V4.15 payment integrity repair: older Customer Credit saves could create the
+   payment ledger row without applying that payment to the selected sales bill.
+   Reconcile those existing rows once, attach them as bill receipts, and keep
+   the original down payment separate from later payments. */
+function cpRepairBillPaymentLinks(){
+ var bills=cpBills(), entries=cpLedger(), changed=false;
+ if(!Array.isArray(bills)||!Array.isArray(entries))return false;
+ bills.forEach(function(b){
+   if(!b||!b.id||String(b.payMode||'')==='Cash')return;
+   b.paymentReceipts=Array.isArray(b.paymentReceipts)?b.paymentReceipts:[];
+   var linked=entries.filter(function(e){
+     if(!e||e.type!=='payment')return false;
+     var ref=String(e.billId||'');
+     var billNo=String(b.billNo||'');
+     var details=String(e.details||'');
+     return ref===String(b.id) || (billNo&&ref===billNo) || (billNo&&details.indexOf(billNo)!==-1);
+   });
+   if(!linked.length&&b.paymentReceipts.length===0)return;
+
+   var receiptChanged=false;
+   linked.forEach(function(e){
+     var exists=b.paymentReceipts.some(function(r){
+       return (e.id&&r.ledgerId&&String(r.ledgerId)===String(e.id)) ||
+         (Number(r.amount||0)===Number(e.amount||0)&&String(r.date||'')===String(e.date||'')&&String(r.mode||'')===String(e.mode||''));
+     });
+     if(!exists){
+       b.paymentReceipts.push({
+         id:'RCP-LINK-'+String(e.id||Date.now()).slice(-12),
+         ledgerId:e.id||'',billId:b.id,date:e.date||cpDate(),
+         amount:Math.max(0,Number(e.amount)||0),mode:e.mode||'Cash',
+         note:e.details||'',type:'payment'
+       });
+       receiptChanged=true;
+     }
+   });
+
+   var paymentSum=b.paymentReceipts.filter(function(r){return String(r.type||'payment')==='payment';})
+     .reduce(function(a,r){return a+Math.max(0,Number(r.amount)||0)},0);
+   var price=Math.max(0,Number(b.price)||0);
+   var advance=Math.max(0,Number(b.advance)||0);
+   var balance=Math.max(0,Number(b.balance)||0);
+   var baseAdvance=Number(b.paymentBaseAdvance);
+
+   if(!Number.isFinite(baseAdvance)){
+     /* If the stored balance still equals price - advance, payments were not
+        applied to the bill yet. Otherwise, if advance includes the linked
+        payments, remove those payments to recover the original down payment. */
+     if(Math.abs(balance-Math.max(0,price-advance))<0.01){
+       baseAdvance=advance;
+     }else if(paymentSum>0 && advance>=paymentSum && Math.abs(balance-Math.max(0,price-advance+paymentSum))<0.01){
+       baseAdvance=Math.max(0,advance-paymentSum);
+     }else{
+       baseAdvance=Math.max(0,Math.min(price,advance));
+     }
+     b.paymentBaseAdvance=baseAdvance;
+     changed=true;
+   }
+
+   var creditNet=Array.isArray(b.creditAdjustments)?b.creditAdjustments.reduce(function(a,x){
+     return a+Math.max(0,Number(x.balance)||0);
+   },0):0;
+   var expected=Math.max(0,price-baseAdvance+creditNet-paymentSum);
+   if(Math.abs(balance-expected)>0.01){b.balance=expected;changed=true;}
+   if(b.advance!==baseAdvance){b.advance=baseAdvance;changed=true;}
+   if(receiptChanged)changed=true;
+ });
+ if(changed)localStorage.setItem('sk_bills',JSON.stringify(bills));
+ return changed;
+}
 function cpDigits(v){return String(v||'').replace(/\D/g,'')}
 function cpKey(n,p){return String(n||'').trim().toLowerCase()+'|'+cpDigits(p)}
 function cpEsc(v){return String(v==null?'':v).replace(/[&<>'"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]})}
@@ -5690,6 +5765,8 @@ function cpDateText(v){if(!v)return '';var d=new Date(v);if(!isNaN(d))return `${
 function cpBillLast3(id){var x=String(id||'').replace(/\D/g,'');return x.slice(-3)||String(id||'').slice(-3)}
 function cpGetCustomers(){
  var map={}, bills=cpBills(), led=cpLedger();
+ cpRepairBillPaymentLinks();
+ bills=cpBills();
  bills.forEach(function(b,i){
    if(!b.custName)return;
    var k=cpKey(b.custName,b.phone);
@@ -5897,7 +5974,8 @@ function cpUpdateBill(idx,type,amount,advance,data){
  b.paymentReceipts=Array.isArray(b.paymentReceipts)?b.paymentReceipts:[];
  if(type==='payment'){
    var before=Math.max(0,Number(b.balance)||0),pay=Math.min(before,amount);
-   b.balance=Math.max(0,before-pay);b.advance=(Number(b.advance)||0)+pay;
+   b.paymentBaseAdvance=Number.isFinite(Number(b.paymentBaseAdvance))?Number(b.paymentBaseAdvance):Math.max(0,Number(b.advance)||0);
+   b.balance=Math.max(0,before-pay);
    b.paymentReceipts.push({id:'RCP-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),billId:b.id,date:data.date,amount:pay,mode:data.mode,note:data.note||'',type:'payment'});
    return pay;
  }
@@ -5908,7 +5986,10 @@ function cpUpdateBill(idx,type,amount,advance,data){
  b.paymentReceipts.push({id:'RCP-CR-'+Date.now().toString().slice(-8),billId:b.id,date:data.date,amount:net,mode:'Credit',note:data.note||'',type:'credit'});
  return net;
 }
-window.skCPSaveAction=function(){
+window.skCPSaveAction=function(ev){
+ if(ev&&typeof ev.preventDefault==='function')ev.preventDefault();
+ var saveButton=document.querySelector('#skCreditActionModal .sk-cp-save-btn');
+ if(saveButton&&saveButton.dataset.saving==='1')return;
  var type=(document.getElementById('skCPActionType')?.value||'').trim();
  var name=(document.getElementById('skCPName')?.value||'').trim();
  var phone=(document.getElementById('skCPPhone')?.value||'').trim();
@@ -5942,6 +6023,7 @@ window.skCPSaveAction=function(){
 
  var applied=type==='payment'?Math.min(currentBalance,amount):Math.max(0,amount-advance);
  if(type==='credit' && applied<=0){showToast?.('Credit amount after advance must be greater than zero');return;}
+ if(saveButton)saveButton.dataset.saving='1';
 
  try{
    var update=cpUpdateBill(billIndex,type,amount,advance,{date:date,mode:mode,note:note,category:category});
@@ -5970,6 +6052,8 @@ window.skCPSaveAction=function(){
  }catch(err){
    console.error('Credit/Payment save failed:',err);
    showToast?.('❌ Save failed. Please try again.');
+ }finally{
+   if(saveButton)saveButton.dataset.saving='0';
  }
 };
 function cpOpenPage(){
