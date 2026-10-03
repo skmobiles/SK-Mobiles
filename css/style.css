@@ -822,3 +822,7 @@ body.sk-worker-mode #settingsModal .sk-worker-blocked{pointer-events:none!import
 @media (max-width:360px){
   .mobile-type-btn{font-size:.62rem;padding-left:3px;padding-right:3px;}
 }
+
+/* SK V4.14: compact current-login badge */
+.sk-top-role-badge{margin-left:auto;align-self:flex-start;margin-top:6px;padding:5px 8px;border:1px solid var(--card-border,#dbe3ef);border-radius:999px;background:var(--pill-bg,#f8fafc);color:var(--text,#0f172a);font-size:.62rem;font-weight:900;white-space:nowrap;box-shadow:0 2px 8px rgba(15,23,42,.06)}
+@media(max-width:520px){.sk-top-role-badge{font-size:.55rem;padding:4px 6px;margin-top:4px}}
