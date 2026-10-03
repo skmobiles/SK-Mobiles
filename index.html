@@ -26,6 +26,46 @@
 </script>
 <link href="css/style.css" rel="stylesheet"/></head>
 <body>
+
+<!-- 🔐 MODERN GLASSMORPHISM LOGIN MODAL -->
+<div id="skLoginModal" class="modal-overlay active">
+  <div class="login-glass-card">
+    <div class="login-logo-container">
+      <div class="login-logo-glow">
+        <img src="logo.png" alt="SK Mobiles Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+        <div class="fallback-logo" style="display:none; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem;">SK</div>
+      </div>
+      <h2 class="login-brand-title">SK MOBILES</h2>
+      <p class="login-brand-subtitle">Smart Billing &amp; Business Control</p>
+    </div>
+
+    <div class="login-role-pill">
+      <span>Admin = Full Access</span> • <span>Worker = Limited Access</span>
+    </div>
+
+    <div class="login-form-group">
+      <div class="login-input-wrap">
+        <span class="login-input-icon">📧</span>
+        <input type="email" id="loginEmailInput" class="login-modern-input" placeholder="Enter email address" autocomplete="username" required>
+      </div>
+
+      <div class="login-input-wrap">
+        <span class="login-input-icon">🔒</span>
+        <input type="password" id="loginPasswordInput" class="login-modern-input" placeholder="Enter password" autocomplete="current-password" required>
+      </div>
+
+      <button id="skFirebaseLoginBtn" class="login-submit-btn" type="button">
+        <span>☁️ Firebase Login</span>
+      </button>
+      <div id="skLoginMsg" class="login-status-msg" aria-live="polite"></div>
+    </div>
+
+    <div class="login-footer-roles">
+      <span>Admin</span> • <span>Manager</span> • <span>Worker</span>
+    </div>
+  </div>
+</div>
+
 <!-- SK V4.16: Firebase-safe Recycle Bin -->
 <div id="skRecycleBinModal" class="modal-overlay" style="z-index:2147483000!important;">
 <div class="modal-sheet" style="max-width:460px;max-height:90vh;">
