@@ -1468,10 +1468,21 @@ body{font-family:var(--app-font);}
 /* V4.16 FONT FIX: selected font must visibly override legacy fixed-font rules. */
 html[data-font-family] body,
 html[data-font-family] body *{
-  font-family:var(--app-font) !important;
+  font-family:var(--app-font);
 }
+/* Font picker cards keep their own preview face. */
 html[data-font-family] .sk-font-choice{
-  font-family:var(--app-font) !important;
+  font-family:inherit;
+}
+/* Bills / invoices intentionally keep their fixed print font. */
+#skFixedInvoiceRoot,
+#skFixedInvoiceRoot *,
+#printableInvoiceCard,
+#printableInvoiceCard *,
+.invoice-emi-schedule-preview,
+.invoice-emi-schedule-preview *,
+.invoice-shop-name{
+  font-family:'Plus Jakarta Sans',sans-serif !important;
 }
 .sk-font-preview{
   display:flex;
