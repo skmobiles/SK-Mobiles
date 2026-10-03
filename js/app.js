@@ -2925,38 +2925,45 @@ const MASTER_INVENTORY = [
 
     function printInvoiceDirect() {
       const source = document.getElementById('printableInvoiceCard');
-      if (!source) return;
+      if (!source) { showToast?.('Live Invoice Preview not found'); return; }
 
       const clone = source.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.style.cssText = 'background:#fff;color:#1e293b;padding:18px;box-shadow:none;border:none;border-radius:0;font-family:"Plus Jakarta Sans",Arial,sans-serif;width:100%;max-width:100%;box-sizing:border-box;';
       const w = window.open('', '_blank');
-      if (!w) {
-        showToast("Please allow popups to print!");
-        return;
-      }
+      if (!w) { showToast?.('Please allow popups to print!'); return; }
 
       w.document.open();
-      w.document.write(`<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>SK MOBILES - Invoice</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
-  
-</head>
-<body>
-  ${clone.outerHTML}
-
-
-
-
-</body>
-</html>`);
+      w.document.write(`<!doctype html><html><head>
+<meta charset="utf-8"><title>SK MOBILES - Invoice</title>
+<style>
+@page{size:A4 portrait;margin:12mm}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#fff;color:#1e293b;font-family:"Plus Jakarta Sans",Arial,sans-serif}
+.print-sheet{width:100%;max-width:100%;margin:0 auto;background:#fff}
+.invoice-brand-header{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding-bottom:14px;border-bottom:1.5px solid #edf0f6}
+.invoice-logo-wrap{width:92px!important;height:92px!important;min-width:92px!important;max-width:92px!important;flex:0 0 92px!important;border-radius:50%;overflow:hidden;background:#fff;border:2px solid #edf0f6;display:flex;align-items:center;justify-content:center}
+.invoice-logo{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:cover!important;display:block}
+.invoice-shop-info{flex:1;text-align:right}
+.invoice-shop-name{font-size:1.65rem;font-weight:900;color:#d9166f;margin-bottom:3px}
+.invoice-address{font-size:.68rem;line-height:1.45;font-weight:700;color:#334155}
+.invoice-phone{font-size:.78rem;font-weight:900;color:#e11d48;margin-top:6px}
+.invoice-meta-row{display:flex;justify-content:space-between;font-size:.73rem;margin:12px 0 10px;padding:9px 12px;border:1.5px solid #ececf5;border-radius:12px;background:#faf8ff}
+table{width:100%;border-collapse:collapse}
+img{max-width:100%!important}
+#invoiceMainSheet{width:100%!important;max-width:100%!important}
+</style></head><body><div class="print-sheet">${clone.outerHTML}</div></body></html>`);
       w.document.close();
-      setTimeout(() => {
-        w.focus();
-        w.print();
-        w.close();
-      }, 400);
+
+      const printNow=()=>{
+        try{w.focus();w.print();}finally{setTimeout(()=>{try{w.close()}catch(e){}},300);}
+      };
+      const imgs=[...w.document.images];
+      if(!imgs.length){setTimeout(printNow,250);return;}
+      let remaining=imgs.length,done=false;
+      const finish=()=>{if(done)return;remaining--;if(remaining<=0){done=true;printNow();}};
+      imgs.forEach(img=>{if(img.complete)finish();else{img.addEventListener('load',finish,{once:true});img.addEventListener('error',finish,{once:true});}});
+      setTimeout(()=>{if(!done){done=true;printNow();}},1200);
     }
 
     function downloadInvoicePDF() {
@@ -3584,6 +3591,7 @@ const MASTER_INVENTORY = [
       const p=(document.getElementById('skRolePin')?.value||'').trim();
       if(p!==pin(selectedRole)){message('❌ Wrong PIN');return;}
       setRole(selectedRole);
+      skRefreshRoleBadge();
       gate(false);
       document.getElementById('skRolePin')?.blur();
       document.body.style.overflow='';
@@ -3594,7 +3602,67 @@ const MASTER_INVENTORY = [
       toast(selectedRole==='admin'?'👑 Admin login successful':'👷 Worker login successful');
     }
     window.skLogout=function(){localStorage.removeItem(ROLE_KEY);document.querySelectorAll('.modal-overlay.active').forEach(m=>m.classList.remove('active'));document.getElementById('skAdminPanelModal')?.classList.remove('active');gate(true);choose('admin');};
-    window.skOpenAdminPanel=function(){if(!admin()){toast('🔒 Admin access only');return;}document.getElementById('skAdminPanelModal')?.classList.add('active');};
+
+    const SK_MANAGER_PERM_KEY='sk_manager_permissions_v1';
+    const SK_MANAGER_DEFAULTS={
+      managerAccess:true,
+      billing:true,
+      inventory:true,
+      credit:true,
+      repair:true,
+      backup:true,
+      restore:false,
+      shopSettings:false,
+      userManagement:false
+    };
+    function skManagerPerms(){
+      let p={...SK_MANAGER_DEFAULTS};
+      try{const x=JSON.parse(localStorage.getItem(SK_MANAGER_PERM_KEY)||'{}');if(x&&typeof x==='object')p={...p,...x};}catch(e){}
+      return p;
+    }
+    function skManagerAllowed(name){return !!skManagerPerms()[name];}
+    function skRenderManagerPermissions(){
+      if(!admin())return;
+      const p=skManagerPerms(), access=document.getElementById('skMgrAccessToggle');
+      if(access)access.checked=!!p.managerAccess;
+      const box=document.getElementById('skManagerPermissionList'); if(!box)return;
+      const rows=[
+        ['billing','🧾 Sales Billing & Edit'],
+        ['inventory','📦 Inventory Management'],
+        ['credit','💳 Credit Ledger & Payments'],
+        ['repair','🔧 Repair Jobs'],
+        ['backup','☁️ Cloud Backup Now'],
+        ['restore','☁️ Cloud Restore Latest'],
+        ['shopSettings','🏪 Shop Profile & Bill Settings'],
+        ['userManagement','👥 User Role Management']
+      ];
+      box.innerHTML=rows.map(([key,label])=>`<label style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 8px;border:1px solid var(--card-border);border-radius:10px;background:var(--pill-bg);font-size:.70rem;font-weight:800;"><span>${label}</span><input type="checkbox" ${p[key]?'checked':''} onchange="skAdminSetManagerPermission('${key}',this.checked)"></label>`).join('');
+    }
+    window.skAdminSetManagerPermission=function(key,value){
+      if(!admin()){toast('🔒 Admin access only');return;}
+      const p=skManagerPerms();p[key]=!!value;localStorage.setItem(SK_MANAGER_PERM_KEY,JSON.stringify(p));
+      if(typeof applyRestrictions==='function')applyRestrictions();
+      skRenderManagerPermissions();
+      toast('Manager permission updated');
+    };
+    window.skAdminResetAllData=function(){
+      if(!admin()){toast('🔒 Admin access only');return;}
+      if(!confirm('Reset all local app data? This cannot be undone.'))return;
+      if(!confirm('Final confirmation: delete all local SK MOBILES app data?'))return;
+      const keepKeys=new Set(['sk_current_role_v1']);
+      Object.keys(localStorage).forEach(k=>{if(k.startsWith('sk_')||k.startsWith('skx_')){if(!keepKeys.has(k))localStorage.removeItem(k);}});
+      localStorage.removeItem('sk_current_worker_id_v1');
+      toast('🗑️ All local app data reset');
+      setTimeout(()=>location.reload(),250);
+    };
+    function skRefreshRoleBadge(){
+      const el=document.getElementById('skTopRoleBadge'); if(!el)return;
+      const r=String(localStorage.getItem(ROLE_KEY)||'').toLowerCase();
+      const map={admin:'👑 Admin',manager:'👔 Manager',worker:'👷 Worker'};
+      el.textContent=map[r]||''; el.style.display=map[r]?'inline-flex':'none';
+    }
+    window.skRefreshRoleBadge=skRefreshRoleBadge;
+    window.skOpenAdminPanel=function(){if(!admin()){toast('🔒 Admin access only');return;}const r=document.getElementById('skAdminCurrentRole');if(r)r.textContent='👑 Admin — Full Access';skRenderManagerPermissions();document.getElementById('skAdminPanelModal')?.classList.add('active');};
     window.skCloseAdminPanel=function(){document.getElementById('skAdminPanelModal')?.classList.remove('active');};
     window.skChangePin=function(r){if(!admin()){toast('🔒 Admin access only');return;}const id=r==='admin'?'skNewAdminPin':'skNewWorkerPin';const v=(document.getElementById(id)?.value||'').trim();if(!/^\d{4,12}$/.test(v)){toast('PIN must be 4-12 digits');return;}localStorage.setItem(pinKey(r),v);document.getElementById(id).value='';toast((r==='admin'?'Admin':'Worker')+' PIN updated');};
 
@@ -3618,33 +3686,56 @@ const MASTER_INVENTORY = [
     const blockedWords=['add item','edit','delete','clear all orders','next status','save repair job','update repair job','backup','restore','stock adjustment','purchase','expense','supplier','used mobile'];
     function applyManagerRestrictions(){
       if(role()!=='manager') return;
+      const p=skManagerPerms();
       const settings=document.getElementById('settingsModal');
       if(settings){
         settings.querySelectorAll('div').forEach(function(el){
           const t=(el.textContent||'').trim().toLowerCase();
-          if(t==='🏪 shop profile & address' || t==='📜 terms & conditions editor' || t==='shop brand logo'){
-            const parent=el.parentElement;
-            if(parent) parent.style.display='none';
+          if(!p.shopSettings && (t==='🏪 shop profile & address' || t==='📜 terms & conditions editor' || t==='shop brand logo')){
+            const parent=el.parentElement;if(parent)parent.style.display='none';
           }
         });
         const cloudTitle=settings.querySelector('#skCloudBackupSection');
         if(cloudTitle && cloudTitle.parentElement){
           const cloudBox=cloudTitle.parentElement;
-          const buttons=cloudBox.querySelectorAll('button');
-          buttons.forEach(function(b){ if((b.textContent||'').toLowerCase().includes('restore latest')) b.style.display='none'; });
+          cloudBox.querySelectorAll('button').forEach(function(b){
+            const txt=(b.textContent||'').toLowerCase();
+            if(txt.includes('backup now'))b.style.display=p.backup?'':'none';
+            if(txt.includes('restore latest'))b.style.display=p.restore?'':'none';
+          });
         }
       }
+      const blockByPermission=function(el){
+        const txt=((el.textContent||'')+' '+(el.getAttribute('title')||'')+' '+(el.getAttribute('onclick')||'')).toLowerCase();
+        if(!p.billing && /(new bill|save bill|edit bill|billing|invoice)/.test(txt))return true;
+        if(!p.inventory && /(add item|inventory|stock|tempered glass|display|update stock)/.test(txt))return true;
+        if(!p.credit && /(credit ledger|credit|payment|outstanding)/.test(txt))return true;
+        if(!p.repair && /(repair job|repair jobs|job card)/.test(txt))return true;
+        if(!p.backup && txt.includes('backup now'))return true;
+        if(!p.restore && txt.includes('restore latest'))return true;
+        if(!p.shopSettings && /(shop profile|bill settings|terms & conditions|brand logo)/.test(txt))return true;
+        if(!p.userManagement && /(user role management|manage users|worker management)/.test(txt))return true;
+        return false;
+      };
+      document.querySelectorAll('button,a,[role="button"]').forEach(function(el){
+        if(el.closest('#skRoleGate')||el.closest('#skAdminPanelModal'))return;
+        if(blockByPermission(el))mark(el);else if(el.classList.contains('sk-worker-blocked'))el.classList.remove('sk-worker-blocked');
+      });
       document.getElementById('skAdminPanelModal')?.classList.remove('active');
-      const adminBtn=document.getElementById('skAdminControlBtn');
-      if(adminBtn) adminBtn.style.display='none';
+      const adminBtn=document.getElementById('skAdminControlBtn');if(adminBtn)adminBtn.style.display='none';
     }
 
     function applyRestrictions(){
       if(!document.body)return;
-      document.body.classList.toggle('sk-worker-mode',role()==='worker');
-      applyManagerRestrictions();
-      if(role()!=='worker'){
-        document.querySelectorAll('.sk-worker-blocked').forEach(el=>el.classList.remove('sk-worker-blocked'));
+      const currentRole=role();
+      document.body.classList.toggle('sk-worker-mode',currentRole==='worker');
+      skRefreshRoleBadge();
+      document.querySelectorAll('.sk-worker-blocked').forEach(el=>el.classList.remove('sk-worker-blocked'));
+      if(currentRole==='manager'){
+        applyManagerRestrictions();
+        return;
+      }
+      if(currentRole!=='worker'){
         return;
       }
       document.querySelectorAll('button,a,[role="button"]').forEach(el=>{
@@ -3678,7 +3769,7 @@ const MASTER_INVENTORY = [
       document.querySelectorAll('.sk-role-btn').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.role)));
       document.getElementById('skRoleLoginBtn')?.addEventListener('click',login);
       document.getElementById('skRolePin')?.addEventListener('keydown',e=>{if(e.key==='Enter')login();});
-      const r=role();if(r==='admin'||r==='worker'){setRole(r);applyRestrictions();}else gate(true);
+      const r=role();if(r==='admin'||r==='worker'||r==='manager'){setRole(r);applyRestrictions();}else gate(true); skRefreshRoleBadge();
       const img=document.getElementById('skLoginLogo');if(img)img.src=logo();
       addAdminButton();refreshAdminButton();guardFunctions();
       const obs=new MutationObserver(()=>{guardFunctions();addAdminButton();refreshAdminButton();if(role()==='worker')applyRestrictions();});
@@ -5751,44 +5842,68 @@ function cpUpdateBill(idx,type,amount,advance,data){
  return net;
 }
 window.skCPSaveAction=function(){
- var type=document.getElementById('skCPActionType').value,name=document.getElementById('skCPName').value.trim(),phone=document.getElementById('skCPPhone').value.trim(),amount=Number(document.getElementById('skCPAmount').value)||0,adv=type==='credit'?(Number(document.getElementById('skCPAdvance').value)||0):0,date=document.getElementById('skCPDate').value||cpDate(),billIdx=document.getElementById('skCPBill').value;
- if(!name||amount<=0){if(typeof showToast==='function')showToast('Customer name and amount required');return}
- if(type==='credit'&&adv>amount){if(typeof showToast==='function')showToast('Advance cannot be more than amount');return}
- var billIdxNum=billIdx===''?null:Number(billIdx),bills=cpBills(),bill=billIdxNum!==null?bills[billIdxNum]:null;
- var oldCustomer=cpGetCustomers().find(function(c){return c.key===cpKey(name,phone)}),oldBal=oldCustomer?oldCustomer.balance:0;
- if(!bill && oldCustomer && oldCustomer.bills && oldCustomer.bills.length){
-   var pendingBill=oldCustomer.bills.find(function(x){return Number(x.b.balance||0)>0;})||oldCustomer.bills[0];
-   billIdxNum=pendingBill.idx; bill=bills[billIdxNum];
-   var billSelect=document.getElementById('skCPBill'); if(billSelect)billSelect.value=String(billIdxNum);
+ var type=(document.getElementById('skCPActionType')?.value||'').trim();
+ var name=(document.getElementById('skCPName')?.value||'').trim();
+ var phone=(document.getElementById('skCPPhone')?.value||'').trim();
+ var amount=Math.max(0,Number(document.getElementById('skCPAmount')?.value)||0);
+ var advance=type==='credit'?Math.max(0,Number(document.getElementById('skCPAdvance')?.value)||0):0;
+ var date=document.getElementById('skCPDate')?.value||cpDate();
+ var billValue=document.getElementById('skCPBill')?.value||'';
+ if(!name||amount<=0){showToast?.('Customer name and amount required');return;}
+ if(type!=='payment'&&type!=='credit'){showToast?.('Invalid credit/payment action');return;}
+ if(type==='credit'&&advance>amount){showToast?.('Advance cannot be more than amount');return;}
+
+ var bills=cpBills(),billIndex=billValue!==''&&/^\d+$/.test(String(billValue))?Number(billValue):null;
+ var bill=billIndex!==null?bills[billIndex]:null;
+ var customer=cpGetCustomers().find(function(c){return c.key===cpKey(name,phone)})||null;
+
+ if(!bill&&customer&&customer.bills&&customer.bills.length){
+   var pending=customer.bills.find(function(x){return Number(x.b.balance||0)>0;})||customer.bills[0];
+   billIndex=pending.idx;bill=bills[billIndex];
+   const select=document.getElementById('skCPBill');if(select)select.value=String(billIndex);
  }
- var mode=type==='payment'?document.getElementById('skCPPaymentMode').value:'Credit';
- var category=document.getElementById('skCPCategory').value,note=document.getElementById('skCPNote').value.trim(),emi=document.getElementById('skCPEmiMode').value==='emi';
- var net=type==='credit'?Math.max(0,amount-adv):amount;
- if((type==='payment'||type==='credit') && !bill && oldCustomer && oldCustomer.bills && oldCustomer.bills.some(function(x){return Number(x.b.balance||0)>0})){
-   if(typeof showToast==='function')showToast('Please select the customer purchase bill');
+ if(!bill){
+   showToast?.('Please select the customer purchase bill');
    return;
  }
- if((type==='payment'||type==='credit') && !bill && oldCustomer && oldCustomer.bills && oldCustomer.bills.length===0){
-   if(typeof showToast==='function')showToast('No sales bill is available for this customer');
-   return;
+
+ var note=(document.getElementById('skCPNote')?.value||'').trim();
+ var category=document.getElementById('skCPCategory')?.value||'Mobile Sale';
+ var mode=type==='payment'?(document.getElementById('skCPPaymentMode')?.value||'Cash'):'Credit';
+ var currentBalance=Math.max(0,Number(bill.balance)||0);
+ if(currentBalance<=0){showToast?.('Selected bill has no pending balance');return;}
+
+ var applied=type==='payment'?Math.min(currentBalance,amount):Math.max(0,amount-advance);
+ if(type==='credit' && applied<=0){showToast?.('Credit amount after advance must be greater than zero');return;}
+
+ try{
+   var update=cpUpdateBill(billIndex,type,amount,advance,{date:date,mode:mode,note:note,category:category});
+   if(type==='payment'&&update<=0){showToast?.('Payment could not be applied');return;}
+
+   localStorage.setItem('sk_bills',JSON.stringify(bills));
+   if(typeof savedBills!=='undefined')savedBills=bills;
+
+   cpSaveLedgerEntry({
+     name:name,phone:phone,type:type,amount:applied,mode:mode,date:date,
+     details:(note|| (type==='payment'?'Payment received':'Credit entry'))+' • Bill '+String(bill.billNo||bill.id||''),
+     source:type==='payment'?'payment-receipt':'manual-credit-page',
+     billId:String(bill.id||''),dueDate:''
+   });
+
+   if(typeof skImportFromBills==='function')skImportFromBills(true);
+   if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
+   if(typeof renderBillHistory==='function')renderBillHistory();
+   if(typeof loadSavedBills==='function')loadSavedBills();
+
+   skCPCloseAction();
+   skCPRender();
+   var refreshed=cpGetCustomers().find(function(c){return c.key===cpKey(name,phone)});
+   if(refreshed)cpOpenDetail(refreshed);
+   showToast?.(type==='payment'?'Payment saved • receipt attached to bill':'Credit saved • balance updated');
+ }catch(err){
+   console.error('Credit/Payment save failed:',err);
+   showToast?.('❌ Save failed. Please try again.');
  }
- if(type==='payment'&&bill){var actual=Math.min(Math.max(0,Number(bill.balance)||0),amount);if(actual<=0){if(typeof showToast==='function')showToast('Selected bill has no pending balance');return}}
- if(type==='payment'&&bill){amount=Math.min(amount,Math.max(0,Number(bill.balance)||0));net=amount}
- if(type==='credit'&&bill){cpUpdateBill(billIdxNum,type,amount,adv,{date:date,category:category,note:note})}
- if(type==='payment'&&bill){cpUpdateBill(billIdxNum,type,amount,0,{date:date,mode:mode,note:note})}
- if(bill){localStorage.setItem('sk_bills',JSON.stringify(bills));}
- if(type==='credit'){
-   cpSaveLedgerEntry({name:name,phone:phone,type:'credit',amount:net,mode:emi?'EMI':'Credit',date:date,details:'['+category+'] '+(note||'Credit entry')+(adv?' • Advance '+cpMoney(adv):''),source:'manual-credit-page',billId:bill?bill.id:'',dueDate:''});
-   if(emi){var months=Math.max(1,Number(document.getElementById('skCPEmiMonths').value)||1),interest=Number(document.getElementById('skCPEmiInterest').value)||0,start=document.getElementById('skCPEmiStart').value||date;cpSaveLedgerEntry({name:name,phone:phone,type:'emi',amount:net,mode:'EMI',date:date,details:'EMI '+months+' months • '+interest+'% • '+(note||''),source:'manual-credit-page',billId:bill?bill.id:'',dueDate:start})}
- }else{
-   cpSaveLedgerEntry({name:name,phone:phone,type:'payment',amount:amount,mode:mode,date:date,details:(note||'Payment received'),source:'payment-receipt',billId:bill?bill.id:''});
- }
- if(typeof skImportFromBills==='function')skImportFromBills(true);
- if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
- if(typeof renderBillHistory==='function')renderBillHistory();
- skCPCloseAction();skCPRender();
- var c=cpGetCustomers().find(function(x){return x.key===cpKey(name,phone)});if(c)cpOpenDetail(c);
- if(typeof showToast==='function')showToast(type==='payment'?'Payment saved • receipt attached to bill':'Credit saved • balance updated');
 };
 function cpOpenPage(){
  if(typeof skImportFromBills==='function')skImportFromBills(true);

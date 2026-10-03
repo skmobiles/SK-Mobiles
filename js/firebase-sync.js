@@ -346,7 +346,12 @@
 
   function cloudBackupAllowed(){
     const role = String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
-    return role === "admin" || role === "manager";
+    if(role === "admin") return true;
+    if(role !== "manager") return false;
+    try{
+      const p = JSON.parse(localStorage.getItem("sk_manager_permissions_v1")||"{}");
+      return p.backup !== false;
+    }catch(e){ return true; }
   }
 
   function cloudAutoBackupKeyAllowed(key){
@@ -456,7 +461,14 @@
   window.skCloudRestoreLatest = async function(){
     if(!auth?.currentUser || !db){ toast("❌ Firebase Login தேவை"); return; }
     const currentRole = String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
-    if(currentRole !== "admin"){ toast("🔒 Cloud Restore Admin-க்கு மட்டும்"); return; }
+    let restoreAllowed = currentRole === "admin";
+    if(currentRole === "manager"){
+      try{
+        const p = JSON.parse(localStorage.getItem("sk_manager_permissions_v1")||"{}");
+        restoreAllowed = p.restore === true;
+      }catch(e){ restoreAllowed = false; }
+    }
+    if(!restoreAllowed){ toast("🔒 Cloud Restore permission இல்லை"); return; }
     if(!confirm("Latest Cloud Backup-ஐ இந்த device-க்கு restore செய்யவா?")) return;
     try{
       cloudRestoreApplying = true;
@@ -516,10 +528,19 @@
     }
     try {
       const role = await ensureUserProfile(user);
+      if(role === "manager"){
+        let managerEnabled = true;
+        try{
+          const p = JSON.parse(localStorage.getItem("sk_manager_permissions_v1")||"{}");
+          managerEnabled = p.managerAccess !== false;
+        }catch(e){}
+        if(!managerEnabled) throw new Error("Manager access is disabled by Admin.");
+      }
       localStorage.setItem(ROLE_KEY, role);
       if(role === "worker") localStorage.setItem(WORKER_KEY, user.uid);
       else localStorage.removeItem(WORKER_KEY);
       document.body.classList.toggle("sk-worker-mode", role === "worker");
+      if(typeof window.skRefreshRoleBadge === "function") window.skRefreshRoleBadge();
       gate(false);
       msg("");
       try { if(typeof applyRestrictions === "function") applyRestrictions(); } catch(e){}
