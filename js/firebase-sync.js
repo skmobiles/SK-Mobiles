@@ -46,8 +46,11 @@
   }
 
   function msg(t){
+    const text = t || "";
     const el = document.getElementById("skRoleMsg");
-    if(el) el.textContent = t || "";
+    if(el) el.textContent = text;
+    const modern = document.getElementById("skLoginMsg");
+    if(modern) modern.textContent = text;
   }
 
   function toast(t){
@@ -115,47 +118,84 @@
   }
 
   function injectLoginUI(){
+    const modernModal = document.getElementById("skLoginModal");
+    const modernEmail = document.getElementById("loginEmailInput");
+    const modernPassword = document.getElementById("loginPasswordInput");
+    const modernBtn = document.getElementById("skFirebaseLoginBtn");
+
+    const doLogin = async ()=>{
+      const email = (modernEmail?.value || document.getElementById("skFirebaseEmail")?.value || "").trim().toLowerCase();
+      const password = modernPassword?.value || document.getElementById("skFirebasePassword")?.value || "";
+      if(!email || !password){ msg("❌ Email மற்றும் Password உள்ளிடவும்."); return; }
+      if(!emailRole(email)){ msg("❌ இந்த Email பதிவு செய்யப்படவில்லை."); return; }
+      msg("⏳ Login செய்கிறது...");
+      if(modernBtn) modernBtn.disabled = true;
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch(e) {
+        console.error(e);
+        msg("❌ Login failed: " + (e.code === "auth/invalid-credential" ? "Email அல்லது Password தவறாக உள்ளது." : e.message));
+      } finally {
+        if(modernBtn) modernBtn.disabled = false;
+      }
+    };
+
+    if(modernModal && modernEmail && modernPassword && modernBtn){
+      if(!modernBtn.dataset.firebaseBound){
+        modernBtn.dataset.firebaseBound = "1";
+        modernBtn.addEventListener("click", doLogin);
+        modernPassword.addEventListener("keydown", e=>{ if(e.key === "Enter") doLogin(); });
+      }
+
+      // Keep the older role-gate login UI hidden when the supplied modern modal exists.
+      const card = document.querySelector("#skRoleGate .sk-login-card");
+      if(card){
+        const oldGrid = card.querySelector(".sk-role-grid");
+        const oldLabel = card.querySelector('label[for="skRolePin"]');
+        const oldPin = card.querySelector("#skRolePin");
+        const oldWorker = card.querySelector("#skWorkerLoginSelect");
+        const oldBtn = card.querySelector("#skRoleLoginBtn");
+        [oldGrid, oldLabel, oldPin, oldWorker, oldBtn].forEach(el=>{ if(el) el.style.display="none"; });
+      }
+      return;
+    }
+
+    // Backward-compatible fallback for copies where the supplied modal is absent.
     const card = document.querySelector("#skRoleGate .sk-login-card");
     if(!card || document.getElementById("skFirebaseLoginBlock")) return;
     const block = document.createElement("div");
     block.id = "skFirebaseLoginBlock";
     block.innerHTML = `
       <div style="margin:12px 0 8px;border-top:1px solid var(--card-border,#ddd);padding-top:12px">
-        <div style="font-weight:800;font-size:.9rem;margin-bottom:8px">🔐 Email & Password Login</div>
+        <div style="font-weight:800;font-size:.9rem;margin-bottom:8px">🔐 Email &amp; Password Login</div>
         <input id="skFirebaseEmail" class="sk-login-input" type="email" autocomplete="username" placeholder="Email address">
         <input id="skFirebasePassword" class="sk-login-input" type="password" autocomplete="current-password" placeholder="Password" style="margin-top:7px">
         <button id="skFirebaseLoginBtn" class="sk-login-btn" type="button" style="margin-top:8px">☁️ Firebase Login</button>
         <div style="font-size:.68rem;color:var(--text-muted,#64748b);margin-top:6px">Admin • Manager • Worker</div>
       </div>`;
     card.appendChild(block);
-
     const oldGrid = card.querySelector(".sk-role-grid");
     const oldLabel = card.querySelector('label[for="skRolePin"]');
     const oldPin = card.querySelector("#skRolePin");
     const oldWorker = card.querySelector("#skWorkerLoginSelect");
     const oldBtn = card.querySelector("#skRoleLoginBtn");
     [oldGrid, oldLabel, oldPin, oldWorker, oldBtn].forEach(el=>{ if(el) el.style.display="none"; });
-
-    const doLogin = async ()=>{
-      const email = (document.getElementById("skFirebaseEmail")?.value || "").trim().toLowerCase();
-      const password = document.getElementById("skFirebasePassword")?.value || "";
-      if(!email || !password){ msg("❌ Email மற்றும் Password உள்ளிடவும்."); return; }
-      if(!emailRole(email)){ msg("❌ இந்த Email பதிவு செய்யப்படவில்லை."); return; }
-      msg("⏳ Login செய்கிறது...");
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-      } catch(e) {
-        console.error(e);
-        msg("❌ Login failed: " + (e.code === "auth/invalid-credential" ? "Email அல்லது Password தவறாக உள்ளது." : e.message));
-      }
-    };
-    document.getElementById("skFirebaseLoginBtn").addEventListener("click", doLogin);
-    document.getElementById("skFirebasePassword").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+    const fallbackBtn=document.getElementById("skFirebaseLoginBtn");
+    const fallbackEmail=document.getElementById("skFirebaseEmail");
+    const fallbackPassword=document.getElementById("skFirebasePassword");
+    fallbackBtn.addEventListener("click", doLogin);
+    fallbackPassword.addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
   }
 
   function gate(show){
+    const modern = document.getElementById("skLoginModal");
     const g = document.getElementById("skRoleGate");
-    if(g) g.classList.toggle("sk-show", !!show);
+    if(modern){
+      modern.classList.toggle("active", !!show);
+      if(g) g.classList.remove("sk-show");
+    } else if(g){
+      g.classList.toggle("sk-show", !!show);
+    }
     document.body.style.overflow = show ? "hidden" : "";
   }
 
