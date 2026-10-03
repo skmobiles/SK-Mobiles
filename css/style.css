@@ -1482,3 +1482,41 @@ html,body{background:var(--page-bg);}
 
 /* Consistent visible date entry format. */
 input[data-dmy-date]{letter-spacing:.02em;}
+
+
+/* V4.16 TARGETED FIX: keep Home matrix/action text readable in dark themes. */
+[data-theme="dark"] #homeMetricGrid .sk-home-metric-card,
+[data-theme="dark"] #homeActionCardsContainer .sk-home-action-row,
+[data-theme="cyber"] #homeMetricGrid .sk-home-metric-card,
+[data-theme="cyber"] #homeActionCardsContainer .sk-home-action-row,
+[data-theme="obsidian"] #homeMetricGrid .sk-home-metric-card,
+[data-theme="obsidian"] #homeActionCardsContainer .sk-home-action-row{
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--card-bg) 94%,var(--primary) 6%),
+    color-mix(in srgb,var(--page-bg) 84%,var(--primary) 16%)) !important;
+  border-color:color-mix(in srgb,var(--primary) 38%,var(--card-border) 62%) !important;
+  color:var(--text) !important;
+  box-shadow:0 10px 26px color-mix(in srgb,var(--primary) 10%,transparent),inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+[data-theme="dark"] #homeMetricGrid .sk-home-metric-card [style*="color: var(--text-muted)"],
+[data-theme="dark"] #homeActionCardsContainer .sk-home-action-row [style*="color: var(--text-muted)"],
+[data-theme="cyber"] #homeMetricGrid .sk-home-metric-card [style*="color: var(--text-muted)"],
+[data-theme="cyber"] #homeActionCardsContainer .sk-home-action-row [style*="color: var(--text-muted)"],
+[data-theme="obsidian"] #homeMetricGrid .sk-home-metric-card [style*="color: var(--text-muted)"],
+[data-theme="obsidian"] #homeActionCardsContainer .sk-home-action-row [style*="color: var(--text-muted)"]{
+  color:var(--text-muted) !important;
+}
+[data-theme="dark"] #homeMetricGrid .sk-home-metric-card [style*="color: var(--text)"],
+[data-theme="dark"] #homeActionCardsContainer .sk-home-action-row [style*="color: var(--text)"],
+[data-theme="cyber"] #homeMetricGrid .sk-home-metric-card [style*="color: var(--text)"],
+[data-theme="cyber"] #homeActionCardsContainer .sk-home-action-row [style*="color: var(--text)"],
+[data-theme="obsidian"] #homeMetricGrid .sk-home-metric-card [style*="color: var(--text)"],
+[data-theme="obsidian"] #homeActionCardsContainer .sk-home-action-row [style*="color: var(--text)"]{
+  color:var(--text) !important;
+}
+
+/* Keep the quick font control visible beside Theme & Icon Packs controls. */
+#skFontQuickBtn{min-height:28px;display:inline-flex;align-items:center;justify-content:center;}
+@media(max-width:420px){
+  #skFontQuickBtn{padding:4px 7px;font-size:.64rem;}
+}
