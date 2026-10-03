@@ -1465,6 +1465,48 @@ body{font-family:var(--app-font);}
 .app-name,.drawer-title,.sk-home-welcome-title{font-family:var(--app-font) !important;}
 .invoice-emi-schedule-preview,.invoice-shop-name,#printableInvoiceCard{font-family:'Plus Jakarta Sans',sans-serif;}
 
+/* V4.16 FONT FIX: selected font must visibly override legacy fixed-font rules. */
+html[data-font-family] body,
+html[data-font-family] body *{
+  font-family:var(--app-font) !important;
+}
+html[data-font-family] .sk-font-choice{
+  font-family:var(--app-font) !important;
+}
+.sk-font-preview{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  min-height:58px;
+  justify-content:center;
+}
+.sk-font-preview strong{
+  font-size:.68rem;
+  color:var(--primary);
+  font-weight:900;
+}
+.sk-font-preview span{
+  font-size:1rem;
+  font-weight:700;
+  line-height:1.25;
+}
+.sk-font-preview small{
+  font-size:.58rem;
+  color:var(--text-muted);
+  font-weight:700;
+}
+.sk-font-choice{
+  text-align:left;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+.sk-font-choice:hover{
+  transform:translateY(-1px);
+}
+.sk-font-choice.active{
+  border-color:var(--primary) !important;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 18%,transparent),0 8px 18px color-mix(in srgb,var(--primary) 12%,transparent) !important;
+}
+
 /* Android/browser status-bar area follows the active theme instead of staying white. */
 html,body{background:var(--page-bg);}
 .app-viewport{padding-top:env(safe-area-inset-top,0px);}
