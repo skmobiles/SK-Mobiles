@@ -145,6 +145,18 @@
         modernBtn.dataset.firebaseBound = "1";
         modernBtn.addEventListener("click", doLogin);
         modernPassword.addEventListener("keydown", e=>{ if(e.key === "Enter") doLogin(); });
+        const toggle = document.getElementById("skLoginPasswordToggle");
+        if(toggle && !toggle.dataset.bound){
+          toggle.dataset.bound = "1";
+          toggle.addEventListener("click", ()=>{
+            const visible = modernPassword.type === "text";
+            modernPassword.type = visible ? "password" : "text";
+            toggle.textContent = visible ? "Show" : "Hide";
+            toggle.setAttribute("aria-label", visible ? "Show password" : "Hide password");
+            toggle.setAttribute("aria-pressed", String(!visible));
+            modernPassword.focus();
+          });
+        }
       }
 
       // Keep the older role-gate login UI hidden when the supplied modern modal exists.
