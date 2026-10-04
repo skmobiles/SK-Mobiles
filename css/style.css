@@ -4955,6 +4955,11 @@ button.form-secondary:focus-visible{
 #billingModal #billNewView{
   padding:0 12px 14px;
   overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  min-height:0;
+  flex:1 1 auto;
 }
 #billingModal #billHistoryView{
   padding:0 12px 14px;
@@ -5119,6 +5124,13 @@ button.form-secondary:focus-visible{
   #billingModal .billing-modern > .modal-title{
     min-height:54px;
     padding:9px 10px;
+  }
+  #billingModal #billNewView{
+    min-height:0;
+    flex:0 0 auto;
+    height:auto;
+    overflow:visible;
+    -webkit-overflow-scrolling:auto;
   }
   #billingModal .mobile-type-tabs{
     margin-left:10px;
@@ -6724,30 +6736,31 @@ button:focus-visible,
   min-height:0 !important;
   display:flex !important;
   flex-direction:column !important;
-  overflow:hidden !important;
-  overflow-x:hidden !important;
-  overscroll-behavior:contain;
-}
-#billingModal .billing-modern > .modal-title{
-  position:relative !important;
-  top:auto !important;
-  flex:0 0 auto !important;
-}
-#billingModal .billing-tabs,
-#billingModal .mobile-type-tabs{flex:0 0 auto !important}
-#billingModal #billNewView,
-#billingModal #billHistoryView{
-  flex:1 1 0 !important;
-  height:0 !important;
-  min-height:0 !important;
-  min-width:0 !important;
-  max-height:none !important;
   overflow-y:auto !important;
   overflow-x:hidden !important;
   -webkit-overflow-scrolling:touch !important;
   overscroll-behavior:contain !important;
   scrollbar-gutter:stable;
-  scroll-padding-bottom:24px;
+}
+#billingModal .billing-modern > .modal-title{
+  position:sticky !important;
+  top:0 !important;
+  flex:0 0 auto !important;
+  z-index:20 !important;
+}
+#billingModal .billing-tabs,
+#billingModal .mobile-type-tabs{flex:0 0 auto !important}
+#billingModal #billNewView,
+#billingModal #billHistoryView{
+  flex:0 0 auto !important;
+  height:auto !important;
+  min-height:0 !important;
+  min-width:0 !important;
+  max-height:none !important;
+  overflow:visible !important;
+  overflow-x:visible !important;
+  -webkit-overflow-scrolling:auto !important;
+  overscroll-behavior:auto !important;
   padding-bottom:8px !important;
 }
 #billingModal #usedMobileBillingForm{min-height:0 !important}
@@ -6932,4 +6945,25 @@ button:focus-visible,
 .bottom-nav #navHome span{
   font-size:10px !important;
   line-height:1.05 !important;
+}
+
+
+/* Billing mobile scroll owner: the complete New Bill workspace scrolls together,
+   while the modal title remains visible. */
+#billingModal .billing-modern{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+}
+#billingModal .billing-modern > .modal-title{
+  position:sticky !important;
+  top:0 !important;
+  z-index:30 !important;
+}
+#billingModal #billNewView,
+#billingModal #billHistoryView{
+  flex:0 0 auto !important;
+  height:auto !important;
+  max-height:none !important;
+  overflow:visible !important;
 }
