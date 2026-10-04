@@ -39,8 +39,8 @@
       <p class="login-brand-subtitle">Smart Billing &amp; Business Control</p>
     </div>
 
-    <div class="login-role-pill">
-      <span>Admin = Full Access</span> • <span>Worker = Limited Access</span>
+    <div class="login-role-pill" aria-label="Available access roles">
+      <span>Admin</span> • <span>Manager</span> • <span>Worker</span>
     </div>
 
     <div class="login-form-group">
@@ -52,10 +52,11 @@
       <div class="login-input-wrap">
         <span class="login-input-icon">🔒</span>
         <input type="password" id="loginPasswordInput" class="login-modern-input" placeholder="Enter password" autocomplete="current-password" required>
+        <button id="skLoginPasswordToggle" class="login-password-toggle" type="button" aria-label="Show password" aria-pressed="false">Show</button>
       </div>
 
       <button id="skFirebaseLoginBtn" class="login-submit-btn" type="button">
-        <span>☁️ Firebase Login</span>
+        <span>🔐 Login</span>
       </button>
       <div id="skLoginMsg" class="login-status-msg" aria-live="polite"></div>
     </div>
@@ -69,8 +70,8 @@
 <!-- SK V4.16: Firebase-safe Recycle Bin -->
 <div id="skRecycleBinModal" class="modal-overlay" style="z-index:2147483000!important;">
 <div class="modal-sheet" style="max-width:460px;max-height:90vh;">
-<div class="modal-title"><span>🗑️ Recycle Bin (Trash)</span><button class="modal-close-btn" type="button" onclick="toggleModal('skRecycleBinModal', false)">✕</button></div>
-<p style="font-size:.72rem;color:var(--text-muted);margin-bottom:10px;">Deleted items will be automatically purged after 30 days. Restore re-syncs the original record through Firebase.</p>
+<div class="modal-title"><span>🗑️ Recycle Bin</span><button class="modal-close-btn" type="button" onclick="toggleModal('skRecycleBinModal', false)" aria-label="Close Recycle Bin">✕</button></div>
+<p style="font-size:.72rem;color:var(--text-muted);margin-bottom:10px;">Deleted items are automatically removed after 30 days.</p>
 <div id="recycleBinItemsContainer" style="display:flex;flex-direction:column;gap:8px;max-height:55vh;overflow-y:auto;"></div>
 <button id="btnEmptyRecycleBin" class="submit-btn" type="button" style="background:#ef4444;margin-top:12px;">⚠ Empty All Trash</button>
 </div>
