@@ -1721,3 +1721,10 @@ input[data-dmy-date]{letter-spacing:.02em;}
   color: #fff; border: none; border-radius: 14px; padding: 14px; font-size: 0.92rem; font-weight: 800;
   cursor: pointer; box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.5); transition: all 0.3s ease; margin-top: 6px;
 }
+/* ஆப் முழுவதும் உள்ள அனைத்து பாக்ஸ்களும் பின்புறத்துடன் பிளெண்ட் ஆக */
+div, section, .card, .modal, .sidebar, .menu, .container {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
