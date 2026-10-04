@@ -3474,8 +3474,30 @@ function viewSavedBill(idx) {
     }
 
     function printInvoiceDirect() {
-      const clone = skCloneLiveInvoiceForOutput();
+      const livePreview = document.getElementById('printableInvoiceCard');
+      if (!livePreview) { showToast?.('Live Invoice Preview not found'); return; }
+
+      // Print the actual Live Invoice Preview card. The EMI schedule is a sibling
+      // of #invoiceMainSheet inside this same preview card, so cloning only
+      // #invoiceMainSheet would silently omit the second page.
+      const previewClone = livePreview.cloneNode(true);
+      const clone = previewClone.querySelector('#invoiceMainSheet');
+      const emiSection = previewClone.querySelector('#pvEmiScheduleSection');
       if (!clone) { showToast?.('Live Invoice Preview not found'); return; }
+
+      // EMI print must be exactly two pages:
+      // Page 1 = the Live Invoice Preview bill
+      // Page 2 = the Live Invoice Preview EMI repayment schedule.
+      // No billing data, calculations, or invoice markup is changed.
+      const isEmiPrint = !!(emiSection && emiSection.style.display !== 'none');
+      const printPage1 = document.createElement('div');
+      printPage1.className = `print-page${isEmiPrint ? ' print-page-1' : ''}`;
+      if (isEmiPrint) emiSection.remove();
+      printPage1.appendChild(clone);
+
+      const printPage2 = document.createElement('div');
+      printPage2.className = 'print-page print-page-2';
+      if (isEmiPrint) printPage2.appendChild(emiSection);
 
       /*
        * Print the exact Live Invoice Preview bill content.
@@ -3516,6 +3538,29 @@ body{
   padding:0!important;
   background:#fff!important;
   box-sizing:border-box!important;
+}
+.print-page{
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  background:#fff!important;
+  box-sizing:border-box!important;
+  box-shadow:none!important;
+  border:none!important;
+  border-radius:0!important;
+}
+.print-page-1{
+  break-after:page!important;
+  page-break-after:always!important;
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+.print-page-2{
+  break-before:page!important;
+  page-break-before:always!important;
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
 }
 .print-sheet > div{
   width:100%!important;
@@ -3614,12 +3659,13 @@ td{padding:7px;border-bottom:1px solid #e2e8f0}
   color:#1e293b!important;
 }
 #pvEmiScheduleSection{
-  break-before:auto!important;
-  page-break-before:auto!important;
+  display:block!important;
+  break-before:avoid!important;
+  page-break-before:avoid!important;
   break-after:auto!important;
   page-break-after:auto!important;
-  break-inside:auto!important;
-  page-break-inside:auto!important;
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
 }
 img{max-width:100%!important}
 *{box-sizing:border-box}
@@ -3628,8 +3674,9 @@ img{max-width:100%!important}
   body *{visibility:visible!important}
   .print-sheet,.print-sheet *{visibility:visible!important}
   .print-sheet{display:block!important}
+  .print-page-1,.print-page-2{display:block!important}
 }
-</style></head><body><div class="print-sheet">${clone.outerHTML}</div></body></html>`);
+</style></head><body><div class="print-sheet">${printPage1.outerHTML}${isEmiPrint ? printPage2.outerHTML : ''}</div></body></html>`);
       w.document.close();
 
       const printNow=()=>{
