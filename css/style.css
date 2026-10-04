@@ -6562,16 +6562,15 @@ button.form-secondary:focus-visible{
   border-color:rgba(255,255,255,.10) !important;
   color:var(--text);
 }
-\n\n/* ==========================================================
-   V4.17 FINAL — TARGETED UI FIXES ONLY
-   Scope: billing scroll/action bar, repair note, Add Item,
-   bottom Home visibility, theme-safe soft controls.
-   No business/data/Firebase logic changes.
+\n\n
+/* ==========================================================
+   SK MOBILES V4.17 — FINAL REQUESTED UI FIXES
+   Scope: repair note, billing sticky actions, Add Item/Home
+   visibility, and theme-soft button styling only.
    ========================================================== */
 
-/* 1) Repair Tools & IC Spares — one canonical multiline field. */
-#repairSparesNoteInput.repair-spares-note-box,
-#repairSparesNoteInput{
+/* 1) Repair Tools / IC Spares — fixed large multiline workspace. */
+#repairSparesModal #repairSparesNoteInput.repair-spares-note-box{
   display:block !important;
   width:100% !important;
   min-height:330px !important;
@@ -6586,106 +6585,129 @@ button.form-secondary:focus-visible{
   word-break:break-word !important;
   line-height:1.5 !important;
   padding:14px 16px !important;
+  font-size:.92rem !important;
 }
 
-/* 2) Billing: modal itself is the scroll container; action bar stays sticky. */
+/* 2) Billing action bar — sticky, with enough scroll-end space. */
 #billingModal .billing-modern{
   overflow-y:auto !important;
   overflow-x:hidden !important;
   overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;
   scrollbar-gutter:stable;
+  scroll-padding-bottom:96px;
+  padding-bottom:96px !important;
 }
 #billingModal .bill-action-grid{
   position:sticky !important;
   bottom:8px !important;
   z-index:50 !important;
   margin-top:10px !important;
-  margin-bottom:2px !important;
+  margin-bottom:0 !important;
   isolation:isolate;
 }
 
-/* 3) Add Item: keep the text visible on small screens. */
+/* 3) Add Item — text + icon remain visible on every theme/width. */
 #headerSearchRow .box-photo-scan-btn,
 #cardsContainer .box-photo-scan-btn{
+  display:flex !important;
+  flex:0 0 auto !important;
   min-width:86px !important;
   width:auto !important;
+  max-width:none !important;
+  min-height:42px !important;
   padding:8px 11px !important;
   font-size:.70rem !important;
+  line-height:1.1 !important;
+  align-items:center !important;
   justify-content:center !important;
+  gap:4px !important;
   white-space:nowrap !important;
   overflow:visible !important;
+  opacity:1 !important;
+  visibility:visible !important;
   background:var(--primary-gradient) !important;
   color:#fff !important;
-  border-color:color-mix(in srgb,var(--primary) 55%,#fff 45%) !important;
+  border:1px solid color-mix(in srgb,var(--primary) 55%,#fff 45%) !important;
   box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 16%,transparent) !important;
 }
 
-/* 4) Home: always visible, including active state, using current theme. */
-#cardsContainer ~ .bottom-nav #navHome,
-.bottom-nav #navHome{
+/* 4) Home — active or inactive state remains visible and theme-aware. */
+.bottom-nav #navHome,
+#cardsContainer ~ .bottom-nav #navHome{
+  display:flex !important;
   flex:0 0 66px !important;
   width:66px !important;
   min-width:66px !important;
   height:66px !important;
   margin-top:-18px !important;
   border-radius:50% !important;
+  align-items:center !important;
+  justify-content:center !important;
   background:var(--primary-gradient) !important;
   color:#fff !important;
-  border:2px solid color-mix(in srgb,var(--card-bg) 82%,#fff 18%) !important;
-  box-shadow:0 9px 24px color-mix(in srgb,var(--primary) 28%,transparent),0 0 0 2px color-mix(in srgb,var(--primary) 22%,transparent) !important;
+  border:2px solid color-mix(in srgb,var(--card-bg) 78%,#fff 22%) !important;
+  box-shadow:0 9px 24px color-mix(in srgb,var(--primary) 25%,transparent),0 0 0 2px color-mix(in srgb,var(--primary) 16%,transparent) !important;
+  opacity:1 !important;
+  visibility:visible !important;
   z-index:10 !important;
+}
+.bottom-nav #navHome svg,
+#cardsContainer ~ .bottom-nav #navHome svg{
+  color:#fff !important;
+  stroke:currentColor !important;
   opacity:1 !important;
   visibility:visible !important;
 }
-#cardsContainer ~ .bottom-nav #navHome svg,
-.bottom-nav #navHome svg{
-  color:#fff !important;
-  stroke:currentColor !important;
-}
-#cardsContainer ~ .bottom-nav #navHome span,
-.bottom-nav #navHome span{
+.bottom-nav #navHome span,
+#cardsContainer ~ .bottom-nav #navHome span{
   color:#fff !important;
   opacity:1 !important;
   visibility:visible !important;
 }
 
-/* 5) Theme-safe soft controls: avoid the harsh all-dark button appearance. */
+/* 5) Theme-soft professional controls — no forced black buttons. */
 :root{
-  --soft-control-bg:color-mix(in srgb,var(--card-bg) 72%,#ffffff 28%);
-  --soft-control-bg-hover:color-mix(in srgb,var(--card-bg) 58%,var(--primary) 8%,#ffffff 34%);
+  --sk-soft-control-bg:color-mix(in srgb,var(--card-bg) 82%,var(--primary) 7%);
+  --sk-soft-control-border:color-mix(in srgb,var(--card-border) 72%,var(--primary) 28%);
+  --sk-soft-control-hover:color-mix(in srgb,var(--card-bg) 68%,var(--primary) 12%);
 }
-.app-viewport button:not(.btn-primary):not(.submit-btn):not(.sk-login-btn):not(.bill-action-save):not(.bill-action-pdf):not(.bill-action-print):not(.bill-action-wa):not(.sk-rj-next):not(.sk-home-action-btn):not(.modal-close-btn),
+.app-viewport button:not(.btn-primary):not(.submit-btn):not(.sk-login-btn):not(.bill-action-save):not(.bill-action-pdf):not(.bill-action-print):not(.bill-action-wa):not(.sk-rj-next):not(.sk-home-action-btn):not(.modal-close-btn):not(#navHome):not(.box-photo-scan-btn),
 #settingsModal .theme-card-btn,
 #settingsModal .sk-settings-collapse-btn,
 #settingsModal .sk-theme-icon-panel-body button{
-  background:var(--soft-control-bg) !important;
+  background:var(--sk-soft-control-bg) !important;
   color:var(--text) !important;
-  border-color:color-mix(in srgb,var(--card-border) 78%,var(--primary) 22%) !important;
+  border-color:var(--sk-soft-control-border) !important;
   box-shadow:0 4px 14px color-mix(in srgb,var(--primary) 7%,transparent) !important;
 }
-.app-viewport button:not(.btn-primary):not(.submit-btn):not(.sk-login-btn):not(.bill-action-save):not(.bill-action-pdf):not(.bill-action-print):not(.bill-action-wa):not(.sk-rj-next):not(.sk-home-action-btn):not(.modal-close-btn):hover,
+.app-viewport button:not(.btn-primary):not(.submit-btn):not(.sk-login-btn):not(.bill-action-save):not(.bill-action-pdf):not(.bill-action-print):not(.bill-action-wa):not(.sk-rj-next):not(.sk-home-action-btn):not(.modal-close-btn):not(#navHome):not(.box-photo-scan-btn):hover,
 #settingsModal .theme-card-btn:hover,
 #settingsModal .sk-settings-collapse-btn:hover,
 #settingsModal .sk-theme-icon-panel-body button:hover{
-  background:var(--soft-control-bg-hover) !important;
+  background:var(--sk-soft-control-hover) !important;
   color:var(--text) !important;
 }
 
-/* Theme gallery titles/icons remain readable in every theme. */
-#settingsModal .theme-card-btn .theme-card-copy strong,
-#settingsModal .theme-card-btn .theme-card-copy small,
-#settingsModal .theme-card-btn .theme-card-icon{
-  color:var(--text) !important;
+/* Primary billing controls use the current theme gradient, not black. */
+#billingModal .billing-tab-btn.active,
+#billingModal .pay-mode-btn.active,
+#billingModal .bill-action-save,
+#billingModal .bill-action-pdf,
+#billingModal .bill-action-print{
+  background:var(--primary-gradient) !important;
+  color:#fff !important;
+  border-color:color-mix(in srgb,var(--primary) 52%,#fff 48%) !important;
+  box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 16%,transparent) !important;
 }
-#settingsModal .theme-card-btn.active{
-  background:color-mix(in srgb,var(--primary) 11%,var(--card-bg)) !important;
-  color:var(--text) !important;
-  border-color:var(--primary) !important;
-  box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 14%,transparent),0 8px 22px color-mix(in srgb,var(--primary) 12%,transparent) !important;
+#billingModal .bill-action-wa{
+  background:linear-gradient(135deg,#20c978,#25d366) !important;
+  color:#fff !important;
+  border-color:rgba(37,211,102,.35) !important;
+  box-shadow:0 7px 18px rgba(37,211,102,.14) !important;
 }
 
-@media (max-width:430px){
+@media(max-width:430px){
   #headerSearchRow .box-photo-scan-btn,
   #cardsContainer .box-photo-scan-btn{
     min-width:86px !important;
@@ -6700,11 +6722,5 @@ button.form-secondary:focus-visible{
     min-width:62px !important;
     height:62px !important;
     margin-top:-14px !important;
-  }
-  #repairSparesNoteInput.repair-spares-note-box,
-  #repairSparesNoteInput{
-    min-height:300px !important;
-    height:300px !important;
-    max-height:300px !important;
   }
 }
