@@ -6976,3 +6976,93 @@ button:disabled,
 @media (prefers-reduced-motion:reduce){
   #billingModal .bill-action-btn{transition:none !important;}
 }
+
+
+/* ==========================================================
+   V4.18 ROOT-CAUSE FIX — BILLING SCROLL OWNER
+   Billing only. No business logic / handlers / data changes.
+   The billing sheet has one fixed viewport; billNewView/billHistoryView
+   is the only vertical scroll owner. Action buttons remain normal-flow.
+   ========================================================== */
+#billingModal .billing-modern{
+  height:min(92vh,980px) !important;
+  max-height:min(92vh,980px) !important;
+  min-height:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  overflow:hidden !important;
+  overflow-y:hidden !important;
+  overflow-x:hidden !important;
+}
+
+#billingModal .billing-modern > .modal-title{
+  position:relative !important;
+  top:auto !important;
+  flex:0 0 auto !important;
+}
+
+#billingModal .billing-tabs,
+#billingModal .mobile-type-tabs{
+  flex:0 0 auto !important;
+}
+
+#billingModal #billNewView,
+#billingModal #billHistoryView{
+  flex:1 1 0 !important;
+  height:0 !important;
+  min-height:0 !important;
+  max-height:none !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior:contain !important;
+  scroll-behavior:auto;
+}
+
+#billingModal .bill-action-grid{
+  position:relative !important;
+  top:auto !important;
+  right:auto !important;
+  bottom:auto !important;
+  left:auto !important;
+  inset:auto !important;
+  z-index:auto !important;
+  float:none !important;
+  transform:none !important;
+  margin:12px 0 16px !important;
+  flex:0 0 auto !important;
+}
+
+#billingModal .bill-action-grid::before,
+#billingModal .bill-action-grid::after{
+  content:none !important;
+  display:none !important;
+}
+
+#billingModal .bill-action-btn{
+  position:relative !important;
+  top:auto !important;
+  right:auto !important;
+  bottom:auto !important;
+  left:auto !important;
+  inset:auto !important;
+  z-index:auto !important;
+  float:none !important;
+  transform:none;
+}
+
+@media (max-width:760px){
+  #billingModal .billing-modern{
+    height:94vh !important;
+    max-height:94vh !important;
+    width:calc(100vw - 12px) !important;
+    max-width:calc(100vw - 12px) !important;
+  }
+}
+
+@media (max-width:430px){
+  #billingModal .billing-modern{
+    height:94vh !important;
+    max-height:94vh !important;
+  }
+}
