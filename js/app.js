@@ -3379,17 +3379,81 @@ function viewSavedBill(idx) {
     }
 
     function skCloneLiveInvoiceForOutput() {
-      const source = document.getElementById('invoiceMainSheet');
+      const source = document.getElementById('printableInvoiceCard');
       if (!source) return null;
-      const clone = source.cloneNode(true);
-      clone.style.width = '100%';
-      clone.style.maxWidth = '100%';
-      clone.style.margin = '0';
-      clone.style.boxSizing = 'border-box';
-      clone.style.background = '#fff';
-      clone.style.boxShadow = 'none';
-      clone.style.borderRadius = '0';
-      return clone;
+
+      // Use the complete Live Invoice Preview as the single output source.
+      // Do not create a second invoice template here. EMI bills are split into
+      // Page 1 (invoiceMainSheet) and Page 2 (pvEmiScheduleSection) only for
+      // pagination; the actual markup/content remains the live preview markup.
+      const previewClone = source.cloneNode(true);
+      const main = previewClone.querySelector('#invoiceMainSheet');
+      const emi = previewClone.querySelector('#pvEmiScheduleSection');
+      if (!main) return null;
+
+      const root = document.createElement('div');
+      root.className = 'sk-invoice-export-root';
+      root.style.width = '100%';
+      root.style.maxWidth = '100%';
+      root.style.margin = '0';
+      root.style.padding = '0';
+      root.style.background = '#ffffff';
+      root.style.color = '#1e293b';
+      root.style.boxSizing = 'border-box';
+
+      const page1 = document.createElement('div');
+      page1.className = 'sk-invoice-export-page sk-invoice-export-page-1';
+      page1.style.width = '100%';
+      page1.style.maxWidth = '100%';
+      page1.style.margin = '0';
+      page1.style.padding = '0';
+      page1.style.background = '#ffffff';
+      page1.style.boxSizing = 'border-box';
+      page1.appendChild(main);
+      root.appendChild(page1);
+
+      const isEmi = !!(emi && emi.style.display !== 'none');
+      if (isEmi) {
+        const page2 = document.createElement('div');
+        page2.className = 'sk-invoice-export-page sk-invoice-export-page-2';
+        page2.style.width = '100%';
+        page2.style.maxWidth = '100%';
+        page2.style.margin = '0';
+        page2.style.padding = '0';
+        page2.style.background = '#ffffff';
+        page2.style.boxSizing = 'border-box';
+        page2.style.breakBefore = 'page';
+        page2.style.pageBreakBefore = 'always';
+        page2.appendChild(emi);
+        root.appendChild(page2);
+
+        // Preserve the exact yellow emphasis used by Live Invoice Preview.
+        const yellowBox = root.querySelector('#pvEmiYellowBox');
+        if (yellowBox) {
+          yellowBox.style.background = '#fef3c7';
+          yellowBox.style.border = '1px solid #fde047';
+          yellowBox.style.color = '#92400e';
+          yellowBox.style.printColorAdjust = 'exact';
+          yellowBox.style.webkitPrintColorAdjust = 'exact';
+        }
+        const schedule = root.querySelector('.bill-emi-schedule-preview');
+        if (schedule) {
+          schedule.style.border = '1px solid #fde047';
+          schedule.style.background = '#ffffff';
+          schedule.style.printColorAdjust = 'exact';
+          schedule.style.webkitPrintColorAdjust = 'exact';
+        }
+        root.querySelectorAll('.bill-emi-schedule-preview th').forEach(th => {
+          th.style.background = '#fef3c7';
+          th.style.color = '#92400e';
+          th.style.printColorAdjust = 'exact';
+          th.style.webkitPrintColorAdjust = 'exact';
+        });
+      }
+
+      // The outer preview card is only a UI shell; output uses its actual
+      // invoice children so the same bill appears in PDF/WhatsApp/Print.
+      return root;
     }
 
     function sendBillToWhatsAppAsPDF() {
@@ -3429,6 +3493,7 @@ function viewSavedBill(idx) {
         filename: ((document.getElementById('pvBillNo')?.innerText || 'SK-Bill') + '.pdf'),
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        pagebreak: { mode: ['css', 'legacy'], before: ['.sk-invoice-export-page-2'] },
         jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
       };
 
@@ -3474,35 +3539,10 @@ function viewSavedBill(idx) {
     }
 
     function printInvoiceDirect() {
-      const livePreview = document.getElementById('printableInvoiceCard');
-      if (!livePreview) { showToast?.('Live Invoice Preview not found'); return; }
-
-      // Print the actual Live Invoice Preview card. The EMI schedule is a sibling
-      // of #invoiceMainSheet inside this same preview card, so cloning only
-      // #invoiceMainSheet would silently omit the second page.
-      const previewClone = livePreview.cloneNode(true);
-      const clone = previewClone.querySelector('#invoiceMainSheet');
-      const emiSection = previewClone.querySelector('#pvEmiScheduleSection');
+      // Print the exact same Live Invoice Preview source used by PDF/WhatsApp.
+      // The helper preserves the EMI schedule as Page 2 when the current bill is EMI.
+      const clone = skCloneLiveInvoiceForOutput();
       if (!clone) { showToast?.('Live Invoice Preview not found'); return; }
-
-      // EMI print must be exactly two pages:
-      // Page 1 = the Live Invoice Preview bill
-      // Page 2 = the Live Invoice Preview EMI repayment schedule.
-      // No billing data, calculations, or invoice markup is changed.
-      const isEmiPrint = !!(emiSection && emiSection.style.display !== 'none');
-      const printPage1 = document.createElement('div');
-      printPage1.className = `print-page${isEmiPrint ? ' print-page-1' : ''}`;
-      if (isEmiPrint) emiSection.remove();
-      printPage1.appendChild(clone);
-
-      const printPage2 = document.createElement('div');
-      printPage2.className = 'print-page print-page-2';
-      if (isEmiPrint) printPage2.appendChild(emiSection);
-
-      /*
-       * Print the exact Live Invoice Preview bill content.
-       * No separate invoice template or alternate bill markup is created.
-       */
 
       const w = window.open('', '_blank');
       if (!w) { showToast?.('Please allow popups to print!'); return; }
@@ -3530,6 +3570,8 @@ html,body{
 }
 body{
   overflow:visible!important;
+  -webkit-print-color-adjust:exact!important;
+  print-color-adjust:exact!important;
 }
 .print-sheet{
   width:100%!important;
@@ -3556,6 +3598,18 @@ body{
   break-inside:avoid!important;
   page-break-inside:avoid!important;
   min-height:calc(297mm - 24mm)!important;
+}
+.sk-invoice-export-page-1{
+  break-after:page!important;
+  page-break-after:always!important;
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+.sk-invoice-export-page-2{
+  break-before:page!important;
+  page-break-before:always!important;
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
 }
 .print-page-2{
   break-before:auto!important;
@@ -3626,6 +3680,8 @@ th{padding:7px;text-align:left;background:#f1f5f9;border-bottom:1px solid #cbd5e
 td{padding:7px;border-bottom:1px solid #e2e8f0}
 .invoice-emi-yellow-box{
   background:#fef3c7!important;
+  -webkit-print-color-adjust:exact!important;
+  print-color-adjust:exact!important;
   border:1px solid #fde047!important;
   padding:9px 12px!important;
   border-radius:12px!important;
@@ -3636,6 +3692,9 @@ td{padding:7px;border-bottom:1px solid #e2e8f0}
 }
 .bill-emi-schedule-preview{
   border:1px solid #fde047!important;
+  background:#ffffff!important;
+  -webkit-print-color-adjust:exact!important;
+  print-color-adjust:exact!important;
   border-radius:12px!important;
   overflow:hidden!important;
   font-size:.70rem!important;
@@ -3648,6 +3707,8 @@ td{padding:7px;border-bottom:1px solid #e2e8f0}
 }
 .bill-emi-schedule-preview th{
   background:#fef3c7!important;
+  -webkit-print-color-adjust:exact!important;
+  print-color-adjust:exact!important;
   color:#92400e!important;
   padding:6px 8px!important;
   text-align:left!important;
@@ -3678,7 +3739,7 @@ img{max-width:100%!important}
   .print-sheet{display:block!important}
   .print-page-1,.print-page-2{display:block!important}
 }
-</style></head><body><div class="print-sheet">${printPage1.outerHTML}${isEmiPrint ? printPage2.outerHTML : ''}</div></body></html>`);
+</style></head><body><div class="print-sheet">${clone.outerHTML}</div></body></html>`);
       w.document.close();
 
       const printNow=()=>{
@@ -3752,6 +3813,7 @@ img{max-width:100%!important}
         filename: ((document.getElementById('pvBillNo')?.innerText || 'SK-Bill') + '.pdf'),
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        pagebreak: { mode: ['css', 'legacy'], before: ['.sk-invoice-export-page-2'] },
         jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
       };
 
