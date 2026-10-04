@@ -6841,3 +6841,95 @@ button:focus-visible,
   #repairSparesModal .repair-spares-note{height:220px !important;min-height:220px !important;max-height:none !important}
   #repairSparesModal .repair-spares-actions{grid-template-columns:1fr}
 }
+
+
+/* ================================================================
+   SK V4.18 — POPUP VIEWPORT / NAVIGATION FONT ROOT-CAUSE FIX
+   UI ONLY — preserve existing popup handlers and business logic.
+   ================================================================ */
+
+/* Prevent popup width from exceeding the real viewport.
+   Root cause: several modal sheets used content-box sizing with
+   width:calc(...), so padding was added outside the declared width. */
+.modal-overlay{
+  box-sizing:border-box !important;
+  width:100% !important;
+  max-width:100vw !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+}
+
+.modal-overlay > .modal-sheet{
+  box-sizing:border-box !important;
+  width:min(calc(100vw - 24px), 100%) !important;
+  max-width:calc(100vw - 24px) !important;
+  min-width:0 !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  overflow-x:hidden !important;
+}
+
+/* Keep all popup controls inside the sheet instead of creating
+   horizontal page/popup overflow. */
+.modal-overlay > .modal-sheet input,
+.modal-overlay > .modal-sheet select,
+.modal-overlay > .modal-sheet textarea,
+.modal-overlay > .modal-sheet button,
+.modal-overlay > .modal-sheet img,
+.modal-overlay > .modal-sheet table{
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+.modal-overlay > .modal-sheet :is(.form-group,.form-row,.form-grid,.grid,.flex){
+  min-width:0;
+}
+
+/* Credit Ledger mobile action row: both actions stay inside the popup. */
+#skCreditLedgerModal .sk-credit-search-row{
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+#skCreditLedgerModal .sk-credit-search-row .sk-credit-btn{
+  min-width:0 !important;
+  max-width:100% !important;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Navigation labels use one stable UI size and cannot enlarge the
+   navigation bar or create horizontal overflow. */
+.bottom-nav{
+  box-sizing:border-box !important;
+  max-width:calc(100vw - 16px) !important;
+}
+
+.bottom-nav .nav-item{
+  box-sizing:border-box !important;
+  min-width:0 !important;
+  font-size:11px !important;
+  line-height:1.1 !important;
+  -webkit-text-size-adjust:100% !important;
+  text-size-adjust:100% !important;
+}
+
+.bottom-nav .nav-item span{
+  display:block !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  font-size:inherit !important;
+  line-height:1.1 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* Keep the highlighted Home label slightly compact without changing
+   its existing icon or active behaviour. */
+.bottom-nav #navHome span{
+  font-size:10px !important;
+  line-height:1.05 !important;
+}
