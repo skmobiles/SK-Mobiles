@@ -1355,31 +1355,29 @@ const MASTER_INVENTORY = [
       el.value = '';
     }
 
+    // Repair Tools & IC Spares — isolated implementation.
     function loadRepairSparesNote() {
       const input = document.getElementById('repairSparesNoteInput');
       if (!input) return;
-      const savedNote = localStorage.getItem('sk_repair_tools_note');
-      if (savedNote !== null) input.value = savedNote;
+      try { input.value = localStorage.getItem('sk_repair_tools_note') || ''; }
+      catch (error) { console.warn('SK repair note load failed:', error); }
     }
 
     function saveRepairSparesNote() {
       const input = document.getElementById('repairSparesNoteInput');
       if (!input) return;
-      const note = input.value;
-      localStorage.setItem('sk_repair_tools_note', note);
-      showToast("Repair Tools & IC notes saved!");
-      toggleModal('repairSparesModal', false);
+      const note = String(input.value || '').trim();
+      try { localStorage.setItem('sk_repair_tools_note', note); }
+      catch (error) { console.warn('SK repair note save failed:', error); }
+      showToast(note ? 'Repair notes saved!' : 'Repair notes cleared!');
     }
 
     function shareRepairNotesWhatsApp() {
       const input = document.getElementById('repairSparesNoteInput');
-      const note = input ? input.value.trim() : '';
-      if (!note) {
-        showToast("Notes empty-ah irukku!");
-        return;
-      }
-      const msg = `*SK MOBILES - Repair Tools & IC Spares Required:*\n\n${note}`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+      const note = String(input?.value || '').trim();
+      if (!note) { showToast('Please enter a repair tools / IC spares list.'); input?.focus(); return; }
+      const message = `SK MOBILES - Repair Tools & IC Spares Required\n\n${note}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
     }
 
     function handleBillingModalClose() {
