@@ -620,22 +620,6 @@
     }
   }
 
-  /* SK MOBILES: Firebase logout — always return to the login screen. */
-  window.skLogout = async function(){
-    try{
-      if(!auth) ensureFirebase();
-      await auth.signOut();
-    }catch(e){
-      console.error(e);
-      try{
-        localStorage.removeItem(ROLE_KEY);
-        localStorage.removeItem(WORKER_KEY);
-      }catch(_){}
-      gate(true);
-      msg("❌ Logout failed. Please try again.");
-    }
-  };
-
   function init(){
     try {
       ensureFirebase();

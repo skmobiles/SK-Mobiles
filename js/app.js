@@ -6404,22 +6404,22 @@ window.skOpenCreditLedger=cpOpenPage;
   document.addEventListener('DOMContentLoaded',function(){purgeExpiredTrash();const empty=document.getElementById('btnEmptyRecycleBin');if(empty)empty.addEventListener('click',function(){const list=readRecycle();if(!list.length){showToast?.('Trash is already empty');return;}if(!confirm('Permanently clear all items in Recycle Bin? This cannot be undone.'))return;saveStoredData({recycleBin:[]});renderRecycleBinUI();showToast?.('🗑️ Trash cleared');});setInterval(purgeExpiredTrash,6*60*60*1000);});
 })();
 
-/* SK MOBILES: Repair Tools / IC Spares note — fixed large multiline box. */
+/* SK REQUEST: Repair Tools / IC Spares note grows with its content. */
 (function(){
   function resizeRepairSparesNote(){
     const el=document.getElementById('repairSparesNoteInput');
     if(!el) return;
-    el.style.setProperty('height','330px','important');
-    el.style.setProperty('min-height','330px','important');
-    el.style.setProperty('max-height','330px','important');
+    el.style.setProperty('height','auto','important');
+    el.style.setProperty('height',Math.max(180,el.scrollHeight)+'px','important');
   }
   function initRepairSparesNote(){
     const el=document.getElementById('repairSparesNoteInput');
-    if(!el || el.dataset.skRepairNoteFixedBound==='1') return;
-    el.dataset.skRepairNoteFixedBound='1';
-    resizeRepairSparesNote();
+    if(!el || el.dataset.skAutoGrowBound==='1') return;
+    el.dataset.skAutoGrowBound='1';
+    el.addEventListener('input',resizeRepairSparesNote,{passive:true});
+    setTimeout(resizeRepairSparesNote,0);
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initRepairSparesNote,{once:true});
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initRepairSparesNote);
   else initRepairSparesNote();
   window.skResizeRepairSparesNote=resizeRepairSparesNote;
-})();;
+})();
