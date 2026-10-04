@@ -1721,6 +1721,16 @@ input[data-dmy-date]{letter-spacing:.02em;}
   color: #fff; border: none; border-radius: 14px; padding: 14px; font-size: 0.92rem; font-weight: 800;
   cursor: pointer; box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.5); transition: all 0.3s ease; margin-top: 6px;
 }
+/* ஆப்பில் உள்ள அனைத்து கார்டுகள், பாப்-அப்கள் மற்றும் சைடு மெனுக்களுக்கு பிளெண்ட் எஃபெக்ட் */
+.card, .container, .modal-content, .billing-card-container, .panel, section, 
+.sidebar, .side-menu, nav, div[class*="card"], div[class*="box"], div[class*="menu"] {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
 .login-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 25px -5px rgba(99, 102, 241, 0.65); filter: brightness(1.08); }
 .login-submit-btn:active { transform: translateY(0); }
 .login-submit-btn:disabled { opacity: .65; cursor: wait; transform: none; }
