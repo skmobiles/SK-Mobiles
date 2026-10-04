@@ -1192,7 +1192,7 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
 
 
 /* =========================================================
-   V4.16 REQUESTED BUTTON / GLASS POLISH — SCOPED ADDITIVE
+   V4.17 REQUESTED BUTTON / GLASS POLISH — SCOPED ADDITIVE
    ========================================================= */
 
 /* Theme gradients used by primary/action buttons. */
@@ -1400,7 +1400,7 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
     inset 0 1px 0 rgba(255,255,255,.96) !important;
 }
 
-/* SK V4.16 Firebase-safe Recycle Bin */
+/* SK V4.17 Firebase-safe Recycle Bin */
 #skRecycleBinModal:not(.active){display:none!important;}
 #recycleBinItemsContainer .sk-trash-row{background:var(--pill-bg);border:1px solid var(--card-border);border-radius:12px;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
 #recycleBinItemsContainer .sk-trash-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
@@ -1423,7 +1423,7 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
 
 
 /* =========================================================
-   SK V4.16 REQUESTED UI POLISH — THEME / FONT / DATE / STATUS BAR
+   SK V4.17 REQUESTED UI POLISH — THEME / FONT / DATE / STATUS BAR
    ========================================================= */
 html,body{overscroll-behavior-x:none;}
 :root{--app-font:'Plus Jakarta Sans',sans-serif;}
@@ -1465,7 +1465,7 @@ body{font-family:var(--app-font);}
 .app-name,.drawer-title,.sk-home-welcome-title{font-family:var(--app-font) !important;}
 .invoice-emi-schedule-preview,.invoice-shop-name,#printableInvoiceCard{font-family:'Plus Jakarta Sans',sans-serif;}
 
-/* V4.16 FONT FIX: selected font must visibly override legacy fixed-font rules. */
+/* V4.17 FONT FIX: selected font must visibly override legacy fixed-font rules. */
 html[data-font-family] body,
 html[data-font-family] body *{
   font-family:var(--app-font);
@@ -1558,7 +1558,7 @@ html,body{background:var(--page-bg);}
 input[data-dmy-date]{letter-spacing:.02em;}
 
 
-/* V4.16 TARGETED FIX: keep Home matrix/action text readable in dark themes. */
+/* V4.17 TARGETED FIX: keep Home matrix/action text readable in dark themes. */
 [data-theme="dark"] #homeMetricGrid .sk-home-metric-card,
 [data-theme="dark"] #homeActionCardsContainer .sk-home-action-row,
 [data-theme="cyber"] #homeMetricGrid .sk-home-metric-card,
@@ -6447,4 +6447,151 @@ button.form-secondary:focus-visible{
 }
 @media (prefers-reduced-motion:reduce){
   #recycleBinItemsContainer .sk-trash-actions button{transition:none!important;}
+}
+
+
+/* =========================================================
+   SK MOBILES V4.17 — FINAL REQUESTED FIXES ONLY
+   Scope: Billing scroll, Keypad RAM/Storage visibility,
+   Apple Light/Dark themes, and theme-safe UI contrast.
+   Existing handlers/data/Firebase/IDs are preserved.
+   ========================================================= */
+
+/* Billing sheet: keep header/tabs visible and scroll only the active bill content. */
+#billingModal .billing-modern{
+  display:flex !important;
+  flex-direction:column !important;
+  min-height:0 !important;
+}
+#billingModal .billing-tabs,
+#billingModal .mobile-type-tabs{
+  flex:0 0 auto !important;
+}
+#billingModal #billNewView,
+#billingModal #billHistoryView{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior:contain !important;
+  scrollbar-width:thin;
+  scrollbar-color:color-mix(in srgb,var(--primary) 32%,transparent) transparent;
+}
+#billingModal #usedMobileBillingForm{
+  min-height:0;
+}
+
+/* Keypad phones do not need RAM/Storage fields. */
+#billingModal #billRamStorageGrid.sk-keypad-hidden{
+  display:none !important;
+}
+
+/* Theme-safe primary controls: never allow white-on-white text. */
+#homeActionCardsContainer .sk-home-action-btn,
+#headerSearchRow .box-photo-scan-btn,
+#cardsContainer .box-photo-scan-btn{
+  background:var(--primary-gradient) !important;
+  color:#fff !important;
+  border-color:color-mix(in srgb,var(--primary) 58%,#fff 42%) !important;
+  text-shadow:0 1px 1px rgba(0,0,0,.10);
+}
+
+/* Apple-style themes requested by the user. */
+:root[data-theme="apple-light"]{
+  --bg:#f5f5f7;
+  --page-bg:#e8e8ed;
+  --card-bg:rgba(255,255,255,.85);
+  --card-border:rgba(0,0,0,.06);
+  --primary:#0071e3;
+  --primary-gradient:linear-gradient(135deg,#0071e3 0%,#409cff 100%);
+  --text:#1d1d1f;
+  --text-muted:#86868b;
+  --input-bg:rgba(255,255,255,.9);
+  --pill-bg:rgba(0,0,0,.045);
+  --model-bg:rgba(255,255,255,.72);
+  --chip-bg:rgba(0,0,0,.06);
+  --bottom-nav-bg:rgba(255,255,255,.96);
+  --header-bg:rgba(255,255,255,.96);
+  --modal-bg:rgba(255,255,255,.94);
+  --danger:#ff3b30;
+  --warning:#ff9500;
+  --success:#34c759;
+  --badge-bg:rgba(0,113,227,.08);
+  --badge-border:rgba(0,113,227,.20);
+  --glass-btn-bg:#0071e3;
+  --glass-btn-border:#0071e3;
+  --glass-btn-text:#fff;
+  --glass-pill-active:#0071e3;
+  --glass-pill-border:#0071e3;
+  --glass-shadow:0 8px 24px rgba(0,113,227,.16),0 0 18px rgba(0,113,227,.08);
+  --card-elevation:0 4px 20px rgba(0,0,0,.04);
+}
+:root[data-theme="apple-dark"]{
+  --bg:#000;
+  --page-bg:#121212;
+  --card-bg:rgba(28,28,30,.85);
+  --card-border:rgba(255,255,255,.10);
+  --primary:#0a84ff;
+  --primary-gradient:linear-gradient(135deg,#0a84ff 0%,#5ac8fa 100%);
+  --text:#f5f5f7;
+  --text-muted:#98989d;
+  --input-bg:rgba(44,44,46,.8);
+  --pill-bg:rgba(255,255,255,.07);
+  --model-bg:rgba(28,28,30,.72);
+  --chip-bg:rgba(255,255,255,.08);
+  --bottom-nav-bg:rgba(18,18,18,.96);
+  --header-bg:rgba(18,18,18,.96);
+  --modal-bg:rgba(28,28,30,.96);
+  --danger:#ff453a;
+  --warning:#ff9f0a;
+  --success:#30d158;
+  --badge-bg:rgba(10,132,255,.13);
+  --badge-border:rgba(10,132,255,.28);
+  --glass-btn-bg:#0a84ff;
+  --glass-btn-border:#0a84ff;
+  --glass-btn-text:#fff;
+  --glass-pill-active:#0a84ff;
+  --glass-pill-border:#0a84ff;
+  --glass-shadow:0 8px 24px rgba(10,132,255,.24),0 0 18px rgba(90,200,250,.10);
+  --card-elevation:0 4px 20px rgba(0,0,0,.40);
+}
+
+/* Requested minimalist icon/button treatment, without overriding existing
+   specialized primary/danger/WhatsApp button handlers or invoice styling. */
+.app-viewport button:not(.btn-primary):not(.submit-btn):not(.sk-login-btn):not(.bill-action-save):not(.bill-action-pdf):not(.bill-action-print):not(.bill-action-wa):not(.sk-rj-next):not(.sk-home-action-btn):not(.modal-close-btn){
+  background:var(--card-bg);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--card-border);
+  border-radius:12px;
+  color:var(--text);
+  transition:all .2s ease;
+}
+.app-viewport button:not(.btn-primary):not(.submit-btn):not(.sk-login-btn):not(.bill-action-save):not(.bill-action-pdf):not(.bill-action-print):not(.bill-action-wa):not(.sk-rj-next):not(.sk-home-action-btn):not(.modal-close-btn):hover{
+  background:var(--primary);
+  color:#fff;
+  transform:translateY(-1px);
+}
+
+/* Common UI text/icon contrast. Printable invoice colors remain untouched. */
+.app-viewport :is(h1,h2,h3,h4,h5,h6,.app-name,.app-sub,.form-label,.bill-section-title,.card-header,.section-title,.modal-title,.menu-btn-label,.theme-card-copy strong,.theme-card-copy small){
+  color:var(--text) !important;
+}
+.app-viewport :is(.nav-item,.menu-drawer-btn,.theme-card-btn,.active-category-notice){
+  color:var(--text) !important;
+}
+.app-viewport svg{color:currentColor;}
+
+/* Apple themes: ensure the Home matrix stays readable while preserving its
+   existing neutral/glass surface. */
+:root[data-theme="apple-light"] #homeMetricGrid .sk-home-metric-card,
+:root[data-theme="apple-light"] #homeActionCardsContainer .sk-home-action-row{
+  color:var(--text);
+}
+:root[data-theme="apple-dark"] #homeMetricGrid .sk-home-metric-card,
+:root[data-theme="apple-dark"] #homeActionCardsContainer .sk-home-action-row{
+  background:rgba(28,28,30,.86) !important;
+  border-color:rgba(255,255,255,.10) !important;
+  color:var(--text);
 }
