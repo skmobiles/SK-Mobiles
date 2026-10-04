@@ -6589,21 +6589,6 @@ button.form-secondary:focus-visible{
 }
 
 /* 2) Billing: modal itself is the scroll container; action bar stays sticky. */
-#billingModal .billing-modern{
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-  overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-gutter:stable;
-}
-#billingModal .bill-action-grid{
-  position:sticky !important;
-  bottom:8px !important;
-  z-index:50 !important;
-  margin-top:10px !important;
-  margin-bottom:2px !important;
-  isolation:isolate;
-}
 
 /* 3) Add Item: keep the text visible on small screens. */
 #headerSearchRow .box-photo-scan-btn,
@@ -6859,3 +6844,60 @@ button:disabled,
   opacity:.55;
   box-shadow:none !important;
 }
+
+/* ==========================================================
+   V4.18 FINAL — BILLING SCROLL / STICKY ACTION BAR
+   Root-cause fix: one scroll owner, one sticky action rule.
+   No billing handlers, data, IDs, Firebase or business logic changed.
+   ========================================================== */
+#billingModal .billing-modern{
+  display:flex !important;
+  flex-direction:column !important;
+  min-height:0 !important;
+  max-height:min(92vh,980px) !important;
+  overflow:hidden !important;
+  overflow-x:hidden !important;
+  overscroll-behavior:contain;
+}
+
+#billingModal .billing-tabs,
+#billingModal .mobile-type-tabs{
+  flex:0 0 auto !important;
+}
+
+#billingModal #billNewView,
+#billingModal #billHistoryView{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  min-width:0 !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior:contain !important;
+  scrollbar-gutter:stable;
+  scroll-padding-bottom:12px;
+}
+
+#billingModal #usedMobileBillingForm{
+  min-height:0 !important;
+}
+
+#billingModal .bill-action-grid{
+  position:sticky !important;
+  bottom:8px !important;
+  z-index:50 !important;
+  margin:10px 0 12px !important;
+  flex:0 0 auto !important;
+  isolation:isolate;
+}
+
+/* Keep the action bar in normal document flow while its sticky
+   position follows the single #billNewView scroll container. */
+#billingModal .bill-action-grid::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+}
+
