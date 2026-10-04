@@ -6450,196 +6450,84 @@ button.form-secondary:focus-visible{
 }
 
 /* ==========================================================
-   SK MOBILES V4.18 — FINAL REQUESTED UI FIXES
-   ONLY the four requested UI changes are handled here.
-   Existing JavaScript, Firebase, data, IDs and handlers are untouched.
+   SK MOBILES V4.17 — FINAL TARGETED UI FIXES
+   ONLY requested fixes are kept in this block.
+   Existing application logic, Firebase, data, IDs and handlers are untouched.
    ========================================================== */
 
 /* ----------------------------------------------------------
-   1) REPAIR TOOLS / IC SPARES — LARGE MULTILINE NOTE BOX
+   1) GLOBAL APPLE-MINIMALIST BUTTON OVERRIDE — ALL THEMES
    ---------------------------------------------------------- */
-#repairSparesModal .repair-spares-note-box{
-  display:block !important;
-  width:100% !important;
-  min-width:0 !important;
-  height:330px !important;
-  min-height:330px !important;
-  max-height:52vh !important;
-  box-sizing:border-box !important;
-  resize:vertical !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  white-space:pre-wrap !important;
-  overflow-wrap:anywhere !important;
-  word-break:break-word !important;
-  line-height:1.48 !important;
-  padding:16px 15px !important;
-  font-size:.86rem !important;
-}
-#repairSparesModal .form-group{min-width:0 !important;}
-
-/* ----------------------------------------------------------
-   2) BILLING ACTIONS — NORMAL DOCUMENT FLOW, NOT STICKY
-   ---------------------------------------------------------- */
-#billingModal .bill-action-grid{
-  position:static !important;
-  inset:auto !important;
-  z-index:auto !important;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:8px;
-  margin:10px 0 0 !important;
-  padding:8px;
-  border-radius:18px;
-  background:color-mix(in srgb,var(--card-bg) 92%,var(--primary) 8%);
-  border:1px solid color-mix(in srgb,var(--card-border) 72%,var(--primary) 28%);
-  box-shadow:0 8px 22px color-mix(in srgb,var(--primary) 8%,transparent);
-  backdrop-filter:none;
-  -webkit-backdrop-filter:none;
-}
-#billingModal .bill-action-btn{
-  min-width:0;
-  min-height:44px;
-  border-radius:13px;
-  padding:8px 9px;
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
-  color:var(--primary) !important;
-  background:color-mix(in srgb,var(--primary) 10%,var(--card-bg)) !important;
-  border:1px solid color-mix(in srgb,var(--primary) 24%,var(--card-border)) !important;
-  box-shadow:0 5px 14px color-mix(in srgb,var(--primary) 8%,transparent) !important;
-}
-#billingModal .bill-action-btn:hover{
-  background:color-mix(in srgb,var(--primary) 18%,var(--card-bg)) !important;
-  color:var(--primary) !important;
-  transform:translateY(-1px);
-}
-#billingModal .bill-action-wa{
-  color:#168a57 !important;
-  background:color-mix(in srgb,#22c55e 10%,var(--card-bg)) !important;
-  border-color:rgba(34,197,94,.24) !important;
-}
-#billingModal .bill-action-pdf,
-#billingModal .bill-action-print{opacity:1 !important;}
-
-/* ----------------------------------------------------------
-   3) TEMPERED GLASS — ADD ITEM + HOME ACTIVE STATE
-   ---------------------------------------------------------- */
-#headerSearchRow .box-photo-scan-btn{
-  width:auto !important;
-  min-width:98px !important;
-  min-height:42px !important;
-  padding:8px 12px !important;
-  justify-content:center !important;
-  gap:5px !important;
-  font-size:.70rem !important;
-  line-height:1 !important;
-  white-space:nowrap !important;
-  overflow:visible !important;
-  color:var(--primary) !important;
-  background:color-mix(in srgb,var(--primary) 10%,var(--card-bg)) !important;
-  border:1px solid color-mix(in srgb,var(--primary) 28%,var(--card-border)) !important;
-  box-shadow:0 5px 14px color-mix(in srgb,var(--primary) 8%,transparent) !important;
-}
-#headerSearchRow .box-photo-scan-btn:hover{
-  background:color-mix(in srgb,var(--primary) 18%,var(--card-bg)) !important;
-  color:var(--primary) !important;
-}
-#cardsContainer:has(> .active-category-notice) .btn-quick-order{
-  color:var(--primary) !important;
-  background:color-mix(in srgb,var(--primary) 9%,var(--card-bg)) !important;
-  border:1px solid color-mix(in srgb,var(--primary) 25%,var(--card-border)) !important;
-  box-shadow:0 4px 12px color-mix(in srgb,var(--primary) 7%,transparent) !important;
-}
-#cardsContainer:has(> .active-category-notice) .btn-quick-order:hover{
-  background:color-mix(in srgb,var(--primary) 17%,var(--card-bg)) !important;
-  color:var(--primary) !important;
-}
-#cardsContainer ~ .bottom-nav .nav-item.active,
-#cardsContainer ~ .bottom-nav #navHome{
-  color:var(--primary) !important;
-  background:color-mix(in srgb,var(--primary) 12%,var(--bottom-nav-bg)) !important;
-  border-color:color-mix(in srgb,var(--primary) 28%,var(--card-border)) !important;
-  box-shadow:0 6px 18px color-mix(in srgb,var(--primary) 12%,transparent),0 0 0 1px color-mix(in srgb,var(--primary) 10%,transparent) !important;
-  opacity:1 !important;
-  visibility:visible !important;
-}
-#cardsContainer ~ .bottom-nav .nav-item.active svg,
-#cardsContainer ~ .bottom-nav .nav-item.active span,
-#cardsContainer ~ .bottom-nav #navHome svg,
-#cardsContainer ~ .bottom-nav #navHome span{
-  color:var(--primary) !important;
-  opacity:1 !important;
-  visibility:visible !important;
+[data-theme] button,
+[data-theme] .btn,
+[data-theme] .primary-btn,
+[data-theme] .nav-tab,
+[data-theme] .chip-active {
+  background: #1d1d1f !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.2s ease !important;
 }
 
-/* ----------------------------------------------------------
-   4) THEME-MATCHED TEXT + SOFT PROFESSIONAL BUTTON SYSTEM
-   ---------------------------------------------------------- */
-.app-viewport :is(h1,h2,h3,h4,h5,h6,.app-name,.app-sub,.form-label,
-  .bill-section-title,.card-header,.section-title,.modal-title,
-  .menu-btn-label,.theme-card-copy strong,.theme-card-copy small,
-  .card-sku-name,.models-count-text,.glass-spec-badge,.form-label){
-  color:var(--text) !important;
+[data-theme] button:hover,
+[data-theme] .btn:hover {
+  background: #0071e3 !important;
+  color: #ffffff !important;
 }
-.app-viewport :is(.nav-item,.menu-drawer-btn,.theme-card-btn,.active-category-notice){
-  color:var(--text) !important;
-}
-.app-viewport svg{color:currentColor;}
 
-/* Replace harsh dark universal button fill with theme-aware soft surfaces. */
+/* Keep the close / danger / WhatsApp / invoice action controls readable.
+   These are still governed by their existing functional styles. */
+[data-theme] .modal-close-btn {
+  background: rgba(239,68,68,.10) !important;
+  color: #dc2626 !important;
+  border-color: rgba(239,68,68,.24) !important;
+}
+[data-theme] .bill-action-wa,
+[data-theme] .submit-btn.whatsapp-green {
+  background: rgba(16,185,129,.92) !important;
+  color:#fff !important;
+}
+[data-theme] .bill-action-save,
+[data-theme] .bill-action-pdf,
+[data-theme] .bill-action-print,
 [data-theme] .submit-btn,
 [data-theme] .mobile-type-btn.active,
 [data-theme] .billing-tab-btn.active,
-[data-theme] .pay-mode-btn.active,
-[data-theme] .copy-btn,
-[data-theme] .menu-drawer-btn,
-[data-theme] .theme-card-btn{
-  color:var(--primary) !important;
-  background:color-mix(in srgb,var(--primary) 9%,var(--card-bg)) !important;
-  border-color:color-mix(in srgb,var(--primary) 24%,var(--card-border)) !important;
-  box-shadow:0 5px 14px color-mix(in srgb,var(--primary) 7%,transparent) !important;
-}
-[data-theme] .submit-btn:hover,
-[data-theme] .mobile-type-btn.active:hover,
-[data-theme] .billing-tab-btn.active:hover,
-[data-theme] .pay-mode-btn.active:hover,
-[data-theme] .copy-btn:hover,
-[data-theme] .menu-drawer-btn:hover,
-[data-theme] .theme-card-btn:hover{
-  color:var(--primary) !important;
-  background:color-mix(in srgb,var(--primary) 16%,var(--card-bg)) !important;
-}
-[data-theme] .submit-btn.whatsapp-green,
-[data-theme] .bill-action-wa{
-  color:#168a57 !important;
-  background:color-mix(in srgb,#22c55e 10%,var(--card-bg)) !important;
-  border-color:rgba(34,197,94,.24) !important;
-}
-[data-theme] .modal-close-btn{
-  color:#dc2626 !important;
-  background:rgba(239,68,68,.08) !important;
-  border-color:rgba(239,68,68,.20) !important;
+[data-theme] .pay-mode-btn.active {
+  background: var(--primary-gradient) !important;
+  color:#fff !important;
+  border-color: color-mix(in srgb,var(--primary) 58%,#fff 42%) !important;
 }
 
-/* Keep inputs, cards and headings readable on every theme. */
-[data-theme] .glass-card,
-[data-theme] .bill-section,
-[data-theme] .modal-sheet,
-[data-theme] .theme-card-btn{
-  color:var(--text);
+/* Always keep the Home navigation control and Add Item control visible. */
+#cardsContainer ~ .bottom-nav .nav-item,
+#headerSearchRow .box-photo-scan-btn,
+#cardsContainer .box-photo-scan-btn {
+  visibility: visible !important;
+  opacity: 1 !important;
 }
-[data-theme] .stock-control-panel,
-[data-theme] .models-section,
-[data-theme] .glass-spec-badge{
-  color:var(--text);
+#cardsContainer ~ .bottom-nav .nav-item svg,
+#cardsContainer ~ .bottom-nav .nav-item span,
+#headerSearchRow .box-photo-scan-btn,
+#cardsContainer .box-photo-scan-btn {
+  color: #ffffff !important;
 }
-[data-theme] .stock-status-badge.in-stock{
-  color:var(--success) !important;
+#cardsContainer ~ .bottom-nav .nav-item.active {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+}
+#headerSearchRow .box-photo-scan-btn,
+#cardsContainer .box-photo-scan-btn {
+  background: var(--primary-gradient) !important;
+  color:#fff !important;
+  border-color: color-mix(in srgb,var(--primary) 58%,#fff 42%) !important;
 }
 
-/* Apple themes retain their exact requested palette. */
-:root[data-theme="apple-light"]{
+/* ----------------------------------------------------------
+   2) APPLE LIGHT / APPLE DARK — COMPLETE THEME VARIABLES
+   ---------------------------------------------------------- */
+:root[data-theme="apple-light"] {
   --bg:#f5f5f7;
   --page-bg:#e8e8ed;
   --card-bg:rgba(255,255,255,.85);
@@ -6647,7 +6535,7 @@ button.form-secondary:focus-visible{
   --primary:#0071e3;
   --primary-gradient:linear-gradient(135deg,#0071e3 0%,#409cff 100%);
   --text:#1d1d1f;
-  --text-muted:#68686d;
+  --text-muted:#86868b;
   --input-bg:rgba(255,255,255,.9);
   --pill-bg:rgba(0,0,0,.045);
   --model-bg:rgba(255,255,255,.72);
@@ -6660,23 +6548,28 @@ button.form-secondary:focus-visible{
   --success:#34c759;
   --badge-bg:rgba(0,113,227,.08);
   --badge-border:rgba(0,113,227,.20);
+  --low-stock-bg:rgba(255,149,0,.10);
+  --low-stock-border:rgba(255,149,0,.25);
+  --low-stock-text:#b45309;
   --glass-btn-bg:#0071e3;
   --glass-btn-border:#0071e3;
   --glass-btn-text:#fff;
   --glass-pill-active:#0071e3;
   --glass-pill-border:#0071e3;
-  --glass-shadow:0 8px 24px rgba(0,113,227,.14),0 0 18px rgba(0,113,227,.06);
+  --glass-shadow:0 8px 24px rgba(0,113,227,.16),0 0 18px rgba(0,113,227,.08);
+  --card-elevation:0 4px 20px rgba(0,0,0,.04);
   color-scheme:light;
 }
-:root[data-theme="apple-dark"]{
-  --bg:#000;
+
+:root[data-theme="apple-dark"] {
+  --bg:#000000;
   --page-bg:#121212;
   --card-bg:rgba(28,28,30,.85);
   --card-border:rgba(255,255,255,.10);
   --primary:#0a84ff;
   --primary-gradient:linear-gradient(135deg,#0a84ff 0%,#5ac8fa 100%);
   --text:#f5f5f7;
-  --text-muted:#b0b0b5;
+  --text-muted:#98989d;
   --input-bg:rgba(44,44,46,.8);
   --pill-bg:rgba(255,255,255,.07);
   --model-bg:rgba(28,28,30,.72);
@@ -6689,41 +6582,128 @@ button.form-secondary:focus-visible{
   --success:#30d158;
   --badge-bg:rgba(10,132,255,.13);
   --badge-border:rgba(10,132,255,.28);
+  --low-stock-bg:rgba(255,159,10,.12);
+  --low-stock-border:rgba(255,159,10,.28);
+  --low-stock-text:#ffb340;
   --glass-btn-bg:#0a84ff;
   --glass-btn-border:#0a84ff;
   --glass-btn-text:#fff;
   --glass-pill-active:#0a84ff;
   --glass-pill-border:#0a84ff;
-  --glass-shadow:0 8px 24px rgba(10,132,255,.20),0 0 18px rgba(90,200,250,.08);
+  --glass-shadow:0 8px 24px rgba(10,132,255,.24),0 0 18px rgba(90,200,250,.10);
+  --card-elevation:0 4px 20px rgba(0,0,0,.40);
   color-scheme:dark;
 }
+
 :root[data-theme="apple-light"] .theme-card-btn[data-theme-choice="apple-light"],
-:root[data-theme="apple-dark"] .theme-card-btn[data-theme-choice="apple-dark"]{
-  border-color:var(--primary) !important;
-  box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 16%,transparent),0 8px 20px color-mix(in srgb,var(--primary) 10%,transparent) !important;
+:root[data-theme="apple-dark"] .theme-card-btn[data-theme-choice="apple-dark"] {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb,var(--primary) 18%,transparent),
+              0 8px 20px color-mix(in srgb,var(--primary) 14%,transparent) !important;
 }
 
-@media(max-width:760px){
-  #repairSparesModal .repair-spares-note-box{
-    height:330px !important;
-    min-height:330px !important;
-    max-height:45vh !important;
-  }
-  #billingModal .bill-action-grid{
-    position:static !important;
-    bottom:auto !important;
-  }
+/* ----------------------------------------------------------
+   3) REPAIR TOOLS / IC SPARES — LONG MULTILINE NOTE BOX
+   ---------------------------------------------------------- */
+#repairSparesModal .repair-spares-note-box {
+  display:block !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:210px !important;
+  height:210px !important;
+  max-height:55vh !important;
+  box-sizing:border-box !important;
+  resize:vertical !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  white-space:pre-wrap !important;
+  overflow-wrap:anywhere !important;
+  line-height:1.5 !important;
+  padding:14px 15px !important;
 }
-@media(max-width:430px){
-  #headerSearchRow .box-photo-scan-btn{
-    width:auto !important;
-    min-width:96px !important;
-    min-height:42px !important;
-    padding:8px 10px !important;
-    font-size:.68rem !important;
-  }
-  #headerSearchRow .box-photo-scan-btn::first-letter{font-size:inherit !important;}
-  #billingModal .bill-action-grid{grid-template-columns:1fr 1fr;gap:6px;}
-  #billingModal .bill-action-btn{min-height:43px;font-size:.68rem;padding-left:6px;padding-right:6px;}
+#repairSparesModal .form-group {
+  min-width:0 !important;
 }
 
+/* ----------------------------------------------------------
+   4) MOBILE BILLING — REAL INTERNAL SCROLL
+   Header + tabs stay fixed; bill content scrolls.
+   ---------------------------------------------------------- */
+#billingModal .billing-modern {
+  display:flex !important;
+  flex-direction:column !important;
+  width:min(700px,calc(100vw - 24px)) !important;
+  height:min(90vh,900px) !important;
+  max-height:90vh !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+#billingModal .billing-modern > .modal-title,
+#billingModal .billing-tabs,
+#billingModal .mobile-type-tabs {
+  flex:0 0 auto !important;
+}
+#billingModal #billNewView,
+#billingModal #billHistoryView {
+  flex:1 1 0 !important;
+  min-height:0 !important;
+  max-height:none !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior:contain !important;
+}
+#billingModal #usedMobileBillingForm {
+  min-width:0 !important;
+  min-height:0 !important;
+}
+
+/* Keypad Mobile: RAM + Storage disappear together, Colour stays. */
+#billingModal #billRamStorageGrid.sk-keypad-hidden {
+  display:none !important;
+}
+
+@media (max-width:760px) {
+  #billingModal .billing-modern {
+    width:calc(100vw - 12px) !important;
+    max-width:calc(100vw - 12px) !important;
+    height:94dvh !important;
+    max-height:94dvh !important;
+    border-radius:21px !important;
+  }
+  #billingModal #billNewView,
+  #billingModal #billHistoryView {
+    padding-left:10px;
+    padding-right:10px;
+    padding-bottom:14px;
+  }
+  #repairSparesModal .repair-spares-note-box {
+    min-height:200px !important;
+    height:200px !important;
+    max-height:48vh !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   5) UNIVERSAL THEME TEXT / ICON CONTRAST
+   ---------------------------------------------------------- */
+.app-viewport :is(h1,h2,h3,h4,h5,h6,.app-name,.app-sub,.form-label,
+.bill-section-title,.card-header,.section-title,.modal-title,
+.menu-btn-label,.theme-card-copy strong,.theme-card-copy small) {
+  color:var(--text) !important;
+}
+.app-viewport :is(.nav-item,.menu-drawer-btn,.theme-card-btn,.active-category-notice) {
+  color:var(--text) !important;
+}
+.app-viewport svg { color:currentColor; }
+
+/* The Home/Add Item controls intentionally remain high-contrast even when
+   the selected theme has a light surface. */
+#cardsContainer ~ .bottom-nav .nav-item.active,
+#cardsContainer ~ .bottom-nav #navHome,
+#headerSearchRow .box-photo-scan-btn,
+#cardsContainer .box-photo-scan-btn {
+  color:#fff !important;
+}
+
+/* End of the single V4.17 targeted-fix block. */
