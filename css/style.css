@@ -6231,3 +6231,220 @@ button.form-secondary:focus-visible{
   #skLoginModal .login-modern-input{animation:none !important;transition:none !important}
 }
 
+
+/* SK MOBILES — LOGIN PASSWORD TOGGLE / FINAL POLISH */
+#skLoginModal .login-password-toggle{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  min-width:48px;min-height:34px;padding:5px 8px;border-radius:10px;
+  border:1px solid color-mix(in srgb,var(--card-border) 82%,transparent);
+  background:color-mix(in srgb,var(--card-bg) 72%,transparent);
+  color:var(--text-muted);font:inherit;font-size:.68rem;font-weight:850;
+  cursor:pointer;z-index:3;
+}
+#skLoginModal .login-password-toggle:hover{
+  color:var(--text);border-color:color-mix(in srgb,var(--primary) 42%,var(--card-border));
+}
+#skLoginModal .login-password-toggle:focus-visible{
+  outline:2px solid color-mix(in srgb,var(--primary) 60%,transparent);outline-offset:2px;
+}
+#skLoginModal #loginPasswordInput{padding-right:76px;}
+
+
+/* =========================================================
+   SK RECYCLE BIN — UI/UX POLISH ONLY
+   Engine, storage, restore and purge logic intentionally untouched.
+   ========================================================= */
+#skRecycleBinModal{
+  --sk-rb-surface:var(--modal-bg,var(--card-bg));
+  --sk-rb-border:color-mix(in srgb,var(--card-border) 78%,transparent);
+  --sk-rb-accent:var(--primary);
+  --sk-rb-danger:#dc5b5b;
+}
+#skRecycleBinModal .modal-sheet{
+  width:min(92vw,560px)!important;
+  max-width:560px!important;
+  max-height:min(88vh,760px)!important;
+  padding:20px!important;
+  border-radius:24px!important;
+  border:1px solid var(--sk-rb-border)!important;
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--sk-rb-surface) 94%,#fff 6%),
+    var(--sk-rb-surface))!important;
+  box-shadow:0 24px 70px rgba(15,23,42,.20),0 4px 18px rgba(15,23,42,.10)!important;
+  overflow:hidden!important;
+}
+#skRecycleBinModal .modal-title{
+  min-height:44px;
+  gap:12px;
+  padding:0 0 12px!important;
+  margin:0 0 12px!important;
+  border-bottom:1px solid var(--sk-rb-border);
+  font-size:1rem!important;
+  letter-spacing:-.01em;
+}
+#skRecycleBinModal .modal-title span{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  font-weight:850;
+}
+#skRecycleBinModal .modal-close-btn{
+  flex:0 0 40px;
+  width:40px;
+  height:40px;
+  min-width:40px;
+  border-radius:12px!important;
+  border:1px solid var(--sk-rb-border)!important;
+  background:var(--pill-bg)!important;
+  color:var(--text)!important;
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+#skRecycleBinModal .modal-close-btn:hover{
+  border-color:color-mix(in srgb,var(--sk-rb-accent) 45%,var(--sk-rb-border))!important;
+  background:color-mix(in srgb,var(--sk-rb-accent) 8%,var(--pill-bg))!important;
+}
+#skRecycleBinModal .modal-close-btn:focus-visible{
+  outline:2px solid color-mix(in srgb,var(--sk-rb-accent) 70%,transparent);
+  outline-offset:2px;
+}
+#skRecycleBinModal > .modal-sheet > p{
+  margin:0 0 14px!important;
+  line-height:1.5!important;
+  font-size:.76rem!important;
+}
+#skRecycleBinModal #recycleBinItemsContainer{
+  gap:10px!important;
+  max-height:min(55vh,500px)!important;
+  padding:2px 2px 4px!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain;
+}
+#recycleBinItemsContainer .sk-trash-row{
+  width:100%;
+  box-sizing:border-box;
+  background:color-mix(in srgb,var(--pill-bg) 78%,transparent)!important;
+  border:1px solid var(--sk-rb-border)!important;
+  border-radius:18px!important;
+  padding:14px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  box-shadow:0 4px 14px rgba(15,23,42,.055);
+}
+#recycleBinItemsContainer .sk-trash-row > div:first-child{
+  flex:1 1 auto;
+  min-width:0;
+}
+#recycleBinItemsContainer .sk-trash-row > div:first-child > div:first-child{
+  color:var(--text)!important;
+  font-size:.84rem!important;
+  line-height:1.35!important;
+  overflow-wrap:anywhere;
+}
+#recycleBinItemsContainer .sk-trash-row > div:first-child > div:last-child{
+  margin-top:4px;
+  color:var(--text-muted)!important;
+  font-size:.68rem!important;
+  line-height:1.45!important;
+}
+#recycleBinItemsContainer .sk-trash-actions{
+  flex:0 0 auto;
+  display:flex!important;
+  align-items:center;
+  justify-content:flex-end;
+  gap:7px!important;
+}
+#recycleBinItemsContainer .sk-trash-actions button{
+  min-height:40px;
+  padding:8px 11px!important;
+  border-radius:11px!important;
+  border:1px solid var(--sk-rb-border)!important;
+  font-size:.72rem;
+  font-weight:800;
+  white-space:nowrap;
+  cursor:pointer;
+  touch-action:manipulation;
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease;
+}
+#recycleBinItemsContainer .sk-trash-actions button:first-child{
+  background:var(--sk-rb-accent)!important;
+  color:#fff!important;
+  border-color:color-mix(in srgb,var(--sk-rb-accent) 75%,transparent)!important;
+  box-shadow:0 5px 14px color-mix(in srgb,var(--sk-rb-accent) 18%,transparent);
+}
+#recycleBinItemsContainer .sk-trash-actions button:last-child{
+  background:rgba(220,91,91,.09)!important;
+  color:var(--sk-rb-danger)!important;
+  border-color:rgba(220,91,91,.22)!important;
+}
+#recycleBinItemsContainer .sk-trash-actions button:hover{
+  transform:translateY(-1px);
+}
+#recycleBinItemsContainer .sk-trash-actions button:focus-visible{
+  outline:2px solid color-mix(in srgb,var(--sk-rb-accent) 70%,transparent);
+  outline-offset:2px;
+}
+#skRecycleBinModal #btnEmptyRecycleBin{
+  width:100%;
+  min-height:44px;
+  margin-top:12px!important;
+  border-radius:13px!important;
+  border:1px solid rgba(220,91,91,.28)!important;
+  background:rgba(220,91,91,.10)!important;
+  color:var(--sk-rb-danger)!important;
+  box-shadow:none!important;
+  font-weight:850;
+  touch-action:manipulation;
+}
+#skRecycleBinModal #btnEmptyRecycleBin:hover{
+  background:rgba(220,91,91,.15)!important;
+  border-color:rgba(220,91,91,.38)!important;
+}
+#skRecycleBinModal #recycleBinItemsContainer:empty{display:flex!important;}
+#skRecycleBinModal .sk-rb-empty-state{
+  width:100%;
+  box-sizing:border-box;
+  padding:28px 18px;
+  border:1px dashed var(--sk-rb-border);
+  border-radius:18px;
+  text-align:center;
+  background:color-mix(in srgb,var(--pill-bg) 58%,transparent);
+  color:var(--text-muted);
+}
+@media (max-width:640px){
+  #skRecycleBinModal .modal-sheet{
+    width:min(100vw,560px)!important;
+    max-height:min(88vh,760px)!important;
+    padding:16px!important;
+    border-radius:24px 24px 0 0!important;
+    margin-top:auto!important;
+  }
+  #skRecycleBinModal #recycleBinItemsContainer{
+    max-height:52vh!important;
+  }
+  #recycleBinItemsContainer .sk-trash-row{
+    align-items:stretch!important;
+    flex-direction:column!important;
+    padding:13px!important;
+  }
+  #recycleBinItemsContainer .sk-trash-actions{
+    width:100%;
+    justify-content:stretch!important;
+  }
+  #recycleBinItemsContainer .sk-trash-actions button{
+    flex:1 1 0;
+    min-width:0;
+    min-height:44px;
+  }
+  #skRecycleBinModal #btnEmptyRecycleBin{
+    min-height:46px;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  #recycleBinItemsContainer .sk-trash-actions button{transition:none!important;}
+}
