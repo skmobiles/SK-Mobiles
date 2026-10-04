@@ -3555,12 +3555,14 @@ body{
   page-break-after:always!important;
   break-inside:avoid!important;
   page-break-inside:avoid!important;
+  min-height:calc(297mm - 24mm)!important;
 }
 .print-page-2{
-  break-before:page!important;
-  page-break-before:always!important;
+  break-before:auto!important;
+  page-break-before:auto!important;
   break-inside:avoid!important;
   page-break-inside:avoid!important;
+  min-height:calc(297mm - 24mm)!important;
 }
 .print-sheet > div{
   width:100%!important;
