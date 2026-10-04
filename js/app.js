@@ -1356,21 +1356,24 @@ const MASTER_INVENTORY = [
     }
 
     function loadRepairSparesNote() {
+      const input = document.getElementById('repairSparesNoteInput');
+      if (!input) return;
       const savedNote = localStorage.getItem('sk_repair_tools_note');
-      if (savedNote && document.getElementById('repairSparesNoteInput')) {
-        document.getElementById('repairSparesNoteInput').value = savedNote;
-      }
+      if (savedNote !== null) input.value = savedNote;
     }
 
     function saveRepairSparesNote() {
-      const note = document.getElementById('repairSparesNoteInput').value;
+      const input = document.getElementById('repairSparesNoteInput');
+      if (!input) return;
+      const note = input.value;
       localStorage.setItem('sk_repair_tools_note', note);
       showToast("Repair Tools & IC notes saved!");
       toggleModal('repairSparesModal', false);
     }
 
     function shareRepairNotesWhatsApp() {
-      const note = document.getElementById('repairSparesNoteInput').value.trim();
+      const input = document.getElementById('repairSparesNoteInput');
+      const note = input ? input.value.trim() : '';
       if (!note) {
         showToast("Notes empty-ah irukku!");
         return;
@@ -1385,6 +1388,7 @@ const MASTER_INVENTORY = [
     }
 
     function handleNewBillClick() {
+      window.__skInvoiceExportBill=null;
       window.__skEditingBillId='';
       autoSaveCurrentFormSilently();
       document.getElementById('usedMobileBillingForm').reset();
@@ -3145,6 +3149,7 @@ window.deleteBillSafely=async function(billId){
 };
 
 function editSavedBill(idx) {
+      window.__skInvoiceExportBill=null;
       const b=savedBills[idx];
       if(!b){showToast('❌ Bill not found');return;}
       window.__skEditingBillId=String(b.id||'');
@@ -3160,16 +3165,203 @@ function editSavedBill(idx) {
       setTimeout(()=>{const btn=document.querySelector('.bill-action-save');if(btn){const sp=btn.querySelector('span:last-child');if(sp)sp.textContent='Update Bill';}},30);
     }
 
-    function viewSavedBill(idx) {
-      const b=savedBills[idx]; if(!b)return; const container=document.getElementById('viewBillContent');
-      const displayNo=b.billNo||skBillNumberFromDateSeq(b.date,skExistingBillSeq(b)||(idx+1),true); const safeId=String(b.id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      container.innerHTML=`<div id="skFixedInvoiceRoot" style="background:#fff;color:#1e293b;padding:20px;border-radius:18px;font-family:'Plus Jakarta Sans',sans-serif;"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid #edf0f6;padding-bottom:12px;margin-bottom:12px;gap:8px;"><button type="button" onclick="closeViewedBillAndReturn()" style="border:1px solid #e2e8f0;background:#f8fafc;border-radius:10px;padding:7px 10px;font-weight:800;cursor:pointer;">← Back</button><div style="font-weight:950;color:#d9166f;font-size:1.3rem;">SK MOBILES</div><div style="text-align:right;font-size:.75rem;"><strong>Bill No:</strong> ${displayNo}<br><strong>Date:</strong> ${skBillUiDate(b.date)}</div></div><div style="font-size:.75rem;background:#f8fafc;padding:10px;border-radius:12px;margin-bottom:12px;border:1px solid #e2e8f0;"><div><strong>Customer:</strong> ${b.custName}</div><div><strong>Phone:</strong> ${b.phone}</div><div><strong>Address:</strong> ${b.address||'---'}</div></div><table style="width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:12px;"><tr style="background:#f1f5f9;border-bottom:1px solid #cbd5e1;"><th style="padding:7px;text-align:left;">Description</th><th style="padding:7px;text-align:right;">Details</th></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">Device Model</td><td style="padding:7px;text-align:right;font-weight:800;">${b.brand||''} ${b.model}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">Mobile Type</td><td style="padding:7px;text-align:right;font-weight:800;">${b.mobileType||'New Mobile'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">RAM / Storage / Colour</td><td style="padding:7px;text-align:right;">${[b.ram,b.storage,b.color].filter(Boolean).join(' / ')||'---'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">IMEI 1</td><td style="padding:7px;text-align:right;font-family:monospace;font-weight:700;">${b.imei1||'---'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#475569;">Payment Mode</td><td style="padding:7px;text-align:right;font-weight:800;">${b.payMode||'Cash'}</td></tr><tr style="border-bottom:1px solid #e2e8f0;background:#f8fafc;"><td style="padding:7px;font-weight:700;">Total Amount</td><td style="padding:7px;text-align:right;font-weight:900;color:#2563eb;">₹ ${(Number(b.price)||0).toLocaleString('en-IN')}</td></tr>${b.payMode==='EMI'||b.payMode==='Credit'?`<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:7px;color:#16a34a;font-weight:700;">Down Payment</td><td style="padding:7px;text-align:right;color:#16a34a;font-weight:700;">₹ ${(Number(b.advance)||0).toLocaleString('en-IN')}</td></tr><tr style="border-bottom:2px solid #0f172a;"><td style="padding:7px;color:#dc2626;font-weight:700;">Balance Due</td><td style="padding:7px;text-align:right;color:#dc2626;font-weight:900;">₹ ${(Number(b.balance)||0).toLocaleString('en-IN')}</td></tr>`:''}</table><div style="font-size:.65rem;color:#64748b;line-height:1.4;border-top:1px dashed #cbd5e1;padding-top:8px;margin-top:8px;"><strong>Terms & Conditions:</strong><div style="white-space:pre-line;margin-top:3px;">${getMobileTerms(b.mobileType||'New Mobile')}</div></div>${b.emiHtml?`<div style="font-size:.72rem;font-weight:800;color:#92400e;margin-bottom:6px;">EMI Schedule Details:</div><div style="border:1px solid #fde047;border-radius:10px;overflow:hidden;font-size:.68rem;margin-bottom:12px;"><table style="width:100%;border-collapse:collapse;">${b.emiHtml}</table></div>`:''}${Array.isArray(b.paymentReceipts)&&b.paymentReceipts.length?`<div style="margin-top:10px;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px;"><div style="font-size:.72rem;font-weight:900;color:#166534;margin-bottom:6px;">🧾 PAYMENT RECEIPTS ATTACHED</div>${b.paymentReceipts.map(r=>`<div style="font-size:.68rem;padding:4px 0;border-bottom:1px solid #dcfce7;"><b>${r.id||''}</b> • ₹ ${(Number(r.amount)||0).toLocaleString('en-IN')} • ${r.mode||''} • ${skBillUiDate(r.date||'')}${r.note?' • '+r.note:''}</div>`).join('')}</div>`:''}<div style="display:flex;gap:8px;margin-top:14px;"><button onclick="toggleModal('viewBillModal',false);setTimeout(()=>editSavedBill(savedBills.findIndex(x=>x&&x.id==='${safeId}')),0);" class="submit-btn" style="flex:1;padding:8px;font-size:.75rem;">✏️ Edit Bill</button><button onclick="downloadInvoicePDF()" class="submit-btn" style="flex:1;padding:8px;font-size:.75rem;">📄 Download PDF</button><button onclick="sendBillToWhatsAppAsPDF()" class="submit-btn whatsapp-green" style="flex:1;padding:8px;font-size:.75rem;">💬 WhatsApp PDF</button></div></div>`;
-      toggleModal('viewBillModal',true);
+    
+function renderSavedBillToLiveInvoicePreview(b) {
+      const source = document.getElementById('printableInvoiceCard');
+      if (!source || !b) return false;
+
+      const setText = (id, value, fallback='---') => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value == null || String(value) === '' ? fallback : String(value);
+      };
+
+      const displayNo = b.billNo || skBillNumberFromDateSeq(b.date, skExistingBillSeq(b) || 1, false);
+      const displayDate = skBillUiDate(b.date || '');
+
+      setText('pvBillNo', displayNo);
+      setText('pvBillDate', displayDate);
+      setText('pvCustName', b.custName);
+      setText('pvCustPhone', b.phone);
+      setText('pvCustAddress', b.address);
+
+      const device = [b.brand, b.model].filter(Boolean).join(' ').trim();
+      setText('pvDevice', device);
+      setText('pvStorage', [b.ram, b.storage, b.color].filter(Boolean).join(' / '));
+      setText('pvImei1', b.imei1);
+      setText('pvPackage', b.package || 'Full Kit');
+      setText('pvMobileType', b.mobileType || 'New Mobile');
+
+      const imei2Row = document.getElementById('pvImei2Row');
+      if (b.imei2) {
+        if (imei2Row) imei2Row.style.display = 'table-row';
+        setText('pvImei2', b.imei2);
+      } else {
+        if (imei2Row) imei2Row.style.display = 'none';
+        setText('pvImei2', '---');
+      }
+
+      const mode = String(b.payMode || 'Cash');
+      const pvPayMode = document.getElementById('pvPayMode');
+      if (pvPayMode) {
+        pvPayMode.textContent = '';
+        const pill = document.createElement('span');
+        pill.textContent = mode;
+        pill.style.background = 'var(--pill-bg)';
+        pill.style.color = 'var(--text)';
+        pill.style.padding = '2px 8px';
+        pill.style.borderRadius = '8px';
+        pvPayMode.appendChild(pill);
+      }
+
+      const total = Number(b.price) || 0;
+      const isCreditOrEmi = mode === 'EMI' || mode === 'Credit';
+      const advance = isCreditOrEmi ? (Number(b.advance) || 0) : 0;
+      const balance = isCreditOrEmi ? Math.max(0, Number(b.balance) || (total - advance)) : 0;
+
+      setText('pvTotalPrice', `₹ ${total.toLocaleString('en-IN')}`);
+      setText('pvAdvance', `₹ ${advance.toLocaleString('en-IN')}`);
+      setText('pvBalance', `₹ ${balance.toLocaleString('en-IN')}`);
+
+      const pvRowAdvance = document.getElementById('pvRowAdvance');
+      const pvRowBalance = document.getElementById('pvRowBalance');
+      if (pvRowAdvance) pvRowAdvance.style.display = isCreditOrEmi ? 'table-row' : 'none';
+      if (pvRowBalance) pvRowBalance.style.display = isCreditOrEmi ? 'table-row' : 'none';
+
+      const emiBox = document.getElementById('pvEmiYellowBox');
+      const emiSection = document.getElementById('pvEmiScheduleSection');
+      const creditBox = document.getElementById('pvCreditBox');
+      const emiTbody = document.getElementById('pvEmiScheduleTbody');
+
+      if (mode === 'EMI') {
+        const tenure = Math.min(60, Math.max(1, Number(b.emiMonths) || 1));
+        const interestRate = Number(b.emiInterest) || 0;
+        const totalPayable = balance + (balance * (interestRate / 100) * (tenure / 12));
+        const monthly = Number(b.monthlyEmi) || Math.ceil(totalPayable / tenure);
+
+        if (emiBox) emiBox.style.display = 'block';
+        if (emiSection) emiSection.style.display = 'block';
+
+        setText('pvEmiDetails', `₹ ${monthly.toLocaleString('en-IN')}/mo for ${tenure} Months`);
+
+        if (emiTbody) {
+          emiTbody.innerHTML = b.emiHtml || '';
+          let closeDate = '--';
+          const lastRow = emiTbody.lastElementChild;
+          if (lastRow?.children?.[1]) closeDate = lastRow.children[1].textContent.trim() || '--';
+          setText('pvEmiClose', closeDate);
+        }
+      } else {
+        if (emiBox) emiBox.style.display = 'none';
+        if (emiSection) emiSection.style.display = 'none';
+        if (emiTbody) emiTbody.innerHTML = '';
+        setText('pvEmiDetails', '---');
+        setText('pvEmiClose', '---');
+      }
+
+      if (mode === 'Credit') {
+        if (creditBox) creditBox.style.display = 'block';
+        setText('pvCreditDetails', parseSmartDate(b.creditDueDate || '') || b.creditDueDate || '---');
+      } else {
+        if (creditBox) creditBox.style.display = 'none';
+        setText('pvCreditDetails', '---');
+      }
+
+      const terms = getMobileTerms(b.mobileType || 'New Mobile');
+      setText('pvTerms', terms, '');
+
+      return true;
+    }
+
+function viewSavedBill(idx) {
+      const b = savedBills[idx];
+      if (!b) return;
+
+      const source = document.getElementById('printableInvoiceCard');
+      const container = document.getElementById('viewBillContent');
+      if (!source || !container) {
+        showToast?.('❌ Live Invoice Preview not found');
+        return;
+      }
+
+      if (!renderSavedBillToLiveInvoicePreview(b)) {
+        showToast?.('❌ Could not prepare saved invoice preview');
+        return;
+      }
+
+      window.__skInvoiceExportBill = b;
+      window.__skBillViewReturn = window.__skBillViewReturn || 'billing';
+
+      container.innerHTML = '';
+
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = "background:#fff;color:#1e293b;padding:20px;border-radius:18px;font-family:'Plus Jakarta Sans',sans-serif;";
+
+      const header = document.createElement('div');
+      header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid #edf0f6;padding-bottom:12px;margin-bottom:12px;gap:8px;';
+
+      const backBtn = document.createElement('button');
+      backBtn.type = 'button';
+      backBtn.textContent = '← Back';
+      backBtn.style.cssText = 'border:1px solid #e2e8f0;background:#f8fafc;border-radius:10px;padding:7px 10px;font-weight:800;cursor:pointer;';
+      backBtn.onclick = closeViewedBillAndReturn;
+
+      const title = document.createElement('div');
+      title.textContent = 'SK MOBILES';
+      title.style.cssText = 'font-weight:950;color:#d9166f;font-size:1.3rem;';
+
+      const meta = document.createElement('div');
+      meta.style.cssText = 'text-align:right;font-size:.75rem;';
+      meta.innerHTML = `<strong>Bill No:</strong> ${String(b.billNo || skBillNumberFromDateSeq(b.date, skExistingBillSeq(b) || 1, false))}<br><strong>Date:</strong> ${String(skBillUiDate(b.date || ''))}`;
+
+      header.append(backBtn, title, meta);
+
+      const previewClone = source.cloneNode(true);
+      previewClone.removeAttribute('id');
+      previewClone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+      previewClone.style.width = '100%';
+      previewClone.style.maxWidth = '100%';
+      previewClone.style.margin = '0';
+      previewClone.style.boxShadow = 'none';
+      previewClone.style.borderRadius = '0';
+
+      const actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;';
+
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'submit-btn';
+      editBtn.style.cssText = 'flex:1;min-width:120px;padding:9px;font-size:.75rem;';
+      editBtn.textContent = '✏️ Edit Bill';
+      editBtn.onclick = () => {
+        toggleModal('viewBillModal', false);
+        setTimeout(() => editSavedBill(savedBills.findIndex(x => x && x.id === b.id)), 0);
+      };
+
+      const downloadBtn = document.createElement('button');
+      downloadBtn.type = 'button';
+      downloadBtn.className = 'submit-btn';
+      downloadBtn.style.cssText = 'flex:1;min-width:120px;padding:9px;font-size:.75rem;';
+      downloadBtn.textContent = '📄 Download PDF';
+      downloadBtn.onclick = downloadInvoicePDF;
+
+      const waBtn = document.createElement('button');
+      waBtn.type = 'button';
+      waBtn.className = 'submit-btn whatsapp-green';
+      waBtn.style.cssText = 'flex:1;min-width:120px;padding:9px;font-size:.75rem;';
+      waBtn.textContent = '💬 WhatsApp PDF';
+      waBtn.onclick = sendBillToWhatsAppAsPDF;
+
+      actions.append(editBtn, downloadBtn, waBtn);
+      wrapper.append(header, previewClone, actions);
+      container.appendChild(wrapper);
+
+      toggleModal('viewBillModal', true);
     }
 
     function closeViewedBillAndReturn(){
       const returnTo=window.__skBillViewReturn||'';
       window.__skBillViewReturn='';
+      window.__skInvoiceExportBill=null;
       const modal=document.getElementById('viewBillModal');
       if(modal)modal.classList.remove('active');
       if(returnTo==='creditLedger'){
@@ -3178,6 +3370,7 @@ function editSavedBill(idx) {
         return;
       }
       document.getElementById('billingModal')?.classList.add('active');
+      if(typeof updateBillPreview==='function')updateBillPreview();
       if(typeof switchBillTab==='function')switchBillTab('history');
     }
 
@@ -3189,12 +3382,25 @@ function editSavedBill(idx) {
 
     function sendBillToWhatsAppAsPDF() {
       const source = document.getElementById('printableInvoiceCard');
-      if (!source) return;
+      if (!source) { showToast?.('❌ Live Invoice Preview not found'); return; }
+      if (typeof html2pdf !== 'function') {
+        showToast?.('❌ PDF service is not loaded. Please try again.');
+        return;
+      }
 
-      const rawPhone = document.getElementById('billCustPhone').value.replace(/\D/g, '');
-      const phone = rawPhone.length === 10 ? rawPhone : (rawPhone.length === 12 && rawPhone.startsWith('91') ? rawPhone.slice(2) : rawPhone);
-      
-      showToast("Preparing WhatsApp PDF share...");
+      const activeBill = window.__skInvoiceExportBill || null;
+      const phoneValue = activeBill?.phone ?? document.getElementById('billCustPhone')?.value ?? '';
+      const rawPhone = String(phoneValue).replace(/\D/g, '');
+      const phone = rawPhone.length === 10
+        ? rawPhone
+        : (rawPhone.length === 12 && rawPhone.startsWith('91') ? rawPhone.slice(2) : rawPhone);
+
+      if (phone.length !== 10) {
+        showToast?.('❌ Valid customer WhatsApp number not found');
+        return;
+      }
+
+      showToast?.('📄 Preparing WhatsApp invoice PDF...');
 
       const clone = source.cloneNode(true);
       clone.style.width = '750px';
@@ -3208,7 +3414,9 @@ function editSavedBill(idx) {
       holder.style.position = 'fixed';
       holder.style.left = '-99999px';
       holder.style.top = '0';
+      holder.style.width = '750px';
       holder.style.background = '#ffffff';
+      holder.setAttribute('aria-hidden', 'true');
       holder.appendChild(clone);
       document.body.appendChild(holder);
 
@@ -3220,24 +3428,45 @@ function editSavedBill(idx) {
         jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
       };
 
-      html2pdf().set(opt).from(clone).outputPdf('blob').then((pdfBlob) => {
-        holder.remove();
-        const billFileNo=(document.getElementById('pvBillNo')?.innerText||'SK-Bill').trim().replace(/[^\w-]/g,'_');
-        const pdfFile = new File([pdfBlob], `SK_Mobiles_Invoice_${billFileNo}.pdf`, { type: "application/pdf" });
-        
-        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-          navigator.share({
-            files: [pdfFile],
-            title: 'SK Mobiles Invoice',
-            text: 'Here is your purchase invoice PDF from SK Mobiles, Dharmapuri.'
-          }).catch(() => {});
-        } else {
-          html2pdf().set(opt).from(clone).save();
-          const name = document.getElementById('billCustName').value || 'Customer';
-          const msg = `Hello ${name}, here is your bill invoice PDF from SK Mobiles. Thank you for shopping with us!`;
-          window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-      });
+      html2pdf().set(opt).from(clone).outputPdf('blob')
+        .then((pdfBlob) => {
+          const billFileNo = (document.getElementById('pvBillNo')?.innerText || 'SK-Bill')
+            .trim().replace(/[^\w-]/g, '_');
+          const pdfFile = new File(
+            [pdfBlob],
+            `SK_Mobiles_Invoice_${billFileNo}.pdf`,
+            { type: 'application/pdf' }
+          );
+
+          if (navigator.canShare && navigator.canShare({ files: [pdfFile] }) && navigator.share) {
+            return navigator.share({
+              files: [pdfFile],
+              title: 'SK Mobiles Invoice',
+              text: 'Here is your purchase invoice PDF from SK Mobiles, Dharmapuri.'
+            }).then(() => {
+              showToast?.('✅ Invoice PDF shared via WhatsApp');
+            }).catch((err) => {
+              if (err?.name !== 'AbortError') {
+                console.warn('Native share failed:', err);
+                throw err;
+              }
+            });
+          }
+
+          return html2pdf().set(opt).from(clone).save().then(() => {
+            const name = activeBill?.custName || document.getElementById('billCustName')?.value || 'Customer';
+            const msg = `Hello ${name}, here is your bill invoice PDF from SK Mobiles. Thank you for shopping with us!`;
+            window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            showToast?.('✅ Invoice PDF downloaded • WhatsApp opened');
+          });
+        })
+        .catch((err) => {
+          console.error('WhatsApp invoice PDF failed:', err);
+          showToast?.('❌ WhatsApp invoice PDF failed');
+        })
+        .finally(() => {
+          holder.remove();
+        });
     }
 
     function printInvoiceDirect() {
@@ -3285,7 +3514,13 @@ img{max-width:100%!important}
 
     function downloadInvoicePDF() {
       const source = document.getElementById('printableInvoiceCard');
-      if (!source) return;
+      if (!source) { showToast?.('❌ Live Invoice Preview not found'); return; }
+      if (typeof html2pdf !== 'function') {
+        showToast?.('❌ PDF service is not loaded. Please try again.');
+        return;
+      }
+
+      showToast?.('📄 Preparing invoice PDF...');
 
       const clone = source.cloneNode(true);
       clone.style.width = '750px';
@@ -3299,7 +3534,9 @@ img{max-width:100%!important}
       holder.style.position = 'fixed';
       holder.style.left = '-99999px';
       holder.style.top = '0';
+      holder.style.width = '750px';
       holder.style.background = '#ffffff';
+      holder.setAttribute('aria-hidden', 'true');
       holder.appendChild(clone);
       document.body.appendChild(holder);
 
@@ -3311,9 +3548,16 @@ img{max-width:100%!important}
         jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
       };
 
-      html2pdf().set(opt).from(clone).save().finally(() => {
-        holder.remove();
-      });
+      Promise.resolve()
+        .then(() => html2pdf().set(opt).from(clone).save())
+        .then(() => showToast?.('✅ Invoice PDF download started'))
+        .catch((err) => {
+          console.error('Invoice PDF download failed:', err);
+          showToast?.('❌ Invoice PDF download failed');
+        })
+        .finally(() => {
+          holder.remove();
+        });
     }
 
     function saveDriveApiUrl() {
