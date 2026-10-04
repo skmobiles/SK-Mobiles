@@ -1633,17 +1633,7 @@ input[data-dmy-date]{letter-spacing:.02em;}
   --glass-btn-bg:#c026d3;--glass-btn-border:#e879f9;--glass-btn-text:#fff;--glass-pill-active:#d946ef;--glass-pill-border:#e879f9;
   --glass-shadow:0 5px 20px rgba(217,70,239,.24),0 0 20px rgba(124,58,237,.12);--search-match-bg:#10b981;--search-match-text:#fff;--card-elevation:0 10px 28px rgba(0,0,0,.28);
 }
-/* SK REQUEST: Repair Tools / IC Spares is the one intentional long-note field. */
-#repairSparesNoteInput{
-  min-height:180px !important;
-  height:180px !important;
-  max-height:none !important;
-  overflow-y:hidden !important;
-  overflow-x:hidden !important;
-  resize:none !important;
-  white-space:pre-wrap !important;
-  line-height:1.45 !important;
-}
+
 /* SK REQUEST: full-page font chooser */
 .sk-font-picker-page{max-width:760px!important;max-height:92vh!important;}
 .sk-font-picker-page-sub{font-size:.76rem;color:var(--text-muted);margin:-2px 0 12px;line-height:1.4;}
@@ -1779,18 +1769,7 @@ input[data-dmy-date]{letter-spacing:.02em;}
   color: var(--text-muted) !important;
 }
 
-/* The Repair Tools / IC Spares note is intentionally the one
-   multiline field requested; other form fields are untouched. */
-.repair-spares-note-box{
-  min-height: 190px !important;
-  height: 190px !important;
-  resize: vertical !important;
-  overflow-y: auto !important;
-  white-space: pre-wrap !important;
-  line-height: 1.5 !important;
-  padding: 12px 14px !important;
-  box-sizing: border-box !important;
-}
+
 
 /* Login logo follows the same saved shop logo used by the app header. */
 #skLoginLogoImg{
@@ -2516,13 +2495,7 @@ button.form-secondary:focus-visible{
   line-height:1.3;
 }
 
-/* Keep the dedicated repair tools/spares field comfortably multiline. */
-.repair-spares-note-box{
-  min-height:150px !important;
-  line-height:1.5;
-  resize:vertical;
-  overflow-y:auto;
-}
+
 
 /* Form grids must shrink cleanly instead of creating horizontal overflow. */
 #usedMobileBillingForm,
@@ -2565,9 +2538,6 @@ button.form-secondary:focus-visible{
     min-height:78px;
   }
 
-  .repair-spares-note-box{
-    min-height:170px !important;
-  }
 
   /* Existing two-column business forms collapse only at mobile size. */
   #usedMobileBillingForm > div[style*="grid-template-columns:1fr 1fr"],
@@ -4338,15 +4308,11 @@ button.form-secondary:focus-visible{
   }
 
   #headerSearchRow .box-photo-scan-btn{
-    width:44px;
-    min-width:44px;
-    padding:0;
+    min-width:86px;
+    width:auto;
+    padding:8px 10px;
     justify-content:center;
-    font-size:0;
-  }
-
-  #headerSearchRow .box-photo-scan-btn::first-letter{
-    font-size:1rem;
+    font-size:.68rem;
   }
 
   #headerSearchRow .clear-search-btn{
@@ -4401,7 +4367,8 @@ button.form-secondary:focus-visible{
   width:min(760px,calc(100vw - 24px));
   max-width:760px;
   max-height:min(92vh,900px);
-  overflow:hidden;
+  overflow-y:auto;
+  overflow-x:hidden;
   border-radius:24px;
   border:1px solid color-mix(in srgb,var(--card-border) 88%,var(--primary) 12%);
   background:color-mix(in srgb,var(--card-bg) 94%,transparent);
@@ -5062,8 +5029,8 @@ button.form-secondary:focus-visible{
 /* Action bar: preserve every existing handler and action. */
 #billingModal .bill-action-grid{
   position:sticky;
-  bottom:0;
-  z-index:8;
+  bottom:8px;
+  z-index:50;
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:7px;
   margin:8px 0 0;
@@ -6594,4 +6561,150 @@ button.form-secondary:focus-visible{
   background:rgba(28,28,30,.86) !important;
   border-color:rgba(255,255,255,.10) !important;
   color:var(--text);
+}
+\n\n/* ==========================================================
+   V4.17 FINAL — TARGETED UI FIXES ONLY
+   Scope: billing scroll/action bar, repair note, Add Item,
+   bottom Home visibility, theme-safe soft controls.
+   No business/data/Firebase logic changes.
+   ========================================================== */
+
+/* 1) Repair Tools & IC Spares — one canonical multiline field. */
+#repairSparesNoteInput.repair-spares-note-box,
+#repairSparesNoteInput{
+  display:block !important;
+  width:100% !important;
+  min-height:330px !important;
+  height:330px !important;
+  max-height:330px !important;
+  box-sizing:border-box !important;
+  resize:vertical !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  white-space:pre-wrap !important;
+  overflow-wrap:anywhere !important;
+  word-break:break-word !important;
+  line-height:1.5 !important;
+  padding:14px 16px !important;
+}
+
+/* 2) Billing: modal itself is the scroll container; action bar stays sticky. */
+#billingModal .billing-modern{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-gutter:stable;
+}
+#billingModal .bill-action-grid{
+  position:sticky !important;
+  bottom:8px !important;
+  z-index:50 !important;
+  margin-top:10px !important;
+  margin-bottom:2px !important;
+  isolation:isolate;
+}
+
+/* 3) Add Item: keep the text visible on small screens. */
+#headerSearchRow .box-photo-scan-btn,
+#cardsContainer .box-photo-scan-btn{
+  min-width:86px !important;
+  width:auto !important;
+  padding:8px 11px !important;
+  font-size:.70rem !important;
+  justify-content:center !important;
+  white-space:nowrap !important;
+  overflow:visible !important;
+  background:var(--primary-gradient) !important;
+  color:#fff !important;
+  border-color:color-mix(in srgb,var(--primary) 55%,#fff 45%) !important;
+  box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 16%,transparent) !important;
+}
+
+/* 4) Home: always visible, including active state, using current theme. */
+#cardsContainer ~ .bottom-nav #navHome,
+.bottom-nav #navHome{
+  flex:0 0 66px !important;
+  width:66px !important;
+  min-width:66px !important;
+  height:66px !important;
+  margin-top:-18px !important;
+  border-radius:50% !important;
+  background:var(--primary-gradient) !important;
+  color:#fff !important;
+  border:2px solid color-mix(in srgb,var(--card-bg) 82%,#fff 18%) !important;
+  box-shadow:0 9px 24px color-mix(in srgb,var(--primary) 28%,transparent),0 0 0 2px color-mix(in srgb,var(--primary) 22%,transparent) !important;
+  z-index:10 !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+#cardsContainer ~ .bottom-nav #navHome svg,
+.bottom-nav #navHome svg{
+  color:#fff !important;
+  stroke:currentColor !important;
+}
+#cardsContainer ~ .bottom-nav #navHome span,
+.bottom-nav #navHome span{
+  color:#fff !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+/* 5) Theme-safe soft controls: avoid the harsh all-dark button appearance. */
+:root{
+  --soft-control-bg:color-mix(in srgb,var(--card-bg) 72%,#ffffff 28%);
+  --soft-control-bg-hover:color-mix(in srgb,var(--card-bg) 58%,var(--primary) 8%,#ffffff 34%);
+}
+.app-viewport button:not(.btn-primary):not(.submit-btn):not(.sk-login-btn):not(.bill-action-save):not(.bill-action-pdf):not(.bill-action-print):not(.bill-action-wa):not(.sk-rj-next):not(.sk-home-action-btn):not(.modal-close-btn),
+#settingsModal .theme-card-btn,
+#settingsModal .sk-settings-collapse-btn,
+#settingsModal .sk-theme-icon-panel-body button{
+  background:var(--soft-control-bg) !important;
+  color:var(--text) !important;
+  border-color:color-mix(in srgb,var(--card-border) 78%,var(--primary) 22%) !important;
+  box-shadow:0 4px 14px color-mix(in srgb,var(--primary) 7%,transparent) !important;
+}
+.app-viewport button:not(.btn-primary):not(.submit-btn):not(.sk-login-btn):not(.bill-action-save):not(.bill-action-pdf):not(.bill-action-print):not(.bill-action-wa):not(.sk-rj-next):not(.sk-home-action-btn):not(.modal-close-btn):hover,
+#settingsModal .theme-card-btn:hover,
+#settingsModal .sk-settings-collapse-btn:hover,
+#settingsModal .sk-theme-icon-panel-body button:hover{
+  background:var(--soft-control-bg-hover) !important;
+  color:var(--text) !important;
+}
+
+/* Theme gallery titles/icons remain readable in every theme. */
+#settingsModal .theme-card-btn .theme-card-copy strong,
+#settingsModal .theme-card-btn .theme-card-copy small,
+#settingsModal .theme-card-btn .theme-card-icon{
+  color:var(--text) !important;
+}
+#settingsModal .theme-card-btn.active{
+  background:color-mix(in srgb,var(--primary) 11%,var(--card-bg)) !important;
+  color:var(--text) !important;
+  border-color:var(--primary) !important;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 14%,transparent),0 8px 22px color-mix(in srgb,var(--primary) 12%,transparent) !important;
+}
+
+@media (max-width:430px){
+  #headerSearchRow .box-photo-scan-btn,
+  #cardsContainer .box-photo-scan-btn{
+    min-width:86px !important;
+    width:auto !important;
+    font-size:.66rem !important;
+    padding:8px 9px !important;
+  }
+  .bottom-nav #navHome,
+  #cardsContainer ~ .bottom-nav #navHome{
+    flex-basis:62px !important;
+    width:62px !important;
+    min-width:62px !important;
+    height:62px !important;
+    margin-top:-14px !important;
+  }
+  #repairSparesNoteInput.repair-spares-note-box,
+  #repairSparesNoteInput{
+    min-height:300px !important;
+    height:300px !important;
+    max-height:300px !important;
+  }
 }
