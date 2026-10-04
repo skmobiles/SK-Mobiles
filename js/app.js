@@ -3471,43 +3471,206 @@ function viewSavedBill(idx) {
       const source = document.getElementById('printableInvoiceCard');
       if (!source) { showToast?.('Live Invoice Preview not found'); return; }
 
+      /*
+       * Print-only layout fix:
+       * Keep the existing invoice DOM/data/functionality untouched and make
+       * the direct-print document use the same invoice styling as the
+       * on-screen preview/PDF layout.
+       */
       const clone = source.cloneNode(true);
       clone.removeAttribute('id');
-      clone.style.cssText = 'background:#fff;color:#1e293b;padding:18px;box-shadow:none;border:none;border-radius:0;font-family:"Plus Jakarta Sans",Arial,sans-serif;width:100%;max-width:100%;box-sizing:border-box;';
+      clone.style.cssText = 'background:#fff;color:#1e293b;padding:0;margin:0;box-shadow:none;border:none;border-radius:0;font-family:"Plus Jakarta Sans",Arial,sans-serif;width:100%;max-width:100%;box-sizing:border-box;';
+
       const w = window.open('', '_blank');
       if (!w) { showToast?.('Please allow popups to print!'); return; }
+
+      const stylesheetLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+        .map(link => link.href)
+        .filter(Boolean)
+        .map(href => `<link rel="stylesheet" href="${href}">`)
+        .join('');
 
       w.document.open();
       w.document.write(`<!doctype html><html><head>
 <meta charset="utf-8"><title>SK MOBILES - Invoice</title>
+${stylesheetLinks}
 <style>
 @page{size:A4 portrait;margin:12mm}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:#fff;color:#1e293b;font-family:"Plus Jakarta Sans",Arial,sans-serif}
-.print-sheet{width:100%;max-width:100%;margin:0 auto;background:#fff}
-.invoice-brand-header{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding-bottom:14px;border-bottom:1.5px solid #edf0f6}
-.invoice-logo-wrap{width:92px!important;height:92px!important;min-width:92px!important;max-width:92px!important;flex:0 0 92px!important;border-radius:50%;overflow:hidden;background:#fff;border:2px solid #edf0f6;display:flex;align-items:center;justify-content:center}
-.invoice-logo{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:cover!important;display:block}
-.invoice-shop-info{flex:1;text-align:right}
-.invoice-shop-name{font-size:1.65rem;font-weight:900;color:#d9166f;margin-bottom:3px}
-.invoice-address{font-size:.68rem;line-height:1.45;font-weight:700;color:#334155}
-.invoice-phone{font-size:.78rem;font-weight:900;color:#e11d48;margin-top:6px}
-.invoice-meta-row{display:flex;justify-content:space-between;font-size:.73rem;margin:12px 0 10px;padding:9px 12px;border:1.5px solid #ececf5;border-radius:12px;background:#faf8ff}
-table{width:100%;border-collapse:collapse}
+html,body{
+  margin:0!important;
+  padding:0!important;
+  width:auto!important;
+  min-width:0!important;
+  background:#fff!important;
+  color:#1e293b!important;
+  font-family:"Plus Jakarta Sans",Arial,sans-serif!important;
+}
+body{
+  overflow:visible!important;
+}
+.print-sheet{
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  background:#fff!important;
+  box-sizing:border-box!important;
+}
+.print-sheet > div{
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  background:#fff!important;
+  box-sizing:border-box!important;
+  box-shadow:none!important;
+  border:none!important;
+  border-radius:0!important;
+}
+#invoiceMainSheet{
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+}
+.invoice-brand-header{
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+.invoice-logo-wrap{
+  width:92px!important;
+  height:92px!important;
+  min-width:92px!important;
+  max-width:92px!important;
+  flex:0 0 92px!important;
+}
+.invoice-logo{
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:cover!important;
+}
+.invoice-shop-info{
+  min-width:0!important;
+  flex:1!important;
+}
+.invoice-shop-name{
+  font-family:"Outfit","Plus Jakarta Sans",Arial,sans-serif!important;
+  font-size:1.85rem!important;
+  font-weight:950!important;
+  line-height:1.05!important;
+  color:#d9166f!important;
+}
+.invoice-address{
+  max-width:100%!important;
+}
+.invoice-meta-row{
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+table{
+  width:100%!important;
+  border-collapse:collapse!important;
+}
+th{padding:7px;text-align:left;background:#f1f5f9;border-bottom:1px solid #cbd5e1}
+td{padding:7px;border-bottom:1px solid #e2e8f0}
+.invoice-emi-yellow-box{
+  background:#fef3c7!important;
+  border:1px solid #fde047!important;
+  padding:9px 12px!important;
+  border-radius:12px!important;
+  font-size:.72rem!important;
+  margin-bottom:12px!important;
+  color:#92400e!important;
+  line-height:1.45!important;
+}
+.bill-emi-schedule-preview{
+  border:1px solid #fde047!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  font-size:.70rem!important;
+  margin-top:10px!important;
+}
+.bill-emi-schedule-preview table{
+  width:100%!important;
+  border-collapse:collapse!important;
+  margin:0!important;
+}
+.bill-emi-schedule-preview th{
+  background:#fef3c7!important;
+  color:#92400e!important;
+  padding:6px 8px!important;
+  text-align:left!important;
+  font-weight:800!important;
+  border-bottom:0!important;
+}
+.bill-emi-schedule-preview td{
+  padding:6px 8px!important;
+  border-top:1px solid #fef9c3!important;
+  border-bottom:0!important;
+  color:#1e293b!important;
+}
+#pvEmiScheduleSection{
+  break-before:page!important;
+  page-break-before:always!important;
+}
 img{max-width:100%!important}
-#invoiceMainSheet{width:100%!important;max-width:100%!important}
+*{box-sizing:border-box}
+@media print{
+  html,body{background:#fff!important}
+  body *{visibility:visible!important}
+  .print-sheet,.print-sheet *{visibility:visible!important}
+  .print-sheet{display:block!important}
+}
 </style></head><body><div class="print-sheet">${clone.outerHTML}</div></body></html>`);
       w.document.close();
 
       const printNow=()=>{
         try{w.focus();w.print();}finally{setTimeout(()=>{try{w.close()}catch(e){}},300);}
       };
+
       const imgs=[...w.document.images];
-      if(!imgs.length){setTimeout(printNow,250);return;}
-      let remaining=imgs.length,done=false;
-      const finish=()=>{if(done)return;remaining--;if(remaining<=0){done=true;printNow();}};
-      imgs.forEach(img=>{if(img.complete)finish();else{img.addEventListener('load',finish,{once:true});img.addEventListener('error',finish,{once:true});}});
-      setTimeout(()=>{if(!done){done=true;printNow();}},1200);
+      const sheets=[...w.document.querySelectorAll('link[rel="stylesheet"]')];
+
+      let remaining=imgs.length;
+      let stylesRemaining=sheets.length;
+      let done=false;
+
+      const finish=()=>{
+        if(done) return;
+        if(remaining<=0 && stylesRemaining<=0){
+          done=true;
+          setTimeout(printNow,120);
+        }
+      };
+
+      if(!imgs.length) remaining=0;
+      imgs.forEach(img=>{
+        if(img.complete) remaining--;
+        else{
+          img.addEventListener('load',()=>{remaining--;finish();},{once:true});
+          img.addEventListener('error',()=>{remaining--;finish();},{once:true});
+        }
+      });
+
+      if(!sheets.length) stylesRemaining=0;
+      sheets.forEach(sheet=>{
+        if(sheet.sheet) stylesRemaining--;
+        else{
+          sheet.addEventListener('load',()=>{stylesRemaining--;finish();},{once:true});
+          sheet.addEventListener('error',()=>{stylesRemaining--;finish();},{once:true});
+        }
+      });
+
+      finish();
+      setTimeout(()=>{
+        if(!done){
+          done=true;
+          printNow();
+        }
+      },1800);
     }
 
     function downloadInvoicePDF() {
