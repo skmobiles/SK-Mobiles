@@ -3378,9 +3378,23 @@ function viewSavedBill(idx) {
       if (typeof showToast === 'function') showToast('❌ Bill ID not found');
     }
 
+    function skCloneLiveInvoiceForOutput() {
+      const source = document.getElementById('invoiceMainSheet');
+      if (!source) return null;
+      const clone = source.cloneNode(true);
+      clone.style.width = '100%';
+      clone.style.maxWidth = '100%';
+      clone.style.margin = '0';
+      clone.style.boxSizing = 'border-box';
+      clone.style.background = '#fff';
+      clone.style.boxShadow = 'none';
+      clone.style.borderRadius = '0';
+      return clone;
+    }
+
     function sendBillToWhatsAppAsPDF() {
-      const source = document.getElementById('printableInvoiceCard');
-      if (!source) { showToast?.('❌ Live Invoice Preview not found'); return; }
+      const clone = skCloneLiveInvoiceForOutput();
+      if (!clone) { showToast?.('❌ Live Invoice Preview not found'); return; }
       if (typeof html2pdf !== 'function') {
         showToast?.('❌ PDF service is not loaded. Please try again.');
         return;
@@ -3399,14 +3413,6 @@ function viewSavedBill(idx) {
       }
 
       showToast?.('📄 Preparing WhatsApp invoice PDF...');
-
-      const clone = source.cloneNode(true);
-      clone.style.width = '750px';
-      clone.style.maxWidth = '750px';
-      clone.style.margin = '0 auto';
-      clone.style.padding = '24px 30px';
-      clone.style.boxSizing = 'border-box';
-      clone.style.background = '#ffffff';
 
       const holder = document.createElement('div');
       holder.style.position = 'fixed';
@@ -3468,18 +3474,13 @@ function viewSavedBill(idx) {
     }
 
     function printInvoiceDirect() {
-      const source = document.getElementById('printableInvoiceCard');
-      if (!source) { showToast?.('Live Invoice Preview not found'); return; }
+      const clone = skCloneLiveInvoiceForOutput();
+      if (!clone) { showToast?.('Live Invoice Preview not found'); return; }
 
       /*
-       * Print-only layout fix:
-       * Keep the existing invoice DOM/data/functionality untouched and make
-       * the direct-print document use the same invoice styling as the
-       * on-screen preview/PDF layout.
+       * Print the exact Live Invoice Preview bill content.
+       * No separate invoice template or alternate bill markup is created.
        */
-      const clone = source.cloneNode(true);
-      clone.removeAttribute('id');
-      clone.style.cssText = 'background:#fff;color:#1e293b;padding:0;margin:0;box-shadow:none;border:none;border-radius:0;font-family:"Plus Jakarta Sans",Arial,sans-serif;width:100%;max-width:100%;box-sizing:border-box;';
 
       const w = window.open('', '_blank');
       if (!w) { showToast?.('Please allow popups to print!'); return; }
@@ -3674,22 +3675,14 @@ img{max-width:100%!important}
     }
 
     function downloadInvoicePDF() {
-      const source = document.getElementById('printableInvoiceCard');
-      if (!source) { showToast?.('❌ Live Invoice Preview not found'); return; }
+      const clone = skCloneLiveInvoiceForOutput();
+      if (!clone) { showToast?.('❌ Live Invoice Preview not found'); return; }
       if (typeof html2pdf !== 'function') {
         showToast?.('❌ PDF service is not loaded. Please try again.');
         return;
       }
 
       showToast?.('📄 Preparing invoice PDF...');
-
-      const clone = source.cloneNode(true);
-      clone.style.width = '750px';
-      clone.style.maxWidth = '750px';
-      clone.style.margin = '0 auto';
-      clone.style.padding = '24px 30px';
-      clone.style.boxSizing = 'border-box';
-      clone.style.background = '#ffffff';
 
       const holder = document.createElement('div');
       holder.style.position = 'fixed';
@@ -6753,7 +6746,7 @@ window.skOpenCreditLedger=cpOpenPage;
 
 
 // ==========================================
-// SK V4.17 FIREBASE-SAFE RECYCLE BIN ENGINE
+// SK V4.19 FIREBASE-SAFE RECYCLE BIN ENGINE
 // ==========================================
 (function(){
   'use strict';
