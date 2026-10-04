@@ -3614,8 +3614,12 @@ td{padding:7px;border-bottom:1px solid #e2e8f0}
   color:#1e293b!important;
 }
 #pvEmiScheduleSection{
-  break-before:page!important;
-  page-break-before:always!important;
+  break-before:auto!important;
+  page-break-before:auto!important;
+  break-after:auto!important;
+  page-break-after:auto!important;
+  break-inside:auto!important;
+  page-break-inside:auto!important;
 }
 img{max-width:100%!important}
 *{box-sizing:border-box}
