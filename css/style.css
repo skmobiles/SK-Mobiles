@@ -6709,94 +6709,153 @@ button.form-secondary:focus-visible{
   }
 }
 
-
 /* ==========================================================
-   SK MOBILES — BILLING SCROLL + SOFT ACTION CONTROLS
-   Scoped UI fix only. Existing handlers/data/Firebase untouched.
+   GLOBAL PROFESSIONAL SOFT BUTTON SYSTEM
+   Applies to all application buttons without changing behavior.
+   Semantic actions retain their meaning: primary, WhatsApp, danger.
    ========================================================== */
-
-/* One scroll owner: the billing content area. */
-#billingModal .billing-modern{
-  display:flex !important;
-  flex-direction:column !important;
-  min-height:0 !important;
-  overflow:hidden !important;
+:root{
+  --soft-btn-primary-start: color-mix(in srgb,var(--primary) 82%,#ffffff 18%);
+  --soft-btn-primary-end: color-mix(in srgb,var(--primary) 64%,#ffffff 36%);
+  --soft-btn-surface: color-mix(in srgb,var(--card-bg) 88%,var(--primary) 12%);
+  --soft-btn-surface-hover: color-mix(in srgb,var(--card-bg) 78%,var(--primary) 22%);
+  --soft-btn-border: color-mix(in srgb,var(--card-border) 68%,var(--primary) 32%);
+  --soft-btn-shadow: 0 6px 16px color-mix(in srgb,var(--primary) 10%,transparent);
 }
 
-#billingModal #billNewView,
-#billingModal #billHistoryView{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-  -webkit-overflow-scrolling:touch !important;
-  overscroll-behavior:contain !important;
-  scrollbar-width:thin;
-  padding-bottom:110px !important;
+/* All normal buttons: calm glass surface instead of hard black/white fills. */
+button:not([disabled]):not(.modal-close-btn):not(.close-btn),
+.btn:not([disabled]),
+.action-btn:not([disabled]),
+.nav-tab:not([disabled]),
+.chip-active:not([disabled]){
+  background:var(--soft-btn-surface);
+  color:var(--text);
+  border-color:var(--soft-btn-border);
+  box-shadow:var(--soft-btn-shadow);
+  transition:background .2s ease,border-color .2s ease,box-shadow .2s ease,
+             transform .18s ease,color .2s ease,filter .18s ease;
 }
 
-/* Keep the four billing actions sticky inside the actual scrolling area.
-   Extra bottom room prevents the final billing fields from being covered. */
-#billingModal .bill-action-grid{
-  position:sticky !important;
-  bottom:8px !important;
-  z-index:60 !important;
-  margin:10px 0 0 !important;
-  padding:8px !important;
-  border-radius:18px !important;
-  background:color-mix(in srgb,var(--modal-bg) 90%,transparent) !important;
-  border:1px solid color-mix(in srgb,var(--card-border) 82%,#fff 18%) !important;
-  box-shadow:0 -6px 20px color-mix(in srgb,var(--primary) 7%,transparent) !important;
-  backdrop-filter:blur(18px) !important;
-  -webkit-backdrop-filter:blur(18px) !important;
+button:not([disabled]):not(.modal-close-btn):not(.close-btn):hover,
+.btn:not([disabled]):hover,
+.action-btn:not([disabled]):hover,
+.nav-tab:not([disabled]):hover,
+.chip-active:not([disabled]):hover{
+  background:var(--soft-btn-surface-hover);
+  color:var(--text);
+  border-color:color-mix(in srgb,var(--primary) 38%,var(--card-border) 62%);
+  box-shadow:0 8px 20px color-mix(in srgb,var(--primary) 13%,transparent);
 }
 
-/* Professional, softer theme-aware billing buttons. */
-#billingModal .bill-action-save{
-  background:linear-gradient(
-    135deg,
-    color-mix(in srgb,var(--primary) 82%,#fff 18%),
-    color-mix(in srgb,var(--primary) 58%,#fff 42%)
-  ) !important;
+button:not([disabled]):not(.modal-close-btn):not(.close-btn):active,
+.btn:not([disabled]):active,
+.action-btn:not([disabled]):active,
+.nav-tab:not([disabled]):active,
+.chip-active:not([disabled]):active{
+  transform:scale(.985);
+}
+
+/* Primary/action buttons: soft theme gradient, never harsh black. */
+.submit-btn:not([disabled]),
+.btn-primary:not([disabled]),
+.sk-login-btn:not([disabled]),
+.bill-action-save:not([disabled]),
+.bill-action-pdf:not([disabled]),
+.bill-action-print:not([disabled]),
+.sk-rj-next:not([disabled]),
+.sk-home-action-btn:not([disabled]),
+.box-photo-scan-btn:not([disabled]),
+#headerSearchRow .box-photo-scan-btn:not([disabled]),
+#cardsContainer .box-photo-scan-btn:not([disabled]){
+  background:linear-gradient(135deg,var(--soft-btn-primary-start),var(--soft-btn-primary-end)) !important;
   color:#fff !important;
-  border:1px solid color-mix(in srgb,var(--primary) 46%,#fff 54%) !important;
-  box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 14%,transparent) !important;
+  border-color:color-mix(in srgb,var(--primary) 48%,#ffffff 52%) !important;
+  box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 16%,transparent),
+             inset 0 1px 0 rgba(255,255,255,.26) !important;
 }
 
-#billingModal .bill-action-pdf,
-#billingModal .bill-action-print{
-  background:linear-gradient(
-    135deg,
-    color-mix(in srgb,var(--card-bg) 90%,var(--primary) 10%),
-    color-mix(in srgb,var(--card-bg) 82%,var(--primary) 18%)
-  ) !important;
+.submit-btn:not([disabled]):hover,
+.btn-primary:not([disabled]):hover,
+.sk-login-btn:not([disabled]):hover,
+.bill-action-save:not([disabled]):hover,
+.bill-action-pdf:not([disabled]):hover,
+.bill-action-print:not([disabled]):hover,
+.sk-rj-next:not([disabled]):hover,
+.sk-home-action-btn:not([disabled]):hover,
+.box-photo-scan-btn:not([disabled]):hover{
+  filter:brightness(1.035);
+  box-shadow:0 9px 22px color-mix(in srgb,var(--primary) 18%,transparent),
+             inset 0 1px 0 rgba(255,255,255,.30) !important;
+}
+
+/* Secondary controls stay neutral and premium. */
+.btn-secondary,
+button.form-secondary,
+.billing-tab-btn,
+.pay-mode-btn,
+.sk-rj-tab,
+.sk-v43-entry-type button,
+.sk-v43-keep-actions button,
+.skcp-btn,
+#settingsModal .sk-settings-collapse-btn,
+#settingsModal .theme-card-btn{
+  background:var(--soft-btn-surface) !important;
   color:var(--text) !important;
-  border:1px solid color-mix(in srgb,var(--card-border) 72%,var(--primary) 28%) !important;
-  box-shadow:0 5px 15px color-mix(in srgb,var(--primary) 7%,transparent) !important;
+  border-color:var(--soft-btn-border) !important;
+  box-shadow:var(--soft-btn-shadow) !important;
 }
 
-#billingModal .bill-action-wa{
-  background:linear-gradient(
-    135deg,
-    color-mix(in srgb,var(--card-bg) 82%,#25d366 18%),
-    color-mix(in srgb,var(--card-bg) 72%,#25d366 28%)
-  ) !important;
-  color:var(--text) !important;
-  border:1px solid color-mix(in srgb,#25d366 34%,var(--card-border) 66%) !important;
-  box-shadow:0 5px 15px rgba(37,211,102,.10) !important;
+/* Active tabs/buttons use the theme without becoming overly saturated. */
+.billing-tab-btn.active,
+.pay-mode-btn.active,
+.sk-rj-tab.active,
+.sk-v43-entry-type button.active,
+.nav-tab.active,
+.chip-active.active{
+  background:linear-gradient(135deg,var(--soft-btn-primary-start),var(--soft-btn-primary-end)) !important;
+  color:#fff !important;
+  border-color:color-mix(in srgb,var(--primary) 48%,#ffffff 52%) !important;
+  box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 16%,transparent) !important;
 }
 
-#billingModal .bill-action-save:hover,
-#billingModal .bill-action-pdf:hover,
-#billingModal .bill-action-print:hover,
-#billingModal .bill-action-wa:hover{
-  transform:translateY(-1px);
-  filter:none !important;
+/* WhatsApp: retain brand meaning, but use a restrained soft green. */
+.submit-btn.whatsapp-green:not([disabled]),
+.bill-action-wa:not([disabled]),
+.whatsapp-btn:not([disabled]),
+.whatsapp-button:not([disabled]){
+  background:linear-gradient(135deg,#34c98b,#19a974) !important;
+  color:#fff !important;
+  border-color:rgba(25,169,116,.42) !important;
+  box-shadow:0 7px 18px rgba(25,169,116,.18),inset 0 1px 0 rgba(255,255,255,.22) !important;
 }
 
-@media (max-width:430px){
-  #billingModal #billNewView,
-  #billingModal #billHistoryView{
-    padding-bottom:104px !important;
-  }
+/* Destructive actions remain red, but softer and less aggressive. */
+.context-delete:not([disabled]),
+.sk-rj-delete:not([disabled]),
+.menu-drawer-btn.logout:not([disabled]),
+button[data-action="delete"]:not([disabled]),
+button[data-action="remove"]:not([disabled]){
+  background:color-mix(in srgb,var(--card-bg) 86%,#ef4444 14%) !important;
+  color:color-mix(in srgb,var(--danger) 88%,var(--text) 12%) !important;
+  border-color:color-mix(in srgb,var(--danger) 30%,var(--card-border) 70%) !important;
+  box-shadow:0 5px 14px rgba(239,68,68,.08) !important;
+}
+
+/* Home active button: preserve its special layout while using the same soft theme language. */
+.bottom-nav #navHome,
+#cardsContainer ~ .bottom-nav #navHome{
+  background:linear-gradient(135deg,var(--soft-btn-primary-start),var(--soft-btn-primary-end)) !important;
+  color:#fff !important;
+  border-color:color-mix(in srgb,var(--primary) 44%,#ffffff 56%) !important;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--primary) 22%,transparent) !important;
+}
+
+/* Disabled controls remain visibly disabled. */
+button:disabled,
+.btn:disabled,
+.action-btn:disabled{
+  filter:saturate(.35);
+  opacity:.55;
+  box-shadow:none !important;
 }
