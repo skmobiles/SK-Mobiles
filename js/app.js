@@ -1156,6 +1156,8 @@ const MASTER_INVENTORY = [
       if (typeEl) typeEl.innerText = currentMobileType;
       const termsEl = document.getElementById('pvTerms');
       if (termsEl) termsEl.innerText = getMobileTerms(currentMobileType);
+      const ramStorageGrid = document.getElementById('billRamStorageGrid');
+      if (ramStorageGrid) ramStorageGrid.classList.toggle('sk-keypad-hidden', currentMobileType === 'Keypad Mobile');
       saveDraft();
       updateBillPreview();
     }
@@ -1640,9 +1642,9 @@ const MASTER_INVENTORY = [
       }
     };
 
-    const THEME_ICON_PACK = { light:'classic', dark:'classic', ocean:'wave', emerald:'wave', royal:'luxury', obsidian:'luxury', sunset:'soft', rose:'soft', midnight:'orbit', cyber:'neon', graphite:'angular', lime:'angular', aurora:'prism', crimson:'pulse', mint:'leaf', solar:'retro', nebula:'orbit', forest:'leaf', glacier:'wave', magenta:'neon' };
+    const THEME_ICON_PACK = { light:'classic', dark:'classic', ocean:'wave', emerald:'wave', royal:'luxury', obsidian:'luxury', sunset:'soft', rose:'soft', midnight:'orbit', cyber:'neon', graphite:'angular', lime:'angular', aurora:'prism', crimson:'pulse', mint:'leaf', solar:'retro', nebula:'orbit', forest:'leaf', glacier:'wave', magenta:'neon', 'apple-light':'classic', 'apple-dark':'classic' };
 
-    const SK_THEME_STATUS_COLORS = {light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',sunset:'#ffedd5',emerald:'#d1fae5',rose:'#ffe4e6',midnight:'#111827',graphite:'#111827',lime:'#0f1a05',dark:'#050811',cyber:'#03040a',obsidian:'#000000',aurora:'#cffafe',crimson:'#ffe4e6',mint:'#ccfbf1',solar:'#000000',nebula:'#17102f',forest:'#062e1c',glacier:'#e0f2fe',magenta:'#2b092f'};
+    const SK_THEME_STATUS_COLORS = {light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',sunset:'#ffedd5',emerald:'#d1fae5',rose:'#ffe4e6',midnight:'#111827',graphite:'#111827',lime:'#0f1a05',dark:'#050811',cyber:'#03040a',obsidian:'#000000',aurora:'#cffafe',crimson:'#ffe4e6',mint:'#ccfbf1',solar:'#000000',nebula:'#17102f',forest:'#062e1c',glacier:'#e0f2fe',magenta:'#2b092f','apple-light':'#f5f5f7','apple-dark':'#000000'};
     const SK_APP_FONTS = {
       jakarta:"'Plus Jakarta Sans', sans-serif", inter:"'Inter', sans-serif", poppins:"'Poppins', sans-serif",
       nunito:"'Nunito', sans-serif", rubik:"'Rubik', sans-serif", manrope:"'Manrope', sans-serif",
@@ -1772,7 +1774,7 @@ const MASTER_INVENTORY = [
     }
 
     function setTheme(theme, silent) {
-      const allowedThemes = ['light','ocean','royal','sunset','emerald','rose','midnight','graphite','lime','dark','cyber','obsidian','aurora','crimson','mint','solar','nebula','forest','glacier','magenta'];
+      const allowedThemes = ['light','ocean','royal','sunset','emerald','rose','midnight','graphite','lime','dark','cyber','obsidian','aurora','crimson','mint','solar','nebula','forest','glacier','magenta','apple-light','apple-dark'];
       if (!allowedThemes.includes(theme)) theme = 'light';
       document.documentElement.setAttribute('data-theme', theme);
       const iconPack = THEME_ICON_PACK[theme] || 'classic';
@@ -6346,7 +6348,7 @@ window.skOpenCreditLedger=cpOpenPage;
 
 
 // ==========================================
-// SK V4.16 FIREBASE-SAFE RECYCLE BIN ENGINE
+// SK V4.17 FIREBASE-SAFE RECYCLE BIN ENGINE
 // ==========================================
 (function(){
   'use strict';
