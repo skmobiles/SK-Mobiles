@@ -2235,6 +2235,7 @@ input[data-dmy-date]{letter-spacing:.02em;}
 }
 .nav-item{
   min-height:52px;
+  font-family:var(--app-font) !important;
   color:var(--text-muted);
   transition:color .18s ease,transform .18s ease,background .18s ease;
 }
@@ -6783,85 +6784,61 @@ button:focus-visible,
 }
 #billingModal #billRamStorageGrid.sk-keypad-hidden{display:none !important}
 
-/* ---------- Repair Tools / IC Spares: one authoritative multiline control ---------- */
+/* ---------- Repair Tools / IC Spares: isolated page UI ---------- */
 #repairSparesModal{overflow:hidden !important}
 #repairSparesModal .modal-sheet{
-  width:min(680px,calc(100% - 24px)) !important;
-  max-width:680px !important;
-  max-height:92dvh !important;
+  width:min(620px,calc(100% - 24px)) !important;
+  max-width:620px !important;
+  max-height:min(760px,92dvh) !important;
   overflow-y:auto !important;
   overflow-x:hidden !important;
   box-sizing:border-box !important;
+  padding:20px !important;
+  border-radius:30px !important;
+}
+#repairSparesModal .repair-spares-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;
+}
+#repairSparesModal .repair-spares-title{
+  display:flex;align-items:center;gap:8px;min-width:0;color:var(--text);font-size:1.12rem;font-weight:900;line-height:1.2;
+}
+#repairSparesModal .repair-spares-info{
+  margin-bottom:14px;padding:13px 14px;border-radius:17px;
+  border:1px solid color-mix(in srgb,var(--primary) 12%,var(--card-border));
+  background:color-mix(in srgb,var(--primary) 8%,var(--card-bg));
+  color:var(--text-muted);font-size:.82rem;line-height:1.55;
+}
+#repairSparesModal .repair-spares-label{
+  display:block;margin:0 0 7px;color:var(--text);font-size:.78rem;font-weight:850;
 }
 #repairSparesModal #repairSparesNoteInput{
-  display:block !important;
-  width:100% !important;
-  min-width:0 !important;
-  height:360px !important;
-  min-height:360px !important;
-  max-height:360px !important;
-  box-sizing:border-box !important;
-  resize:vertical !important;
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-  white-space:pre-wrap !important;
-  overflow-wrap:anywhere !important;
-  word-break:break-word !important;
-  line-height:1.55 !important;
-  padding:16px 18px !important;
-  border-radius:16px !important;
-  border:1px solid color-mix(in srgb,var(--primary) 18%,var(--card-border)) !important;
-  background:color-mix(in srgb,var(--card-bg) 94%,#fff 6%) !important;
-  color:var(--text) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 5px 16px rgba(2,6,23,.055) !important;
-  -webkit-appearance:none !important;
+  display:block !important;width:100% !important;min-width:0 !important;height:230px !important;
+  min-height:230px !important;max-height:230px !important;box-sizing:border-box !important;
+  resize:vertical !important;overflow:auto !important;white-space:pre-wrap !important;
+  overflow-wrap:anywhere !important;word-break:break-word !important;line-height:1.55 !important;
+  padding:14px 16px !important;border-radius:17px !important;
+  border:1px solid color-mix(in srgb,var(--primary) 20%,var(--card-border)) !important;
+  background:color-mix(in srgb,var(--card-bg) 96%,#fff 4%) !important;color:var(--text) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 6px 18px rgba(2,6,23,.055) !important;
+  -webkit-appearance:none;
 }
 #repairSparesModal #repairSparesNoteInput:focus{
-  outline:none !important;
-  border-color:color-mix(in srgb,var(--primary) 48%,var(--card-border)) !important;
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 10%,transparent),inset 0 1px 0 rgba(255,255,255,.5),0 6px 18px rgba(2,6,23,.07) !important;
+  outline:none !important;border-color:color-mix(in srgb,var(--primary) 55%,var(--card-border)) !important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 10%,transparent),inset 0 1px 0 rgba(255,255,255,.55),0 8px 20px rgba(2,6,23,.07) !important;
 }
-
-@media (max-width:760px){
-  #billingModal .billing-modern{
-    height:94vh !important;
-    max-height:94vh !important;
-    width:calc(100vw - 12px) !important;
-    max-width:calc(100vw - 12px) !important;
-  }
-  #repairSparesModal .modal-sheet{
-    width:calc(100% - 16px) !important;
-    max-width:calc(100% - 16px) !important;
-    max-height:92dvh !important;
-    border-radius:24px !important;
-  }
-  #repairSparesModal #repairSparesNoteInput{
-    height:320px !important;
-    min-height:320px !important;
-    max-height:320px !important;
-    padding:15px 15px 15px 17px !important;
-  }
+#repairSparesModal .repair-spares-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+#repairSparesModal .repair-spares-action{
+  min-height:48px;border-radius:15px !important;font-family:var(--app-font) !important;font-size:.86rem;font-weight:850;
 }
-
-@media (max-width:430px){
-  .btn-primary,
-  .submit-btn,
-  .sk-home-action-btn,
-  .box-photo-scan-btn{min-height:42px;font-size:.72rem}
-  #headerSearchRow .box-photo-scan-btn,
-  #cardsContainer .box-photo-scan-btn{font-size:.66rem;padding:8px 9px !important}
-  .bottom-nav #navHome,
-  #cardsContainer ~ .bottom-nav #navHome{
-    flex:0 0 62px !important;
-    flex-basis:62px !important;
-    width:62px !important;
-    min-width:62px !important;
-    height:62px !important;
-    margin-top:-14px !important;
-  }
-  #repairSparesModal #repairSparesNoteInput{
-    height:290px !important;
-    min-height:290px !important;
-    max-height:290px !important;
-  }
+#repairSparesModal .repair-spares-save{
+  background:linear-gradient(135deg,var(--soft-btn-primary-start),var(--soft-btn-primary-end)) !important;
+  color:#fff !important;border-color:color-mix(in srgb,var(--primary) 55%,#fff 45%) !important;
+}
+#repairSparesModal .repair-spares-share{
+  background:color-mix(in srgb,#22c55e 88%,var(--card-bg) 12%) !important;color:#fff !important;border-color:rgba(34,197,94,.35) !important;
+}
+@media(max-width:600px){
+  #repairSparesModal .modal-sheet{width:calc(100% - 16px) !important;max-width:calc(100% - 16px) !important;max-height:88dvh !important;padding:17px !important;border-radius:28px !important}
+  #repairSparesModal #repairSparesNoteInput{height:190px !important;min-height:190px !important;max-height:190px !important}
+  #repairSparesModal .repair-spares-actions{grid-template-columns:1fr}
 }
