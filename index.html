@@ -32,7 +32,7 @@
   <div class="login-glass-card">
     <div class="login-logo-container">
       <div class="login-logo-glow">
-        <img src="logo.png" alt="SK Mobiles Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+        <img id="skLoginLogoImg" src="Logo.png" alt="SK Mobiles Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
         <div class="fallback-logo" style="display:none; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem;">SK</div>
       </div>
       <h2 class="login-brand-title">SK MOBILES</h2>
@@ -234,28 +234,28 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <button class="submit-btn" onclick="resetShopLogo()" style="flex:1; padding:8px; font-size:0.76rem; background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text);">↺ Reset Default</button>
 </div>
 </div>
-<div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">💾 DATA BACKUP &amp; RESTORE</div>
-<div style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
-<div style="display:flex; gap:8px;">
+<div class="sk-backup-ui-heading" style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">💾 DATA BACKUP &amp; RESTORE</div>
+<div class="sk-backup-ui-card" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
+<div class="sk-backup-ui-actions" style="display:flex; gap:8px;">
 <button class="submit-btn" onclick="exportAppDataBackup()" style="flex:1; padding:8px; font-size:0.75rem;">⬇️ Backup (JSON)</button>
 <button class="submit-btn" onclick="document.getElementById('importBackupInput').click()" style="flex:1; padding:8px; font-size:0.75rem; background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text);">⬆️ Restore</button>
 </div>
 <input accept=".json" id="importBackupInput" onchange="importAppDataBackup(this)" style="display:none;" type="file"/>
 </div>
 <!-- CLOUD BACKUP: Firebase Firestore app-data backup. Keep this block unchanged unless cloud-backup behavior is intentionally modified. -->
-<div id="skCloudBackupSection" style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">☁️ CLOUD BACKUP</div>
-<div id="skCloudBackupBox" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
-<div style="font-size:0.70rem;color:var(--text-muted);line-height:1.45;margin-bottom:9px;">Firebase Cloud Backup saves the app's local data to the SK-MOBILES cloud. Auto Sync is enabled after Admin/Manager login; changes are uploaded after a short quiet period.</div>
-<div id="skCloudBackupStatus" style="font-size:0.70rem;font-weight:800;color:var(--text);background:var(--pill-bg);border:1px solid var(--card-border);border-radius:10px;padding:8px;margin-bottom:8px;">☁️ Auto Sync: ON • Cloud backup not created</div>
-<div style="display:flex;gap:7px;">
+<div id="skCloudBackupSection" class="sk-backup-ui-heading" style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">☁️ CLOUD BACKUP</div>
+<div id="skCloudBackupBox" class="sk-backup-ui-card sk-cloud-backup-card" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
+<div class="sk-backup-ui-description" style="font-size:0.70rem;color:var(--text-muted);line-height:1.45;margin-bottom:9px;">Firebase Cloud Backup saves the app's local data to the SK-MOBILES cloud. Auto Sync is enabled after Admin/Manager login; changes are uploaded after a short quiet period.</div>
+<div id="skCloudBackupStatus" class="sk-backup-ui-status" style="font-size:0.70rem;font-weight:800;color:var(--text);background:var(--pill-bg);border:1px solid var(--card-border);border-radius:10px;padding:8px;margin-bottom:8px;">☁️ Auto Sync: ON • Cloud backup not created</div>
+<div class="sk-backup-ui-actions" style="display:flex;gap:7px;">
 <button class="submit-btn" onclick="skCloudBackupNow()" style="flex:1;padding:8px;font-size:0.73rem;" type="button">☁️ Backup Now</button>
 <button class="submit-btn" onclick="skCloudRestoreLatest()" style="flex:1;padding:8px;font-size:0.73rem;background:var(--pill-bg);border:1px solid var(--card-border);color:var(--text);" type="button">☁️ Restore Latest</button>
 </div>
 <div style="font-size:0.64rem;color:var(--text-muted);margin-top:7px;line-height:1.4;">Cloud Backup is separate from the existing JSON backup and App Data Folder backup. Do not remove this section.</div>
 </div>
 <!-- APP DATA FOLDER: Admin only. Browser writes a user-selected folder with section-wise JSON files. -->
-<div id="skAppDataFolderSection" style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">📁 APP DATA FOLDER</div>
-<div id="skAppDataFolderBox" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
+<div id="skAppDataFolderSection" class="sk-backup-ui-heading" style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">📁 APP DATA FOLDER</div>
+<div id="skAppDataFolderBox" class="sk-backup-ui-card sk-app-folder-card" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
 <div style="font-size:0.70rem;color:var(--text-muted);line-height:1.45;margin-bottom:9px;">All Local Storage data can be copied into <b>SK Mobiles</b> with section-wise sub-folders. This gives you a physical backup folder you can copy to another device/storage.</div>
 <div id="skAppDataFolderPath" style="font-size:0.70rem;font-weight:800;color:var(--text);background:var(--pill-bg);border:1px solid var(--card-border);border-radius:10px;padding:8px;margin-bottom:8px;word-break:break-word;">Folder not connected</div>
 <div style="display:flex;gap:7px;">
@@ -349,7 +349,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
     </div>
 <div class="form-group">
 <label class="form-label">Required Repair Tools / IC Spares List</label>
-<textarea class="form-input" id="repairSparesNoteInput" placeholder="e.g.
+<textarea class="form-input repair-spares-note-box" id="repairSparesNoteInput" placeholder="e.g.
 1. PM6150 / PM6150L Power IC - 2 pcs
 2. Universal BGA Reballing Stencil 0.12mm
 3. 2UUL Tweezers Ultra-fine curved
