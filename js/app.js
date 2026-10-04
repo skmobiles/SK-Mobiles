@@ -1518,6 +1518,11 @@ const MASTER_INVENTORY = [
       if (headerLogo) headerLogo.src = savedLogo;
       if (invoiceLogo) invoiceLogo.src = savedLogo;
       if (previewLogo) previewLogo.src = savedLogo;
+      const loginLogo = document.getElementById('skLoginLogoImg');
+      if (loginLogo) {
+        loginLogo.src = savedLogo;
+        loginLogo.onerror = function(){ this.style.display='none'; const fb=this.nextElementSibling; if(fb) fb.style.display='flex'; };
+      }
     }
 
     function bringModalToFront(modal) {
@@ -2588,9 +2593,10 @@ const MASTER_INVENTORY = [
             <div>
               <div class="sk-home-welcome-kicker" style="font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 2px;">Welcome to</div>
               <div class="sk-home-welcome-title" style="font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 950; line-height: 1.15;">
-                <span style="background:var(--sk-shop-brand-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">SK Mobiles</span> Master
+                <span style="color:var(--primary);">SK MOBILES</span>
               </div>
-              <div class="sk-home-welcome-sub" style="font-size: 11.5px; margin-top: 3px; font-weight: 600;">Stay organized. Track stock.</div>
+              <div class="sk-home-welcome-sub" style="font-size: 11.5px; margin-top: 3px; font-weight: 600;">Smart Billing &amp; Business Management</div>
+
             </div>
             <div class="sk-home-welcome-icon" style="font-size: 2.2rem; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">📱</div>
           </div>
