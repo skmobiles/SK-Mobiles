@@ -342,25 +342,23 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="repairSparesModal" style="z-index: 10030 !important;">
-<div class="modal-sheet" style="max-height:88vh;">
-<div class="modal-title">
-<span style="display:flex; align-items:center; gap:6px;"> 🔧 Repair Tools &amp; IC Spares Note </span>
-<button class="modal-close-btn" onclick="toggleModal('repairSparesModal', false)">✕</button>
+<div class="modal-sheet">
+<div class="repair-spares-head">
+<div class="repair-spares-title"><span aria-hidden="true">🔧</span><span>Repair Tools &amp; IC Spares</span></div>
+<button class="modal-close-btn" type="button" onclick="toggleModal('repairSparesModal', false)" aria-label="Close Repair Tools & IC Spares">✕</button>
 </div>
-<div style="background:rgba(37,99,235,0.08); border:1px solid var(--card-border); border-radius:14px; padding:10px; font-size:0.75rem; color:var(--text-muted); margin-bottom:12px; line-height:1.4;">
-     Mobile Motherboard repair-ku thevaiyana <strong>Power IC, Charging IC, Stencils, Tweezers, DC Power Cable, Microscope lenses, matrum tools</strong> thevaigalai inge note panni track pannalaam!
-    </div>
-<div class="form-group">
-<label class="form-label">Required Repair Tools / IC Spares List</label>
-<textarea class="form-input repair-spares-note-box" id="repairSparesNoteInput" placeholder="e.g.
+<div class="repair-spares-info">தேவையான <strong>Power IC, Charging IC, Stencils, Tweezers, DC Power Cable, Microscope Lenses</strong> மற்றும் பிற motherboard repair tools / spares-ஐ இங்கே ஒரு குறிப்பாக பதிவு செய்து வைத்துக்கொள்ளலாம்.</div>
+<label class="repair-spares-label" for="repairSparesNoteInput">Required Repair Tools / IC Spares List</label>
+<textarea class="form-input" id="repairSparesNoteInput" placeholder="எ.கா.
 1. PM6150 / PM6150L Power IC - 2 pcs
-2. Universal BGA Reballing Stencil 0.12mm
-3. 2UUL Tweezers Ultra-fine curved
-4. Charging CC board for Redmi 9A / Vivo Y20
-5. UV Curing Light &amp; Solder Mask Green" rows="8"></textarea>
+2. Universal BGA Reballing Stencil
+3. Fine-tip Tweezers
+4. Charging CC Board
+5. UV Curing Light"></textarea>
+<div class="repair-spares-actions">
+<button class="repair-spares-action repair-spares-save" type="button" onclick="saveRepairSparesNote()">💾 Save Repair Notes</button>
+<button class="repair-spares-action repair-spares-share" type="button" onclick="shareRepairNotesWhatsApp()">💬 Share via WhatsApp</button>
 </div>
-<button class="submit-btn" onclick="saveRepairSparesNote()" style="margin-top:8px;">💾 Save Repair Notes</button>
-<button class="submit-btn whatsapp-green" onclick="shareRepairNotesWhatsApp()" style="margin-top:8px;">💬 Share List via WhatsApp</button>
 </div>
 </div>
 <div class="modal-overlay" id="billingModal">
