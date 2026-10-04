@@ -668,7 +668,7 @@
     #navHome:active { transform: scale(.92); }
 
 
-    .toast { position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--card-bg); color: var(--text); border: 1.5px solid var(--primary); border-radius: 30px; padding: 8px 18px; font-size: 0.80rem; font-weight: 700; z-index: 10000; transition: transform 0.25s ease; }
+    .toast { position: fixed !important; top: 18px !important; left: 50% !important; transform: translateX(-50%) translateY(-100px); background: var(--card-bg); color: var(--text); border: 1.5px solid var(--primary); border-radius: 30px; padding: 8px 18px; font-size: 0.80rem; font-weight: 700; z-index: 2147483647 !important; transition: transform 0.25s ease; pointer-events: none; }
     .toast.show { transform: translateX(-50%) translateY(0); }
     .empty-state { text-align: center; padding: 30px 16px; color: var(--text-muted); font-size: 0.85rem; display: none; }
 
@@ -762,7 +762,7 @@
   .sk-ur-job-name{font-size:.82rem;font-weight:900;color:var(--text)}
   .sk-ur-job-meta{font-size:.67rem;color:var(--text-muted);margin-top:3px;line-height:1.45}
   .sk-ur-badge{font-size:.61rem;font-weight:900;padding:4px 7px;border-radius:9px;background:rgba(239,68,68,.11);color:#dc2626;border:1px solid rgba(239,68,68,.22);white-space:nowrap}
-  #skUrgentNotifyBar{display:none;position:fixed;left:12px;right:12px;top:12px;z-index:10350;background:#fff;border:1px solid rgba(239,68,68,.25);border-radius:15px;padding:10px 12px;box-shadow:0 8px 25px rgba(0,0,0,.16);align-items:center;gap:9px}
+  #skUrgentNotifyBar{display:none;position:fixed;left:12px;right:12px;top:12px;z-index:2147483647;background:#fff;border:1px solid rgba(239,68,68,.25);border-radius:15px;padding:10px 12px;box-shadow:0 8px 25px rgba(0,0,0,.16);align-items:center;gap:9px}
   #skUrgentNotifyBar .sk-un-text{flex:1;font-size:12px;font-weight:800;color:#111827;line-height:1.3}
   #skUrgentNotifyBar button{border:0;border-radius:9px;padding:7px 10px;font-size:11px;font-weight:900;cursor:pointer}
   #skUrgentNotifyOpen{background:#dc2626;color:#fff}
