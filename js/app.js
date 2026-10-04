@@ -1660,17 +1660,9 @@ const MASTER_INVENTORY = [
     };
     function skUpdateThemeChrome(theme){
       try{
-        const root=document.documentElement;
-        const fallback=SK_THEME_STATUS_COLORS[theme]||SK_THEME_STATUS_COLORS.light;
-        root.style.setProperty('--app-status-color',fallback);
-        const probe=document.createElement('span');
-        probe.style.cssText='position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;background:color-mix(in srgb,var(--page-bg) 72%,var(--primary) 28%);pointer-events:none;';
-        document.body.appendChild(probe);
-        const blended=getComputedStyle(probe).backgroundColor||fallback;
-        probe.remove();
         const meta=document.getElementById('skThemeColorMeta');
-        if(meta) meta.setAttribute('content',blended);
-        root.style.setProperty('--app-status-color',blended);
+        if(meta) meta.setAttribute('content',SK_THEME_STATUS_COLORS[theme]||SK_THEME_STATUS_COLORS.light);
+        document.documentElement.style.setProperty('--app-status-color',SK_THEME_STATUS_COLORS[theme]||SK_THEME_STATUS_COLORS.light);
       }catch(e){}
     }
     function setAppFont(fontKey, silent){
@@ -6417,12 +6409,8 @@ window.skOpenCreditLedger=cpOpenPage;
   function resizeRepairSparesNote(){
     const el=document.getElementById('repairSparesNoteInput');
     if(!el) return;
-    /* Keep the textarea as a real multiline writing area. The previous
-       scrollHeight auto-grow wrote an inline height and collapsed the
-       empty note field into a single-line-looking box on mobile. */
-    el.style.removeProperty('height');
-    el.style.removeProperty('min-height');
-    el.style.removeProperty('max-height');
+    el.style.setProperty('height','auto','important');
+    el.style.setProperty('height',Math.max(180,el.scrollHeight)+'px','important');
   }
   function initRepairSparesNote(){
     const el=document.getElementById('repairSparesNoteInput');
