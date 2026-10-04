@@ -126,15 +126,15 @@
     const doLogin = async ()=>{
       const email = (modernEmail?.value || document.getElementById("skFirebaseEmail")?.value || "").trim().toLowerCase();
       const password = modernPassword?.value || document.getElementById("skFirebasePassword")?.value || "";
-      if(!email || !password){ msg("❌ Email மற்றும் Password உள்ளிடவும்."); return; }
-      if(!emailRole(email)){ msg("❌ இந்த Email பதிவு செய்யப்படவில்லை."); return; }
-      msg("⏳ Login செய்கிறது...");
+      if(!email || !password){ msg("❌ Enter Email and Password."); return; }
+      if(!emailRole(email)){ msg("❌ This Email is not registered."); return; }
+      msg("⏳ Logging in...");
       if(modernBtn) modernBtn.disabled = true;
       try {
         await auth.signInWithEmailAndPassword(email, password);
       } catch(e) {
         console.error(e);
-        msg("❌ Login failed: " + (e.code === "auth/invalid-credential" ? "Email அல்லது Password தவறாக உள்ளது." : e.message));
+        msg("❌ Login failed: " + (e.code === "auth/invalid-credential" ? "Email or Password is incorrect." : e.message));
       } finally {
         if(modernBtn) modernBtn.disabled = false;
       }
@@ -213,7 +213,7 @@
 
   async function ensureUserProfile(user){
     const expectedRole = emailRole(user.email);
-    if(!expectedRole) throw new Error("இந்த Email அனுமதிக்கப்படவில்லை.");
+    if(!expectedRole) throw new Error("This Email is not authorized.");
     const ref = db.collection("users").doc(user.uid);
     const snap = await ref.get();
     if(!snap.exists){
@@ -227,8 +227,8 @@
       return expectedRole;
     }
     const data = snap.data() || {};
-    if(data.role !== expectedRole) throw new Error("Role அமைப்பு பொருந்தவில்லை.");
-    if(data.active === false) throw new Error("இந்த கணக்கு முடக்கப்பட்டுள்ளது.");
+    if(data.role !== expectedRole) throw new Error("Role configuration does not match.");
+    if(data.active === false) throw new Error("This account is disabled.");
     return data.role;
   }
 
@@ -477,10 +477,10 @@
   }
 
   window.skCloudBackupNow = async function(silent){
-    if(!auth?.currentUser || !db){ toast("❌ Firebase Login தேவை"); return; }
-    if(!cloudBackupAllowed()){ toast("🔒 Cloud Backup Admin/Manager-க்கு மட்டும்"); return; }
+    if(!auth?.currentUser || !db){ toast("❌ Firebase Login required"); return; }
+    if(!cloudBackupAllowed()){ toast("🔒 Cloud Backup for Admin/Manager only"); return; }
     try{
-      cloudBackupStatus(silent ? "⏳ Auto cloud sync..." : "⏳ Cloud backup உருவாக்கப்படுகிறது...");
+      cloudBackupStatus(silent ? "⏳ Auto cloud sync..." : "⏳ Creating cloud backup...");
       const data = cloudBackupStorage();
       const backupId = "backup_" + Date.now();
       const backupRef = db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT).doc(backupId);
@@ -520,7 +520,7 @@
   };
 
   window.skCloudRestoreLatest = async function(){
-    if(!auth?.currentUser || !db){ toast("❌ Firebase Login தேவை"); return; }
+    if(!auth?.currentUser || !db){ toast("❌ Firebase Login required"); return; }
     const currentRole = String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
     let restoreAllowed = currentRole === "admin";
     if(currentRole === "manager"){
@@ -529,15 +529,15 @@
         restoreAllowed = p.restore === true;
       }catch(e){ restoreAllowed = false; }
     }
-    if(!restoreAllowed){ toast("🔒 Cloud Restore permission இல்லை"); return; }
-    if(!confirm("Latest Cloud Backup-ஐ இந்த device-க்கு restore செய்யவா?")) return;
+    if(!restoreAllowed){ toast("🔒 Cloud Restore permission denied"); return; }
+    if(!confirm("Restore the latest Cloud Backup to this device?")) return;
     try{
       cloudRestoreApplying = true;
-      cloudBackupStatus("⏳ Latest cloud backup தேடப்படுகிறது...");
+      cloudBackupStatus("⏳ Searching for latest cloud backup...");
       const base = db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT);
       const snaps = await base.orderBy("createdAtMs","desc").limit(20).get();
       const latest = snaps.docs.find(d => (d.data()||{}).status === "complete");
-      if(!latest) throw new Error("Cloud backup கிடைக்கவில்லை");
+      if(!latest) throw new Error("Cloud backup not found");
       const itemsSnap = await latest.ref.collection("items").get();
       const restored = {};
       for(const itemDoc of itemsSnap.docs){
@@ -553,7 +553,7 @@
       if(!keys.length) throw new Error("Cloud backup empty");
       keys.forEach(key => localStorage.setItem(key, restored[key]));
       cloudBackupStatus("✅ Latest cloud backup restored • " + keys.length + " data items");
-      toast("☁️ Cloud Restore completed. App reload ஆகிறது...");
+      toast("☁️ Cloud Restore completed. App is reloading...");
       setTimeout(() => location.reload(), 700);
     }catch(e){
       console.error("Restore error", e);

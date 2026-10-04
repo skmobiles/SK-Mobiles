@@ -5110,7 +5110,7 @@ img{max-width:100%!important}
         '<button type="button" id="skDownloadLastExcelBtn" class="submit-btn" style="width:100%;padding:8px;font-size:.72rem;">⬇️ Download Excel File</button>';
       document.getElementById('skDownloadLastExcelBtn').onclick=downloadLastExcel;
       document.getElementById('skDeleteLastExcelBtn').onclick=function(){
-        if(!confirm('Latest uploaded Excel file-ஐ delete செய்யவா?')) return;
+        if(!confirm('Delete the latest uploaded Excel file?')) return;
         deleteUploadedExcel().then(function(){
           box.style.display='none';
           var inp=document.getElementById('excelUploadInput');
