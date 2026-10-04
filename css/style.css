@@ -1418,8 +1418,8 @@ html[data-icon-pack="graphite"] .theme-card-icon { border-radius: 8px; }
 .form-group > .form-select,
 .form-input:not(textarea),
 .form-select{min-height:42px;line-height:1.2;box-sizing:border-box;}
-.form-group > textarea.form-input:not(#cfgShopAddress):not(#cfgTermsConditions){height:42px !important;min-height:42px !important;max-height:42px !important;resize:none !important;overflow:hidden !important;white-space:nowrap !important;line-height:1.2 !important;}
-#skRepairJobsModal textarea.form-input{height:42px !important;min-height:42px !important;max-height:42px !important;resize:none !important;overflow:hidden !important;white-space:nowrap !important;}
+.form-group > textarea.form-input:not(#cfgShopAddress):not(#cfgTermsConditions):not(.repair-spares-note-box){height:42px !important;min-height:42px !important;max-height:42px !important;resize:none !important;overflow:hidden !important;white-space:nowrap !important;line-height:1.2 !important;}
+#skRepairJobsModal textarea.form-input:not(.repair-spares-note-box){height:42px !important;min-height:42px !important;max-height:42px !important;resize:none !important;overflow:hidden !important;white-space:nowrap !important;}
 
 
 /* =========================================================
@@ -1779,18 +1779,6 @@ input[data-dmy-date]{letter-spacing:.02em;}
   color: var(--text-muted) !important;
 }
 
-/* The Repair Tools / IC Spares note is intentionally the one
-   multiline field requested; other form fields are untouched. */
-.repair-spares-note-box{
-  min-height: 190px !important;
-  height: 190px !important;
-  resize: vertical !important;
-  overflow-y: auto !important;
-  white-space: pre-wrap !important;
-  line-height: 1.5 !important;
-  padding: 12px 14px !important;
-  box-sizing: border-box !important;
-}
 
 /* Login logo follows the same saved shop logo used by the app header. */
 #skLoginLogoImg{
@@ -2516,13 +2504,6 @@ button.form-secondary:focus-visible{
   line-height:1.3;
 }
 
-/* Keep the dedicated repair tools/spares field comfortably multiline. */
-.repair-spares-note-box{
-  min-height:150px !important;
-  line-height:1.5;
-  resize:vertical;
-  overflow-y:auto;
-}
 
 /* Form grids must shrink cleanly instead of creating horizontal overflow. */
 #usedMobileBillingForm,
@@ -2565,9 +2546,6 @@ button.form-secondary:focus-visible{
     min-height:78px;
   }
 
-  .repair-spares-note-box{
-    min-height:170px !important;
-  }
 
   /* Existing two-column business forms collapse only at mobile size. */
   #usedMobileBillingForm > div[style*="grid-template-columns:1fr 1fr"],
@@ -4338,19 +4316,19 @@ button.form-secondary:focus-visible{
   }
 
   #headerSearchRow .box-photo-scan-btn{
-    width:44px;
-    min-width:44px;
-    padding:0;
+    width:auto;
+    min-width:92px;
+    min-height:44px;
+    padding:8px 11px;
     justify-content:center;
-    font-size:0;
-  }
-
-  #headerSearchRow .box-photo-scan-btn::first-letter{
-    font-size:1rem;
+    font-size:.72rem;
+    line-height:1.1;
+    white-space:nowrap;
+    flex:0 0 auto;
   }
 
   #headerSearchRow .clear-search-btn{
-    right:54px;
+    right:calc(92px + 7px);
   }
 
   #cardsContainer:has(> .active-category-notice) .card-header{
@@ -5061,9 +5039,8 @@ button.form-secondary:focus-visible{
 
 /* Action bar: preserve every existing handler and action. */
 #billingModal .bill-action-grid{
-  position:sticky;
-  bottom:0;
-  z-index:8;
+  position:relative;
+  z-index:2;
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:7px;
   margin:8px 0 0;
@@ -6450,55 +6427,16 @@ button.form-secondary:focus-visible{
 }
 
 
-/* =========================================================
-   SK MOBILES V4.17 — FINAL REQUESTED FIXES ONLY
-   Scope: Billing scroll, Keypad RAM/Storage visibility,
-   Apple Light/Dark themes, and theme-safe UI contrast.
-   Existing handlers/data/Firebase/IDs are preserved.
-   ========================================================= */
+/* ==========================================================
+   SK MOBILES V4.17 — FINAL ROOT-CAUSE FIX BLOCK
+   Scope: only the three issues requested in the latest fix.
+   Existing Firebase, data, IDs, handlers and business logic are untouched.
+   ========================================================== */
 
-/* Billing sheet: keep header/tabs visible and scroll only the active bill content. */
-#billingModal .billing-modern{
-  display:flex !important;
-  flex-direction:column !important;
-  min-height:0 !important;
-}
-#billingModal .billing-tabs,
-#billingModal .mobile-type-tabs{
-  flex:0 0 auto !important;
-}
-#billingModal #billNewView,
-#billingModal #billHistoryView{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-  -webkit-overflow-scrolling:touch !important;
-  overscroll-behavior:contain !important;
-  scrollbar-width:thin;
-  scrollbar-color:color-mix(in srgb,var(--primary) 32%,transparent) transparent;
-}
-#billingModal #usedMobileBillingForm{
-  min-height:0;
-}
-
-/* Keypad phones do not need RAM/Storage fields. */
-#billingModal #billRamStorageGrid.sk-keypad-hidden{
-  display:none !important;
-}
-
-/* Theme-safe primary controls: never allow white-on-white text. */
-#homeActionCardsContainer .sk-home-action-btn,
-#headerSearchRow .box-photo-scan-btn,
-#cardsContainer .box-photo-scan-btn{
-  background:var(--primary-gradient) !important;
-  color:#fff !important;
-  border-color:color-mix(in srgb,var(--primary) 58%,#fff 42%) !important;
-  text-shadow:0 1px 1px rgba(0,0,0,.10);
-}
-
-/* Apple-style themes requested by the user. */
-:root[data-theme="apple-light"]{
+/* ----------------------------------------------------------
+   A) APPLE LIGHT / APPLE DARK — keep both themes complete
+   ---------------------------------------------------------- */
+:root[data-theme="apple-light"] {
   --bg:#f5f5f7;
   --page-bg:#e8e8ed;
   --card-bg:rgba(255,255,255,.85);
@@ -6519,6 +6457,9 @@ button.form-secondary:focus-visible{
   --success:#34c759;
   --badge-bg:rgba(0,113,227,.08);
   --badge-border:rgba(0,113,227,.20);
+  --low-stock-bg:rgba(255,149,0,.10);
+  --low-stock-border:rgba(255,149,0,.25);
+  --low-stock-text:#b45309;
   --glass-btn-bg:#0071e3;
   --glass-btn-border:#0071e3;
   --glass-btn-text:#fff;
@@ -6526,9 +6467,11 @@ button.form-secondary:focus-visible{
   --glass-pill-border:#0071e3;
   --glass-shadow:0 8px 24px rgba(0,113,227,.16),0 0 18px rgba(0,113,227,.08);
   --card-elevation:0 4px 20px rgba(0,0,0,.04);
+  color-scheme:light;
 }
-:root[data-theme="apple-dark"]{
-  --bg:#000;
+
+:root[data-theme="apple-dark"] {
+  --bg:#000000;
   --page-bg:#121212;
   --card-bg:rgba(28,28,30,.85);
   --card-border:rgba(255,255,255,.10);
@@ -6548,6 +6491,9 @@ button.form-secondary:focus-visible{
   --success:#30d158;
   --badge-bg:rgba(10,132,255,.13);
   --badge-border:rgba(10,132,255,.28);
+  --low-stock-bg:rgba(255,159,10,.12);
+  --low-stock-border:rgba(255,159,10,.28);
+  --low-stock-text:#ffb340;
   --glass-btn-bg:#0a84ff;
   --glass-btn-border:#0a84ff;
   --glass-btn-text:#fff;
@@ -6555,43 +6501,176 @@ button.form-secondary:focus-visible{
   --glass-pill-border:#0a84ff;
   --glass-shadow:0 8px 24px rgba(10,132,255,.24),0 0 18px rgba(90,200,250,.10);
   --card-elevation:0 4px 20px rgba(0,0,0,.40);
+  color-scheme:dark;
 }
 
-/* Requested minimalist icon/button treatment, without overriding existing
-   specialized primary/danger/WhatsApp button handlers or invoice styling. */
-.app-viewport button:not(.btn-primary):not(.submit-btn):not(.sk-login-btn):not(.bill-action-save):not(.bill-action-pdf):not(.bill-action-print):not(.bill-action-wa):not(.sk-rj-next):not(.sk-home-action-btn):not(.modal-close-btn){
-  background:var(--card-bg);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border:1px solid var(--card-border);
-  border-radius:12px;
-  color:var(--text);
-  transition:all .2s ease;
-}
-.app-viewport button:not(.btn-primary):not(.submit-btn):not(.sk-login-btn):not(.bill-action-save):not(.bill-action-pdf):not(.bill-action-print):not(.bill-action-wa):not(.sk-rj-next):not(.sk-home-action-btn):not(.modal-close-btn):hover{
-  background:var(--primary);
-  color:#fff;
-  transform:translateY(-1px);
+:root[data-theme="apple-light"] .theme-card-btn[data-theme-choice="apple-light"],
+:root[data-theme="apple-dark"] .theme-card-btn[data-theme-choice="apple-dark"] {
+  border-color:var(--primary) !important;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb,var(--primary) 18%,transparent),
+    0 8px 20px color-mix(in srgb,var(--primary) 14%,transparent) !important;
 }
 
-/* Common UI text/icon contrast. Printable invoice colors remain untouched. */
-.app-viewport :is(h1,h2,h3,h4,h5,h6,.app-name,.app-sub,.form-label,.bill-section-title,.card-header,.section-title,.modal-title,.menu-btn-label,.theme-card-copy strong,.theme-card-copy small){
-  color:var(--text) !important;
+/* ----------------------------------------------------------
+   B) ALL-THEME BUTTON CONTRAST
+   ---------------------------------------------------------- */
+[data-theme] button,
+[data-theme] .btn,
+[data-theme] .primary-btn,
+[data-theme] .nav-tab,
+[data-theme] .chip-active {
+  background:#1d1d1f !important;
+  color:#fff !important;
+  border:1px solid rgba(255,255,255,.10) !important;
+  box-shadow:0 4px 12px rgba(0,0,0,.08) !important;
+  transition:all .2s ease !important;
 }
-.app-viewport :is(.nav-item,.menu-drawer-btn,.theme-card-btn,.active-category-notice){
-  color:var(--text) !important;
-}
-.app-viewport svg{color:currentColor;}
 
-/* Apple themes: ensure the Home matrix stays readable while preserving its
-   existing neutral/glass surface. */
-:root[data-theme="apple-light"] #homeMetricGrid .sk-home-metric-card,
-:root[data-theme="apple-light"] #homeActionCardsContainer .sk-home-action-row{
-  color:var(--text);
+[data-theme] button:hover,
+[data-theme] .btn:hover {
+  background:#0071e3 !important;
+  color:#fff !important;
 }
-:root[data-theme="apple-dark"] #homeMetricGrid .sk-home-metric-card,
-:root[data-theme="apple-dark"] #homeActionCardsContainer .sk-home-action-row{
-  background:rgba(28,28,30,.86) !important;
-  border-color:rgba(255,255,255,.10) !important;
-  color:var(--text);
+
+/* Preserve the existing special action colours. */
+[data-theme] .modal-close-btn {
+  background:rgba(239,68,68,.10) !important;
+  color:#dc2626 !important;
+  border-color:rgba(239,68,68,.24) !important;
 }
+[data-theme] .bill-action-wa,
+[data-theme] .submit-btn.whatsapp-green {
+  background:rgba(16,185,129,.92) !important;
+  color:#fff !important;
+}
+[data-theme] .bill-action-save,
+[data-theme] .bill-action-pdf,
+[data-theme] .bill-action-print,
+[data-theme] .submit-btn,
+[data-theme] .mobile-type-btn.active,
+[data-theme] .billing-tab-btn.active,
+[data-theme] .pay-mode-btn.active {
+  background:var(--primary-gradient) !important;
+  color:#fff !important;
+  border-color:color-mix(in srgb,var(--primary) 58%,#fff 42%) !important;
+}
+
+/* ----------------------------------------------------------
+   C) BILLING — action buttons must scroll with the bill
+      instead of floating over the lower fields.
+   ---------------------------------------------------------- */
+#billingModal .bill-action-grid {
+  position:relative !important;
+  bottom:auto !important;
+  z-index:2 !important;
+  margin:8px 0 0 !important;
+}
+
+#billingModal #billNewView,
+#billingModal #billHistoryView {
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior:contain !important;
+  scrollbar-width:thin;
+}
+
+@media (max-width:760px) {
+  #billingModal #billNewView,
+  #billingModal #billHistoryView {
+    padding-bottom:18px !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   D) REPAIR TOOLS / IC SPARES — one real multiline textarea
+      The old global textarea rule forced all textareas to 42px.
+      This selector is explicitly excluded from that rule above.
+   ---------------------------------------------------------- */
+#repairSparesModal .repair-spares-note-box {
+  display:block !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:210px !important;
+  min-height:210px !important;
+  max-height:55vh !important;
+  box-sizing:border-box !important;
+  padding:14px 15px !important;
+  resize:vertical !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  white-space:pre-wrap !important;
+  overflow-wrap:anywhere !important;
+  line-height:1.5 !important;
+}
+
+#repairSparesModal .form-group {
+  min-width:0 !important;
+}
+
+@media (max-width:760px) {
+  #repairSparesModal .repair-spares-note-box {
+    height:210px !important;
+    min-height:210px !important;
+    max-height:48vh !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   E) HOME + ADD ITEM — never hide the controls on small screens
+   ---------------------------------------------------------- */
+#navHome,
+#navHome.active {
+  visibility:visible !important;
+  opacity:1 !important;
+  color:#fff !important;
+  background:var(--primary-gradient) !important;
+}
+
+#headerSearchRow .box-photo-scan-btn {
+  visibility:visible !important;
+  opacity:1 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:auto !important;
+  min-width:92px !important;
+  min-height:44px !important;
+  padding:8px 11px !important;
+  font-size:.72rem !important;
+  line-height:1.1 !important;
+  white-space:nowrap !important;
+  flex:0 0 auto !important;
+  color:#fff !important;
+  background:var(--primary-gradient) !important;
+  border-color:color-mix(in srgb,var(--primary) 58%,#fff 42%) !important;
+}
+
+@media (max-width:430px) {
+  #headerSearchRow .box-photo-scan-btn {
+    width:auto !important;
+    min-width:92px !important;
+    max-width:none !important;
+    padding:8px 11px !important;
+    font-size:.72rem !important;
+  }
+}
+
+/* Keep all bottom navigation items readable in every theme. */
+.bottom-nav .nav-item,
+.bottom-nav .nav-item span,
+.bottom-nav .nav-item svg {
+  visibility:visible !important;
+  opacity:1 !important;
+}
+.bottom-nav .nav-item.active {
+  color:#fff !important;
+}
+.bottom-nav #navHome,
+.bottom-nav #navHome span,
+.bottom-nav #navHome svg {
+  color:#fff !important;
+}
+
+/* End of the single root-cause fix block. */
