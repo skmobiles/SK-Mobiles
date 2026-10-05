@@ -69,7 +69,7 @@
 
 <!-- SK V4.19: Firebase-safe Recycle Bin -->
 <div id="skRecycleBinModal" class="modal-overlay" style="z-index:2147483000!important;">
-<div class="modal-sheet" style="max-width:460px;max-height:90vh;">
+<div class="modal-sheet">
 <div class="modal-title"><span>🗑️ Recycle Bin</span><button class="modal-close-btn" type="button" onclick="toggleModal('skRecycleBinModal', false)" aria-label="Close Recycle Bin">✕</button></div>
 <p style="font-size:.72rem;color:var(--text-muted);margin-bottom:10px;">Deleted items are automatically removed after 30 days.</p>
 <div id="recycleBinItemsContainer" style="display:flex;flex-direction:column;gap:8px;max-height:55vh;overflow-y:auto;"></div>
@@ -271,7 +271,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="modelsModal">
-<div class="modal-sheet" style="max-height:85vh;">
+<div class="modal-sheet">
 <div class="modal-title">
 <span id="modalModelTitle">Compatible Models</span>
 <button class="modal-close-btn" onclick="toggleModal('modelsModal', false)">✕</button>
@@ -281,7 +281,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="viewBillModal" style="z-index: 10010 !important;">
-<div class="modal-sheet" style="max-height:85vh; z-index: 10011 !important;">
+<div class="modal-sheet">
 <div class="modal-title">
 <span>🧾 Bill Details</span>
 <button class="modal-close-btn" onclick="toggleModal('viewBillModal', false)">✕</button>
@@ -290,7 +290,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="itemEditorModal" style="z-index: 10020 !important;">
-<div class="modal-sheet" style="max-height:85vh;">
+<div class="modal-sheet">
 <div class="modal-title">
 <span id="itemModalTitle">📊 Upload Excel / Add Item</span>
 <button class="modal-close-btn" onclick="toggleModal('itemEditorModal', false)">✕</button>
@@ -362,7 +362,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="billingModal">
-<div class="modal-sheet billing-modern" style="max-height:90vh; max-width:620px;">
+<div class="modal-sheet billing-modern">
 <div class="modal-title">
 <div style="display:flex;align-items:center;gap:8px;">
 <span style="font-size:1.25rem;">🧾</span>
@@ -636,7 +636,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="orderModal">
-<div class="modal-sheet" style="max-height:85vh;">
+<div class="modal-sheet">
 <div class="modal-title">
 <span style="display:flex; align-items:center; gap:6px;"> 📦 Order List (<span id="modalOrderCount">0</span>) </span>
 <button class="modal-close-btn" onclick="toggleModal('orderModal', false)">✕</button>
@@ -801,7 +801,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="sk-access-badge" id="skAccessBadge">👷 Worker Mode</div>
 <!-- V4.1 WORKER PROFILE / ADMIN WORKER MANAGEMENT -->
 <div class="modal-overlay" id="skWorkerProfileModal" style="z-index:2147482000!important;">
-<div class="modal-sheet" style="max-width:430px;max-height:88vh;overflow:auto;">
+<div class="modal-sheet">
 <div class="modal-title"><span>👷 My Worker Profile</span><button class="modal-close-btn" onclick="skCloseWorkerProfile()">✕</button></div>
 <div style="text-align:center;margin-bottom:10px;">
 <img alt="Worker Photo" class="sk-profile-photo" id="skWorkerProfilePhoto"/>
@@ -816,7 +816,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skWorkerEditModal" style="z-index:2147482100!important;">
-<div class="modal-sheet" style="max-width:430px;max-height:88vh;overflow:auto;">
+<div class="modal-sheet">
 <div class="modal-title"><span>👷 Add / Edit Worker</span><button class="modal-close-btn" onclick="skCloseWorkerEdit()">✕</button></div>
 <input id="skWorkerEditIndex" type="hidden" value="-1"/>
 <div style="text-align:center;margin-bottom:10px;"><img alt="Worker Photo" class="sk-profile-photo" id="skWorkerEditPhotoPreview"/><input accept="image/*" class="form-input" id="skWorkerEditPhoto" style="font-size:.72rem;" type="file"/></div>
@@ -830,7 +830,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skAdminPanelModal" style="z-index:2147481000!important;">
-<div class="modal-sheet" style="max-width:430px;max-height:86vh;">
+<div class="modal-sheet">
 <div class="modal-title"><span>👑 Admin Control</span><button class="modal-close-btn" onclick="skCloseAdminPanel()">✕</button></div>
 <div class="sk-admin-box"><div class="sk-admin-title">CURRENT LOGIN</div><div id="skAdminCurrentRole" style="font-size:.88rem;font-weight:900;color:var(--text);">👑 Admin — Full Access</div></div>
 <div class="sk-admin-box" style="margin-top:10px;">
@@ -866,7 +866,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <!-- SK MOBILES V3.9 additive correction layer: invoice share bill-number + order rendering -->
 <!-- SK MOBILES V4.0 additive layer: low-stock auto orders + JSON backup + configurable App Data Folder auto-sync -->
 <div class="modal-overlay" id="skAdminProfileModal" style="z-index:2147482200!important;">
-<div class="modal-sheet" style="max-width:430px;">
+<div class="modal-sheet">
 <div class="modal-title"><span id="skAdminProfileTitle">👑 My Admin Profile</span><button class="modal-close-btn" onclick="skCloseAdminProfile()">✕</button></div>
 <div class="sk-v42-profile-box" style="text-align:center;margin-bottom:9px;"><div style="font-size:2.1rem;margin-bottom:4px;">👑</div><div id="skAdminProfileName" style="font-size:1rem;font-weight:950;">SK MOBILES Admin</div><div style="font-size:.68rem;color:var(--text-muted);margin-top:3px;">Full Access Account</div></div>
 <div class="sk-v42-profile-grid">
@@ -879,7 +879,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skCreditLedgerModal" style="z-index:2147482300!important;">
-<div class="modal-sheet" style="max-width:460px;max-height:90vh;">
+<div class="modal-sheet">
 <div class="modal-title"><span>💳 Customer Credit Ledger</span><button class="modal-close-btn" onclick="skCloseCreditLedger()">✕</button></div>
 <div id="skCreditReminderBox"></div>
 <div class="sk-credit-summary">
@@ -902,7 +902,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skCreditEntryModal" style="z-index:2147482400!important;">
-<div class="modal-sheet" style="max-width:430px;">
+<div class="modal-sheet">
 <div class="modal-title"><span id="skCreditEntryTitle">➕ Add Credit</span><button class="modal-close-btn" onclick="skCloseCreditEntry()">✕</button></div>
 <input id="skCreditEntryType" type="hidden" value="credit"/>
 <div class="form-group"><label class="form-label">Customer Name *</label><input class="form-input" id="skCreditName" placeholder="Customer name"/></div>
@@ -915,7 +915,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skCreditCustomerModal" style="z-index:2147482500!important;">
-<div class="modal-sheet" style="max-width:460px;max-height:90vh;">
+<div class="modal-sheet">
 <div class="modal-title"><span id="skCreditCustomerTitle">Customer History</span><button class="modal-close-btn" onclick="skCloseCreditCustomer()">✕</button></div>
 <div id="skCreditCustomerSummary" style="margin-bottom:9px;"></div>
 <div class="sk-credit-actions" style="margin-bottom:9px;">
@@ -929,7 +929,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skEmiReminderModal" style="z-index:2147482600!important;">
-<div class="modal-sheet" style="max-width:430px;">
+<div class="modal-sheet">
 <div class="modal-title"><span>🔔 EMI Reminder Settings</span><button class="modal-close-btn" onclick="skCloseReminderSettings()">✕</button></div>
 <div class="sk-v42-profile-box">
 <div class="form-group"><label class="form-label">Remind before due date (days)</label><input class="form-input" id="skEmiReminderDays" max="30" min="0" type="number" value="3"/></div>
@@ -942,7 +942,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 <!-- Additive V4.4 Customer Credit / Google Keep layer -->
 <div class="modal-overlay" id="skKeepImportModal" style="z-index:2147482700!important;">
-<div class="modal-sheet" style="max-width:460px;max-height:90vh;">
+<div class="modal-sheet">
 <div class="modal-title"><span>📥 Google Keep / Notes Import</span><button class="modal-close-btn" onclick="skCloseKeepImport()">✕</button></div>
 <div class="sk-v43-keep-box">
 <div class="sk-v43-keep-title">Google Keep data → Customer Credit</div>
