@@ -1,0 +1,640 @@
+/* SK MOBILES - Universal Realtime Auto-Sync Engine
+   Zero-Maintenance: Automatically Syncs All sk_ and skx_ Data Modules Across All Devices */
+(function(){
+  'use strict';
+
+  const FB_CONFIG = {
+    apiKey: "AIzaSyDufQNy7l9M3ue_32u3gcH3TZUhPlrSILA",
+    authDomain: "sk-mobiles-2d61d.firebaseapp.com",
+    projectId: "sk-mobiles-2d61d",
+    storageBucket: "sk-mobiles-2d61d.firebasestorage.app",
+    messagingSenderId: "705961182597",
+    appId: "1:705961182597:web:fa8238739d140b250df0ec"
+  };
+
+  const ROLE_BY_EMAIL = {
+    "skmobilesdpi@gmail.com": "admin",
+    "lavanyam.com94@gmail.com": "manager",
+    "sriyogi6@gmail.com": "worker"
+  };
+
+  const ROLE_KEY = "sk_current_role_v1";
+  const WORKER_KEY = "sk_current_worker_id_v1";
+  const SHOP_ID = "SK-MOBILES";
+  const BILL_KEY = "sk_bills";
+
+  let auth, db, unsubscribeBills = null, unsubscribeAllData = null;
+  let remoteReady = false;
+  let applyingRemote = false;
+  let syncingLocal = false;
+  let lastKnownBillIds = new Set();
+  let syncTimer = null;
+  const syncKeyTimers = {};
+  let cloudAutoBackupTimer = null;
+  let cloudAutoBackupRunning = false;
+  let cloudRestoreApplying = false;
+  let refreshUiFrame = 0;
+
+  // தானாகவே அனைத்து sk_ மற்றும் skx_ விசைகளையும் கண்டறியும் அமைப்பு
+  function isSyncableKey(key) {
+    if (!key) return false;
+    // உள்நுழைவு/தீம் போன்ற சாதன தனிப்பட்ட அமைப்புகளை மட்டும் தவிர்த்தல்
+    if (key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_bill_draft") {
+      return false;
+    }
+    return key.startsWith("sk_") || key.startsWith("skx_");
+  }
+
+  function msg(t){
+    const text = t || "";
+    const el = document.getElementById("skRoleMsg");
+    if(el) el.textContent = text;
+    const modern = document.getElementById("skLoginMsg");
+    if(modern) modern.textContent = text;
+  }
+
+  function toast(t){
+    try { if(typeof showToast === "function") showToast(t); } catch(e){}
+  }
+
+  function localBills(){
+    try {
+      const a = JSON.parse(localStorage.getItem(BILL_KEY) || "[]");
+      return Array.isArray(a) ? a : [];
+    } catch(e){ return []; }
+  }
+
+  function setLocalBills(a){
+    applyingRemote = true;
+    try { localStorage.setItem(BILL_KEY, JSON.stringify(a)); } finally { applyingRemote = false; }
+    refreshAllUI();
+  }
+
+  // தரவு மாறியவுடன் அனைத்து UI பகுதிகளையும் உடனுக்குடன் புதுப்பித்தல்
+  function refreshAllUI(){
+    /* Coalesce bursts of Firebase/localStorage updates into one paint.
+       This prevents visible page flicker when several synced keys arrive together. */
+    if(refreshUiFrame) return;
+    const run = function(){
+      refreshUiFrame = 0;
+      try {
+        if(typeof savedBills !== "undefined") savedBills = localBills();
+        if(typeof updateBillHistoryCount === "function") updateBillHistoryCount();
+        if(typeof renderBillHistory === "function") renderBillHistory();
+        if(typeof loadSavedBills === "function") loadSavedBills();
+        if(typeof displayBills === "function") displayBills();
+        if(typeof renderInventory === "function") renderInventory();
+        if(typeof renderJobCards === "function") renderJobCards();
+        if(typeof renderJobs === "function") renderJobs();
+        if(typeof renderRepairJobs === "function") renderRepairJobs();
+        if(typeof renderCreditList === "function") renderCreditList();
+        if(typeof renderDueList === "function") renderDueList();
+        if(typeof renderCustomerLedger === "function") renderCustomerLedger();
+        if(typeof renderLedgerList === "function") renderLedgerList();
+        if(typeof renderDashboard === "function") renderDashboard();
+        if(typeof updateStats === "function") updateStats();
+        if(typeof loadAllData === "function") loadAllData();
+      } catch(e){}
+    };
+    if(typeof requestAnimationFrame === "function") refreshUiFrame=requestAnimationFrame(run);
+    else refreshUiFrame=setTimeout(run,0);
+  }
+
+  function normalizeBill(b){
+    if(!b || !b.id) return null;
+    return Object.assign({}, b, { id: String(b.id) });
+  }
+
+  function emailRole(email){
+    return ROLE_BY_EMAIL[String(email||"").trim().toLowerCase()] || "";
+  }
+
+  function ensureFirebase(){
+    if(!window.firebase) throw new Error("Firebase SDK not loaded.");
+    if(!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    return true;
+  }
+
+  function injectLoginUI(){
+    const modernModal = document.getElementById("skLoginModal");
+    const modernEmail = document.getElementById("loginEmailInput");
+    const modernPassword = document.getElementById("loginPasswordInput");
+    const modernBtn = document.getElementById("skFirebaseLoginBtn");
+
+    const doLogin = async ()=>{
+      const email = (modernEmail?.value || document.getElementById("skFirebaseEmail")?.value || "").trim().toLowerCase();
+      const password = modernPassword?.value || document.getElementById("skFirebasePassword")?.value || "";
+      if(!email || !password){ msg("❌ Enter Email and Password."); return; }
+      if(!emailRole(email)){ msg("❌ This Email is not registered."); return; }
+      msg("⏳ Logging in...");
+      if(modernBtn) modernBtn.disabled = true;
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch(e) {
+        console.error(e);
+        msg("❌ Login failed: " + (e.code === "auth/invalid-credential" ? "Email or Password is incorrect." : e.message));
+      } finally {
+        if(modernBtn) modernBtn.disabled = false;
+      }
+    };
+
+    if(modernModal && modernEmail && modernPassword && modernBtn){
+      if(!modernBtn.dataset.firebaseBound){
+        modernBtn.dataset.firebaseBound = "1";
+        modernBtn.addEventListener("click", doLogin);
+        modernPassword.addEventListener("keydown", e=>{ if(e.key === "Enter") doLogin(); });
+        const toggle = document.getElementById("skLoginPasswordToggle");
+        if(toggle && !toggle.dataset.bound){
+          toggle.dataset.bound = "1";
+          toggle.addEventListener("click", ()=>{
+            const visible = modernPassword.type === "text";
+            modernPassword.type = visible ? "password" : "text";
+            toggle.textContent = visible ? "Show" : "Hide";
+            toggle.setAttribute("aria-label", visible ? "Show password" : "Hide password");
+            toggle.setAttribute("aria-pressed", String(!visible));
+            modernPassword.focus();
+          });
+        }
+      }
+
+      // Keep the older role-gate login UI hidden when the supplied modern modal exists.
+      const card = document.querySelector("#skRoleGate .sk-login-card");
+      if(card){
+        const oldGrid = card.querySelector(".sk-role-grid");
+        const oldLabel = card.querySelector('label[for="skRolePin"]');
+        const oldPin = card.querySelector("#skRolePin");
+        const oldWorker = card.querySelector("#skWorkerLoginSelect");
+        const oldBtn = card.querySelector("#skRoleLoginBtn");
+        [oldGrid, oldLabel, oldPin, oldWorker, oldBtn].forEach(el=>{ if(el) el.style.display="none"; });
+      }
+      return;
+    }
+
+    // Backward-compatible fallback for copies where the supplied modal is absent.
+    const card = document.querySelector("#skRoleGate .sk-login-card");
+    if(!card || document.getElementById("skFirebaseLoginBlock")) return;
+    const block = document.createElement("div");
+    block.id = "skFirebaseLoginBlock";
+    block.innerHTML = `
+      <div style="margin:12px 0 8px;border-top:1px solid var(--card-border,#ddd);padding-top:12px">
+        <div style="font-weight:800;font-size:.9rem;margin-bottom:8px">🔐 Email &amp; Password Login</div>
+        <input id="skFirebaseEmail" class="sk-login-input" type="email" autocomplete="username" placeholder="Email address">
+        <input id="skFirebasePassword" class="sk-login-input" type="password" autocomplete="current-password" placeholder="Password" style="margin-top:7px">
+        <button id="skFirebaseLoginBtn" class="sk-login-btn" type="button" style="margin-top:8px">☁️ Firebase Login</button>
+        <div style="font-size:.68rem;color:var(--text-muted,#64748b);margin-top:6px">Admin • Manager • Worker</div>
+      </div>`;
+    card.appendChild(block);
+    const oldGrid = card.querySelector(".sk-role-grid");
+    const oldLabel = card.querySelector('label[for="skRolePin"]');
+    const oldPin = card.querySelector("#skRolePin");
+    const oldWorker = card.querySelector("#skWorkerLoginSelect");
+    const oldBtn = card.querySelector("#skRoleLoginBtn");
+    [oldGrid, oldLabel, oldPin, oldWorker, oldBtn].forEach(el=>{ if(el) el.style.display="none"; });
+    const fallbackBtn=document.getElementById("skFirebaseLoginBtn");
+    const fallbackEmail=document.getElementById("skFirebaseEmail");
+    const fallbackPassword=document.getElementById("skFirebasePassword");
+    fallbackBtn.addEventListener("click", doLogin);
+    fallbackPassword.addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+  }
+
+  function gate(show){
+    const modern = document.getElementById("skLoginModal");
+    const g = document.getElementById("skRoleGate");
+    if(modern){
+      modern.classList.toggle("active", !!show);
+      if(g) g.classList.remove("sk-show");
+    } else if(g){
+      g.classList.toggle("sk-show", !!show);
+    }
+    document.body.style.overflow = show ? "hidden" : "";
+  }
+
+  async function ensureUserProfile(user){
+    const expectedRole = emailRole(user.email);
+    if(!expectedRole) throw new Error("This Email is not authorized.");
+    const ref = db.collection("users").doc(user.uid);
+    const snap = await ref.get();
+    if(!snap.exists){
+      await ref.set({
+        email: user.email,
+        role: expectedRole,
+        name: expectedRole === "admin" ? "Admin" : expectedRole === "manager" ? "Manager" : "Worker",
+        active: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      return expectedRole;
+    }
+    const data = snap.data() || {};
+    if(data.role !== expectedRole) throw new Error("Role configuration does not match.");
+    if(data.active === false) throw new Error("This account is disabled.");
+    return data.role;
+  }
+
+  function billRef(id){
+    return db.collection("shops").doc(SHOP_ID).collection("bills").doc(String(id));
+  }
+
+  async function uploadBills(){
+    if(!auth?.currentUser || !db || applyingRemote || !remoteReady || syncingLocal) return;
+    syncingLocal = true;
+    try {
+      const local = localBills().map(normalizeBill).filter(Boolean);
+      const localIds = new Set(local.map(b => b.id));
+      const batch = db.batch();
+      local.forEach(b => {
+        const copy = Object.assign({}, b, {
+          _syncUpdatedAt: Date.now(),
+          _syncUpdatedBy: auth.currentUser.uid
+        });
+        if(copy.isDeleted !== true && copy._deleted !== true){
+          copy._deleted = false;
+        }
+        batch.set(billRef(b.id), copy, {merge:true});
+      });
+      for(const id of lastKnownBillIds){
+        if(!localIds.has(id)){
+          batch.set(billRef(id), {
+            id, isDeleted: true, _deleted: true, _syncUpdatedAt: Date.now(),
+            _syncUpdatedBy: auth.currentUser.uid
+          }, {merge:true});
+        }
+      }
+      if(local.length || lastKnownBillIds.size) await batch.commit();
+      lastKnownBillIds = localIds;
+    } catch(e){
+      console.error("Bill upload failed", e);
+    } finally {
+      syncingLocal = false;
+    }
+  }
+
+  function replaceLocalBillsFromRemote(remoteDocs){
+    const remote = [];
+    remoteDocs.forEach(d => {
+      const r = d.data() || {};
+      if(r.isDeleted === true || r._deleted === true) return;
+      const id = String(r.id || d.id);
+      const clean = Object.assign({}, r, {id});
+      delete clean._deleted; delete clean._syncUpdatedBy; delete clean._syncUpdatedAt;
+      remote.push(clean);
+    });
+    setLocalBills(remote);
+    lastKnownBillIds = new Set(remote.map(b => String(b.id)));
+  }
+
+  function removeBillFromLocalStorage(billId){
+    const target = String(billId || '');
+    if(!target) return;
+    const current = localBills();
+    const filtered = current.filter(b => String(b?.id || '') !== target && String(b?.billId || '') !== target && String(b?.billNo || '') !== target);
+    if(filtered.length !== current.length){
+      setLocalBills(filtered);
+    }
+  }
+
+  async function startBillSync(){
+    if(unsubscribeBills) unsubscribeBills();
+    remoteReady = false;
+    const ref = db.collection("shops").doc(SHOP_ID).collection("bills");
+    const snap = await ref.get();
+    replaceLocalBillsFromRemote(snap.docs);
+    remoteReady = true;
+
+    unsubscribeBills = ref.onSnapshot(snapshot => {
+      try {
+        snapshot.docChanges().forEach(change => {
+          const data = change.doc.data() || {};
+          const docId = String(change.doc.id);
+          if(data.isDeleted === true || data._deleted === true || change.type === "removed") {
+            removeBillFromLocalStorage(docId);
+            lastKnownBillIds.delete(docId);
+          }
+        });
+
+        const activeRemote = [];
+        snapshot.docs.forEach(d => {
+          const r = d.data() || {};
+          if(r.isDeleted === true || r._deleted === true) return;
+          activeRemote.push(Object.assign({}, r, { id: String(r.id || d.id) }));
+        });
+
+        setLocalBills(activeRemote);
+        lastKnownBillIds = new Set(activeRemote.map(b => String(b.id)));
+      } catch(e) {
+        console.error("Bill snapshot error", e);
+      }
+    }, err => console.error("Firebase connection error", err));
+  }
+
+  // கிளவுடில் உள்ள அனைத்து sk_ டேட்டாக்களையும் நிகழ்நேரத்தில் கண்காணிக்கும் அமைப்பு
+  function syncKeyToCloud(key) {
+    if (!auth?.currentUser || !db || applyingRemote || !remoteReady) return;
+    try {
+      const rawData = localStorage.getItem(key);
+      if (rawData === null) return;
+      const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
+      ref.set({
+        data: rawData,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedBy: auth.currentUser.uid
+      }, { merge: true });
+    } catch(e) {
+      console.error(key + " cloud sync failed", e);
+    }
+  }
+
+  function startUniversalDataSync() {
+    if (unsubscribeAllData) unsubscribeAllData();
+    const dataColRef = db.collection("shops").doc(SHOP_ID).collection("data");
+
+    // கிளவுடில் இருக்கும் எந்த sk_ டேட்டா மாறினாலும் உடனடியாக லோக்கலில் ஏற்றுதல்
+    unsubscribeAllData = dataColRef.onSnapshot(snapshot => {
+      if (applyingRemote) return;
+      let hasChanges = false;
+      snapshot.docChanges().forEach(change => {
+        const key = change.doc.id;
+        if (!isSyncableKey(key)) return;
+        const cloudVal = (change.doc.data() || {}).data;
+        const localVal = localStorage.getItem(key);
+        if (cloudVal && cloudVal !== localVal) {
+          applyingRemote = true;
+          try {
+            localStorage.setItem(key, cloudVal);
+            hasChanges = true;
+          } finally {
+            applyingRemote = false;
+          }
+        }
+      });
+      if (hasChanges) {
+        refreshAllUI();
+      }
+    }, err => console.error("Universal data sync error", err));
+  }
+
+  // லோக்கல் ஸ்டோரேஜில் நடக்கும் அனைத்து மாற்றங்களையும் பிடிக்கும் கொக்கி
+  function hookLocalBillWrites(){
+    if(window.__skFirebaseStorageHook) return;
+    window.__skFirebaseStorageHook = true;
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(key, value){
+      const result = original.apply(this, arguments);
+      if(this === localStorage && !applyingRemote && auth?.currentUser && remoteReady){
+        if(key === BILL_KEY){
+          clearTimeout(syncTimer);
+          syncTimer = setTimeout(uploadBills, 50);
+        } else if(isSyncableKey(key)){
+          clearTimeout(syncKeyTimers[key]);
+          syncKeyTimers[key] = setTimeout(() => syncKeyToCloud(key), 80);
+        }
+      }
+      return result;
+    };
+  }
+
+  // ----------------------------------------------------
+  // CLOUD BACKUP & RESTORE
+  // ----------------------------------------------------
+  const CLOUD_BACKUP_ROOT = "cloudBackups";
+  const CLOUD_BACKUP_CHUNK = 650000;
+
+  function cloudBackupStatus(text){
+    const el = document.getElementById("skCloudBackupStatus");
+    if(el) el.textContent = text || "";
+  }
+
+  function cloudBackupAllowed(){
+    const role = String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
+    if(role === "admin") return true;
+    if(role !== "manager") return false;
+    try{
+      const p = JSON.parse(localStorage.getItem("sk_manager_permissions_v1")||"{}");
+      return p.backup !== false;
+    }catch(e){ return true; }
+  }
+
+  function cloudAutoBackupKeyAllowed(key){
+    const k = String(key||"");
+    if(!k || cloudRestoreApplying || applyingRemote) return false;
+    if(k.indexOf("sk_current_") === 0 || k === "sk_bill_draft" || k === "sk_theme" || k === "sk_theme_depth" || k.indexOf("sk_recovery_backup_") === 0) return false;
+    return true;
+  }
+
+  function scheduleCloudAutoBackup(key){
+    if(!cloudAutoBackupKeyAllowed(key)) return;
+    if(!auth?.currentUser || !db || !cloudBackupAllowed()) return;
+    clearTimeout(cloudAutoBackupTimer);
+    cloudAutoBackupTimer = setTimeout(async function(){
+      if(cloudAutoBackupRunning || cloudRestoreApplying || !auth?.currentUser || !db || !cloudBackupAllowed()) return;
+      cloudAutoBackupRunning = true;
+      try{
+        await window.skCloudBackupNow(true);
+        toast("☁️ Cloud Sync ✓");
+      }catch(e){ console.error("Auto backup error", e); }
+      finally{ cloudAutoBackupRunning = false; }
+    }, 5000);
+  }
+
+  function hookCloudAutoBackup(){
+    if(window.__skCloudAutoBackupHook) return;
+    window.__skCloudAutoBackupHook = true;
+    const original = Storage.prototype.setItem;
+    const originalRemove = Storage.prototype.removeItem;
+    Storage.prototype.setItem = function(key, value){
+      const result = original.apply(this, arguments);
+      if(this === localStorage) scheduleCloudAutoBackup(key);
+      return result;
+    };
+    Storage.prototype.removeItem = function(key){
+      const result = originalRemove.apply(this, arguments);
+      if(this === localStorage) scheduleCloudAutoBackup(key);
+      return result;
+    };
+  }
+
+  function cloudBackupStorage(){
+    const out = {};
+    for(let i=0; i<localStorage.length; i++){
+      const key = localStorage.key(i);
+      if(key !== null) out[key] = localStorage.getItem(key);
+    }
+    return out;
+  }
+
+  function cloudDocId(value){
+    try{ return btoa(unescape(encodeURIComponent(String(value)))).replace(/[\/+=]/g, "_").slice(0, 140); }
+    catch(e){ return String(value).replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 140); }
+  }
+
+  async function cloudWriteBatches(writes){
+    for(let i=0; i<writes.length; i+=450){
+      const batch = db.batch();
+      writes.slice(i, i+450).forEach(w => batch.set(w.ref, w.data, w.options||{}));
+      await batch.commit();
+    }
+  }
+
+  window.skCloudBackupNow = async function(silent){
+    if(!auth?.currentUser || !db){ toast("❌ Firebase Login required"); return; }
+    if(!cloudBackupAllowed()){ toast("🔒 Cloud Backup for Admin/Manager only"); return; }
+    try{
+      cloudBackupStatus(silent ? "⏳ Auto cloud sync..." : "⏳ Creating cloud backup...");
+      const data = cloudBackupStorage();
+      const backupId = "backup_" + Date.now();
+      const backupRef = db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT).doc(backupId);
+      const itemRefs = db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT).doc(backupId).collection("items");
+      const writes = [];
+      let itemCount = 0, chunkCount = 0;
+      Object.keys(data).forEach(key=>{
+        const raw = String(data[key] ?? "");
+        const ref = itemRefs.doc(cloudDocId(key));
+        const chunks = [];
+        for(let i=0; i<raw.length; i+=CLOUD_BACKUP_CHUNK) chunks.push(raw.slice(i, i+CLOUD_BACKUP_CHUNK));
+        writes.push({ref, data:{key, chunkCount:chunks.length, bytes:raw.length}, options:{merge:true}});
+        chunks.forEach((chunk, index)=>{
+          writes.push({ref:ref.collection("chunks").doc(String(index).padStart(6, "0")), data:{value:chunk}, options:{merge:true}});
+          chunkCount++;
+        });
+        itemCount++;
+      });
+      await cloudWriteBatches(writes);
+      await backupRef.set({
+        app: "SK Mobiles",
+        version: 1,
+        status: "complete",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdAtMs: Date.now(),
+        createdBy: auth.currentUser.uid,
+        createdByEmail: auth.currentUser.email || "",
+        itemCount,
+        chunkCount
+      }, {merge:true});
+      cloudBackupStatus("✅ Cloud backup saved • " + itemCount + " data items");
+      if(!silent) toast("☁️ Cloud Backup completed");
+    }catch(e){
+      console.error("Cloud backup error", e);
+      cloudBackupStatus("❌ Cloud backup failed");
+    }
+  };
+
+  window.skCloudRestoreLatest = async function(){
+    if(!auth?.currentUser || !db){ toast("❌ Firebase Login required"); return; }
+    const currentRole = String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
+    let restoreAllowed = currentRole === "admin";
+    if(currentRole === "manager"){
+      try{
+        const p = JSON.parse(localStorage.getItem("sk_manager_permissions_v1")||"{}");
+        restoreAllowed = p.restore === true;
+      }catch(e){ restoreAllowed = false; }
+    }
+    if(!restoreAllowed){ toast("🔒 Cloud Restore permission denied"); return; }
+    if(!confirm("Restore the latest Cloud Backup to this device?")) return;
+    try{
+      cloudRestoreApplying = true;
+      cloudBackupStatus("⏳ Searching for latest cloud backup...");
+      const base = db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT);
+      const snaps = await base.orderBy("createdAtMs","desc").limit(20).get();
+      const latest = snaps.docs.find(d => (d.data()||{}).status === "complete");
+      if(!latest) throw new Error("Cloud backup not found");
+      const itemsSnap = await latest.ref.collection("items").get();
+      const restored = {};
+      for(const itemDoc of itemsSnap.docs){
+        const meta = itemDoc.data() || {};
+        const chunkSnap = await itemDoc.ref.collection("chunks").orderBy(firebase.firestore.FieldPath.documentId()).get();
+        if(chunkSnap.empty){
+          restored[meta.key] = String(meta.value||"");
+        }else{
+          restored[meta.key] = chunkSnap.docs.map(d => String((d.data()||{}).value||"")).join("");
+        }
+      }
+      const keys = Object.keys(restored);
+      if(!keys.length) throw new Error("Cloud backup empty");
+      keys.forEach(key => localStorage.setItem(key, restored[key]));
+      cloudBackupStatus("✅ Latest cloud backup restored • " + keys.length + " data items");
+      toast("☁️ Cloud Restore completed. App is reloading...");
+      setTimeout(() => location.reload(), 700);
+    }catch(e){
+      console.error("Restore error", e);
+      cloudBackupStatus("❌ Cloud restore failed");
+      toast("❌ Cloud Restore failed: " + (e.message||"Error"));
+    }finally{
+      cloudRestoreApplying = false;
+    }
+  };
+
+  // பட்டன்களுக்கு நேரடி கிளிக் நிகழ்வு வழங்குதல்
+  function bindBackupButtons() {
+    document.querySelectorAll("button").forEach(btn => {
+      const text = btn.textContent || "";
+      if (text.includes("Backup Now")) {
+        btn.onclick = () => window.skCloudBackupNow();
+      }
+      if (text.includes("Restore Latest")) {
+        btn.onclick = () => window.skCloudRestoreLatest();
+      }
+    });
+  }
+
+  async function handleUser(user){
+    if(!user){ 
+      if(unsubscribeBills){ unsubscribeBills(); unsubscribeBills = null; }
+      if(unsubscribeAllData){ unsubscribeAllData(); unsubscribeAllData = null; }
+      remoteReady = false;
+      localStorage.removeItem(ROLE_KEY);
+      localStorage.removeItem(WORKER_KEY);
+      gate(true);
+      return;
+    }
+    try {
+      const role = await ensureUserProfile(user);
+      if(role === "manager"){
+        let managerEnabled = true;
+        try{
+          const p = JSON.parse(localStorage.getItem("sk_manager_permissions_v1")||"{}");
+          managerEnabled = p.managerAccess !== false;
+        }catch(e){}
+        if(!managerEnabled) throw new Error("Manager access is disabled by Admin.");
+      }
+      localStorage.setItem(ROLE_KEY, role);
+      if(role === "worker") localStorage.setItem(WORKER_KEY, user.uid);
+      else localStorage.removeItem(WORKER_KEY);
+      document.body.classList.toggle("sk-worker-mode", role === "worker");
+      if(typeof window.skRefreshRoleBadge === "function") window.skRefreshRoleBadge();
+      gate(false);
+      msg("");
+      try { if(typeof applyRestrictions === "function") applyRestrictions(); } catch(e){}
+      try { if(typeof refreshAdminButton === "function") refreshAdminButton(); } catch(e){}
+      await startBillSync();
+      startUniversalDataSync();
+      hookCloudAutoBackup();
+      bindBackupButtons();
+      scheduleCloudAutoBackup("login");
+      toast("☁️ " + role.toUpperCase() + " login • All modules real-time synced");
+    } catch(e) {
+      console.error(e);
+      msg("❌ " + e.message);
+      await auth.signOut().catch(()=>{});
+      gate(true);
+    }
+  }
+
+  function init(){
+    try {
+      ensureFirebase();
+      injectLoginUI();
+      hookLocalBillWrites();
+      hookCloudAutoBackup();
+      bindBackupButtons();
+      gate(true);
+      auth.onAuthStateChanged(handleUser);
+    } catch(e) {
+      console.error(e);
+      msg("❌ Firebase initialization failed.");
+    }
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, {once:true});
+  else init();
+})();
