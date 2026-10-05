@@ -6855,56 +6855,166 @@ button:focus-visible,
   #repairSparesModal .repair-spares-actions{grid-template-columns:1fr}
 }
 
+/* ========================================================================
+   SK MOBILES V5.0 — UNIFIED MOBILE PAGE / POPUP PRESENTATION
+   ------------------------------------------------------------------------
+   Presentation layer only.
+   - One mobile canvas width for every popup/page sheet.
+   - One top-aligned popup presentation matching the Billing reference.
+   - One scroll owner per popup.
+   - No changes to IDs, handlers, data, calculations, Firebase or navigation.
+   - Replaces the previous stacked popup patch/override blocks.
+   ======================================================================== */
 
-/* ================================================================
-   SK V4.18 — POPUP VIEWPORT / NAVIGATION FONT ROOT-CAUSE FIX
-   UI ONLY — preserve existing popup handlers and business logic.
-   ================================================================ */
+:root{
+  --sk-mobile-width:430px;
+  --sk-mobile-gap:8px;
+  --sk-mobile-radius:22px;
+  --sk-mobile-header-height:56px;
+}
 
-/* Prevent popup width from exceeding the real viewport.
-   Root cause: several modal sheets used content-box sizing with
-   width:calc(...), so padding was added outside the declared width. */
-.modal-overlay{
+.app-viewport{
+  width:100%;
+  max-width:var(--sk-mobile-width);
+  min-width:0;
+  box-sizing:border-box;
+  overflow-x:hidden;
+}
+.app-viewport > *{min-width:0;box-sizing:border-box;}
+
+/* One top-aligned viewport for every normal popup. */
+.modal-overlay.active:not(#skLoginModal){
+  position:fixed !important;
+  inset:0 !important;
+  width:100vw !important;
+  height:100dvh !important;
+  min-height:100vh !important;
+  padding:max(8px,env(safe-area-inset-top,0px)) var(--sk-mobile-gap) max(8px,env(safe-area-inset-bottom,0px)) !important;
   box-sizing:border-box !important;
-  width:100% !important;
-  max-width:100vw !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  overflow:hidden !important;
+  overscroll-behavior:none !important;
+  touch-action:pan-y !important;
+}
+
+/* One consistent mobile sheet size. */
+.modal-overlay.active:not(#skLoginModal) > .modal-sheet,
+.modal-overlay.active:not(#skLoginModal) > .context-menu-sheet{
+  width:min(var(--sk-mobile-width),calc(100vw - (var(--sk-mobile-gap) * 2))) !important;
+  max-width:min(var(--sk-mobile-width),calc(100vw - (var(--sk-mobile-gap) * 2))) !important;
+  min-width:0 !important;
+  height:auto !important;
+  min-height:0 !important;
+  max-height:calc(100dvh - max(8px,env(safe-area-inset-top,0px)) - max(8px,env(safe-area-inset-bottom,0px)) - 16px) !important;
+  margin:0 auto !important;
+  box-sizing:border-box !important;
+  position:relative !important;
+  flex:0 1 auto !important;
   overflow-x:hidden !important;
   overflow-y:auto !important;
+  overscroll-behavior:contain !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior-x:none !important;
+  touch-action:pan-y !important;
+  border-radius:var(--sk-mobile-radius) !important;
 }
 
-.modal-overlay > .modal-sheet{
+.modal-overlay.active:not(#skLoginModal) > .modal-sheet :is(input,select,textarea,button,img,video,canvas,table){
+  max-width:100% !important;
   box-sizing:border-box !important;
-  width:min(calc(100vw - 24px), 100%) !important;
-  max-width:calc(100vw - 24px) !important;
+}
+.modal-overlay.active:not(#skLoginModal) > .modal-sheet :is(.form-group,.form-row,.form-grid,.grid,.flex){
   min-width:0 !important;
-  margin-left:auto !important;
-  margin-right:auto !important;
+  max-width:100% !important;
+}
+
+/* Common top header — same visual position as the Billing reference. */
+.modal-overlay.active:not(#skLoginModal) > .modal-sheet > .modal-title{
+  position:sticky !important;
+  top:0 !important;
+  z-index:50 !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:var(--sk-mobile-header-height) !important;
+  margin:0 !important;
+  padding:9px 10px !important;
+  box-sizing:border-box !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:8px !important;
+  flex:0 0 auto !important;
+  border-bottom:1px solid color-mix(in srgb,var(--card-border) 82%,transparent) !important;
+  border-radius:var(--sk-mobile-radius) var(--sk-mobile-radius) 0 0 !important;
+  background:color-mix(in srgb,var(--modal-bg) 94%,#ffffff 6%) !important;
+  color:var(--text) !important;
+  backdrop-filter:blur(18px) saturate(115%) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(115%) !important;
+}
+.modal-overlay.active:not(#skLoginModal) > .modal-sheet::before{content:none !important;display:none !important;}
+.modal-overlay.active:not(#skLoginModal) > .modal-sheet > .modal-title > :first-child{min-width:0;}
+.modal-overlay.active:not(#skLoginModal) > .modal-sheet > .modal-title .modal-close-btn{
+  flex:0 0 auto !important;
+  width:36px !important;
+  height:36px !important;
+  min-width:36px !important;
+  min-height:36px !important;
+  margin:0 !important;
+  border-radius:50% !important;
+}
+.modal-overlay.active:not(#skLoginModal) > .modal-sheet > :not(.modal-title){box-sizing:border-box;max-width:100%;}
+
+/* Billing: preserve its existing internal flow and handlers. */
+#billingModal .billing-modern{
+  padding:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  overflow-y:auto !important;
   overflow-x:hidden !important;
 }
-
-/* Keep all popup controls inside the sheet instead of creating
-   horizontal page/popup overflow. */
-.modal-overlay > .modal-sheet input,
-.modal-overlay > .modal-sheet select,
-.modal-overlay > .modal-sheet textarea,
-.modal-overlay > .modal-sheet button,
-.modal-overlay > .modal-sheet img,
-.modal-overlay > .modal-sheet table{
-  max-width:100%;
-  box-sizing:border-box;
+#billingModal .billing-modern > .modal-title{flex:0 0 auto !important;}
+#billingModal #billNewView,
+#billingModal #billHistoryView{
+  min-width:0 !important;
+  max-width:100% !important;
+  height:auto !important;
+  max-height:none !important;
+  overflow:visible !important;
+  box-sizing:border-box !important;
 }
 
-.modal-overlay > .modal-sheet :is(.form-group,.form-row,.form-grid,.grid,.flex){
-  min-width:0;
+/* Repair and ledger sheets use the same shell. */
+#skRepairJobsModal > .modal-sheet,
+#skRepairDetailModal > .modal-sheet,
+#skUrgentRepairModal > .modal-sheet,
+#skCreditLedgerModal > .modal-sheet,
+#skCreditCustomerModal > .modal-sheet,
+#skCreditLedgerPage > .modal-sheet,
+#skCreditActionModal > .modal-sheet,
+#skCreditEntryModal > .modal-sheet,
+#skKeepImportModal > .modal-sheet{
+  max-width:min(var(--sk-mobile-width),calc(100vw - (var(--sk-mobile-gap) * 2))) !important;
 }
 
-/* Credit Ledger mobile action row: both actions stay inside the popup. */
-#skCreditLedgerModal .sk-credit-search-row{
+/* Credit ledger content keeps every row and toolbar inside the sheet. */
+#skCreditLedgerModal,
+#skCreditLedgerPage{
+  box-sizing:border-box !important;
+  max-width:100vw !important;
+  overflow-x:hidden !important;
+  overscroll-behavior-x:none !important;
+  touch-action:pan-y !important;
+}
+#skCreditLedgerModal .sk-credit-search-row,
+#skCreditLedgerPage :is(.skcp-toolbar,.skcp-summary,.skcp-list,.skcp-row,.skcp-detail-box,.skcp-detail-grid,.skcp-bill-card,.skcp-filters),
+#skCreditLedgerPage :is(.skcp-toolbar input,.skcp-toolbar button,.skcp-row-main){
   min-width:0 !important;
   max-width:100% !important;
   box-sizing:border-box !important;
 }
-
 #skCreditLedgerModal .sk-credit-search-row .sk-credit-btn{
   min-width:0 !important;
   max-width:100% !important;
@@ -6912,14 +7022,30 @@ button:focus-visible,
   text-overflow:ellipsis;
   white-space:nowrap;
 }
+#skCreditLedgerPage .skcp-filters{
+  overflow-x:auto;
+  overscroll-behavior-x:contain !important;
+  -webkit-overflow-scrolling:touch;
+}
 
-/* Navigation labels use one stable UI size and cannot enlarge the
-   navigation bar or create horizontal overflow. */
+/* Repair Jobs keeps its existing inner views inside the unified sheet. */
+#skRepairJobsModal #skRjJobsView,
+#skRepairJobsModal #skRjHistoryView{
+  max-height:calc(100dvh - 205px) !important;
+  min-width:0 !important;
+}
+
+#longPressMenuModal > .context-menu-sheet{
+  width:min(var(--sk-mobile-width),calc(100vw - (var(--sk-mobile-gap) * 2))) !important;
+  max-width:min(var(--sk-mobile-width),calc(100vw - (var(--sk-mobile-gap) * 2))) !important;
+  padding:14px !important;
+}
+
+/* Bottom navigation remains compact and cannot stretch the mobile canvas. */
 .bottom-nav{
   box-sizing:border-box !important;
   max-width:calc(100vw - 16px) !important;
 }
-
 .bottom-nav .nav-item{
   box-sizing:border-box !important;
   min-width:0 !important;
@@ -6928,7 +7054,6 @@ button:focus-visible,
   -webkit-text-size-adjust:100% !important;
   text-size-adjust:100% !important;
 }
-
 .bottom-nav .nav-item span{
   display:block !important;
   max-width:100% !important;
@@ -6939,179 +7064,13 @@ button:focus-visible,
   overflow:hidden !important;
   text-overflow:ellipsis !important;
 }
+.bottom-nav #navHome span{font-size:10px !important;line-height:1.05 !important;}
 
-/* Keep the highlighted Home label slightly compact without changing
-   its existing icon or active behaviour. */
-.bottom-nav #navHome span{
-  font-size:10px !important;
-  line-height:1.05 !important;
+@media (max-width:360px){
+  :root{--sk-mobile-gap:6px;--sk-mobile-radius:19px;--sk-mobile-header-height:52px;}
 }
 
-
-/* Billing mobile scroll owner: the complete New Bill workspace scrolls together,
-   while the modal title remains visible. */
-#billingModal .billing-modern{
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-  -webkit-overflow-scrolling:touch !important;
-}
-#billingModal .billing-modern > .modal-title{
-  position:sticky !important;
-  top:0 !important;
-  z-index:30 !important;
-}
-#billingModal #billNewView,
-#billingModal #billHistoryView{
-  flex:0 0 auto !important;
-  height:auto !important;
-  max-height:none !important;
-  overflow:visible !important;
-}
-
-
-/* ================================================================
-   V5.0 APPROVED MOBILE STABILITY PATCH
-   Scope: popup horizontal movement + mobile back navigation support.
-   No billing/customer/data/Firebase styling or logic is changed.
-   ================================================================ */
-
-/* Keep the Customer Credit Ledger popup physically inside the viewport.
-   Prevent horizontal touch/pan from moving the sheet or the page. */
-#skCreditLedgerPage,
-#skCreditLedgerModal{
-  box-sizing:border-box !important;
-  width:100vw !important;
-  max-width:100vw !important;
-  overflow-x:hidden !important;
-  overscroll-behavior-x:none !important;
-  touch-action:pan-y !important;
-}
-
-#skCreditLedgerPage > .modal-sheet,
-#skCreditLedgerModal > .modal-sheet{
-  box-sizing:border-box !important;
-  width:min(calc(100vw - 24px),720px) !important;
-  max-width:calc(100vw - 24px) !important;
-  min-width:0 !important;
-  margin-left:auto !important;
-  margin-right:auto !important;
-  overflow-x:hidden !important;
-  overscroll-behavior-x:none !important;
-  touch-action:pan-y !important;
-}
-
-#skCreditLedgerPage .skcp-toolbar,
-#skCreditLedgerPage .skcp-summary,
-#skCreditLedgerPage .skcp-list,
-#skCreditLedgerPage .skcp-row,
-#skCreditLedgerPage .skcp-detail-box,
-#skCreditLedgerPage .skcp-detail-grid,
-#skCreditLedgerPage .skcp-bill-card{
-  min-width:0 !important;
-  max-width:100% !important;
-  box-sizing:border-box !important;
-}
-
-#skCreditLedgerPage .skcp-toolbar input,
-#skCreditLedgerPage .skcp-toolbar button,
-#skCreditLedgerPage .skcp-row-main{
-  min-width:0 !important;
-  max-width:100% !important;
-  box-sizing:border-box !important;
-}
-
-#skCreditLedgerPage .skcp-filters{
-  max-width:100% !important;
-  min-width:0 !important;
-  overscroll-behavior-x:contain !important;
-  -webkit-overflow-scrolling:touch !important;
-}
-
-@media(max-width:480px){
-  #skCreditLedgerPage > .modal-sheet,
-  #skCreditLedgerModal > .modal-sheet{
-    width:calc(100vw - 16px) !important;
-    max-width:calc(100vw - 16px) !important;
-    max-height:calc(100dvh - 16px) !important;
-    padding:16px !important;
-  }
-}
-
-
-/* ================================================================
-   V5.0 APPROVED MOBILE POPUP TOP-VIEW / SIZE PATCH
-   Scope: mobile popup presentation only.
-   Keeps existing popup content, controls, logic and page data unchanged.
-   ================================================================ */
-@media (max-width: 767px){
-  /* Present every standard modal as one consistent top-view sheet,
-     matching the compact Billing-style page framing. */
-  .modal-overlay.active{
-    align-items:flex-start !important;
-    justify-content:center !important;
-    padding:58px 0 24px !important;
-    box-sizing:border-box !important;
-    overflow-x:hidden !important;
-    overflow-y:hidden !important;
-  }
-
-  .modal-overlay.active > .modal-sheet{
-    width:92vw !important;
-    max-width:92vw !important;
-    min-width:0 !important;
-    max-height:calc(100dvh - 82px) !important;
-    height:auto !important;
-    margin:0 auto !important;
-    box-sizing:border-box !important;
-    border-radius:30px !important;
-    overflow-x:hidden !important;
-    overflow-y:auto !important;
-    overscroll-behavior-x:none !important;
-  }
-
-  /* Keep the top title area visually integrated with the rounded sheet. */
-  .modal-overlay.active > .modal-sheet > .modal-title:first-child{
-    border-radius:28px 28px 0 0 !important;
-    box-sizing:border-box !important;
-  }
-
-  /* Repair Jobs: use the same mobile sheet dimensions as the other pages. */
-  #skRepairJobsModal.active > .modal-sheet,
-  #skRepairDetailModal.active > .modal-sheet,
-  #skUrgentRepairModal.active > .modal-sheet{
-    width:92vw !important;
-    max-width:92vw !important;
-    max-height:calc(100dvh - 82px) !important;
-    border-radius:30px !important;
-  }
-
-  #skRepairJobsModal #skRjJobsView,
-  #skRepairJobsModal #skRjHistoryView{
-    max-height:calc(100dvh - 205px) !important;
-  }
-}
-
-/* V5.0 — unify all mobile popup headers with the Billing top-view reference.
-   Presentation-only: no content, controls or behavior changed. */
-@media (max-width: 767px){
-  .modal-overlay.active > .modal-sheet{
-    width:92vw !important;
-    max-width:92vw !important;
-    border-radius:30px !important;
-    padding:18px !important;
-  }
-
-  .modal-overlay.active > .modal-sheet > .modal-title:first-child{
-    margin:-18px -18px 14px !important;
-    padding:20px 18px 14px !important;
-    min-height:72px;
-    box-sizing:border-box !important;
-    border-radius:30px 30px 0 0 !important;
-    border-bottom:1px solid color-mix(in srgb,var(--card-border) 70%,transparent) !important;
-    background:color-mix(in srgb,var(--modal-bg) 94%,#ffffff 6%) !important;
-  }
-
-  .modal-overlay.active > .modal-sheet > .modal-title:first-child .modal-close-btn{
-    flex:0 0 auto;
-  }
+@media (prefers-reduced-motion:reduce){
+  .modal-overlay.active:not(#skLoginModal) > .modal-sheet,
+  .modal-overlay.active:not(#skLoginModal) > .modal-sheet *{transition:none !important;animation:none !important;}
 }
