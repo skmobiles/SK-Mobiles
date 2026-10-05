@@ -7090,3 +7090,28 @@ button:focus-visible,
     max-height:calc(100dvh - 205px) !important;
   }
 }
+
+/* V5.0 — unify all mobile popup headers with the Billing top-view reference.
+   Presentation-only: no content, controls or behavior changed. */
+@media (max-width: 767px){
+  .modal-overlay.active > .modal-sheet{
+    width:92vw !important;
+    max-width:92vw !important;
+    border-radius:30px !important;
+    padding:18px !important;
+  }
+
+  .modal-overlay.active > .modal-sheet > .modal-title:first-child{
+    margin:-18px -18px 14px !important;
+    padding:20px 18px 14px !important;
+    min-height:72px;
+    box-sizing:border-box !important;
+    border-radius:30px 30px 0 0 !important;
+    border-bottom:1px solid color-mix(in srgb,var(--card-border) 70%,transparent) !important;
+    background:color-mix(in srgb,var(--modal-bg) 94%,#ffffff 6%) !important;
+  }
+
+  .modal-overlay.active > .modal-sheet > .modal-title:first-child .modal-close-btn{
+    flex:0 0 auto;
+  }
+}
