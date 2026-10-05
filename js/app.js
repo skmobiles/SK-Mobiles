@@ -4317,6 +4317,7 @@ img{max-width:100%!important}
       else if(st&&st.modal==='skRepairJobsModal')window.skOpenRepairJobs?.();
       else if(st&&st.modal==='skRepairDetailModal'&&st.detailId)window.skRjShowDetail?.(st.detailId);
       else if(st&&st.modal==='skUrgentRepairModal')window.skOpenUrgentRepairModal?.();
+      else if(st&&st.modal==='skCreditLedgerPage')window.skOpenCreditLedger?.();
       window.scrollTo({top:0,behavior:'smooth'});
     }finally{restoring=false;}
   }
@@ -4327,6 +4328,33 @@ img{max-width:100%!important}
     if(e.state&&e.state.skMobilesApp)restoreState(e.state);
     else{history.pushState(currentState(),document.title,location.href);restoreState(currentState());}
   });
+
+  /* Mobile back navigation guard for legacy/directly-opened popup pages.
+     Existing modal history handlers remain the source of truth; this observer
+     only fills the gap for overlays opened by older direct classList calls. */
+  try{
+    const skModalHistoryObserver=new MutationObserver(function(){
+      if(restoring)return;
+      const active=[...document.querySelectorAll('.modal-overlay.active')];
+      if(!active.length){
+        const st=currentState();
+        if(st.modal)history.replaceState({skMobilesApp:true,filter:st.filter||'home',modal:null},document.title,location.href);
+        return;
+      }
+      let top=active[0],topZ=-1;
+      active.forEach(function(m){
+        const z=parseInt(getComputedStyle(m).zIndex,10);
+        if(Number.isFinite(z)&&z>=topZ){top=m;topZ=z;}
+      });
+      const id=top&&top.id;
+      if(!id)return;
+      const st=currentState();
+      if(st.modal!==id){
+        pushAppState({filter:(typeof currentFilter==='string'?currentFilter:'home'),modal:id});
+      }
+    });
+    if(document.body)skModalHistoryObserver.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
+  }catch(e){}
 
   document.addEventListener('click',function(e){
     if(restoring)return;
@@ -6105,9 +6133,9 @@ function getCustomers(){
  return Object.values(map).map(c=>{c.credits=c.entries.filter(e=>e.type==='credit').reduce((s,e)=>s+Number(e.amount||0),0);c.payments=c.entries.filter(e=>e.type==='payment').reduce((s,e)=>s+Number(e.amount||0),0);c.balance=Math.max(0,c.credits-c.payments);return c})
 }
 function getCustomer(k){return getCustomers().find(c=>c.key===k)||null}
-function openLedger(){skImportFromBills(true);skRenderCreditCustomers();document.getElementById('skCreditLedgerModal')?.classList.add('active');skCheckEmiReminders()}
+function openLedger(){skImportFromBills(true);skRenderCreditCustomers();document.getElementById('skCreditLedgerModal')?.classList.add('active');document.body.classList.add('modal-open');skCheckEmiReminders();if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skCreditLedgerModal',true)}
 window.skOpenCreditLedger=openLedger;
-window.skCloseCreditLedger=function(){document.getElementById('skCreditLedgerModal')?.classList.remove('active')};
+window.skCloseCreditLedger=function(){document.getElementById('skCreditLedgerModal')?.classList.remove('active');document.body.classList.remove('modal-open');if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skCreditLedgerModal',false)};
 window.skOpenRoleProfile=function(){
  const role=localStorage.getItem('sk_current_role_v1');
  if(role==='admin'){const c=document.getElementById('skAdminProfileWorkerCount'),w=safeJson('sk_workers_v1',[]);if(c)c.textContent=Array.isArray(w)?w.length:0;
@@ -6124,10 +6152,10 @@ window.skOpenRoleProfile=function(){
    document.getElementById('skAdminProfileWorkerCount')?.replaceChildren(document.createTextNode('—'));
    document.getElementById('skAdminProfileModal')?.classList.add('active');
  }
- else if(role==='worker'){if(typeof window.skOpenWorkerProfile==='function'){window.skOpenWorkerProfile()}else{const id=localStorage.getItem('sk_current_worker_id_v1'),a=safeJson('sk_workers_v1',[]),w=Array.isArray(a)?a.find(x=>x.id===id):null;if(!w){toast('Worker profile not found');return}const set=(i,v)=>{const e=document.getElementById(i);if(e)e.value=v||''};const img=document.getElementById('skWorkerProfilePhoto');if(img)img.src=w.photo||'';set('skWorkerProfileName',w.name);set('skWorkerProfileId',w.id);set('skWorkerProfilePhone',w.phone);set('skWorkerProfileDesignation',w.designation);set('skWorkerProfileDetails',w.details);document.getElementById('skWorkerProfileModal')?.classList.add('active')}}
+ else if(role==='worker'){if(typeof window.skOpenWorkerProfile==='function'){window.skOpenWorkerProfile()}else{const id=localStorage.getItem('sk_current_worker_id_v1'),a=safeJson('sk_workers_v1',[]),w=Array.isArray(a)?a.find(x=>x.id===id):null;if(!w){toast('Worker profile not found');return}const set=(i,v)=>{const e=document.getElementById(i);if(e)e.value=v||''};const img=document.getElementById('skWorkerProfilePhoto');if(img)img.src=w.photo||'';set('skWorkerProfileName',w.name);set('skWorkerProfileId',w.id);set('skWorkerProfilePhone',w.phone);set('skWorkerProfileDesignation',w.designation);set('skWorkerProfileDetails',w.details);document.getElementById('skWorkerProfileModal')?.classList.add('active');if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skWorkerProfileModal',true)}}
  else toast('🔐 Please login first')
 };
-window.skCloseAdminProfile=function(){document.getElementById('skAdminProfileModal')?.classList.remove('active')};
+window.skCloseAdminProfile=function(){document.getElementById('skAdminProfileModal')?.classList.remove('active');if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skAdminProfileModal',false)};
 
 function clearEntryForm(){['skCreditName','skCreditPhone','skCreditAmount','skCreditDetails'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});const d=document.getElementById('skCreditDate');if(d)d.value=skISOToDmy(todayISO());const m=document.getElementById('skCreditMode');if(m)m.value='Cash'}
 function openEntry(type,c){
@@ -6137,7 +6165,7 @@ function openEntry(type,c){
 }
 window.skOpenCreditEntry=function(){openEntry('credit',null)}
 window.skOpenPaymentEntry=function(){openEntry('payment',null)}
-window.skCloseCreditEntry=function(){document.getElementById('skCreditEntryModal')?.classList.remove('active')}
+window.skCloseCreditEntry=function(){document.getElementById('skCreditEntryModal')?.classList.remove('active');if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skCreditEntryModal',false)}
 window.skSaveCreditEntry=function(){
  const btn=document.querySelector('#skCreditEntryModal .submit-btn');
  if(btn && btn.dataset.skSaving==='1')return;
@@ -6664,7 +6692,11 @@ window.skCPDeleteCustomer=async function(k){
 };
 window.skCPOpenCustomer=function(k){var c=cpGetCustomers().find(function(x){return x.key===k});if(c)cpOpenDetail(c);else if(typeof showToast==='function')showToast('Customer not found')}
 window.skCPBackToList=cpShowMain;
-window.skCPBackToHome=function(){document.getElementById('skCreditLedgerPage').classList.remove('active')}
+window.skCPBackToHome=function(){
+ document.getElementById('skCreditLedgerPage').classList.remove('active');
+ document.body.classList.remove('modal-open');
+ if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skCreditLedgerPage',false);
+}
 window.skCPViewBill=function(idx){try{window.__skBillViewReturn='creditLedger';if(typeof viewSavedBill==='function'){viewSavedBill(idx)}else{}}catch(e){window.__skBillViewReturn=''}}
 function cpFillBillsForCustomer(c,idx){document.getElementById('skCPBill').innerHTML=cpBillOptions(c,idx);if(c){document.getElementById('skCPName').value=c.name||'';document.getElementById('skCPPhone').value=c.phone||''}}
 function cpResetForm(type,c,idx){
@@ -6854,7 +6886,8 @@ window.skCPSaveAction=function(){
 };
 function cpOpenPage(){
  if(typeof skImportFromBills==='function')skImportFromBills(true);
- document.getElementById('skCreditLedgerPage').classList.add('active');cpShowMain();
+ document.getElementById('skCreditLedgerPage').classList.add('active');document.body.classList.add('modal-open');cpShowMain();
+ if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skCreditLedgerPage',true);
 }
 window.skOpenCreditLedger=cpOpenPage;
 })();
@@ -6913,7 +6946,7 @@ window.skOpenCreditLedger=cpOpenPage;
     }catch(err){console.error('Recycle Bin restore failed:',err);showToast?.('❌ Restore failed');}
   };
   window.permanentlyDeleteTrash=function(trashId){const list=readRecycle(),idx=list.findIndex(x=>String(x.trashId)===String(trashId));if(idx<0)return;if(!confirm('Permanently delete this Recycle Bin item? This cannot be undone.'))return;list.splice(idx,1);saveStoredData({recycleBin:list});renderRecycleBinUI();showToast?.('🗑️ Permanently deleted');};
-  window.skOpenRecycleBin=function(){const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();if(role&&role!=='admin'){showToast?.('🔒 Admin access only');return;}purgeExpiredTrash();renderRecycleBinUI();document.getElementById('skRecycleBinModal')?.classList.add('active');};
+  window.skOpenRecycleBin=function(){const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();if(role&&role!=='admin'){showToast?.('🔒 Admin access only');return;}purgeExpiredTrash();renderRecycleBinUI();document.getElementById('skRecycleBinModal')?.classList.add('active');if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skRecycleBinModal',true);};
   document.addEventListener('DOMContentLoaded',function(){purgeExpiredTrash();const empty=document.getElementById('btnEmptyRecycleBin');if(empty)empty.addEventListener('click',function(){const list=readRecycle();if(!list.length){showToast?.('Trash is already empty');return;}if(!confirm('Permanently clear all items in Recycle Bin? This cannot be undone.'))return;saveStoredData({recycleBin:[]});renderRecycleBinUI();showToast?.('🗑️ Trash cleared');});setInterval(purgeExpiredTrash,6*60*60*1000);});
 })();
 
