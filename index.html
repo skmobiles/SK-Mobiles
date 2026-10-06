@@ -86,7 +86,7 @@
 <div class="modal-sheet" style="max-width:460px;max-height:90vh;">
 <div class="modal-title"><span>🗑️ Recycle Bin</span><button class="modal-close-btn" type="button" onclick="toggleModal('skRecycleBinModal', false)" aria-label="Close Recycle Bin">✕</button></div>
 <p style="font-size:.72rem;color:var(--text-muted);margin-bottom:10px;">Deleted items are automatically removed after 30 days.</p>
-<div id="recycleBinItemsContainer" style="display:flex;flex-direction:column;gap:8px;max-height:55vh;overflow-y:auto;"></div>
+<div id="recycleBinItemsContainer" style="display:flex;flex-direction:column;gap:14px;max-height:55vh;overflow-y:auto;"></div>
 <button id="btnEmptyRecycleBin" class="submit-btn" type="button" style="background:#ef4444;margin-top:12px;">⚠ Empty All Trash</button>
 </div>
 </div>
@@ -378,14 +378,14 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <input accept="image/*" id="logoFileInput" onchange="uploadShopLogo(this)" style="display:none;" type="file"/>
-<div style="display:flex; gap:8px;">
+<div style="display:flex; gap:14px;">
 <button class="submit-btn" onclick="document.getElementById('logoFileInput').click()" style="flex:1; padding:8px; font-size:0.76rem;">📁 Choose Image</button>
 <button class="submit-btn" onclick="resetShopLogo()" style="flex:1; padding:8px; font-size:0.76rem; background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text);">↺ Reset Default</button>
 </div>
 </div>
 <div class="sk-backup-ui-heading" style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">💾 DATA BACKUP &amp; RESTORE</div>
 <div class="sk-backup-ui-card" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
-<div class="sk-backup-ui-actions" style="display:flex; gap:8px;">
+<div class="sk-backup-ui-actions" style="display:flex; gap:14px;">
 <button class="submit-btn" onclick="exportAppDataBackup()" style="flex:1; padding:8px; font-size:0.75rem;">⬇️ Backup (JSON)</button>
 <button class="submit-btn" onclick="document.getElementById('importBackupInput').click()" style="flex:1; padding:8px; font-size:0.75rem; background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text);">⬆️ Restore</button>
 </div>
@@ -459,7 +459,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="form-group">
 <label class="form-label">Item Title (Optional)</label> <input class="form-input" id="editItemTitle" placeholder="e.g. Realme 20 / Realme 21 / Samsung A51" type="text"/>
 </div>
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
 <div class="form-group">
 <label class="form-label">Category</label> <select class="form-input" id="editItemCategory"> <option value="glass">Tempered Glass</option> <option value="combo">Touch Combo</option> </select>
 </div>
@@ -528,7 +528,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="modal-overlay" id="billingModal">
 <div class="modal-sheet billing-modern" style="max-height:90vh; max-width:620px;">
 <div class="modal-title">
-<div style="display:flex;align-items:center;gap:8px;">
+<div style="display:flex;align-items:center;gap:14px;">
 <span style="font-size:1.25rem;">🧾</span>
 <div>
 <div style="font-weight:900;color:var(--text);font-size:1.02rem;">SK MOBILES - Mobile Sale Bill</div>
@@ -546,12 +546,12 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <button type="button" class="mobile-type-btn" id="mobileTypeKeypad" onclick="selectMobileType('Keypad Mobile')">⌨️ Keypad Mobile</button>
 </div>
 <div id="billNewView">
-<form id="usedMobileBillingForm" onsubmit="event.preventDefault();" style="display:flex;flex-direction:column;gap:10px;">
+<form id="usedMobileBillingForm" onsubmit="event.preventDefault();" style="display:flex;flex-direction:column;gap:14px;">
 <div class="bill-section">
 <div class="bill-section-title">
 <span>👤</span> Customer Details
        </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
 <div>
 <label class="form-label">Customer Name *</label> <input class="form-input" id="billCustName" onfocus="handleInputClear(this)" oninput="saveDraft(); updateBillPreview()" placeholder="Customer name" required="" type="text"/>
 </div>
@@ -571,7 +571,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <span>📱</span> Mobile Details
         </div>
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
 <div>
 <label class="form-label">Brand *</label> <input class="form-input" id="billBrand" onfocus="handleInputClear(this)" oninput="saveDraft(); updateBillPreview()" placeholder="Samsung / Vivo / Apple" required="" type="text"/>
 </div>
@@ -579,7 +579,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <label class="form-label">Model *</label> <input class="form-input" id="billModel" onfocus="handleInputClear(this)" oninput="saveDraft(); updateBillPreview()" placeholder="Galaxy A55 / iPhone 13" required="" type="text"/>
 </div>
 </div>
-<div id="billRamStorageGrid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;">
+<div id="billRamStorageGrid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:8px;">
 <div>
 <label class="form-label">RAM</label> <input class="form-input" id="billRam" onfocus="handleInputClear(this)" oninput="saveDraft(); updateBillPreview()" placeholder="8GB" type="text"/>
 </div>
@@ -593,7 +593,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div style="margin-top:8px;">
 <label class="form-label">Package</label> <select class="form-input" id="billPackage" onchange="saveDraft(); updateBillPreview()"> <option value="Full Kit (Box + Charger + Bill)">Full Kit (Box + Charger + Bill)</option> <option value="Box Only (Mobile + Box)">Box Only (Mobile + Box)</option> <option value="Mobile + Charger">Mobile + Charger</option> <option value="Mobile Only">Mobile Only</option> </select>
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px;">
 <div>
 <label class="form-label">IMEI 1 *</label> <input class="form-input" id="billImei1" maxlength="16" onfocus="handleInputClear(this)" oninput="saveDraft(); updateBillPreview()" placeholder="15 digit IMEI" required="" type="text"/>
 </div>
@@ -612,7 +612,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <button class="pay-mode-btn" id="payModeEMI" onclick="selectPayMode('EMI')" type="button">📅 EMI</button>
 <button class="pay-mode-btn" id="payModeCredit" onclick="selectPayMode('Credit')" type="button">🤝 Credit</button>
 </div>
-<div id="priceFieldsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+<div id="priceFieldsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
 <div id="salePriceCol" style="grid-column: 1 / -1;">
 <label class="form-label">Sale Price (₹) *</label> <input class="form-input" id="billTotalPrice" min="0" onfocus="handleInputClear(this)" oninput="saveDraft(); calculateBillMath()" placeholder="20000" required="" type="number"/>
 </div>
@@ -635,7 +635,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <label class="form-label" style="font-size:0.65rem;">Monthly EMI (₹)</label> <input class="form-input" id="billMonthlyEmi" placeholder="Auto" readonly="" style="font-weight:bold;color:var(--primary);" type="number"/>
 </div>
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px;">
 <div>
 <label class="form-label">EMI Start Date</label> <input class="form-input" id="billEmiStartDate" onblur="handleSmartDateInput(this); this.dataset.autoDefault='0'; saveDraft(); calculateBillMath()" onchange="handleSmartDateInput(this); this.dataset.autoDefault='0'; saveDraft(); calculateBillMath()" onfocus="handleInputClear(this)" oninput="this.dataset.autoDefault='0';" placeholder="DD-MM-YYYY" type="text"/>
 </div>
@@ -795,7 +795,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="bill-filter-bar" style="display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:6px; margin-bottom:10px;">
 <input class="form-input" id="billHistorySearch" oninput="renderBillHistory()" placeholder="Search customer, phone, model..." type="text"/> <select class="form-input" id="billHistoryPayFilter" onchange="renderBillHistory()"> <option value="">All Payments</option> <option value="Cash">Cash</option> <option value="GPay">GPay / UPI</option> <option value="EMI">EMI</option> <option value="Credit">Credit</option> </select> <input class="form-input" id="billHistoryDateFilter" onchange="renderBillHistory()" title="Filter by bill date" type="text" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY" data-dmy-date="1">
 </div>
-<div id="billHistoryContainer" style="display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto;"></div>
+<div id="billHistoryContainer" style="display:flex;flex-direction:column;gap:14px;max-height:60vh;overflow-y:auto;"></div>
 </div>
 </div>
 </div>
@@ -1002,7 +1002,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="sk-admin-box"><div class="sk-admin-title">CURRENT LOGIN</div><div id="skAdminCurrentRole" style="font-size:.88rem;font-weight:900;color:var(--text);">👑 Admin — Full Access</div></div>
 <div class="sk-admin-box" style="margin-top:10px;">
   <div class="sk-admin-title">MANAGER PROMOTION & ACCESS</div>
-  <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;font-size:.75rem;font-weight:800;">
+  <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 0;font-size:.75rem;font-weight:800;">
     <span>👔 Manager Access</span>
     <input id="skMgrAccessToggle" type="checkbox" onchange="skAdminSetManagerPermission('managerAccess',this.checked)">
   </label>
