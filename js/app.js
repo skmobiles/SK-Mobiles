@@ -2907,7 +2907,7 @@ const MASTER_INVENTORY = [
                 <div class="sk-home-metric-icon spares" style="width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;">🧰</div>
                 <div style="min-width:0;">
                   <div style="font-size:12px;color:var(--text-muted);font-weight:800;">Repair Spares Orders</div>
-                  <div style="font-size:10px;color:var(--text-muted);font-weight:600;">Manual spares note</div>
+                  <div style="font-size:10px;color:var(--text-muted);font-weight:600;">Daily service spares note</div>
                 </div>
               </div>
               <span style="font-size:14px;color:var(--text-muted);font-weight:800;flex-shrink:0;">›</span>
@@ -3004,27 +3004,15 @@ const MASTER_INVENTORY = [
               <button class="sk-home-action-btn accessories" style="width: 115px; height: 34px; background: #059669; color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Accessories →</button>
             </div>
           `,
-          'card-tools': `
-            <div data-card-id="card-tools" draggable="true" class="draggable-card sk-home-action-row sk-home-action-tools" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="toggleModal('toolsOthersNoteModal', true);">
-              <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-                <div class="sk-home-action-icon tools" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">🛠️</div>
-                <div style="min-width: 0;">
-                  <div style="font-weight: 850; font-size: 14px; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">3. Tools &amp; Others</div>
-                  <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Monthly / Rare Order Notes</div>
-                </div>
-              </div>
-              <button class="sk-home-action-btn tools" style="width: 115px; height: 34px; background: #e11d48; color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Tools →</button>
-            </div>
-          `
         };
 
-        const defaultActionOrder = ['card-glass', 'card-display', 'card-accessories', 'card-tools'];
+        const defaultActionOrder = ['card-glass', 'card-display', 'card-accessories'];
         let savedActionOrder = defaultActionOrder;
         try {
           const storedA = localStorage.getItem('sk_order_homeActionCardsContainer');
           if (storedA) {
             const p = JSON.parse(storedA);
-            if (Array.isArray(p) && p.length > 0) savedActionOrder = p;
+            if (Array.isArray(p) && p.length > 0) savedActionOrder = p.filter(id => id !== 'card-tools');
           }
         } catch (e) {}
         const actionCardsHTML = savedActionOrder.map(id => actionCardsMap[id] || '').join('');
