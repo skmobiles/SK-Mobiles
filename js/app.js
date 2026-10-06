@@ -3956,6 +3956,13 @@ function viewSavedBill(idx) {
         emi.style.pageBreakBefore = 'always';
       }
 
+      const printBadge = clone.ownerDocument.createElement('div');
+      printBadge.className = 'sk-print-mobile-type-badge';
+      printBadge.dataset.type = clone.dataset.mobileType;
+      printBadge.textContent = clone.dataset.mobileType === 'used' ? 'USED MOBILE' : clone.dataset.mobileType === 'keypad' ? 'KEYPAD MOBILE' : 'NEW MOBILE';
+      const printCustomerBlock = clone.querySelector('#invoiceMainSheet > div:has(> div > #pvCustName)');
+      if (printCustomerBlock) printCustomerBlock.insertBefore(printBadge, printCustomerBlock.firstChild);
+
       clone.removeAttribute('style');
       clone.style.cssText = 'width:100%;max-width:100%;margin:0;padding:22px;background:#fff;color:#1e293b;box-sizing:border-box;font-family:"Plus Jakarta Sans",sans-serif;';
 
@@ -3966,6 +3973,9 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
 body{font-family:"Plus Jakarta Sans",Arial,sans-serif!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
 .print-preview-host{width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;background:#fff!important;}
 #printableInvoiceCard{width:100%!important;max-width:100%!important;margin:0 auto!important;box-sizing:border-box!important;background:#fff!important;color:#1e293b!important;box-shadow:none!important;}
+.sk-print-mobile-type-badge{display:inline-flex!important;align-items:center!important;min-height:28px!important;width:max-content!important;box-sizing:border-box!important;margin:0 0 9px!important;padding:5px 12px!important;border:1px solid #93c5fd!important;border-radius:9px!important;background:#eff6ff!important;color:#1d4ed8!important;font-size:11px!important;line-height:1!important;font-weight:900!important;letter-spacing:.035em!important;}
+.sk-print-mobile-type-badge[data-type="used"]{border-color:#f59e0b!important;background:#fef3c7!important;color:#92400e!important;}
+.sk-print-mobile-type-badge[data-type="keypad"]{border-color:#94a3b8!important;background:#f1f5f9!important;color:#334155!important;}
 img{max-width:100%!important;}
 @media print{body{background:#fff!important;}#printableInvoiceCard{box-shadow:none!important;}}
 </style></head><body><div class="print-preview-host">${clone.outerHTML}</div></body></html>`);
@@ -4151,6 +4161,9 @@ img{max-width:100%!important;}
       estimate:Number(document.getElementById('skRjEstimate').value)||0,
       status:document.getElementById('skRjStatus').value,
       note:document.getElementById('skRjNote').value.trim(),
+      deliveryStatus: status==='Delivered' ? 'Delivered' : (status==='Ready' ? 'Ready for Delivery' : (existing?.deliveryStatus||'Pending')),
+      reworkReason: existing?.reworkReason||'',
+      reworkCount: Number(existing?.reworkCount)||0,
       createdAt:existing?.createdAt||new Date().toISOString(),
       updatedAt:new Date().toISOString()
     };
@@ -4190,9 +4203,44 @@ img{max-width:100%!important;}
 
   window.skRjNext=function(id){
     const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
-    const old=a[i].status; a[i].status=statusNext(old);
-    if(old==='Ready') a[i].status='Delivered';
+    const old=a[i].status;
+    const next=statusNext(old);
+    if(old==='Ready'){
+      a[i].status='Delivered';
+      a[i].deliveryStatus='Delivered';
+      a[i].deliveredAt=new Date().toISOString();
+    }else{
+      a[i].status=next;
+      if(next==='Ready') a[i].deliveryStatus='Ready for Delivery';
+      else if(!a[i].deliveryStatus || a[i].deliveryStatus==='Ready for Delivery') a[i].deliveryStatus='Pending';
+    }
     a[i].updatedAt=new Date().toISOString(); save(a); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
+  };
+
+  window.skRjDeliver=function(id){
+    const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
+    if(a[i].status!=='Ready'){ showToast('Repair job must be Ready before delivery'); return; }
+    a[i].status='Delivered';
+    a[i].deliveryStatus='Delivered';
+    a[i].deliveredAt=new Date().toISOString();
+    a[i].updatedAt=new Date().toISOString();
+    save(a); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
+    showToast('Repair job marked Delivered');
+  };
+
+  window.skRjRework=function(id){
+    const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
+    if(a[i].status!=='Delivered' && a[i].status!=='Ready'){ showToast('Rework is available after delivery'); return; }
+    const reason=prompt('Enter the customer complaint / rework reason:', a[i].reworkReason||'');
+    if(reason===null)return;
+    a[i].status='Repairing';
+    a[i].deliveryStatus='Rework';
+    a[i].reworkReason=String(reason).trim();
+    a[i].reworkCount=(Number(a[i].reworkCount)||0)+1;
+    a[i].reworkAt=new Date().toISOString();
+    a[i].updatedAt=new Date().toISOString();
+    save(a); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
+    showToast('Repair job moved to Rework / Pending Jobs');
   };
 
   window.skRjDelete=function(id){
@@ -4244,7 +4292,8 @@ img{max-width:100%!important;}
       <div class="sk-rj-card" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div></div>
+          <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
+          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div></div>
           <div><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span></div>
         </div>
         <div class="sk-rj-actions">
@@ -4270,9 +4319,12 @@ img{max-width:100%!important;}
       <div class="sk-rj-card" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div></div>
+          <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
+          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||(j.status==='Delivered'?'Delivered':'Ready for Delivery'))}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div></div>
           <span class="sk-rj-status">${esc(j.status)}</span>
         </div>
+        ${j.status==='Ready'?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-deliver" onclick="event.stopPropagation();skRjDeliver('${j.id}')">🚚 Mark Delivered</button></div>`:''}
+        ${j.status==='Delivered'?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-rework" onclick="event.stopPropagation();skRjRework('${j.id}')">↩️ Customer Rework</button></div>`:''}
         <div style="margin-top:7px;font-size:.65rem;color:var(--primary);font-weight:800">Tap to open full repair details →</div>
       </div>`).join(''):'<div class="sk-rj-empty">No repair history found for selected filters.</div>';
   };

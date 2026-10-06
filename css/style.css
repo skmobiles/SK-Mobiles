@@ -1,501 +1,14 @@
-
-/* PERMANENT BRAND GRADIENT FOR SHOP NAME */
-    :root {
-      --sk-shop-brand-gradient: linear-gradient(135deg, #ea580c 0%, #db2777 55%, #7c3aed 100%) !important;
-    }
-
-    /* 1. LIGHT CLASSIC */
-    :root[data-theme="light"] {
-      --bg: #f8fafc;
-      --page-bg: #f1f5f9;
-      --card-bg: #ffffff;
-      --card-border: #e2e8f0;
-      --primary: #2563eb;
-      --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --input-bg: #ffffff;
-      --pill-bg: #f1f5f9;
-      --model-bg: #f8fafc;
-      --chip-bg: #e2e8f0;
-      --bottom-nav-bg: rgba(255, 255, 255, 0.96);
-      --header-bg: rgba(255, 255, 255, 0.96);
-      --modal-bg: #ffffff;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
-      --badge-bg: rgba(37, 99, 235, 0.08);
-      --badge-border: rgba(37, 99, 235, 0.2);
-      --low-stock-bg: rgba(245, 158, 11, 0.1);
-      --low-stock-border: rgba(245, 158, 11, 0.25);
-      --low-stock-text: #b45309;
-      --glass-btn-bg: #2563eb;
-      --glass-btn-border: #1d4ed8;
-      --glass-btn-text: #ffffff;
-      --glass-pill-active: #2563eb;
-      --glass-pill-border: #1d4ed8;
-      --glass-shadow: 0 4px 14px rgba(37, 99, 235, 0.18);
-      --search-match-bg: #10b981;
-      --search-match-text: #ffffff;
-      --card-elevation: 0 10px 28px rgba(15, 23, 42, 0.08);
-    
-    }
-
-    /* 2. OCEAN BLUE */
-    :root[data-theme="ocean"] {
-      --bg: #f0f9ff;
-      --page-bg: #e0f2fe;
-      --card-bg: #ffffff;
-      --card-border: #bae6fd;
-      --primary: #0284c7;
-      --primary-gradient: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --input-bg: #ffffff;
-      --pill-bg: #e0f2fe;
-      --model-bg: #f0f9ff;
-      --chip-bg: #bae6fd;
-      --bottom-nav-bg: rgba(255, 255, 255, 0.96);
-      --header-bg: rgba(255, 255, 255, 0.96);
-      --modal-bg: #ffffff;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
-      --badge-bg: rgba(2, 132, 199, 0.08);
-      --badge-border: rgba(2, 132, 199, 0.2);
-      --low-stock-bg: rgba(245, 158, 11, 0.1);
-      --low-stock-border: rgba(245, 158, 11, 0.25);
-      --low-stock-text: #b45309;
-      --glass-btn-bg: #0284c7;
-      --glass-btn-border: #0369a1;
-      --glass-btn-text: #ffffff;
-      --glass-pill-active: #0284c7;
-      --glass-pill-border: #0369a1;
-      --glass-shadow: 0 4px 14px rgba(2, 132, 199, 0.18);
-      --search-match-bg: #10b981;
-      --search-match-text: #ffffff;
-      --card-elevation: 0 10px 28px rgba(15, 23, 42, 0.08);
-    
-    }
-
-    /* 3. ROYAL VIOLET */
-    :root[data-theme="royal"] {
-      --bg: #f5f3ff;
-      --page-bg: #ede9fe;
-      --card-bg: #ffffff;
-      --card-border: #ddd6fe;
-      --primary: #7c3aed;
-      --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --input-bg: #ffffff;
-      --pill-bg: #ede9fe;
-      --model-bg: #f5f3ff;
-      --chip-bg: #ddd6fe;
-      --bottom-nav-bg: rgba(255, 255, 255, 0.96);
-      --header-bg: rgba(255, 255, 255, 0.96);
-      --modal-bg: #ffffff;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
-      --badge-bg: rgba(124, 58, 237, 0.08);
-      --badge-border: rgba(124, 58, 237, 0.2);
-      --low-stock-bg: rgba(245, 158, 11, 0.1);
-      --low-stock-border: rgba(245, 158, 11, 0.25);
-      --low-stock-text: #b45309;
-      --glass-btn-bg: #7c3aed;
-      --glass-btn-border: #6d28d9;
-      --glass-btn-text: #ffffff;
-      --glass-pill-active: #7c3aed;
-      --glass-pill-border: #6d28d9;
-      --glass-shadow: 0 4px 14px rgba(124, 58, 237, 0.18);
-      --search-match-bg: #10b981;
-      --search-match-text: #ffffff;
-      --card-elevation: 0 10px 28px rgba(15, 23, 42, 0.08);
-    
-    }
-
-    /* 4. SUNSET */
-    :root[data-theme="sunset"] {
-      --bg: #fff7ed;
-      --page-bg: #ffedd5;
-      --card-bg: #ffffff;
-      --card-border: #fed7aa;
-      --primary: #ea580c;
-      --primary-gradient: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --input-bg: #ffffff;
-      --pill-bg: #ffedd5;
-      --model-bg: #fff7ed;
-      --chip-bg: #fed7aa;
-      --bottom-nav-bg: rgba(255, 255, 255, 0.96);
-      --header-bg: rgba(255, 255, 255, 0.96);
-      --modal-bg: #ffffff;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
-      --badge-bg: rgba(234, 88, 12, 0.08);
-      --badge-border: rgba(234, 88, 12, 0.2);
-      --low-stock-bg: rgba(245, 158, 11, 0.1);
-      --low-stock-border: rgba(245, 158, 11, 0.25);
-      --low-stock-text: #b45309;
-      --glass-btn-bg: #ea580c;
-      --glass-btn-border: #c2410c;
-      --glass-btn-text: #ffffff;
-      --glass-pill-active: #ea580c;
-      --glass-pill-border: #c2410c;
-      --glass-shadow: 0 4px 14px rgba(234, 88, 12, 0.18);
-      --search-match-bg: #10b981;
-      --search-match-text: #ffffff;
-      --card-elevation: 0 10px 28px rgba(15, 23, 42, 0.08);
-    
-    }
-
-    /* 5. EMERALD */
-    :root[data-theme="emerald"] {
-      --bg: #ecfdf5;
-      --page-bg: #d1fae5;
-      --card-bg: #ffffff;
-      --card-border: #a7f3d0;
-      --primary: #059669;
-      --primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --input-bg: #ffffff;
-      --pill-bg: #d1fae5;
-      --model-bg: #ecfdf5;
-      --chip-bg: #a7f3d0;
-      --bottom-nav-bg: rgba(255, 255, 255, 0.96);
-      --header-bg: rgba(255, 255, 255, 0.96);
-      --modal-bg: #ffffff;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
-      --badge-bg: rgba(5, 150, 105, 0.08);
-      --badge-border: rgba(5, 150, 105, 0.2);
-      --low-stock-bg: rgba(245, 158, 11, 0.1);
-      --low-stock-border: rgba(245, 158, 11, 0.25);
-      --low-stock-text: #b45309;
-      --glass-btn-bg: #059669;
-      --glass-btn-border: #047857;
-      --glass-btn-text: #ffffff;
-      --glass-pill-active: #059669;
-      --glass-pill-border: #047857;
-      --glass-shadow: 0 4px 14px rgba(5, 150, 105, 0.18);
-      --search-match-bg: #10b981;
-      --search-match-text: #ffffff;
-      --card-elevation: 0 10px 28px rgba(15, 23, 42, 0.08);
-    
-    }
-
-    /* 6. ROSE */
-    :root[data-theme="rose"] {
-      --bg: #fff1f2;
-      --page-bg: #ffe4e6;
-      --card-bg: #ffffff;
-      --card-border: #fecdd3;
-      --primary: #e11d48;
-      --primary-gradient: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --input-bg: #ffffff;
-      --pill-bg: #ffe4e6;
-      --model-bg: #fff1f2;
-      --chip-bg: #fecdd3;
-      --bottom-nav-bg: rgba(255, 255, 255, 0.96);
-      --header-bg: rgba(255, 255, 255, 0.96);
-      --modal-bg: #ffffff;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
-      --badge-bg: rgba(225, 29, 72, 0.08);
-      --badge-border: rgba(225, 29, 72, 0.2);
-      --low-stock-bg: rgba(245, 158, 11, 0.1);
-      --low-stock-border: rgba(245, 158, 11, 0.25);
-      --low-stock-text: #b45309;
-      --glass-btn-bg: #e11d48;
-      --glass-btn-border: #be123c;
-      --glass-btn-text: #ffffff;
-      --glass-pill-active: #e11d48;
-      --glass-pill-border: #be123c;
-      --glass-shadow: 0 4px 14px rgba(225, 29, 72, 0.18);
-      --search-match-bg: #10b981;
-      --search-match-text: #ffffff;
-      --card-elevation: 0 10px 28px rgba(15, 23, 42, 0.08);
-    
-    }
-
-    /* 7. MIDNIGHT */
-    :root[data-theme="midnight"] {
-      --bg: #eef2ff;
-      --page-bg: #e0e7ff;
-      --card-bg: #ffffff;
-      --card-border: #c7d2fe;
-      --primary: #4f46e5;
-      --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --input-bg: #ffffff;
-      --pill-bg: #e0e7ff;
-      --model-bg: #eef2ff;
-      --chip-bg: #c7d2fe;
-      --bottom-nav-bg: rgba(255, 255, 255, 0.96);
-      --header-bg: rgba(255, 255, 255, 0.96);
-      --modal-bg: #ffffff;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
-      --badge-bg: rgba(79, 70, 229, 0.08);
-      --badge-border: rgba(79, 70, 229, 0.2);
-      --low-stock-bg: rgba(245, 158, 11, 0.1);
-      --low-stock-border: rgba(245, 158, 11, 0.25);
-      --low-stock-text: #b45309;
-      --glass-btn-bg: #4f46e5;
-      --glass-btn-border: #4338ca;
-      --glass-btn-text: #ffffff;
-      --glass-pill-active: #4f46e5;
-      --glass-pill-border: #4338ca;
-      --glass-shadow: 0 4px 14px rgba(79, 70, 229, 0.18);
-      --search-match-bg: #10b981;
-      --search-match-text: #ffffff;
-      --card-elevation: 0 10px 28px rgba(15, 23, 42, 0.08);
-    
-    }
-
-    /* 8. GRAPHITE */
-    :root[data-theme="graphite"] {
-      --bg: #f1f5f9;
-      --page-bg: #e2e8f0;
-      --card-bg: #ffffff;
-      --card-border: #cbd5e1;
-      --primary: #334155;
-      --primary-gradient: linear-gradient(135deg, #475569 0%, #334155 100%);
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --input-bg: #ffffff;
-      --pill-bg: #e2e8f0;
-      --model-bg: #f1f5f9;
-      --chip-bg: #cbd5e1;
-      --bottom-nav-bg: rgba(255, 255, 255, 0.96);
-      --header-bg: rgba(255, 255, 255, 0.96);
-      --modal-bg: #ffffff;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
-      --badge-bg: rgba(51, 65, 85, 0.08);
-      --badge-border: rgba(51, 65, 85, 0.2);
-      --low-stock-bg: rgba(245, 158, 11, 0.1);
-      --low-stock-border: rgba(245, 158, 11, 0.25);
-      --low-stock-text: #b45309;
-      --glass-btn-bg: #334155;
-      --glass-btn-border: #1e293b;
-      --glass-btn-text: #ffffff;
-      --glass-pill-active: #334155;
-      --glass-pill-border: #1e293b;
-      --glass-shadow: 0 4px 14px rgba(51, 65, 85, 0.18);
-      --search-match-bg: #10b981;
-      --search-match-text: #ffffff;
-      --card-elevation: 0 10px 28px rgba(15, 23, 42, 0.08);
-    
-    }
-
-    /* 9. LIME */
-    :root[data-theme="lime"] {
-      --bg: #f7fee7;
-      --page-bg: #ecfccb;
-      --card-bg: #ffffff;
-      --card-border: #d9f99d;
-      --primary: #65a30d;
-      --primary-gradient: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --input-bg: #ffffff;
-      --pill-bg: #ecfccb;
-      --model-bg: #f7fee7;
-      --chip-bg: #d9f99d;
-      --bottom-nav-bg: rgba(255, 255, 255, 0.96);
-      --header-bg: rgba(255, 255, 255, 0.96);
-      --modal-bg: #ffffff;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
-      --badge-bg: rgba(101, 163, 13, 0.08);
-      --badge-border: rgba(101, 163, 13, 0.2);
-      --low-stock-bg: rgba(245, 158, 11, 0.1);
-      --low-stock-border: rgba(245, 158, 11, 0.25);
-      --low-stock-text: #b45309;
-      --glass-btn-bg: #65a30d;
-      --glass-btn-border: #4d7c0f;
-      --glass-btn-text: #ffffff;
-      --glass-pill-active: #65a30d;
-      --glass-pill-border: #4d7c0f;
-      --glass-shadow: 0 4px 14px rgba(101, 163, 13, 0.18);
-      --search-match-bg: #10b981;
-      --search-match-text: #ffffff;
-      --card-elevation: 0 10px 28px rgba(15, 23, 42, 0.08);
-    
-    }
-
-    /* 10. DARK MODE */
-    :root[data-theme="dark"] {
-      --bg: #090e1a;
-      --page-bg: #050811;
-      --card-bg: rgba(17, 26, 46, 0.88);
-      --card-border: rgba(255, 255, 255, 0.09);
-      --primary: #60a5fa;
-      --primary-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --input-bg: rgba(14, 22, 40, 0.85);
-      --pill-bg: rgba(255, 255, 255, 0.06);
-      --model-bg: rgba(11, 18, 33, 0.75);
-      --chip-bg: rgba(255, 255, 255, 0.08);
-      --bottom-nav-bg: rgba(9, 14, 26, 0.95);
-      --header-bg: rgba(9, 14, 26, 0.95);
-      --modal-bg: rgba(13, 21, 39, 0.96);
-      --danger: #f87171;
-      --warning: #fbbf24;
-      --success: #34d399;
-      --badge-bg: rgba(96, 165, 250, 0.12);
-      --badge-border: rgba(96, 165, 250, 0.25);
-      --glass-btn-bg: rgba(59, 130, 246, 0.30);
-      --glass-btn-border: rgba(96, 165, 250, 0.45);
-      --glass-btn-text: #bfdbfe;
-      --glass-pill-active: rgba(59, 130, 246, 0.28);
-      --glass-pill-border: rgba(96, 165, 250, 0.40);
-      --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-      --card-elevation: 0 10px 28px rgba(15, 23, 42, 0.08);
-    
-    }
-
-
-    /* 11. CYBER NEON */
-    :root[data-theme="cyber"] {
-      --bg: #070817;
-      --page-bg: #03040a;
-      --card-bg: rgba(15, 18, 40, 0.86);
-      --card-border: rgba(34, 211, 238, 0.24);
-      --primary: #22d3ee;
-      --primary-gradient: linear-gradient(135deg, #22d3ee 0%, #d946ef 100%);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --input-bg: rgba(15, 23, 42, 0.72);
-      --pill-bg: rgba(34, 211, 238, 0.10);
-      --model-bg: rgba(15, 23, 42, 0.68);
-      --chip-bg: rgba(217, 70, 239, 0.13);
-      --bottom-nav-bg: rgba(3, 4, 10, 0.82);
-      --header-bg: rgba(3, 4, 10, 0.78);
-      --modal-bg: #0b1022;
-      --danger: #fb7185;
-      --warning: #fbbf24;
-      --success: #34d399;
-      --badge-bg: rgba(34, 211, 238, 0.10);
-      --badge-border: rgba(34, 211, 238, 0.28);
-      --low-stock-bg: rgba(251, 191, 36, 0.12);
-      --low-stock-border: rgba(251, 191, 36, 0.30);
-      --low-stock-text: #fbbf24;
-      --glass-btn-bg: #0891b2;
-      --glass-btn-border: #22d3ee;
-      --glass-btn-text: #ffffff;
-      --glass-pill-active: #0891b2;
-      --glass-pill-border: #22d3ee;
-      --glass-shadow: 0 8px 28px rgba(34, 211, 238, 0.20), 0 0 28px rgba(217, 70, 239, 0.10);
-      --search-match-bg: #10b981;
-      --search-match-text: #ffffff;
-      --card-elevation: 0 12px 32px rgba(0, 0, 0, 0.34);
-    }
-
-    /* 12. OBSIDIAN AMBER */
-    :root[data-theme="obsidian"] {
-      --bg: #000000;
-      --page-bg: #000000;
-      --card-bg: rgba(10, 10, 10, 0.94);
-      --card-border: rgba(245, 158, 11, 0.20);
-      --primary: #f59e0b;
-      --primary-gradient: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-      --text: #fafafa;
-      --text-muted: #a3a3a3;
-      --input-bg: #0a0a0a;
-      --pill-bg: #111111;
-      --model-bg: #0b0b0b;
-      --chip-bg: #171717;
-      --bottom-nav-bg: rgba(0, 0, 0, 0.90);
-      --header-bg: rgba(0, 0, 0, 0.88);
-      --modal-bg: #080808;
-      --danger: #f87171;
-      --warning: #fbbf24;
-      --success: #34d399;
-      --badge-bg: rgba(245, 158, 11, 0.10);
-      --badge-border: rgba(245, 158, 11, 0.28);
-      --low-stock-bg: rgba(245, 158, 11, 0.12);
-      --low-stock-border: rgba(245, 158, 11, 0.30);
-      --low-stock-text: #fbbf24;
-      --glass-btn-bg: #d97706;
-      --glass-btn-border: #f59e0b;
-      --glass-btn-text: #ffffff;
-      --glass-pill-active: #d97706;
-      --glass-pill-border: #f59e0b;
-      --glass-shadow: 0 8px 28px rgba(245, 158, 11, 0.16);
-      --search-match-bg: #10b981;
-      --search-match-text: #ffffff;
-      --card-elevation: 0 12px 30px rgba(0, 0, 0, 0.55);
-    }
-
-
-
-/* V4.13+ Theme Expansion — additional distinct palettes */
-:root[data-theme="aurora"]{
-  --bg:#ecfeff;--page-bg:#cffafe;--card-bg:#ffffff;--card-border:#a5f3fc;
-  --primary:#0891b2;--primary-gradient:linear-gradient(135deg,#06b6d4 0%,#4f46e5 100%);
-  --text:#0f172a;--text-muted:#475569;--input-bg:#ffffff;--pill-bg:#cffafe;--model-bg:#ecfeff;--chip-bg:#a5f3fc;
-  --bottom-nav-bg:rgba(255,255,255,.96);--header-bg:rgba(255,255,255,.96);--modal-bg:#ffffff;--danger:#ef4444;--warning:#f59e0b;--success:#10b981;
-  --badge-bg:rgba(8,145,178,.09);--badge-border:rgba(8,145,178,.24);--low-stock-bg:rgba(245,158,11,.1);--low-stock-border:rgba(245,158,11,.25);--low-stock-text:#b45309;
-  --glass-btn-bg:#0891b2;--glass-btn-border:#0e7490;--glass-btn-text:#fff;--glass-pill-active:#0891b2;--glass-pill-border:#0e7490;
-  --glass-shadow:0 5px 18px rgba(8,145,178,.20),0 0 18px rgba(79,70,229,.08);--search-match-bg:#10b981;--search-match-text:#fff;--card-elevation:0 10px 28px rgba(15,23,42,.08);
-}
-:root[data-theme="crimson"]{
-  --bg:#fff1f2;--page-bg:#ffe4e6;--card-bg:#ffffff;--card-border:#fecdd3;
-  --primary:#be123c;--primary-gradient:linear-gradient(135deg,#f43f5e 0%,#be123c 100%);
-  --text:#1f0a12;--text-muted:#6b4652;--input-bg:#ffffff;--pill-bg:#ffe4e6;--model-bg:#fff1f2;--chip-bg:#fecdd3;
-  --bottom-nav-bg:rgba(255,255,255,.96);--header-bg:rgba(255,255,255,.96);--modal-bg:#ffffff;--danger:#dc2626;--warning:#f59e0b;--success:#10b981;
-  --badge-bg:rgba(190,18,60,.08);--badge-border:rgba(190,18,60,.23);--low-stock-bg:rgba(245,158,11,.1);--low-stock-border:rgba(245,158,11,.25);--low-stock-text:#9a3412;
-  --glass-btn-bg:#be123c;--glass-btn-border:#9f1239;--glass-btn-text:#fff;--glass-pill-active:#be123c;--glass-pill-border:#9f1239;
-  --glass-shadow:0 5px 18px rgba(190,18,60,.20),0 0 16px rgba(244,63,94,.08);--search-match-bg:#10b981;--search-match-text:#fff;--card-elevation:0 10px 28px rgba(15,23,42,.08);
-}
-:root[data-theme="mint"]{
-  --bg:#f0fdfa;--page-bg:#ccfbf1;--card-bg:#ffffff;--card-border:#99f6e4;
-  --primary:#0f766e;--primary-gradient:linear-gradient(135deg,#14b8a6 0%,#0f766e 100%);
-  --text:#062b2a;--text-muted:#476b69;--input-bg:#ffffff;--pill-bg:#ccfbf1;--model-bg:#f0fdfa;--chip-bg:#99f6e4;
-  --bottom-nav-bg:rgba(255,255,255,.96);--header-bg:rgba(255,255,255,.96);--modal-bg:#ffffff;--danger:#ef4444;--warning:#f59e0b;--success:#059669;
-  --badge-bg:rgba(15,118,110,.08);--badge-border:rgba(15,118,110,.22);--low-stock-bg:rgba(245,158,11,.1);--low-stock-border:rgba(245,158,11,.25);--low-stock-text:#b45309;
-  --glass-btn-bg:#0f766e;--glass-btn-border:#115e59;--glass-btn-text:#fff;--glass-pill-active:#0f766e;--glass-pill-border:#115e59;
-  --glass-shadow:0 5px 18px rgba(15,118,110,.20),0 0 16px rgba(20,184,166,.08);--search-match-bg:#10b981;--search-match-text:#fff;--card-elevation:0 10px 28px rgba(15,23,42,.08);
-}
-:root[data-theme="solar"]{
-  --bg:#fffbeb;--page-bg:#fef3c7;--card-bg:#ffffff;--card-border:#fde68a;
-  --primary:#b45309;--primary-gradient:linear-gradient(135deg,#f59e0b 0%,#ea580c 100%);
-  --text:#2b1605;--text-muted:#72533a;--input-bg:#ffffff;--pill-bg:#fef3c7;--model-bg:#fffbeb;--chip-bg:#fde68a;
-  --bottom-nav-bg:rgba(255,255,255,.96);--header-bg:rgba(255,255,255,.96);--modal-bg:#ffffff;--danger:#dc2626;--warning:#d97706;--success:#10b981;
-  --badge-bg:rgba(180,83,9,.08);--badge-border:rgba(180,83,9,.22);--low-stock-bg:rgba(245,158,11,.1);--low-stock-border:rgba(245,158,11,.25);--low-stock-text:#92400e;
-  --glass-btn-bg:#b45309;--glass-btn-border:#92400e;--glass-btn-text:#fff;--glass-pill-active:#b45309;--glass-pill-border:#92400e;
-  --glass-shadow:0 5px 18px rgba(180,83,9,.20),0 0 16px rgba(245,158,11,.08);--search-match-bg:#10b981;--search-match-text:#fff;--card-elevation:0 10px 28px rgba(15,23,42,.08);
-}
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    html, body { background-color: var(--page-bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; overflow-x: hidden; scroll-behavior: smooth; }
-    body.modal-open { overflow: hidden !important; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.45); border-radius: 10px; transition: background 0.2s; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
-
-    .app-viewport { width: 100%; max-width: 440px; min-height: 100vh; background: var(--bg); border-left: 1px solid var(--card-border); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; position: relative; box-shadow: 0 4px 30px rgba(0,0,0,0.08); padding-bottom: 74px; }
-
-/* Root responsive guard: the application shell must never exceed the viewport. */
-html, body { width:100%; max-width:100%; overflow-x:hidden !important; }
-.app-viewport { min-width:0; box-sizing:border-box; overflow-x:hidden; }
-.app-viewport > * { min-width:0; max-width:100%; box-sizing:border-box; }
-img, svg, video, canvas, iframe { max-width:100%; }
+/* ============================================================
+   SK MOBILES — GLOBAL TYPOGRAPHY + EDGE-TO-EDGE LAYOUT SOURCE OF TRUTH
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;}
+*{margin:0;padding:0;font-family:'Plus Jakarta Sans',-apple-system,sans-serif !important;-webkit-tap-highlight-color:transparent;}
+h1,h2,h3,h4,.stat-value,.card-title,.badge,strong{font-family:'Plus Jakarta Sans',sans-serif !important;font-weight:700 !important;letter-spacing:-0.02em !important;}
+html,body{width:100%;max-width:100%;margin:0;padding:0;overflow-x:hidden;background-color:#f8fafc;color:var(--text);min-height:100vh;scroll-behavior:smooth;} body.modal-open{overflow:hidden;} .app-viewport{width:100%;max-width:100%;min-width:0;min-height:100vh;margin:0;padding:0 10px 90px;box-sizing:border-box;overflow-x:hidden;} .app-viewport > *{min-width:0;max-width:100%;box-sizing:border-box;} .container,.page-container,.view-section,.tab-content,main,.billing-container{width:100%;max-width:100%;margin:0;padding:0;box-sizing:border-box;} .card,.form-section,.bill-card,.content-box,.panel{width:100%;max-width:100%;margin-left:0;margin-right:0;margin-bottom:12px;box-sizing:border-box;} .content-area{width:100%;max-width:100%;margin:0;padding:0;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:rgba(148,163,184,.45);border-radius:10px;transition:background .2s;}
+::-webkit-scrollbar-thumb:hover{background:var(--primary);}
+img,svg,video,canvas,iframe{max-width:100%;}
     
     .app-header { position: sticky; top: 0; z-index: 100; background: var(--header-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--card-border); padding: 8px 16px; min-height: 72px; display: flex; flex-direction: column; justify-content: center; }
     .header-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
@@ -503,7 +16,7 @@ img, svg, video, canvas, iframe { max-width:100%; }
     
     .sk-logo-img { width: 56px !important; height: 56px !important; border-radius: 50% !important; object-fit: cover !important; background: #ffffff !important; border: 2px solid rgba(234,88,12,0.3); flex-shrink: 0; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     
-    .app-name { font-family: 'Outfit', sans-serif !important; font-size: 24px !important; font-weight: 950 !important; background: var(--sk-shop-brand-gradient) !important; -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important; line-height: 1.1; }
+    .app-name { font-size: 24px !important; font-weight: 950 !important; background: var(--sk-shop-brand-gradient) !important; -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important; line-height: 1.1; }
     .app-sub { font-size: 11.5px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; margin-top: 1px; }
     
     .menu-icon-btn { background: var(--badge-bg); border: 1px solid var(--badge-border); color: var(--primary); font-size: 1.25rem; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -633,7 +146,7 @@ img, svg, video, canvas, iframe { max-width:100%; }
     .invoice-logo-wrap { width: 92px !important; height: 92px !important; flex: 0 0 92px !important; border-radius: 50% !important; overflow: hidden !important; background: #ffffff !important; border: 2px solid #edf0f6 !important; box-shadow: 0 4px 16px rgba(0,0,0,0.06); display: flex !important; align-items: center !important; justify-content: center !important; }
     .invoice-logo { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; }
     .invoice-shop-info { flex: 1 !important; text-align: right !important; display: flex !important; flex-direction: column !important; align-items: flex-end !important; }
-    .invoice-shop-name { font-family: 'Outfit', sans-serif !important; font-size: clamp(1.45rem, 5.5vw, 1.95rem) !important; font-weight: 950 !important; letter-spacing: 0.8px !important; line-height: 1.05 !important; color: #d9166f !important; margin-bottom: 3px !important; }
+    .invoice-shop-name { font-size: clamp(1.45rem, 5.5vw, 1.95rem) !important; font-weight: 950 !important; letter-spacing: 0.8px !important; line-height: 1.05 !important; color: #d9166f !important; margin-bottom: 3px !important; }
     .invoice-address { margin-top: 4px !important; font-size: 0.67rem !important; line-height: 1.45 !important; font-weight: 700 !important; color: #334155 !important; text-align: right !important; }
     .invoice-phone { margin-top: 6px !important; font-size: 0.78rem !important; font-weight: 900 !important; color: #e11d48 !important; display: flex !important; align-items: center !important; gap: 4px !important; }
     .invoice-meta-row { display: flex; justify-content: space-between; font-size: .73rem; color: #24304b; margin: 12px 0 10px; padding: 9px 12px; border: 1.5px solid #ececf5; border-radius: 12px; background: #faf8ff; }
@@ -667,12 +180,12 @@ img, svg, video, canvas, iframe { max-width:100%; }
     }
 
 @page { size: portrait; margin: 12mm; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; background: #fff; color: #1e293b; }
+    body { margin: 0; padding: 0; background: #fff; color: #1e293b; }
     .invoice-brand-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1.5px solid #edf0f6; padding-bottom: 14px; }
     .invoice-logo-wrap { width: 92px; height: 92px; border-radius: 50%; overflow: hidden; border: 2px solid #edf0f6; flex-shrink: 0; }
     .invoice-logo { width: 100%; height: 100%; object-fit: cover; }
     .invoice-shop-info { text-align: right; }
-    .invoice-shop-name { font-family: 'Outfit', sans-serif; font-size: 1.85rem; font-weight: 950; color: #d9166f; margin-bottom: 3px; }
+    .invoice-shop-name { font-size: 1.85rem; font-weight: 950; color: #d9166f; margin-bottom: 3px; }
     .invoice-address { font-size: 0.68rem; line-height: 1.45; font-weight: 700; color: #334155; }
     .invoice-phone { font-size: 0.78rem; font-weight: 900; color: #e11d48; margin-top: 6px; }
     .invoice-meta-row { display: flex; justify-content: space-between; font-size: .73rem; margin: 12px 0 10px; padding: 9px 12px; border: 1.5px solid #ececf5; border-radius: 12px; background: #faf8ff; }
@@ -777,7 +290,7 @@ img, svg, video, canvas, iframe { max-width:100%; }
     .sk-worker-row-main{min-width:0;flex:1}.sk-worker-row-name{font-weight:900;font-size:.82rem}.sk-worker-row-sub{font-size:.68rem;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .sk-worker-row-actions{display:flex;gap:5px}.sk-mini-btn{border:1px solid var(--card-border);border-radius:9px;padding:6px 8px;font-weight:800;cursor:pointer;background:var(--pill-bg);color:var(--text)}
     .sk-mini-danger{color:#b91c1c}.sk-profile-photo{width:82px;height:82px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);background:var(--pill-bg);display:block;margin:0 auto 8px}
-    .sk-password-view{font-family:monospace;letter-spacing:1px}
+    .sk-password-view{letter-spacing:1px}
     .sk-worker-login-select{display:none;width:100%;margin:0 0 8px;padding:11px 12px;border:1px solid var(--card-border);border-radius:12px;background:var(--input-bg,var(--card-bg));color:var(--text);font-weight:800}
     .sk-worker-login-select.sk-show{display:block}
 
@@ -1434,19 +947,17 @@ html[data-font-family="ibmplex"]{--app-font:'IBM Plex Sans',sans-serif;}
 html[data-font-family="josefin"]{--app-font:'Josefin Sans',sans-serif;}
 html[data-font-family="playfair"]{--app-font:'Playfair Display',serif;}
 
-body{font-family:var(--app-font);}
-.app-viewport,.app-viewport *{font-family:var(--app-font);}
-.app-name,.drawer-title,.sk-home-welcome-title{font-family:var(--app-font) !important;}
-.invoice-emi-schedule-preview,.invoice-shop-name,#printableInvoiceCard{font-family:'Plus Jakarta Sans',sans-serif;}
+body{}
+.app-viewport,.app-viewport *{}
+.app-name,.drawer-title,.sk-home-welcome-title{}
+.invoice-emi-schedule-preview,.invoice-shop-name,#printableInvoiceCard{}
 
 /* V4.17 FONT FIX: selected font must visibly override legacy fixed-font rules. */
 html[data-font-family] body,
 html[data-font-family] body *{
-  font-family:var(--app-font);
 }
 /* Font picker cards keep their own preview face. */
 html[data-font-family] .sk-font-choice{
-  font-family:inherit;
 }
 /* Bills / invoices intentionally keep their fixed print font. */
 #skFixedInvoiceRoot,
@@ -1456,7 +967,6 @@ html[data-font-family] .sk-font-choice{
 .invoice-emi-schedule-preview,
 .invoice-emi-schedule-preview *,
 .invoice-shop-name{
-  font-family:'Plus Jakarta Sans',sans-serif !important;
 }
 .sk-font-preview{
   display:flex;
@@ -1971,7 +1481,7 @@ input[data-dmy-date]{letter-spacing:.02em;}
 }
 
 #leftDrawer .left-drawer-content{
-  width:min(340px,88vw);
+  width:min(300px,82vw);
   padding:16px 14px 14px;
   gap:11px;
   background:color-mix(in srgb,var(--modal-bg) 82%, transparent);
@@ -4779,7 +4289,7 @@ button.form-secondary:focus-visible{
   top:auto;
   z-index:12;
   min-height:58px;
-  margin:0;
+  margin:10px 12px;
   padding:10px 12px;
   border-bottom:1px solid var(--card-border);
   background:color-mix(in srgb,var(--modal-bg) 88%,var(--primary) 12%);
@@ -4796,7 +4306,7 @@ button.form-secondary:focus-visible{
 
 /* Tabs and mobile-type selector: compact, high-contrast controls. */
 #billingModal .billing-tabs{
-  margin:10px 12px 8px;
+  margin:0 12px 8px;
   padding:3px;
   gap:4px;
   border-radius:15px;
@@ -5002,14 +4512,6 @@ button.form-secondary:focus-visible{
     width:min(700px,calc(100vw - 48px));
     max-width:700px;
   }
-  #billingModal #billNewView{
-    padding-left:14px;
-    padding-right:14px;
-  }
-  #billingModal #billHistoryView{
-    padding-left:14px;
-    padding-right:14px;
-  }
 }
 
 @media (max-width:760px){
@@ -5031,13 +4533,13 @@ button.form-secondary:focus-visible{
     -webkit-overflow-scrolling:auto;
   }
   #billingModal .mobile-type-tabs{
-    margin-left:10px;
-    margin-right:10px;
+    margin-left:12px;
+    margin-right:12px;
   }
   #billingModal #billNewView,
   #billingModal #billHistoryView{
-    padding-left:10px;
-    padding-right:10px;
+    padding-left:12px;
+    padding-right:12px;
   }
   #billingModal .billing-modern .bill-section{
     padding:10px;
@@ -5859,8 +5361,8 @@ button.form-secondary:focus-visible{
 }
 @media (min-width:900px){
   .left-drawer-content{
-    width:352px;
-    max-width:352px;
+    width:320px;
+    max-width:320px;
     padding:18px 15px 13px;
   }
   .menu-drawer-btn{
@@ -5869,8 +5371,8 @@ button.form-secondary:focus-visible{
 }
 @media (max-width:600px){
   .left-drawer-content{
-    width:min(340px,91vw);
-    max-width:340px;
+    width:min(300px,82vw);
+    max-width:300px;
     padding:13px 11px 10px;
     border-top-right-radius:22px;
     border-bottom-right-radius:22px;
@@ -6709,7 +6211,7 @@ button:focus-visible,
 }
 #repairSparesModal .repair-spares-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
 #repairSparesModal .repair-spares-action{
-  min-height:48px;border-radius:15px !important;font-family:var(--app-font) !important;font-size:.86rem;font-weight:850;
+  min-height:48px;border-radius:15px !important;font-size:.86rem;font-weight:850;
 }
 #repairSparesModal .repair-spares-save{
   background:linear-gradient(135deg,var(--soft-btn-primary-start),var(--soft-btn-primary-end)) !important;
@@ -6732,7 +6234,7 @@ button:focus-visible,
 .modal-overlay{position:fixed !important;inset:0 !important;width:100vw !important;height:100dvh !important;max-width:none !important;max-height:none !important;padding:0 !important;margin:0 !important;display:none !important;align-items:stretch !important;justify-content:stretch !important;box-sizing:border-box !important;background:var(--page-bg) !important;background-image:radial-gradient(circle at 15% 8%,color-mix(in srgb,var(--primary) 5%,transparent),transparent 34%),radial-gradient(circle at 90% 22%,rgba(255,255,255,.72),transparent 38%) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;overflow:hidden !important;overscroll-behavior:none !important;z-index:2147483000 !important;}
 .modal-overlay.active{display:flex !important;}
 .modal-overlay > .modal-sheet{position:relative !important;width:100% !important;max-width:none !important;min-width:0 !important;height:100dvh !important;max-height:none !important;min-height:0 !important;margin:0 !important;padding:max(12px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(88px,calc(76px + env(safe-area-inset-bottom))) max(14px,env(safe-area-inset-left)) !important;box-sizing:border-box !important;border:0 !important;border-radius:0 !important;background:transparent !important;box-shadow:none !important;overflow-y:auto !important;overflow-x:hidden !important;overscroll-behavior:contain !important;-webkit-overflow-scrolling:touch !important;}
-.modal-overlay > .modal-sheet > .modal-title{position:sticky !important;top:0 !important;z-index:50 !important;min-height:64px !important;margin:0 0 14px !important;padding:10px 10px 10px 14px !important;border:1px solid color-mix(in srgb,var(--card-border) 82%,#fff 18%) !important;border-radius:24px !important;background:color-mix(in srgb,var(--card-bg) 94%,transparent) !important;box-shadow:0 8px 22px rgba(15,23,42,.045) !important;backdrop-filter:blur(16px) !important;-webkit-backdrop-filter:blur(16px) !important;font-size:clamp(1.05rem,4.2vw,1.32rem) !important;line-height:1.2 !important;letter-spacing:-.02em !important;box-sizing:border-box !important;}
+.modal-overlay > .modal-sheet > .modal-title{position:sticky !important;top:0 !important;z-index:50 !important;min-height:54px !important;margin:0 0 10px !important;padding:7px 9px 7px 12px !important;border:1px solid color-mix(in srgb,var(--card-border) 82%,#fff 18%) !important;border-radius:18px !important;background:color-mix(in srgb,var(--card-bg) 94%,transparent) !important;box-shadow:0 6px 18px rgba(15,23,42,.045) !important;backdrop-filter:blur(16px) !important;-webkit-backdrop-filter:blur(16px) !important;font-size:clamp(1rem,4vw,1.18rem) !important;line-height:1.15 !important;letter-spacing:-.02em !important;box-sizing:border-box !important;}
 .modal-overlay > .modal-sheet > .modal-title .modal-close-btn{flex:0 0 46px !important;width:46px !important;height:46px !important;min-width:46px !important;min-height:46px !important;border-radius:50% !important;font-size:1.35rem !important;}
 .modal-overlay > .modal-sheet > :not(.modal-title){max-width:100% !important;min-width:0 !important;}
 .modal-overlay > .modal-sheet input,.modal-overlay > .modal-sheet select,.modal-overlay > .modal-sheet textarea,.modal-overlay > .modal-sheet button,.modal-overlay > .modal-sheet img,.modal-overlay > .modal-sheet table{max-width:100%;box-sizing:border-box;}
@@ -6747,7 +6249,7 @@ html,body{overscroll-behavior-x:none !important;}
 #billingModal .billing-modern{overflow-y:auto !important;overflow-x:hidden !important;-webkit-overflow-scrolling:touch !important;}
 #billingModal .billing-modern > .modal-title{position:sticky !important;top:0 !important;z-index:30 !important;}
 #billingModal #billNewView,#billingModal #billHistoryView{min-width:0 !important;height:auto !important;max-height:none !important;}
-@media(max-width:760px){.modal-overlay > .modal-sheet > .modal-title{min-height:60px !important;border-radius:22px !important;}.menu-drawer-btn{min-height:54px !important;border-radius:20px !important;}.menu-icon-pod{width:40px !important;height:40px !important;flex-basis:40px !important;border-radius:14px !important;}}
+@media(max-width:760px){.modal-overlay > .modal-sheet > .modal-title{min-height:52px !important;border-radius:18px !important;padding-top:6px !important;padding-bottom:6px !important;}.menu-drawer-btn{min-height:54px !important;border-radius:20px !important;}.menu-icon-pod{width:40px !important;height:40px !important;flex-basis:40px !important;border-radius:14px !important;}}
 
 
 /* ============================================================
@@ -6880,9 +6382,6 @@ html[data-ui-aura="off"] body:before,html[data-ui-aura="off"] body:after{display
 html[data-ui-motion="on"] *,html[data-ui-motion="on"] *::before,html[data-ui-motion="on"] *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important;transform:none!important;}
 
 /* Responsive shell. Keep the mobile app edge-to-edge and give desktop a stable centered canvas. */
-.app-viewport{width:100%;min-width:0;box-sizing:border-box;}
-@media(min-width:761px){.app-viewport{width:min(760px,100vw)!important;max-width:760px!important;margin:0 auto!important;}}
-@media(max-width:760px){.app-viewport{width:100%!important;max-width:100%!important;margin:0!important;}}
 html[data-ui-scale="compact"] .app-viewport{font-size:92%;}
 html[data-ui-scale="comfortable"] .app-viewport{font-size:108%;}
 
@@ -6905,9 +6404,6 @@ html[data-ui-scale="comfortable"] .app-viewport{font-size:108%;}
    Shared alignment + professional defaults. Appearance Studio tokens
    override the radius/surface values at runtime.
    ============================================================ */
-.app-viewport{width:100%;min-width:0;box-sizing:border-box;}
-@media(min-width:761px){.app-viewport{width:min(760px,100vw)!important;max-width:760px!important;margin:0 auto!important;}}
-@media(max-width:760px){.app-viewport{width:100%!important;max-width:100%!important;margin:0!important;}}
 body.modal-open{overflow:hidden!important;}
 body.modal-open .app-viewport{overflow:hidden!important;height:100dvh!important;}
 html,body{overscroll-behavior-x:none!important;}
@@ -7037,12 +6533,12 @@ html[data-ui-mode="dark"][data-ui-surface="offwhite"] body,html[data-ui-mode="da
 /* ============================================================
    SK MOBILES — TARGETED REPAIR PAGES + NAV FINAL OVERRIDES
    ============================================================ */
-#skRepairJobsModal .sk-rj-tabs{grid-template-columns:repeat(3,minmax(0,1fr));}
+#skRepairJobsModal .sk-rj-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:6px !important;align-items:center !important;}
 #skRepairJobsModal #skRjJobsView,#skRepairJobsModal #skRjPendingView,#skRepairJobsModal #skRjHistoryView{max-height:calc(92vh - 125px);overflow:auto;padding:2px 12px 14px;box-sizing:border-box;scrollbar-width:thin;}
 #skRepairJobsModal .sk-rj-page-head{display:flex;flex-direction:column;gap:3px;margin:2px 0 8px;padding:10px 11px;background:var(--model-bg);border:1px solid var(--card-border);border-radius:var(--ui-card-radius);}
 #skRepairJobsModal .sk-rj-page-head b{font-size:.78rem;color:var(--text);}
 #skRepairJobsModal .sk-rj-page-head small{font-size:.62rem;color:var(--text-muted);}
-@media(max-width:620px){#skRepairJobsModal .sk-rj-tabs{grid-template-columns:1fr;}}
+@media(max-width:620px){#skRepairJobsModal .sk-rj-tabs{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:5px !important;}}
 
 
 
@@ -7287,242 +6783,30 @@ html[data-ui-mode="dark"][data-ui-surface="offwhite"] body,html[data-ui-mode="da
 
 /* ============================================================
    SK MOBILES — FLOATING BULB FAB NAVIGATION
-   Canonical navigation source of truth.
-   Five equal 20% slots; existing IDs/onclick handlers preserved.
+   Single canonical implementation. Five equal slots.
+   Existing IDs and onclick handlers remain untouched.
    ============================================================ */
-.bottom-nav{
-  position:fixed !important;
-  left:50% !important;
-  right:auto !important;
-  bottom:12px !important;
-  width:92% !important;
-  max-width:430px !important;
-  height:62px !important;
-  margin:0 !important;
-  padding:0 6px !important;
-  box-sizing:border-box !important;
-  display:grid !important;
-  grid-template-columns:repeat(5,minmax(0,1fr)) !important;
-  align-items:center !important;
-  justify-items:stretch !important;
-  gap:0 !important;
-  overflow:visible !important;
-  z-index:2147483647 !important;
-  transform:translateX(-50%) !important;
-  background:rgba(255,255,255,.94) !important;
-  backdrop-filter:blur(18px) !important;
-  -webkit-backdrop-filter:blur(18px) !important;
-  border:1px solid rgba(226,232,240,.85) !important;
-  border-radius:24px !important;
-  box-shadow:0 10px 25px rgba(0,0,0,.08) !important;
-  -webkit-tap-highlight-color:transparent !important;
-}
-
-.bottom-nav > .nav-item{
-  width:100% !important;
-  max-width:100% !important;
-  min-width:0 !important;
-  height:62px !important;
-  min-height:62px !important;
-  margin:0 !important;
-  padding:0 2px !important;
-  box-sizing:border-box !important;
-  display:flex !important;
-  flex:1 1 0 !important;
-  flex-direction:column !important;
-  align-items:center !important;
-  justify-content:center !important;
-  gap:3px !important;
-  position:relative !important;
-  border:0 !important;
-  outline:0 !important;
-  border-radius:0 !important;
-  background:transparent !important;
-  box-shadow:none !important;
-  color:#64748b !important;
-  font-family:var(--app-font) !important;
-  font-size:11px !important;
-  font-weight:700 !important;
-  line-height:1 !important;
-  text-align:center !important;
-  cursor:pointer !important;
-  appearance:none !important;
-  -webkit-appearance:none !important;
-  transition:color .18s ease,transform .18s ease !important;
-  -webkit-tap-highlight-color:transparent !important;
-}
-
-/* Absolute purge of rectangular side-button styling. */
-.bottom-nav > .nav-item:not(#navHome),
-.bottom-nav > .nav-item:not(#navHome):hover,
-.bottom-nav > .nav-item:not(#navHome):focus,
-.bottom-nav > .nav-item:not(#navHome):focus-visible,
-.bottom-nav > .nav-item:not(#navHome):active,
-.bottom-nav button:not(#navHome),
-.bottom-nav button:not(#navHome):hover,
-.bottom-nav button:not(#navHome):focus,
-.bottom-nav button:not(#navHome):focus-visible{
-  border:0 !important;
-  outline:0 !important;
-  background:transparent !important;
-  box-shadow:none !important;
-  border-radius:0 !important;
-}
-
+.bottom-nav{position:fixed !important;bottom:12px !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:calc(100% - 24px) !important;max-width:440px !important;height:64px !important;display:grid !important;grid-template-columns:repeat(5,minmax(0,1fr)) !important;align-items:center !important;justify-items:stretch !important;gap:0 !important;padding:0 4px !important;margin:0 !important;box-sizing:border-box !important;background:rgba(255,255,255,.94) !important;backdrop-filter:blur(18px) !important;-webkit-backdrop-filter:blur(18px) !important;border-radius:26px !important;border:1px solid rgba(226,232,240,.85) !important;box-shadow:0 12px 30px rgba(0,0,0,.08) !important;z-index:9999 !important;overflow:visible !important;}
+.bottom-nav > .nav-item{grid-row:1 !important;width:100% !important;max-width:100% !important;min-width:0 !important;height:64px !important;min-height:64px !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;gap:3px !important;margin:0 !important;padding:4px 0 !important;box-sizing:border-box !important;position:relative !important;appearance:none !important;-webkit-appearance:none !important;background:transparent !important;border:none !important;border-radius:0 !important;box-shadow:none !important;outline:none !important;color:#64748b !important;cursor:pointer !important;text-align:center !important;-webkit-tap-highlight-color:transparent !important;transition:transform .16s ease,color .16s ease !important;}
+.bottom-nav > .nav-item:not(#navHome){grid-column:auto !important;}
+.bottom-nav > .nav-item:not(#navHome):hover,.bottom-nav > .nav-item:not(#navHome):focus,.bottom-nav > .nav-item:not(#navHome):focus-visible,.bottom-nav > .nav-item:not(#navHome):active{background:transparent !important;border:none !important;box-shadow:none !important;outline:none !important;}
 .bottom-nav > .nav-item:not(#navHome):active{transform:scale(.92) !important;}
-.bottom-nav > .nav-item.active:not(#navHome){color:#2563eb !important;font-weight:850 !important;}
-.bottom-nav > .nav-item svg{
-  width:21px !important;
-  height:21px !important;
-  flex:0 0 21px !important;
-  margin:0 !important;
-  color:currentColor !important;
-  stroke-width:1.9 !important;
-  filter:none !important;
-  transform:none !important;
-}
-.bottom-nav > .nav-item span{
-  display:block !important;
-  width:100% !important;
-  max-width:100% !important;
-  min-width:0 !important;
-  margin:0 !important;
-  padding:0 !important;
-  overflow:hidden !important;
-  text-overflow:ellipsis !important;
-  white-space:nowrap !important;
-  font-size:11px !important;
-  line-height:1 !important;
-}
-
-/* Slot 3: exact middle column; the actual circle is the pseudo-element. */
-.bottom-nav > #navHome{
-  grid-column:3 !important;
-  width:100% !important;
-  max-width:100% !important;
-  min-width:0 !important;
-  height:62px !important;
-  min-height:62px !important;
-  margin:0 !important;
-  padding:0 !important;
-  border:0 !important;
-  outline:0 !important;
-  border-radius:0 !important;
-  background:transparent !important;
-  box-shadow:none !important;
-  color:#fff !important;
-  transform:none !important;
-  z-index:5 !important;
-  appearance:none !important;
-  -webkit-appearance:none !important;
-}
-.bottom-nav > #navHome::before{
-  content:"" !important;
-  position:absolute !important;
-  left:50% !important;
-  top:50% !important;
-  width:52px !important;
-  height:52px !important;
-  margin:0 !important;
-  transform:translate(-50%,-50%) translateY(-16px) !important;
-  border-radius:50% !important;
-  background:linear-gradient(135deg,#2563eb,#1d4ed8) !important;
-  border:3.5px solid #fff !important;
-  box-shadow:0 10px 22px rgba(37,99,235,.42) !important;
-  pointer-events:none !important;
-  box-sizing:border-box !important;
-}
-.bottom-nav > #navHome:hover,
-.bottom-nav > #navHome:focus,
-.bottom-nav > #navHome:focus-visible{
-  border:0 !important;
-  outline:0 !important;
-  background:transparent !important;
-  box-shadow:none !important;
-  color:#fff !important;
-}
-.bottom-nav > #navHome:active{transform:none !important;}
-.bottom-nav > #navHome:active::before{
-  transform:translate(-50%,-50%) translateY(-16px) scale(.92) !important;
-}
+.bottom-nav > .nav-item.active:not(#navHome){color:#2563eb !important;font-weight:700 !important;}
+.bottom-nav > .nav-item svg{width:20px !important;height:20px !important;flex:0 0 20px !important;margin:0 !important;color:currentColor !important;stroke-width:1.9 !important;filter:none !important;transform:none !important;}
+.bottom-nav > .nav-item span{display:block !important;width:100% !important;max-width:100% !important;min-width:0 !important;margin:3px 0 0 !important;padding:0 !important;overflow:hidden !important;text-overflow:ellipsis !important;white-space:nowrap !important;font-size:11px !important;line-height:1 !important;font-weight:600 !important;color:inherit !important;}
+.bottom-nav > #navHome{grid-column:3 !important;width:100% !important;max-width:100% !important;height:64px !important;min-height:64px !important;display:flex !important;align-items:center !important;justify-content:center !important;margin:0 !important;padding:0 !important;background:transparent !important;border:none !important;border-radius:0 !important;box-shadow:none !important;outline:none !important;color:#fff !important;transform:none !important;z-index:10 !important;}
+.bottom-nav > #navHome::before{content:"" !important;position:absolute !important;left:50% !important;top:50% !important;width:52px !important;height:52px !important;margin:0 !important;transform:translate(-50%,-50%) translateY(-16px) !important;border-radius:50% !important;background:linear-gradient(135deg,#2563eb,#1d4ed8) !important;border:3.5px solid #fff !important;box-shadow:0 10px 22px rgba(37,99,235,.42) !important;box-sizing:border-box !important;pointer-events:none !important;}
+.bottom-nav > #navHome:hover,.bottom-nav > #navHome:focus,.bottom-nav > #navHome:focus-visible,.bottom-nav > #navHome:active{background:transparent !important;border:none !important;box-shadow:none !important;outline:none !important;color:#fff !important;}
+.bottom-nav > #navHome:active::before{transform:translate(-50%,-50%) translateY(-16px) scale(.92) !important;}
 .bottom-nav > #navHome span{display:none !important;}
-.bottom-nav > #navHome svg{
-  position:relative !important;
-  z-index:2 !important;
-  width:25px !important;
-  height:25px !important;
-  flex:0 0 25px !important;
-  margin:0 !important;
-  transform:translateY(-16px) !important;
-  color:#fff !important;
-  stroke-width:2.25 !important;
-  filter:none !important;
-  pointer-events:none !important;
-}
-
-/* Keep the user-requested purge selectors active without affecting the FAB. */
-.bottom-nav button:not(.home-btn),
-.nav-item:not(.home-btn),
-.tab-bar button:not(.home-btn){
-  border:none !important;
-  background:transparent !important;
-  box-shadow:none !important;
-}
-
-@media(max-width:600px){
-  .bottom-nav{
-    width:92% !important;
-    max-width:430px !important;
-    height:62px !important;
-    bottom:12px !important;
-    padding:0 6px !important;
-    grid-template-columns:repeat(5,minmax(0,1fr)) !important;
-  }
-  .bottom-nav > .nav-item{
-    width:100% !important;
-    max-width:100% !important;
-    height:62px !important;
-    min-height:62px !important;
-  }
-}
-@media(prefers-reduced-motion:reduce){
-  .bottom-nav > .nav-item,
-  .bottom-nav > .nav-item::before,
-  .bottom-nav > .nav-item::after,
-  .bottom-nav > .nav-item svg{transition:none !important;}
-}
+.bottom-nav > #navHome svg{position:relative !important;z-index:2 !important;width:22px !important;height:22px !important;flex:0 0 22px !important;margin:0 !important;transform:translateY(-16px) !important;color:#fff !important;stroke-width:2.25 !important;filter:none !important;pointer-events:none !important;}
+@media(max-width:600px){.bottom-nav{width:calc(100% - 24px) !important;max-width:440px !important;height:64px !important;bottom:12px !important;padding:0 4px !important;}}
+@media(prefers-reduced-motion:reduce){.bottom-nav,.bottom-nav > .nav-item,.bottom-nav > .nav-item::before,.bottom-nav > .nav-item svg{transition:none !important;}}
 
 /* ============================================================
    SK MOBILES — APPEARANCE STUDIO FUNCTIONALITY BRIDGE
    Only connects existing Studio controls to existing app surfaces.
    ============================================================ */
-html[data-ui-nav="fixed"] .bottom-nav{
-  left:0 !important;
-  right:0 !important;
-  bottom:0 !important;
-  width:100% !important;
-  max-width:none !important;
-  height:62px !important;
-  transform:none !important;
-  border-radius:0 !important;
-  border-left:0 !important;
-  border-right:0 !important;
-  border-bottom:0 !important;
-}
-html[data-ui-nav="floating"] .bottom-nav{
-  left:50% !important;
-  right:auto !important;
-  bottom:12px !important;
-  width:92% !important;
-  max-width:430px !important;
-  height:62px !important;
-  transform:translateX(-50%) !important;
-  border-radius:24px !important;
-  border:1px solid rgba(226,232,240,.85) !important;
-}
-html[data-ui-nav="fixed"] .bottom-nav > .nav-item,
-html[data-ui-nav="floating"] .bottom-nav > .nav-item{width:100% !important;max-width:100% !important;}
-
 html[data-ui-header="glass"] .app-header,
 html[data-ui-header="solid"] .app-header,
 html[data-ui-header="minimal"] .app-header{transition:background .18s ease,box-shadow .18s ease,border-color .18s ease;}
@@ -7589,4 +6873,709 @@ html[data-ui-card-surface="shadow"] :is(.sk-ui-section,.sk-ui-preview,.sk-ui-pre
 .app-viewport #skUrgentRepairCard .sk-ur-icon,
 .app-viewport #skUrgentRepairCard .sk-ur-arrow{
   font-size:revert !important;
+}
+
+/* SK MOBILES — Repair delivery / rework status presentation */
+#skRepairJobsModal .sk-rj-delivery-meta{
+  margin-top:5px;
+  font-size:.66rem;
+  line-height:1.45;
+  color:var(--text-muted);
+  overflow-wrap:anywhere;
+}
+#skRepairJobsModal .sk-rj-delivery-meta b{
+  color:var(--text);
+  font-weight:850;
+}
+#skRepairJobsModal .sk-rj-delivery-actions{
+  display:flex;
+  gap:7px;
+  margin-top:8px;
+}
+#skRepairJobsModal .sk-rj-delivery-actions button{
+  width:100%;
+  min-height:38px;
+  border-radius:10px !important;
+  font-size:.69rem;
+  font-weight:850;
+  box-sizing:border-box;
+}
+#skRepairJobsModal .sk-rj-deliver{
+  background:var(--primary) !important;
+  color:#fff !important;
+  border:1px solid var(--primary) !important;
+}
+#skRepairJobsModal .sk-rj-rework{
+  background:color-mix(in srgb,#f59e0b 10%,var(--card-bg)) !important;
+  color:#b45309 !important;
+  border:1px solid rgba(245,158,11,.28) !important;
+}
+
+
+/* ============================================================
+   SK MOBILES — CANONICAL PAGE WIDTH SYSTEM
+   Single 10px application gutter. No nested horizontal gutters.
+   ============================================================ */
+html,body{
+  width:100%;
+  max-width:100%;
+  margin:0;
+  padding:0;
+  overflow-x:hidden;
+  box-sizing:border-box;
+}
+html,body,*{box-sizing:border-box;}
+
+.app-viewport{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  margin:0;
+  padding:0 8px 90px;
+  box-sizing:border-box;
+}
+
+.app-viewport > .content-area,
+.app-viewport > main,
+.app-viewport > .container,
+.app-viewport > .page-container,
+.app-viewport > .view-section,
+.app-viewport > .tab-content,
+.app-viewport > .billing-container{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+.app-viewport > .content-area{
+  padding-top:10px;
+  padding-bottom:90px;
+}
+
+.app-viewport > .content-area > *,
+.app-viewport > main > *,
+.app-viewport > .container > *,
+.app-viewport > .page-container > *,
+.app-viewport > .view-section > *,
+.app-viewport > .tab-content > *,
+.app-viewport > .billing-container > *{
+  width:auto;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+
+.app-viewport :is(.card,.form-section,.bill-card,.content-box,.panel,.glass-card,.form-card,.summary-card,.history-card,.sk-home-action-row,.sk-home-metric-card,.sk-rj-card,.models-section){
+  width:100%;
+  max-width:100%;
+  margin-left:0;
+  margin-right:0;
+  box-sizing:border-box;
+}
+
+/* Repair Jobs: one outer gutter only; internal views/cards use full width. */
+#skRepairJobsModal > .modal-sheet{
+  width:calc(100% - 16px);
+  max-width:760px;
+  padding-left:8px;
+  padding-right:8px;
+  box-sizing:border-box;
+}
+#skRepairJobsModal #skRjJobsView,
+#skRepairJobsModal #skRjPendingView,
+#skRepairJobsModal #skRjHistoryView{
+  width:100%;
+  max-width:100%;
+  margin:0;
+  padding-left:0;
+  padding-right:0;
+  box-sizing:border-box;
+}
+#skRepairJobsModal .sk-rj-card,
+#skRepairJobsModal .sk-rj-empty,
+#skRepairJobsModal #skUrgentRepairCard{
+  width:100%;
+  max-width:100%;
+  margin-left:0;
+  margin-right:0;
+  box-sizing:border-box;
+}
+
+@media(min-width:761px){
+  .app-viewport{
+    width:100%;
+    max-width:100%;
+    margin:0;
+  }
+}
+
+
+/* ============================================================
+   SK MOBILES — CANONICAL MODAL EDGE ALIGNMENT
+   Billing uses the same single outer gutter as Settings.
+   UI spacing only; billing logic/data/IDs unchanged.
+   ============================================================ */
+#billingModal .billing-modern{
+  width:100% !important;
+  max-width:none !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+}
+#billingModal .billing-modern > .modal-title{
+  margin:0 0 10px !important;
+}
+#billingModal .billing-tabs{
+  margin:0 0 8px !important;
+}
+#billingModal .mobile-type-tabs{
+  margin:0 0 9px !important;
+}
+#billingModal #billNewView,
+#billingModal #billHistoryView{
+  padding-left:0 !important;
+  padding-right:0 !important;
+}
+
+
+/* ============================================================
+   SK MOBILES — GLOBAL SECTION SPACING NORMALIZATION
+   One consistent vertical gap between primary page sections/cards.
+   UI spacing only; no data, IDs, calculations or business logic changed.
+   ============================================================ */
+
+/* Primary app page stacks use one spacing rhythm. */
+.app-viewport > .content-area,
+.app-viewport > main,
+.app-viewport > .container,
+.app-viewport > .page-container,
+.app-viewport > .view-section,
+.app-viewport > .tab-content,
+.app-viewport > .billing-container{
+  row-gap:8px !important;
+}
+
+/* Remove legacy bottom margins from primary card/section siblings so
+   flex/grid gap is the single source of truth. */
+.app-viewport > .content-area > :is(
+  .card,.section-card,.stat-card,.form-section,.bill-card,.content-box,
+  .panel,.glass-card,.form-card,.summary-card,.history-card,
+  .draggable-card,.sk-home-action-row,.sk-home-metric-card,
+  .sk-rj-card,.models-section,.stock-control-panel,
+  .theme-grid-selector,.sk-credit-summary,.sk-credit-list,
+  .sk-credit-customer,.sk-credit-customer-card
+),
+.app-viewport > main > :is(
+  .card,.section-card,.stat-card,.form-section,.bill-card,.content-box,
+  .panel,.glass-card,.form-card,.summary-card,.history-card,
+  .draggable-card,.sk-home-action-row,.sk-home-metric-card,
+  .sk-rj-card,.models-section,.stock-control-panel,
+  .theme-grid-selector,.sk-credit-summary,.sk-credit-list,
+  .sk-credit-customer,.sk-credit-customer-card
+),
+.app-viewport > .page-container > :is(
+  .card,.section-card,.stat-card,.form-section,.bill-card,.content-box,
+  .panel,.glass-card,.form-card,.summary-card,.history-card,
+  .draggable-card,.sk-home-action-row,.sk-home-metric-card,
+  .sk-rj-card,.models-section,.stock-control-panel,
+  .theme-grid-selector,.sk-credit-summary,.sk-credit-list,
+  .sk-credit-customer,.sk-credit-customer-card
+){
+  margin-bottom:0 !important;
+}
+
+/* Billing sections: the form already uses a vertical flex stack.
+   Normalize its inline 10px gap and old 9px section margins to 8px. */
+#billingModal #usedMobileBillingForm,
+#billingModal #billHistoryView,
+#billingModal .billing-modern{
+  row-gap:8px !important;
+}
+
+#billingModal #usedMobileBillingForm > .bill-section{
+  margin-bottom:0 !important;
+}
+
+#billingModal .billing-modern > .bill-section,
+#billingModal .billing-modern > #billNewView > .bill-section{
+  margin-bottom:0 !important;
+}
+
+/* Repair / credit / other modal page stacks use the same rhythm. */
+#skRepairJobsModal .modal-sheet,
+#repairSparesModal .modal-sheet,
+#skCreditActionModal .modal-sheet,
+#skCreditLedgerPage .modal-sheet{
+  row-gap:8px !important;
+}
+
+#skRepairJobsModal .modal-sheet > :is(
+  .sk-rj-card,.sk-rj-empty,.sk-ui-section,.form-section,
+  .section-card,.card,.panel
+),
+#repairSparesModal .modal-sheet > :is(
+  .form-section,.section-card,.card,.panel
+),
+#skCreditActionModal .modal-sheet > :is(
+  .form-section,.section-card,.card,.panel
+),
+#skCreditLedgerPage .modal-sheet > :is(
+  .sk-credit-summary,.sk-credit-list,.sk-credit-customer,
+  .sk-credit-customer-card,.section-card,.card,.panel
+){
+  margin-bottom:0 !important;
+}
+
+/* Settings / Appearance: keep the same compact section rhythm. */
+#settingsModal .modal-sheet > :is(
+  .sk-ui-studio,.sk-ui-section,.sk-ui-preview,
+  .settings-card,.setting-card,.section-card,.card,.panel
+){
+  margin-bottom:0 !important;
+}
+
+#settingsModal .modal-sheet{
+  row-gap:8px !important;
+}
+
+/* Do not add extra spacing after the final section in a vertical stack. */
+.app-viewport > .content-area > :last-child,
+.app-viewport > main > :last-child,
+.app-viewport > .page-container > :last-child,
+#billingModal #usedMobileBillingForm > :last-child{
+  margin-bottom:0 !important;
+}
+
+/* =========================================================
+   SK MOBILES — CREDIT LEDGER OUTER PAGE WIDTH MATCH
+   Match the same 13px left/right page gutter used by the
+   Mobile Sale Bill / other main pages. Presentation only.
+   ========================================================= */
+#skCreditLedgerPage > .modal-sheet{
+  width:calc(100% - 26px) !important;
+  max-width:980px !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  box-sizing:border-box !important;
+}
+@media (max-width:600px){
+  #skCreditLedgerPage > .modal-sheet{
+    width:calc(100% - 26px) !important;
+    max-width:none !important;
+  }
+}
+
+
+/* =========================================================
+   FINAL — CUSTOMER CREDIT LEDGER MATCHES MAIN PAGE SHELL
+   UI/layout only. Existing data, IDs, handlers and logic untouched.
+   Reference: Mobile Sale Bill / History page shell.
+   ========================================================= */
+#skCreditLedgerPage{
+  background:var(--page-bg) !important;
+  background-image:radial-gradient(circle at 15% 8%,color-mix(in srgb,var(--primary) 5%,transparent),transparent 34%),radial-gradient(circle at 90% 22%,rgba(255,255,255,.72),transparent 38%) !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  padding:0 !important;
+  align-items:flex-start !important;
+  justify-content:center !important;
+  overflow-y:auto !important;
+}
+
+#skCreditLedgerPage > .modal-sheet{
+  width:calc(100% - 26px) !important;
+  max-width:980px !important;
+  height:auto !important;
+  max-height:none !important;
+  min-height:0 !important;
+  margin:38px auto 24px !important;
+  padding:0 !important;
+  overflow:visible !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+
+#skCreditLedgerPage > .modal-sheet::before{
+  display:none !important;
+}
+
+#skCreditLedgerPage .modal-title{
+  min-height:60px !important;
+  margin:0 0 8px !important;
+  padding:12px 14px !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:20px !important;
+  background:var(--card-bg) !important;
+  box-shadow:0 5px 16px rgba(2,6,23,.045) !important;
+  position:relative !important;
+  top:auto !important;
+}
+
+#skCreditLedgerPage #skCPMainView,
+#skCreditLedgerPage #skCPDetailView{
+  padding:0 !important;
+  max-height:none !important;
+  overflow:visible !important;
+}
+
+#skCreditLedgerPage .skcp-summary{
+  margin-bottom:8px !important;
+}
+
+#skCreditLedgerPage .skcp-toolbar{
+  margin-bottom:8px !important;
+}
+
+#skCreditLedgerPage .skcp-filters{
+  margin-bottom:8px !important;
+  padding:0 0 1px !important;
+}
+
+#skCreditLedgerPage .skcp-list{
+  gap:8px !important;
+}
+
+@media(max-width:600px){
+  #skCreditLedgerPage > .modal-sheet{
+    width:calc(100% - 16px) !important;
+    margin-top:16px !important;
+    margin-bottom:16px !important;
+  }
+
+  #skCreditLedgerPage .modal-title{
+    min-height:58px !important;
+    border-radius:18px !important;
+  }
+}
+
+/* =========================================================
+   FINAL — CREDIT ENTRY PAGE MATCHES MAIN APP PAGE SHELL
+   Match the Mobile Sale Bill / History page structure.
+   UI/layout only; existing fields, IDs, handlers and logic unchanged.
+   ========================================================= */
+#skCreditEntryModal{
+  position:fixed !important;
+  inset:0 !important;
+  width:100vw !important;
+  height:100dvh !important;
+  padding:0 !important;
+  margin:0 !important;
+  align-items:stretch !important;
+  justify-content:stretch !important;
+  background:var(--page-bg) !important;
+  background-image:radial-gradient(circle at 15% 8%,color-mix(in srgb,var(--primary) 5%,transparent),transparent 34%),radial-gradient(circle at 90% 22%,rgba(255,255,255,.72),transparent 38%) !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  overflow:hidden !important;
+}
+#skCreditEntryModal.active{
+  display:flex !important;
+}
+#skCreditEntryModal > .modal-sheet{
+  position:relative !important;
+  width:calc(100% - 26px) !important;
+  max-width:none !important;
+  min-width:0 !important;
+  height:100dvh !important;
+  max-height:none !important;
+  min-height:0 !important;
+  margin:0 auto !important;
+  padding:max(12px,env(safe-area-inset-top)) max(0px,env(safe-area-inset-right)) max(88px,calc(76px + env(safe-area-inset-bottom))) max(0px,env(safe-area-inset-left)) !important;
+  box-sizing:border-box !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior:contain !important;
+  -webkit-overflow-scrolling:touch !important;
+}
+#skCreditEntryModal > .modal-sheet > .modal-title{
+  position:sticky !important;
+  top:0 !important;
+  z-index:50 !important;
+  min-height:60px !important;
+  margin:0 0 10px !important;
+  padding:7px 10px 7px 12px !important;
+  border:1px solid color-mix(in srgb,var(--card-border) 82%,#fff 18%) !important;
+  border-radius:18px !important;
+  background:color-mix(in srgb,var(--card-bg) 94%,transparent) !important;
+  box-shadow:0 6px 18px rgba(15,23,42,.045) !important;
+  backdrop-filter:blur(16px) !important;
+  -webkit-backdrop-filter:blur(16px) !important;
+  font-size:clamp(1rem,4vw,1.18rem) !important;
+  line-height:1.15 !important;
+  letter-spacing:-.02em !important;
+  box-sizing:border-box !important;
+}
+#skCreditEntryModal > .modal-sheet > .modal-title .modal-close-btn{
+  flex:0 0 46px !important;
+  width:46px !important;
+  height:46px !important;
+  min-width:46px !important;
+  min-height:46px !important;
+  border-radius:50% !important;
+  font-size:1.35rem !important;
+}
+#skCreditEntryModal > .modal-sheet > .form-group{
+  width:100% !important;
+  max-width:100% !important;
+  margin:0 0 10px !important;
+  box-sizing:border-box !important;
+}
+#skCreditEntryModal > .modal-sheet > .form-group:first-of-type{
+  margin-top:0 !important;
+}
+#skCreditEntryModal > .modal-sheet .form-label{
+  display:block !important;
+  margin-bottom:5px !important;
+  font-size:.67rem !important;
+  font-weight:850 !important;
+}
+#skCreditEntryModal > .modal-sheet .form-input,
+#skCreditEntryModal > .modal-sheet .form-select{
+  width:100% !important;
+  max-width:100% !important;
+  min-height:42px !important;
+  border-radius:10px !important;
+  box-sizing:border-box !important;
+}
+#skCreditEntryModal > .modal-sheet textarea.form-input{
+  min-height:82px !important;
+  resize:vertical !important;
+}
+#skCreditEntryModal > .modal-sheet .submit-btn{
+  width:100% !important;
+  min-height:46px !important;
+  margin-top:2px !important;
+  border-radius:14px !important;
+  box-sizing:border-box !important;
+}
+@media(max-width:600px){
+  #skCreditEntryModal > .modal-sheet{
+    width:calc(100% - 26px) !important;
+    max-width:none !important;
+  }
+}
+
+
+
+/* ============================================================
+   SK MOBILES — GLOBAL DEFAULT SECTION GAP: 14PX
+   One standard vertical gap between primary page-level boxes/sections.
+   This uses sibling margins so it works even when the existing containers
+   are not flex/grid. Internal field/control spacing is untouched.
+   ============================================================ */
+:root{--sk-section-gap:14px !important;}
+
+/* Main page-level blocks */
+.app-viewport > .content-area > * + *,
+.app-viewport > main > * + *,
+.app-viewport > .container > * + *,
+.app-viewport > .page-container > * + *,
+.app-viewport > .view-section > * + *,
+.app-viewport > .tab-content > * + *,
+.app-viewport > .billing-container > * + *,
+.content-area > * + *,
+.page-container > * + *,
+.view-section > * + *,
+.tab-content > * + *,
+.billing-container > * + *{
+  margin-top:var(--sk-section-gap) !important;
+}
+
+/* Billing: the bill sections themselves are the page-level boxes. */
+#billingModal #usedMobileBillingForm > .bill-section + .bill-section,
+#billingModal .billing-modern > .bill-section + .bill-section,
+#billingModal .billing-modern > #billNewView > .bill-section + .bill-section{
+  margin-top:var(--sk-section-gap) !important;
+}
+
+/* Repair / credit / settings modal page sections. */
+#skRepairJobsModal .modal-sheet > * + *,
+#repairSparesModal .modal-sheet > * + *,
+#skCreditActionModal .modal-sheet > * + *,
+#skCreditLedgerPage .modal-sheet > * + *,
+#skCreditEntryModal .modal-sheet > * + *,
+#settingsModal .modal-sheet > * + *{
+  margin-top:var(--sk-section-gap) !important;
+}
+
+/* Do not create a trailing section gap after the final block. */
+.app-viewport > .content-area > :last-child,
+.app-viewport > main > :last-child,
+.app-viewport > .container > :last-child,
+.app-viewport > .page-container > :last-child,
+.app-viewport > .view-section > :last-child,
+.app-viewport > .tab-content > :last-child,
+.app-viewport > .billing-container > :last-child,
+#billingModal #usedMobileBillingForm > :last-child,
+#billingModal .billing-modern > :last-child,
+#skRepairJobsModal .modal-sheet > :last-child,
+#repairSparesModal .modal-sheet > :last-child,
+#skCreditActionModal .modal-sheet > :last-child,
+#skCreditLedgerPage .modal-sheet > :last-child,
+#skCreditEntryModal .modal-sheet > :last-child,
+#settingsModal .modal-sheet > :last-child{
+  margin-bottom:0 !important;
+}
+
+
+/* ============================================================
+   SK MOBILES — FINAL BOTTOM NAV PURGE / IMAGE-1 STYLE
+   Canonical navigation style. This block intentionally wins over
+   the legacy button foundation and Appearance Studio button-radius rules.
+   ============================================================ */
+html .bottom-nav{
+  position:fixed !important;
+  left:50% !important;
+  right:auto !important;
+  bottom:12px !important;
+  transform:translateX(-50%) !important;
+  width:calc(100% - 24px) !important;
+  max-width:440px !important;
+  height:66px !important;
+  min-height:66px !important;
+  display:grid !important;
+  grid-template-columns:repeat(5,minmax(0,1fr)) !important;
+  align-items:center !important;
+  gap:0 !important;
+  padding:0 6px !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+  background:rgba(255,255,255,.96) !important;
+  border:1px solid rgba(226,232,240,.9) !important;
+  border-radius:28px !important;
+  box-shadow:0 12px 30px rgba(15,23,42,.10) !important;
+  backdrop-filter:blur(18px) !important;
+  -webkit-backdrop-filter:blur(18px) !important;
+  z-index:99999 !important;
+  overflow:visible !important;
+}
+html .bottom-nav > .nav-item,
+html[data-ui-button-radius] .bottom-nav > .nav-item:not(#navHome){
+  width:100% !important;
+  height:66px !important;
+  min-height:66px !important;
+  min-width:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:4px !important;
+  margin:0 !important;
+  padding:4px 0 !important;
+  position:relative !important;
+  box-sizing:border-box !important;
+  background:transparent !important;
+  border:0 !important;
+  border-width:0 !important;
+  border-style:none !important;
+  border-color:transparent !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  outline:none !important;
+  color:#0f172a !important;
+  font-weight:600 !important;
+  transform:none !important;
+  appearance:none !important;
+  -webkit-appearance:none !important;
+}
+html .bottom-nav > .nav-item:hover,
+html .bottom-nav > .nav-item:focus,
+html .bottom-nav > .nav-item:focus-visible,
+html .bottom-nav > .nav-item:active,
+html[data-ui-button-radius] .bottom-nav > .nav-item:not(#navHome):hover,
+html[data-ui-button-radius] .bottom-nav > .nav-item:not(#navHome):focus,
+html[data-ui-button-radius] .bottom-nav > .nav-item:not(#navHome):focus-visible,
+html[data-ui-button-radius] .bottom-nav > .nav-item:not(#navHome):active{
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  outline:none !important;
+}
+html .bottom-nav > .nav-item svg{
+  width:20px !important;
+  height:20px !important;
+  flex:0 0 20px !important;
+  margin:0 !important;
+  padding:0 !important;
+  color:currentColor !important;
+  stroke-width:1.9 !important;
+  filter:none !important;
+  transform:none !important;
+}
+html .bottom-nav > .nav-item span{
+  display:block !important;
+  width:100% !important;
+  margin:2px 0 0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+  text-align:center !important;
+  font-size:11px !important;
+  line-height:1 !important;
+  font-weight:600 !important;
+  color:inherit !important;
+}
+html .bottom-nav > #navHome,
+html[data-ui-button-radius] .bottom-nav > #navHome{
+  grid-column:3 !important;
+  width:100% !important;
+  height:66px !important;
+  min-height:66px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin:0 !important;
+  padding:0 !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  outline:none !important;
+  color:#fff !important;
+  z-index:10 !important;
+}
+html .bottom-nav > #navHome::before{
+  content:"" !important;
+  position:absolute !important;
+  left:50% !important;
+  top:50% !important;
+  width:52px !important;
+  height:52px !important;
+  transform:translate(-50%,-50%) translateY(-15px) !important;
+  border-radius:50% !important;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8) !important;
+  border:3px solid #fff !important;
+  box-shadow:0 10px 22px rgba(37,99,235,.42) !important;
+  pointer-events:none !important;
+  box-sizing:border-box !important;
+}
+html .bottom-nav > #navHome svg{
+  position:relative !important;
+  z-index:2 !important;
+  width:22px !important;
+  height:22px !important;
+  flex:0 0 22px !important;
+  margin:0 !important;
+  transform:translateY(-15px) !important;
+  color:#fff !important;
+  stroke-width:2.25 !important;
+  filter:none !important;
+  pointer-events:none !important;
+}
+html .bottom-nav > #navHome span{display:none !important;}
+html .bottom-nav > #navHome:active::before{transform:translate(-50%,-50%) translateY(-15px) scale(.92) !important;}
+@media(max-width:600px){
+  html .bottom-nav{width:calc(100% - 24px) !important;max-width:440px !important;height:66px !important;bottom:12px !important;}
 }
