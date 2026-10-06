@@ -8088,3 +8088,18 @@ html[data-ui-scale="comfortable"] .app-viewport{font-size:108% !important;}
   #toolsOthersNoteModal .tools-others-note{height:220px !important;min-height:220px !important;}
   #toolsOthersNoteModal .tools-others-actions{grid-template-columns:1fr;}
 }
+
+/* SK FIX — center the two manual spares note sheets; never let them dock to the left. */
+#repairSparesModal,
+#toolsOthersNoteModal{
+  align-items:center !important;
+  justify-content:center !important;
+}
+#repairSparesModal > .modal-sheet,
+#toolsOthersNoteModal > .modal-sheet{
+  margin:0 auto !important;
+  position:relative !important;
+  left:auto !important;
+  right:auto !important;
+  transform:none !important;
+}
