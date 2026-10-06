@@ -1154,10 +1154,6 @@ const MASTER_INVENTORY = [
       document.getElementById(id)?.classList.add('active');
       const typeEl = document.getElementById('pvMobileType');
       if (typeEl) typeEl.innerText = currentMobileType;
-      const invoiceCard = document.getElementById('printableInvoiceCard');
-      if (invoiceCard) {
-        invoiceCard.dataset.mobileType = currentMobileType === 'Used Mobile' ? 'used' : currentMobileType === 'Keypad Mobile' ? 'keypad' : 'new';
-      }
       const termsEl = document.getElementById('pvTerms');
       if (termsEl) termsEl.innerText = getMobileTerms(currentMobileType);
       const ramStorageGrid = document.getElementById('billRamStorageGrid');
@@ -3944,18 +3940,6 @@ function viewSavedBill(idx) {
         : printMobileType.includes('keypad')
           ? 'keypad'
           : 'new';
-      clone.classList.add('sk-print-output');
-
-      // Add a real badge to the cloned invoice so standalone print output
-      // does not depend on the billing modal's live :has() selectors.
-      const customerNameEl = clone.querySelector('#pvCustName');
-      const customerBlock = customerNameEl?.parentElement?.parentElement;
-      if (customerBlock) {
-        const badge = document.createElement('div');
-        badge.className = 'sk-print-mobile-type';
-        badge.textContent = clone.dataset.mobileType === 'used' ? 'USED MOBILE' : clone.dataset.mobileType === 'keypad' ? 'KEYPAD MOBILE' : 'NEW MOBILE';
-        customerBlock.parentElement?.insertBefore(badge, customerBlock);
-      }
 
       const w = window.open('', '_blank');
       if (!w) { showToast?.('Please allow popups to print!'); return; }
