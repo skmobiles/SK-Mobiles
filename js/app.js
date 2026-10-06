@@ -1363,17 +1363,35 @@ const MASTER_INVENTORY = [
       catch (error) { console.warn('SK repair note load failed:', error); }
     }
 
+    function getRepairSparesInput() {
+      const studio = document.getElementById('skRjSparesNoteInput');
+      const legacy = document.getElementById('repairSparesNoteInput');
+      if (studio && document.getElementById('skRjSparesView')?.style.display !== 'none') return studio;
+      return legacy || studio;
+    }
+    function loadRepairSparesNoteIntoStudio() {
+      const value = (() => { try { return localStorage.getItem('sk_repair_tools_note') || ''; } catch(e) { return ''; } })();
+      const studio = document.getElementById('skRjSparesNoteInput');
+      const legacy = document.getElementById('repairSparesNoteInput');
+      if (studio) studio.value=value;
+      if (legacy) legacy.value=value;
+    }
+
     function saveRepairSparesNote() {
-      const input = document.getElementById('repairSparesNoteInput');
+      const input = getRepairSparesInput();
       if (!input) return;
       const note = String(input.value || '').trim();
       try { localStorage.setItem('sk_repair_tools_note', note); }
       catch (error) { console.warn('SK repair note save failed:', error); }
+      const studio = document.getElementById('skRjSparesNoteInput');
+      const legacy = document.getElementById('repairSparesNoteInput');
+      if(studio) studio.value=note;
+      if(legacy) legacy.value=note;
       showToast(note ? 'Repair notes saved!' : 'Repair notes cleared!');
     }
 
     function shareRepairNotesWhatsApp() {
-      const input = document.getElementById('repairSparesNoteInput');
+      const input = getRepairSparesInput();
       const note = String(input?.value || '').trim();
       if (!note) { showToast('Please enter a repair tools / IC spares list.'); input?.focus(); return; }
       const message = `SK MOBILES - Repair Tools & IC Spares Required\n\n${note}`;
@@ -1922,6 +1940,12 @@ const MASTER_INVENTORY = [
       root.style.setProperty('--text-muted',muted);
       root.style.setProperty('--glass-shadow',shadow);
       root.style.setProperty('--card-elevation',shadow);
+      const cardRadiusMap={sharp:'0px',standard:'8px',modern:'12px',smooth:'16px',pill:'24px'};
+      const buttonRadiusMap={sharp:'0px',modern:'8px',smooth:'14px',pill:'999px'};
+      const scaleMap={compact:'.92',normal:'1',comfortable:'1.08'};
+      root.style.setProperty('--ui-card-radius',cardRadiusMap[settings.cardRadius]||'12px');
+      root.style.setProperty('--ui-button-radius',buttonRadiusMap[settings.buttonRadius]||'8px');
+      root.style.setProperty('--ui-scale',scaleMap[settings.scale]||'1');
       root.style.setProperty('--ui-aura-opacity',settings.aura?.45:0);
       root.setAttribute('data-ui-mode',resolved);
       root.setAttribute('data-ui-preset',settings.preset);
@@ -2000,6 +2024,7 @@ const MASTER_INVENTORY = [
       }
       skAppearanceApply(settings,{theme:true});
       skInitUIAppearanceBehavior();
+      skInitAppearanceSandbox();
       if(!skAppearanceSystemMedia && window.matchMedia){
         skAppearanceSystemMedia=window.matchMedia('(prefers-color-scheme: dark)');
         const onSystemChange=()=>{const s=skAppearanceRead();if(s.themeMode==='system')skAppearanceApply(s,{theme:false});};
@@ -2050,6 +2075,85 @@ const MASTER_INVENTORY = [
       const settings=skAppearanceRead();settings.preset=map[theme]||settings.preset;
       skAppearanceSave(settings);skAppearanceApplyTokens(settings);skAppearanceSyncControls(settings);
     }
+    function skAppearanceSandboxSet(tab){
+      const root=document.getElementById('skUiAppearanceStudio');
+      if(!root)return;
+      const allowed=['home','cards','inputs','navigation'];
+      const next=allowed.includes(tab)?tab:'home';
+      root.querySelectorAll('.sk-ui-sandbox-tab').forEach(btn=>{
+        const active=btn.dataset.sandboxTab===next;
+        btn.classList.toggle('active',active);
+        btn.setAttribute('aria-selected',active?'true':'false');
+      });
+      root.querySelectorAll('.sk-ui-sandbox-pane').forEach(pane=>{
+        const active=pane.dataset.sandboxPane===next;
+        pane.classList.toggle('active',active);
+        pane.hidden=!active;
+      });
+      skAppearanceSandboxRefresh();
+      try{sessionStorage.setItem('sk_ui_sandbox_tab',next);}catch(e){}
+    }
+    function skAppearanceSandboxRefresh(){
+      const root=document.getElementById('skUiAppearanceStudio');
+      if(!root)return;
+      const money=v=>'₹'+Number(v||0).toLocaleString('en-IN');
+      try{
+        const inv=Array.isArray(window.inventory)?window.inventory:[];
+        const stock=inv.reduce((sum,item)=>sum+(Number(item?.stock)||0),0);
+        const stockEl=document.getElementById('skSandboxStock'); if(stockEl)stockEl.textContent=String(stock);
+      }catch(e){}
+      try{
+        const credit=typeof window.skOutstandingTotalForHome==='function'?Number(window.skOutstandingTotalForHome()||0):0;
+        const el=document.getElementById('skSandboxCredit'); if(el)el.textContent=money(credit);
+        const top=document.getElementById('skSandboxOutstanding'); if(top)top.textContent=money(credit);
+      }catch(e){}
+      try{
+        const bills=JSON.parse(localStorage.getItem('sk_bills')||'[]');
+        const el=document.getElementById('skSandboxBills'); if(el)el.textContent=String(Array.isArray(bills)?bills.length:0);
+      }catch(e){}
+      try{
+        const jobs=JSON.parse(localStorage.getItem('skx_repair_jobs_v2')||'[]');
+        const pending=Array.isArray(jobs)?jobs.filter(j=>['Received','Checking','Repairing'].includes(String(j?.status||''))).length:0;
+        const el=document.getElementById('skSandboxJobs'); if(el)el.textContent=String(pending);
+      }catch(e){}
+    }
+    function skAppearanceSandboxAction(action){
+      try{
+        const settings=document.getElementById('settingsModal');
+        if(settings){settings.classList.remove('active');document.body.classList.remove('modal-open');}
+        const go={
+          home:()=>window.skGoHomeFromAppShell?.(),
+          glass:()=>window.skGoToInventoryFilter?.('glass'),
+          combo:()=>window.skGoToInventoryFilter?.('combo'),
+          billing:()=>{window.toggleModal?.('billingModal',true);window.scrollTo?.({top:0,behavior:'smooth'});},
+          orders:()=>{window.toggleModal?.('orderModal',true);window.scrollTo?.({top:0,behavior:'smooth'});},
+          newbill:()=>{window.toggleModal?.('billingModal',true);window.handleNewBillClick?.();window.scrollTo?.({top:0,behavior:'smooth'});},
+          customers:()=>window.openCustomers?.() || window.openCustomerModal?.() || window.skOpenCreditLedger?.(),
+          stock:()=>window.skGoToInventoryFilter?.('all'),
+          pending:()=>window.skOpenPendingRepairJobs?.(),
+          credit:()=>window.skOpenCreditLedger?.(),
+          bills:()=>{window.toggleModal?.('billingModal',true);window.switchBillTab?.('history');window.scrollTo?.({top:0,behavior:'smooth'});},
+          billingFromInput:()=>{
+            window.toggleModal?.('billingModal',true);
+            window.handleNewBillClick?.();
+            const name=document.getElementById('skSandboxCustomer')?.value||'';
+            const phone=document.getElementById('skSandboxPhone')?.value||'';
+            const model=document.getElementById('skSandboxModel')?.value||'';
+            const n=document.getElementById('billCustName'); if(n&&name)n.value=name;
+            const ph=document.getElementById('billCustPhone'); if(ph&&phone)ph.value=phone;
+            const md=document.getElementById('billModel'); if(md&&model)md.value=model;
+            window.updateBillPreview?.();
+          }
+        };
+        if(go[action])go[action]();
+      }catch(e){console.warn('Appearance sandbox action failed:',action,e);}
+    }
+    function skInitAppearanceSandbox(){
+      let tab='home';
+      try{tab=sessionStorage.getItem('sk_ui_sandbox_tab')||'home';}catch(e){}
+      skAppearanceSandboxSet(tab);
+    }
+    window.skAppearanceSandboxSet=skAppearanceSandboxSet;
     window.skAppearanceSet=skAppearanceSet;
     window.skAppearanceSetCustomAccent=skAppearanceSetCustomAccent;
     window.skResetAppearanceStudio=skResetAppearanceStudio;
@@ -2771,12 +2875,12 @@ const MASTER_INVENTORY = [
             </div>
           `,
           'metric-repair': `
-            <div class="draggable-card sk-home-metric-card sk-home-metric-repair" data-card-id="metric-repair" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="skOpenRepairJobs(); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div class="draggable-card sk-home-metric-card sk-home-metric-repair" data-card-id="metric-repair" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="skOpenPendingRepairJobs(); window.scrollTo({top: 0, behavior: 'smooth'});">
               <div style="display:flex; align-items:center; gap:8px;">
                 <div class="sk-home-metric-icon repair" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">🔧</div>
                 <div>
-                  <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Repair Jobs</div>
-                  <div style="font-size: 18px; font-weight: 950; color: #e11d48; line-height: 1.1;">${(() => { try { const r=JSON.parse(localStorage.getItem('skx_repair_jobs_v2')||'[]'); return Array.isArray(r)?r.length:0; } catch(e){ return 0; } })()}</div>
+                  <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Pending Jobs</div>
+                  <div style="font-size: 18px; font-weight: 950; color: #e11d48; line-height: 1.1;">${(() => { try { const r=JSON.parse(localStorage.getItem('skx_repair_jobs_v2')||'[]'); return Array.isArray(r)?r.filter(j=>['Received','Checking','Repairing'].includes(String(j?.status||''))).length:0; } catch(e){ return 0; } })()}</div>
                 </div>
               </div>
               <span style="font-size: 14px; color: var(--text-muted); font-weight: 700;">›</span>
@@ -3969,7 +4073,7 @@ img{max-width:100%!important;}
     const d=new Date(value);
     return isNaN(d.getTime())?(s||'---'):String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
   }
-  function isPending(j){ return j.status!=='Delivered'; }
+  function isPending(j){ return ['Received','Checking','Repairing'].includes(String(j?.status||'')); }
   function statusNext(s){
     const x=['Received','Checking','Repairing','Ready'];
     const i=x.indexOf(s);
@@ -4008,13 +4112,22 @@ img{max-width:100%!important;}
   };
 
   window.skRjSwitchTab=function(tab){
-    rjTab=tab;
-    const jobs=tab==='jobs';
+    rjTab=['jobs','pending','history'].includes(tab)?tab:'jobs';
+    const jobs=rjTab==='jobs', pending=rjTab==='pending', history=rjTab==='history';
     document.getElementById('skRjJobsView').style.display=jobs?'block':'none';
-    document.getElementById('skRjHistoryView').style.display=jobs?'none':'block';
+    document.getElementById('skRjPendingView').style.display=pending?'block':'none';
+    document.getElementById('skRjHistoryView').style.display=history?'block':'none';
     document.getElementById('skRjJobsTab').classList.toggle('active',jobs);
-    document.getElementById('skRjHistoryTab').classList.toggle('active',!jobs);
-    if(jobs) skRjRenderJobs(); else skRjRenderHistory();
+    document.getElementById('skRjPendingTab').classList.toggle('active',pending);
+    document.getElementById('skRjHistoryTab').classList.toggle('active',history);
+    if(jobs) clearForm();
+    if(pending) skRjRenderJobs();
+    if(history) skRjRenderHistory();
+  };
+
+  window.skOpenPendingRepairJobs=function(){
+    openJobs();
+    skRjSwitchTab('pending');
   };
 
   window.skRjSaveJob=function(e){
@@ -4192,7 +4305,7 @@ img{max-width:100%!important;}
       <div><div style="font-size:12px;color:var(--text-muted);font-weight:700">Pending Repair Jobs</div>
       <div class="sk-home-rj-count">${a.length}</div><div class="sk-home-rj-mini">${a.length?'Pending Jobs':'No Pending Jobs'}</div></div></div>
       <span style="font-size:14px;color:var(--text-muted);font-weight:700">›</span>`;
-    el.onclick=function(){skOpenRepairJobs()};
+    el.onclick=function(){skOpenPendingRepairJobs()};
     grid.appendChild(el);
     if(window.handleCardDragStart){
       el.addEventListener('dragstart',handleCardDragStart); el.addEventListener('dragover',handleCardDragOver);
