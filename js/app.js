@@ -1723,9 +1723,35 @@ const MASTER_INVENTORY = [
         document.documentElement.style.setProperty('--app-status-color',SK_THEME_STATUS_COLORS[theme]||SK_THEME_STATUS_COLORS.light);
       }catch(e){}
     }
+    function skEnsureGoogleFont(fontKey){
+      const families={
+        inter:'Inter:wght@400;500;600;700;800',poppins:'Poppins:wght@400;500;600;700;800',
+        nunito:'Nunito:wght@400;500;600;700;800',rubik:'Rubik:wght@400;500;600;700;800',
+        manrope:'Manrope:wght@400;500;600;700;800',dm:'DM+Sans:wght@400;500;600;700;800',
+        space:'Space+Grotesk:wght@400;500;600;700',lato:'Lato:wght@400;700;900',
+        outfit:'Outfit:wght@400;500;600;700;800',roboto:'Roboto:wght@400;500;700;900',
+        montserrat:'Montserrat:wght@400;500;600;700;800',opensans:'Open+Sans:wght@400;500;600;700;800',
+        raleway:'Raleway:wght@400;500;600;700;800',quicksand:'Quicksand:wght@400;500;600;700',
+        fira:'Fira+Sans:wght@400;500;600;700;800',work:'Work+Sans:wght@400;500;600;700;800',
+        lexend:'Lexend:wght@400;500;600;700;800',sora:'Sora:wght@400;500;600;700;800',
+        urbanist:'Urbanist:wght@400;500;600;700;800',barlow:'Barlow:wght@400;500;600;700;800',
+        archivo:'Archivo:wght@400;500;600;700;800',mulish:'Mulish:wght@400;500;600;700;800',
+        karla:'Karla:wght@400;500;600;700;800',cabin:'Cabin:wght@400;500;600;700',
+        source:'Source+Sans+3:wght@400;500;600;700;800',ibmplex:'IBM+Plex+Sans:wght@400;500;600;700',
+        josefin:'Josefin+Sans:wght@400;500;600;700',playfair:'Playfair+Display:wght@400;500;600;700;800'
+      };
+      const spec=families[fontKey]; if(!spec)return;
+      const id='sk-font-google-'+fontKey;
+      if(document.getElementById(id))return;
+      const link=document.createElement('link');link.id=id;link.rel='stylesheet';
+      link.href='https://fonts.googleapis.com/css2?family='+spec+'&display=swap';
+      document.head.appendChild(link);
+    }
+
     function setAppFont(fontKey, silent){
       if(!SK_APP_FONTS[fontKey]) fontKey='jakarta';
       const family=SK_APP_FONTS[fontKey];
+      skEnsureGoogleFont(fontKey);
       const labelMap={
         jakarta:'Plus Jakarta Sans',inter:'Inter',poppins:'Poppins',nunito:'Nunito',rubik:'Rubik',
         manrope:'Manrope',dm:'DM Sans',space:'Space Grotesk',lato:'Lato',outfit:'Outfit',
@@ -2850,16 +2876,16 @@ const MASTER_INVENTORY = [
         if (catScroll) catScroll.style.display = 'none';
         
         const metricCardsMap = {
-          'metric-stock': `
-            <div class="draggable-card sk-home-metric-card sk-home-metric-stock" data-card-id="metric-stock" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="currentFilter='all'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <div class="sk-home-metric-icon stock" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">📦</div>
-                <div>
-                  <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Total Stock</div>
-                  <div style="font-size: 18px; font-weight: 950; color: var(--primary); line-height: 1.1;">${inventory.reduce((acc, i) => acc + (i.stock || 0), 0)}</div>
+          'metric-spares': `
+            <div class="draggable-card sk-home-metric-card sk-home-metric-spares" data-card-id="metric-spares" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="toggleModal('repairSparesModal', true);">
+              <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+                <div class="sk-home-metric-icon spares" style="width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;">🧰</div>
+                <div style="min-width:0;">
+                  <div style="font-size:12px;color:var(--text-muted);font-weight:800;">Repair Spares Orders</div>
+                  <div style="font-size:10px;color:var(--text-muted);font-weight:600;">Manual spares note</div>
                 </div>
               </div>
-              <span style="font-size: 14px; color: var(--text-muted); font-weight: 700;">›</span>
+              <span style="font-size:14px;color:var(--text-muted);font-weight:800;flex-shrink:0;">›</span>
             </div>
           `,
           'metric-credit': `
@@ -2900,14 +2926,15 @@ const MASTER_INVENTORY = [
           `
         };
 
-        const defaultMetricOrder = ['metric-stock', 'metric-credit', 'metric-repair', 'metric-bills'];
+        const defaultMetricOrder = ['metric-spares', 'metric-credit', 'metric-repair', 'metric-bills'];
         let savedMetricOrder = defaultMetricOrder;
         try {
           const storedM = localStorage.getItem('sk_order_homeMetricGrid');
           if (storedM) {
             const p = JSON.parse(storedM);
             if (Array.isArray(p) && p.length > 0) {
-              savedMetricOrder = p.map(id => id === 'metric-low' ? 'metric-credit' : (id === 'metric-orders' ? 'metric-repair' : id));
+              savedMetricOrder = p.map(id => id === 'metric-stock' ? 'metric-spares' : (id === 'metric-low' ? 'metric-credit' : (id === 'metric-orders' ? 'metric-repair' : id)));
+              if (!savedMetricOrder.includes('metric-spares')) savedMetricOrder.splice(0, 0, 'metric-spares');
               if (!savedMetricOrder.includes('metric-credit')) savedMetricOrder.splice(1, 0, 'metric-credit');
               savedMetricOrder = savedMetricOrder.filter((id, idx, arr) => arr.indexOf(id) === idx);
             }
@@ -3014,6 +3041,7 @@ const MASTER_INVENTORY = [
         }, 50);
 
         syncInventorySelectionUI();
+        skRestoreRepairSpares();
         skPostRenderEnhancements();
         return;
       }
