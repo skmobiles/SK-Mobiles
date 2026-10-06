@@ -115,7 +115,7 @@
 <div class="drawer-group">
 <div class="drawer-group-title">TECHNICAL &amp; DATA</div>
 <button class="menu-drawer-btn" onclick="toggleModal('repairSparesModal', true); toggleLeftDrawer(false);">
-<span class="menu-icon-pod menu-icon-repair" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.5 5.5a4 4 0 0 0-5 5l-5.2 5.2a1.8 1.8 0 0 0 2.5 2.5l5.2-5.2a4 4 0 0 0 5-5l-2.2 2.2-2-2z"/><path d="M16 4l4 4"/></svg></span><span class="menu-btn-label">Repair Tools &amp; IC Notes</span><span class="menu-arrow">›</span>
+<span class="menu-icon-pod menu-icon-repair" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.5 5.5a4 4 0 0 0-5 5l-5.2 5.2a1.8 1.8 0 0 0 2.5 2.5l5.2-5.2a4 4 0 0 0 5-5l-2.2 2.2-2-2z"/><path d="M16 4l4 4"/></svg></span><span class="menu-btn-label">Tools &amp; Others Notes</span><span class="menu-arrow">›</span>
 </button>
 <button class="menu-drawer-btn" onclick="toggleModal('settingsModal', true); toggleLeftDrawer(false);">
 <span class="menu-icon-pod menu-icon-data" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15.5A2.5 2.5 0 0 0 16.5 21H7.5A2.5 2.5 0 0 1 5 18.5z"/><path d="M8 7h8M8 11h6"/></svg></span><span class="menu-btn-label">App Data Folder</span><span class="menu-arrow">›</span>
@@ -503,6 +503,25 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="repair-spares-actions">
 <button class="repair-spares-action repair-spares-save" type="button" onclick="saveRepairSparesNote()">💾 Save Spares Note</button>
 <button class="repair-spares-action repair-spares-share" type="button" onclick="shareRepairNotesWhatsApp()">💬 Share Note via WhatsApp</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="toolsOthersNoteModal" style="z-index: 10031 !important;">
+<div class="modal-sheet">
+<div class="tools-others-head">
+<div class="tools-others-title"><span aria-hidden="true">🛠️</span><span>Tools &amp; Others Notes</span></div>
+<button class="modal-close-btn" type="button" onclick="toggleModal('toolsOthersNoteModal', false)" aria-label="Close Tools & Others Notes">✕</button>
+</div>
+<div class="tools-others-info">Monthly / rare order செய்ய வேண்டிய tools, equipment மற்றும் other items-ஐ இங்கே manual-ஆக note செய்து save செய்யலாம்.</div>
+<label class="tools-others-label" for="toolsOthersNoteInput">Tools &amp; Others Order Note</label>
+<textarea class="tools-others-note" id="toolsOthersNoteInput" rows="10" placeholder="e.g.
+1. Soldering Iron - 1 pc
+2. DC Power Supply - 1 pc
+3. Microscope Light - 1 pc
+4. Cleaning Liquid - 2 pcs"></textarea>
+<div class="tools-others-actions">
+<button class="tools-others-action tools-others-save" type="button" onclick="saveToolsOthersNote()">💾 Save Note</button>
+<button class="tools-others-action tools-others-share" type="button" onclick="shareToolsOthersNoteWhatsApp()">💬 Share Note via WhatsApp</button>
 </div>
 </div>
 </div>
