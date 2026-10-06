@@ -1841,6 +1841,22 @@ const MASTER_INVENTORY = [
         const v=skReadUISetting(k); skApplyUISetting(k,v);
       });
       skSyncUIStudioControls();
+      skInitUIAppearanceBehavior();
+    }
+
+    /* SK UI Appearance Studio — interaction bridge.
+       Presentation-only: reads the existing sk_ui_* preferences and applies them
+       without touching billing, Firebase, customer, repair or inventory logic. */
+    function skInitUIAppearanceBehavior(){
+      if(window.__skUiAppearanceBehaviorReady) return;
+      window.__skUiAppearanceBehaviorReady=true;
+      document.addEventListener('click', function(ev){
+        const target=ev.target && ev.target.closest ? ev.target.closest('button,[role=button],.nav-item,.sk-ui-choice,.sk-ui-card-choice') : null;
+        if(!target) return;
+        if(skReadUISetting('haptic') && navigator.vibrate){
+          try{ navigator.vibrate(8); }catch(e){}
+        }
+      }, {passive:true});
     }
     window.skSetUISetting=skSetUISetting;
     window.skInitUIAppearanceStudio=skInitUIAppearanceStudio;
