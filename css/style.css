@@ -8057,3 +8057,34 @@ html[data-ui-nav="floating"] .bottom-nav{
 html[data-ui-scale="compact"] .app-viewport{font-size:92% !important;}
 html[data-ui-scale="normal"] .app-viewport{font-size:100% !important;}
 html[data-ui-scale="comfortable"] .app-viewport{font-size:108% !important;}
+
+
+/* SK — Separate daily repair spares vs monthly/rare Tools & Others notes. */
+#repairSparesModal .modal-sheet{margin-left:auto !important;margin-right:auto !important;}
+#toolsOthersNoteModal{overflow:hidden !important}
+#toolsOthersNoteModal .modal-sheet{
+  width:min(620px,calc(100% - 24px)) !important;
+  max-width:620px !important;
+  max-height:min(760px,92dvh) !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  box-sizing:border-box !important;
+  padding:20px !important;
+  border-radius:30px !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+#toolsOthersNoteModal .tools-others-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+#toolsOthersNoteModal .tools-others-title{display:flex;align-items:center;gap:8px;min-width:0;color:var(--text);font-size:1.12rem;font-weight:900;line-height:1.2;}
+#toolsOthersNoteModal .tools-others-info{margin-bottom:14px;padding:13px 14px;border-radius:17px;border:1px solid color-mix(in srgb,var(--primary) 12%,var(--card-border));background:color-mix(in srgb,var(--primary) 8%,var(--card-bg));color:var(--text-muted);font-size:.82rem;line-height:1.55;}
+#toolsOthersNoteModal .tools-others-label{display:block;margin:0 0 7px;color:var(--text);font-size:.78rem;font-weight:850;}
+#toolsOthersNoteModal .tools-others-note{display:block !important;width:100% !important;min-width:0 !important;height:230px !important;min-height:230px !important;box-sizing:border-box !important;resize:vertical !important;overflow-y:auto !important;overflow-x:hidden !important;white-space:pre-wrap !important;overflow-wrap:anywhere !important;word-break:break-word !important;line-height:1.55 !important;padding:14px 16px !important;border-radius:17px !important;border:1px solid color-mix(in srgb,var(--primary) 20%,var(--card-border)) !important;background:color-mix(in srgb,var(--card-bg) 96%,#fff 4%) !important;color:var(--text) !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 6px 18px rgba(2,6,23,.055) !important;-webkit-appearance:none;}
+#toolsOthersNoteModal .tools-others-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;}
+#toolsOthersNoteModal .tools-others-action{min-height:48px;border-radius:15px !important;font-size:.86rem;font-weight:850;}
+#toolsOthersNoteModal .tools-others-save{background:linear-gradient(135deg,var(--soft-btn-primary-start),var(--soft-btn-primary-end)) !important;color:#fff !important;border-color:color-mix(in srgb,var(--primary) 55%,#fff 45%) !important;}
+#toolsOthersNoteModal .tools-others-share{background:color-mix(in srgb,#22c55e 88%,var(--card-bg) 12%) !important;color:#fff !important;border-color:rgba(34,197,94,.35) !important;}
+@media(max-width:600px){
+  #toolsOthersNoteModal .modal-sheet{width:calc(100% - 16px) !important;max-width:calc(100% - 16px) !important;max-height:88dvh !important;padding:17px !important;border-radius:28px !important;}
+  #toolsOthersNoteModal .tools-others-note{height:220px !important;min-height:220px !important;}
+  #toolsOthersNoteModal .tools-others-actions{grid-template-columns:1fr;}
+}
