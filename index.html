@@ -24,7 +24,7 @@
 <script>
 (function(){try{var r=document.documentElement,t=localStorage.getItem('sk_theme');if(t)r.setAttribute('data-theme',t);var f=localStorage.getItem('sk_font_family');if(f)r.setAttribute('data-font-family',f);var meta=document.getElementById('skThemeColorMeta');var c={light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',sunset:'#ffedd5',emerald:'#d1fae5',rose:'#ffe4e6',midnight:'#111827',graphite:'#111827',lime:'#0f1a05',dark:'#050811',cyber:'#03040a',obsidian:'#000000',aurora:'#cffafe',crimson:'#ffe4e6',mint:'#ccfbf1',solar:'#000000',nebula:'#17102f',forest:'#062e1c',glacier:'#e0f2fe',magenta:'#2b092f','apple-light':'#f5f5f7','apple-dark':'#000000'}[t||'light'];if(meta&&c)meta.setAttribute('content',c);}catch(e){}})();
 </script>
-<link href="./css/style.css?v=5.0-ui-appearance-fix" rel="stylesheet" type="text/css"/><script>
+<link href="./css/style.css?v=5.1-fab-nav-final" rel="stylesheet" type="text/css"/><script>
 (function(){try{
   var s=JSON.parse(localStorage.getItem('sk_appearance_settings')||'null');
   if(!s)return;
@@ -178,10 +178,56 @@
 
   <div class="sk-ui-preview" aria-label="Live Appearance Preview">
     <div class="sk-ui-preview-top"><span>LIVE SANDBOX</span><span class="sk-ui-preview-status">● Live</span></div>
-    <div class="sk-ui-preview-card">
-      <div class="sk-ui-preview-brand"><span class="sk-ui-preview-logo">SK</span><div><b>SK MOBILES</b><small>Smart Business Management</small></div></div>
-      <div class="sk-ui-preview-metrics"><span>Stock <b>1680</b></span><span>Outstanding <b>₹0</b></span><span>Repairs <b>0</b></span></div>
-      <button type="button" class="sk-ui-preview-action">Tap to Preview <span>→</span></button>
+    <div class="sk-ui-sandbox-tabs" role="tablist" aria-label="Live sandbox sections">
+      <button type="button" class="sk-ui-sandbox-tab active" data-sandbox-tab="home" onclick="skAppearanceSandboxSet('home')" role="tab" aria-selected="true">Home</button>
+      <button type="button" class="sk-ui-sandbox-tab" data-sandbox-tab="cards" onclick="skAppearanceSandboxSet('cards')" role="tab" aria-selected="false">Cards</button>
+      <button type="button" class="sk-ui-sandbox-tab" data-sandbox-tab="inputs" onclick="skAppearanceSandboxSet('inputs')" role="tab" aria-selected="false">Inputs</button>
+      <button type="button" class="sk-ui-sandbox-tab" data-sandbox-tab="navigation" onclick="skAppearanceSandboxSet('navigation')" role="tab" aria-selected="false">Navigation</button>
+    </div>
+
+    <div class="sk-ui-sandbox">
+      <div class="sk-ui-sandbox-pane active" data-sandbox-pane="home" role="tabpanel">
+        <div class="sk-ui-sandbox-welcome">
+          <div><small>Welcome Back</small><b>SK MOBILES</b><span>Smart Business Management</span></div>
+          <span class="sk-ui-sandbox-balance">₹ 2,450.00</span>
+        </div>
+        <div class="sk-ui-sandbox-shortcuts">
+          <button type="button"><i>▣</i><span>Prepaid</span></button>
+          <button type="button"><i>▣</i><span>DTH</span></button>
+          <button type="button"><i>⌁</i><span>Fastag</span></button>
+          <button type="button"><i>♧</i><span>Electricity</span></button>
+        </div>
+        <button type="button" class="sk-ui-sandbox-primary">Tap to Test Recharge <span>→</span></button>
+      </div>
+
+      <div class="sk-ui-sandbox-pane" data-sandbox-pane="cards" role="tabpanel" hidden>
+        <div class="sk-ui-sandbox-card-grid">
+          <div><small>Total Stock</small><b>1,680</b><span>Items available</span></div>
+          <div><small>Outstanding</small><b>₹0</b><span>No dues</span></div>
+          <div><small>Saved Bills</small><b>12</b><span>This month</span></div>
+          <div><small>Pending Jobs</small><b>2</b><span>Needs attention</span></div>
+        </div>
+      </div>
+
+      <div class="sk-ui-sandbox-pane" data-sandbox-pane="inputs" role="tabpanel" hidden>
+        <div class="sk-ui-sandbox-form">
+          <label>Customer Name<input type="text" value="Ganapathi Manogaran" readonly></label>
+          <label>Phone / WhatsApp<input type="text" value="785556546" readonly></label>
+          <label>Product / Model<select><option>Redmi Note 11 Pro Plus</option></select></label>
+          <button type="button" class="sk-ui-sandbox-primary">Save Preview</button>
+        </div>
+      </div>
+
+      <div class="sk-ui-sandbox-pane" data-sandbox-pane="navigation" role="tabpanel" hidden>
+        <div class="sk-ui-sandbox-nav">
+          <button type="button"><i>▤</i><span>Tempered</span></button>
+          <button type="button"><i>▥</i><span>Display</span></button>
+          <button type="button" class="is-home"><i>⌂</i></button>
+          <button type="button"><i>▧</i><span>Billing</span></button>
+          <button type="button"><i>🛒</i><span>Orders</span></button>
+        </div>
+        <small class="sk-ui-sandbox-hint">Preview of the current five-column floating navigation.</small>
+      </div>
     </div>
   </div>
 
@@ -297,53 +343,6 @@
     <label class="sk-ui-toggle-row"><span><b>Reduced Motion</b><small>Disable transitions and transforms</small></span><input type="checkbox" id="skUiMotion" onchange="skAppearanceSet('motion',this.checked)"><i></i></label>
   </div>
 </section>
-<!-- THEME CUSTOMIZER WITH DEPTH SLIDER & MATCHING ICON PACKS -->
-<div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
-<span>🎨 THEME &amp; ICON PACKS</span>
-<div style="display:flex;align-items:center;gap:5px;"><button id="skFontQuickBtn" class="sk-settings-collapse-btn" type="button" onclick="openAppFontPicker()">🔤 Change Font</button><button id="skThemePanelToggle" class="sk-settings-collapse-btn" type="button" aria-expanded="true" onclick="toggleThemeIconPanel()">⌃ Minimise</button><button onclick="resetThemeToDefault()" style="background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text); padding:3px 8px; border-radius:8px; font-size:0.68rem; font-weight:800; cursor:pointer;" type="button">↺ Default Reset</button></div>
-</div>
-<div id="skThemeIconPanelBody" class="sk-theme-icon-panel-body" data-collapsed="0" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
-<div style="font-size:0.71rem; color:var(--text-muted); margin-bottom:8px; line-height:1.35;">
-       Select matching icon pack &amp; theme style:
-     </div>
-<div class="theme-grid-selector theme-gallery" aria-label="Theme and icon packs">
-<button class="theme-card-btn" data-theme-choice="light" onclick="setTheme('light')" type="button"><span class="theme-card-icon">☀️</span><span class="theme-card-copy"><strong>Classic</strong><small>Blue • Clean</small></span></button>
-<button class="theme-card-btn" data-theme-choice="apple-light" onclick="setTheme('apple-light')" type="button"><span class="theme-card-icon"></span><span class="theme-card-copy"><strong>Apple Light</strong><small>White • Blue</small></span></button>
-<button class="theme-card-btn" data-theme-choice="apple-dark" onclick="setTheme('apple-dark')" type="button"><span class="theme-card-icon"></span><span class="theme-card-copy"><strong>Apple Dark</strong><small>Black • Blue</small></span></button>
-<button class="theme-card-btn" data-theme-choice="ocean" onclick="setTheme('ocean')" type="button"><span class="theme-card-icon">🌊</span><span class="theme-card-copy"><strong>Ocean</strong><small>Cyan • Wave</small></span></button>
-<button class="theme-card-btn" data-theme-choice="royal" onclick="setTheme('royal')" type="button"><span class="theme-card-icon">♛</span><span class="theme-card-copy"><strong>Royal</strong><small>Violet • Luxe</small></span></button>
-<button class="theme-card-btn" data-theme-choice="sunset" onclick="setTheme('sunset')" type="button"><span class="theme-card-icon">🌅</span><span class="theme-card-copy"><strong>Sunset</strong><small>Amber • Coral</small></span></button>
-<button class="theme-card-btn" data-theme-choice="emerald" onclick="setTheme('emerald')" type="button"><span class="theme-card-icon">🌿</span><span class="theme-card-copy"><strong>Emerald</strong><small>Mint • Fresh</small></span></button>
-<button class="theme-card-btn" data-theme-choice="rose" onclick="setTheme('rose')" type="button"><span class="theme-card-icon">🌹</span><span class="theme-card-copy"><strong>Rose</strong><small>Blush • Crimson</small></span></button>
-<button class="theme-card-btn" data-theme-choice="midnight" onclick="setTheme('midnight')" type="button"><span class="theme-card-icon">🌌</span><span class="theme-card-copy"><strong>Midnight</strong><small>Indigo • Electric</small></span></button>
-<button class="theme-card-btn" data-theme-choice="graphite" onclick="setTheme('graphite')" type="button"><span class="theme-card-icon">◈</span><span class="theme-card-copy"><strong>Graphite</strong><small>Charcoal • Slate</small></span></button>
-<button class="theme-card-btn" data-theme-choice="lime" onclick="setTheme('lime')" type="button"><span class="theme-card-icon">⚡</span><span class="theme-card-copy"><strong>Lime</strong><small>Electro • Green</small></span></button>
-<button class="theme-card-btn" data-theme-choice="dark" onclick="setTheme('dark')" type="button"><span class="theme-card-icon">◐</span><span class="theme-card-copy"><strong>Dark</strong><small>Navy • Cyan</small></span></button>
-<button class="theme-card-btn" data-theme-choice="cyber" onclick="setTheme('cyber')" type="button"><span class="theme-card-icon">✦</span><span class="theme-card-copy"><strong>Cyber</strong><small>Neon • Magenta</small></span></button>
-<button class="theme-card-btn" data-theme-choice="obsidian" onclick="setTheme('obsidian')" type="button"><span class="theme-card-icon">⬢</span><span class="theme-card-copy"><strong>Obsidian</strong><small>AMOLED • Gold</small></span></button>
-<button class="theme-card-btn" data-theme-choice="aurora" onclick="setTheme('aurora')" type="button"><span class="theme-card-icon">🌌</span><span class="theme-card-copy"><strong>Aurora</strong><small>Teal • Indigo</small></span></button>
-<button class="theme-card-btn" data-theme-choice="crimson" onclick="setTheme('crimson')" type="button"><span class="theme-card-icon">🩸</span><span class="theme-card-copy"><strong>Crimson</strong><small>Ruby • Ember</small></span></button>
-<button class="theme-card-btn" data-theme-choice="mint" onclick="setTheme('mint')" type="button"><span class="theme-card-icon">🍃</span><span class="theme-card-copy"><strong>Mint</strong><small>Mint • Aqua</small></span></button>
-<button class="theme-card-btn" data-theme-choice="solar" onclick="setTheme('solar')" type="button"><span class="theme-card-icon">☀️</span><span class="theme-card-copy"><strong>Solar</strong><small>Gold • Coral</small></span></button>
-<button class="theme-card-btn" data-theme-choice="nebula" onclick="setTheme('nebula')" type="button"><span class="theme-card-icon">🪐</span><span class="theme-card-copy"><strong>Nebula</strong><small>Violet • Space</small></span></button>
-<button class="theme-card-btn" data-theme-choice="forest" onclick="setTheme('forest')" type="button"><span class="theme-card-icon">🌲</span><span class="theme-card-copy"><strong>Forest</strong><small>Emerald • Earth</small></span></button>
-<button class="theme-card-btn" data-theme-choice="glacier" onclick="setTheme('glacier')" type="button"><span class="theme-card-icon">🧊</span><span class="theme-card-copy"><strong>Glacier</strong><small>Ice • Azure</small></span></button>
-<button class="theme-card-btn" data-theme-choice="magenta" onclick="setTheme('magenta')" type="button"><span class="theme-card-icon">💜</span><span class="theme-card-copy"><strong>Magenta</strong><small>Fuchsia • Violet</small></span></button>
-</div>
-<!-- COLOR DEPTH ADJUSTMENT SLIDER -->
-<div style="border-top:1px dashed var(--card-border); padding-top:8px; margin-top:6px;">
-<div style="display:flex; justify-content:space-between; font-size:0.72rem; font-weight:750; color:var(--text); margin-bottom:4px;">
-<span>Theme Color Depth / Shade:</span>
-<span id="depthValueLabel">100%</span>
-</div>
-<input id="themeDepthSlider" max="150" min="50" oninput="adjustThemeDepth(this.value)" step="5" style="width:100%; cursor:pointer;" type="range" value="100"/>
-</div>
-<div class="sk-font-picker">
-<div class="sk-font-picker-head"><span>🔤 APP FONT STYLE</span><small>Choose a readable font for the app UI</small></div>
-<select id="skFontFamilySelect" class="form-select" onchange="setAppFont(this.value)"><option value="jakarta">Plus Jakarta Sans</option><option value="inter">Inter</option><option value="poppins">Poppins</option><option value="nunito">Nunito</option><option value="rubik">Rubik</option><option value="manrope">Manrope</option><option value="dm">DM Sans</option><option value="space">Space Grotesk</option><option value="lato">Lato</option><option value="outfit">Outfit</option><option value="roboto">Roboto</option><option value="montserrat">Montserrat</option><option value="opensans">Open Sans</option><option value="raleway">Raleway</option><option value="quicksand">Quicksand</option><option value="fira">Fira Sans</option><option value="work">Work Sans</option><option value="lexend">Lexend</option><option value="sora">Sora</option><option value="urbanist">Urbanist</option><option value="barlow">Barlow</option><option value="archivo">Archivo</option><option value="mulish">Mulish</option><option value="karla">Karla</option><option value="cabin">Cabin</option><option value="source">Source Sans 3</option><option value="ibmplex">IBM Plex Sans</option><option value="josefin">Josefin Sans</option><option value="playfair">Playfair Display</option><option value="serif">Classic Serif</option><option value="mono">Clean Mono</option></select>
-<div id="skFontPreview" class="sk-font-preview">SK MOBILES — Sample Text 12345</div>
-</div>
-</div>
 <div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">🏪 SHOP PROFILE &amp; ADDRESS</div>
 <div style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
 <div class="form-group">
@@ -848,7 +847,8 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <button class="modal-close-btn" onclick="skCloseRepairJobs()" type="button">✕</button>
 </div>
 <div class="sk-rj-tabs">
-<button class="sk-rj-tab active" id="skRjJobsTab" onclick="skRjSwitchTab('jobs')" type="button">🔧 Jobs <span id="skRjPendingCount">0</span></button>
+<button class="sk-rj-tab active" id="skRjJobsTab" onclick="skRjSwitchTab('jobs')" type="button">🔧 Jobs</button>
+<button class="sk-rj-tab" id="skRjPendingTab" onclick="skRjSwitchTab('pending')" type="button">⏳ Pending Jobs <span id="skRjPendingCount">0</span></button>
 <button class="sk-rj-tab" id="skRjHistoryTab" onclick="skRjSwitchTab('history')" type="button">📜 History <span id="skRjHistoryCount">0</span></button>
 </div>
 <div id="skRjJobsView">
@@ -882,6 +882,9 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <button class="submit-btn" id="skRjSaveBtn" type="submit">💾 Save Repair Job</button>
 <button class="submit-btn" id="skRjCancelEdit" onclick="skRjResetForm()" style="display:none;margin-top:6px;background:var(--pill-bg);border:1px solid var(--card-border);color:var(--text);" type="button">✕ Cancel Edit</button>
 </form>
+</div>
+<div id="skRjPendingView" style="display:none">
+<div class="sk-rj-page-head"><b>⏳ Pending Repair Jobs</b><small>Received, Checking and Repairing jobs only</small></div>
 <div id="skRjJobsList" style="margin-top:10px"></div>
 </div>
 <div id="skRjHistoryView" style="display:none">
@@ -893,6 +896,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <button class="submit-btn sk-rj-export" onclick="skRjExportHistory()" type="button">📊 Export Repair History Excel</button>
 <div id="skRjHistoryList" style="margin-top:9px"></div>
 </div>
+
 </div>
 </div>
 <div class="modal-overlay" id="skRepairDetailModal" style="z-index:10130!important;">
