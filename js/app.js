@@ -1283,7 +1283,7 @@ const MASTER_INVENTORY = [
       try { applyShopConfig(); } catch (e) { console.error('SK shop config startup:', e); }
       try { applySavedLogo(); } catch (e) { console.error('SK logo startup:', e); }
       try { restoreDraft(); } catch (e) { console.error('SK draft startup:', e); }
-      try { loadRepairSparesNote(); } catch (e) { console.error('SK repair note startup:', e); }
+      try { loadRepairSparesNote(); loadToolsOthersNote(); } catch (e) { console.error('SK spares note startup:', e); }
       try { updateOrderBadge(); } catch (e) { console.error('SK order badge startup:', e); }
       try { updateBillHistoryCount(); } catch (e) { console.error('SK bill count startup:', e); }
       try { skInitDmyDateInputs(document); } catch (e) { console.error('SK date input startup:', e); }
@@ -1395,6 +1395,31 @@ const MASTER_INVENTORY = [
       const note = String(input?.value || '').trim();
       if (!note) { showToast('Please enter a repair tools / IC spares list.'); input?.focus(); return; }
       const message = `SK MOBILES - Repair Tools & IC Spares Required\n\n${note}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+    }
+
+    // Tools & Others — separate monthly / rare-order manual note.
+    function loadToolsOthersNote() {
+      const input = document.getElementById('toolsOthersNoteInput');
+      if (!input) return;
+      try { input.value = localStorage.getItem('sk_tools_others_order_note') || ''; }
+      catch (error) { console.warn('SK tools & others note load failed:', error); }
+    }
+
+    function saveToolsOthersNote() {
+      const input = document.getElementById('toolsOthersNoteInput');
+      if (!input) return;
+      const note = String(input.value || '').trim();
+      try { localStorage.setItem('sk_tools_others_order_note', note); }
+      catch (error) { console.warn('SK tools & others note save failed:', error); }
+      showToast(note ? 'Tools & Others note saved!' : 'Tools & Others note cleared!');
+    }
+
+    function shareToolsOthersNoteWhatsApp() {
+      const input = document.getElementById('toolsOthersNoteInput');
+      const note = String(input?.value || '').trim();
+      if (!note) { showToast('Please enter a Tools & Others order note.'); input?.focus(); return; }
+      const message = `SK MOBILES - Tools & Others Order Note\n\n${note}`;
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
     }
 
@@ -1559,7 +1584,7 @@ const MASTER_INVENTORY = [
       const modal=document.getElementById(modalId); if(!modal)return;
       if(show){
         modal.classList.add('active'); document.body.classList.add('modal-open');
-        if(modalId==='orderModal')renderOrders(); if(modalId==='repairSparesModal')loadRepairSparesNote();
+        if(modalId==='orderModal')renderOrders(); if(modalId==='repairSparesModal')loadRepairSparesNote(); if(modalId==='toolsOthersNoteModal')loadToolsOthersNote();
         if(modalId==='billingModal'){switchBillTab('new');restoreDraft();updateBillPreview();}
         bringModalToFront(modal); requestAnimationFrame(()=>bringModalToFront(modal));
         if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal(modalId,true);
@@ -2980,12 +3005,12 @@ const MASTER_INVENTORY = [
             </div>
           `,
           'card-tools': `
-            <div data-card-id="card-tools" draggable="true" class="draggable-card sk-home-action-row sk-home-action-tools" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="toggleModal('repairSparesModal', true);">
+            <div data-card-id="card-tools" draggable="true" class="draggable-card sk-home-action-row sk-home-action-tools" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="toggleModal('toolsOthersNoteModal', true);">
               <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
                 <div class="sk-home-action-icon tools" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">🛠️</div>
                 <div style="min-width: 0;">
                   <div style="font-weight: 850; font-size: 14px; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">3. Tools &amp; Others</div>
-                  <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">View Tools Stock</div>
+                  <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Monthly / Rare Order Notes</div>
                 </div>
               </div>
               <button class="sk-home-action-btn tools" style="width: 115px; height: 34px; background: #e11d48; color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Tools →</button>
