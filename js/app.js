@@ -1273,7 +1273,7 @@ const MASTER_INVENTORY = [
       }
 
       // Apply the saved theme before the first Home render to avoid a light→dark repaint flash.
-      try { setTheme(localStorage.getItem('sk_theme') || 'light', true); skInitThemeSettingsUI(); } catch (e) { console.error('SK theme startup:', e); }
+      try { setTheme(localStorage.getItem('sk_theme') || 'light', true); skInitThemeSettingsUI(); skInitUIAppearanceStudio(); } catch (e) { console.error('SK theme startup:', e); }
 
       // Render Home before optional UI restoration so the page cannot remain blank.
       try { renderCards(); } catch (e) {
@@ -1557,6 +1557,44 @@ const MASTER_INVENTORY = [
       }
     }
 
+    // Direct app-shell inventory navigation: close the current page/modal and switch
+    // directly to the requested inventory category without changing any business logic.
+    window.skGoToInventoryFilter = function(filter){
+      try{
+        document.querySelectorAll('.modal-overlay.active').forEach(function(m){
+          m.classList.remove('active');
+          m.style.display='';
+        });
+        document.body.classList.remove('modal-open');
+        if(typeof window.toggleLeftDrawer==='function') window.toggleLeftDrawer(false);
+        currentFilter = filter;
+        if(typeof renderCards==='function') renderCards();
+        window.scrollTo({top:0,behavior:'smooth'});
+        if(typeof window.skAppHistoryFilter==='function') window.skAppHistoryFilter(filter);
+      }catch(e){
+        console.warn('Inventory navigation failed:',e);
+      }
+    };
+
+    // Final app-shell Home action: close any open page/modal and return to Home.
+    // This is navigation-only; it does not alter page data or business logic.
+    window.skGoHomeFromAppShell = function(){
+      try{
+        document.querySelectorAll('.modal-overlay.active').forEach(function(m){
+          m.classList.remove('active');
+          m.style.display='';
+        });
+        document.body.classList.remove('modal-open');
+        if(typeof window.toggleLeftDrawer==='function') window.toggleLeftDrawer(false);
+        currentFilter='home';
+        if(typeof renderCards==='function') renderCards();
+        window.scrollTo({top:0,behavior:'smooth'});
+        if(typeof window.skAppHistoryFilter==='function') window.skAppHistoryFilter('home');
+      }catch(e){
+        console.warn('Home navigation failed:',e);
+      }
+    };
+
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.innerText = msg;
@@ -1775,6 +1813,248 @@ const MASTER_INVENTORY = [
       }catch(e){}
     }
 
+    /* ================================================================
+       UI & APPEARANCE STUDIO — token engine
+       All preferences are presentation-only and persisted under one key.
+       ================================================================ */
+    const SK_APPEARANCE_KEY = 'sk_appearance_settings';
+    const SK_APPEARANCE_DEFAULTS = {
+      preset:'classic', themeMode:'light', accent:'blue', customHex:'#2563EB',
+      surface:'offwhite', cardRadius:'modern', buttonRadius:'modern', cardSurface:'blur',
+      header:'glass', nav:'floating', scale:'normal', aura:true, haptic:true, sound:false, motion:false
+    };
+    const SK_APPEARANCE_ACCENTS = {
+      blue:'#2563EB', violet:'#7C3AED', green:'#059669', rose:'#E11D48',
+      amber:'#D97706', teal:'#0D9488', coral:'#F05A5A', indigo:'#4F46E5'
+    };
+    const SK_APPEARANCE_PRESETS = {
+      classic:{theme:'light',accent:'blue',surface:'offwhite',cardSurface:'blur',header:'glass',nav:'fixed',cardRadius:'modern',buttonRadius:'modern',aura:true},
+      liquid:{theme:'light',accent:'blue',surface:'accent',cardSurface:'ios',header:'glass',nav:'floating',cardRadius:'smooth',buttonRadius:'pill',aura:true},
+      white:{theme:'light',accent:'blue',surface:'flat',cardSurface:'border',header:'minimal',nav:'fixed',cardRadius:'standard',buttonRadius:'modern',aura:false},
+      midnight:{theme:'dark',accent:'violet',surface:'flat',cardSurface:'shadow',header:'minimal',nav:'floating',cardRadius:'modern',buttonRadius:'modern',aura:false},
+      emerald:{theme:'light',accent:'green',surface:'accent',cardSurface:'ios',header:'glass',nav:'floating',cardRadius:'smooth',buttonRadius:'modern',aura:true},
+      amber:{theme:'dark',accent:'amber',surface:'glow',cardSurface:'blur',header:'glass',nav:'floating',cardRadius:'modern',buttonRadius:'modern',aura:true},
+      ruby:{theme:'light',accent:'rose',surface:'classic',cardSurface:'shadow',header:'solid',nav:'fixed',cardRadius:'standard',buttonRadius:'modern',aura:false},
+      ocean:{theme:'light',accent:'teal',surface:'accent',cardSurface:'blur',header:'glass',nav:'floating',cardRadius:'smooth',buttonRadius:'modern',aura:true}
+    };
+    let skAppearanceSystemMedia = null;
+
+    function skAppearanceRead(){
+      try{
+        const raw=localStorage.getItem(SK_APPEARANCE_KEY);
+        if(!raw) return {...SK_APPEARANCE_DEFAULTS};
+        const parsed=JSON.parse(raw);
+        return {...SK_APPEARANCE_DEFAULTS,...(parsed&&typeof parsed==='object'?parsed:{})};
+      }catch(e){ return {...SK_APPEARANCE_DEFAULTS}; }
+    }
+    function skAppearanceSave(settings){
+      try{localStorage.setItem(SK_APPEARANCE_KEY,JSON.stringify(settings));}catch(e){}
+    }
+    function skHex(hex){
+      const s=String(hex||'').trim().replace(/^#/,'');
+      if(/^[0-9a-f]{3}$/i.test(s)) return '#'+s.split('').map(c=>c+c).join('').toUpperCase();
+      if(/^[0-9a-f]{6}$/i.test(s)) return '#'+s.toUpperCase();
+      return '#2563EB';
+    }
+    function skHexRgb(hex){
+      const h=skHex(hex).slice(1);return {r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)};
+    }
+    function skRgbHex(r,g,b){return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('').toUpperCase();}
+    function skMix(hex,target,amount){
+      const a=skHexRgb(hex), b=skHexRgb(target), p=Math.max(0,Math.min(1,amount));
+      return skRgbHex(a.r+(b.r-a.r)*p,a.g+(b.g-a.g)*p,a.b+(b.b-a.b)*p);
+    }
+    function skAppearanceResolvedMode(settings){
+      if(settings.themeMode==='system') return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+      if(settings.themeMode==='scheduled'){
+        const hour=new Date().getHours();
+        return (hour>=18 || hour<6)?'dark':'light';
+      }
+      return settings.themeMode==='dark'?'dark':'light';
+    }
+    function skAppearanceThemeFor(settings){
+      const mode=skAppearanceResolvedMode(settings);
+      const map={
+        classic:{light:'light',dark:'dark'}, liquid:{light:'apple-light',dark:'apple-dark'},
+        white:{light:'apple-light',dark:'apple-dark'}, midnight:{light:'midnight',dark:'obsidian'},
+        emerald:{light:'emerald',dark:'forest'}, amber:{light:'sunset',dark:'cyber'},
+        ruby:{light:'rose',dark:'crimson'}, ocean:{light:'ocean',dark:'dark'}
+      };
+      return (map[settings.preset]||map.classic)[mode];
+    }
+    function skAppearanceApplyTokens(settings){
+      const root=document.documentElement;
+      const resolved=skAppearanceResolvedMode(settings);
+      const preset=SK_APPEARANCE_PRESETS[settings.preset]||SK_APPEARANCE_PRESETS.classic;
+      const accentName=settings.accent==='custom'?'custom':settings.accent;
+      const accent=accentName==='custom'?skHex(settings.customHex):skHex(SK_APPEARANCE_ACCENTS[accentName]||SK_APPEARANCE_ACCENTS.blue);
+      const light=resolved==='light';
+      const primary2=skMix(accent,light?'#0F172A':'#FFFFFF',light?.12:.18);
+      const border=light?skMix(accent,'#E2E8F0',.78):skMix(accent,'#FFFFFF',.82);
+      const page=light?skMix(accent,'#F8FAFC',.93):'#070A10';
+      const bg=light?skMix(accent,'#FFFFFF',.97):'#05070C';
+      const card=light?'#FFFFFF':'#0D121C';
+      const model=light?skMix(accent,'#F8FAFC',.94):'#0A0F18';
+      const pill=light?skMix(accent,'#F1F5F9',.88):'rgba(255,255,255,.06)';
+      const muted=light?'#64748B':'#94A3B8';
+      const text=light?'#0F172A':'#F8FAFC';
+      const shadow=light?`0 8px 24px ${skMix(accent,'#FFFFFF',.78)}55`:`0 10px 28px rgba(0,0,0,.30)`;
+      root.style.setProperty('--primary',accent);
+      root.style.setProperty('--primary-gradient',`linear-gradient(135deg,${accent} 0%,${primary2} 100%)`);
+      root.style.setProperty('--glass-btn-bg',accent);
+      root.style.setProperty('--glass-btn-border',primary2);
+      root.style.setProperty('--glass-pill-active',accent);
+      root.style.setProperty('--glass-pill-border',primary2);
+      root.style.setProperty('--badge-bg',light?skMix(accent,'#FFFFFF',.90):skMix(accent,'#000000',.72));
+      root.style.setProperty('--badge-border',light?skMix(accent,'#FFFFFF',.70):skMix(accent,'#FFFFFF',.65));
+      root.style.setProperty('--card-border',border);
+      root.style.setProperty('--page-bg',page);
+      root.style.setProperty('--bg',bg);
+      root.style.setProperty('--card-bg',card);
+      root.style.setProperty('--model-bg',model);
+      root.style.setProperty('--input-bg',light?'#FFFFFF':'#0B111B');
+      root.style.setProperty('--pill-bg',pill);
+      root.style.setProperty('--chip-bg',border);
+      root.style.setProperty('--bottom-nav-bg',light?'rgba(255,255,255,.94)':'rgba(8,11,18,.94)');
+      root.style.setProperty('--header-bg',light?'rgba(255,255,255,.90)':'rgba(7,10,16,.90)');
+      root.style.setProperty('--modal-bg',light?'#FFFFFF':'#0B1019');
+      root.style.setProperty('--text',text);
+      root.style.setProperty('--text-muted',muted);
+      root.style.setProperty('--glass-shadow',shadow);
+      root.style.setProperty('--card-elevation',shadow);
+      root.style.setProperty('--ui-aura-opacity',settings.aura?.45:0);
+      root.setAttribute('data-ui-mode',resolved);
+      root.setAttribute('data-ui-preset',settings.preset);
+      root.setAttribute('data-ui-accent',accentName);
+      root.setAttribute('data-ui-header',settings.header);
+      root.setAttribute('data-ui-nav',settings.nav);
+      root.setAttribute('data-ui-scale',settings.scale);
+      root.setAttribute('data-ui-aura',settings.aura?'on':'off');
+      root.setAttribute('data-ui-haptic',settings.haptic?'on':'off');
+      root.setAttribute('data-ui-sound',settings.sound?'on':'off');
+      root.setAttribute('data-ui-motion',settings.motion?'on':'off');
+      root.setAttribute('data-ui-surface',settings.surface);
+      root.setAttribute('data-ui-card-radius',settings.cardRadius);
+      root.setAttribute('data-ui-button-radius',settings.buttonRadius);
+      root.setAttribute('data-ui-card-surface',settings.cardSurface);
+      root.style.colorScheme=resolved;
+      const hexEl=document.getElementById('skAppearanceHexValue');if(hexEl)hexEl.textContent=accent.toUpperCase();
+      const colorEl=document.getElementById('skAppearanceCustomHex');if(colorEl && /^#[0-9A-F]{6}$/i.test(skHex(settings.customHex)))colorEl.value=skHex(settings.customHex);
+      const preview=document.querySelector('#skUiAppearanceStudio .sk-ui-preview-card');if(preview)preview.style.setProperty('--preview-primary',accent);
+    }
+    function skAppearanceSyncControls(settings){
+      const root=document.getElementById('skUiAppearanceStudio');if(!root)return;
+      root.querySelectorAll('[data-setting-group]').forEach(group=>{
+        const key=group.getAttribute('data-setting-group'), value=settings[key];
+        group.querySelectorAll('[data-value]').forEach(btn=>btn.classList.toggle('active',String(btn.dataset.value)===String(value)));
+      });
+      const aura=document.getElementById('skUiAura'),h=document.getElementById('skUiHaptic'),snd=document.getElementById('skUiSound'),m=document.getElementById('skUiMotion');
+      if(aura)aura.checked=!!settings.aura;if(h)h.checked=!!settings.haptic;if(snd)snd.checked=!!settings.sound;if(m)m.checked=!!settings.motion;
+      root.querySelectorAll('.sk-ui-profile').forEach(btn=>btn.classList.toggle('active',btn.dataset.value===settings.preset));
+    }
+    function skAppearanceApply(settings,opts){
+      const next={...SK_APPEARANCE_DEFAULTS,...settings};
+      skAppearanceSave(next);skAppearanceApplyTokens(next);skAppearanceSyncControls(next);
+      if(opts?.theme){
+        window.__skAppearanceApplying=true;
+        try{setTheme(skAppearanceThemeFor(next),true);}catch(e){}
+        window.__skAppearanceApplying=false;
+      }
+      return next;
+    }
+    function skAppearanceSet(key,value){
+      let settings=skAppearanceRead();
+      if(key==='preset'){
+        const p=SK_APPEARANCE_PRESETS[value]||SK_APPEARANCE_PRESETS.classic;
+        settings={...settings,preset:value,accent:p.accent||settings.accent,themeMode:p.theme||settings.themeMode,surface:p.surface,cardSurface:p.cardSurface,header:p.header,nav:p.nav,cardRadius:p.cardRadius,buttonRadius:p.buttonRadius,aura:p.aura};
+        if(value==='liquid'||value==='white') settings.themeMode='light';
+        if(value==='midnight'||value==='amber') settings.themeMode='dark';
+        if(value==='classic'||value==='emerald'||value==='ruby'||value==='ocean') settings.themeMode='light';
+        skAppearanceApply(settings,{theme:true});
+      }else{
+        if(key==='accent') settings.accent=value;
+        else if(key==='themeMode') settings.themeMode=value;
+        else if(['aura','haptic','sound','motion'].includes(key)) settings[key]=!!value;
+        else settings[key]=value;
+        if(key==='accent' && value!=='custom') settings.customHex=skHex(SK_APPEARANCE_ACCENTS[value]||SK_APPEARANCE_ACCENTS.blue);
+        skAppearanceApply(settings,{theme:key==='themeMode'});
+      }
+    }
+    function skAppearanceSetCustomAccent(value){
+      const hex=skHex(value),settings=skAppearanceRead();settings.accent='custom';settings.customHex=hex;settings.preset='classic';skAppearanceApply(settings,{theme:false});
+    }
+    function skResetAppearanceStudio(){
+      const next={...SK_APPEARANCE_DEFAULTS};
+      skAppearanceApply(next,{theme:true});
+      try{localStorage.removeItem('sk_theme_depth');}catch(e){}
+      const slider=document.getElementById('themeDepthSlider');if(slider)slider.value=100;
+      const label=document.getElementById('depthValueLabel');if(label)label.textContent='100%';
+      if(typeof showToast==='function')showToast('Appearance Studio reset to Classic Blue.');
+    }
+    function skInitUIAppearanceStudio(){
+      let settings=skAppearanceRead();
+      /* One-time migration from the older sk_ui_* bridge. */
+      if(!localStorage.getItem(SK_APPEARANCE_KEY)){
+        const oldMap={header:'header',nav:'nav',scale:'scale',aura:'aura',haptic:'haptic',motion:'motion',surface:'surface',cardRadius:'cardRadius',buttonRadius:'buttonRadius',cardSurface:'cardSurface'};
+        Object.keys(oldMap).forEach(k=>{const raw=localStorage.getItem('sk_ui_'+oldMap[k]);if(raw!==null)settings[k]=raw==='true'?true:raw==='false'?false:raw;});
+      }
+      skAppearanceApply(settings,{theme:true});
+      skInitUIAppearanceBehavior();
+      if(!skAppearanceSystemMedia && window.matchMedia){
+        skAppearanceSystemMedia=window.matchMedia('(prefers-color-scheme: dark)');
+        const onSystemChange=()=>{const s=skAppearanceRead();if(s.themeMode==='system')skAppearanceApply(s,{theme:false});};
+        if(skAppearanceSystemMedia.addEventListener)skAppearanceSystemMedia.addEventListener('change',onSystemChange);else skAppearanceSystemMedia.addListener(onSystemChange);
+      }
+    }
+    let skAppearanceClockTimer=null;
+    let skAppearanceAudioContext=null;
+    function skAppearanceSoftClick(){
+      try{
+        const AC=window.AudioContext||window.webkitAudioContext;
+        if(!AC)return;
+        skAppearanceAudioContext=skAppearanceAudioContext||new AC();
+        const ctx=skAppearanceAudioContext;
+        if(ctx.state==='suspended')ctx.resume().catch(()=>{});
+        const osc=ctx.createOscillator(),gain=ctx.createGain();
+        osc.type='sine'; osc.frequency.setValueAtTime(620,ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(470,ctx.currentTime+0.045);
+        gain.gain.setValueAtTime(0.0001,ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.035,ctx.currentTime+0.006);
+        gain.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.055);
+        osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+0.06);
+      }catch(e){}
+    }
+    function skAppearanceRefreshScheduled(){
+      const s=skAppearanceRead();
+      if(s.themeMode==='scheduled'){
+        skAppearanceApply(s,{theme:true});
+      }
+    }
+    function skInitUIAppearanceBehavior(){
+      if(window.__skUiAppearanceBehaviorReady)return;
+      window.__skUiAppearanceBehaviorReady=true;
+      document.addEventListener('click',function(ev){
+        const target=ev.target&&ev.target.closest?ev.target.closest('button,[role="button"],.nav-item,.tab,.mobile-type-btn,.billing-tab-btn'):null;
+        if(!target)return;
+        const s=skAppearanceRead();
+        if(s.haptic && navigator.vibrate){try{navigator.vibrate([15]);}catch(e){}}
+        if(s.sound)skAppearanceSoftClick();
+      },{passive:true});
+      if(skAppearanceClockTimer)clearInterval(skAppearanceClockTimer);
+      skAppearanceClockTimer=setInterval(skAppearanceRefreshScheduled,60000);
+      document.addEventListener('visibilitychange',function(){if(!document.hidden)skAppearanceRefreshScheduled();},{passive:true});
+    }
+    function skAppearanceSyncFromLegacyTheme(theme){
+      if(window.__skAppearanceApplying)return;
+      const map={light:'classic',ocean:'ocean',emerald:'emerald',rose:'ruby',midnight:'midnight',cyber:'amber','apple-light':'white','apple-dark':'midnight',royal:'classic',sunset:'amber',dark:'midnight'};
+      const settings=skAppearanceRead();settings.preset=map[theme]||settings.preset;
+      skAppearanceSave(settings);skAppearanceApplyTokens(settings);skAppearanceSyncControls(settings);
+    }
+    window.skAppearanceSet=skAppearanceSet;
+    window.skAppearanceSetCustomAccent=skAppearanceSetCustomAccent;
+    window.skResetAppearanceStudio=skResetAppearanceStudio;
+    window.skInitUIAppearanceStudio=skInitUIAppearanceStudio;
+
     function setTheme(theme, silent) {
       const allowedThemes = ['light','ocean','royal','sunset','emerald','rose','midnight','graphite','lime','dark','cyber','obsidian','aurora','crimson','mint','solar','nebula','forest','glacier','magenta','apple-light','apple-dark'];
       if (!allowedThemes.includes(theme)) theme = 'light';
@@ -1792,6 +2072,7 @@ const MASTER_INVENTORY = [
       localStorage.setItem('sk_theme', theme);
       localStorage.setItem('sk_icon_pack', iconPack);
       skUpdateThemeChrome(theme);
+      try { skAppearanceSyncFromLegacyTheme(theme); } catch (e) {}
       if(!silent) showToast("Theme applied: " + theme.toUpperCase());
     }
 
@@ -1804,6 +2085,7 @@ const MASTER_INVENTORY = [
     }
 
     function resetThemeToDefault() {
+      if (window.skResetAppearanceStudio) { skResetAppearanceStudio(); return; }
       setTheme('light');
       localStorage.removeItem('sk_theme');
       localStorage.removeItem('sk_theme_depth');
@@ -3539,253 +3821,66 @@ function viewSavedBill(idx) {
     }
 
     function printInvoiceDirect() {
-      // Print the exact same Live Invoice Preview source used by PDF/WhatsApp.
-      // The helper preserves the EMI schedule as Page 2 when the current bill is EMI.
-      const clone = skCloneLiveInvoiceForOutput();
-      if (!clone) { showToast?.('Live Invoice Preview not found'); return; }
+      // Print the exact Live Invoice Preview as the single source of truth.
+      const source = document.getElementById('printableInvoiceCard');
+      if (!source) { showToast?.('Live Invoice Preview not found'); return; }
+
+      const clone = source.cloneNode(true);
+
+      // Preserve the live-preview mobile-type highlight in the print document.
+      // The print window does not retain the billing modal wrapper, so the
+      // live :has(#mobileTypeUsed.active) selectors cannot determine the type.
+      const printMobileType = String(clone.querySelector('#pvMobileType')?.textContent || 'New Mobile').trim().toLowerCase();
+      clone.dataset.mobileType = printMobileType.includes('used')
+        ? 'used'
+        : printMobileType.includes('keypad')
+          ? 'keypad'
+          : 'new';
 
       const w = window.open('', '_blank');
       if (!w) { showToast?.('Please allow popups to print!'); return; }
 
-      const stylesheetLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
-        .map(link => link.href)
-        .filter(Boolean)
-        .map(href => `<link rel="stylesheet" href="${href}">`)
+      const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"],style'))
+        .map(el => el.tagName.toLowerCase()==='link'
+          ? `<link rel="stylesheet" href="${el.href}">`
+          : `<style>${el.textContent||''}</style>`)
         .join('');
 
+      const emi = clone.querySelector('#pvEmiScheduleSection');
+      if (emi && emi.style.display !== 'none') {
+        emi.style.breakBefore = 'page';
+        emi.style.pageBreakBefore = 'always';
+      }
+
+      clone.removeAttribute('style');
+      clone.style.cssText = 'width:100%;max-width:100%;margin:0;padding:22px;background:#fff;color:#1e293b;box-sizing:border-box;font-family:"Plus Jakarta Sans",sans-serif;';
+
       w.document.open();
-      w.document.write(`<!doctype html><html><head>
-<meta charset="utf-8"><title>SK MOBILES - Invoice</title>
-${stylesheetLinks}
-<style>
-@page{size:A4 portrait;margin:12mm}
-html,body{
-  margin:0!important;
-  padding:0!important;
-  width:auto!important;
-  min-width:0!important;
-  background:#fff!important;
-  color:#1e293b!important;
-  font-family:"Plus Jakarta Sans",Arial,sans-serif!important;
-}
-body{
-  overflow:visible!important;
-  -webkit-print-color-adjust:exact!important;
-  print-color-adjust:exact!important;
-}
-.print-sheet{
-  width:100%!important;
-  max-width:100%!important;
-  margin:0!important;
-  padding:0!important;
-  background:#fff!important;
-  box-sizing:border-box!important;
-}
-.print-page{
-  width:100%!important;
-  max-width:100%!important;
-  margin:0!important;
-  padding:0!important;
-  background:#fff!important;
-  box-sizing:border-box!important;
-  box-shadow:none!important;
-  border:none!important;
-  border-radius:0!important;
-}
-.print-page-1{
-  break-after:page!important;
-  page-break-after:always!important;
-  break-inside:avoid!important;
-  page-break-inside:avoid!important;
-  min-height:calc(297mm - 24mm)!important;
-}
-.sk-invoice-export-page-1{
-  break-after:page!important;
-  page-break-after:always!important;
-  break-inside:avoid!important;
-  page-break-inside:avoid!important;
-}
-.sk-invoice-export-page-2{
-  break-before:page!important;
-  page-break-before:always!important;
-  break-inside:avoid!important;
-  page-break-inside:avoid!important;
-}
-.print-page-2{
-  break-before:auto!important;
-  page-break-before:auto!important;
-  break-inside:avoid!important;
-  page-break-inside:avoid!important;
-  min-height:calc(297mm - 24mm)!important;
-}
-.print-sheet > div{
-  width:100%!important;
-  max-width:100%!important;
-  margin:0!important;
-  padding:0!important;
-  background:#fff!important;
-  box-sizing:border-box!important;
-  box-shadow:none!important;
-  border:none!important;
-  border-radius:0!important;
-}
-#invoiceMainSheet{
-  width:100%!important;
-  max-width:100%!important;
-  margin:0!important;
-  padding:0!important;
-  box-sizing:border-box!important;
-}
-.invoice-brand-header{
-  width:100%!important;
-  box-sizing:border-box!important;
-}
-.invoice-logo-wrap{
-  width:92px!important;
-  height:92px!important;
-  min-width:92px!important;
-  max-width:92px!important;
-  flex:0 0 92px!important;
-}
-.invoice-logo{
-  width:100%!important;
-  height:100%!important;
-  max-width:100%!important;
-  max-height:100%!important;
-  object-fit:cover!important;
-}
-.invoice-shop-info{
-  min-width:0!important;
-  flex:1!important;
-}
-.invoice-shop-name{
-  font-family:"Outfit","Plus Jakarta Sans",Arial,sans-serif!important;
-  font-size:1.85rem!important;
-  font-weight:950!important;
-  line-height:1.05!important;
-  color:#d9166f!important;
-}
-.invoice-address{
-  max-width:100%!important;
-}
-.invoice-meta-row{
-  width:100%!important;
-  box-sizing:border-box!important;
-}
-table{
-  width:100%!important;
-  border-collapse:collapse!important;
-}
-th{padding:7px;text-align:left;background:#f1f5f9;border-bottom:1px solid #cbd5e1}
-td{padding:7px;border-bottom:1px solid #e2e8f0}
-.invoice-emi-yellow-box{
-  background:#fef3c7!important;
-  -webkit-print-color-adjust:exact!important;
-  print-color-adjust:exact!important;
-  border:1px solid #fde047!important;
-  padding:9px 12px!important;
-  border-radius:12px!important;
-  font-size:.72rem!important;
-  margin-bottom:12px!important;
-  color:#92400e!important;
-  line-height:1.45!important;
-}
-.bill-emi-schedule-preview{
-  border:1px solid #fde047!important;
-  background:#ffffff!important;
-  -webkit-print-color-adjust:exact!important;
-  print-color-adjust:exact!important;
-  border-radius:12px!important;
-  overflow:hidden!important;
-  font-size:.70rem!important;
-  margin-top:10px!important;
-}
-.bill-emi-schedule-preview table{
-  width:100%!important;
-  border-collapse:collapse!important;
-  margin:0!important;
-}
-.bill-emi-schedule-preview th{
-  background:#fef3c7!important;
-  -webkit-print-color-adjust:exact!important;
-  print-color-adjust:exact!important;
-  color:#92400e!important;
-  padding:6px 8px!important;
-  text-align:left!important;
-  font-weight:800!important;
-  border-bottom:0!important;
-}
-.bill-emi-schedule-preview td{
-  padding:6px 8px!important;
-  border-top:1px solid #fef9c3!important;
-  border-bottom:0!important;
-  color:#1e293b!important;
-}
-#pvEmiScheduleSection{
-  display:block!important;
-  break-before:avoid!important;
-  page-break-before:avoid!important;
-  break-after:auto!important;
-  page-break-after:auto!important;
-  break-inside:avoid!important;
-  page-break-inside:avoid!important;
-}
-img{max-width:100%!important}
-*{box-sizing:border-box}
-@media print{
-  html,body{background:#fff!important}
-  body *{visibility:visible!important}
-  .print-sheet,.print-sheet *{visibility:visible!important}
-  .print-sheet{display:block!important}
-  .print-page-1,.print-page-2{display:block!important}
-}
-</style></head><body><div class="print-sheet">${clone.outerHTML}</div></body></html>`);
+      w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>SK MOBILES - Invoice</title>${styles}<style>
+@page{size:A4 portrait;margin:10mm}
+html,body{margin:0!important;padding:0!important;background:#fff!important;color:#1e293b!important;overflow:visible!important;}
+body{font-family:"Plus Jakarta Sans",Arial,sans-serif!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+.print-preview-host{width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;background:#fff!important;}
+#printableInvoiceCard{width:100%!important;max-width:100%!important;margin:0 auto!important;box-sizing:border-box!important;background:#fff!important;color:#1e293b!important;box-shadow:none!important;}
+img{max-width:100%!important;}
+@media print{body{background:#fff!important;}#printableInvoiceCard{box-shadow:none!important;}}
+</style></head><body><div class="print-preview-host">${clone.outerHTML}</div></body></html>`);
       w.document.close();
 
       const printNow=()=>{
-        try{w.focus();w.print();}finally{setTimeout(()=>{try{w.close()}catch(e){}},300);}
+        try{w.focus();w.print();}
+        finally{setTimeout(()=>{try{w.close();}catch(e){}},400);}
       };
-
-      const imgs=[...w.document.images];
-      const sheets=[...w.document.querySelectorAll('link[rel="stylesheet"]')];
-
-      let remaining=imgs.length;
-      let stylesRemaining=sheets.length;
-      let done=false;
-
-      const finish=()=>{
-        if(done) return;
-        if(remaining<=0 && stylesRemaining<=0){
-          done=true;
-          setTimeout(printNow,120);
-        }
+      const waitForReady=()=>{
+        const images=Array.from(w.document.images);
+        const links=Array.from(w.document.querySelectorAll('link[rel="stylesheet"]'));
+        let pending=0;
+        const done=()=>{pending--;if(pending<=0)setTimeout(printNow,120);};
+        images.forEach(img=>{if(!img.complete){pending++;img.addEventListener('load',done,{once:true});img.addEventListener('error',done,{once:true});}});
+        links.forEach(link=>{if(!link.sheet){pending++;link.addEventListener('load',done,{once:true});link.addEventListener('error',done,{once:true});}});
+        if(pending===0)setTimeout(printNow,120);
       };
-
-      if(!imgs.length) remaining=0;
-      imgs.forEach(img=>{
-        if(img.complete) remaining--;
-        else{
-          img.addEventListener('load',()=>{remaining--;finish();},{once:true});
-          img.addEventListener('error',()=>{remaining--;finish();},{once:true});
-        }
-      });
-
-      if(!sheets.length) stylesRemaining=0;
-      sheets.forEach(sheet=>{
-        if(sheet.sheet) stylesRemaining--;
-        else{
-          sheet.addEventListener('load',()=>{stylesRemaining--;finish();},{once:true});
-          sheet.addEventListener('error',()=>{stylesRemaining--;finish();},{once:true});
-        }
-      });
-
-      finish();
-      setTimeout(()=>{
-        if(!done){
-          done=true;
-          printNow();
-        }
-      },1800);
+      setTimeout(waitForReady,80);
     }
 
     function downloadInvoicePDF() {
@@ -4086,15 +4181,15 @@ img{max-width:100%!important}
   window.skRjRenderHomeMetric=function(){
     const grid=document.getElementById('homeMetricGrid'); if(!grid)return;
     const old=document.getElementById('skHomeRepairMetric'); old?.remove();
-    const a=getPending();
+    /* Home card shows only genuinely pending repair work; Ready/Delivered remain in Repair History. */
+    const a=load().filter(j=>['Received','Checking','Repairing'].includes(String(j.status||'')));
     const el=document.createElement('div');
-    el.id='skHomeRepairMetric'; el.className='draggable-card';
+    el.id='skHomeRepairMetric'; el.className='draggable-card sk-home-rj-card';
     el.draggable=true;
     el.dataset.cardId='metric-repairs';
-    el.className='draggable-card sk-home-rj-card';
     el.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
       <div style="width:38px;height:38px;border-radius:12px;background:rgba(239,68,68,.10);display:flex;align-items:center;justify-content:center;font-size:1.15rem">🔧</div>
-      <div><div style="font-size:12px;color:var(--text-muted);font-weight:700">Repair Jobs</div>
+      <div><div style="font-size:12px;color:var(--text-muted);font-weight:700">Pending Repair Jobs</div>
       <div class="sk-home-rj-count">${a.length}</div><div class="sk-home-rj-mini">${a.length?'Pending Jobs':'No Pending Jobs'}</div></div></div>
       <span style="font-size:14px;color:var(--text-muted);font-weight:700">›</span>`;
     el.onclick=function(){skOpenRepairJobs()};
@@ -4317,7 +4412,6 @@ img{max-width:100%!important}
       else if(st&&st.modal==='skRepairJobsModal')window.skOpenRepairJobs?.();
       else if(st&&st.modal==='skRepairDetailModal'&&st.detailId)window.skRjShowDetail?.(st.detailId);
       else if(st&&st.modal==='skUrgentRepairModal')window.skOpenUrgentRepairModal?.();
-      else if(st&&st.modal==='skCreditLedgerPage')window.skOpenCreditLedger?.();
       window.scrollTo({top:0,behavior:'smooth'});
     }finally{restoring=false;}
   }
@@ -4328,33 +4422,6 @@ img{max-width:100%!important}
     if(e.state&&e.state.skMobilesApp)restoreState(e.state);
     else{history.pushState(currentState(),document.title,location.href);restoreState(currentState());}
   });
-
-  /* Mobile back navigation guard for legacy/directly-opened popup pages.
-     Existing modal history handlers remain the source of truth; this observer
-     only fills the gap for overlays opened by older direct classList calls. */
-  try{
-    const skModalHistoryObserver=new MutationObserver(function(){
-      if(restoring)return;
-      const active=[...document.querySelectorAll('.modal-overlay.active')];
-      if(!active.length){
-        const st=currentState();
-        if(st.modal)history.replaceState({skMobilesApp:true,filter:st.filter||'home',modal:null},document.title,location.href);
-        return;
-      }
-      let top=active[0],topZ=-1;
-      active.forEach(function(m){
-        const z=parseInt(getComputedStyle(m).zIndex,10);
-        if(Number.isFinite(z)&&z>=topZ){top=m;topZ=z;}
-      });
-      const id=top&&top.id;
-      if(!id)return;
-      const st=currentState();
-      if(st.modal!==id){
-        pushAppState({filter:(typeof currentFilter==='string'?currentFilter:'home'),modal:id});
-      }
-    });
-    if(document.body)skModalHistoryObserver.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
-  }catch(e){}
 
   document.addEventListener('click',function(e){
     if(restoring)return;
@@ -6133,9 +6200,9 @@ function getCustomers(){
  return Object.values(map).map(c=>{c.credits=c.entries.filter(e=>e.type==='credit').reduce((s,e)=>s+Number(e.amount||0),0);c.payments=c.entries.filter(e=>e.type==='payment').reduce((s,e)=>s+Number(e.amount||0),0);c.balance=Math.max(0,c.credits-c.payments);return c})
 }
 function getCustomer(k){return getCustomers().find(c=>c.key===k)||null}
-function openLedger(){skImportFromBills(true);skRenderCreditCustomers();document.getElementById('skCreditLedgerModal')?.classList.add('active');document.body.classList.add('modal-open');skCheckEmiReminders();if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skCreditLedgerModal',true)}
+function openLedger(){skImportFromBills(true);skRenderCreditCustomers();document.getElementById('skCreditLedgerModal')?.classList.add('active');skCheckEmiReminders()}
 window.skOpenCreditLedger=openLedger;
-window.skCloseCreditLedger=function(){document.getElementById('skCreditLedgerModal')?.classList.remove('active');document.body.classList.remove('modal-open');if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skCreditLedgerModal',false)};
+window.skCloseCreditLedger=function(){document.getElementById('skCreditLedgerModal')?.classList.remove('active')};
 window.skOpenRoleProfile=function(){
  const role=localStorage.getItem('sk_current_role_v1');
  if(role==='admin'){const c=document.getElementById('skAdminProfileWorkerCount'),w=safeJson('sk_workers_v1',[]);if(c)c.textContent=Array.isArray(w)?w.length:0;
@@ -6152,10 +6219,10 @@ window.skOpenRoleProfile=function(){
    document.getElementById('skAdminProfileWorkerCount')?.replaceChildren(document.createTextNode('—'));
    document.getElementById('skAdminProfileModal')?.classList.add('active');
  }
- else if(role==='worker'){if(typeof window.skOpenWorkerProfile==='function'){window.skOpenWorkerProfile()}else{const id=localStorage.getItem('sk_current_worker_id_v1'),a=safeJson('sk_workers_v1',[]),w=Array.isArray(a)?a.find(x=>x.id===id):null;if(!w){toast('Worker profile not found');return}const set=(i,v)=>{const e=document.getElementById(i);if(e)e.value=v||''};const img=document.getElementById('skWorkerProfilePhoto');if(img)img.src=w.photo||'';set('skWorkerProfileName',w.name);set('skWorkerProfileId',w.id);set('skWorkerProfilePhone',w.phone);set('skWorkerProfileDesignation',w.designation);set('skWorkerProfileDetails',w.details);document.getElementById('skWorkerProfileModal')?.classList.add('active');if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skWorkerProfileModal',true)}}
+ else if(role==='worker'){if(typeof window.skOpenWorkerProfile==='function'){window.skOpenWorkerProfile()}else{const id=localStorage.getItem('sk_current_worker_id_v1'),a=safeJson('sk_workers_v1',[]),w=Array.isArray(a)?a.find(x=>x.id===id):null;if(!w){toast('Worker profile not found');return}const set=(i,v)=>{const e=document.getElementById(i);if(e)e.value=v||''};const img=document.getElementById('skWorkerProfilePhoto');if(img)img.src=w.photo||'';set('skWorkerProfileName',w.name);set('skWorkerProfileId',w.id);set('skWorkerProfilePhone',w.phone);set('skWorkerProfileDesignation',w.designation);set('skWorkerProfileDetails',w.details);document.getElementById('skWorkerProfileModal')?.classList.add('active')}}
  else toast('🔐 Please login first')
 };
-window.skCloseAdminProfile=function(){document.getElementById('skAdminProfileModal')?.classList.remove('active');if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skAdminProfileModal',false)};
+window.skCloseAdminProfile=function(){document.getElementById('skAdminProfileModal')?.classList.remove('active')};
 
 function clearEntryForm(){['skCreditName','skCreditPhone','skCreditAmount','skCreditDetails'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});const d=document.getElementById('skCreditDate');if(d)d.value=skISOToDmy(todayISO());const m=document.getElementById('skCreditMode');if(m)m.value='Cash'}
 function openEntry(type,c){
@@ -6165,7 +6232,7 @@ function openEntry(type,c){
 }
 window.skOpenCreditEntry=function(){openEntry('credit',null)}
 window.skOpenPaymentEntry=function(){openEntry('payment',null)}
-window.skCloseCreditEntry=function(){document.getElementById('skCreditEntryModal')?.classList.remove('active');if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skCreditEntryModal',false)}
+window.skCloseCreditEntry=function(){document.getElementById('skCreditEntryModal')?.classList.remove('active')}
 window.skSaveCreditEntry=function(){
  const btn=document.querySelector('#skCreditEntryModal .submit-btn');
  if(btn && btn.dataset.skSaving==='1')return;
@@ -6692,11 +6759,7 @@ window.skCPDeleteCustomer=async function(k){
 };
 window.skCPOpenCustomer=function(k){var c=cpGetCustomers().find(function(x){return x.key===k});if(c)cpOpenDetail(c);else if(typeof showToast==='function')showToast('Customer not found')}
 window.skCPBackToList=cpShowMain;
-window.skCPBackToHome=function(){
- document.getElementById('skCreditLedgerPage').classList.remove('active');
- document.body.classList.remove('modal-open');
- if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skCreditLedgerPage',false);
-}
+window.skCPBackToHome=function(){document.getElementById('skCreditLedgerPage').classList.remove('active')}
 window.skCPViewBill=function(idx){try{window.__skBillViewReturn='creditLedger';if(typeof viewSavedBill==='function'){viewSavedBill(idx)}else{}}catch(e){window.__skBillViewReturn=''}}
 function cpFillBillsForCustomer(c,idx){document.getElementById('skCPBill').innerHTML=cpBillOptions(c,idx);if(c){document.getElementById('skCPName').value=c.name||'';document.getElementById('skCPPhone').value=c.phone||''}}
 function cpResetForm(type,c,idx){
@@ -6886,8 +6949,7 @@ window.skCPSaveAction=function(){
 };
 function cpOpenPage(){
  if(typeof skImportFromBills==='function')skImportFromBills(true);
- document.getElementById('skCreditLedgerPage').classList.add('active');document.body.classList.add('modal-open');cpShowMain();
- if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skCreditLedgerPage',true);
+ document.getElementById('skCreditLedgerPage').classList.add('active');cpShowMain();
 }
 window.skOpenCreditLedger=cpOpenPage;
 })();
@@ -6946,7 +7008,7 @@ window.skOpenCreditLedger=cpOpenPage;
     }catch(err){console.error('Recycle Bin restore failed:',err);showToast?.('❌ Restore failed');}
   };
   window.permanentlyDeleteTrash=function(trashId){const list=readRecycle(),idx=list.findIndex(x=>String(x.trashId)===String(trashId));if(idx<0)return;if(!confirm('Permanently delete this Recycle Bin item? This cannot be undone.'))return;list.splice(idx,1);saveStoredData({recycleBin:list});renderRecycleBinUI();showToast?.('🗑️ Permanently deleted');};
-  window.skOpenRecycleBin=function(){const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();if(role&&role!=='admin'){showToast?.('🔒 Admin access only');return;}purgeExpiredTrash();renderRecycleBinUI();document.getElementById('skRecycleBinModal')?.classList.add('active');if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal('skRecycleBinModal',true);};
+  window.skOpenRecycleBin=function(){const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();if(role&&role!=='admin'){showToast?.('🔒 Admin access only');return;}purgeExpiredTrash();renderRecycleBinUI();document.getElementById('skRecycleBinModal')?.classList.add('active');};
   document.addEventListener('DOMContentLoaded',function(){purgeExpiredTrash();const empty=document.getElementById('btnEmptyRecycleBin');if(empty)empty.addEventListener('click',function(){const list=readRecycle();if(!list.length){showToast?.('Trash is already empty');return;}if(!confirm('Permanently clear all items in Recycle Bin? This cannot be undone.'))return;saveStoredData({recycleBin:[]});renderRecycleBinUI();showToast?.('🗑️ Trash cleared');});setInterval(purgeExpiredTrash,6*60*60*1000);});
 })();
 

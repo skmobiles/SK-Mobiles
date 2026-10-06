@@ -24,7 +24,19 @@
 <script>
 (function(){try{var r=document.documentElement,t=localStorage.getItem('sk_theme');if(t)r.setAttribute('data-theme',t);var f=localStorage.getItem('sk_font_family');if(f)r.setAttribute('data-font-family',f);var meta=document.getElementById('skThemeColorMeta');var c={light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',sunset:'#ffedd5',emerald:'#d1fae5',rose:'#ffe4e6',midnight:'#111827',graphite:'#111827',lime:'#0f1a05',dark:'#050811',cyber:'#03040a',obsidian:'#000000',aurora:'#cffafe',crimson:'#ffe4e6',mint:'#ccfbf1',solar:'#000000',nebula:'#17102f',forest:'#062e1c',glacier:'#e0f2fe',magenta:'#2b092f','apple-light':'#f5f5f7','apple-dark':'#000000'}[t||'light'];if(meta&&c)meta.setAttribute('content',c);}catch(e){}})();
 </script>
-<link href="css/style.css" rel="stylesheet"/></head>
+<link href="./css/style.css?v=5.0-ui-appearance-fix" rel="stylesheet" type="text/css"/><script>
+(function(){try{
+  var s=JSON.parse(localStorage.getItem('sk_appearance_settings')||'null');
+  if(!s)return;
+  var r=document.documentElement;
+  r.setAttribute('data-ui-mode',s.themeMode==='dark'?'dark':(s.themeMode==='system'&&matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+  if(s.preset)r.setAttribute('data-ui-preset',s.preset);
+  if(s.header)r.setAttribute('data-ui-header',s.header);if(s.nav)r.setAttribute('data-ui-nav',s.nav);
+  if(s.surface)r.setAttribute('data-ui-surface',s.surface);if(s.cardRadius)r.setAttribute('data-ui-card-radius',s.cardRadius);if(s.buttonRadius)r.setAttribute('data-ui-button-radius',s.buttonRadius);if(s.cardSurface)r.setAttribute('data-ui-card-surface',s.cardSurface);
+  if(s.scale)r.setAttribute('data-ui-scale',s.scale);r.setAttribute('data-ui-aura',s.aura===false?'off':'on');r.setAttribute('data-ui-motion',s.motion?'on':'off');
+}catch(e){}})();
+</script>
+</head>
 <body>
 
 <!-- 🔐 MODERN GLASSMORPHISM LOGIN MODAL -->
@@ -69,7 +81,7 @@
 
 <!-- SK V4.19: Firebase-safe Recycle Bin -->
 <div id="skRecycleBinModal" class="modal-overlay" style="z-index:2147483000!important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-width:460px;max-height:90vh;">
 <div class="modal-title"><span>🗑️ Recycle Bin</span><button class="modal-close-btn" type="button" onclick="toggleModal('skRecycleBinModal', false)" aria-label="Close Recycle Bin">✕</button></div>
 <p style="font-size:.72rem;color:var(--text-muted);margin-bottom:10px;">Deleted items are automatically removed after 30 days.</p>
 <div id="recycleBinItemsContainer" style="display:flex;flex-direction:column;gap:8px;max-height:55vh;overflow-y:auto;"></div>
@@ -129,7 +141,7 @@
 </button>
 
 <div class="drawer-footer-badge">
-<span>SK Mobiles Master • V5.0</span>
+<span>SK Mobiles Master • V5.1</span>
 <span>Dharmapuri, Tamil Nadu</span>
 </div>
 </div>
@@ -152,6 +164,139 @@
 <span>App Settings &amp; Themes</span>
 <button class="modal-close-btn" onclick="toggleModal('settingsModal', false)">✕</button>
 </div>
+
+<!-- UI & APPEARANCE STUDIO: additive UI settings only -->
+<section id="skUiAppearanceStudio" class="sk-ui-studio" aria-label="UI & Appearance Studio">
+  <div class="sk-ui-studio-head">
+    <div>
+      <div class="sk-ui-eyebrow">✦ UI &amp; APPEARANCE</div>
+      <h3>Appearance Studio</h3>
+      <p>Live design controls for the app shell. Changes save automatically.</p>
+    </div>
+    <button type="button" class="sk-ui-reset-btn" onclick="skResetAppearanceStudio()">↺ Factory Reset</button>
+  </div>
+
+  <div class="sk-ui-preview" aria-label="Live Appearance Preview">
+    <div class="sk-ui-preview-top"><span>LIVE SANDBOX</span><span class="sk-ui-preview-status">● Live</span></div>
+    <div class="sk-ui-preview-card">
+      <div class="sk-ui-preview-brand"><span class="sk-ui-preview-logo">SK</span><div><b>SK MOBILES</b><small>Smart Business Management</small></div></div>
+      <div class="sk-ui-preview-metrics"><span>Stock <b>1680</b></span><span>Outstanding <b>₹0</b></span><span>Repairs <b>0</b></span></div>
+      <button type="button" class="sk-ui-preview-action">Tap to Preview <span>→</span></button>
+    </div>
+  </div>
+
+  <div class="sk-ui-section">
+    <div class="sk-ui-section-title">⚡ 1-CLICK STYLE PROFILES</div>
+    <div class="sk-ui-profile-grid" data-setting-group="preset">
+      <button type="button" class="sk-ui-profile" data-value="classic" onclick="skAppearanceSet('preset','classic')"><span>🔷</span><b>Mobirec / Classic Blue</b><small>Soft blue business UI</small></button>
+      <button type="button" class="sk-ui-profile" data-value="liquid" onclick="skAppearanceSet('preset','liquid')"><span>◉</span><b>iOS Liquid Glass</b><small>Frosted Cupertino glass</small></button>
+      <button type="button" class="sk-ui-profile" data-value="white" onclick="skAppearanceSet('preset','white')"><span>□</span><b>Pure White Minimal</b><small>Flat white + hairlines</small></button>
+      <button type="button" class="sk-ui-profile" data-value="midnight" onclick="skAppearanceSet('preset','midnight')"><span>◐</span><b>Midnight OLED</b><small>Black + royal violet</small></button>
+      <button type="button" class="sk-ui-profile" data-value="emerald" onclick="skAppearanceSet('preset','emerald')"><span>✦</span><b>Emerald Glass</b><small>Emerald frosted surfaces</small></button>
+      <button type="button" class="sk-ui-profile" data-value="amber" onclick="skAppearanceSet('preset','amber')"><span>◈</span><b>Cyber Amber</b><small>Gold high-contrast UI</small></button>
+      <button type="button" class="sk-ui-profile" data-value="ruby" onclick="skAppearanceSet('preset','ruby')"><span>◆</span><b>Ruby Executive</b><small>Premium ruby accent</small></button>
+      <button type="button" class="sk-ui-profile" data-value="ocean" onclick="skAppearanceSet('preset','ocean')"><span>🌊</span><b>Ocean Breeze</b><small>Calm teal glass</small></button>
+    </div>
+  </div>
+
+  <div class="sk-ui-section">
+    <div class="sk-ui-section-title">☼ THEME MODE &amp; ACCENT</div>
+    <div class="sk-ui-label">Theme Mode</div>
+    <div class="sk-ui-choice-row sk-ui-theme-mode-row" data-setting-group="themeMode">
+      <button type="button" class="sk-ui-choice" data-value="light" onclick="skAppearanceSet('themeMode','light')"><b>☀ Light</b><small>Bright surfaces</small></button>
+      <button type="button" class="sk-ui-choice" data-value="dark" onclick="skAppearanceSet('themeMode','dark')"><b>☾ Dark</b><small>Low-light UI</small></button>
+      <button type="button" class="sk-ui-choice" data-value="system" onclick="skAppearanceSet('themeMode','system')"><b>◌ System</b><small>Device setting</small></button>
+      <button type="button" class="sk-ui-choice" data-value="scheduled" onclick="skAppearanceSet('themeMode','scheduled')"><b>◷ Auto Night</b><small>6 PM → 6 AM</small></button>
+    </div>
+    <div class="sk-ui-label">Accent Color</div>
+    <div class="sk-ui-accent-grid" data-setting-group="accent">
+      <button type="button" class="sk-ui-accent" data-value="blue" onclick="skAppearanceSet('accent','blue')"><i style="--sw:#2563eb"></i><b>Blue</b></button>
+      <button type="button" class="sk-ui-accent" data-value="violet" onclick="skAppearanceSet('accent','violet')"><i style="--sw:#7c3aed"></i><b>Violet</b></button>
+      <button type="button" class="sk-ui-accent" data-value="green" onclick="skAppearanceSet('accent','green')"><i style="--sw:#059669"></i><b>Green</b></button>
+      <button type="button" class="sk-ui-accent" data-value="rose" onclick="skAppearanceSet('accent','rose')"><i style="--sw:#e11d48"></i><b>Rose</b></button>
+      <button type="button" class="sk-ui-accent" data-value="amber" onclick="skAppearanceSet('accent','amber')"><i style="--sw:#d97706"></i><b>Amber</b></button>
+      <button type="button" class="sk-ui-accent" data-value="teal" onclick="skAppearanceSet('accent','teal')"><i style="--sw:#0d9488"></i><b>Teal</b></button>
+      <button type="button" class="sk-ui-accent" data-value="coral" onclick="skAppearanceSet('accent','coral')"><i style="--sw:#f05a5a"></i><b>Coral</b></button>
+      <button type="button" class="sk-ui-accent" data-value="indigo" onclick="skAppearanceSet('accent','indigo')"><i style="--sw:#4f46e5"></i><b>Indigo</b></button>
+    </div>
+    <div class="sk-ui-custom-color">
+      <div><b>Custom Brand Hex</b><small>Apply any brand colour instantly</small></div>
+      <input id="skAppearanceCustomHex" type="color" value="#2563eb" aria-label="Custom brand colour" oninput="skAppearanceSetCustomAccent(this.value)">
+      <code id="skAppearanceHexValue">#2563EB</code>
+    </div>
+  </div>
+
+  <div class="sk-ui-section">
+    <div class="sk-ui-section-title">◌ SHELL BACKGROUND SURFACE &amp; GRADIENTS</div>
+    <div class="sk-ui-choice-grid" data-setting-group="surface">
+      <button type="button" class="sk-ui-card-choice" data-value="flat" onclick="skAppearanceSet('surface','flat')"><b>Pure Flat White</b><small>Crisp #FFFFFF clean flat</small></button>
+      <button type="button" class="sk-ui-card-choice" data-value="accent" onclick="skAppearanceSet('surface','accent')"><b>Accent Gradient</b><small>Dynamic primary hue</small></button>
+      <button type="button" class="sk-ui-card-choice" data-value="classic" onclick="skAppearanceSet('surface','classic')"><b>Classic / Old Gradient</b><small>Original soft depth</small></button>
+      <button type="button" class="sk-ui-card-choice" data-value="slate" onclick="skAppearanceSet('surface','slate')"><b>Subtle Slate</b><small>Neutral cool surface</small></button>
+      <button type="button" class="sk-ui-card-choice" data-value="offwhite" onclick="skAppearanceSet('surface','offwhite')"><b>Off-White Solid</b><small>Soft neutral white</small></button>
+      <button type="button" class="sk-ui-card-choice" data-value="glow" onclick="skAppearanceSet('surface','glow')"><b>Vibrant Mesh Glow</b><small>Radial ambient colour</small></button>
+    </div>
+  </div>
+
+  <div class="sk-ui-section">
+    <div class="sk-ui-section-title">□ CORNER RADIUS &amp; CARD SURFACES</div>
+    <div class="sk-ui-label">Card Corner Radius</div>
+    <div class="sk-ui-choice-row sk-ui-radius" data-setting-group="cardRadius">
+      <button type="button" class="sk-ui-choice" data-value="sharp" onclick="skAppearanceSet('cardRadius','sharp')"><b>Sharp</b><small>0px</small></button>
+      <button type="button" class="sk-ui-choice" data-value="standard" onclick="skAppearanceSet('cardRadius','standard')"><b>Standard</b><small>8px</small></button>
+      <button type="button" class="sk-ui-choice" data-value="modern" onclick="skAppearanceSet('cardRadius','modern')"><b>Modern</b><small>12px</small></button>
+      <button type="button" class="sk-ui-choice" data-value="smooth" onclick="skAppearanceSet('cardRadius','smooth')"><b>Smooth</b><small>16px</small></button>
+      <button type="button" class="sk-ui-choice" data-value="pill" onclick="skAppearanceSet('cardRadius','pill')"><b>Pill</b><small>24px</small></button>
+    </div>
+    <div class="sk-ui-label">Button Corner Radius</div>
+    <div class="sk-ui-choice-row" data-setting-group="buttonRadius">
+      <button type="button" class="sk-ui-choice" data-value="sharp" onclick="skAppearanceSet('buttonRadius','sharp')"><b>Sharp</b><small>0px</small></button>
+      <button type="button" class="sk-ui-choice" data-value="modern" onclick="skAppearanceSet('buttonRadius','modern')"><b>Modern</b><small>8px</small></button>
+      <button type="button" class="sk-ui-choice" data-value="smooth" onclick="skAppearanceSet('buttonRadius','smooth')"><b>Smooth</b><small>14px</small></button>
+      <button type="button" class="sk-ui-choice" data-value="pill" onclick="skAppearanceSet('buttonRadius','pill')"><b>Full Pill</b><small>999px</small></button>
+    </div>
+    <div class="sk-ui-label">Card Surface Style</div>
+    <div class="sk-ui-card-row" data-setting-group="cardSurface">
+      <button type="button" class="sk-ui-card-choice" data-value="ios" onclick="skAppearanceSet('cardSurface','ios')"><b>iOS Full Glass</b><small>Specular shine + blur</small></button>
+      <button type="button" class="sk-ui-card-choice" data-value="blur" onclick="skAppearanceSet('cardSurface','blur')"><b>Glass Blur</b><small>Translucent frosted blur</small></button>
+      <button type="button" class="sk-ui-card-choice" data-value="border" onclick="skAppearanceSet('cardSurface','border')"><b>Modern Border</b><small>Clean hairline border</small></button>
+      <button type="button" class="sk-ui-card-choice" data-value="shadow" onclick="skAppearanceSet('cardSurface','shadow')"><b>Elevated Shadow</b><small>Soft floating elevation</small></button>
+    </div>
+  </div>
+
+  <div class="sk-ui-section">
+    <div class="sk-ui-section-title">➤ NAVIGATION &amp; HEADER STYLE</div>
+    <div class="sk-ui-label">Header Appearance</div>
+    <div class="sk-ui-choice-row" data-setting-group="header">
+      <button type="button" class="sk-ui-choice" data-value="glass" onclick="skAppearanceSet('header','glass')"><b>Glass</b><small>Blurred header</small></button>
+      <button type="button" class="sk-ui-choice" data-value="solid" onclick="skAppearanceSet('header','solid')"><b>Solid</b><small>Opaque header</small></button>
+      <button type="button" class="sk-ui-choice" data-value="minimal" onclick="skAppearanceSet('header','minimal')"><b>Minimal</b><small>Quiet chrome</small></button>
+    </div>
+    <div class="sk-ui-label">Bottom Navigation Style</div>
+    <div class="sk-ui-card-row" data-setting-group="nav">
+      <button type="button" class="sk-ui-card-choice" data-value="fixed" onclick="skAppearanceSet('nav','fixed')"><b>Fixed Dock</b><small>Standard screen-bottom dock</small></button>
+      <button type="button" class="sk-ui-card-choice" data-value="floating" onclick="skAppearanceSet('nav','floating')"><b>Floating Island</b><small>Detached floating navbar</small></button>
+    </div>
+  </div>
+
+  <div class="sk-ui-section">
+    <div class="sk-ui-section-title">T INTERFACE SCALE &amp; TYPOGRAPHY</div>
+    <div class="sk-ui-label">Content &amp; Text Scaling</div>
+    <div class="sk-ui-choice-row" data-setting-group="scale">
+      <button type="button" class="sk-ui-choice" data-value="compact" onclick="skAppearanceSet('scale','compact')"><b>Compact</b><small>92%</small></button>
+      <button type="button" class="sk-ui-choice" data-value="normal" onclick="skAppearanceSet('scale','normal')"><b>Normal</b><small>100%</small></button>
+      <button type="button" class="sk-ui-choice" data-value="comfortable" onclick="skAppearanceSet('scale','comfortable')"><b>Comfortable</b><small>108%</small></button>
+    </div>
+  </div>
+
+  <div class="sk-ui-section">
+    <div class="sk-ui-section-title">◌ VISUAL EFFECTS &amp; TACTILE FEEDBACK</div>
+    <label class="sk-ui-toggle-row"><span><b>Ambient Aura Glow</b><small>Subtle radial colour aura behind surfaces</small></span><input type="checkbox" id="skUiAura" onchange="skAppearanceSet('aura',this.checked)"><i></i></label>
+    <label class="sk-ui-toggle-row"><span><b>Haptic Touch Feedback</b><small>navigator.vibrate([15]) on buttons and tabs</small></span><input type="checkbox" id="skUiHaptic" onchange="skAppearanceSet('haptic',this.checked)"><i></i></label>
+    <label class="sk-ui-toggle-row"><span><b>Soft Click Sound</b><small>Short audio feedback on buttons and tabs</small></span><input type="checkbox" id="skUiSound" onchange="skAppearanceSet('sound',this.checked)"><i></i></label>
+    <label class="sk-ui-toggle-row"><span><b>Reduced Motion</b><small>Disable transitions and transforms</small></span><input type="checkbox" id="skUiMotion" onchange="skAppearanceSet('motion',this.checked)"><i></i></label>
+  </div>
+</section>
 <!-- THEME CUSTOMIZER WITH DEPTH SLIDER & MATCHING ICON PACKS -->
 <div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
 <span>🎨 THEME &amp; ICON PACKS</span>
@@ -271,7 +416,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="modelsModal">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-height:85vh;">
 <div class="modal-title">
 <span id="modalModelTitle">Compatible Models</span>
 <button class="modal-close-btn" onclick="toggleModal('modelsModal', false)">✕</button>
@@ -281,7 +426,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="viewBillModal" style="z-index: 10010 !important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-height:85vh; z-index: 10011 !important;">
 <div class="modal-title">
 <span>🧾 Bill Details</span>
 <button class="modal-close-btn" onclick="toggleModal('viewBillModal', false)">✕</button>
@@ -290,7 +435,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="itemEditorModal" style="z-index: 10020 !important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-height:85vh;">
 <div class="modal-title">
 <span id="itemModalTitle">📊 Upload Excel / Add Item</span>
 <button class="modal-close-btn" onclick="toggleModal('itemEditorModal', false)">✕</button>
@@ -362,7 +507,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="billingModal">
-<div class="modal-sheet billing-modern">
+<div class="modal-sheet billing-modern" style="max-height:90vh; max-width:620px;">
 <div class="modal-title">
 <div style="display:flex;align-items:center;gap:8px;">
 <span style="font-size:1.25rem;">🧾</span>
@@ -636,7 +781,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="orderModal">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-height:85vh;">
 <div class="modal-title">
 <span style="display:flex; align-items:center; gap:6px;"> 📦 Order List (<span id="modalOrderCount">0</span>) </span>
 <button class="modal-close-btn" onclick="toggleModal('orderModal', false)">✕</button>
@@ -659,7 +804,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <img alt="SK MOBILES" class="sk-logo-img" id="appHeaderLogo" onclick="document.getElementById('logoFileInput').click()" src="Logo.png" title="Click to change logo"/>
 <div>
 <div class="app-name" id="appHeaderTitle">SK MOBILES</div>
-<div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V5.0</span></div>
+<div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V5.1</span></div>
 </div>
 </div>
 <div id="skTopRoleBadge" class="sk-top-role-badge" style="display:none;" aria-live="polite"></div>
@@ -673,15 +818,15 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </header>
 <main class="content-area" id="cardsContainer"></main>
 <nav class="bottom-nav" aria-label="Primary navigation">
-<button class="nav-item" id="navGlass" type="button" onclick="currentFilter='glass'; renderCards(); window.scrollTo({top:0,behavior:'smooth'});" aria-label="Tempered Glass">
+<button class="nav-item" id="navGlass" type="button" onclick="skGoToInventoryFilter('glass');" aria-label="Tempered Glass">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.2" y="3.2" width="15.6" height="17.6" rx="3"></rect><path d="M7.4 8.1h9.2M7.4 11.8h9.2M7.4 15.5h5.2"></path><path d="m15.2 15.1 1.3 1.3 2.2-2.6"></path></svg>
 <span>Tempered</span>
 </button>
-<button class="nav-item" id="navCombo" type="button" onclick="currentFilter='combo'; renderCards(); window.scrollTo({top:0,behavior:'smooth'});" aria-label="Display">
+<button class="nav-item" id="navCombo" type="button" onclick="skGoToInventoryFilter('combo');" aria-label="Display">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.2" y="2.8" width="15.6" height="18.4" rx="3"></rect><path d="M7.7 6.5h8.6M7.7 10.2h8.6M7.7 13.9h5.2"></path><path d="M15.7 17.4h1.6"></path></svg>
 <span>Display</span>
 </button>
-<button class="nav-item" id="navHome" type="button" onclick="currentFilter='home'; renderCards(); window.scrollTo({top:0,behavior:'smooth'});" aria-label="Home">
+<button class="nav-item" id="navHome" type="button" onclick="skGoHomeFromAppShell();" aria-label="Home">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.2 10.7 8.8-7.2 8.8 7.2"></path><path d="M5.5 9.6V20.5h13V9.6"></path><path d="M9.1 20.5v-5.7h5.8v5.7"></path><path d="M8.1 10.2h.01M15.9 10.2h.01"></path></svg>
 <span>Home</span>
 </button>
@@ -801,7 +946,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="sk-access-badge" id="skAccessBadge">👷 Worker Mode</div>
 <!-- V4.1 WORKER PROFILE / ADMIN WORKER MANAGEMENT -->
 <div class="modal-overlay" id="skWorkerProfileModal" style="z-index:2147482000!important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-width:430px;max-height:88vh;overflow:auto;">
 <div class="modal-title"><span>👷 My Worker Profile</span><button class="modal-close-btn" onclick="skCloseWorkerProfile()">✕</button></div>
 <div style="text-align:center;margin-bottom:10px;">
 <img alt="Worker Photo" class="sk-profile-photo" id="skWorkerProfilePhoto"/>
@@ -816,7 +961,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skWorkerEditModal" style="z-index:2147482100!important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-width:430px;max-height:88vh;overflow:auto;">
 <div class="modal-title"><span>👷 Add / Edit Worker</span><button class="modal-close-btn" onclick="skCloseWorkerEdit()">✕</button></div>
 <input id="skWorkerEditIndex" type="hidden" value="-1"/>
 <div style="text-align:center;margin-bottom:10px;"><img alt="Worker Photo" class="sk-profile-photo" id="skWorkerEditPhotoPreview"/><input accept="image/*" class="form-input" id="skWorkerEditPhoto" style="font-size:.72rem;" type="file"/></div>
@@ -830,7 +975,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skAdminPanelModal" style="z-index:2147481000!important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-width:430px;max-height:86vh;">
 <div class="modal-title"><span>👑 Admin Control</span><button class="modal-close-btn" onclick="skCloseAdminPanel()">✕</button></div>
 <div class="sk-admin-box"><div class="sk-admin-title">CURRENT LOGIN</div><div id="skAdminCurrentRole" style="font-size:.88rem;font-weight:900;color:var(--text);">👑 Admin — Full Access</div></div>
 <div class="sk-admin-box" style="margin-top:10px;">
@@ -866,12 +1011,12 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <!-- SK MOBILES V3.9 additive correction layer: invoice share bill-number + order rendering -->
 <!-- SK MOBILES V4.0 additive layer: low-stock auto orders + JSON backup + configurable App Data Folder auto-sync -->
 <div class="modal-overlay" id="skAdminProfileModal" style="z-index:2147482200!important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-width:430px;">
 <div class="modal-title"><span id="skAdminProfileTitle">👑 My Admin Profile</span><button class="modal-close-btn" onclick="skCloseAdminProfile()">✕</button></div>
 <div class="sk-v42-profile-box" style="text-align:center;margin-bottom:9px;"><div style="font-size:2.1rem;margin-bottom:4px;">👑</div><div id="skAdminProfileName" style="font-size:1rem;font-weight:950;">SK MOBILES Admin</div><div style="font-size:.68rem;color:var(--text-muted);margin-top:3px;">Full Access Account</div></div>
 <div class="sk-v42-profile-grid">
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCOUNT</div><b id="skAdminProfileAccount">Admin</b></div>
-<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V5.0</b></div>
+<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V5.1</b></div>
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">WORKERS</div><b id="skAdminProfileWorkerCount">0</b></div>
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCESS</div><b id="skAdminProfileAccess">Full Access</b></div>
 </div>
@@ -879,7 +1024,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skCreditLedgerModal" style="z-index:2147482300!important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-width:460px;max-height:90vh;">
 <div class="modal-title"><span>💳 Customer Credit Ledger</span><button class="modal-close-btn" onclick="skCloseCreditLedger()">✕</button></div>
 <div id="skCreditReminderBox"></div>
 <div class="sk-credit-summary">
@@ -902,7 +1047,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skCreditEntryModal" style="z-index:2147482400!important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-width:430px;">
 <div class="modal-title"><span id="skCreditEntryTitle">➕ Add Credit</span><button class="modal-close-btn" onclick="skCloseCreditEntry()">✕</button></div>
 <input id="skCreditEntryType" type="hidden" value="credit"/>
 <div class="form-group"><label class="form-label">Customer Name *</label><input class="form-input" id="skCreditName" placeholder="Customer name"/></div>
@@ -915,7 +1060,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skCreditCustomerModal" style="z-index:2147482500!important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-width:460px;max-height:90vh;">
 <div class="modal-title"><span id="skCreditCustomerTitle">Customer History</span><button class="modal-close-btn" onclick="skCloseCreditCustomer()">✕</button></div>
 <div id="skCreditCustomerSummary" style="margin-bottom:9px;"></div>
 <div class="sk-credit-actions" style="margin-bottom:9px;">
@@ -929,7 +1074,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <div class="modal-overlay" id="skEmiReminderModal" style="z-index:2147482600!important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-width:430px;">
 <div class="modal-title"><span>🔔 EMI Reminder Settings</span><button class="modal-close-btn" onclick="skCloseReminderSettings()">✕</button></div>
 <div class="sk-v42-profile-box">
 <div class="form-group"><label class="form-label">Remind before due date (days)</label><input class="form-input" id="skEmiReminderDays" max="30" min="0" type="number" value="3"/></div>
@@ -942,7 +1087,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 <!-- Additive V4.4 Customer Credit / Google Keep layer -->
 <div class="modal-overlay" id="skKeepImportModal" style="z-index:2147482700!important;">
-<div class="modal-sheet">
+<div class="modal-sheet" style="max-width:460px;max-height:90vh;">
 <div class="modal-title"><span>📥 Google Keep / Notes Import</span><button class="modal-close-btn" onclick="skCloseKeepImport()">✕</button></div>
 <div class="sk-v43-keep-box">
 <div class="sk-v43-keep-title">Google Keep data → Customer Credit</div>
