@@ -6894,210 +6894,281 @@ html,body{overscroll-behavior-x:none !important;}
 
 /* ============================================================
    SK MOBILES — UI & APPEARANCE STUDIO
-   Additive presentation-only layer. Existing data/business logic untouched.
+   Single token-driven presentation layer. No business/data selectors.
    ============================================================ */
-#settingsModal .sk-ui-studio{
-  margin:0 0 16px;
-  padding:0;
-  color:var(--text);
+:root{
+  --ui-card-radius:12px;
+  --ui-button-radius:8px;
+  --ui-control-radius:9px;
+  --ui-modal-radius:16px;
+  --ui-scale:1;
+  --ui-aura-opacity:.42;
 }
+
+#settingsModal .sk-ui-studio{margin:0 0 16px;padding:0;color:var(--text);}
 #settingsModal .sk-ui-studio-head{
-  padding:14px 14px 13px;
-  border:1px solid color-mix(in srgb,var(--card-border) 82%,transparent);
-  border-radius:20px;
-  background:color-mix(in srgb,var(--card-bg) 94%,transparent);
-  box-shadow:0 8px 24px rgba(15,23,42,.045);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:13px 14px;border:1px solid color-mix(in srgb,var(--card-border) 82%,transparent);
+  border-radius:14px;background:color-mix(in srgb,var(--card-bg) 94%,transparent);
+  box-shadow:0 7px 20px rgba(15,23,42,.045);
 }
-#settingsModal .sk-ui-eyebrow{
-  font-size:.62rem;font-weight:900;letter-spacing:.14em;color:var(--primary);margin-bottom:4px;
-}
-#settingsModal .sk-ui-studio-head h3{margin:0;font-size:1.05rem;line-height:1.2;letter-spacing:-.02em}
-#settingsModal .sk-ui-studio-head p{margin:4px 0 0;font-size:.68rem;color:var(--text-muted);line-height:1.4}
-#settingsModal .sk-ui-section{
-  margin-top:10px;padding:13px 12px;border:1px solid color-mix(in srgb,var(--card-border) 80%,transparent);
-  border-radius:20px;background:color-mix(in srgb,var(--card-bg) 92%,transparent);
-  box-shadow:0 6px 18px rgba(15,23,42,.035);
-}
-#settingsModal .sk-ui-section-title{font-size:.68rem;font-weight:950;letter-spacing:.08em;color:var(--text);margin-bottom:12px}
-#settingsModal .sk-ui-label{font-size:.72rem;font-weight:850;color:var(--text);margin:11px 2px 7px}
-#settingsModal .sk-ui-choice-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-#settingsModal .sk-ui-choice{
-  min-height:48px;padding:8px 7px;border-radius:14px;border:1px solid var(--card-border);background:var(--pill-bg);color:var(--text);font:inherit;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:.18s ease;
-}
-#settingsModal .sk-ui-choice b{font-size:.72rem;line-height:1.1}
-#settingsModal .sk-ui-choice small,#settingsModal .sk-ui-card-choice small{font-size:.61rem;color:var(--text-muted);line-height:1.3}
-#settingsModal .sk-ui-choice.active,#settingsModal .sk-ui-card-choice.active{
-  border-color:var(--primary)!important;background:color-mix(in srgb,var(--primary) 8%,var(--card-bg));box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 12%,transparent);
-}
-#settingsModal .sk-ui-card-row,#settingsModal .sk-ui-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-#settingsModal .sk-ui-card-choice{
-  min-height:68px;padding:11px 12px;text-align:left;border-radius:15px;border:1px solid var(--card-border);background:var(--pill-bg);color:var(--text);font:inherit;cursor:pointer;transition:.18s ease;
-  display:flex;flex-direction:column;justify-content:center;gap:4px;
-}
-#settingsModal .sk-ui-card-choice b{font-size:.73rem;line-height:1.15}
-#settingsModal .sk-ui-scale .sk-ui-choice,#settingsModal .sk-ui-radius .sk-ui-choice{min-height:56px}
-#settingsModal .sk-ui-toggle-row{
-  min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 2px;border-bottom:1px solid color-mix(in srgb,var(--card-border) 58%,transparent);cursor:pointer;
-}
-#settingsModal .sk-ui-toggle-row:last-child{border-bottom:0}
-#settingsModal .sk-ui-toggle-row span{display:flex;flex-direction:column;gap:3px;min-width:0}
-#settingsModal .sk-ui-toggle-row b{font-size:.74rem}
-#settingsModal .sk-ui-toggle-row small{font-size:.61rem;color:var(--text-muted);line-height:1.3}
-#settingsModal .sk-ui-toggle-row input{position:absolute;opacity:0;pointer-events:none}
-#settingsModal .sk-ui-toggle-row i{position:relative;width:45px;height:26px;flex:0 0 45px;border-radius:999px;background:color-mix(in srgb,var(--text-muted) 28%,var(--card-bg));border:1px solid var(--card-border);transition:.2s ease}
-#settingsModal .sk-ui-toggle-row i:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.16);transition:.2s ease}
-#settingsModal .sk-ui-toggle-row input:checked + i{background:var(--primary);border-color:var(--primary)}
-#settingsModal .sk-ui-toggle-row input:checked + i:after{transform:translateX(19px)}
+#settingsModal .sk-ui-eyebrow{font-size:.60rem;font-weight:950;letter-spacing:.13em;color:var(--primary);margin-bottom:3px;}
+#settingsModal .sk-ui-studio-head h3{margin:0;font-size:1.02rem;line-height:1.2;letter-spacing:-.02em;}
+#settingsModal .sk-ui-studio-head p{margin:4px 0 0;font-size:.66rem;color:var(--text-muted);line-height:1.35;}
+#settingsModal .sk-ui-reset-btn{flex:0 0 auto;min-height:34px;padding:7px 10px;border:1px solid var(--card-border);border-radius:8px;background:var(--pill-bg);color:var(--text);font:inherit;font-size:.68rem;font-weight:850;cursor:pointer;}
 
-/* Applied UI setting states. */
-html[data-ui-scale="compact"]{font-size:92%}
-html[data-ui-scale="normal"]{font-size:100%}
-html[data-ui-scale="comfortable"]{font-size:108%}
-html[data-ui-header="solid"] .app-header{background:var(--card-bg)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-html[data-ui-header="minimal"] .app-header{background:transparent!important;border-bottom-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-html[data-ui-nav="floating"] .bottom-nav{left:12px!important;right:12px!important;bottom:10px!important;border-radius:22px!important;border:1px solid color-mix(in srgb,var(--card-border) 80%,#fff 20%)!important;box-shadow:0 12px 30px rgba(15,23,42,.16)!important}
-html[data-ui-aura="off"] body:before,html[data-ui-aura="off"] body:after{display:none!important}
-html[data-ui-motion="on"] *,html[data-ui-motion="on"] *::before,html[data-ui-motion="on"] *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
-html[data-ui-surface="flat"] .card,html[data-ui-surface="flat"] .section-card,html[data-ui-surface="flat"] .stat-card{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-html[data-ui-surface="offwhite"] .card,html[data-ui-surface="offwhite"] .section-card,html[data-ui-surface="offwhite"] .stat-card{background:#f8fafc!important}
-html[data-ui-surface="accent"] .card,html[data-ui-surface="accent"] .section-card,html[data-ui-surface="accent"] .stat-card{background:linear-gradient(145deg,color-mix(in srgb,var(--primary) 5%,var(--card-bg)),var(--card-bg))!important}
-html[data-ui-surface="slate"] .card,html[data-ui-surface="slate"] .section-card,html[data-ui-surface="slate"] .stat-card{background:color-mix(in srgb,#64748b 4%,var(--card-bg))!important}
-html[data-ui-surface="glow"] body:before{opacity:.65!important}
-html[data-ui-card-radius="sharp"]{--ui-card-radius:8px}
-html[data-ui-card-radius="standard"]{--ui-card-radius:14px}
-html[data-ui-card-radius="modern"]{--ui-card-radius:20px}
-html[data-ui-card-radius="smooth"]{--ui-card-radius:26px}
-html[data-ui-card-radius="pill"]{--ui-card-radius:999px}
-html[data-ui-button-radius="sharp"]{--ui-button-radius:8px}
-html[data-ui-button-radius="modern"]{--ui-button-radius:14px}
-html[data-ui-button-radius="smooth"]{--ui-button-radius:20px}
+#settingsModal .sk-ui-preview{margin-top:9px;padding:9px;border:1px solid color-mix(in srgb,var(--primary) 20%,var(--card-border));border-radius:14px;background:color-mix(in srgb,var(--primary) 4%,var(--card-bg));}
+#settingsModal .sk-ui-preview-top{display:flex;justify-content:space-between;align-items:center;margin:0 2px 7px;font-size:.58rem;font-weight:900;letter-spacing:.10em;color:var(--text-muted);}
+#settingsModal .sk-ui-preview-status{color:var(--primary);letter-spacing:0;}
+#settingsModal .sk-ui-preview-card{padding:10px;border:1px solid var(--card-border);border-radius:var(--ui-card-radius);background:var(--card-bg);box-shadow:var(--card-elevation);}
+#settingsModal .sk-ui-preview-brand{display:flex;align-items:center;gap:8px;min-width:0;}
+#settingsModal .sk-ui-preview-logo{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:var(--primary-gradient);color:#fff;font-size:.68rem;font-weight:950;box-shadow:0 5px 14px color-mix(in srgb,var(--primary) 25%,transparent);}
+#settingsModal .sk-ui-preview-brand div{display:flex;flex-direction:column;min-width:0;}
+#settingsModal .sk-ui-preview-brand b{font-size:.70rem;line-height:1.1;}
+#settingsModal .sk-ui-preview-brand small{margin-top:2px;font-size:.57rem;color:var(--text-muted);}
+#settingsModal .sk-ui-preview-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:8px;}
+#settingsModal .sk-ui-preview-metrics span{padding:6px 5px;border:1px solid var(--card-border);border-radius:var(--ui-control-radius);background:var(--model-bg);font-size:.56rem;color:var(--text-muted);}
+#settingsModal .sk-ui-preview-metrics b{display:block;margin-top:2px;color:var(--text);font-size:.68rem;}
+#settingsModal .sk-ui-preview-action{width:100%;margin-top:7px;padding:7px 9px;border:0;border-radius:var(--ui-button-radius);background:var(--primary-gradient);color:#fff;font:inherit;font-size:.63rem;font-weight:900;cursor:pointer;}
+
+#settingsModal .sk-ui-section{margin-top:9px;padding:11px;border:1px solid color-mix(in srgb,var(--card-border) 82%,transparent);border-radius:14px;background:color-mix(in srgb,var(--card-bg) 92%,transparent);box-shadow:0 5px 15px rgba(15,23,42,.025);}
+#settingsModal .sk-ui-section-title{font-size:.64rem;font-weight:950;letter-spacing:.075em;color:var(--text);margin-bottom:10px;line-height:1.25;}
+#settingsModal .sk-ui-label{font-size:.68rem;font-weight:850;color:var(--text);margin:9px 2px 6px;}
+#settingsModal .sk-ui-choice-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+#settingsModal .sk-ui-choice,
+#settingsModal .sk-ui-card-choice,
+#settingsModal .sk-ui-profile,
+#settingsModal .sk-ui-accent{
+  min-width:0;border:1px solid var(--card-border);background:var(--pill-bg);color:var(--text);font:inherit;cursor:pointer;
+  transition:border-color .16s ease,background .16s ease,box-shadow .16s ease,transform .16s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+#settingsModal .sk-ui-choice{min-height:48px;padding:7px 6px;border-radius:var(--ui-control-radius);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;}
+#settingsModal .sk-ui-choice b{font-size:.67rem;line-height:1.1;}
+#settingsModal .sk-ui-choice small,#settingsModal .sk-ui-card-choice small,#settingsModal .sk-ui-profile small{font-size:.57rem;color:var(--text-muted);line-height:1.25;}
+#settingsModal .sk-ui-choice.active,#settingsModal .sk-ui-card-choice.active,#settingsModal .sk-ui-profile.active,#settingsModal .sk-ui-accent.active{border-color:var(--primary)!important;background:color-mix(in srgb,var(--primary) 8%,var(--card-bg));box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 12%,transparent);}
+#settingsModal .sk-ui-card-row,#settingsModal .sk-ui-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+#settingsModal .sk-ui-card-choice{min-height:62px;padding:9px 10px;text-align:left;border-radius:var(--ui-card-radius);display:flex;flex-direction:column;justify-content:center;gap:3px;}
+#settingsModal .sk-ui-card-choice b{font-size:.67rem;line-height:1.15;}
+#settingsModal .sk-ui-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+#settingsModal .sk-ui-profile{min-height:66px;padding:8px;border-radius:var(--ui-card-radius);display:grid;grid-template-columns:28px minmax(0,1fr);grid-template-rows:auto auto;column-gap:7px;text-align:left;align-items:center;}
+#settingsModal .sk-ui-profile > span{grid-row:1 / span 2;display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:color-mix(in srgb,var(--primary) 9%,var(--pill-bg));color:var(--primary);font-size:.84rem;}
+#settingsModal .sk-ui-profile b{font-size:.65rem;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#settingsModal .sk-ui-accent-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
+#settingsModal .sk-ui-accent{min-height:44px;padding:5px 3px;border-radius:var(--ui-control-radius);display:flex;align-items:center;justify-content:center;gap:4px;}
+#settingsModal .sk-ui-accent i{width:13px;height:13px;flex:0 0 13px;border-radius:50%;background:var(--sw);box-shadow:0 0 0 1px rgba(15,23,42,.08);}
+#settingsModal .sk-ui-accent b{font-size:.59rem;}
+#settingsModal .sk-ui-custom-color{display:grid;grid-template-columns:minmax(0,1fr) 34px auto;align-items:center;gap:7px;margin-top:7px;padding:8px;border:1px solid var(--card-border);border-radius:var(--ui-control-radius);background:var(--model-bg);}
+#settingsModal .sk-ui-custom-color div{display:flex;flex-direction:column;min-width:0;}
+#settingsModal .sk-ui-custom-color b{font-size:.65rem;}
+#settingsModal .sk-ui-custom-color small{font-size:.56rem;color:var(--text-muted);margin-top:2px;}
+#settingsModal .sk-ui-custom-color input{width:32px;height:30px;padding:2px;border:1px solid var(--card-border);border-radius:7px;background:var(--card-bg);cursor:pointer;}
+#settingsModal .sk-ui-custom-color code{font-size:.59rem;font-weight:900;color:var(--primary);}
+#settingsModal .sk-ui-toggle-row{min-height:53px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid color-mix(in srgb,var(--card-border) 58%,transparent);cursor:pointer;}
+#settingsModal .sk-ui-toggle-row:last-child{border-bottom:0;}
+#settingsModal .sk-ui-toggle-row span{display:flex;flex-direction:column;gap:2px;min-width:0;}
+#settingsModal .sk-ui-toggle-row b{font-size:.68rem;}
+#settingsModal .sk-ui-toggle-row small{font-size:.56rem;color:var(--text-muted);line-height:1.25;}
+#settingsModal .sk-ui-toggle-row input{position:absolute;opacity:0;pointer-events:none;}
+#settingsModal .sk-ui-toggle-row i{position:relative;width:42px;height:24px;flex:0 0 42px;border-radius:999px;background:color-mix(in srgb,var(--text-muted) 28%,var(--card-bg));border:1px solid var(--card-border);transition:.18s ease;}
+#settingsModal .sk-ui-toggle-row i:after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.16);transition:.18s ease;}
+#settingsModal .sk-ui-toggle-row input:checked + i{background:var(--primary);border-color:var(--primary);}
+#settingsModal .sk-ui-toggle-row input:checked + i:after{transform:translateX(18px);}
+
+/* Appearance tokens applied across the existing app. */
+html[data-ui-card-radius="sharp"]{--ui-card-radius:0px}
+html[data-ui-card-radius="standard"]{--ui-card-radius:8px}
+html[data-ui-card-radius="modern"]{--ui-card-radius:12px}
+html[data-ui-card-radius="smooth"]{--ui-card-radius:16px}
+html[data-ui-card-radius="pill"]{--ui-card-radius:24px}
+html[data-ui-button-radius="sharp"]{--ui-button-radius:0px}
+html[data-ui-button-radius="modern"]{--ui-button-radius:8px}
+html[data-ui-button-radius="smooth"]{--ui-button-radius:14px}
 html[data-ui-button-radius="pill"]{--ui-button-radius:999px}
-html[data-ui-card-surface="ios"] .card,html[data-ui-card-surface="ios"] .section-card,html[data-ui-card-surface="ios"] .stat-card{backdrop-filter:blur(24px) saturate(150%)!important;-webkit-backdrop-filter:blur(24px) saturate(150%)!important;box-shadow:0 12px 32px rgba(15,23,42,.08)!important}
-html[data-ui-card-surface="blur"] .card,html[data-ui-card-surface="blur"] .section-card,html[data-ui-card-surface="blur"] .stat-card{backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
-html[data-ui-card-surface="border"] .card,html[data-ui-card-surface="border"] .section-card,html[data-ui-card-surface="border"] .stat-card{box-shadow:none!important;border-color:color-mix(in srgb,var(--card-border) 95%,transparent)!important}
-html[data-ui-card-surface="shadow"] .card,html[data-ui-card-surface="shadow"] .section-card,html[data-ui-card-surface="shadow"] .stat-card{box-shadow:0 12px 28px rgba(15,23,42,.12)!important}
-html[data-ui-card-radius] .card,html[data-ui-card-radius] .section-card,html[data-ui-card-radius] .stat-card{border-radius:var(--ui-card-radius)!important}
-html[data-ui-button-radius] button:not(.modal-close-btn):not(.drawer-close-btn){border-radius:var(--ui-button-radius)}
-@media(max-width:560px){
-  #settingsModal .sk-ui-section{padding:11px 10px;border-radius:18px}
-  #settingsModal .sk-ui-card-row,#settingsModal .sk-ui-choice-grid{gap:7px}
-  #settingsModal .sk-ui-card-choice{min-height:64px;padding:9px 10px}
-}
+html[data-ui-scale="compact"]{--ui-scale:.92}
+html[data-ui-scale="normal"]{--ui-scale:1}
+html[data-ui-scale="comfortable"]{--ui-scale:1.08}
 
+/* Header + navigation. */
+html[data-ui-header="glass"] .app-header{background:color-mix(in srgb,var(--header-bg) 72%,transparent)!important;backdrop-filter:blur(18px) saturate(140%)!important;-webkit-backdrop-filter:blur(18px) saturate(140%)!important;}
+html[data-ui-header="solid"] .app-header{background:var(--header-bg)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+html[data-ui-header="minimal"] .app-header{background:transparent!important;border-bottom-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+html[data-ui-nav="fixed"] .bottom-nav{left:50%!important;right:auto!important;bottom:0!important;transform:translateX(-50%)!important;width:min(520px,100vw)!important;border-radius:16px 16px 0 0!important;}
+html[data-ui-nav="floating"] .bottom-nav{left:50%!important;right:auto!important;bottom:12px!important;transform:translateX(-50%)!important;width:min(520px,calc(100vw - 20px))!important;border-radius:18px!important;}
+
+/* Surfaces. */
+html[data-ui-surface="flat"] body,html[data-ui-surface="flat"] .app-viewport{background:#fff!important;}
+html[data-ui-surface="offwhite"] body,html[data-ui-surface="offwhite"] .app-viewport{background:#f8fafc!important;}
+html[data-ui-surface="accent"] body,html[data-ui-surface="accent"] .app-viewport{background:linear-gradient(145deg,color-mix(in srgb,var(--primary) 8%,var(--page-bg)),var(--page-bg))!important;}
+html[data-ui-surface="classic"] body,html[data-ui-surface="classic"] .app-viewport{background:linear-gradient(145deg,var(--page-bg),color-mix(in srgb,var(--primary) 3%,var(--bg)))!important;}
+html[data-ui-surface="slate"] body,html[data-ui-surface="slate"] .app-viewport{background:color-mix(in srgb,#64748b 7%,var(--page-bg))!important;}
+html[data-ui-surface="glow"] body,html[data-ui-surface="glow"] .app-viewport{background:radial-gradient(circle at 15% 12%,color-mix(in srgb,var(--primary) 14%,transparent),transparent 42%),radial-gradient(circle at 85% 82%,color-mix(in srgb,#a855f7 10%,transparent),transparent 43%),var(--page-bg)!important;}
+html[data-ui-mode="dark"][data-ui-surface="flat"] body,html[data-ui-mode="dark"][data-ui-surface="flat"] .app-viewport{background:#000!important;}
+html[data-ui-mode="dark"][data-ui-surface="offwhite"] body,html[data-ui-mode="dark"][data-ui-surface="offwhite"] .app-viewport{background:#080b12!important;}
+
+/* Card/button/input normalization driven by the same tokens. */
+html[data-ui-card-radius] :is(.card,.section-card,.stat-card,.form-card,.summary-card,.history-card,.draggable-card,.sk-home-action-row,.sk-home-metric-card,.stock-control-panel,.models-section,.theme-grid-selector,.context-menu-sheet,.sk-credit-customer,.sk-credit-summary,.sk-credit-list,.sk-credit-customer-card){border-radius:var(--ui-card-radius)!important;}
+html[data-ui-button-radius] button:not(.modal-close-btn):not(.drawer-close-btn):not(#navHome){border-radius:var(--ui-button-radius)!important;}
+html[data-ui-card-radius] :is(input[type="text"],input[type="tel"],input[type="number"],input[type="email"],input[type="password"],input[type="date"],input[type="datetime-local"],input[type="search"],select,textarea,.form-input,.form-select,.search-input){border-radius:var(--ui-control-radius)!important;}
+html[data-ui-card-surface="ios"] :is(.card,.section-card,.stat-card,.form-card,.summary-card,.history-card,.draggable-card,.sk-home-action-row,.sk-home-metric-card){background:color-mix(in srgb,var(--card-bg) 76%,transparent)!important;backdrop-filter:blur(24px) saturate(150%)!important;-webkit-backdrop-filter:blur(24px) saturate(150%)!important;box-shadow:0 12px 32px color-mix(in srgb,var(--primary) 10%,transparent),inset 0 1px 0 rgba(255,255,255,.28)!important;}
+html[data-ui-card-surface="blur"] :is(.card,.section-card,.stat-card,.form-card,.summary-card,.history-card,.draggable-card,.sk-home-action-row,.sk-home-metric-card){background:color-mix(in srgb,var(--card-bg) 82%,transparent)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;}
+html[data-ui-card-surface="border"] :is(.card,.section-card,.stat-card,.form-card,.summary-card,.history-card,.draggable-card,.sk-home-action-row,.sk-home-metric-card){box-shadow:none!important;border-color:color-mix(in srgb,var(--card-border) 92%,transparent)!important;}
+html[data-ui-card-surface="shadow"] :is(.card,.section-card,.stat-card,.form-card,.summary-card,.history-card,.draggable-card,.sk-home-action-row,.sk-home-metric-card){box-shadow:0 12px 28px color-mix(in srgb,var(--primary) 10%,rgba(15,23,42,.12))!important;}
+
+/* Aura + motion. */
+html[data-ui-aura="on"] body:before,html[data-ui-aura="on"] body:after{content:"";display:block;position:fixed;pointer-events:none;z-index:-1;border-radius:50%;filter:blur(38px);opacity:var(--ui-aura-opacity);}
+html[data-ui-aura="on"] body:before{width:42vw;height:42vw;max-width:300px;max-height:300px;left:-10vw;top:10vh;background:color-mix(in srgb,var(--primary) 25%,transparent);}
+html[data-ui-aura="on"] body:after{width:38vw;height:38vw;max-width:280px;max-height:280px;right:-8vw;bottom:12vh;background:color-mix(in srgb,#a855f7 18%,transparent);}
+html[data-ui-aura="off"] body:before,html[data-ui-aura="off"] body:after{display:none!important;}
+html[data-ui-motion="on"] *,html[data-ui-motion="on"] *::before,html[data-ui-motion="on"] *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important;transform:none!important;}
+
+/* Responsive shell. Keep the mobile app edge-to-edge and give desktop a stable centered canvas. */
+.app-viewport{width:100%;min-width:0;box-sizing:border-box;}
+@media(min-width:761px){.app-viewport{width:min(760px,100vw)!important;max-width:760px!important;margin:0 auto!important;}}
+@media(max-width:760px){.app-viewport{width:100%!important;max-width:100%!important;margin:0!important;}}
+html[data-ui-scale="compact"] .app-viewport{font-size:92%;}
+html[data-ui-scale="comfortable"] .app-viewport{font-size:108%;}
+
+@media(max-width:560px){
+  #settingsModal .sk-ui-profile-grid{grid-template-columns:1fr;}
+  #settingsModal .sk-ui-accent-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+  #settingsModal .sk-ui-section{padding:10px;}
+  #settingsModal .sk-ui-card-choice{min-height:58px;padding:8px;}
+  #settingsModal .sk-ui-profile{min-height:60px;}
+}
+@media(max-width:360px){
+  #settingsModal .sk-ui-choice-row{grid-template-columns:repeat(2,minmax(0,1fr));}
+  #settingsModal .sk-ui-accent-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  #settingsModal .sk-ui-custom-color{grid-template-columns:minmax(0,1fr) 34px auto;}
+}
 
 /* ============================================================
-   SK MOBILES — UI & APPEARANCE STUDIO FUNCTIONAL STATE BRIDGE
-   Ensures every newly-added Appearance Studio choice maps to the
-   actual SK MOBILES shell/components used by the current source.
-   Presentation-only; no business/data behaviour is changed.
+   SK MOBILES — FINAL GLOBAL UI NORMALIZATION
+   Shared alignment + professional defaults. Appearance Studio tokens
+   override the radius/surface values at runtime.
    ============================================================ */
+.app-viewport{width:100%;min-width:0;box-sizing:border-box;}
+@media(min-width:761px){.app-viewport{width:min(760px,100vw)!important;max-width:760px!important;margin:0 auto!important;}}
+@media(max-width:760px){.app-viewport{width:100%!important;max-width:100%!important;margin:0!important;}}
+.bottom-nav{box-sizing:border-box!important;max-width:calc(100vw - 16px)!important;overflow:hidden!important;}
+.bottom-nav .nav-item{box-sizing:border-box!important;min-width:0!important;font-size:11px!important;line-height:1.1!important;-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;}
+.bottom-nav .nav-item span{display:block!important;max-width:100%!important;min-width:0!important;font-size:inherit!important;line-height:1.1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+.bottom-nav #navHome span{font-size:10px!important;line-height:1.05!important;}
+.app-viewport > .bottom-nav,body > .bottom-nav{z-index:2147483647!important;}
+body.modal-open{overflow:hidden!important;}
+body.modal-open .app-viewport{overflow:hidden!important;height:100dvh!important;}
+html,body{overscroll-behavior-x:none!important;}
+.modal-overlay > .modal-sheet input,.modal-overlay > .modal-sheet select,.modal-overlay > .modal-sheet textarea,.modal-overlay > .modal-sheet button,.modal-overlay > .modal-sheet img,.modal-overlay > .modal-sheet table{max-width:100%;box-sizing:border-box;}
+.modal-sheet .modal-close-btn{border-radius:50%!important;}
+/* Global controls inherit the Studio token; special circular controls stay circular. */
+html[data-ui-card-radius] :is(input[type="text"],input[type="tel"],input[type="number"],input[type="email"],input[type="password"],input[type="date"],input[type="datetime-local"],input[type="search"],select,textarea,.form-input,.form-select,.search-input){border-radius:var(--ui-control-radius)!important;border-width:1px!important;box-sizing:border-box!important;}
+html[data-ui-button-radius] button:not(.modal-close-btn):not(.drawer-close-btn):not(#navHome){border-radius:var(--ui-button-radius)!important;}
+html[data-ui-card-radius] :is(.glass-card,.bill-section,.section-card,.stat-card,.form-card,.summary-card,.history-card,.draggable-card,.sk-home-action-row,.sk-home-metric-card,.stock-control-panel,.models-section,.theme-grid-selector,.context-menu-sheet,.sk-credit-customer,.sk-credit-summary,.sk-credit-list,.sk-credit-customer-card){border-radius:var(--ui-card-radius)!important;}
+@media(max-width:600px){.bottom-nav{max-width:calc(100vw - 16px)!important;}.bottom-nav .nav-item{border-radius:var(--ui-button-radius)!important;}}
 
-/* Header styles */
-html[data-ui-header="glass"] .app-header{
-  background:color-mix(in srgb,var(--card-bg) 72%,transparent)!important;
-  backdrop-filter:blur(18px) saturate(140%)!important;
-  -webkit-backdrop-filter:blur(18px) saturate(140%)!important;
+/* 7) Live/print invoice: highlight New / Used / Keypad type like the bill reference.
+      The existing Mobile Type row remains in the DOM for JS/data compatibility,
+      but is presented as the dedicated badge above Customer Details. */
+#billingModal #printableInvoiceCard #pvMobileType,
+#printableInvoiceCard #pvMobileType{
+  font-weight:900 !important;
 }
-html[data-ui-header="solid"] .app-header{
-  background:var(--card-bg)!important;
-  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+#billingModal #printableInvoiceCard #pvMobileTypeRow,
+#billingModal #printableInvoiceCard tr:has(> td > #pvMobileType),
+#printableInvoiceCard #pvMobileTypeRow,
+#printableInvoiceCard tr:has(> td > #pvMobileType){
+  display:none !important;
 }
-html[data-ui-header="minimal"] .app-header{
-  background:transparent!important;border-color:transparent!important;box-shadow:none!important;
-  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+#billingModal #printableInvoiceCard #invoiceMainSheet > div:has(> div > #pvCustName),
+#printableInvoiceCard #invoiceMainSheet > div:has(> div > #pvCustName){
+  position:relative;
+  padding-top:9px !important;
+}
+#billingModal #printableInvoiceCard #invoiceMainSheet > div:has(> div > #pvCustName)::before,
+#printableInvoiceCard #invoiceMainSheet > div:has(> div > #pvCustName)::before{
+  content:"NEW MOBILE";
+  display:inline-flex;
+  align-items:center;
+  min-height:28px;
+  width:max-content;
+  max-width:100%;
+  box-sizing:border-box;
+  margin:0 0 9px;
+  padding:5px 12px;
+  border:1px solid color-mix(in srgb,var(--primary) 30%,#fff 70%);
+  border-radius:9px;
+  background:color-mix(in srgb,var(--primary) 12%,#fff 88%);
+  color:var(--primary);
+  font-size:.70rem;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.035em;
+}
+#billingModal:has(#mobileTypeUsed.active) #printableInvoiceCard #invoiceMainSheet > div:has(> div > #pvCustName)::before,
+#printableInvoiceCard[data-mobile-type="used"] #invoiceMainSheet > div:has(> div > #pvCustName)::before{
+  content:"USED MOBILE";
+  border-color:#f59e0b;
+  background:#fef3c7;
+  color:#92400e;
+}
+#billingModal:has(#mobileTypeKeypad.active) #printableInvoiceCard #invoiceMainSheet > div:has(> div > #pvCustName)::before,
+#printableInvoiceCard[data-mobile-type="keypad"] #invoiceMainSheet > div:has(> div > #pvCustName)::before{
+  content:"KEYPAD MOBILE";
+  border-color:#94a3b8;
+  background:#f1f5f9;
+  color:#334155;
 }
 
-/* Navigation styles */
-html[data-ui-nav="fixed"] .bottom-nav{
-  left:0!important;right:0!important;bottom:0!important;border-radius:24px 24px 0 0!important;
+/* Keep the invoice's existing table/content alignment intact after the badge is added. */
+#billingModal #printableInvoiceCard{
+  min-width:0 !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
 }
-html[data-ui-nav="floating"] .bottom-nav{
-  left:12px!important;right:12px!important;bottom:10px!important;border-radius:24px!important;
+#billingModal #printableInvoiceCard table{
+  width:100% !important;
+  table-layout:fixed;
 }
-
-/* Scale: use the actual application viewport so px-based legacy controls are also affected. */
-html[data-ui-scale="compact"]{--sk-ui-zoom:.92}
-html[data-ui-scale="normal"]{--sk-ui-zoom:1}
-html[data-ui-scale="comfortable"]{--sk-ui-zoom:1.08}
-/* Keep the visual app shell inside every viewport while retaining the selected scale. */
-html[data-ui-scale] .app-viewport{
-  width:min(440px, calc(100% / var(--sk-ui-zoom))) !important;
-  max-width:none !important;
-  min-height:calc(100vh / var(--sk-ui-zoom)) !important;
-  zoom:var(--sk-ui-zoom);
-}
-@media(max-width:560px){
-  html[data-ui-scale] .app-viewport{
-    width:calc(100% / var(--sk-ui-zoom)) !important;
-    max-width:none !important;
-    min-height:calc(100vh / var(--sk-ui-zoom)) !important;
-  }
+#billingModal #printableInvoiceCard td,
+#billingModal #printableInvoiceCard th{
+  min-width:0;
 }
 
-/* Ambient background */
-html[data-ui-aura="on"] body:before,html[data-ui-aura="on"] body:after{display:block!important}
-html[data-ui-aura="off"] body:before,html[data-ui-aura="off"] body:after{display:none!important}
-html[data-ui-aura="on"] .app-viewport{position:relative;z-index:0}
-
-/* Surface presets — cover the real current shell/card classes, not only legacy .card selectors. */
-html[data-ui-surface="flat"] body,html[data-ui-surface="flat"] .app-viewport{background:#fff!important}
-html[data-ui-surface="offwhite"] body,html[data-ui-surface="offwhite"] .app-viewport{background:#f8fafc!important}
-html[data-ui-surface="accent"] body,html[data-ui-surface="accent"] .app-viewport{background:linear-gradient(145deg,color-mix(in srgb,var(--primary) 7%,var(--page-bg)),var(--page-bg))!important}
-html[data-ui-surface="classic"] body,html[data-ui-surface="classic"] .app-viewport{background:var(--page-bg)!important}
-html[data-ui-surface="slate"] body,html[data-ui-surface="slate"] .app-viewport{background:color-mix(in srgb,#64748b 7%,var(--page-bg))!important}
-html[data-ui-surface="tricolor"] body,html[data-ui-surface="tricolor"] .app-viewport{background:linear-gradient(145deg,color-mix(in srgb,#f59e0b 5%,var(--page-bg)),var(--page-bg) 48%,color-mix(in srgb,#16a34a 5%,var(--page-bg)))!important}
-html[data-ui-surface="glow"] body,html[data-ui-surface="glow"] .app-viewport{background:radial-gradient(circle at 15% 12%,color-mix(in srgb,var(--primary) 12%,transparent),transparent 42%),radial-gradient(circle at 85% 80%,color-mix(in srgb,#a855f7 9%,transparent),transparent 42%),var(--page-bg)!important}
-
-/* Radius presets apply to the actual cards generated by this source. */
+/* 8) Existing appearance-radius states now resolve to the same professional standard. */
+html[data-ui-card-radius="sharp"],
+html[data-ui-card-radius="standard"],
+html[data-ui-card-radius="modern"],
+html[data-ui-card-radius="smooth"],
+html[data-ui-card-radius="pill"]{
+  --ui-card-radius:12px !important;
+}
+html[data-ui-button-radius="sharp"],
+html[data-ui-button-radius="modern"],
+html[data-ui-button-radius="smooth"],
+html[data-ui-button-radius="pill"]{
+  --ui-button-radius:10px !important;
+}
+html[data-ui-card-radius] .card,
+html[data-ui-card-radius] .section-card,
+html[data-ui-card-radius] .stat-card,
 html[data-ui-card-radius] .draggable-card,
 html[data-ui-card-radius] .sk-home-action-row,
 html[data-ui-card-radius] .sk-home-metric-card,
-html[data-ui-card-radius] .section-card,
-html[data-ui-card-radius] .stat-card,
 html[data-ui-card-radius] .form-card,
 html[data-ui-card-radius] .summary-card,
-html[data-ui-card-radius] .history-card{border-radius:var(--ui-card-radius)!important}
+html[data-ui-card-radius] .history-card{
+  border-radius:12px !important;
+}
+html[data-ui-button-radius] button:not(.modal-close-btn):not(.drawer-close-btn):not(#navHome){
+  border-radius:10px !important;
+}
 
-/* Card surface presets */
-html[data-ui-card-surface="ios"] .draggable-card,
-html[data-ui-card-surface="ios"] .sk-home-action-row,
-html[data-ui-card-surface="ios"] .sk-home-metric-card,
-html[data-ui-card-surface="ios"] .section-card,
-html[data-ui-card-surface="ios"] .stat-card,
-html[data-ui-card-surface="ios"] .form-card,
-html[data-ui-card-surface="ios"] .summary-card,
-html[data-ui-card-surface="ios"] .history-card{backdrop-filter:blur(24px) saturate(150%)!important;-webkit-backdrop-filter:blur(24px) saturate(150%)!important;box-shadow:0 12px 32px rgba(15,23,42,.08)!important}
-html[data-ui-card-surface="blur"] .draggable-card,
-html[data-ui-card-surface="blur"] .sk-home-action-row,
-html[data-ui-card-surface="blur"] .sk-home-metric-card,
-html[data-ui-card-surface="blur"] .section-card,
-html[data-ui-card-surface="blur"] .stat-card,
-html[data-ui-card-surface="blur"] .form-card,
-html[data-ui-card-surface="blur"] .summary-card,
-html[data-ui-card-surface="blur"] .history-card{backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
-html[data-ui-card-surface="border"] .draggable-card,
-html[data-ui-card-surface="border"] .sk-home-action-row,
-html[data-ui-card-surface="border"] .sk-home-metric-card,
-html[data-ui-card-surface="border"] .section-card,
-html[data-ui-card-surface="border"] .stat-card,
-html[data-ui-card-surface="border"] .form-card,
-html[data-ui-card-surface="border"] .summary-card,
-html[data-ui-card-surface="border"] .history-card{box-shadow:none!important;border-color:color-mix(in srgb,var(--card-border) 95%,transparent)!important}
-html[data-ui-card-surface="shadow"] .draggable-card,
-html[data-ui-card-surface="shadow"] .sk-home-action-row,
-html[data-ui-card-surface="shadow"] .sk-home-metric-card,
-html[data-ui-card-surface="shadow"] .section-card,
-html[data-ui-card-surface="shadow"] .stat-card,
-html[data-ui-card-surface="shadow"] .form-card,
-html[data-ui-card-surface="shadow"] .summary-card,
-html[data-ui-card-surface="shadow"] .history-card{box-shadow:0 12px 28px rgba(15,23,42,.12)!important}
-
-/* Button radius must override legacy inline radius declarations. */
-html[data-ui-button-radius="sharp"] button:not(.modal-close-btn):not(.drawer-close-btn){border-radius:8px!important}
-html[data-ui-button-radius="modern"] button:not(.modal-close-btn):not(.drawer-close-btn){border-radius:14px!important}
-html[data-ui-button-radius="smooth"] button:not(.modal-close-btn):not(.drawer-close-btn){border-radius:20px!important}
-html[data-ui-button-radius="pill"] button:not(.modal-close-btn):not(.drawer-close-btn){border-radius:999px!important}
-
-/* Reduced motion is a real functional preference. */
-html[data-ui-motion="on"] *,html[data-ui-motion="on"] *::before,html[data-ui-motion="on"] *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+@media (max-width:430px){
+  .modal-sheet,
+  #billingModal .billing-modern{border-radius:16px !important;}
+  #billingModal #printableInvoiceCard #invoiceMainSheet > div:has(> div > #pvCustName)::before{
+    font-size:.64rem;
+    min-height:27px;
+    padding:5px 10px;
+  }
+}

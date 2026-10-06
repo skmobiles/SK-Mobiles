@@ -1557,6 +1557,25 @@ const MASTER_INVENTORY = [
       }
     }
 
+    // Direct app-shell inventory navigation: close the current page/modal and switch
+    // directly to the requested inventory category without changing any business logic.
+    window.skGoToInventoryFilter = function(filter){
+      try{
+        document.querySelectorAll('.modal-overlay.active').forEach(function(m){
+          m.classList.remove('active');
+          m.style.display='';
+        });
+        document.body.classList.remove('modal-open');
+        if(typeof window.toggleLeftDrawer==='function') window.toggleLeftDrawer(false);
+        currentFilter = filter;
+        if(typeof renderCards==='function') renderCards();
+        window.scrollTo({top:0,behavior:'smooth'});
+        if(typeof window.skAppHistoryFilter==='function') window.skAppHistoryFilter(filter);
+      }catch(e){
+        console.warn('Inventory navigation failed:',e);
+      }
+    };
+
     // Final app-shell Home action: close any open page/modal and return to Home.
     // This is navigation-only; it does not alter page data or business logic.
     window.skGoHomeFromAppShell = function(){
@@ -1794,71 +1813,212 @@ const MASTER_INVENTORY = [
       }catch(e){}
     }
 
-    /* UI & Appearance Studio — presentation-only settings. */
-    const SK_UI_DEFAULTS = {
-      header:'glass', nav:'fixed', scale:'normal', aura:true, haptic:true, motion:false,
-      surface:'offwhite', cardRadius:'modern', buttonRadius:'modern', cardSurface:'blur'
+    /* ================================================================
+       UI & APPEARANCE STUDIO — token engine
+       All preferences are presentation-only and persisted under one key.
+       ================================================================ */
+    const SK_APPEARANCE_KEY = 'sk_appearance_settings';
+    const SK_APPEARANCE_DEFAULTS = {
+      preset:'classic', themeMode:'light', accent:'blue', customHex:'#2563EB',
+      surface:'offwhite', cardRadius:'modern', buttonRadius:'modern', cardSurface:'blur',
+      header:'glass', nav:'fixed', scale:'normal', aura:true, haptic:true, motion:false
     };
-    function skApplyUISetting(key, value){
+    const SK_APPEARANCE_ACCENTS = {
+      blue:'#2563EB', violet:'#7C3AED', green:'#059669', rose:'#E11D48',
+      amber:'#D97706', teal:'#0D9488', coral:'#F05A5A', indigo:'#4F46E5'
+    };
+    const SK_APPEARANCE_PRESETS = {
+      classic:{theme:'light',accent:'blue',surface:'offwhite',cardSurface:'blur',header:'glass',nav:'fixed',cardRadius:'modern',buttonRadius:'modern',aura:true},
+      liquid:{theme:'light',accent:'blue',surface:'accent',cardSurface:'ios',header:'glass',nav:'floating',cardRadius:'smooth',buttonRadius:'pill',aura:true},
+      white:{theme:'light',accent:'blue',surface:'flat',cardSurface:'border',header:'minimal',nav:'fixed',cardRadius:'standard',buttonRadius:'modern',aura:false},
+      midnight:{theme:'dark',accent:'violet',surface:'flat',cardSurface:'shadow',header:'minimal',nav:'floating',cardRadius:'modern',buttonRadius:'modern',aura:false},
+      emerald:{theme:'light',accent:'green',surface:'accent',cardSurface:'ios',header:'glass',nav:'floating',cardRadius:'smooth',buttonRadius:'modern',aura:true},
+      amber:{theme:'dark',accent:'amber',surface:'glow',cardSurface:'blur',header:'glass',nav:'floating',cardRadius:'modern',buttonRadius:'modern',aura:true},
+      ruby:{theme:'light',accent:'rose',surface:'classic',cardSurface:'shadow',header:'solid',nav:'fixed',cardRadius:'standard',buttonRadius:'modern',aura:false},
+      ocean:{theme:'light',accent:'teal',surface:'accent',cardSurface:'blur',header:'glass',nav:'floating',cardRadius:'smooth',buttonRadius:'modern',aura:true}
+    };
+    let skAppearanceSystemMedia = null;
+
+    function skAppearanceRead(){
+      try{
+        const raw=localStorage.getItem(SK_APPEARANCE_KEY);
+        if(!raw) return {...SK_APPEARANCE_DEFAULTS};
+        const parsed=JSON.parse(raw);
+        return {...SK_APPEARANCE_DEFAULTS,...(parsed&&typeof parsed==='object'?parsed:{})};
+      }catch(e){ return {...SK_APPEARANCE_DEFAULTS}; }
+    }
+    function skAppearanceSave(settings){
+      try{localStorage.setItem(SK_APPEARANCE_KEY,JSON.stringify(settings));}catch(e){}
+    }
+    function skHex(hex){
+      const s=String(hex||'').trim().replace(/^#/,'');
+      if(/^[0-9a-f]{3}$/i.test(s)) return '#'+s.split('').map(c=>c+c).join('').toUpperCase();
+      if(/^[0-9a-f]{6}$/i.test(s)) return '#'+s.toUpperCase();
+      return '#2563EB';
+    }
+    function skHexRgb(hex){
+      const h=skHex(hex).slice(1);return {r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)};
+    }
+    function skRgbHex(r,g,b){return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('').toUpperCase();}
+    function skMix(hex,target,amount){
+      const a=skHexRgb(hex), b=skHexRgb(target), p=Math.max(0,Math.min(1,amount));
+      return skRgbHex(a.r+(b.r-a.r)*p,a.g+(b.g-a.g)*p,a.b+(b.b-a.b)*p);
+    }
+    function skAppearanceResolvedMode(settings){
+      if(settings.themeMode==='system') return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+      return settings.themeMode==='dark'?'dark':'light';
+    }
+    function skAppearanceThemeFor(settings){
+      const mode=skAppearanceResolvedMode(settings);
+      const map={
+        classic:{light:'light',dark:'dark'}, liquid:{light:'apple-light',dark:'apple-dark'},
+        white:{light:'apple-light',dark:'apple-dark'}, midnight:{light:'midnight',dark:'obsidian'},
+        emerald:{light:'emerald',dark:'forest'}, amber:{light:'sunset',dark:'cyber'},
+        ruby:{light:'rose',dark:'crimson'}, ocean:{light:'ocean',dark:'dark'}
+      };
+      return (map[settings.preset]||map.classic)[mode];
+    }
+    function skAppearanceApplyTokens(settings){
       const root=document.documentElement;
-      if(key==='header') root.setAttribute('data-ui-header',value);
-      if(key==='nav') root.setAttribute('data-ui-nav',value);
-      if(key==='scale') root.setAttribute('data-ui-scale',value);
-      if(key==='aura') root.setAttribute('data-ui-aura',value?'on':'off');
-      if(key==='haptic') root.setAttribute('data-ui-haptic',value?'on':'off');
-      if(key==='motion') root.setAttribute('data-ui-motion',value?'on':'off');
-      if(key==='surface') root.setAttribute('data-ui-surface',value);
-      if(key==='cardRadius') root.setAttribute('data-ui-card-radius',value);
-      if(key==='buttonRadius') root.setAttribute('data-ui-button-radius',value);
-      if(key==='cardSurface') root.setAttribute('data-ui-card-surface',value);
+      const resolved=skAppearanceResolvedMode(settings);
+      const preset=SK_APPEARANCE_PRESETS[settings.preset]||SK_APPEARANCE_PRESETS.classic;
+      const accentName=settings.accent==='custom'?'custom':settings.accent;
+      const accent=accentName==='custom'?skHex(settings.customHex):skHex(SK_APPEARANCE_ACCENTS[accentName]||SK_APPEARANCE_ACCENTS.blue);
+      const light=resolved==='light';
+      const primary2=skMix(accent,light?'#0F172A':'#FFFFFF',light?.12:.18);
+      const border=light?skMix(accent,'#E2E8F0',.78):skMix(accent,'#FFFFFF',.82);
+      const page=light?skMix(accent,'#F8FAFC',.93):'#070A10';
+      const bg=light?skMix(accent,'#FFFFFF',.97):'#05070C';
+      const card=light?'#FFFFFF':'#0D121C';
+      const model=light?skMix(accent,'#F8FAFC',.94):'#0A0F18';
+      const pill=light?skMix(accent,'#F1F5F9',.88):'rgba(255,255,255,.06)';
+      const muted=light?'#64748B':'#94A3B8';
+      const text=light?'#0F172A':'#F8FAFC';
+      const shadow=light?`0 8px 24px ${skMix(accent,'#FFFFFF',.78)}55`:`0 10px 28px rgba(0,0,0,.30)`;
+      root.style.setProperty('--primary',accent);
+      root.style.setProperty('--primary-gradient',`linear-gradient(135deg,${accent} 0%,${primary2} 100%)`);
+      root.style.setProperty('--glass-btn-bg',accent);
+      root.style.setProperty('--glass-btn-border',primary2);
+      root.style.setProperty('--glass-pill-active',accent);
+      root.style.setProperty('--glass-pill-border',primary2);
+      root.style.setProperty('--badge-bg',light?skMix(accent,'#FFFFFF',.90):skMix(accent,'#000000',.72));
+      root.style.setProperty('--badge-border',light?skMix(accent,'#FFFFFF',.70):skMix(accent,'#FFFFFF',.65));
+      root.style.setProperty('--card-border',border);
+      root.style.setProperty('--page-bg',page);
+      root.style.setProperty('--bg',bg);
+      root.style.setProperty('--card-bg',card);
+      root.style.setProperty('--model-bg',model);
+      root.style.setProperty('--input-bg',light?'#FFFFFF':'#0B111B');
+      root.style.setProperty('--pill-bg',pill);
+      root.style.setProperty('--chip-bg',border);
+      root.style.setProperty('--bottom-nav-bg',light?'rgba(255,255,255,.94)':'rgba(8,11,18,.94)');
+      root.style.setProperty('--header-bg',light?'rgba(255,255,255,.90)':'rgba(7,10,16,.90)');
+      root.style.setProperty('--modal-bg',light?'#FFFFFF':'#0B1019');
+      root.style.setProperty('--text',text);
+      root.style.setProperty('--text-muted',muted);
+      root.style.setProperty('--glass-shadow',shadow);
+      root.style.setProperty('--card-elevation',shadow);
+      root.style.setProperty('--ui-aura-opacity',settings.aura?.45:0);
+      root.setAttribute('data-ui-mode',resolved);
+      root.setAttribute('data-ui-preset',settings.preset);
+      root.setAttribute('data-ui-accent',accentName);
+      root.setAttribute('data-ui-header',settings.header);
+      root.setAttribute('data-ui-nav',settings.nav);
+      root.setAttribute('data-ui-scale',settings.scale);
+      root.setAttribute('data-ui-aura',settings.aura?'on':'off');
+      root.setAttribute('data-ui-haptic',settings.haptic?'on':'off');
+      root.setAttribute('data-ui-motion',settings.motion?'on':'off');
+      root.setAttribute('data-ui-surface',settings.surface);
+      root.setAttribute('data-ui-card-radius',settings.cardRadius);
+      root.setAttribute('data-ui-button-radius',settings.buttonRadius);
+      root.setAttribute('data-ui-card-surface',settings.cardSurface);
+      root.style.colorScheme=resolved;
+      const hexEl=document.getElementById('skAppearanceHexValue');if(hexEl)hexEl.textContent=accent.toUpperCase();
+      const colorEl=document.getElementById('skAppearanceCustomHex');if(colorEl && /^#[0-9A-F]{6}$/i.test(skHex(settings.customHex)))colorEl.value=skHex(settings.customHex);
+      const preview=document.querySelector('#skUiAppearanceStudio .sk-ui-preview-card');if(preview)preview.style.setProperty('--preview-primary',accent);
     }
-    function skSetUISetting(key,value){
-      const v=(typeof value==='string')?value:!!value;
-      localStorage.setItem('sk_ui_'+key, typeof v==='boolean' ? String(v) : v);
-      skApplyUISetting(key,v);
-      skSyncUIStudioControls();
-    }
-    function skReadUISetting(key){
-      const raw=localStorage.getItem('sk_ui_'+key);
-      if(raw===null) return SK_UI_DEFAULTS[key];
-      if(raw==='true') return true;
-      if(raw==='false') return false;
-      return raw;
-    }
-    function skSyncUIStudioControls(){
-      document.querySelectorAll('#skUiAppearanceStudio [data-setting-group]').forEach(group=>{
-        const key=group.getAttribute('data-setting-group');
-        const val=skReadUISetting(key);
-        group.querySelectorAll('[data-value]').forEach(btn=>btn.classList.toggle('active',String(btn.getAttribute('data-value'))===String(val)));
+    function skAppearanceSyncControls(settings){
+      const root=document.getElementById('skUiAppearanceStudio');if(!root)return;
+      root.querySelectorAll('[data-setting-group]').forEach(group=>{
+        const key=group.getAttribute('data-setting-group'), value=settings[key];
+        group.querySelectorAll('[data-value]').forEach(btn=>btn.classList.toggle('active',String(btn.dataset.value)===String(value)));
       });
-      const aura=document.getElementById('skUiAura'), h=document.getElementById('skUiHaptic'), m=document.getElementById('skUiMotion');
-      if(aura)aura.checked=!!skReadUISetting('aura');
-      if(h)h.checked=!!skReadUISetting('haptic');
-      if(m)m.checked=!!skReadUISetting('motion');
+      const aura=document.getElementById('skUiAura'),h=document.getElementById('skUiHaptic'),m=document.getElementById('skUiMotion');
+      if(aura)aura.checked=!!settings.aura;if(h)h.checked=!!settings.haptic;if(m)m.checked=!!settings.motion;
+      root.querySelectorAll('.sk-ui-profile').forEach(btn=>btn.classList.toggle('active',btn.dataset.value===settings.preset));
+    }
+    function skAppearanceApply(settings,opts){
+      const next={...SK_APPEARANCE_DEFAULTS,...settings};
+      skAppearanceSave(next);skAppearanceApplyTokens(next);skAppearanceSyncControls(next);
+      if(opts?.theme){
+        window.__skAppearanceApplying=true;
+        try{setTheme(skAppearanceThemeFor(next),true);}catch(e){}
+        window.__skAppearanceApplying=false;
+      }
+      return next;
+    }
+    function skAppearanceSet(key,value){
+      let settings=skAppearanceRead();
+      if(key==='preset'){
+        const p=SK_APPEARANCE_PRESETS[value]||SK_APPEARANCE_PRESETS.classic;
+        settings={...settings,preset:value,accent:p.accent||settings.accent,themeMode:p.theme||settings.themeMode,surface:p.surface,cardSurface:p.cardSurface,header:p.header,nav:p.nav,cardRadius:p.cardRadius,buttonRadius:p.buttonRadius,aura:p.aura};
+        if(value==='liquid'||value==='white') settings.themeMode='light';
+        if(value==='midnight'||value==='amber') settings.themeMode='dark';
+        if(value==='classic'||value==='emerald'||value==='ruby'||value==='ocean') settings.themeMode='light';
+        skAppearanceApply(settings,{theme:true});
+      }else{
+        if(key==='accent') settings.accent=value;
+        else if(key==='themeMode') settings.themeMode=value;
+        else if(['aura','haptic','motion'].includes(key)) settings[key]=!!value;
+        else settings[key]=value;
+        if(key==='accent' && value!=='custom') settings.customHex=skHex(SK_APPEARANCE_ACCENTS[value]||SK_APPEARANCE_ACCENTS.blue);
+        skAppearanceApply(settings,{theme:key==='themeMode'});
+      }
+    }
+    function skAppearanceSetCustomAccent(value){
+      const hex=skHex(value),settings=skAppearanceRead();settings.accent='custom';settings.customHex=hex;settings.preset='classic';skAppearanceApply(settings,{theme:false});
+    }
+    function skResetAppearanceStudio(){
+      const next={...SK_APPEARANCE_DEFAULTS};
+      skAppearanceApply(next,{theme:true});
+      try{localStorage.removeItem('sk_theme_depth');}catch(e){}
+      const slider=document.getElementById('themeDepthSlider');if(slider)slider.value=100;
+      const label=document.getElementById('depthValueLabel');if(label)label.textContent='100%';
+      if(typeof showToast==='function')showToast('Appearance Studio reset to Classic Blue.');
     }
     function skInitUIAppearanceStudio(){
-      Object.keys(SK_UI_DEFAULTS).forEach(k=>{
-        const v=skReadUISetting(k); skApplyUISetting(k,v);
-      });
-      skSyncUIStudioControls();
+      let settings=skAppearanceRead();
+      /* One-time migration from the older sk_ui_* bridge. */
+      if(!localStorage.getItem(SK_APPEARANCE_KEY)){
+        const oldMap={header:'header',nav:'nav',scale:'scale',aura:'aura',haptic:'haptic',motion:'motion',surface:'surface',cardRadius:'cardRadius',buttonRadius:'buttonRadius',cardSurface:'cardSurface'};
+        Object.keys(oldMap).forEach(k=>{const raw=localStorage.getItem('sk_ui_'+oldMap[k]);if(raw!==null)settings[k]=raw==='true'?true:raw==='false'?false:raw;});
+      }
+      skAppearanceApply(settings,{theme:true});
       skInitUIAppearanceBehavior();
+      if(!skAppearanceSystemMedia && window.matchMedia){
+        skAppearanceSystemMedia=window.matchMedia('(prefers-color-scheme: dark)');
+        const onSystemChange=()=>{const s=skAppearanceRead();if(s.themeMode==='system')skAppearanceApply(s,{theme:false});};
+        if(skAppearanceSystemMedia.addEventListener)skAppearanceSystemMedia.addEventListener('change',onSystemChange);else skAppearanceSystemMedia.addListener(onSystemChange);
+      }
     }
-
-    /* SK UI Appearance Studio — interaction bridge.
-       Presentation-only: reads the existing sk_ui_* preferences and applies them
-       without touching billing, Firebase, customer, repair or inventory logic. */
     function skInitUIAppearanceBehavior(){
-      if(window.__skUiAppearanceBehaviorReady) return;
+      if(window.__skUiAppearanceBehaviorReady)return;
       window.__skUiAppearanceBehaviorReady=true;
-      document.addEventListener('click', function(ev){
-        const target=ev.target && ev.target.closest ? ev.target.closest('button,[role=button],.nav-item,.sk-ui-choice,.sk-ui-card-choice') : null;
-        if(!target) return;
-        if(skReadUISetting('haptic') && navigator.vibrate){
-          try{ navigator.vibrate(8); }catch(e){}
-        }
-      }, {passive:true});
+      document.addEventListener('click',function(ev){
+        const target=ev.target&&ev.target.closest?ev.target.closest('button,[role="button"],.nav-item,.tab,.mobile-type-btn,.billing-tab-btn'):null;
+        if(!target)return;
+        if(skAppearanceRead().haptic && navigator.vibrate){try{navigator.vibrate([15]);}catch(e){}}
+      },{passive:true});
     }
-    window.skSetUISetting=skSetUISetting;
+    function skAppearanceSyncFromLegacyTheme(theme){
+      if(window.__skAppearanceApplying)return;
+      const map={light:'classic',ocean:'ocean',emerald:'emerald',rose:'ruby',midnight:'midnight',cyber:'amber','apple-light':'white','apple-dark':'midnight',royal:'classic',sunset:'amber',dark:'midnight'};
+      const settings=skAppearanceRead();settings.preset=map[theme]||settings.preset;
+      skAppearanceSave(settings);skAppearanceApplyTokens(settings);skAppearanceSyncControls(settings);
+    }
+    window.skAppearanceSet=skAppearanceSet;
+    window.skAppearanceSetCustomAccent=skAppearanceSetCustomAccent;
+    window.skResetAppearanceStudio=skResetAppearanceStudio;
     window.skInitUIAppearanceStudio=skInitUIAppearanceStudio;
 
     function setTheme(theme, silent) {
@@ -1878,6 +2038,7 @@ const MASTER_INVENTORY = [
       localStorage.setItem('sk_theme', theme);
       localStorage.setItem('sk_icon_pack', iconPack);
       skUpdateThemeChrome(theme);
+      try { skAppearanceSyncFromLegacyTheme(theme); } catch (e) {}
       if(!silent) showToast("Theme applied: " + theme.toUpperCase());
     }
 
@@ -1890,6 +2051,7 @@ const MASTER_INVENTORY = [
     }
 
     function resetThemeToDefault() {
+      if (window.skResetAppearanceStudio) { skResetAppearanceStudio(); return; }
       setTheme('light');
       localStorage.removeItem('sk_theme');
       localStorage.removeItem('sk_theme_depth');
@@ -3630,6 +3792,17 @@ function viewSavedBill(idx) {
       if (!source) { showToast?.('Live Invoice Preview not found'); return; }
 
       const clone = source.cloneNode(true);
+
+      // Preserve the live-preview mobile-type highlight in the print document.
+      // The print window does not retain the billing modal wrapper, so the
+      // live :has(#mobileTypeUsed.active) selectors cannot determine the type.
+      const printMobileType = String(clone.querySelector('#pvMobileType')?.textContent || 'New Mobile').trim().toLowerCase();
+      clone.dataset.mobileType = printMobileType.includes('used')
+        ? 'used'
+        : printMobileType.includes('keypad')
+          ? 'keypad'
+          : 'new';
+
       const w = window.open('', '_blank');
       if (!w) { showToast?.('Please allow popups to print!'); return; }
 
