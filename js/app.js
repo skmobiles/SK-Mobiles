@@ -1381,8 +1381,10 @@ const MASTER_INVENTORY = [
       const input = getRepairSparesInput();
       if (!input) return;
       const note = String(input.value || '').trim();
-      try { localStorage.setItem('sk_repair_tools_note', note); }
-      catch (error) { console.warn('SK repair note save failed:', error); }
+      try {
+        if (note) localStorage.setItem('sk_repair_tools_note', note);
+        else localStorage.removeItem('sk_repair_tools_note');
+      } catch (error) { console.warn('SK repair note save failed:', error); }
       const studio = document.getElementById('skRjSparesNoteInput');
       const legacy = document.getElementById('repairSparesNoteInput');
       if(studio) studio.value=note;
@@ -2272,7 +2274,7 @@ const MASTER_INVENTORY = [
 
       target.innerHTML = items.map(item => `
         <div style="padding:9px 10px;border:1px solid var(--card-border);border-radius:11px;background:var(--card-bg);margin-bottom:6px;">
-          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
+          <div style="display:flex;justify-content:space-between;gap:14px;align-items:center;">
             <div style="font-weight:850;font-size:.78rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.title}</div>
             <div style="font-size:.68rem;font-weight:800;color:var(--primary);white-space:nowrap;">${item.stock} pcs</div>
           </div>
@@ -2503,9 +2505,11 @@ const MASTER_INVENTORY = [
       const bar = document.getElementById('skTemperedSelectBar');
       if (!container || !bar || !inventorySelectionMode || !isInventorySelectionCategory()) return;
 
-      const first = container.firstElementChild;
-      if (first && first !== bar) first.insertAdjacentElement('afterend', bar);
+      const notice = container.querySelector(':scope > .active-category-notice');
+      if (notice) notice.insertAdjacentElement('afterend', bar);
+      else container.insertBefore(bar, container.firstElementChild);
       bar.classList.add('sk-active');
+      bar.style.display = 'flex';
       container.classList.add('sk-tempered-selection-mode');
     }
 
@@ -2546,6 +2550,7 @@ const MASTER_INVENTORY = [
 
       if (bar) {
         bar.classList.remove('sk-active');
+        bar.style.display = 'none';
         if (bar.parentElement === container) document.body.appendChild(bar);
       }
 
@@ -2619,6 +2624,39 @@ const MASTER_INVENTORY = [
       clearTimeout(longPressTimer);
       clearTimeout(inventorySelectionTimer);
     }
+
+    // Android/WebView long-press fallback: use pointer events + contextmenu so
+    // selection works reliably even when touchend/click timing differs by device.
+    let skPointerLongPressTimer = null;
+    let skPointerLongPressCard = null;
+    document.addEventListener('pointerdown', function(event){
+      if (!isInventorySelectionCategory()) return;
+      const card = event.target.closest && event.target.closest('#cardsContainer .glass-card');
+      if (!card) return;
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      clearTimeout(skPointerLongPressTimer);
+      skPointerLongPressCard = card;
+      skPointerLongPressTimer = setTimeout(function(){
+        const id = getInventoryCardId(card);
+        if (id) {
+          enterInventorySelectionMode();
+          inventorySuppressClickUntil = Date.now() + 1200;
+        }
+      }, 550);
+    }, {passive:true});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(type){
+      document.addEventListener(type, function(event){
+        clearTimeout(skPointerLongPressTimer);
+        skPointerLongPressCard = null;
+      }, {passive:true});
+    });
+    document.addEventListener('contextmenu', function(event){
+      const card = event.target.closest && event.target.closest('#cardsContainer .glass-card');
+      if (!card || !isInventorySelectionCategory()) return;
+      event.preventDefault();
+      event.stopPropagation();
+      enterInventorySelectionMode();
+    }, true);
 
     document.addEventListener('click', function(event) {
       const card = event.target.closest && event.target.closest('#cardsContainer .glass-card');
@@ -2903,7 +2941,7 @@ const MASTER_INVENTORY = [
         const metricCardsMap = {
           'metric-spares': `
             <div class="draggable-card sk-home-metric-card sk-home-metric-spares" data-card-id="metric-spares" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="toggleModal('repairSparesModal', true);">
-              <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+              <div style="display:flex;align-items:center;gap:14px;min-width:0;">
                 <div class="sk-home-metric-icon spares" style="width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;">🧰</div>
                 <div style="min-width:0;">
                   <div style="font-size:12px;color:var(--text-muted);font-weight:800;">Repair Spares Orders</div>
@@ -2915,7 +2953,7 @@ const MASTER_INVENTORY = [
           `,
           'metric-credit': `
             <div class="draggable-card sk-home-metric-card sk-home-metric-credit" data-card-id="metric-credit" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="skOpenCreditLedger(); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div style="display:flex; align-items:center; gap:8px;">
+              <div style="display:flex; align-items:center; gap:14px;">
                 <div class="sk-home-metric-icon credit" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">💳</div>
                 <div>
                   <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Outstanding</div>
@@ -2927,7 +2965,7 @@ const MASTER_INVENTORY = [
           `,
           'metric-repair': `
             <div class="draggable-card sk-home-metric-card sk-home-metric-repair" data-card-id="metric-repair" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="skOpenPendingRepairJobs(); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div style="display:flex; align-items:center; gap:8px;">
+              <div style="display:flex; align-items:center; gap:14px;">
                 <div class="sk-home-metric-icon repair" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">🔧</div>
                 <div>
                   <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Pending Jobs</div>
@@ -2939,7 +2977,7 @@ const MASTER_INVENTORY = [
           `,
           'metric-bills': `
             <div class="draggable-card sk-home-metric-card sk-home-metric-bills" data-card-id="metric-bills" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="toggleModal('billingModal', true); switchBillTab('history'); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div style="display:flex; align-items:center; gap:8px;">
+              <div style="display:flex; align-items:center; gap:14px;">
                 <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(124,58,237,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">🧾</div>
                 <div>
                   <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Saved Bills</div>
@@ -2970,7 +3008,7 @@ const MASTER_INVENTORY = [
         const actionCardsMap = {
           'card-glass': `
             <div data-card-id="card-glass" draggable="true" class="draggable-card sk-home-action-row sk-home-action-glass" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='glass'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+              <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
                 <div class="sk-home-action-icon glass" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">🛡️</div>
                 <div style="min-width: 0;">
                   <div style="font-weight: 850; font-size: 14px; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tempered Glass</div>
@@ -2982,7 +3020,7 @@ const MASTER_INVENTORY = [
           `,
           'card-display': `
             <div data-card-id="card-display" draggable="true" class="draggable-card sk-home-action-row sk-home-action-display" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='combo'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+              <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
                 <div class="sk-home-action-icon display" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">📱</div>
                 <div style="min-width: 0;">
                   <div style="font-weight: 850; font-size: 14px; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">1. Display</div>
@@ -2994,7 +3032,7 @@ const MASTER_INVENTORY = [
           `,
           'card-accessories': `
             <div data-card-id="card-accessories" draggable="true" class="draggable-card sk-home-action-row sk-home-action-accessories" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='combo'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+              <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
                 <div class="sk-home-action-icon accessories" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">⚡</div>
                 <div style="min-width: 0;">
                   <div style="font-weight: 850; font-size: 14px; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">2. Accessories</div>
@@ -3032,12 +3070,12 @@ const MASTER_INVENTORY = [
           </div>
 
           <!-- 4 Metric Cards Grid: All boxes are draggable and reorderable -->
-          <div id="homeMetricGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%;">
+          <div id="homeMetricGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%;">
             ${metricGridHTML}
           </div>
 
           <!-- Reorderable Long Action Cards (Compact 58px high, fits in screen) -->
-          <div id="homeActionCardsContainer" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+          <div id="homeActionCardsContainer" style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
             ${actionCardsHTML}
           </div>
         `;
@@ -3054,7 +3092,7 @@ const MASTER_INVENTORY = [
         }, 50);
 
         syncInventorySelectionUI();
-        skRestoreRepairSpares();
+        loadRepairSparesNote();
         skPostRenderEnhancements();
         return;
       }
@@ -3722,7 +3760,7 @@ function viewSavedBill(idx) {
       wrapper.style.cssText = "background:#fff;color:#1e293b;padding:20px;border-radius:18px;font-family:'Plus Jakarta Sans',sans-serif;";
 
       const header = document.createElement('div');
-      header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid #edf0f6;padding-bottom:12px;margin-bottom:12px;gap:8px;';
+      header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid #edf0f6;padding-bottom:12px;margin-bottom:12px;gap:14px;';
 
       const backBtn = document.createElement('button');
       backBtn.type = 'button';
@@ -3750,7 +3788,7 @@ function viewSavedBill(idx) {
       previewClone.style.borderRadius = '0';
 
       const actions = document.createElement('div');
-      actions.style.cssText = 'display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;';
+      actions.style.cssText = 'display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;';
 
       const editBtn = document.createElement('button');
       editBtn.type = 'button';
@@ -4192,6 +4230,29 @@ img{max-width:100%!important;}
     skRjSwitchTab('pending');
   };
 
+  // Home → Urgent Repair must open the Pending Jobs page directly, not the
+  // separate Urgent Repair modal. The urgent job is placed first and focused.
+  window.skOpenUrgentPendingRepair=function(){
+    const jobs=load().filter(j=>j.status!=='Delivered' && String(j.workType||'Normal').toLowerCase()==='urgent');
+    if(!jobs.length){
+      skOpenPendingRepairJobs();
+      return;
+    }
+    window.__skUrgentFocusId=jobs[0].id;
+    openJobs();
+    skRjSwitchTab('pending');
+    setTimeout(function(){
+      const id=String(window.__skUrgentFocusId||'');
+      const el=Array.from(document.querySelectorAll('[data-rj-id]')).find(node=>String(node.getAttribute('data-rj-id'))===id);
+      if(el){
+        el.classList.add('sk-rj-urgent-focus');
+        el.scrollIntoView({behavior:'smooth',block:'center'});
+        setTimeout(()=>el.classList.remove('sk-rj-urgent-focus'),1800);
+      }
+      window.__skUrgentFocusId='';
+    },80);
+  };
+
   window.skRjSaveJob=function(e){
     e?.preventDefault();
     const id=document.getElementById('skRjEditId').value;
@@ -4338,12 +4399,14 @@ img{max-width:100%!important;}
 
   window.skRjRenderJobs=function(){
     const list=document.getElementById('skRjJobsList'); if(!list)return;
-    const a=getPending();
+    let a=getPending();
+    const focusId=String(window.__skUrgentFocusId||'');
+    if(focusId) a.sort((x,y)=>(String(x.id)===focusId?-1:0)-(String(y.id)===focusId?-1:0));
     document.getElementById('skRjPendingCount').textContent=a.length;
     const hc=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const hEl=document.getElementById('skRjHistoryCount'); if(hEl) hEl.textContent=hc;
     list.innerHTML=a.length? a.map(j=>`
-      <div class="sk-rj-card" onclick="skRjShowDetail('${j.id}')">
+      <div class="sk-rj-card" data-rj-id="${esc(j.id)}" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
@@ -4407,7 +4470,7 @@ img{max-width:100%!important;}
     el.id='skHomeRepairMetric'; el.className='draggable-card sk-home-rj-card';
     el.draggable=true;
     el.dataset.cardId='metric-repairs';
-    el.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
+    el.innerHTML=`<div style="display:flex;align-items:center;gap:14px">
       <div style="width:38px;height:38px;border-radius:12px;background:rgba(239,68,68,.10);display:flex;align-items:center;justify-content:center;font-size:1.15rem">🔧</div>
       <div><div style="font-size:12px;color:var(--text-muted);font-weight:700">Pending Repair Jobs</div>
       <div class="sk-home-rj-count">${a.length}</div><div class="sk-home-rj-mini">${a.length?'Pending Jobs':'No Pending Jobs'}</div></div></div>
@@ -4488,8 +4551,8 @@ img{max-width:100%!important;}
     let card=document.getElementById('skUrgentRepairCard');
     if(!card){
       card=document.createElement('div');card.id='skUrgentRepairCard';
-      card.innerHTML='<div style="display:flex;align-items:center;gap:8px;min-width:0"><div class="sk-ur-icon">🚨</div><div style="min-width:0"><div class="sk-ur-title">Urgent Repair Jobs</div><div class="sk-ur-count" id="skUrgentRepairCount">0</div><div class="sk-ur-preview" id="skUrgentRepairPreview">No urgent jobs</div></div></div><span class="sk-ur-arrow">›</span>';
-      card.onclick=openUrgentModal;
+      card.innerHTML='<div style="display:flex;align-items:center;gap:14px;min-width:0"><div class="sk-ur-icon">🚨</div><div style="min-width:0"><div class="sk-ur-title">Urgent Repair Jobs</div><div class="sk-ur-count" id="skUrgentRepairCount">0</div><div class="sk-ur-preview" id="skUrgentRepairPreview">No urgent jobs</div></div></div><span class="sk-ur-arrow">›</span>';
+      card.onclick=window.skOpenUrgentPendingRepair;
       grid.insertAdjacentElement('afterend',card);
     }
     const jobs=urgentJobs();
@@ -4635,12 +4698,34 @@ img{max-width:100%!important;}
       window.scrollTo({top:0,behavior:'smooth'});
     }finally{restoring=false;}
   }
-  if(!history.state||!history.state.skMobilesApp){
-    history.replaceState({skMobilesApp:true,filter:(typeof currentFilter==='string'?currentFilter:'home'),modal:null},document.title,location.href);
-  }
+  // Keep one hidden in-app root entry so Android/mobile Back can never close the
+  // app from its first page. Normal app states still behave as previous-page history.
+  (function ensureSkBackRoot(){
+    const existing=history.state;
+    const current=existing&&existing.skMobilesApp
+      ? {skMobilesApp:true,filter:existing.filter||((typeof currentFilter==='string')?currentFilter:'home'),modal:existing.modal||null,detailId:existing.detailId||null}
+      : {skMobilesApp:true,filter:((typeof currentFilter==='string')?currentFilter:'home'),modal:null};
+    if(existing&&existing.skMobilesApp&&existing.__skBackRoot){
+      return;
+    }
+    history.replaceState({skMobilesApp:true,__skBackRoot:true,filter:current.filter||'home',modal:null},document.title,location.href);
+    history.pushState(current,document.title,location.href);
+  })();
   window.addEventListener('popstate',function(e){
+    if(e.state&&e.state.skMobilesApp&&e.state.__skBackRoot){
+      // Root reached: restore the current app page and immediately recreate the
+      // forward app entry. This consumes the Back press without exiting the app.
+      const rootFilter=e.state.filter||'home';
+      restoreState({skMobilesApp:true,filter:rootFilter,modal:null});
+      history.pushState({skMobilesApp:true,filter:rootFilter,modal:null},document.title,location.href);
+      return;
+    }
     if(e.state&&e.state.skMobilesApp)restoreState(e.state);
-    else{history.pushState(currentState(),document.title,location.href);restoreState(currentState());}
+    else{
+      const st=currentState();
+      restoreState(st);
+      history.pushState(st,document.title,location.href);
+    }
   });
 
   document.addEventListener('click',function(e){
@@ -4800,7 +4885,7 @@ img{max-width:100%!important;}
         ['shopSettings','🏪 Shop Profile & Bill Settings'],
         ['userManagement','👥 User Role Management']
       ];
-      box.innerHTML=rows.map(([key,label])=>`<label style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 8px;border:1px solid var(--card-border);border-radius:10px;background:var(--pill-bg);font-size:.70rem;font-weight:800;"><span>${label}</span><input type="checkbox" ${p[key]?'checked':''} onchange="skAdminSetManagerPermission('${key}',this.checked)"></label>`).join('');
+      box.innerHTML=rows.map(([key,label])=>`<label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:7px 8px;border:1px solid var(--card-border);border-radius:10px;background:var(--pill-bg);font-size:.70rem;font-weight:800;"><span>${label}</span><input type="checkbox" ${p[key]?'checked':''} onchange="skAdminSetManagerPermission('${key}',this.checked)"></label>`).join('');
     }
     window.skAdminSetManagerPermission=function(key,value){
       if(!admin()){toast('🔒 Admin access only');return;}
@@ -5532,7 +5617,7 @@ img{max-width:100%!important;}
       }
       box.style.display='block';
       box.innerHTML=
-        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:7px;">'+
         '<div style="font-size:.72rem;font-weight:800;color:var(--text);">📊 Last uploaded Excel</div>'+
         '<button type="button" id="skDeleteLastExcelBtn" title="Delete uploaded Excel" style="width:30px;height:30px;padding:0;border-radius:8px;border:1px solid #fecaca;background:#fff1f2;color:#dc2626;font-weight:900;cursor:pointer;">🗑️</button>'+
         '</div>'+
