@@ -4121,6 +4121,16 @@ img{max-width:100%!important;}
     if(typeof window.skAppHistoryRepairClose==='function')window.skAppHistoryRepairClose('skRepairDetailModal');
   };
 
+  function skRjRefreshCounts(){
+    const a=load();
+    const pendingCount=a.filter(isPending).length;
+    const historyCount=a.filter(j=>j.status==='Ready'||j.status==='Delivered').length;
+    const p=document.getElementById('skRjPendingCount');
+    const h=document.getElementById('skRjHistoryCount');
+    if(p) p.textContent=pendingCount;
+    if(h) h.textContent=historyCount;
+  }
+
   window.skRjSwitchTab=function(tab){
     rjTab=['jobs','pending','history'].includes(tab)?tab:'jobs';
     const jobs=rjTab==='jobs', pending=rjTab==='pending', history=rjTab==='history';
@@ -4130,6 +4140,7 @@ img{max-width:100%!important;}
     document.getElementById('skRjJobsTab').classList.toggle('active',jobs);
     document.getElementById('skRjPendingTab').classList.toggle('active',pending);
     document.getElementById('skRjHistoryTab').classList.toggle('active',history);
+    skRjRefreshCounts();
     if(jobs) clearForm();
     if(pending) skRjRenderJobs();
     if(history) skRjRenderHistory();
@@ -4288,6 +4299,8 @@ img{max-width:100%!important;}
     const list=document.getElementById('skRjJobsList'); if(!list)return;
     const a=getPending();
     document.getElementById('skRjPendingCount').textContent=a.length;
+    const hc=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
+    const hEl=document.getElementById('skRjHistoryCount'); if(hEl) hEl.textContent=hc;
     list.innerHTML=a.length? a.map(j=>`
       <div class="sk-rj-card" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
@@ -4299,8 +4312,8 @@ img{max-width:100%!important;}
         <div class="sk-rj-actions">
           <button type="button" class="sk-rj-next" onclick="event.stopPropagation();skRjNext('${j.id}')">Next Status</button>
           <button type="button" class="sk-rj-edit" onclick="event.stopPropagation();skRjEdit('${j.id}')">✏️ Edit</button>
+          <button type="button" class="sk-rj-delete" onclick="event.stopPropagation();skRjDelete('${j.id}')">🗑️ Delete</button>
         </div>
-        <button type="button" class="sk-rj-delete" style="width:100%;margin-top:6px;height:32px;border-radius:10px;border:1px solid rgba(239,68,68,.22)" onclick="event.stopPropagation();skRjDelete('${j.id}')">🗑️ Delete</button>
       </div>`).join(''):'<div class="sk-rj-empty">No pending repair jobs.</div>';
   };
 
@@ -4315,6 +4328,7 @@ img{max-width:100%!important;}
       return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.imei,j.problem,j.status].join(' ').toLowerCase().includes(q));
     });
     document.getElementById('skRjHistoryCount').textContent=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
+    const pEl=document.getElementById('skRjPendingCount'); if(pEl) pEl.textContent=load().filter(isPending).length;
     list.innerHTML=a.length?a.map(j=>`
       <div class="sk-rj-card" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
         <div class="sk-rj-card-top">

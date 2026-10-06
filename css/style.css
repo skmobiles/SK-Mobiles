@@ -7878,3 +7878,133 @@ html .bottom-nav > #navHome:active::before{transform:translate(-50%,-50%) transl
     box-sizing:border-box !important;
   }
 }
+
+
+/* ============================================================
+   SK MOBILES — REPAIR JOBS COUNT SYNC + FULL-WIDTH CARDS
+   Presentation/count synchronization only.
+   ============================================================ */
+#skRepairJobsModal .sk-rj-tabs,
+#skRepairJobsModal #skRjJobsView,
+#skRepairJobsModal #skRjPendingView,
+#skRepairJobsModal #skRjHistoryView,
+#skRepairJobsModal #skRjJobsList,
+#skRepairJobsModal #skRjHistoryList{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+#skRepairJobsModal #skRjJobsList .sk-rj-card,
+#skRepairJobsModal #skRjHistoryList .sk-rj-card,
+#skRepairJobsModal #skRjPendingView .sk-rj-card{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+  box-sizing:border-box !important;
+}
+
+/* ============================================================
+   FINAL — REPAIR JOBS RIGHT-EDGE ALIGNMENT FIX
+   Keep the Repair Jobs shell at 100% width without overflow.
+   UI alignment only; no data/functionality changes.
+   ============================================================ */
+#skRepairJobsModal > .modal-sheet{
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+  padding-left:8px !important;
+  padding-right:8px !important;
+  box-sizing:border-box !important;
+  overflow-x:hidden !important;
+}
+#skRepairJobsModal .sk-rj-tabs,
+#skRepairJobsModal #skRjJobsView,
+#skRepairJobsModal #skRjPendingView,
+#skRepairJobsModal #skRjHistoryView,
+#skRepairJobsModal #skRjJobsList,
+#skRepairJobsModal #skRjHistoryList,
+#skRepairJobsModal .sk-rj-card,
+#skRepairJobsModal .sk-rj-empty,
+#skRepairJobsModal #skUrgentRepairCard{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+  box-sizing:border-box !important;
+}
+#skRepairJobsModal #skRjJobsView,
+#skRepairJobsModal #skRjPendingView,
+#skRepairJobsModal #skRjHistoryView{
+  padding-left:0 !important;
+  padding-right:0 !important;
+  overflow-x:hidden !important;
+}
+
+
+/* ================================================================
+   SK REPAIR JOBS — ACTION ROW + NATURAL MOBILE SCROLL
+   UI-only: keep existing handlers and repair logic unchanged.
+   ================================================================ */
+#skRepairJobsModal .sk-rj-actions{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:7px !important;
+  width:100% !important;
+  margin-top:9px !important;
+  box-sizing:border-box !important;
+}
+#skRepairJobsModal .sk-rj-actions button,
+#skRepairJobsModal .sk-rj-actions .sk-rj-delete{
+  width:100% !important;
+  min-width:0 !important;
+  min-height:38px !important;
+  height:38px !important;
+  margin:0 !important;
+  padding:0 7px !important;
+  box-sizing:border-box !important;
+  border-radius:12px !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+#skRepairJobsModal{
+  overscroll-behavior-y:auto !important;
+}
+#skRepairJobsModal > .modal-sheet{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior-y:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+  scroll-behavior:smooth !important;
+  padding-bottom:max(96px,calc(84px + env(safe-area-inset-bottom))) !important;
+}
+#skRepairJobsModal #skRjHistoryView{
+  max-height:none !important;
+  overflow:visible !important;
+  overscroll-behavior:visible !important;
+  -webkit-overflow-scrolling:auto !important;
+}
+#skRepairJobsModal #skRjPendingView,
+#skRepairJobsModal #skRjJobsView{
+  max-height:none !important;
+  overflow:visible !important;
+}
+@media(max-width:759px){
+  #skRepairJobsModal .sk-rj-actions{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:6px !important;
+  }
+  #skRepairJobsModal .sk-rj-actions button,
+  #skRepairJobsModal .sk-rj-actions .sk-rj-delete{
+    min-height:40px !important;
+    height:40px !important;
+    font-size:.64rem !important;
+    padding:0 4px !important;
+  }
+}
