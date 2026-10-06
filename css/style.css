@@ -7681,3 +7681,200 @@ html .bottom-nav > #navHome:active::before{transform:translate(-50%,-50%) transl
     min-height:43px !important;
   }
 }
+
+/* ============================================================
+   FINAL CREDIT STYLE ALIGNMENT — USER REFERENCE MATCH
+   STYLE ONLY. No fields, IDs, handlers or business logic changed.
+   ============================================================ */
+
+/* Credit Entry: match Mobile Sale Bill's thin, soft border language. */
+#skCreditActionModal > .modal-sheet{
+  border:1px solid color-mix(in srgb,var(--card-border) 72%,#fff 28%) !important;
+  box-shadow:0 10px 28px rgba(2,6,23,.055) !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+#skCreditActionModal > .modal-sheet > .modal-title{
+  border:1px solid color-mix(in srgb,var(--card-border) 72%,#fff 28%) !important;
+  border-bottom:1px solid color-mix(in srgb,var(--card-border) 72%,#fff 28%) !important;
+  box-shadow:none !important;
+}
+
+#skCreditActionModal > .modal-sheet .form-input,
+#skCreditActionModal > .modal-sheet .form-select{
+  border-width:1px !important;
+  border-style:solid !important;
+  border-color:color-mix(in srgb,var(--card-border) 72%,#fff 28%) !important;
+  box-shadow:none !important;
+}
+
+/* One 14px gap between consecutive form fields — avoid the old double gap. */
+#skCreditActionModal > .modal-sheet > .form-group{
+  margin-top:0 !important;
+  margin-bottom:14px !important;
+}
+#skCreditActionModal > .modal-sheet > .form-group:first-of-type{
+  margin-top:14px !important;
+}
+#skCreditActionModal > .modal-sheet > .form-group + .form-group{
+  margin-top:0 !important;
+}
+
+#skCreditActionModal > .modal-sheet .form-label{
+  margin-bottom:5px !important;
+}
+
+/* Customer Credit Ledger: Search + Credit must stay on one row on mobile. */
+@media(max-width:600px){
+  #skCreditLedgerPage .skcp-toolbar{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) auto !important;
+    gap:8px !important;
+    align-items:center !important;
+  }
+  #skCreditLedgerPage .skcp-toolbar .skcp-btn{
+    width:auto !important;
+    min-width:86px !important;
+    min-height:44px !important;
+  }
+}
+
+/* Keep the visual gap between the ledger toolbar and filter row consistent. */
+#skCreditLedgerPage .skcp-toolbar{
+  margin-bottom:14px !important;
+}
+#skCreditLedgerPage .skcp-filters{
+  margin-top:0 !important;
+}
+
+/* ============================================================
+   FINAL ROOT FIX — CREDIT FORM BORDER + 14PX RHYTHM
+   STYLE ONLY. Existing DOM, IDs, handlers and business logic unchanged.
+   ============================================================ */
+
+/* Credit form: use the same restrained 1px border language as Mobile Sale Bill. */
+#skCreditActionModal > .modal-sheet,
+#skCreditActionModal > .modal-sheet > .modal-title,
+#skCreditActionModal > .modal-sheet .form-input,
+#skCreditActionModal > .modal-sheet .form-select,
+#skCreditActionModal > .modal-sheet .submit-btn{
+  border-width:1px !important;
+  border-style:solid !important;
+}
+
+#skCreditActionModal > .modal-sheet{
+  border-color:rgba(148,163,184,.24) !important;
+  box-shadow:0 8px 24px rgba(15,23,42,.035) !important;
+}
+
+#skCreditActionModal > .modal-sheet > .modal-title{
+  border-color:rgba(148,163,184,.24) !important;
+  border-bottom-color:rgba(148,163,184,.24) !important;
+  box-shadow:none !important;
+}
+
+#skCreditActionModal > .modal-sheet .form-input,
+#skCreditActionModal > .modal-sheet .form-select{
+  border-color:rgba(148,163,184,.30) !important;
+  box-shadow:none !important;
+}
+
+#skCreditActionModal > .modal-sheet .form-input:focus,
+#skCreditActionModal > .modal-sheet .form-select:focus{
+  border-color:color-mix(in srgb,var(--primary) 48%,rgba(148,163,184,.30)) !important;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 8%,transparent) !important;
+}
+
+/* IMPORTANT: remove the old double-margin cascade.
+   One and only one 14px vertical gap between consecutive form groups. */
+#skCreditActionModal > .modal-sheet > .form-group{
+  margin-top:0 !important;
+  margin-right:0 !important;
+  margin-bottom:14px !important;
+  margin-left:0 !important;
+}
+
+#skCreditActionModal > .modal-sheet > .modal-title{
+  margin-bottom:14px !important;
+}
+
+#skCreditActionModal > .modal-sheet > .form-group + .form-group{
+  margin-top:0 !important;
+}
+
+#skCreditActionModal > .modal-sheet > .form-group:first-of-type{
+  margin-top:0 !important;
+}
+
+#skCreditActionModal > .modal-sheet > .submit-btn{
+  margin-top:0 !important;
+}
+
+/* Keep the credit form aligned to the same page gutter as Mobile Sale Bill. */
+#skCreditActionModal > .modal-sheet{
+  padding-left:max(13px,env(safe-area-inset-left)) !important;
+  padding-right:max(13px,env(safe-area-inset-right)) !important;
+}
+
+/* ============================================================
+   FINAL ROOT FIX — CREDIT LEDGER SEARCH + CREDIT ALIGNMENT
+   ============================================================ */
+#skCreditLedgerPage .skcp-toolbar{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  align-items:center !important;
+  gap:8px !important;
+}
+
+#skCreditLedgerPage .skcp-toolbar #skCPSearch{
+  width:100% !important;
+  min-width:0 !important;
+  margin:0 !important;
+}
+
+#skCreditLedgerPage .skcp-toolbar .skcp-btn{
+  width:auto !important;
+  min-width:86px !important;
+  max-width:max-content !important;
+  margin:0 !important;
+  justify-self:end !important;
+}
+
+@media(max-width:600px){
+  #skCreditLedgerPage .skcp-toolbar{
+    grid-template-columns:minmax(0,1fr) auto !important;
+  }
+  #skCreditLedgerPage .skcp-toolbar .skcp-btn{
+    width:auto !important;
+    min-width:86px !important;
+  }
+}
+
+/* ============================================================
+   FINAL CREDIT SAVE BUTTON ALIGNMENT FIX — STYLE ONLY
+   Remove legacy horizontal margins so the Save button stays
+   flush with the Credit form's content width on all screens.
+   ============================================================ */
+#skCreditActionModal > .modal-sheet > .submit-btn{
+  display:flex !important;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  margin:0 !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+  box-sizing:border-box !important;
+  align-self:stretch !important;
+  justify-self:stretch !important;
+  transform:none;
+}
+
+@media(max-width:600px){
+  #skCreditActionModal > .modal-sheet > .submit-btn{
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+  }
+}
