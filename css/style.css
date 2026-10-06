@@ -2,8 +2,8 @@
    SK MOBILES — GLOBAL TYPOGRAPHY + EDGE-TO-EDGE LAYOUT SOURCE OF TRUTH
    ============================================================ */
 *,*::before,*::after{box-sizing:border-box;}
-*{margin:0;padding:0;font-family:'Plus Jakarta Sans',-apple-system,sans-serif !important;-webkit-tap-highlight-color:transparent;}
-h1,h2,h3,h4,.stat-value,.card-title,.badge,strong{font-family:'Plus Jakarta Sans',sans-serif !important;font-weight:700 !important;letter-spacing:-0.02em !important;}
+*{margin:0;padding:0;font-family:var(--app-font,'Plus Jakarta Sans'),-apple-system,sans-serif !important;-webkit-tap-highlight-color:transparent;}
+h1,h2,h3,h4,.stat-value,.card-title,.badge,strong{font-family:var(--app-font,'Plus Jakarta Sans'),sans-serif !important;font-weight:700 !important;letter-spacing:-0.02em !important;}
 html,body{width:100%;max-width:100%;margin:0;padding:0;overflow-x:hidden;background-color:#f8fafc;color:var(--text);min-height:100vh;scroll-behavior:smooth;} body.modal-open{overflow:hidden;} .app-viewport{width:100%;max-width:100%;min-width:0;min-height:100vh;margin:0;padding:0 10px 90px;box-sizing:border-box;overflow-x:hidden;} .app-viewport > *{min-width:0;max-width:100%;box-sizing:border-box;} .container,.page-container,.view-section,.tab-content,main,.billing-container{width:100%;max-width:100%;margin:0;padding:0;box-sizing:border-box;} .card,.form-section,.bill-card,.content-box,.panel{width:100%;max-width:100%;margin-left:0;margin-right:0;margin-bottom:12px;box-sizing:border-box;} .content-area{width:100%;max-width:100%;margin:0;padding:0;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;}
 ::-webkit-scrollbar{width:6px;height:6px;}
 ::-webkit-scrollbar-thumb{background:rgba(148,163,184,.45);border-radius:10px;transition:background .2s;}
@@ -8008,3 +8008,52 @@ html .bottom-nav > #navHome:active::before{transform:translate(-50%,-50%) transl
     padding:0 4px !important;
   }
 }
+
+/* SK Home — Repair Spares Orders metric card */
+.sk-home-metric-spares{cursor:pointer !important;}
+.sk-home-metric-icon.spares{background:rgba(245,158,11,.12);}
+
+
+/* ============================================================
+   SK MOBILES — APPEARANCE STUDIO: NAVIGATION MODE RUNTIME
+   Fixed Dock and Floating Island are both live and mutually exclusive.
+   ============================================================ */
+html[data-ui-nav="fixed"] .bottom-nav{
+  left:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  transform:none !important;
+  width:100% !important;
+  max-width:none !important;
+  height:66px !important;
+  min-height:66px !important;
+  border-radius:0 !important;
+  border-left:0 !important;
+  border-right:0 !important;
+  border-bottom:0 !important;
+  padding:0 6px !important;
+  box-shadow:0 -6px 20px rgba(15,23,42,.08) !important;
+}
+html[data-ui-nav="fixed"] .bottom-nav > .nav-item,
+html[data-ui-nav="fixed"] .bottom-nav > #navHome{
+  height:66px !important;
+  min-height:66px !important;
+}
+html[data-ui-nav="floating"] .bottom-nav{
+  left:50% !important;
+  right:auto !important;
+  bottom:12px !important;
+  transform:translateX(-50%) !important;
+  width:calc(100% - 24px) !important;
+  max-width:440px !important;
+  height:66px !important;
+  min-height:66px !important;
+  border-radius:28px !important;
+  border:1px solid rgba(226,232,240,.9) !important;
+  box-shadow:0 12px 30px rgba(15,23,42,.10) !important;
+}
+
+/* Studio scale applies to the entire app viewport, not only inherited text. */
+html[data-ui-scale="compact"] .app-viewport{font-size:92% !important;}
+html[data-ui-scale="normal"] .app-viewport{font-size:100% !important;}
+html[data-ui-scale="comfortable"] .app-viewport{font-size:108% !important;}
