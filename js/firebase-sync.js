@@ -39,6 +39,8 @@
   const syncKeyTimers = {};
   let cloudAutoBackupTimer = null;
   let cloudAutoBackupRunning = false;
+  let cloudAutoBackupLastMs = 0;
+  const CLOUD_AUTO_BACKUP_MIN_INTERVAL = 6 * 60 * 60 * 1000;
   let cloudRestoreApplying = false;
   let refreshUiFrame = 0;
   const REPAIR_KEY = "skx_repair_jobs_v2";
@@ -652,6 +654,7 @@
 
   // கிளவுடில் உள்ள அனைத்து sk_ டேட்டாக்களையும் நிகழ்நேரத்தில் கண்காணிக்கும் அமைப்பு
   const universalLastSyncedHash = new Map();
+  const universalDirtyKeys = new Set();
   let universalSyncStarted = false;
 
   function syncHash(value){
@@ -678,6 +681,7 @@
         updatedBy: auth.currentUser.uid
       }, { merge: true });
       universalLastSyncedHash.set(key, hash);
+      universalDirtyKeys.delete(String(key));
       markRemoteBaseline(key, updatedAtMs);
     } catch(e) {
       console.error(key + " cloud sync failed", e);
@@ -807,15 +811,18 @@
 
   function startSyncSafetyReconcile(){
     if(window.__skFirebaseSyncReconcile) clearInterval(window.__skFirebaseSyncReconcile);
+    // Safety retry only for keys that were actually changed locally.
+    // Do NOT scan/write every localStorage key on a fixed short interval.
+    // The old full scan could create a large number of unnecessary Firestore
+    // operations when several devices were open at once.
     window.__skFirebaseSyncReconcile = setInterval(() => {
       if(!auth?.currentUser || !remoteReady || !universalSyncStarted || applyingRemote) return;
-      for(let i=0;i<localStorage.length;i++){
-        const key=localStorage.key(i);
-        if(isSyncableKey(key)) syncKeyToCloud(key);
-      }
+      const pending=[...universalDirtyKeys];
+      pending.forEach(key => syncKeyToCloud(key).catch(()=>{}));
       if(repairSyncReady) uploadRepairJobs(false);
-      if(auth?.currentUser) uploadBills().catch(()=>{});
-    }, 15000);
+      // Bills are uploaded by the localStorage write hook and by initial sync.
+      // Do not rewrite every bill on a periodic timer.
+    }, 60000);
   }
 
   // லோக்கல் ஸ்டோரேஜில் நடக்கும் அனைத்து மாற்றங்களையும் பிடிக்கும் கொக்கி
@@ -828,7 +835,10 @@
 
     Storage.prototype.setItem = function(key, value){
       const result = originalSet.apply(this, arguments);
-      if(this === localStorage && !applyingRemote && auth?.currentUser && isSyncableKey(key)) markLocalChange(key, Date.now());
+      if(this === localStorage && !applyingRemote && auth?.currentUser && isSyncableKey(key)) {
+        markLocalChange(key, Date.now());
+        universalDirtyKeys.add(String(key));
+      }
       if(this === localStorage && !applyingRemote && auth?.currentUser && remoteReady){
         if(key === BILL_KEY){
           clearTimeout(syncTimer);
@@ -902,13 +912,17 @@
   function scheduleCloudAutoBackup(key){
     if(!cloudAutoBackupKeyAllowed(key)) return;
     if(!auth?.currentUser || !db || !cloudBackupAllowed()) return;
+    // Full cloud backups are separate from realtime sync. Throttle them so
+    // ordinary localStorage writes do not create a new backup every few seconds.
+    if(cloudAutoBackupLastMs && (Date.now() - cloudAutoBackupLastMs) < CLOUD_AUTO_BACKUP_MIN_INTERVAL) return;
     clearTimeout(cloudAutoBackupTimer);
     cloudAutoBackupTimer = setTimeout(async function(){
       if(cloudAutoBackupRunning || cloudRestoreApplying || !auth?.currentUser || !db || !cloudBackupAllowed()) return;
       cloudAutoBackupRunning = true;
       try{
         await window.skCloudBackupNow(true);
-        toast("☁️ Cloud Sync ✓");
+        cloudAutoBackupLastMs = Date.now();
+        toast("☁️ Cloud Backup ✓");
       }catch(e){ console.error("Auto backup error", e); }
       finally{ cloudAutoBackupRunning = false; }
     }, 5000);
@@ -921,12 +935,12 @@
     const originalRemove = Storage.prototype.removeItem;
     Storage.prototype.setItem = function(key, value){
       const result = original.apply(this, arguments);
-      if(this === localStorage) scheduleCloudAutoBackup(key);
+      if(this === localStorage && !applyingRemote && !cloudRestoreApplying && isSyncableKey(key)) scheduleCloudAutoBackup(key);
       return result;
     };
     Storage.prototype.removeItem = function(key){
       const result = originalRemove.apply(this, arguments);
-      if(this === localStorage) scheduleCloudAutoBackup(key);
+      if(this === localStorage && !applyingRemote && !cloudRestoreApplying && isSyncableKey(key)) scheduleCloudAutoBackup(key);
       return result;
     };
   }
