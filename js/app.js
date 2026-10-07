@@ -4171,7 +4171,24 @@ img{max-width:100%!important;}
     const i=x.indexOf(s);
     return i<0?'Ready':x[Math.min(i+1,x.length-1)];
   }
-  function getPending(){ return load().filter(isPending); }
+  function rjSortNewest(a,b){
+    const ts=x=>{
+      const raw=String(x?.updatedAt||x?.createdAt||x?.date||'');
+      const iso=rjToISODate(raw);
+      const d=iso?Date.parse(iso):Date.parse(raw);
+      return Number.isNaN(d)?0:d;
+    };
+    const diff=ts(b)-ts(a);
+    return diff || String(b?.id||'').localeCompare(String(a?.id||''));
+  }
+  function getPending(){
+    return load().filter(isPending).sort((a,b)=>{
+      const au=String(a?.workType||'Normal').trim().toLowerCase().includes('urgent');
+      const bu=String(b?.workType||'Normal').trim().toLowerCase().includes('urgent');
+      if(au!==bu) return au?-1:1;
+      return rjSortNewest(a,b);
+    });
+  }
 
   function clearForm(){
     document.getElementById('skRjForm')?.reset();
@@ -4412,6 +4429,13 @@ img{max-width:100%!important;}
     if(typeof window.skAppHistoryRepairOpen==='function')window.skAppHistoryRepairOpen('skRepairDetailModal',{detailId:id});
   };
 
+  window.skRjWorkTypeBorderColor=function(workType){
+    const t=String(workType||'Normal').trim().toLowerCase();
+    if(t.includes('urgent')) return '#dc2626';
+    if(t.includes('scheduled')) return '#2563eb';
+    return '#16a34a';
+  };
+
   window.skRjRenderJobs=function(){
     const list=document.getElementById('skRjJobsList'); if(!list)return;
     let a=getPending();
@@ -4421,7 +4445,7 @@ img{max-width:100%!important;}
     const hc=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const hEl=document.getElementById('skRjHistoryCount'); if(hEl) hEl.textContent=hc;
     list.innerHTML=a.length? a.map(j=>`
-      <div class="sk-rj-card" data-rj-id="${esc(j.id)}" data-work-type="${esc(String(j.workType||'Normal').toLowerCase())}" onclick="skRjShowDetail('${j.id}')">
+      <div class="sk-rj-card" data-rj-id="${esc(j.id)}" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
@@ -4444,12 +4468,14 @@ img{max-width:100%!important;}
     let a=load().filter(j=>j.status==='Ready'||j.status==='Delivered');
     a=a.filter(j=>{
       const d=j.date||'';
-      return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.imei,j.problem,j.status].join(' ').toLowerCase().includes(q));
+      return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.imei,j.problem,j.status,j.workType].join(' ').toLowerCase().includes(q));
     });
+    const ready=a.filter(j=>j.status==='Ready').sort(rjSortNewest);
+    const delivered=a.filter(j=>j.status==='Delivered').sort(rjSortNewest);
     document.getElementById('skRjHistoryCount').textContent=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const pEl=document.getElementById('skRjPendingCount'); if(pEl) pEl.textContent=load().filter(isPending).length;
-    list.innerHTML=a.length?a.map(j=>`
-      <div class="sk-rj-card" data-work-type="${esc(String(j.workType||'Normal').toLowerCase())}" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
+    const card=j=>`
+      <div class="sk-rj-card" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
@@ -4459,7 +4485,10 @@ img{max-width:100%!important;}
         ${j.status==='Ready'?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-deliver" onclick="event.stopPropagation();skRjDeliver('${j.id}')">🚚 Mark Delivered</button></div>`:''}
         ${j.status==='Delivered'?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-rework" onclick="event.stopPropagation();skRjRework('${j.id}')">↩️ Customer Rework</button></div>`:''}
         <div style="margin-top:7px;font-size:.65rem;color:var(--primary);font-weight:800">Tap to open full repair details →</div>
-      </div>`).join(''):'<div class="sk-rj-empty">No repair history found for selected filters.</div>';
+      </div>`;
+    list.innerHTML=(ready.length?`<div class="sk-rj-history-section-title ready">✅ Ready for Delivery <span>${ready.length}</span></div>${ready.map(card).join('')}`:'')
+      +(delivered.length?`<div class="sk-rj-history-section-title delivered">🚚 Delivered <span>${delivered.length}</span></div>${delivered.map(card).join('')}`:'')
+      ||'<div class="sk-rj-empty">No repair history found for selected filters.</div>';
   };
 
   window.skRjExportHistory=function(){

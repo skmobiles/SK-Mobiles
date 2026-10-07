@@ -8212,3 +8212,59 @@ html[data-ui-card-surface="blur"] .sk-rj-card[data-work-type="scheduled"],
 html[data-ui-card-surface="border"] .sk-rj-card[data-work-type="scheduled"],
 html[data-ui-card-surface="shadow"] .sk-rj-card[data-work-type="scheduled"],
 .sk-rj-card[data-work-type="scheduled"] { border-color:#2563eb !important; }
+
+/* Repair History compact filters and status grouping. */
+#skRepairJobsModal #skRjHistoryView .sk-rj-filters{
+  background:transparent !important;
+  border:0 !important;
+  padding:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  gap:6px !important;
+  margin-bottom:7px !important;
+}
+#skRepairJobsModal #skRjHistoryView .sk-rj-filter-label{
+  font-size:.58rem !important;
+  margin-bottom:2px !important;
+}
+#skRepairJobsModal #skRjHistoryView .form-input{
+  min-height:36px !important;
+  height:36px !important;
+  padding:6px 10px !important;
+  border-radius:10px !important;
+  font-size:.78rem !important;
+}
+#skRepairJobsModal #skRjHistoryView .sk-rj-export{
+  min-height:36px !important;
+  height:36px !important;
+  margin-top:5px !important;
+  border-radius:10px !important;
+  font-size:.72rem !important;
+}
+#skRepairJobsModal .sk-rj-history-section-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:30px;
+  padding:5px 9px;
+  margin:5px 1px 3px;
+  border-radius:9px;
+  font-size:.72rem;
+  font-weight:900;
+  border:1px solid var(--card-border);
+  background:var(--pill-bg);
+}
+#skRepairJobsModal .sk-rj-history-section-title.ready{color:#15803d;border-color:rgba(22,163,74,.35)}
+#skRepairJobsModal .sk-rj-history-section-title.delivered{color:#2563eb;border-color:rgba(37,99,235,.28)}
+#skRepairJobsModal .sk-rj-history-section-title span{font-size:.62rem;opacity:.8}
+@media(max-width:759px){
+  #skRepairJobsModal #skRjHistoryView .sk-rj-filters{
+    grid-template-columns:1fr 1fr !important;
+  }
+  #skRepairJobsModal #skRjHistoryView .sk-rj-filters > div[style*="grid-column"]{
+    grid-column:1 / -1 !important;
+  }
+  #skRepairJobsModal #skRjHistoryView .sk-rj-export{
+    margin-top:4px !important;
+  }
+}
