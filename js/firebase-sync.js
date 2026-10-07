@@ -329,15 +329,16 @@
   }
 
   // கிளவுடில் உள்ள அனைத்து sk_ டேட்டாக்களையும் நிகழ்நேரத்தில் கண்காணிக்கும் அமைப்பு
-  function syncKeyToCloud(key) {
-    if (!auth?.currentUser || !db || applyingRemote || !remoteReady) return;
+  async function syncKeyToCloud(key) {
+    if (!auth?.currentUser || !db || applyingRemote || !remoteReady || !isSyncableKey(key)) return;
     try {
       const rawData = localStorage.getItem(key);
       if (rawData === null) return;
       const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
-      ref.set({
+      await ref.set({
         data: rawData,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAtMs: Date.now(),
         updatedBy: auth.currentUser.uid
       }, { merge: true });
     } catch(e) {
@@ -345,20 +346,63 @@
     }
   }
 
+  async function syncMissingLocalDataToCloud(snapshot) {
+    if (!auth?.currentUser || !db || !remoteReady || applyingRemote) return;
+    const remoteKeys = new Set(snapshot.docs.map(d => String(d.id)));
+    const writes = [];
+
+    for(let i = 0; i < localStorage.length; i++){
+      const key = localStorage.key(i);
+      if(!isSyncableKey(key) || remoteKeys.has(key)) continue;
+      const rawData = localStorage.getItem(key);
+      if(rawData === null) continue;
+      const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
+      writes.push(ref.set({
+        data: rawData,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAtMs: Date.now(),
+        updatedBy: auth.currentUser.uid
+      }, { merge: true }));
+    }
+
+    if(writes.length){
+      try { await Promise.all(writes); }
+      catch(e){ console.error("Initial local data cloud sync failed", e); }
+    }
+  }
+
   function startUniversalDataSync() {
     if (unsubscribeAllData) unsubscribeAllData();
     const dataColRef = db.collection("shops").doc(SHOP_ID).collection("data");
 
-    // கிளவுடில் இருக்கும் எந்த sk_ டேட்டா மாறினாலும் உடனடியாக லோக்கலில் ஏற்றுதல்
     unsubscribeAllData = dataColRef.onSnapshot(snapshot => {
       if (applyingRemote) return;
       let hasChanges = false;
+
       snapshot.docChanges().forEach(change => {
         const key = change.doc.id;
         if (!isSyncableKey(key)) return;
+
         const cloudVal = (change.doc.data() || {}).data;
         const localVal = localStorage.getItem(key);
-        if (cloudVal && cloudVal !== localVal) {
+
+        if(change.type === "removed"){
+          if(localVal !== null){
+            applyingRemote = true;
+            try {
+              localStorage.removeItem(key);
+              hasChanges = true;
+            } finally {
+              applyingRemote = false;
+            }
+          }
+          return;
+        }
+
+        // A cloud document is authoritative for an existing key.
+        // Do not use a truthiness check here: empty-string/empty-array JSON
+        // are valid synced states too.
+        if (typeof cloudVal === "string" && cloudVal !== localVal) {
           applyingRemote = true;
           try {
             localStorage.setItem(key, cloudVal);
@@ -368,9 +412,12 @@
           }
         }
       });
-      if (hasChanges) {
-        refreshAllUI();
-      }
+
+      // If this device has a syncable key that does not exist in Firestore
+      // yet, publish it once. Existing cloud keys are never overwritten here.
+      syncMissingLocalDataToCloud(snapshot);
+
+      if (hasChanges) refreshAllUI();
     }, err => console.error("Universal data sync error", err));
   }
 
@@ -378,17 +425,31 @@
   function hookLocalBillWrites(){
     if(window.__skFirebaseStorageHook) return;
     window.__skFirebaseStorageHook = true;
-    const original = Storage.prototype.setItem;
+
+    const originalSet = Storage.prototype.setItem;
+    const originalRemove = Storage.prototype.removeItem;
+
     Storage.prototype.setItem = function(key, value){
-      const result = original.apply(this, arguments);
+      const result = originalSet.apply(this, arguments);
       if(this === localStorage && !applyingRemote && auth?.currentUser && remoteReady){
         if(key === BILL_KEY){
           clearTimeout(syncTimer);
-          syncTimer = setTimeout(uploadBills, 50);
+          syncTimer = setTimeout(() => { uploadBills().catch?.(()=>{}); }, 50);
         } else if(isSyncableKey(key)){
           clearTimeout(syncKeyTimers[key]);
-          syncKeyTimers[key] = setTimeout(() => syncKeyToCloud(key), 80);
+          syncKeyTimers[key] = setTimeout(() => { syncKeyToCloud(key); }, 80);
         }
+      }
+      return result;
+    };
+
+    // Deletions must also propagate. Otherwise a removed key can be
+    // resurrected from Firestore on another device.
+    Storage.prototype.removeItem = function(key){
+      const result = originalRemove.apply(this, arguments);
+      if(this === localStorage && !applyingRemote && auth?.currentUser && remoteReady && isSyncableKey(key)){
+        const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
+        ref.delete().catch(e => console.error(key + " cloud delete failed", e));
       }
       return result;
     };
