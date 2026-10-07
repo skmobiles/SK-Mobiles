@@ -1,4 +1,1 @@
 SK-V4.18 ( Final Base )
-
-
-AUTO-SYNC FIX: Background realtime replication is independent of Manager feature permissions. Firestore data, bills and repairJobs are writable by active staff accounts so authorised devices can stay in sync. UI feature permissions remain unchanged.

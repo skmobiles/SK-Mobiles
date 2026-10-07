@@ -90,6 +90,51 @@
 <button id="btnEmptyRecycleBin" class="submit-btn" type="button" style="background:#ef4444;margin-top:12px;">⚠ Empty All Trash</button>
 </div>
 </div>
+
+<!-- SK ACCESSORIES PAGE — isolated feature -->
+<div class="modal-overlay" id="skAccessoriesPage" style="z-index:2147482900!important;">
+  <div class="modal-sheet" style="max-width:760px;max-height:92vh;">
+    <div class="modal-title">
+      <span>⚡ Mobile Shop Accessories</span>
+      <button class="modal-close-btn" type="button" onclick="skCloseAccessoriesPage()">✕</button>
+    </div>
+    <div style="padding:12px 14px;overflow:auto;max-height:calc(92vh - 58px);">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <button type="button" class="submit-btn" onclick="skNewAccessory()">＋ Add Accessory</button>
+        <button type="button" class="submit-btn" onclick="document.getElementById('skAccessoriesFileInput').click()">📁 Upload List</button>
+        <button type="button" class="submit-btn" onclick="skExportAccessories()">⬇ Export</button>
+      </div>
+      <input id="skAccessoriesFileInput" type="file" accept=".json,.csv,.txt,application/json,text/csv,text/plain" style="display:none" onchange="skImportAccessoriesFile(this)">
+      <div style="font-size:.72rem;color:var(--text-muted);margin-bottom:10px;">
+        Upload CSV/JSON accessory lists. Select, edit or delete individual items. Image can be attached to each accessory.
+      </div>
+      <div id="skAccessoryEditor" style="display:none;background:var(--model-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px;margin-bottom:12px;">
+        <div style="font-weight:800;margin-bottom:10px;" id="skAccessoryEditorTitle">Add Accessory</div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+          <input id="skAccName" class="form-input" placeholder="Accessory name">
+          <input id="skAccCategory" class="form-input" placeholder="Category">
+          <input id="skAccBrand" class="form-input" placeholder="Brand">
+          <input id="skAccPrice" class="form-input" type="number" min="0" step="0.01" placeholder="Price">
+          <input id="skAccStock" class="form-input" type="number" min="0" step="1" placeholder="Stock">
+          <input id="skAccImage" type="file" accept="image/*" class="form-input">
+        </div>
+        <textarea id="skAccNote" class="form-input" rows="2" placeholder="Notes"></textarea>
+        <input id="skAccEditId" type="hidden">
+        <div id="skAccImagePreview" style="margin:8px 0;"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button type="button" class="submit-btn" onclick="skSaveAccessory()">💾 Save</button>
+          <button type="button" class="submit-btn" onclick="skCancelAccessoryEdit()">Cancel</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input id="skAccessoriesSearch" class="form-input" placeholder="Search accessories..." oninput="skRenderAccessories()">
+        <button type="button" class="submit-btn" onclick="skDeleteSelectedAccessories()">🗑 Delete Selected</button>
+      </div>
+      <div id="skAccessoriesList"></div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast">Action Success!</div>
 <!-- LEFT DRAWER MENU -->
 <div class="left-drawer" id="leftDrawer" onclick="toggleLeftDrawer(false)">
@@ -143,7 +188,7 @@
 </button>
 
 <div class="drawer-footer-badge">
-<span>SK Mobiles Master • V5.1</span>
+<span>SK Mobiles Master • V5.2</span>
 <span>Dharmapuri, Tamil Nadu</span>
 </div>
 </div>
@@ -824,7 +869,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <img alt="SK MOBILES" class="sk-logo-img" id="appHeaderLogo" onclick="document.getElementById('logoFileInput').click()" src="Logo.png" title="Click to change logo"/>
 <div>
 <div class="app-name" id="appHeaderTitle">SK MOBILES</div>
-<div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V5.1</span></div>
+<div class="app-sub">Tempered Glass &amp; Inventory Master <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V5.2</span></div>
 </div>
 </div>
 <div id="skTopRoleBadge" class="sk-top-role-badge" style="display:none;" aria-live="polite"></div>
@@ -1039,7 +1084,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="sk-v42-profile-box" style="text-align:center;margin-bottom:9px;"><div style="font-size:2.1rem;margin-bottom:4px;">👑</div><div id="skAdminProfileName" style="font-size:1rem;font-weight:950;">SK MOBILES Admin</div><div style="font-size:.68rem;color:var(--text-muted);margin-top:3px;">Full Access Account</div></div>
 <div class="sk-v42-profile-grid">
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCOUNT</div><b id="skAdminProfileAccount">Admin</b></div>
-<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V5.1</b></div>
+<div class="sk-v42-profile-box"><div class="sk-v42-profile-label">APP VERSION</div><b>V5.2</b></div>
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">WORKERS</div><b id="skAdminProfileWorkerCount">0</b></div>
 <div class="sk-v42-profile-box"><div class="sk-v42-profile-label">ACCESS</div><b id="skAdminProfileAccess">Full Access</b></div>
 </div>
