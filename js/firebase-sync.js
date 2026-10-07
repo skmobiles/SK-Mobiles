@@ -63,10 +63,32 @@
   function isSyncableKey(key) {
     if (!key) return false;
     // உள்நுழைவு/தீம் போன்ற சாதன தனிப்பட்ட அமைப்புகளை மட்டும் தவிர்த்தல்
-    if (key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_bill_draft" || key === REPAIR_KEY) {
+    if (key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_bill_draft" || key === REPAIR_KEY || key === "sk_manager_permissions_v1") {
       return false;
     }
     return key.startsWith("sk_") || key.startsWith("skx_");
+  }
+
+  function managerDataWriteAllowed(key){
+    const role = String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
+    if(role !== "manager") return true;
+    try{
+      if(typeof window.skManagerPermissionAllowsDataKey === "function"){
+        return window.skManagerPermissionAllowsDataKey(key) === true;
+      }
+    }catch(e){}
+    return false;
+  }
+
+  function managerPermissionAllowed(name){
+    const role = String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
+    if(role !== "manager") return true;
+    try{
+      if(typeof window.skManagerPermissionAllowed === "function"){
+        return window.skManagerPermissionAllowed(name) === true;
+      }
+    }catch(e){}
+    return false;
   }
 
   function msg(t){
@@ -270,6 +292,7 @@
   }
 
   async function uploadBills(){
+    if(String(localStorage.getItem(ROLE_KEY)||"").toLowerCase()==="manager" && !managerPermissionAllowed("billing")) return;
     if(!auth?.currentUser || !db || applyingRemote || !remoteReady || syncingLocal) return;
     syncingLocal = true;
     try {
@@ -421,6 +444,7 @@
   }
 
   async function uploadRepairJobs(force){
+    if(String(localStorage.getItem(ROLE_KEY)||"").toLowerCase()==="manager" && !managerPermissionAllowed("repair")) return;
     if(!auth?.currentUser || !db || !repairSyncReady || repairApplyingRemote || applyingRemote) return;
     try{
       const local = repairJobsLocal().map(repairNormalize).filter(Boolean);
@@ -572,6 +596,7 @@
   }
 
   async function syncKeyToCloud(key, force=false) {
+    if (!managerDataWriteAllowed(key)) return;
     if (!auth?.currentUser || !db || applyingRemote || !remoteReady || !isSyncableKey(key)) return;
     try {
       const rawData = localStorage.getItem(key);
@@ -949,6 +974,22 @@
     });
   }
 
+  window.skRefreshManagerPermissionSync = async function(){
+    try{
+      if(String(localStorage.getItem(ROLE_KEY)||"").toLowerCase() !== "manager") return;
+      await uploadBills();
+      await uploadRepairJobs(false);
+      if(universalSyncStarted && remoteReady){
+        for(let i=0;i<localStorage.length;i++){
+          const key=localStorage.key(i);
+          if(isSyncableKey(key) && managerDataWriteAllowed(key)){
+            await syncKeyToCloud(key, true);
+          }
+        }
+      }
+    }catch(e){ console.warn("Manager permission resync failed:",e); }
+  };
+
   // Explicit application logout: terminate the Firebase session and clear
   // only device-local login state. Business/app data must remain untouched.
   window.skFirebaseLogout = async function(){
@@ -960,6 +1001,7 @@
     try {
       localStorage.removeItem(ROLE_KEY);
       localStorage.removeItem(WORKER_KEY);
+      try { if(typeof window.skClearManagerPermissionCache === "function") window.skClearManagerPermissionCache(); } catch(e){}
       const email = document.getElementById("loginEmailInput");
       const password = document.getElementById("loginPasswordInput");
       if(email) email.value = "";
@@ -980,6 +1022,7 @@
       if(window.__skFirebaseSyncReconcile){ clearInterval(window.__skFirebaseSyncReconcile); window.__skFirebaseSyncReconcile=null; }
       localStorage.removeItem(ROLE_KEY);
       localStorage.removeItem(WORKER_KEY);
+      try { if(typeof window.skClearManagerPermissionCache === "function") window.skClearManagerPermissionCache(); } catch(e){}
       try {
         const email = document.getElementById("loginEmailInput");
         const password = document.getElementById("loginPasswordInput");
@@ -991,15 +1034,18 @@
     }
     try {
       const role = await ensureUserProfile(user);
+      localStorage.setItem(ROLE_KEY, role);
+      if(typeof window.skReloadManagerPermissions === "function"){
+        try { await window.skReloadManagerPermissions(); } catch(e) { console.warn("Manager permission sync failed:", e); }
+      }
       if(role === "manager"){
-        let managerEnabled = true;
+        let managerEnabled = false;
         try{
           const p = JSON.parse(localStorage.getItem("sk_manager_permissions_v1")||"{}");
-          managerEnabled = p.managerAccess !== false;
+          managerEnabled = p.managerAccess === true;
         }catch(e){}
         if(!managerEnabled) throw new Error("Manager access is disabled by Admin.");
       }
-      localStorage.setItem(ROLE_KEY, role);
       if(role === "worker") localStorage.setItem(WORKER_KEY, user.uid);
       else localStorage.removeItem(WORKER_KEY);
       document.body.classList.toggle("sk-worker-mode", role === "worker");
