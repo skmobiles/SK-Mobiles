@@ -446,7 +446,10 @@
       } catch(e) {
         console.error("Bill snapshot error", e);
       }
-    }, err => console.error("Firebase connection error", err));
+    }, err => {
+      console.error("Firebase connection error", err);
+      realtimeSyncStatus("❌ Realtime Sync error • " + (err?.code || "Firebase connection"));
+    });
   }
 
   // ----------------------------------------------------
@@ -637,7 +640,10 @@
           }
           if(localWins) uploadRepairJobs(false).catch(()=>{});
         }catch(e){ console.error("Repair Jobs realtime snapshot error",e); }
-      }, err=>console.error("Repair Jobs realtime listener error",err));
+      }, err=>{
+        console.error("Repair Jobs realtime listener error",err);
+        realtimeSyncStatus("❌ Realtime Sync error • Repair Jobs listener");
+      });
     }catch(e){
       console.error("Repair Jobs realtime initialization failed",e);
       repairSyncReady=false;
@@ -695,6 +701,7 @@
   async function startUniversalDataSync() {
     if (unsubscribeAllData) unsubscribeAllData();
     universalSyncStarted = false;
+    realtimeSyncStatus("⏳ Realtime Sync connecting...");
     universalLastSyncedHash.clear();
     const dataColRef = db.collection("shops").doc(SHOP_ID).collection("data");
 
@@ -783,14 +790,18 @@
         if(changed) refreshAllUI();
       }, err => {
         console.error("Universal data sync error", err);
-        cloudBackupStatus("❌ Realtime sync error • Check Firebase connection/rules");
+        realtimeSyncStatus("❌ Realtime Sync failed • Check Firebase connection/rules");
       });
 
       universalSyncStarted = true;
+      realtimeSyncStatus("🟢 Realtime Auto Sync: ON • All app data connected");
       if(hasChanges) refreshAllUI();
     } catch(e){
       console.error("Universal data sync initialization failed", e);
       universalSyncStarted = false;
+      remoteReady = false;
+      realtimeSyncStatus("❌ Realtime Sync failed • " + (e?.code || e?.message || "Firebase error"));
+      throw e;
     }
   }
 
@@ -863,6 +874,11 @@
 
   function cloudBackupStatus(text){
     const el = document.getElementById("skCloudBackupStatus");
+    if(el) el.textContent = text || "";
+  }
+
+  function realtimeSyncStatus(text){
+    const el = document.getElementById("skRealtimeSyncStatus");
     if(el) el.textContent = text || "";
   }
 
@@ -1126,8 +1142,7 @@
       startSyncSafetyReconcile();
       hookCloudAutoBackup();
       bindBackupButtons();
-      scheduleCloudAutoBackup("login");
-      cloudBackupStatus("☁️ Auto Sync: ON • Realtime sync connected");
+      realtimeSyncStatus("🟢 Realtime Auto Sync: ON • " + role.toUpperCase() + " • All app data connected");
       toast("☁️ Auto Sync: ON • " + role.toUpperCase() + " login • All modules real-time synced");
     } catch(e) {
       console.error(e);
