@@ -1121,7 +1121,8 @@
       hookCloudAutoBackup();
       bindBackupButtons();
       scheduleCloudAutoBackup("login");
-      toast("☁️ " + role.toUpperCase() + " login • All modules real-time synced");
+      cloudBackupStatus("☁️ Auto Sync: ON • Realtime sync connected");
+      toast("☁️ Auto Sync: ON • " + role.toUpperCase() + " login • All modules real-time synced");
     } catch(e) {
       console.error(e);
       msg("❌ " + e.message);
