@@ -87,22 +87,23 @@ service cloud.firestore {
 
     match /shops/{shopId}/data/{key} {
       allow read: if isActiveStaff() && shopId == 'SK-MOBILES';
-      allow create, update: if shopId == 'SK-MOBILES' && (
-        isAdmin() || isWorker() || managerDataKeyAllowed(key)
-      );
-      allow delete: if shopId == 'SK-MOBILES' && (isAdmin() || (isManager() && managerDataKeyAllowed(key)));
+      // UI/feature permissions are enforced in the app. Realtime replication
+      // must be allowed for every active staff device so data cannot remain
+      // stranded on one device.
+      allow create, update: if shopId == 'SK-MOBILES' && isActiveStaff();
+      allow delete: if shopId == 'SK-MOBILES' && isActiveStaff();
     }
 
     match /shops/{shopId}/bills/{billId} {
       allow read: if isActiveStaff() && shopId == 'SK-MOBILES';
-      allow create, update: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('billing'));
-      allow delete: if shopId == 'SK-MOBILES' && (isAdmin() || managerHasPermission('billing'));
+      allow create, update: if shopId == 'SK-MOBILES' && isActiveStaff();
+      allow delete: if shopId == 'SK-MOBILES' && isActiveStaff();
     }
 
     match /shops/{shopId}/repairJobs/{jobId} {
       allow read: if isActiveStaff() && shopId == 'SK-MOBILES';
-      allow create, update: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('repair'));
-      allow delete: if shopId == 'SK-MOBILES' && (isAdmin() || managerHasPermission('repair'));
+      allow create, update: if shopId == 'SK-MOBILES' && isActiveStaff();
+      allow delete: if shopId == 'SK-MOBILES' && isActiveStaff();
     }
 
     match /shops/{shopId}/cloudBackups/{backupId} {

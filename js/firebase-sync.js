@@ -318,18 +318,16 @@
   }
 
   function managerCanSyncKey(key){
-    const role=String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
-    if(role!=="manager") return true;
-    const k=String(key||"");
-    if(k==="sk_bills") return managerPermission("billing");
-    if(k==="sk_orders") return managerPermission("orders");
-    if(k==="sk_inventory" || k==="sk_low_threshold") return managerPermission("inventory");
-    if(k==="sk_credit_ledger_v1") return managerPermission("credit");
-    if(k==="sk_repair_tools_note" || k==="sk_tools_others_order_note") return managerPermission("toolsNotes");
-    if(k==="sk_workers_v1" || k==="sk_worker_pin_v1") return managerPermission("userManagement");
-    if(k==="sk_shop_name" || k==="sk_shop_addr" || k==="sk_shop_phone" || k==="sk_terms" || k==="sk_custom_logo") return managerPermission("shopSettings");
-    if(k==="sk_theme" || k==="sk_theme_depth" || k==="sk_font_family" || k==="sk_icon_pack" || k==="sk_appearance_settings" || k==="sk_theme_panel_collapsed") return managerPermission("settings");
-    if(k==="sk_recycle_bin_v1") return managerPermission("recycleBin");
+    /*
+     * IMPORTANT:
+     * Manager feature permissions control which UI modules/actions are
+     * available to the manager. They must NOT block the background
+     * replication layer, otherwise data created on one authorised device
+     * can remain local-only and never reach the other devices.
+     *
+     * Firestore rules are the server-side security boundary. All active
+     * SK MOBILES staff accounts are allowed to replicate shop data.
+     */
     return true;
   }
 
@@ -342,7 +340,8 @@
 
   async function uploadBills(){
     if(!auth?.currentUser || !db || applyingRemote || !remoteReady || syncingLocal) return;
-    if(!managerCanSyncKey(BILL_KEY)) return;
+    // Billing feature permissions control UI actions; they must not block
+    // realtime replication of already-authorised shop data.
     syncingLocal = true;
     try {
       const local = localBills().map(normalizeBill).filter(Boolean);
@@ -782,7 +781,10 @@
         // Initial catch-up is already completed before the realtime listener is attached.
         // Avoid rescanning and resyncing every localStorage key on every snapshot.
         if(changed) refreshAllUI();
-      }, err => console.error("Universal data sync error", err));
+      }, err => {
+        console.error("Universal data sync error", err);
+        cloudBackupStatus("❌ Realtime sync error • Check Firebase connection/rules");
+      });
 
       universalSyncStarted = true;
       if(hasChanges) refreshAllUI();
@@ -842,7 +844,11 @@
           repairSyncTimer = setTimeout(() => { uploadRepairJobs(false); }, 80);
         } else if(isSyncableKey(key)){
           const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
-          ref.delete().catch(e => console.error(key + " cloud delete failed", e));
+          ref.delete().then(() => {
+            universalLastSyncedHash.delete(String(key));
+            delete syncMeta[String(key)];
+            persistSyncMetaSoon();
+          }).catch(e => console.error(key + " cloud delete failed", e));
         }
       }
       return result;
