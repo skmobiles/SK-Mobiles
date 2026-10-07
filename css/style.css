@@ -8150,3 +8150,40 @@ html[data-ui-scale="comfortable"] .app-viewport{font-size:108% !important;}
 
 /* SK URGENT PENDING FOCUS */
 .sk-rj-card.sk-rj-urgent-focus{border-color:#ef4444 !important;box-shadow:0 0 0 2px rgba(239,68,68,.14),0 12px 28px rgba(239,68,68,.12) !important;}
+
+
+/* SK MOBILES targeted scroll-performance optimization.
+   Existing glass styling is preserved at rest; expensive backdrop filtering is
+   temporarily disabled only during active scrolling to keep the compositor smooth. */
+html.sk-perf-scrolling * {
+  scroll-behavior: auto !important;
+}
+html.sk-perf-scrolling .app-header,
+html.sk-perf-scrolling .left-drawer-content,
+html.sk-perf-scrolling .modal-overlay,
+html.sk-perf-scrolling .modal-title,
+html.sk-perf-scrolling .card,
+html.sk-perf-scrolling .section-card,
+html.sk-perf-scrolling .stat-card,
+html.sk-perf-scrolling .form-card,
+html.sk-perf-scrolling .summary-card,
+html.sk-perf-scrolling .history-card,
+html.sk-perf-scrolling .draggable-card,
+html.sk-perf-scrolling .sk-home-action-row,
+html.sk-perf-scrolling .sk-home-metric-card,
+html.sk-perf-scrolling .bottom-nav,
+html.sk-perf-scrolling .sk-ui-section,
+html.sk-perf-scrolling .sk-ui-preview,
+html.sk-perf-scrolling .sk-ui-preview-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: none !important;
+}
+html.sk-perf-scrolling .card,
+html.sk-perf-scrolling .section-card,
+html.sk-perf-scrolling .stat-card,
+html.sk-perf-scrolling .form-card,
+html.sk-perf-scrolling .summary-card,
+html.sk-perf-scrolling .history-card {
+  box-shadow: 0 4px 14px rgba(15,23,42,.06) !important;
+}

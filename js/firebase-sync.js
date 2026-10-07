@@ -54,23 +54,31 @@
     catch(e){ return {}; }
   }
   let syncMeta = readSyncMeta();
+  let syncMetaWriteTimer = null;
+  function persistSyncMetaSoon(){
+    clearTimeout(syncMetaWriteTimer);
+    syncMetaWriteTimer = setTimeout(function(){
+      syncMetaWriteTimer = null;
+      try { localStorage.setItem(SYNC_META_KEY, JSON.stringify(syncMeta)); } catch(e){}
+    }, 250);
+  }
   function localChangeTime(key){ return Number(syncMeta[key]?.updatedAtMs || 0); }
   function markLocalChange(key, updatedAtMs){
     if(!isSyncableKey(key)) return;
     syncMeta[key] = {updatedAtMs:Number(updatedAtMs)||Date.now()};
-    try { localStorage.setItem(SYNC_META_KEY, JSON.stringify(syncMeta)); } catch(e){}
+    persistSyncMetaSoon();
   }
   function markRemoteBaseline(key, updatedAtMs){
     if(!isSyncableKey(key)) return;
     syncMeta[key] = {updatedAtMs:Number(updatedAtMs)||Date.now()};
-    try { localStorage.setItem(SYNC_META_KEY, JSON.stringify(syncMeta)); } catch(e){}
+    persistSyncMetaSoon();
   }
 
   // தானாகவே அனைத்து sk_ மற்றும் skx_ விசைகளையும் கண்டறியும் அமைப்பு
   function isSyncableKey(key) {
     if (!key) return false;
     // உள்நுழைவு/தீம் போன்ற சாதன தனிப்பட்ட அமைப்புகளை மட்டும் தவிர்த்தல்
-    if (key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_bill_draft" || key === REPAIR_KEY) {
+    if (key === SYNC_META_KEY || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_bill_draft" || key === REPAIR_KEY) {
       return false;
     }
     return key.startsWith("sk_") || key.startsWith("skx_");
@@ -103,6 +111,13 @@
 
   // தரவு மாறியவுடன் அனைத்து UI பகுதிகளையும் உடனுக்குடன் புதுப்பித்தல்
   function refreshAllUI(){
+    /* During the three-part login bootstrap, wait until bills/repairs/data have
+       all reached their baseline. Rendering each intermediate state causes a
+       large amount of synchronous DOM work on startup. */
+    if(window.__skInitialSyncBatch){
+      window.__skInitialSyncRefreshPending=true;
+      return;
+    }
     /* Coalesce bursts of Firebase/localStorage updates into one paint.
        This prevents visible page flicker when several synced keys arrive together. */
     if(refreshUiFrame) return;
@@ -127,8 +142,7 @@
         if(typeof loadAllData === "function") loadAllData();
       } catch(e){}
     };
-    if(typeof requestAnimationFrame === "function") refreshUiFrame=requestAnimationFrame(run);
-    else refreshUiFrame=setTimeout(run,0);
+    refreshUiFrame=setTimeout(run,120);
   }
 
   function normalizeBill(b){
@@ -753,11 +767,8 @@
           markRemoteBaseline(key, remoteTime || Date.now());
         });
 
-        // Catch any local change that happened while the listener was attaching.
-        for(let i=0;i<localStorage.length;i++){
-          const key=localStorage.key(i);
-          if(isSyncableKey(key)) syncKeyToCloud(key);
-        }
+        // Initial catch-up is already completed before the realtime listener is attached.
+        // Avoid rescanning and resyncing every localStorage key on every snapshot.
         if(changed) refreshAllUI();
       }, err => console.error("Universal data sync error", err));
 
@@ -779,7 +790,7 @@
       }
       if(repairSyncReady) uploadRepairJobs(false);
       if(auth?.currentUser) uploadBills().catch(()=>{});
-    }, 5000);
+    }, 15000);
   }
 
   // லோக்கல் ஸ்டோரேஜில் நடக்கும் அனைத்து மாற்றங்களையும் பிடிக்கும் கொக்கி
@@ -1080,9 +1091,20 @@
       msg("");
       try { if(typeof applyRestrictions === "function") applyRestrictions(); } catch(e){}
       try { if(typeof refreshAdminButton === "function") refreshAdminButton(); } catch(e){}
-      await startBillSync();
-      await startRepairJobSync();
-      await startUniversalDataSync();
+      /* Bootstrap all realtime sources first, then render the UI once. */
+      window.__skInitialSyncBatch=true;
+      window.__skInitialSyncRefreshPending=false;
+      try{
+        await startBillSync();
+        await startRepairJobSync();
+        await startUniversalDataSync();
+      }finally{
+        window.__skInitialSyncBatch=false;
+      }
+      if(window.__skInitialSyncRefreshPending){
+        window.__skInitialSyncRefreshPending=false;
+        refreshAllUI();
+      }
       startSyncSafetyReconcile();
       hookCloudAutoBackup();
       bindBackupButtons();

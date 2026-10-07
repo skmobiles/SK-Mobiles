@@ -6,8 +6,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
 <title>SK Mobiles - Glass &amp; Inventory Master</title>
@@ -1199,6 +1199,57 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-<script src="js/app.js?v=6.0.0" defer></script></script>
+<script>
+/* SK MOBILES performance layer: throttle non-critical DOM maintenance and
+   keep expensive glass filtering disabled only during active scrolling. */
+(function(){
+  try{
+    var NativeMO=window.MutationObserver;
+    if(NativeMO && !window.__skPerfMutationObserverWrapped){
+      window.MutationObserver=function(callback){
+        var pending=[];
+        var timer=0;
+        var observer;
+        function flush(){
+          timer=0;
+          if(!pending.length)return;
+          var batch=pending; pending=[];
+          try{ callback(batch, observer); }catch(e){ setTimeout(function(){throw e;},0); }
+        }
+        observer=new NativeMO(function(records){
+          for(var i=0;i<records.length;i++) pending.push(records[i]);
+          /* Non-critical maintenance observers do not need frame-rate callbacks.
+             One callback per 180ms is enough and prevents DOM-mutation storms. */
+          if(!timer) timer=setTimeout(flush,300);
+        });
+        var nativeDisconnect=observer.disconnect.bind(observer);
+        observer.disconnect=function(){
+          if(timer){clearTimeout(timer);timer=0;}
+          pending=[];
+          nativeDisconnect();
+        };
+        window.__skPerfMutationObserverWrapped=true;
+        return observer;
+      };
+      window.MutationObserver.prototype=NativeMO.prototype;
+    }
+  }catch(e){}
+
+  var scrolling=false, scrollTimer=0;
+  function onScroll(){
+    if(!scrolling){
+      scrolling=true;
+      document.documentElement.classList.add('sk-perf-scrolling');
+    }
+    clearTimeout(scrollTimer);
+    scrollTimer=setTimeout(function(){
+      scrolling=false;
+      document.documentElement.classList.remove('sk-perf-scrolling');
+    },140);
+  }
+  window.addEventListener('scroll',onScroll,{passive:true,capture:true});
+})();
+</script>
+<script src="js/app.js?v=6.0.0" defer></script>
 <script src="js/firebase-sync.js?v=6.0.0"></script>
 </html>
