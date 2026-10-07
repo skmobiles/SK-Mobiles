@@ -4361,9 +4361,21 @@ img{max-width:100%!important;}
 
   window.skRjDelete=function(id){
     if(!confirm('Delete this repair job?\n\nThe job will be moved to Recycle Bin for 30 days.'))return;
-    const current=load(), item=current.find(x=>String(x.id)===String(id));
+    const sid=String(id);
+    const current=load(), item=current.find(x=>String(x.id)===sid);
+    if(!item) return;
     if(item && typeof window.moveToTrash==='function') window.moveToTrash(item,'repair',item.customer||item.id);
-    save(current.filter(x=>x.id!==id)); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
+    /* Persist a deletion marker before removing the local job. This prevents
+       an older Firebase snapshot/another device from resurrecting the job. */
+    try{
+      const markerKey='skx_repair_deleted_ids_v1';
+      const markers=JSON.parse(localStorage.getItem(markerKey)||'{}');
+      markers[sid]=Date.now();
+      localStorage.setItem(markerKey,JSON.stringify(markers));
+    }catch(e){}
+    save(current.filter(x=>String(x.id)!==sid));
+    skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
+    showToast?.('🗑️ Repair job moved to Recycle Bin');
   };
 
   window.skRjCallPhone=function(phone){
@@ -4409,7 +4421,7 @@ img{max-width:100%!important;}
     const hc=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const hEl=document.getElementById('skRjHistoryCount'); if(hEl) hEl.textContent=hc;
     list.innerHTML=a.length? a.map(j=>`
-      <div class="sk-rj-card" data-rj-id="${esc(j.id)}" onclick="skRjShowDetail('${j.id}')">
+      <div class="sk-rj-card" data-rj-id="${esc(j.id)}" data-work-type="${esc(String(j.workType||'Normal').toLowerCase())}" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
@@ -4437,7 +4449,7 @@ img{max-width:100%!important;}
     document.getElementById('skRjHistoryCount').textContent=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const pEl=document.getElementById('skRjPendingCount'); if(pEl) pEl.textContent=load().filter(isPending).length;
     list.innerHTML=a.length?a.map(j=>`
-      <div class="sk-rj-card" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
+      <div class="sk-rj-card" data-work-type="${esc(String(j.workType||'Normal').toLowerCase())}" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>

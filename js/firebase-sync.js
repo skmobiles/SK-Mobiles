@@ -43,6 +43,7 @@
   let refreshUiFrame = 0;
   const REPAIR_KEY = "skx_repair_jobs_v2";
   const REPAIR_COLLECTION = "repairJobs";
+  const REPAIR_DELETED_KEY = "skx_repair_deleted_ids_v1";
   let repairSyncReady = false;
   let repairApplyingRemote = false;
   let repairKnownRemote = new Map();
@@ -465,6 +466,17 @@
     }catch(e){ return []; }
   }
 
+  function repairDeletedMarkers(){
+    try{
+      const x = JSON.parse(localStorage.getItem(REPAIR_DELETED_KEY) || "{}");
+      return x && typeof x === "object" ? x : {};
+    }catch(e){ return {}; }
+  }
+
+  function setRepairDeletedMarkers(x){
+    try{ localStorage.setItem(REPAIR_DELETED_KEY, JSON.stringify(x || {})); }catch(e){}
+  }
+
   function setRepairJobsLocal(a){
     repairApplyingRemote = true;
     try { localStorage.setItem(REPAIR_KEY, JSON.stringify(Array.isArray(a) ? a : [])); }
@@ -518,8 +530,23 @@
         writes++;
       }
 
-      // Publish tombstones for jobs removed locally so another device cannot
-      // resurrect them from its older local array.
+      // Publish explicit deletion markers first. These survive local/remote
+      // snapshot ordering and prevent an older device from resurrecting a job.
+      const deletedMarkers=repairDeletedMarkers();
+      for(const [id,deletedAtRaw] of Object.entries(deletedMarkers)){
+        const deletedAt=Number(deletedAtRaw)||now;
+        batch.set(repairRef(id), {
+          id,
+          _deleted:true,
+          isDeleted:true,
+          _syncUpdatedAt:deletedAt,
+          _syncUpdatedBy:auth.currentUser.uid
+        }, {merge:true});
+        repairKnownRemote.set(String(id), {hash:"", updatedAt:deletedAt, deleted:true});
+        writes++;
+      }
+
+      // Also catch jobs removed locally when no explicit marker exists.
       for(const [id, meta] of repairKnownRemote.entries()){
         if(localIds.has(id) || meta?.deleted) continue;
         batch.set(repairRef(id), {
@@ -562,10 +589,12 @@
       });
 
       const local = repairJobsLocal();
+      const deletedMarkers=repairDeletedMarkers();
       const merged = new Map(remoteMap);
       local.forEach(job=>{
         const id = String(job?.id || "");
         if(!id) return;
+        if(Number(deletedMarkers[id]||0) >= repairTime(job)) { merged.delete(id); return; }
         const remote = remoteMap.get(id);
         const remoteMeta = repairKnownRemote.get(id);
         const localTime = repairTime(job);
@@ -602,10 +631,12 @@
           });
 
           const local=repairJobsLocal();
+          const deletedMarkers=repairDeletedMarkers();
           const merged=new Map(remoteMapNow);
           let localWins=false;
           local.forEach(job=>{
             const id=String(job?.id||""); if(!id) return;
+            if(Number(deletedMarkers[id]||0) >= repairTime(job)){ merged.delete(id); return; }
             const localTime=repairTime(job);
             const rm=remoteMetaNow.get(id);
             const remoteTime=Number(rm?.updatedAt||0);
