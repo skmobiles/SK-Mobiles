@@ -4171,24 +4171,7 @@ img{max-width:100%!important;}
     const i=x.indexOf(s);
     return i<0?'Ready':x[Math.min(i+1,x.length-1)];
   }
-  function rjSortNewest(a,b){
-    const ts=x=>{
-      const raw=String(x?.updatedAt||x?.createdAt||x?.date||'');
-      const iso=rjToISODate(raw);
-      const d=iso?Date.parse(iso):Date.parse(raw);
-      return Number.isNaN(d)?0:d;
-    };
-    const diff=ts(b)-ts(a);
-    return diff || String(b?.id||'').localeCompare(String(a?.id||''));
-  }
-  function getPending(){
-    return load().filter(isPending).sort((a,b)=>{
-      const au=String(a?.workType||'Normal').trim().toLowerCase().includes('urgent');
-      const bu=String(b?.workType||'Normal').trim().toLowerCase().includes('urgent');
-      if(au!==bu) return au?-1:1;
-      return rjSortNewest(a,b);
-    });
-  }
+  function getPending(){ return load().filter(isPending); }
 
   function clearForm(){
     document.getElementById('skRjForm')?.reset();
@@ -4294,7 +4277,7 @@ img{max-width:100%!important;}
       estimate:Number(document.getElementById('skRjEstimate').value)||0,
       status:document.getElementById('skRjStatus').value,
       note:document.getElementById('skRjNote').value.trim(),
-      deliveryStatus: status==='Delivered' ? 'Delivered' : (status==='Ready' ? 'Ready for Delivery' : (existing?.deliveryStatus||'Pending')),
+      deliveryStatus: (document.getElementById('skRjStatus').value==='Delivered') ? 'Delivered' : (document.getElementById('skRjStatus').value==='Ready' ? 'Ready for Delivery' : (existing?.deliveryStatus||'Pending')),
       reworkReason: existing?.reworkReason||'',
       reworkCount: Number(existing?.reworkCount)||0,
       createdAt:existing?.createdAt||new Date().toISOString(),
@@ -4378,21 +4361,9 @@ img{max-width:100%!important;}
 
   window.skRjDelete=function(id){
     if(!confirm('Delete this repair job?\n\nThe job will be moved to Recycle Bin for 30 days.'))return;
-    const sid=String(id);
-    const current=load(), item=current.find(x=>String(x.id)===sid);
-    if(!item) return;
+    const current=load(), item=current.find(x=>String(x.id)===String(id));
     if(item && typeof window.moveToTrash==='function') window.moveToTrash(item,'repair',item.customer||item.id);
-    /* Persist a deletion marker before removing the local job. This prevents
-       an older Firebase snapshot/another device from resurrecting the job. */
-    try{
-      const markerKey='skx_repair_deleted_ids_v1';
-      const markers=JSON.parse(localStorage.getItem(markerKey)||'{}');
-      markers[sid]=Date.now();
-      localStorage.setItem(markerKey,JSON.stringify(markers));
-    }catch(e){}
-    save(current.filter(x=>String(x.id)!==sid));
-    skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
-    showToast?.('🗑️ Repair job moved to Recycle Bin');
+    save(current.filter(x=>x.id!==id)); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
   };
 
   window.skRjCallPhone=function(phone){
@@ -4429,13 +4400,6 @@ img{max-width:100%!important;}
     if(typeof window.skAppHistoryRepairOpen==='function')window.skAppHistoryRepairOpen('skRepairDetailModal',{detailId:id});
   };
 
-  window.skRjWorkTypeBorderColor=function(workType){
-    const t=String(workType||'Normal').trim().toLowerCase();
-    if(t.includes('urgent')) return '#dc2626';
-    if(t.includes('scheduled')) return '#2563eb';
-    return '#16a34a';
-  };
-
   window.skRjRenderJobs=function(){
     const list=document.getElementById('skRjJobsList'); if(!list)return;
     let a=getPending();
@@ -4445,7 +4409,7 @@ img{max-width:100%!important;}
     const hc=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const hEl=document.getElementById('skRjHistoryCount'); if(hEl) hEl.textContent=hc;
     list.innerHTML=a.length? a.map(j=>`
-      <div class="sk-rj-card" data-rj-id="${esc(j.id)}" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')">
+      <div class="sk-rj-card" data-rj-id="${esc(j.id)}" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
@@ -4468,14 +4432,12 @@ img{max-width:100%!important;}
     let a=load().filter(j=>j.status==='Ready'||j.status==='Delivered');
     a=a.filter(j=>{
       const d=j.date||'';
-      return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.imei,j.problem,j.status,j.workType].join(' ').toLowerCase().includes(q));
+      return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.imei,j.problem,j.status].join(' ').toLowerCase().includes(q));
     });
-    const ready=a.filter(j=>j.status==='Ready').sort(rjSortNewest);
-    const delivered=a.filter(j=>j.status==='Delivered').sort(rjSortNewest);
     document.getElementById('skRjHistoryCount').textContent=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const pEl=document.getElementById('skRjPendingCount'); if(pEl) pEl.textContent=load().filter(isPending).length;
-    const card=j=>`
-      <div class="sk-rj-card" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
+    list.innerHTML=a.length?a.map(j=>`
+      <div class="sk-rj-card" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
@@ -4485,10 +4447,7 @@ img{max-width:100%!important;}
         ${j.status==='Ready'?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-deliver" onclick="event.stopPropagation();skRjDeliver('${j.id}')">🚚 Mark Delivered</button></div>`:''}
         ${j.status==='Delivered'?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-rework" onclick="event.stopPropagation();skRjRework('${j.id}')">↩️ Customer Rework</button></div>`:''}
         <div style="margin-top:7px;font-size:.65rem;color:var(--primary);font-weight:800">Tap to open full repair details →</div>
-      </div>`;
-    list.innerHTML=(ready.length?`<div class="sk-rj-history-section-title ready">✅ Ready for Delivery <span>${ready.length}</span></div>${ready.map(card).join('')}`:'')
-      +(delivered.length?`<div class="sk-rj-history-section-title delivered">🚚 Delivered <span>${delivered.length}</span></div>${delivered.map(card).join('')}`:'')
-      ||'<div class="sk-rj-empty">No repair history found for selected filters.</div>';
+      </div>`).join(''):'<div class="sk-rj-empty">No repair history found for selected filters.</div>';
   };
 
   window.skRjExportHistory=function(){

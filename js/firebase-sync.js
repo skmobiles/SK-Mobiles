@@ -43,7 +43,6 @@
   let refreshUiFrame = 0;
   const REPAIR_KEY = "skx_repair_jobs_v2";
   const REPAIR_COLLECTION = "repairJobs";
-  const REPAIR_DELETED_KEY = "skx_repair_deleted_ids_v1";
   let repairSyncReady = false;
   let repairApplyingRemote = false;
   let repairKnownRemote = new Map();
@@ -466,17 +465,6 @@
     }catch(e){ return []; }
   }
 
-  function repairDeletedMarkers(){
-    try{
-      const x = JSON.parse(localStorage.getItem(REPAIR_DELETED_KEY) || "{}");
-      return x && typeof x === "object" ? x : {};
-    }catch(e){ return {}; }
-  }
-
-  function setRepairDeletedMarkers(x){
-    try{ localStorage.setItem(REPAIR_DELETED_KEY, JSON.stringify(x || {})); }catch(e){}
-  }
-
   function setRepairJobsLocal(a){
     repairApplyingRemote = true;
     try { localStorage.setItem(REPAIR_KEY, JSON.stringify(Array.isArray(a) ? a : [])); }
@@ -506,13 +494,19 @@
 
   async function uploadRepairJobs(force){
     if(!auth?.currentUser || !db || !repairSyncReady || repairApplyingRemote || applyingRemote) return;
-    if(String(localStorage.getItem(ROLE_KEY)||"").toLowerCase()==="manager" && !managerPermission("repair")) return;
+    // Repair Jobs cloud synchronization is independent of the Manager UI permission.
+    // The permission controls access to the Repair feature; it must not leave this
+    // device's existing repair data stranded locally. Firestore rules remain the
+    // server-side security boundary for who may write repairJobs.
     try{
       const local = repairJobsLocal().map(repairNormalize).filter(Boolean);
       const localIds = new Set(local.map(j => String(j.id)));
       const batch = db.batch();
       let writes = 0;
       const now = Date.now();
+
+      const pendingMeta = new Map();
+      const pendingTombstones = new Map();
 
       for(const job of local){
         const id = String(job.id);
@@ -526,27 +520,14 @@
           _deleted: false,
           isDeleted: false
         }), {merge:true});
-        repairKnownRemote.set(id, {hash:rawHash, updatedAt:localTime, deleted:false});
+        pendingMeta.set(id, {hash:rawHash, updatedAt:localTime, deleted:false});
         writes++;
       }
 
-      // Publish explicit deletion markers first. These survive local/remote
-      // snapshot ordering and prevent an older device from resurrecting a job.
-      const deletedMarkers=repairDeletedMarkers();
-      for(const [id,deletedAtRaw] of Object.entries(deletedMarkers)){
-        const deletedAt=Number(deletedAtRaw)||now;
-        batch.set(repairRef(id), {
-          id,
-          _deleted:true,
-          isDeleted:true,
-          _syncUpdatedAt:deletedAt,
-          _syncUpdatedBy:auth.currentUser.uid
-        }, {merge:true});
-        repairKnownRemote.set(String(id), {hash:"", updatedAt:deletedAt, deleted:true});
-        writes++;
-      }
-
-      // Also catch jobs removed locally when no explicit marker exists.
+      // Publish tombstones for jobs removed locally so another device cannot
+      // resurrect them from its older local array.  Do not update
+      // repairKnownRemote until the Firestore batch actually commits; otherwise
+      // a transient write failure can permanently suppress the retry.
       for(const [id, meta] of repairKnownRemote.entries()){
         if(localIds.has(id) || meta?.deleted) continue;
         batch.set(repairRef(id), {
@@ -556,10 +537,14 @@
           _syncUpdatedAt:now,
           _syncUpdatedBy:auth.currentUser.uid
         }, {merge:true});
-        repairKnownRemote.set(id, {hash:"", updatedAt:now, deleted:true});
+        pendingTombstones.set(id, {hash:"", updatedAt:now, deleted:true});
         writes++;
       }
-      if(writes) await batch.commit();
+      if(writes){
+        await batch.commit();
+        pendingMeta.forEach((meta,id)=>repairKnownRemote.set(id,meta));
+        pendingTombstones.forEach((meta,id)=>repairKnownRemote.set(id,meta));
+      }
     }catch(e){
       console.error("Repair Jobs cloud sync failed", e);
     }
@@ -589,12 +574,10 @@
       });
 
       const local = repairJobsLocal();
-      const deletedMarkers=repairDeletedMarkers();
       const merged = new Map(remoteMap);
       local.forEach(job=>{
         const id = String(job?.id || "");
         if(!id) return;
-        if(Number(deletedMarkers[id]||0) >= repairTime(job)) { merged.delete(id); return; }
         const remote = remoteMap.get(id);
         const remoteMeta = repairKnownRemote.get(id);
         const localTime = repairTime(job);
@@ -631,12 +614,10 @@
           });
 
           const local=repairJobsLocal();
-          const deletedMarkers=repairDeletedMarkers();
           const merged=new Map(remoteMapNow);
           let localWins=false;
           local.forEach(job=>{
             const id=String(job?.id||""); if(!id) return;
-            if(Number(deletedMarkers[id]||0) >= repairTime(job)){ merged.delete(id); return; }
             const localTime=repairTime(job);
             const rm=remoteMetaNow.get(id);
             const remoteTime=Number(rm?.updatedAt||0);

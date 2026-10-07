@@ -205,11 +205,6 @@ img,svg,video,canvas,iframe{max-width:100%;}
   .sk-rj-filters{display:grid;grid-template-columns:1fr 1fr;gap:7px;background:var(--model-bg);border:1px solid var(--card-border);padding:9px;border-radius:14px;margin-bottom:9px}
   .sk-rj-filter-label{font-size:.62rem;color:var(--text-muted);font-weight:800;margin-bottom:3px;display:block}
   .sk-rj-card{background:color-mix(in srgb, var(--card-bg) 88%, transparent);border:1px solid color-mix(in srgb,var(--card-border) 78%,#fff 22%);border-radius:20px;padding:11px;margin-bottom:8px;box-shadow:0 10px 26px rgba(2,6,23,.07),inset 0 1px 0 rgba(255,255,255,.34);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-  /* Repair job work-type borders: UI-only; job logic/data unchanged. */
-  .sk-rj-card[data-work-type="urgent"]{border:1.5px solid #dc2626 !important;}
-  .sk-rj-card[data-work-type="normal"]{border:1.5px solid #16a34a !important;}
-  .sk-rj-card[data-work-type="scheduled"]{border:1.5px solid #2563eb !important;}
-
   .sk-rj-card:active{transform:scale(.98);box-shadow:0 7px 18px rgba(2,6,23,.08)}
   .sk-rj-card-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
   .sk-rj-name{font-size:.82rem;font-weight:900;color:var(--text)}
@@ -8191,80 +8186,4 @@ html.sk-perf-scrolling .form-card,
 html.sk-perf-scrolling .summary-card,
 html.sk-perf-scrolling .history-card {
   box-shadow: 0 4px 14px rgba(15,23,42,.06) !important;
-}
-
-
-/* SK JOB TYPE BORDER — FINAL SPECIFICITY FIX
-   Appearance Studio card-surface rules must not override job-type borders.
-   UI-only: no data/functionality changes. */
-html[data-ui-card-surface="ios"] .sk-rj-card[data-work-type="urgent"],
-html[data-ui-card-surface="blur"] .sk-rj-card[data-work-type="urgent"],
-html[data-ui-card-surface="border"] .sk-rj-card[data-work-type="urgent"],
-html[data-ui-card-surface="shadow"] .sk-rj-card[data-work-type="urgent"],
-.sk-rj-card[data-work-type="urgent"] { border-color:#dc2626 !important; }
-html[data-ui-card-surface="ios"] .sk-rj-card[data-work-type="normal"],
-html[data-ui-card-surface="blur"] .sk-rj-card[data-work-type="normal"],
-html[data-ui-card-surface="border"] .sk-rj-card[data-work-type="normal"],
-html[data-ui-card-surface="shadow"] .sk-rj-card[data-work-type="normal"],
-.sk-rj-card[data-work-type="normal"] { border-color:#16a34a !important; }
-html[data-ui-card-surface="ios"] .sk-rj-card[data-work-type="scheduled"],
-html[data-ui-card-surface="blur"] .sk-rj-card[data-work-type="scheduled"],
-html[data-ui-card-surface="border"] .sk-rj-card[data-work-type="scheduled"],
-html[data-ui-card-surface="shadow"] .sk-rj-card[data-work-type="scheduled"],
-.sk-rj-card[data-work-type="scheduled"] { border-color:#2563eb !important; }
-
-/* Repair History compact filters and status grouping. */
-#skRepairJobsModal #skRjHistoryView .sk-rj-filters{
-  background:transparent !important;
-  border:0 !important;
-  padding:0 !important;
-  border-radius:0 !important;
-  box-shadow:none !important;
-  gap:6px !important;
-  margin-bottom:7px !important;
-}
-#skRepairJobsModal #skRjHistoryView .sk-rj-filter-label{
-  font-size:.58rem !important;
-  margin-bottom:2px !important;
-}
-#skRepairJobsModal #skRjHistoryView .form-input{
-  min-height:36px !important;
-  height:36px !important;
-  padding:6px 10px !important;
-  border-radius:10px !important;
-  font-size:.78rem !important;
-}
-#skRepairJobsModal #skRjHistoryView .sk-rj-export{
-  min-height:36px !important;
-  height:36px !important;
-  margin-top:5px !important;
-  border-radius:10px !important;
-  font-size:.72rem !important;
-}
-#skRepairJobsModal .sk-rj-history-section-title{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  min-height:30px;
-  padding:5px 9px;
-  margin:5px 1px 3px;
-  border-radius:9px;
-  font-size:.72rem;
-  font-weight:900;
-  border:1px solid var(--card-border);
-  background:var(--pill-bg);
-}
-#skRepairJobsModal .sk-rj-history-section-title.ready{color:#15803d;border-color:rgba(22,163,74,.35)}
-#skRepairJobsModal .sk-rj-history-section-title.delivered{color:#2563eb;border-color:rgba(37,99,235,.28)}
-#skRepairJobsModal .sk-rj-history-section-title span{font-size:.62rem;opacity:.8}
-@media(max-width:759px){
-  #skRepairJobsModal #skRjHistoryView .sk-rj-filters{
-    grid-template-columns:1fr 1fr !important;
-  }
-  #skRepairJobsModal #skRjHistoryView .sk-rj-filters > div[style*="grid-column"]{
-    grid-column:1 / -1 !important;
-  }
-  #skRepairJobsModal #skRjHistoryView .sk-rj-export{
-    margin-top:4px !important;
-  }
 }
