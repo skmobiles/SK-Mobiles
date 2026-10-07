@@ -23,7 +23,7 @@
   const SHOP_ID = "SK-MOBILES";
   const BILL_KEY = "sk_bills";
 
-  let auth, db, unsubscribeBills = null, unsubscribeAllData = null;
+  let auth, db, unsubscribeBills = null, unsubscribeAllData = null, unsubscribeRepairJobs = null;
   let remoteReady = false;
   let applyingRemote = false;
   let syncingLocal = false;
@@ -34,12 +34,18 @@
   let cloudAutoBackupRunning = false;
   let cloudRestoreApplying = false;
   let refreshUiFrame = 0;
+  const REPAIR_KEY = "skx_repair_jobs_v2";
+  const REPAIR_COLLECTION = "repairJobs";
+  let repairSyncReady = false;
+  let repairApplyingRemote = false;
+  let repairKnownRemote = new Map();
+  let repairSyncTimer = null;
 
   // தானாகவே அனைத்து sk_ மற்றும் skx_ விசைகளையும் கண்டறியும் அமைப்பு
   function isSyncableKey(key) {
     if (!key) return false;
     // உள்நுழைவு/தீம் போன்ற சாதன தனிப்பட்ட அமைப்புகளை மட்டும் தவிர்த்தல்
-    if (key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_bill_draft") {
+    if (key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_bill_draft" || key === REPAIR_KEY) {
       return false;
     }
     return key.startsWith("sk_") || key.startsWith("skx_");
@@ -299,29 +305,46 @@
     remoteReady = false;
     const ref = db.collection("shops").doc(SHOP_ID).collection("bills");
     const snap = await ref.get();
-    replaceLocalBillsFromRemote(snap.docs);
+    const localBefore = localBills();
+    const remoteIds = new Set();
+    const mergedInitial = new Map();
+    snap.docs.forEach(d => {
+      const r = d.data() || {};
+      const id = String(r.id || d.id);
+      remoteIds.add(id);
+      if(r.isDeleted === true || r._deleted === true) return;
+      mergedInitial.set(id, Object.assign({}, r, {id}));
+    });
+    // Never discard a local bill that has not reached Firebase yet.
+    localBefore.forEach(b => {
+      const id = String(b?.id || b?.billId || b?.billNo || "");
+      if(id && !remoteIds.has(id)) mergedInitial.set(id, normalizeBill(b));
+    });
+    setLocalBills([...mergedInitial.values()].filter(Boolean));
     remoteReady = true;
+    await uploadBills();
 
     unsubscribeBills = ref.onSnapshot(snapshot => {
       try {
-        snapshot.docChanges().forEach(change => {
-          const data = change.doc.data() || {};
-          const docId = String(change.doc.id);
-          if(data.isDeleted === true || data._deleted === true || change.type === "removed") {
-            removeBillFromLocalStorage(docId);
-            lastKnownBillIds.delete(docId);
-          }
-        });
-
-        const activeRemote = [];
+        const remoteIdsNow = new Set();
+        const remoteMap = new Map();
         snapshot.docs.forEach(d => {
           const r = d.data() || {};
+          const id = String(r.id || d.id);
+          remoteIdsNow.add(id);
           if(r.isDeleted === true || r._deleted === true) return;
-          activeRemote.push(Object.assign({}, r, { id: String(r.id || d.id) }));
+          remoteMap.set(id, Object.assign({}, r, {id}));
         });
-
-        setLocalBills(activeRemote);
-        lastKnownBillIds = new Set(activeRemote.map(b => String(b.id)));
+        const localNow = localBills();
+        const merged = new Map(remoteMap);
+        // Preserve only genuinely local/unpublished bills; Firebase tombstones win.
+        localNow.forEach(b => {
+          const id = String(b?.id || b?.billId || b?.billNo || "");
+          if(id && !remoteIdsNow.has(id)) merged.set(id, normalizeBill(b));
+        });
+        setLocalBills([...merged.values()].filter(Boolean));
+        lastKnownBillIds = new Set([...remoteMap.keys(), ...[...merged.keys()].filter(id => !remoteIdsNow.has(id))]);
+        if([...merged.keys()].some(id => !remoteIdsNow.has(id))) uploadBills().catch(()=>{});
       } catch(e) {
         console.error("Bill snapshot error", e);
       }
@@ -329,11 +352,23 @@
   }
 
   // கிளவுடில் உள்ள அனைத்து sk_ டேட்டாக்களையும் நிகழ்நேரத்தில் கண்காணிக்கும் அமைப்பு
-  async function syncKeyToCloud(key) {
+  const universalLastSyncedHash = new Map();
+  let universalSyncStarted = false;
+
+  function syncHash(value){
+    const s = String(value ?? "");
+    let h = 2166136261;
+    for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h,16777619); }
+    return (h >>> 0).toString(16);
+  }
+
+  async function syncKeyToCloud(key, force=false) {
     if (!auth?.currentUser || !db || applyingRemote || !remoteReady || !isSyncableKey(key)) return;
     try {
       const rawData = localStorage.getItem(key);
       if (rawData === null) return;
+      const hash = syncHash(rawData);
+      if (!force && universalLastSyncedHash.get(key) === hash) return;
       const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
       await ref.set({
         data: rawData,
@@ -341,6 +376,7 @@
         updatedAtMs: Date.now(),
         updatedBy: auth.currentUser.uid
       }, { merge: true });
+      universalLastSyncedHash.set(key, hash);
     } catch(e) {
       console.error(key + " cloud sync failed", e);
     }
@@ -349,76 +385,105 @@
   async function syncMissingLocalDataToCloud(snapshot) {
     if (!auth?.currentUser || !db || !remoteReady || applyingRemote) return;
     const remoteKeys = new Set(snapshot.docs.map(d => String(d.id)));
-    const writes = [];
-
-    for(let i = 0; i < localStorage.length; i++){
+    const jobs = [];
+    for(let i=0; i<localStorage.length; i++){
       const key = localStorage.key(i);
       if(!isSyncableKey(key) || remoteKeys.has(key)) continue;
       const rawData = localStorage.getItem(key);
       if(rawData === null) continue;
-      const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
-      writes.push(ref.set({
-        data: rawData,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAtMs: Date.now(),
-        updatedBy: auth.currentUser.uid
-      }, { merge: true }));
+      jobs.push(syncKeyToCloud(key, true));
     }
+    if(jobs.length) await Promise.allSettled(jobs);
+  }
 
-    if(writes.length){
-      try { await Promise.all(writes); }
-      catch(e){ console.error("Initial local data cloud sync failed", e); }
+  async function startUniversalDataSync() {
+    if (unsubscribeAllData) unsubscribeAllData();
+    universalSyncStarted = false;
+    universalLastSyncedHash.clear();
+    const dataColRef = db.collection("shops").doc(SHOP_ID).collection("data");
+
+    try {
+      // Complete the first snapshot before accepting it as the sync baseline.
+      // This removes the login-time race where a local write could be mistaken
+      // for the current cloud state or vice versa.
+      const initial = await dataColRef.get();
+      const remoteKeys = new Set();
+      let hasChanges = false;
+
+      initial.docs.forEach(doc => {
+        const key = String(doc.id);
+        if(!isSyncableKey(key)) return;
+        remoteKeys.add(key);
+        const cloudVal = (doc.data() || {}).data;
+        if(typeof cloudVal !== "string") return;
+        const localVal = localStorage.getItem(key);
+        if(cloudVal !== localVal){
+          applyingRemote = true;
+          try { localStorage.setItem(key, cloudVal); hasChanges = true; }
+          finally { applyingRemote = false; }
+        }
+        universalLastSyncedHash.set(key, syncHash(cloudVal));
+      });
+
+      remoteReady = true;
+      await syncMissingLocalDataToCloud(initial);
+
+      // Register the realtime listener only after the initial baseline is ready.
+      unsubscribeAllData = dataColRef.onSnapshot(snapshot => {
+        if (applyingRemote) return;
+        let changed = false;
+        snapshot.docChanges().forEach(change => {
+          const key = String(change.doc.id);
+          if(!isSyncableKey(key)) return;
+
+          if(change.type === "removed"){
+            if(localStorage.getItem(key) !== null){
+              applyingRemote = true;
+              try { localStorage.removeItem(key); changed = true; }
+              finally { applyingRemote = false; }
+            }
+            universalLastSyncedHash.delete(key);
+            return;
+          }
+
+          const cloudVal = (change.doc.data() || {}).data;
+          if(typeof cloudVal !== "string") return;
+          const localVal = localStorage.getItem(key);
+          universalLastSyncedHash.set(key, syncHash(cloudVal));
+          if(cloudVal !== localVal){
+            applyingRemote = true;
+            try { localStorage.setItem(key, cloudVal); changed = true; }
+            finally { applyingRemote = false; }
+          }
+        });
+
+        // Catch any local change that happened while the listener was attaching.
+        for(let i=0;i<localStorage.length;i++){
+          const key=localStorage.key(i);
+          if(isSyncableKey(key)) syncKeyToCloud(key);
+        }
+        if(changed) refreshAllUI();
+      }, err => console.error("Universal data sync error", err));
+
+      universalSyncStarted = true;
+      if(hasChanges) refreshAllUI();
+    } catch(e){
+      console.error("Universal data sync initialization failed", e);
+      universalSyncStarted = false;
     }
   }
 
-  function startUniversalDataSync() {
-    if (unsubscribeAllData) unsubscribeAllData();
-    const dataColRef = db.collection("shops").doc(SHOP_ID).collection("data");
-
-    unsubscribeAllData = dataColRef.onSnapshot(snapshot => {
-      if (applyingRemote) return;
-      let hasChanges = false;
-
-      snapshot.docChanges().forEach(change => {
-        const key = change.doc.id;
-        if (!isSyncableKey(key)) return;
-
-        const cloudVal = (change.doc.data() || {}).data;
-        const localVal = localStorage.getItem(key);
-
-        if(change.type === "removed"){
-          if(localVal !== null){
-            applyingRemote = true;
-            try {
-              localStorage.removeItem(key);
-              hasChanges = true;
-            } finally {
-              applyingRemote = false;
-            }
-          }
-          return;
-        }
-
-        // A cloud document is authoritative for an existing key.
-        // Do not use a truthiness check here: empty-string/empty-array JSON
-        // are valid synced states too.
-        if (typeof cloudVal === "string" && cloudVal !== localVal) {
-          applyingRemote = true;
-          try {
-            localStorage.setItem(key, cloudVal);
-            hasChanges = true;
-          } finally {
-            applyingRemote = false;
-          }
-        }
-      });
-
-      // If this device has a syncable key that does not exist in Firestore
-      // yet, publish it once. Existing cloud keys are never overwritten here.
-      syncMissingLocalDataToCloud(snapshot);
-
-      if (hasChanges) refreshAllUI();
-    }, err => console.error("Universal data sync error", err));
+  function startSyncSafetyReconcile(){
+    if(window.__skFirebaseSyncReconcile) clearInterval(window.__skFirebaseSyncReconcile);
+    window.__skFirebaseSyncReconcile = setInterval(() => {
+      if(!auth?.currentUser || !remoteReady || !universalSyncStarted || applyingRemote) return;
+      for(let i=0;i<localStorage.length;i++){
+        const key=localStorage.key(i);
+        if(isSyncableKey(key)) syncKeyToCloud(key);
+      }
+      if(repairSyncReady) uploadRepairJobs(false);
+      if(auth?.currentUser) uploadBills().catch(()=>{});
+    }, 5000);
   }
 
   // லோக்கல் ஸ்டோரேஜில் நடக்கும் அனைத்து மாற்றங்களையும் பிடிக்கும் கொக்கி
@@ -435,6 +500,9 @@
         if(key === BILL_KEY){
           clearTimeout(syncTimer);
           syncTimer = setTimeout(() => { uploadBills().catch?.(()=>{}); }, 50);
+        } else if(key === REPAIR_KEY){
+          clearTimeout(repairSyncTimer);
+          repairSyncTimer = setTimeout(() => { uploadRepairJobs(false); }, 80);
         } else if(isSyncableKey(key)){
           clearTimeout(syncKeyTimers[key]);
           syncKeyTimers[key] = setTimeout(() => { syncKeyToCloud(key); }, 80);
@@ -447,9 +515,14 @@
     // resurrected from Firestore on another device.
     Storage.prototype.removeItem = function(key){
       const result = originalRemove.apply(this, arguments);
-      if(this === localStorage && !applyingRemote && auth?.currentUser && remoteReady && isSyncableKey(key)){
-        const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
-        ref.delete().catch(e => console.error(key + " cloud delete failed", e));
+      if(this === localStorage && !applyingRemote && auth?.currentUser && remoteReady){
+        if(key === REPAIR_KEY){
+          clearTimeout(repairSyncTimer);
+          repairSyncTimer = setTimeout(() => { uploadRepairJobs(false); }, 80);
+        } else if(isSyncableKey(key)){
+          const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
+          ref.delete().catch(e => console.error(key + " cloud delete failed", e));
+        }
       }
       return result;
     };
@@ -642,7 +715,12 @@
     if(!user){ 
       if(unsubscribeBills){ unsubscribeBills(); unsubscribeBills = null; }
       if(unsubscribeAllData){ unsubscribeAllData(); unsubscribeAllData = null; }
+      if(unsubscribeRepairJobs){ unsubscribeRepairJobs(); unsubscribeRepairJobs = null; }
+      repairSyncReady = false;
+      repairKnownRemote = new Map();
       remoteReady = false;
+      universalSyncStarted = false;
+      if(window.__skFirebaseSyncReconcile){ clearInterval(window.__skFirebaseSyncReconcile); window.__skFirebaseSyncReconcile=null; }
       localStorage.removeItem(ROLE_KEY);
       localStorage.removeItem(WORKER_KEY);
       gate(true);
@@ -668,7 +746,9 @@
       try { if(typeof applyRestrictions === "function") applyRestrictions(); } catch(e){}
       try { if(typeof refreshAdminButton === "function") refreshAdminButton(); } catch(e){}
       await startBillSync();
-      startUniversalDataSync();
+      await startRepairJobSync();
+      await startUniversalDataSync();
+      startSyncSafetyReconcile();
       hookCloudAutoBackup();
       bindBackupButtons();
       scheduleCloudAutoBackup("login");
