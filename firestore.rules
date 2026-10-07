@@ -38,6 +38,29 @@ service cloud.firestore {
         (email == 'sriyogi6@gmail.com' && role == 'worker');
     }
 
+    function managerPermissions() {
+      return get(/databases/$(database)/documents/shops/SK-MOBILES/permissions/manager).data.permissions;
+    }
+
+    function managerHasPermission(key) {
+      return isManager()
+        && managerPermissions().get('managerAccess', false) == true
+        && managerPermissions().get(key, false) == true;
+    }
+
+    function managerDataKeyAllowed(key) {
+      return
+        (key == 'sk_bills' && managerHasPermission('billing')) ||
+        (key == 'sk_orders' && managerHasPermission('orders')) ||
+        ((key == 'sk_inventory' || key == 'sk_low_threshold') && managerHasPermission('inventory')) ||
+        (key == 'sk_credit_ledger_v1' && managerHasPermission('credit')) ||
+        ((key == 'sk_repair_tools_note' || key == 'sk_tools_others_order_note') && managerHasPermission('toolsNotes')) ||
+        ((key == 'sk_shop_name' || key == 'sk_shop_addr' || key == 'sk_shop_phone' || key == 'sk_terms' || key == 'sk_custom_logo') && managerHasPermission('shopSettings')) ||
+        ((key == 'sk_theme' || key == 'sk_theme_depth' || key == 'sk_font_family' || key == 'sk_icon_pack' || key == 'sk_appearance_settings' || key == 'sk_theme_panel_collapsed') && managerHasPermission('settings')) ||
+        ((key == 'sk_workers_v1' || key == 'sk_worker_pin_v1') && managerHasPermission('userManagement')) ||
+        (key == 'sk_recycle_bin_v1' && managerHasPermission('recycleBin'));
+    }
+
     match /users/{userId} {
       allow read: if signedIn() && request.auth.uid == userId;
       allow read: if isAdmin();
@@ -56,10 +79,43 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    match /shops/{shopId}/{document=**} {
-  allow read: if isActiveStaff() && shopId == 'SK-MOBILES';
-  allow create, update: if isActiveStaff() && shopId == 'SK-MOBILES';
-  allow delete: if (isAdmin() || isManager()) && shopId == 'SK-MOBILES';
-	}
+    match /shops/{shopId}/permissions/{permissionDoc} {
+      allow read: if isAdmin() || (isManager() && permissionDoc == 'manager');
+      allow create, update: if isAdmin() && permissionDoc == 'manager';
+      allow delete: if isAdmin() && permissionDoc == 'manager';
+    }
+
+    match /shops/{shopId}/data/{key} {
+      allow read: if isActiveStaff() && shopId == 'SK-MOBILES';
+      allow create, update: if shopId == 'SK-MOBILES' && (
+        isAdmin() || isWorker() || managerDataKeyAllowed(key)
+      );
+      allow delete: if shopId == 'SK-MOBILES' && (isAdmin() || (isManager() && managerDataKeyAllowed(key)));
+    }
+
+    match /shops/{shopId}/bills/{billId} {
+      allow read: if isActiveStaff() && shopId == 'SK-MOBILES';
+      allow create, update: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('billing'));
+      allow delete: if shopId == 'SK-MOBILES' && (isAdmin() || managerHasPermission('billing'));
+    }
+
+    match /shops/{shopId}/repairJobs/{jobId} {
+      allow read: if isActiveStaff() && shopId == 'SK-MOBILES';
+      allow create, update: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('repair'));
+      allow delete: if shopId == 'SK-MOBILES' && (isAdmin() || managerHasPermission('repair'));
+    }
+
+    match /shops/{shopId}/cloudBackups/{backupId} {
+      allow read: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('restore'));
+      allow create, update: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('backup'));
+      allow delete: if isAdmin() && shopId == 'SK-MOBILES';
+
+      match /items/{itemId} {
+        allow read: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('restore'));
+        allow create, update: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('backup'));
+        allow delete: if isAdmin() && shopId == 'SK-MOBILES';
+      }
+    }
+
   }
 }

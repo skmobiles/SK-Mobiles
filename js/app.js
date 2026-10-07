@@ -3248,6 +3248,9 @@ const MASTER_INVENTORY = [
     }
 
     function toggleQuickOrder(id) {
+      if(String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase()==='manager'){
+        try{const p=JSON.parse(localStorage.getItem('sk_manager_permissions_v1')||'{}');if(p.orders!==true){showToast('🔒 Admin permission required');return;}}catch(e){showToast('🔒 Admin permission required');return;}
+      }
       const item = inventory.find(i => i.id === id);
       if (!item) return;
       item.ordered = !item.ordered;
@@ -4874,14 +4877,20 @@ img{max-width:100%!important;}
     const SK_MANAGER_PERM_KEY='sk_manager_permissions_v1';
     const SK_MANAGER_DEFAULTS={
       managerAccess:true,
-      billing:true,
-      inventory:true,
-      credit:true,
-      repair:true,
-      backup:true,
+      billing:false,
+      orders:false,
+      inventory:false,
+      credit:false,
+      repair:false,
+      toolsNotes:false,
+      dataFolder:false,
+      settings:false,
+      profile:true,
+      backup:false,
       restore:false,
       shopSettings:false,
-      userManagement:false
+      userManagement:false,
+      recycleBin:false
     };
     function skManagerPerms(){
       let p={...SK_MANAGER_DEFAULTS};
@@ -4889,28 +4898,61 @@ img{max-width:100%!important;}
       return p;
     }
     function skManagerAllowed(name){return !!skManagerPerms()[name];}
-    function skRenderManagerPermissions(){
+    window.skManagerFeatureAllowed=function(name){return localStorage.getItem('sk_current_role_v1')!=='manager' || skManagerAllowed(name);};
+    async function skLoadManagerPermissions(){
+      try{
+        if(typeof window.skFirebaseGetManagerPermissions==='function'){
+          const remote=await window.skFirebaseGetManagerPermissions();
+          if(remote&&typeof remote==='object'){
+            const p={...SK_MANAGER_DEFAULTS,...remote};
+            localStorage.setItem(SK_MANAGER_PERM_KEY,JSON.stringify(p));
+            return p;
+          }
+        }
+      }catch(e){console.warn('Manager permission load failed:',e);}
+      return skManagerPerms();
+    }
+    async function skRenderManagerPermissions(){
       if(!admin())return;
-      const p=skManagerPerms(), access=document.getElementById('skMgrAccessToggle');
+      const p=await skLoadManagerPermissions();
+      const access=document.getElementById('skMgrAccessToggle');
       if(access)access.checked=!!p.managerAccess;
       const box=document.getElementById('skManagerPermissionList'); if(!box)return;
       const rows=[
-        ['billing','🧾 Sales Billing & Edit'],
+        ['billing','🧾 Mobile Billing & History'],
+        ['orders','📋 Order List'],
         ['inventory','📦 Inventory Management'],
-        ['credit','💳 Credit Ledger & Payments'],
+        ['credit','💳 Customer Credit'],
         ['repair','🔧 Repair Jobs'],
+        ['toolsNotes','🛠️ Tools & Others Notes'],
+        ['dataFolder','📁 App Data Folder'],
+        ['settings','⚙️ App Settings & Themes'],
+        ['profile','👤 My Profile / Account'],
         ['backup','☁️ Cloud Backup Now'],
         ['restore','☁️ Cloud Restore Latest'],
         ['shopSettings','🏪 Shop Profile & Bill Settings'],
-        ['userManagement','👥 User Role Management']
+        ['userManagement','👥 User / Worker Management'],
+        ['recycleBin','🗑️ Recycle Bin']
       ];
       box.innerHTML=rows.map(([key,label])=>`<label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:7px 8px;border:1px solid var(--card-border);border-radius:10px;background:var(--pill-bg);font-size:.70rem;font-weight:800;"><span>${label}</span><input type="checkbox" ${p[key]?'checked':''} onchange="skAdminSetManagerPermission('${key}',this.checked)"></label>`).join('');
     }
-    window.skAdminSetManagerPermission=function(key,value){
+    window.skAdminSetManagerPermission=async function(key,value){
       if(!admin()){toast('🔒 Admin access only');return;}
-      const p=skManagerPerms();p[key]=!!value;localStorage.setItem(SK_MANAGER_PERM_KEY,JSON.stringify(p));
+      const p={...skManagerPerms(),[key]:!!value};
+      localStorage.setItem(SK_MANAGER_PERM_KEY,JSON.stringify(p));
+      try{
+        if(typeof window.skFirebaseSetManagerPermission==='function'){
+          await window.skFirebaseSetManagerPermission(key,!!value);
+          const remote=await window.skFirebaseGetManagerPermissions?.();
+          if(remote&&typeof remote==='object')localStorage.setItem(SK_MANAGER_PERM_KEY,JSON.stringify({...SK_MANAGER_DEFAULTS,...remote}));
+        }
+      }catch(e){
+        console.error('Manager permission update failed:',e);
+        toast('❌ Could not save Manager permission');
+        return;
+      }
       if(typeof applyRestrictions==='function')applyRestrictions();
-      skRenderManagerPermissions();
+      await skRenderManagerPermissions();
       toast('Manager permission updated');
     };
     window.skAdminResetAllData=function(){
@@ -4930,7 +4972,7 @@ img{max-width:100%!important;}
       el.textContent=map[r]||''; el.style.display=map[r]?'inline-flex':'none';
     }
     window.skRefreshRoleBadge=skRefreshRoleBadge;
-    window.skOpenAdminPanel=function(){if(!admin()){toast('🔒 Admin access only');return;}const r=document.getElementById('skAdminCurrentRole');if(r)r.textContent='👑 Admin — Full Access';skRenderManagerPermissions();document.getElementById('skAdminPanelModal')?.classList.add('active');};
+    window.skOpenAdminPanel=function(){if(!admin()){toast('🔒 Admin access only');return;}const r=document.getElementById('skAdminCurrentRole');if(r)r.textContent='👑 Admin — Full Access';document.getElementById('skAdminPanelModal')?.classList.add('active');skRenderManagerPermissions();};
     window.skCloseAdminPanel=function(){document.getElementById('skAdminPanelModal')?.classList.remove('active');};
     window.skChangePin=function(r){if(!admin()){toast('🔒 Admin access only');return;}const id=r==='admin'?'skNewAdminPin':'skNewWorkerPin';const v=(document.getElementById(id)?.value||'').trim();if(!/^\d{4,12}$/.test(v)){toast('PIN must be 4-12 digits');return;}localStorage.setItem(pinKey(r),v);document.getElementById(id).value='';toast((r==='admin'?'Admin':'Worker')+' PIN updated');};
 
@@ -4952,45 +4994,117 @@ img{max-width:100%!important;}
       });
     }
     const blockedWords=['add item','edit','delete','clear all orders','next status','save repair job','update repair job','backup','restore','stock adjustment','purchase','expense','supplier','used mobile'];
+    function managerPermissionForElement(el,p){
+      const txt=((el.textContent||'')+' '+(el.getAttribute('title')||'')+' '+(el.getAttribute('onclick')||'')).toLowerCase();
+      const id=(el.id||'').toLowerCase();
+      if(el.closest('#skAdminPanelModal')) return true;
+      if(id==='skProfileAccountMenuBtn' || /my profile\s*\/\s*account/.test(txt)) return p.profile;
+      if(/mobile billing|billing|invoice|save bill|new bill/.test(txt)) return p.billing;
+      if(/order list|orders?/.test(txt)) return p.orders;
+      if(/inventory|add item|stock|tempered glass|display/.test(txt)) return p.inventory;
+      if(/customer credit|credit ledger|credit|payment|outstanding/.test(txt)) return p.credit;
+      if(/repair job|repair jobs|job card|next status/.test(txt)) return p.repair;
+      if(/tools & others notes|tools|notes/.test(txt) && el.closest('#leftDrawer')) return p.toolsNotes;
+      if(/app data folder/.test(txt)) return p.dataFolder;
+      if(/app settings|themes|theme/.test(txt) && el.closest('#leftDrawer')) return p.settings;
+      if(/backup now/.test(txt)) return p.backup;
+      if(/restore latest/.test(txt)) return p.restore;
+      if(/shop profile|bill settings|terms & conditions|brand logo/.test(txt)) return p.shopSettings;
+      if(/user role management|manage users|worker management/.test(txt)) return p.userManagement;
+      if(/recycle bin|trash/.test(txt)) return p.recycleBin;
+      return true;
+    }
+    function managerEditElement(el){
+      const txt=((el.textContent||'')+' '+(el.getAttribute('title')||'')+' '+(el.getAttribute('onclick')||'')).toLowerCase();
+      const oc=(el.getAttribute('onclick')||'').toLowerCase();
+      const id=(el.id||'').toLowerCase();
+      return /(^|\s)(edit|modify|delete|next status)(\s|$)/.test(txt) || /\bedit\b|\bmodify\b|\bdelete\b|\bnext status\b/.test(txt) || /triggereditfromcontext|triggerdeletefromcontext|skrjedit|skrjdelete|updateStock|setDirectStock|deleteinventoryitem|deletesavedbill/.test(oc) || id.includes('edit') || id.includes('delete');
+    }
     function applyManagerRestrictions(){
       if(role()!=='manager') return;
       const p=skManagerPerms();
       const settings=document.getElementById('settingsModal');
       if(settings){
-        settings.querySelectorAll('div').forEach(function(el){
-          const t=(el.textContent||'').trim().toLowerCase();
-          if(!p.shopSettings && (t==='🏪 shop profile & address' || t==='📜 terms & conditions editor' || t==='shop brand logo')){
-            const parent=el.parentElement;if(parent)parent.style.display='none';
+        const lockAllSettingsControls=function(){
+          settings.querySelectorAll('button,input,textarea,select').forEach(function(el){
+            if(el.classList.contains('modal-close-btn'))return;
+            el.classList.add('sk-manager-locked');
+            el.setAttribute('aria-disabled','true');
+            el.setAttribute('data-sk-lock-reason','Admin permission required');
+          });
+        };
+        const unlockRoot=function(root){
+          if(!root)return;
+          root.querySelectorAll('button,input,textarea,select').forEach(function(el){
+            el.classList.remove('sk-manager-locked');
+            el.removeAttribute('aria-disabled');
+            el.removeAttribute('data-sk-lock-reason');
+          });
+        };
+        const unlockElement=function(el){
+          if(!el)return;
+          el.classList.remove('sk-manager-locked');
+          el.removeAttribute('aria-disabled');
+          el.removeAttribute('data-sk-lock-reason');
+        };
+        const headingRoot=function(text){
+          const node=[...settings.querySelectorAll('div')].find(function(el){return (el.textContent||'').trim().toLowerCase()===text.toLowerCase();});
+          return node ? node.nextElementSibling : null;
+        };
+        // Settings is a permission-gated area. Individual Admin settings remain
+        // independently controllable so App Data Folder/Backup can be granted
+        // without unlocking the entire Appearance/Shop Settings area.
+        lockAllSettingsControls();
+        if(p.settings)unlockRoot(document.getElementById('skUiAppearanceStudio'));
+        if(p.shopSettings){
+          unlockRoot(headingRoot('🏪 SHOP PROFILE & ADDRESS'));
+          unlockRoot(headingRoot('📜 TERMS & CONDITIONS EDITOR'));
+          unlockRoot(headingRoot('SHOP BRAND LOGO'));
+        }
+        if(p.backup || p.restore){
+          const backupBox=settings.querySelector('.sk-backup-ui-heading + .sk-backup-ui-card');
+          if(backupBox){
+            backupBox.querySelectorAll('button,input').forEach(function(el){
+              const txt=(el.textContent||'').toLowerCase();
+              if(txt.includes('backup') && p.backup)unlockElement(el);
+              if(txt.includes('restore') && p.restore)unlockElement(el);
+            });
           }
-        });
-        const cloudTitle=settings.querySelector('#skCloudBackupSection');
-        if(cloudTitle && cloudTitle.parentElement){
-          const cloudBox=cloudTitle.parentElement;
+        }
+        const cloudBox=document.getElementById('skCloudBackupBox');
+        if(cloudBox){
           cloudBox.querySelectorAll('button').forEach(function(b){
             const txt=(b.textContent||'').toLowerCase();
-            if(txt.includes('backup now'))b.style.display=p.backup?'':'none';
-            if(txt.includes('restore latest'))b.style.display=p.restore?'':'none';
+            if(txt.includes('backup now') && p.backup)unlockElement(b);
+            if(txt.includes('restore latest') && p.restore)unlockElement(b);
           });
         }
+        const folderBox=document.getElementById('skAppDataFolderBox');
+        if(p.dataFolder)unlockRoot(folderBox);
       }
-      const blockByPermission=function(el){
-        const txt=((el.textContent||'')+' '+(el.getAttribute('title')||'')+' '+(el.getAttribute('onclick')||'')).toLowerCase();
-        if(!p.billing && /(new bill|save bill|edit bill|billing|invoice)/.test(txt))return true;
-        if(!p.inventory && /(add item|inventory|stock|tempered glass|display|update stock)/.test(txt))return true;
-        if(!p.credit && /(credit ledger|credit|payment|outstanding)/.test(txt))return true;
-        if(!p.repair && /(repair job|repair jobs|job card)/.test(txt))return true;
-        if(!p.backup && txt.includes('backup now'))return true;
-        if(!p.restore && txt.includes('restore latest'))return true;
-        if(!p.shopSettings && /(shop profile|bill settings|terms & conditions|brand logo)/.test(txt))return true;
-        if(!p.userManagement && /(user role management|manage users|worker management)/.test(txt))return true;
-        return false;
-      };
       document.querySelectorAll('button,a,[role="button"]').forEach(function(el){
-        if(el.closest('#skRoleGate')||el.closest('#skAdminPanelModal'))return;
-        if(blockByPermission(el))mark(el);else if(el.classList.contains('sk-worker-blocked'))el.classList.remove('sk-worker-blocked');
+        if(el.closest('#skRoleGate')||el.closest('#skLoginModal')||el.closest('#skAdminPanelModal'))return;
+        if(el.closest('#settingsModal'))return;
+        el.classList.remove('sk-manager-locked');
+        el.removeAttribute('aria-disabled');
+        el.removeAttribute('data-sk-lock-reason');
+        if(managerEditElement(el)){
+          el.classList.add('sk-manager-locked');
+          el.setAttribute('aria-disabled','true');
+          el.setAttribute('data-sk-lock-reason','Admin only: Edit / Modify');
+          el.title='🔒 Admin only — Edit / Modify';
+          return;
+        }
+        if(!managerPermissionForElement(el,p)){
+          el.classList.add('sk-manager-locked');
+          el.setAttribute('aria-disabled','true');
+          el.setAttribute('data-sk-lock-reason','Admin permission required');
+          if(!el.getAttribute('title'))el.title='🔒 Admin permission required';
+        }
       });
-      document.getElementById('skAdminPanelModal')?.classList.remove('active');
       const adminBtn=document.getElementById('skAdminControlBtn');if(adminBtn)adminBtn.style.display='none';
+      const staticAdminButtons=[...document.querySelectorAll('#leftDrawer button')].filter(el=>/admin control/i.test(el.textContent||''));
+      staticAdminButtons.forEach(el=>{el.style.display='none';});
     }
 
     function applyRestrictions(){
@@ -4998,7 +5112,7 @@ img{max-width:100%!important;}
       const currentRole=role();
       document.body.classList.toggle('sk-worker-mode',currentRole==='worker');
       skRefreshRoleBadge();
-      document.querySelectorAll('.sk-worker-blocked').forEach(el=>el.classList.remove('sk-worker-blocked'));
+      document.querySelectorAll('.sk-worker-blocked,.sk-manager-locked').forEach(el=>{el.classList.remove('sk-worker-blocked','sk-manager-locked');el.removeAttribute('aria-disabled');});
       if(currentRole==='manager'){
         applyManagerRestrictions();
         return;
@@ -5010,16 +5124,43 @@ img{max-width:100%!important;}
         if(el.closest('#skRoleGate')||el.closest('#skAdminPanelModal'))return;
         if(el.closest('#settingsModal'))return;
         const txt=(el.textContent||'').trim().toLowerCase(),oc=(el.getAttribute('onclick')||'').toLowerCase(),title=(el.getAttribute('title')||'').toLowerCase(),id=(el.id||'').toLowerCase();
-        const badFn=['openitemeditor','savemanualinventoryitem','deleteinventoryitem','updatestock','clearallorders','skrjdelete','skrjnext','exportappdatabackup','importappdatabackup','saveusedbill','deletesavedbill'];
+        const badFn=['openitemeditor','savemanualinventoryitem','deleteinventoryitem','updatestock','clearallorders','skrjedit','skrjdelete','skrjnext','exportappdatabackup','importappdatabackup','saveusedbill','deletesavedbill'];
         if(badFn.some(x=>oc.includes(x))||blockedWords.some(x=>txt.includes(x)||title.includes(x))||id.includes('delete')||id.includes('edit'))mark(el);
       });
       settingsRestrict();
     }
+    window.skApplyRoleRestrictions=function(){try{applyRestrictions();}catch(e){console.warn('Role restriction refresh failed:',e);}};
+
+    const SK_MANAGER_FUNCTION_PERMS={
+      saveInventory:'inventory',saveManualInventoryItem:'inventory',updateStock:'inventory',setDirectStock:'inventory',deleteInventoryItem:'inventory',
+      saveOrders:'orders',clearAllOrders:'orders',
+      saveUsedBill:'billing',deleteSavedBill:'billing',
+      saveRepairSparesNote:'toolsNotes',
+      skRjSaveJob:'repair',skRjEdit:'repair',skRjDelete:'repair',skRjNext:'repair',
+      exportAppDataBackup:'backup',importAppDataBackup:'restore',
+      saveLowStockThreshold:'inventory'
+    };
+    const SK_MANAGER_ADMIN_ONLY_FUNCTIONS=new Set([
+      'updateStock','setDirectStock','deleteInventoryItem','clearAllOrders','deleteSavedBill',
+      'saveRepairSparesNote','skRjEdit','skRjDelete','skRjNext','triggerEditFromContext','triggerDeleteFromContext'
+    ]);
     function guard(name){
       const fn=window[name];if(typeof fn!=='function'||fn.__skRoleGuard)return;
-      const w=function(){if(role()==='worker'){toast('🔒 Admin permission required');return false;}return fn.apply(this,arguments);};w.__skRoleGuard=true;window[name]=w;
+      const w=function(){
+        const r=role();
+        if(r==='worker'){toast('🔒 Admin permission required');return false;}
+        if(r==='manager'){
+          if(SK_MANAGER_ADMIN_ONLY_FUNCTIONS.has(name)){toast('🔒 Admin only — Edit / Modify');return false;}
+          if((name==='saveUsedBill'||name==='skRjSaveJob') && (window.__skEditingBillId || document.getElementById('skRjEditId')?.value)){
+            toast('🔒 Admin only — Edit / Modify');return false;
+          }
+          const perm=SK_MANAGER_FUNCTION_PERMS[name];
+          if(perm && !skManagerAllowed(perm)){toast('🔒 Admin permission required');return false;}
+        }
+        return fn.apply(this,arguments);
+      };w.__skRoleGuard=true;window[name]=w;
     }
-    function guardFunctions(){['saveInventory','saveOrders','saveManualInventoryItem','deleteInventoryItem','updateStock','clearAllOrders','saveUsedBill','deleteSavedBill','saveRepairSparesNote','triggerEditFromContext','triggerDeleteFromContext','skRjSaveJob','skRjDelete','skRjNext','exportAppDataBackup','importAppDataBackup','saveLowStockThreshold'].forEach(guard);}
+    function guardFunctions(){[...Object.keys(SK_MANAGER_FUNCTION_PERMS),'triggerEditFromContext','triggerDeleteFromContext'].forEach(guard);}
     function addAdminButton(){
       const drawer=document.querySelector('#leftDrawer .left-drawer-content');if(!drawer||document.getElementById('skAdminControlBtn'))return;
       const groups=drawer.children;let host=null;for(let i=0;i<groups.length;i++){if(groups[i].querySelector&&groups[i].querySelector('.logout')){host=groups[i];break;}}
@@ -5032,6 +5173,7 @@ img{max-width:100%!important;}
       if(t.includes('logout')){e.preventDefault();e.stopImmediatePropagation();skLogout();return false;}
       if(t.includes('profile / account')||t.includes('my profile / account')){e.preventDefault();e.stopImmediatePropagation();if(typeof skOpenRoleProfile==='function')skOpenRoleProfile();return false;}
       if(role()==='worker'&&el.classList.contains('sk-worker-blocked')){e.preventDefault();e.stopImmediatePropagation();toast('🔒 Admin permission required');return false;}
+      if(role()==='manager'&&el.classList.contains('sk-manager-locked')){e.preventDefault();e.stopImmediatePropagation();toast(el.getAttribute('data-sk-lock-reason')||'🔒 Admin permission required');return false;}
     },true);
     function init(){
       document.querySelectorAll('.sk-role-btn').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.role)));
@@ -5040,7 +5182,7 @@ img{max-width:100%!important;}
       const r=role();if(r==='admin'||r==='worker'||r==='manager'){setRole(r);applyRestrictions();}else gate(true); skRefreshRoleBadge();
       const img=document.getElementById('skLoginLogo');if(img)img.src=logo();
       addAdminButton();refreshAdminButton();guardFunctions();
-      const obs=new MutationObserver(()=>{guardFunctions();addAdminButton();refreshAdminButton();if(role()==='worker')applyRestrictions();});
+      const obs=new MutationObserver(()=>{guardFunctions();addAdminButton();refreshAdminButton();if(role()==='worker'||role()==='manager')applyRestrictions();});
       obs.observe(document.body,{childList:true,subtree:true});
     }
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
@@ -7311,6 +7453,9 @@ window.skOpenCreditLedger=cpOpenPage;
   };
   async function restoreCloudBill(id){try{if(window.firebase?.auth&&firebase.auth().currentUser&&firebase.firestore){await firebase.firestore().collection('shops').doc('SK-MOBILES').collection('bills').doc(String(id)).set({id:String(id),isDeleted:false,_deleted:false,deletedAt:null,_syncUpdatedAt:Date.now(),_syncUpdatedBy:firebase.auth().currentUser.uid},{merge:true});}}catch(e){console.warn('Recycle Bin cloud bill restore failed:',e);}}
   window.restoreFromTrash=async function(trashId){
+    const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();
+    if(role==='manager' && !window.skManagerFeatureAllowed?.('recycleBin')){showToast?.('🔒 Admin permission required');return;}
+    if(role==='worker'){showToast?.('🔒 Admin access only');return;}
     purgeExpiredTrash();const list=readRecycle(),index=list.findIndex(x=>String(x.trashId)===String(trashId));if(index<0){showToast?.('❌ Recycle item not found');return;}const item=list[index];
     try{
       if(item.type==='bill'){
@@ -7331,8 +7476,8 @@ window.skOpenCreditLedger=cpOpenPage;
       list.splice(index,1);saveStoredData({recycleBin:list});renderRecycleBinUI();showToast?.('✅ Successfully restored');
     }catch(err){console.error('Recycle Bin restore failed:',err);showToast?.('❌ Restore failed');}
   };
-  window.permanentlyDeleteTrash=function(trashId){const list=readRecycle(),idx=list.findIndex(x=>String(x.trashId)===String(trashId));if(idx<0)return;if(!confirm('Permanently delete this Recycle Bin item? This cannot be undone.'))return;list.splice(idx,1);saveStoredData({recycleBin:list});renderRecycleBinUI();showToast?.('🗑️ Permanently deleted');};
-  window.skOpenRecycleBin=function(){const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();if(role&&role!=='admin'){showToast?.('🔒 Admin access only');return;}purgeExpiredTrash();renderRecycleBinUI();document.getElementById('skRecycleBinModal')?.classList.add('active');};
-  document.addEventListener('DOMContentLoaded',function(){purgeExpiredTrash();const empty=document.getElementById('btnEmptyRecycleBin');if(empty)empty.addEventListener('click',function(){const list=readRecycle();if(!list.length){showToast?.('Trash is already empty');return;}if(!confirm('Permanently clear all items in Recycle Bin? This cannot be undone.'))return;saveStoredData({recycleBin:[]});renderRecycleBinUI();showToast?.('🗑️ Trash cleared');});setInterval(purgeExpiredTrash,6*60*60*1000);});
+  window.permanentlyDeleteTrash=function(trashId){const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();if(role==='manager' && !window.skManagerFeatureAllowed?.('recycleBin')){showToast?.('🔒 Admin permission required');return;}if(role==='worker'){showToast?.('🔒 Admin access only');return;}const list=readRecycle(),idx=list.findIndex(x=>String(x.trashId)===String(trashId));if(idx<0)return;if(!confirm('Permanently delete this Recycle Bin item? This cannot be undone.'))return;list.splice(idx,1);saveStoredData({recycleBin:list});renderRecycleBinUI();showToast?.('🗑️ Permanently deleted');};
+  window.skOpenRecycleBin=function(){const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();if(role==='manager' && !window.skManagerFeatureAllowed?.('recycleBin')){showToast?.('🔒 Admin permission required');return;}if(role==='worker'){showToast?.('🔒 Admin access only');return;}purgeExpiredTrash();renderRecycleBinUI();document.getElementById('skRecycleBinModal')?.classList.add('active');};
+  document.addEventListener('DOMContentLoaded',function(){purgeExpiredTrash();const empty=document.getElementById('btnEmptyRecycleBin');if(empty)empty.addEventListener('click',function(){const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();if(role==='manager' && !window.skManagerFeatureAllowed?.('recycleBin')){showToast?.('🔒 Admin permission required');return;}if(role==='worker'){showToast?.('🔒 Admin access only');return;}const list=readRecycle();if(!list.length){showToast?.('Trash is already empty');return;}if(!confirm('Permanently clear all items in Recycle Bin? This cannot be undone.'))return;saveStoredData({recycleBin:[]});renderRecycleBinUI();showToast?.('🗑️ Trash cleared');});setInterval(purgeExpiredTrash,6*60*60*1000);});
 })();
 

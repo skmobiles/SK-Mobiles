@@ -279,6 +279,9 @@ img,svg,video,canvas,iframe{max-width:100%;}
     .sk-access-badge{position:fixed;top:7px;right:9px;z-index:9999;background:rgba(15,23,42,.78);color:#fff;border-radius:20px;padding:4px 9px;font-size:.62rem;font-weight:850;backdrop-filter:blur(8px);display:none}
     body.sk-worker-mode .sk-access-badge{display:block}
     .sk-worker-blocked{opacity:.48!important;pointer-events:none!important;filter:grayscale(.35)}
+    .sk-manager-locked{opacity:.48!important;pointer-events:none!important;filter:grayscale(.35);position:relative!important;}
+    .sk-manager-locked::after{content:"🔒";position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:.78rem;line-height:1;pointer-events:none;}
+
     #skAdminPanelModal .sk-admin-box{background:var(--model-bg);border:1px solid var(--card-border);border-radius:17px;padding:12px;margin-bottom:10px}
     #skAdminPanelModal .sk-admin-title{font-size:.74rem;color:var(--text-muted);font-weight:850;margin-bottom:7px}
 

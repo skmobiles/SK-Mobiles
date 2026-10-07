@@ -18,12 +18,19 @@
     "sriyogi6@gmail.com": "worker"
   };
 
+  const MANAGER_PERMISSION_DEFAULTS = {
+    managerAccess:true, billing:false, orders:false, inventory:false, credit:false, repair:false,
+    toolsNotes:false, dataFolder:false, settings:false, profile:true, backup:false, restore:false,
+    shopSettings:false, userManagement:false, recycleBin:false
+  };
+  const MANAGER_PERMISSION_DOC = "manager";
+
   const ROLE_KEY = "sk_current_role_v1";
   const WORKER_KEY = "sk_current_worker_id_v1";
   const SHOP_ID = "SK-MOBILES";
   const BILL_KEY = "sk_bills";
 
-  let auth, db, unsubscribeBills = null, unsubscribeAllData = null, unsubscribeRepairJobs = null;
+  let auth, db, unsubscribeBills = null, unsubscribeAllData = null, unsubscribeRepairJobs = null, unsubscribeManagerPermissions = null;
   let remoteReady = false;
   let applyingRemote = false;
   let syncingLocal = false;
@@ -257,13 +264,63 @@
         active: true,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      return expectedRole;
     }
-    const data = snap.data() || {};
+    const data = (await ref.get()).data() || {};
     if(data.role !== expectedRole) throw new Error("Role configuration does not match.");
     if(data.active === false) throw new Error("This account is disabled.");
+    if(expectedRole === "manager"){
+      const perms=await getManagerPermissions();
+      localStorage.setItem("sk_manager_permissions_v1",JSON.stringify(perms));
+      if(perms.managerAccess===false) throw new Error("Manager access is disabled by Admin.");
+    }
     return data.role;
   }
+
+  async function getManagerPermissions(){
+    if(!db) return {...MANAGER_PERMISSION_DEFAULTS};
+    const ref=db.collection("shops").doc(SHOP_ID).collection("permissions").doc(MANAGER_PERMISSION_DOC);
+    const snap=await ref.get();
+    const remote=snap.exists && snap.data() && typeof snap.data().permissions === "object" ? snap.data().permissions : {};
+    return {...MANAGER_PERMISSION_DEFAULTS,...remote};
+  }
+
+  async function setManagerPermission(key,value){
+    const allowed=Object.prototype.hasOwnProperty.call(MANAGER_PERMISSION_DEFAULTS,key);
+    if(!allowed) throw new Error("Unknown Manager permission");
+    if(!auth?.currentUser || emailRole(auth.currentUser.email)!=="admin") throw new Error("Admin access only");
+    const ref=db.collection("shops").doc(SHOP_ID).collection("permissions").doc(MANAGER_PERMISSION_DOC);
+    const current=await getManagerPermissions();
+    current[key]=!!value;
+    current.managerAccess=current.managerAccess!==false;
+    await ref.set({permissions:current,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:auth.currentUser.uid},{merge:true});
+    return current;
+  }
+
+  function managerPermission(key){
+    try{
+      const p=JSON.parse(localStorage.getItem("sk_manager_permissions_v1")||"{}");
+      return p[key] !== false;
+    }catch(e){ return !!MANAGER_PERMISSION_DEFAULTS[key]; }
+  }
+
+  function managerCanSyncKey(key){
+    const role=String(localStorage.getItem(ROLE_KEY)||"").toLowerCase();
+    if(role!=="manager") return true;
+    const k=String(key||"");
+    if(k==="sk_bills") return managerPermission("billing");
+    if(k==="sk_orders") return managerPermission("orders");
+    if(k==="sk_inventory" || k==="sk_low_threshold") return managerPermission("inventory");
+    if(k==="sk_credit_ledger_v1") return managerPermission("credit");
+    if(k==="sk_repair_tools_note" || k==="sk_tools_others_order_note") return managerPermission("toolsNotes");
+    if(k==="sk_workers_v1" || k==="sk_worker_pin_v1") return managerPermission("userManagement");
+    if(k==="sk_shop_name" || k==="sk_shop_addr" || k==="sk_shop_phone" || k==="sk_terms" || k==="sk_custom_logo") return managerPermission("shopSettings");
+    if(k==="sk_theme" || k==="sk_theme_depth" || k==="sk_font_family" || k==="sk_icon_pack" || k==="sk_appearance_settings" || k==="sk_theme_panel_collapsed") return managerPermission("settings");
+    if(k==="sk_recycle_bin_v1") return managerPermission("recycleBin");
+    return true;
+  }
+
+  window.skFirebaseGetManagerPermissions=async function(){ return getManagerPermissions(); };
+  window.skFirebaseSetManagerPermission=async function(key,value){ return setManagerPermission(key,value); };
 
   function billRef(id){
     return db.collection("shops").doc(SHOP_ID).collection("bills").doc(String(id));
@@ -271,6 +328,7 @@
 
   async function uploadBills(){
     if(!auth?.currentUser || !db || applyingRemote || !remoteReady || syncingLocal) return;
+    if(!managerCanSyncKey(BILL_KEY)) return;
     syncingLocal = true;
     try {
       const local = localBills().map(normalizeBill).filter(Boolean);
@@ -422,6 +480,7 @@
 
   async function uploadRepairJobs(force){
     if(!auth?.currentUser || !db || !repairSyncReady || repairApplyingRemote || applyingRemote) return;
+    if(String(localStorage.getItem(ROLE_KEY)||"").toLowerCase()==="manager" && !managerPermission("repair")) return;
     try{
       const local = repairJobsLocal().map(repairNormalize).filter(Boolean);
       const localIds = new Set(local.map(j => String(j.id)));
@@ -573,6 +632,7 @@
 
   async function syncKeyToCloud(key, force=false) {
     if (!auth?.currentUser || !db || applyingRemote || !remoteReady || !isSyncableKey(key)) return;
+    if (!managerCanSyncKey(key)) return;
     try {
       const rawData = localStorage.getItem(key);
       if (rawData === null) return;
@@ -936,6 +996,23 @@
     }
   };
 
+  function startManagerPermissionListener(){
+    if(unsubscribeManagerPermissions){ unsubscribeManagerPermissions(); unsubscribeManagerPermissions=null; }
+    if(String(localStorage.getItem(ROLE_KEY)||"").toLowerCase()!=="manager" || !db) return;
+    const ref=db.collection("shops").doc(SHOP_ID).collection("permissions").doc(MANAGER_PERMISSION_DOC);
+    unsubscribeManagerPermissions=ref.onSnapshot(async snap=>{
+      const remote=snap.exists && snap.data() && typeof snap.data().permissions === "object" ? snap.data().permissions : {};
+      const perms={...MANAGER_PERMISSION_DEFAULTS,...remote};
+      try{localStorage.setItem("sk_manager_permissions_v1",JSON.stringify(perms));}catch(e){}
+      if(perms.managerAccess===false){
+        toast("🔒 Manager access disabled by Admin");
+        try{await auth.signOut();}catch(e){}
+        return;
+      }
+      try{if(typeof window.skApplyRoleRestrictions==='function')window.skApplyRoleRestrictions();}catch(e){}
+    },err=>console.warn("Manager permission listener failed:",err));
+  }
+
   // பட்டன்களுக்கு நேரடி கிளிக் நிகழ்வு வழங்குதல்
   function bindBackupButtons() {
     document.querySelectorAll("button").forEach(btn => {
@@ -973,6 +1050,7 @@
       if(unsubscribeBills){ unsubscribeBills(); unsubscribeBills = null; }
       if(unsubscribeAllData){ unsubscribeAllData(); unsubscribeAllData = null; }
       if(unsubscribeRepairJobs){ unsubscribeRepairJobs(); unsubscribeRepairJobs = null; }
+      if(unsubscribeManagerPermissions){ unsubscribeManagerPermissions(); unsubscribeManagerPermissions = null; }
       repairSyncReady = false;
       repairKnownRemote = new Map();
       remoteReady = false;
@@ -991,17 +1069,11 @@
     }
     try {
       const role = await ensureUserProfile(user);
-      if(role === "manager"){
-        let managerEnabled = true;
-        try{
-          const p = JSON.parse(localStorage.getItem("sk_manager_permissions_v1")||"{}");
-          managerEnabled = p.managerAccess !== false;
-        }catch(e){}
-        if(!managerEnabled) throw new Error("Manager access is disabled by Admin.");
-      }
       localStorage.setItem(ROLE_KEY, role);
       if(role === "worker") localStorage.setItem(WORKER_KEY, user.uid);
       else localStorage.removeItem(WORKER_KEY);
+      if(role === "manager") startManagerPermissionListener();
+      else if(unsubscribeManagerPermissions){ unsubscribeManagerPermissions(); unsubscribeManagerPermissions=null; }
       document.body.classList.toggle("sk-worker-mode", role === "worker");
       if(typeof window.skRefreshRoleBadge === "function") window.skRefreshRoleBadge();
       gate(false);
