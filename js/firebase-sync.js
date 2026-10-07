@@ -40,6 +40,24 @@
   let repairApplyingRemote = false;
   let repairKnownRemote = new Map();
   let repairSyncTimer = null;
+  const SYNC_META_KEY = "sk_sync_meta_v1";
+
+  function readSyncMeta(){
+    try { const x = JSON.parse(localStorage.getItem(SYNC_META_KEY) || "{}"); return x && typeof x === "object" ? x : {}; }
+    catch(e){ return {}; }
+  }
+  let syncMeta = readSyncMeta();
+  function localChangeTime(key){ return Number(syncMeta[key]?.updatedAtMs || 0); }
+  function markLocalChange(key, updatedAtMs){
+    if(!isSyncableKey(key)) return;
+    syncMeta[key] = {updatedAtMs:Number(updatedAtMs)||Date.now()};
+    try { localStorage.setItem(SYNC_META_KEY, JSON.stringify(syncMeta)); } catch(e){}
+  }
+  function markRemoteBaseline(key, updatedAtMs){
+    if(!isSyncableKey(key)) return;
+    syncMeta[key] = {updatedAtMs:Number(updatedAtMs)||Date.now()};
+    try { localStorage.setItem(SYNC_META_KEY, JSON.stringify(syncMeta)); } catch(e){}
+  }
 
   // தானாகவே அனைத்து sk_ மற்றும் skx_ விசைகளையும் கண்டறியும் அமைப்பு
   function isSyncableKey(key) {
@@ -120,6 +138,15 @@
     if(!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
     auth = firebase.auth();
     db = firebase.firestore();
+    // Strict login mode: Firebase must not restore an old authenticated
+    // session automatically. Every login requires the email + password.
+    try {
+      auth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(function(e){
+        console.warn("Firebase auth persistence setup failed:", e);
+      });
+    } catch(e) {
+      console.warn("Firebase auth persistence setup failed:", e);
+    }
     return true;
   }
 
@@ -351,6 +378,188 @@
     }, err => console.error("Firebase connection error", err));
   }
 
+  // ----------------------------------------------------
+  // Repair Jobs: dedicated per-job realtime sync.
+  // This intentionally does not use the whole-array generic data mirror.
+  // ----------------------------------------------------
+  function repairRef(id){
+    return db.collection("shops").doc(SHOP_ID).collection(REPAIR_COLLECTION).doc(String(id));
+  }
+
+  function repairJobsLocal(){
+    try{
+      const a = JSON.parse(localStorage.getItem(REPAIR_KEY) || "[]");
+      return Array.isArray(a) ? a : [];
+    }catch(e){ return []; }
+  }
+
+  function setRepairJobsLocal(a){
+    repairApplyingRemote = true;
+    try { localStorage.setItem(REPAIR_KEY, JSON.stringify(Array.isArray(a) ? a : [])); }
+    finally { repairApplyingRemote = false; }
+    refreshAllUI();
+  }
+
+  function repairTime(job){
+    const candidates = [job && job._syncUpdatedAt, job && job.updatedAt, job && job.createdAt];
+    for(const value of candidates){
+      if(typeof value === "number" && isFinite(value)) return value;
+      const n = Date.parse(String(value || ""));
+      if(!isNaN(n)) return n;
+    }
+    return 0;
+  }
+
+  function repairNormalize(job){
+    if(!job || !job.id) return null;
+    const out = Object.assign({}, job, {id:String(job.id)});
+    delete out._syncUpdatedBy;
+    delete out._deleted;
+    delete out.isDeleted;
+    delete out._syncUpdatedAt;
+    return out;
+  }
+
+  async function uploadRepairJobs(force){
+    if(!auth?.currentUser || !db || !repairSyncReady || repairApplyingRemote || applyingRemote) return;
+    try{
+      const local = repairJobsLocal().map(repairNormalize).filter(Boolean);
+      const localIds = new Set(local.map(j => String(j.id)));
+      const batch = db.batch();
+      let writes = 0;
+      const now = Date.now();
+
+      for(const job of local){
+        const id = String(job.id);
+        const rawHash = syncHash(JSON.stringify(job));
+        const previous = repairKnownRemote.get(id);
+        const localTime = repairTime(job) || now;
+        if(!force && previous && previous.hash === rawHash && !previous.deleted) continue;
+        batch.set(repairRef(id), Object.assign({}, job, {
+          _syncUpdatedAt: localTime,
+          _syncUpdatedBy: auth.currentUser.uid,
+          _deleted: false,
+          isDeleted: false
+        }), {merge:true});
+        repairKnownRemote.set(id, {hash:rawHash, updatedAt:localTime, deleted:false});
+        writes++;
+      }
+
+      // Publish tombstones for jobs removed locally so another device cannot
+      // resurrect them from its older local array.
+      for(const [id, meta] of repairKnownRemote.entries()){
+        if(localIds.has(id) || meta?.deleted) continue;
+        batch.set(repairRef(id), {
+          id,
+          _deleted:true,
+          isDeleted:true,
+          _syncUpdatedAt:now,
+          _syncUpdatedBy:auth.currentUser.uid
+        }, {merge:true});
+        repairKnownRemote.set(id, {hash:"", updatedAt:now, deleted:true});
+        writes++;
+      }
+      if(writes) await batch.commit();
+    }catch(e){
+      console.error("Repair Jobs cloud sync failed", e);
+    }
+  }
+
+  async function startRepairJobSync(){
+    if(unsubscribeRepairJobs) unsubscribeRepairJobs();
+    repairSyncReady = false;
+    repairKnownRemote = new Map();
+    const ref = db.collection("shops").doc(SHOP_ID).collection(REPAIR_COLLECTION);
+
+    try{
+      const snap = await ref.get();
+      const remoteMap = new Map();
+      const tombstones = new Map();
+      snap.docs.forEach(d=>{
+        const r = d.data() || {};
+        const id = String(r.id || d.id);
+        const meta = {
+          hash: r._deleted || r.isDeleted ? "" : syncHash(JSON.stringify(repairNormalize(r))),
+          updatedAt: Number(r._syncUpdatedAt) || repairTime(r),
+          deleted: r._deleted === true || r.isDeleted === true
+        };
+        repairKnownRemote.set(id, meta);
+        if(meta.deleted) tombstones.set(id, meta);
+        else remoteMap.set(id, repairNormalize(r));
+      });
+
+      const local = repairJobsLocal();
+      const merged = new Map(remoteMap);
+      local.forEach(job=>{
+        const id = String(job?.id || "");
+        if(!id) return;
+        const remote = remoteMap.get(id);
+        const remoteMeta = repairKnownRemote.get(id);
+        const localTime = repairTime(job);
+        const remoteTime = Number(remoteMeta?.updatedAt || 0);
+        if(!remote || localTime > remoteTime){
+          merged.set(id, repairNormalize(job));
+        } else if(remoteMeta?.deleted && localTime <= remoteTime){
+          merged.delete(id);
+        }
+      });
+
+      // If local contains jobs that are newer than cloud, keep them and upload.
+      // If cloud is newer, cloud becomes the local source of truth.
+      setRepairJobsLocal([...merged.values()].filter(Boolean));
+      repairSyncReady = true;
+      await uploadRepairJobs(false);
+
+      unsubscribeRepairJobs = ref.onSnapshot(snapshot=>{
+        if(repairApplyingRemote) return;
+        try{
+          const remoteMapNow = new Map();
+          const remoteMetaNow = new Map();
+          snapshot.docs.forEach(d=>{
+            const r=d.data()||{};
+            const id=String(r.id||d.id);
+            const deleted=r._deleted===true || r.isDeleted===true;
+            const meta={
+              hash:deleted?"":syncHash(JSON.stringify(repairNormalize(r))),
+              updatedAt:Number(r._syncUpdatedAt)||repairTime(r),
+              deleted
+            };
+            remoteMetaNow.set(id,meta);
+            if(!deleted) remoteMapNow.set(id,repairNormalize(r));
+          });
+
+          const local=repairJobsLocal();
+          const merged=new Map(remoteMapNow);
+          let localWins=false;
+          local.forEach(job=>{
+            const id=String(job?.id||""); if(!id) return;
+            const localTime=repairTime(job);
+            const rm=remoteMetaNow.get(id);
+            const remoteTime=Number(rm?.updatedAt||0);
+            if(!rm || localTime>remoteTime){
+              merged.set(id,repairNormalize(job));
+              localWins=true;
+            } else if(rm.deleted && localTime<=remoteTime){
+              merged.delete(id);
+            }
+          });
+
+          const next=[...merged.values()].filter(Boolean);
+          const oldRaw=JSON.stringify(local);
+          const nextRaw=JSON.stringify(next);
+          repairKnownRemote=remoteMetaNow;
+          if(oldRaw!==nextRaw){
+            setRepairJobsLocal(next);
+          }
+          if(localWins) uploadRepairJobs(false).catch(()=>{});
+        }catch(e){ console.error("Repair Jobs realtime snapshot error",e); }
+      }, err=>console.error("Repair Jobs realtime listener error",err));
+    }catch(e){
+      console.error("Repair Jobs realtime initialization failed",e);
+      repairSyncReady=false;
+    }
+  }
+
   // கிளவுடில் உள்ள அனைத்து sk_ டேட்டாக்களையும் நிகழ்நேரத்தில் கண்காணிக்கும் அமைப்பு
   const universalLastSyncedHash = new Map();
   let universalSyncStarted = false;
@@ -370,13 +579,15 @@
       const hash = syncHash(rawData);
       if (!force && universalLastSyncedHash.get(key) === hash) return;
       const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
+      const updatedAtMs = Math.max(Date.now(), localChangeTime(key));
       await ref.set({
         data: rawData,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAtMs: Date.now(),
+        updatedAtMs,
         updatedBy: auth.currentUser.uid
       }, { merge: true });
       universalLastSyncedHash.set(key, hash);
+      markRemoteBaseline(key, updatedAtMs);
     } catch(e) {
       console.error(key + " cloud sync failed", e);
     }
@@ -410,22 +621,39 @@
       const remoteKeys = new Set();
       let hasChanges = false;
 
+      const localWins = new Set();
       initial.docs.forEach(doc => {
         const key = String(doc.id);
         if(!isSyncableKey(key)) return;
         remoteKeys.add(key);
-        const cloudVal = (doc.data() || {}).data;
+        const data = doc.data() || {};
+        const cloudVal = data.data;
         if(typeof cloudVal !== "string") return;
+        const remoteTime = Number(data.updatedAtMs || 0);
         const localVal = localStorage.getItem(key);
+        const localTime = localChangeTime(key);
+
+        // If this device changed the key after the cloud version it last saw,
+        // preserve that local write and publish it instead of blindly replacing
+        // it during login. This is the core fix for Manager/Admin divergence.
+        if(localVal !== null && localVal !== cloudVal && localTime > remoteTime){
+          localWins.add(key);
+          universalLastSyncedHash.set(key, syncHash(localVal));
+          return;
+        }
+
         if(cloudVal !== localVal){
           applyingRemote = true;
           try { localStorage.setItem(key, cloudVal); hasChanges = true; }
           finally { applyingRemote = false; }
         }
         universalLastSyncedHash.set(key, syncHash(cloudVal));
+        markRemoteBaseline(key, remoteTime || Date.now());
       });
 
       remoteReady = true;
+      // Upload local-newer keys first, then publish any keys missing in cloud.
+      for(const key of localWins) await syncKeyToCloud(key, true);
       await syncMissingLocalDataToCloud(initial);
 
       // Register the realtime listener only after the initial baseline is ready.
@@ -446,15 +674,23 @@
             return;
           }
 
-          const cloudVal = (change.doc.data() || {}).data;
+          const data = change.doc.data() || {};
+          const cloudVal = data.data;
           if(typeof cloudVal !== "string") return;
           const localVal = localStorage.getItem(key);
+          const remoteTime = Number(data.updatedAtMs || 0);
+          const localTime = localChangeTime(key);
+          if(localVal !== null && localVal !== cloudVal && localTime > remoteTime){
+            syncKeyToCloud(key, true);
+            return;
+          }
           universalLastSyncedHash.set(key, syncHash(cloudVal));
           if(cloudVal !== localVal){
             applyingRemote = true;
             try { localStorage.setItem(key, cloudVal); changed = true; }
             finally { applyingRemote = false; }
           }
+          markRemoteBaseline(key, remoteTime || Date.now());
         });
 
         // Catch any local change that happened while the listener was attaching.
@@ -496,6 +732,7 @@
 
     Storage.prototype.setItem = function(key, value){
       const result = originalSet.apply(this, arguments);
+      if(this === localStorage && !applyingRemote && auth?.currentUser && isSyncableKey(key)) markLocalChange(key, Date.now());
       if(this === localStorage && !applyingRemote && auth?.currentUser && remoteReady){
         if(key === BILL_KEY){
           clearTimeout(syncTimer);
@@ -515,6 +752,7 @@
     // resurrected from Firestore on another device.
     Storage.prototype.removeItem = function(key){
       const result = originalRemove.apply(this, arguments);
+      if(this === localStorage && !applyingRemote && auth?.currentUser && isSyncableKey(key)) markLocalChange(key, Date.now());
       if(this === localStorage && !applyingRemote && auth?.currentUser && remoteReady){
         if(key === REPAIR_KEY){
           clearTimeout(repairSyncTimer);
@@ -711,6 +949,25 @@
     });
   }
 
+  // Explicit application logout: terminate the Firebase session and clear
+  // only device-local login state. Business/app data must remain untouched.
+  window.skFirebaseLogout = async function(){
+    try {
+      if(auth && auth.currentUser) await auth.signOut();
+    } catch(e) {
+      console.error("Firebase logout failed:", e);
+    }
+    try {
+      localStorage.removeItem(ROLE_KEY);
+      localStorage.removeItem(WORKER_KEY);
+      const email = document.getElementById("loginEmailInput");
+      const password = document.getElementById("loginPasswordInput");
+      if(email) email.value = "";
+      if(password) password.value = "";
+    } catch(e){}
+    gate(true);
+  };
+
   async function handleUser(user){
     if(!user){ 
       if(unsubscribeBills){ unsubscribeBills(); unsubscribeBills = null; }
@@ -723,6 +980,12 @@
       if(window.__skFirebaseSyncReconcile){ clearInterval(window.__skFirebaseSyncReconcile); window.__skFirebaseSyncReconcile=null; }
       localStorage.removeItem(ROLE_KEY);
       localStorage.removeItem(WORKER_KEY);
+      try {
+        const email = document.getElementById("loginEmailInput");
+        const password = document.getElementById("loginPasswordInput");
+        if(email) email.value = "";
+        if(password) password.value = "";
+      } catch(e){}
       gate(true);
       return;
     }

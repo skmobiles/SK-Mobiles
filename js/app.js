@@ -4832,7 +4832,7 @@ img{max-width:100%!important;}
     function pin(r){return localStorage.getItem(pinKey(r))||(r==='admin'?DEFAULT_ADMIN_PIN:DEFAULT_WORKER_PIN);}
     function toast(t){if(typeof showToast==='function')showToast(t);}
     function setRole(r){localStorage.setItem(ROLE_KEY,r);document.body.classList.toggle('sk-worker-mode',r==='worker');}
-    function gate(show){const g=document.getElementById('skRoleGate');if(g)g.classList.toggle('sk-show',show);}
+    function gate(show){const modern=document.getElementById('skLoginModal');const g=document.getElementById('skRoleGate');if(modern){modern.classList.toggle('active',!!show);if(g)g.classList.remove('sk-show');return;}if(g)g.classList.toggle('sk-show',show);}
     function logo(){return localStorage.getItem('sk_custom_logo')||window.SK_MOBILES_EMBEDDED_LOGO||'Logo.png';}
     function message(t){const m=document.getElementById('skRoleMsg');if(m)m.textContent=t||'';}
     function choose(r){selectedRole=r;document.querySelectorAll('.sk-role-btn').forEach(b=>b.classList.toggle('active',b.dataset.role===r));const p=document.getElementById('skRolePin');if(p){p.value='';p.placeholder=r==='admin'?'Admin PIN':'Worker PIN';p.focus();}message('');}
@@ -4850,7 +4850,26 @@ img{max-width:100%!important;}
       setTimeout(()=>{gate(false);applyRestrictions();},0);
       toast(selectedRole==='admin'?'👑 Admin login successful':'👷 Worker login successful');
     }
-    window.skLogout=function(){localStorage.removeItem(ROLE_KEY);document.querySelectorAll('.modal-overlay.active').forEach(m=>m.classList.remove('active'));document.getElementById('skAdminPanelModal')?.classList.remove('active');gate(true);choose('admin');};
+    window.skLogout=async function(){
+      try{
+        if(typeof window.skFirebaseLogout === 'function'){
+          await window.skFirebaseLogout();
+        }else{
+          localStorage.removeItem(ROLE_KEY);
+          localStorage.removeItem(WORKER_KEY);
+        }
+      }catch(e){ console.error('Logout failed:',e); }
+      document.querySelectorAll('.modal-overlay.active').forEach(m=>{
+        if(m.id !== 'skLoginModal') m.classList.remove('active');
+      });
+      document.getElementById('skAdminPanelModal')?.classList.remove('active');
+      const email=document.getElementById('loginEmailInput');
+      const password=document.getElementById('loginPasswordInput');
+      if(email) email.value='';
+      if(password) password.value='';
+      gate(true);
+      email?.focus();
+    };
 
     const SK_MANAGER_PERM_KEY='sk_manager_permissions_v1';
     const SK_MANAGER_DEFAULTS={
