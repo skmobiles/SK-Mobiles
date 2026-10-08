@@ -4563,11 +4563,11 @@ img{max-width:100%!important;}
       const dealer=String(j.dealer||'');
       const dealerOptions=dealers.map(d=>`<option value="${esc(d)}" ${d===dealer?'selected':''}>${esc(d)}</option>`).join('');
       const dealerControl=isManager
-        ? `<div class="sk-rj-dealer-inline sk-rj-dealer-readonly" onclick="event.stopPropagation()"><span class="sk-rj-dealer-label">🏪</span><b>${esc(dealer||'Dealer')}</b></div>`
+        ? `<div class="sk-rj-dealer-inline sk-rj-dealer-readonly" onclick="event.stopPropagation()"><span class="sk-rj-dealer-label">🏪 Dealer</span><b>${esc(dealer||'Not selected')}</b></div>`
         : `<div class="sk-rj-dealer-inline" onclick="event.stopPropagation()">
-        <span class="sk-rj-dealer-label">🏪</span>
+        <span class="sk-rj-dealer-label">🏪 Dealer</span>
         <select class="sk-rj-dealer-select" aria-label="Dealer" onchange="skRjSetDealer('${esc(j.id)}',this.value)">
-          <option value="">Dealer</option>${dealerOptions}
+          <option value="">Select dealer</option>${dealerOptions}
         </select>
         <button type="button" class="sk-rj-dealer-add" title="Add dealer" onclick="event.stopPropagation();skRjAddDealerName()">＋</button>
       </div>`;
@@ -4585,8 +4585,9 @@ img{max-width:100%!important;}
             <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div>
             <div class="sk-rj-money-line">💰 Estimate ₹${Number(j.estimate||0).toLocaleString('en-IN')} · Advance ₹${Number(j.advance||0).toLocaleString('en-IN')} · Paid ₹${Number(j.totalPaid||j.advance||0).toLocaleString('en-IN')} · Balance ₹${Number(j.balance||0).toLocaleString('en-IN')}</div>
           </div>
-          <div class="sk-rj-status-priority-dealer"><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${esc(work)}">${esc(j.workType||'Normal')}</span>${dealerControl}</div>
+          <div><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${esc(work)}">${esc(j.workType||'Normal')}</span></div>
         </div>
+        ${dealerControl}
         ${actions}
         <div class="sk-rj-open-hint">Tap to open full repair details →</div>
       </div>`;
@@ -4633,20 +4634,12 @@ img{max-width:100%!important;}
           <div class="sk-rj-open-hint">Tap to open full repair details →</div>
         </div>`;
       };
-      const readyHtml=ready.length?`<div class="sk-rj-history-section-title ready">✅ Ready for Delivery <span>${ready.length}</span></div>${ready.map(makeCard).join('')}`:'';
-      const deliveredHtml=delivered.length?`<div class="sk-rj-history-section-title delivered">🚚 Delivered <span>${delivered.length}</span></div>${delivered.map(makeCard).join('')}`:'';
-      list.innerHTML=readyHtml+deliveredHtml;
+      list.innerHTML=(ready.length?`<div class="sk-rj-history-section-title ready">✅ Ready for Delivery <span>${ready.length}</span></div>${ready.map(makeCard).join('')}`:'')
+        +(delivered.length?`<div class="sk-rj-history-section-title delivered">🚚 Delivered <span>${delivered.length}</span></div>${delivered.map(makeCard).join('')}`:'');
       if(!list.innerHTML)list.innerHTML='<div class="sk-rj-empty">No repair history found for selected filters.</div>';
     }catch(err){
       console.error('Repair history render failed:',err);
-      /* Keep history usable even if one malformed legacy record exists. */
-      try{
-        const safe=load().filter(j=>j&&['Ready','Delivered'].includes(String(j.status||'')));
-        list.innerHTML=safe.length?safe.map(j=>`<div class="sk-rj-card" data-work-type="${esc(String(j.workType||'Normal').toLowerCase())}" onclick="skRjShowDetail('${esc(j.id||'')}')"><div class="sk-rj-name">${esc(j.customer||'Customer')} · ${esc(j.model||'')}</div><div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status||'')} · 📱 ${esc(j.phone||'—')}</div><div class="sk-rj-problem-highlight">🔴 <b>Problem:</b> ${esc(j.problem||'—')}</div><div class="sk-rj-open-hint">Tap to open full repair details →</div></div>`).join(''):'<div class="sk-rj-empty">No repair history found for selected filters.</div>';
-      }catch(fallbackErr){
-        console.error('Repair history fallback failed:',fallbackErr);
-        list.innerHTML='<div class="sk-rj-empty">No repair history found for selected filters.</div>';
-      }
+      list.innerHTML='<div class="sk-rj-empty">Unable to display repair history. Please try again.</div>';
     }
   };
 
