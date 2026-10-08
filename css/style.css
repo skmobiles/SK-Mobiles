@@ -8725,3 +8725,176 @@ html[data-ui-card-surface="shadow"] .sk-rj-card[data-work-type="scheduled"],
     width:104px !important;
   }
 }
+
+
+/* ============================================================
+   FINAL REPAIR JOBS — RESTORE COMPACT PREVIOUS PRESENTATION
+   Functional/data logic untouched. Keep the requested dealer,
+   history, urgent and permission behavior; only presentation.
+   ============================================================ */
+#skRepairJobsModal > .modal-sheet{
+  width:calc(100% - 12px) !important;
+  max-width:760px !important;
+  max-height:calc(100dvh - 12px) !important;
+  height:auto !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior-y:contain !important;
+  padding-bottom:90px !important;
+}
+#skRepairJobsModal .modal-title{
+  min-height:48px !important;
+  padding:7px 10px !important;
+  margin-bottom:7px !important;
+  font-size:.98rem !important;
+  line-height:1.2 !important;
+}
+#skRepairJobsModal .modal-title .modal-close-btn{
+  width:38px !important;
+  height:38px !important;
+  min-width:38px !important;
+  min-height:38px !important;
+  font-size:1.1rem !important;
+}
+#skRepairJobsModal .sk-rj-tabs{
+  margin:7px 6px 7px !important;
+  padding:3px !important;
+  gap:5px !important;
+}
+#skRepairJobsModal .sk-rj-tab{
+  min-height:40px !important;
+  height:40px !important;
+  padding:0 7px !important;
+  font-size:.72rem !important;
+  line-height:1.15 !important;
+}
+#skRepairJobsModal #skRjJobsView,
+#skRepairJobsModal #skRjPendingView,
+#skRepairJobsModal #skRjHistoryView{
+  max-height:none !important;
+  overflow:visible !important;
+  padding-left:6px !important;
+  padding-right:6px !important;
+}
+#skRepairJobsModal #skRjJobsList,
+#skRepairJobsModal #skRjHistoryList{
+  gap:8px !important;
+}
+#skRepairJobsModal .sk-rj-card{
+  padding:10px !important;
+  border-radius:15px !important;
+}
+#skRepairJobsModal .sk-rj-card-top{
+  gap:8px !important;
+}
+#skRepairJobsModal .sk-rj-name{
+  font-size:.82rem !important;
+  line-height:1.3 !important;
+}
+#skRepairJobsModal .sk-rj-meta{
+  margin-top:3px !important;
+  font-size:.65rem !important;
+  line-height:1.4 !important;
+}
+#skRepairJobsModal .sk-rj-problem-highlight{
+  margin-top:4px !important;
+  padding:5px 7px !important;
+  border-radius:8px !important;
+  font-size:.68rem !important;
+  line-height:1.35 !important;
+}
+#skRepairJobsModal .sk-rj-delivery-meta,
+#skRepairJobsModal .sk-rj-money-line,
+#skRepairJobsModal .sk-rj-dealer-history{
+  font-size:.64rem !important;
+  line-height:1.4 !important;
+}
+#skRepairJobsModal .sk-rj-status,
+#skRepairJobsModal .sk-rj-priority{
+  min-height:24px !important;
+  padding:3px 7px !important;
+  font-size:.6rem !important;
+}
+#skRepairJobsModal .sk-rj-actions{
+  gap:6px !important;
+  margin-top:7px !important;
+}
+#skRepairJobsModal .sk-rj-actions button,
+#skRepairJobsModal .sk-rj-delete{
+  min-height:36px !important;
+  height:36px !important;
+  padding:0 6px !important;
+  border-radius:10px !important;
+  font-size:.64rem !important;
+}
+#skRepairJobsModal .sk-rj-open-hint{
+  margin-top:5px !important;
+  font-size:.64rem !important;
+  line-height:1.3 !important;
+}
+#skRepairJobsModal .sk-rj-status-priority-dealer{
+  gap:4px !important;
+}
+#skRepairJobsModal .sk-rj-status-priority-dealer .sk-rj-dealer-inline{
+  height:29px !important;
+  padding:2px 4px !important;
+  gap:3px !important;
+  border-radius:8px !important;
+}
+#skRepairJobsModal .sk-rj-status-priority-dealer .sk-rj-dealer-select{
+  width:100px !important;
+  min-width:74px !important;
+  height:23px !important;
+  font-size:.59rem !important;
+}
+#skRepairJobsModal .sk-rj-status-priority-dealer .sk-rj-dealer-add{
+  width:23px !important;
+  min-width:23px !important;
+  height:23px !important;
+  font-size:.9rem !important;
+}
+#skRepairJobsModal #skRjHistoryView .sk-rj-filter-label{
+  font-size:.57rem !important;
+}
+#skRepairJobsModal #skRjHistoryView .form-input{
+  min-height:36px !important;
+  height:36px !important;
+  font-size:.72rem !important;
+}
+#skRepairJobsModal #skRjHistoryView .sk-rj-export{
+  min-height:36px !important;
+  height:36px !important;
+  font-size:.68rem !important;
+}
+#skRepairJobsModal .sk-rj-history-section-title{
+  min-height:28px !important;
+  padding:4px 8px !important;
+  font-size:.68rem !important;
+}
+#skRepairJobsModal .sk-rj-history-section-title span{font-size:.58rem !important;}
+@media(max-width:759px){
+  #skRepairJobsModal > .modal-sheet{
+    width:calc(100vw - 12px) !important;
+    max-height:calc(100dvh - 8px) !important;
+    border-radius:20px !important;
+  }
+  #skRepairJobsModal .modal-title{
+    min-height:48px !important;
+    padding:6px 9px !important;
+  }
+  #skRepairJobsModal .sk-rj-card-top{
+    flex-direction:column !important;
+  }
+  #skRepairJobsModal .sk-rj-card-top > div:last-child{
+    width:100% !important;
+    display:flex !important;
+    align-items:center !important;
+    flex-wrap:wrap !important;
+    gap:4px !important;
+  }
+  #skRepairJobsModal .sk-rj-status-priority-dealer{
+    width:100% !important;
+    justify-content:flex-start !important;
+  }
+}
