@@ -4197,6 +4197,9 @@ img{max-width:100%!important;}
     document.getElementById('skRjDate').value=rjFmtDate(today());
     document.getElementById('skRjStatus').value='Received';
     document.getElementById('skRjWorkType').value='Normal';
+    document.getElementById('skRjAdvance').value='0';
+    document.getElementById('skRjBalance').value='₹ 0';
+    const dealerRows=document.getElementById('skRjDealerRows'); if(dealerRows) dealerRows.innerHTML='';
     document.getElementById('skRjScheduleWrap').style.display='none';
     document.getElementById('skRjSaveBtn').textContent='💾 Save Repair Job';
     document.getElementById('skRjCancelEdit').style.display='none';
@@ -4253,7 +4256,7 @@ img{max-width:100%!important;}
   // Home → Urgent Repair must open the Pending Jobs page directly, not the
   // separate Urgent Repair modal. The urgent job is placed first and focused.
   window.skOpenUrgentPendingRepair=function(){
-    const jobs=load().filter(j=>j.status!=='Delivered' && String(j.workType||'Normal').toLowerCase()==='urgent');
+    const jobs=load().filter(j=>isPending(j) && String(j.workType||'Normal').toLowerCase()==='urgent');
     if(!jobs.length){
       skOpenPendingRepairJobs();
       return;
@@ -4273,6 +4276,32 @@ img{max-width:100%!important;}
     },80);
   };
 
+  function addDealerRow(spare='',dealer=''){
+    const wrap=document.getElementById('skRjDealerRows'); if(!wrap)return;
+    const row=document.createElement('div');
+    row.className='sk-rj-dealer-row';
+    row.style.cssText='display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-top:6px;align-items:center';
+    row.innerHTML='<input class="form-input sk-rj-spare" placeholder="Spare name" value="'+esc(spare)+'"><input class="form-input sk-rj-dealer" placeholder="Dealer name" value="'+esc(dealer)+'"><button type="button" class="submit-btn" style="padding:9px 11px;background:var(--pill-bg);border:1px solid var(--card-border);color:var(--text)">✕</button>';
+    row.querySelector('button').onclick=()=>row.remove();
+    wrap.appendChild(row);
+  }
+  function collectDealerSpares(){
+    return Array.from(document.querySelectorAll('#skRjDealerRows .sk-rj-dealer-row')).map(row=>({
+      spare:row.querySelector('.sk-rj-spare')?.value.trim()||'',
+      dealer:row.querySelector('.sk-rj-dealer')?.value.trim()||''
+    })).filter(x=>x.spare||x.dealer);
+  }
+  function updateRepairBalance(){
+    const estimate=Number(document.getElementById('skRjEstimate')?.value)||0;
+    const advance=Number(document.getElementById('skRjAdvance')?.value)||0;
+    const balance=Math.max(0,estimate-advance);
+    const el=document.getElementById('skRjBalance'); if(el) el.value='₹ '+balance.toLocaleString('en-IN');
+  }
+  window.skRjAddDealer=addDealerRow;
+  document.getElementById('skRjAddDealerBtn')?.addEventListener('click',()=>addDealerRow());
+  document.getElementById('skRjEstimate')?.addEventListener('input',updateRepairBalance);
+  document.getElementById('skRjAdvance')?.addEventListener('input',updateRepairBalance);
+
   window.skRjSaveJob=function(e){
     e?.preventDefault();
     const id=document.getElementById('skRjEditId').value;
@@ -4286,15 +4315,19 @@ img{max-width:100%!important;}
       customer:document.getElementById('skRjCustomer').value.trim()||'Walk-in Customer',
       phone:document.getElementById('skRjPhone').value.trim(),
       model:document.getElementById('skRjModel').value.trim(),
-      imei:document.getElementById('skRjImei').value.trim(),
       workType:document.getElementById('skRjWorkType').value,
       schedule:document.getElementById('skRjSchedule').value,
       problem:document.getElementById('skRjProblem').value.trim(),
       date:rjToISODate(document.getElementById('skRjDate').value)||today(),
       estimate:Number(document.getElementById('skRjEstimate').value)||0,
+      advance:Number(document.getElementById('skRjAdvance').value)||0,
+      deliveryPayment:Number(existing?.deliveryPayment)||0,
+      totalPaid:(Number(document.getElementById('skRjAdvance').value)||0)+(Number(existing?.deliveryPayment)||0),
+      balance:Math.max(0,(Number(document.getElementById('skRjEstimate').value)||0)-((Number(document.getElementById('skRjAdvance').value)||0)+(Number(existing?.deliveryPayment)||0))),
       status:document.getElementById('skRjStatus').value,
+      dealerSpares:collectDealerSpares(),
       note:document.getElementById('skRjNote').value.trim(),
-      deliveryStatus: status==='Delivered' ? 'Delivered' : (status==='Ready' ? 'Ready for Delivery' : (existing?.deliveryStatus||'Pending')),
+      deliveryStatus: document.getElementById('skRjStatus').value==='Ready' ? 'Ready for Delivery' : (existing?.deliveryStatus||'Pending'),
       reworkReason: existing?.reworkReason||'',
       reworkCount: Number(existing?.reworkCount)||0,
       createdAt:existing?.createdAt||new Date().toISOString(),
@@ -4320,14 +4353,17 @@ img{max-width:100%!important;}
     document.getElementById('skRjCustomer').value=j.customer||'Walk-in Customer';
     document.getElementById('skRjPhone').value=j.phone||'';
     document.getElementById('skRjModel').value=j.model||'';
-    document.getElementById('skRjImei').value=j.imei||'';
     document.getElementById('skRjWorkType').value=j.workType||'Normal';
     document.getElementById('skRjSchedule').value=j.schedule||'';
     document.getElementById('skRjProblem').value=j.problem||'';
     document.getElementById('skRjDate').value=rjFmtDate(j.date||today());
     document.getElementById('skRjEstimate').value=j.estimate||'';
+    document.getElementById('skRjAdvance').value=j.advance||0;
+    document.getElementById('skRjBalance').value='₹ '+Number(j.balance||Math.max(0,(Number(j.estimate)||0)-(Number(j.advance)||0)-(Number(j.deliveryPayment)||0))).toLocaleString('en-IN');
     document.getElementById('skRjStatus').value=j.status||'Received';
     document.getElementById('skRjNote').value=j.note||'';
+    const dealerRows=document.getElementById('skRjDealerRows'); if(dealerRows) dealerRows.innerHTML='';
+    (Array.isArray(j.dealerSpares)?j.dealerSpares:[]).forEach(x=>addDealerRow(x.spare,x.dealer));
     document.getElementById('skRjScheduleWrap').style.display=j.workType==='Scheduled'?'block':'none';
     document.getElementById('skRjSaveBtn').textContent='✏️ Update Repair Job';
     document.getElementById('skRjCancelEdit').style.display='block';
@@ -4339,9 +4375,8 @@ img{max-width:100%!important;}
     const old=a[i].status;
     const next=statusNext(old);
     if(old==='Ready'){
-      a[i].status='Delivered';
-      a[i].deliveryStatus='Delivered';
-      a[i].deliveredAt=new Date().toISOString();
+      skRjDeliver(id);
+      return;
     }else{
       a[i].status=next;
       if(next==='Ready') a[i].deliveryStatus='Ready for Delivery';
@@ -4353,12 +4388,23 @@ img{max-width:100%!important;}
   window.skRjDeliver=function(id){
     const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
     if(a[i].status!=='Ready'){ showToast('Repair job must be Ready before delivery'); return; }
+    const estimate=Number(a[i].estimate)||0;
+    const advance=Number(a[i].advance)||0;
+    const previousDelivery=Number(a[i].deliveryPayment)||0;
+    const currentBalance=Math.max(0,estimate-advance-previousDelivery);
+    const raw=prompt('Customer payment received at delivery (₹):', currentBalance ? String(currentBalance) : '0');
+    if(raw===null)return;
+    const deliveryPayment=Math.max(0,Number(String(raw).replace(/,/g,''))||0);
+    const totalPaid=advance+deliveryPayment;
+    a[i].deliveryPayment=deliveryPayment;
+    a[i].totalPaid=totalPaid;
+    a[i].balance=Math.max(0,estimate-totalPaid);
     a[i].status='Delivered';
     a[i].deliveryStatus='Delivered';
     a[i].deliveredAt=new Date().toISOString();
     a[i].updatedAt=new Date().toISOString();
     save(a); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
-    showToast('Repair job marked Delivered');
+    showToast('Repair job marked Delivered • Balance ₹'+Number(a[i].balance||0).toLocaleString('en-IN'));
   };
 
   window.skRjRework=function(id){
@@ -4414,7 +4460,7 @@ img{max-width:100%!important;}
     document.getElementById('skRepairDetailContent').innerHTML=`
       <div style="background:var(--model-bg);border:1px solid var(--card-border);border-radius:15px;padding:12px">
         <div style="font-weight:900;font-size:.95rem">${esc(j.customer)} · ${esc(j.model)}</div>
-        <div style="font-size:.72rem;color:var(--text-muted);margin-top:5px">📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}</div>
+        <div style="font-size:.72rem;color:var(--text-muted);margin-top:5px">📱 Repair Phone: ${esc(j.phone||'—')}</div>
         <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
           <button type="button" class="submit-btn" style="flex:1;min-width:135px;background:#2563eb" onclick="skRjCallPhone('${esc(j.phone||'')}')">📞 Call Repair Phone</button>
           <button type="button" class="submit-btn whatsapp-green" style="flex:1;min-width:135px" onclick="skRjWhatsAppReady('${esc(j.id||'')}')">💬 WhatsApp</button>
@@ -4422,7 +4468,8 @@ img{max-width:100%!important;}
         <div style="margin-top:9px;font-size:.76rem"><b>Problem / Repair:</b><br>${esc(j.problem)}</div>
         <div style="margin-top:8px;font-size:.72rem;color:var(--text-muted)">📅 ${rjFmtDate(j.date)} · Status: <b>${esc(j.status)}</b> · Work: <b>${esc(j.workType)}</b></div>
         ${j.schedule?`<div style="margin-top:6px;font-size:.72rem">🗓️ Scheduled: <b>${esc(j.schedule)}</b></div>`:''}
-        <div style="margin-top:6px;font-size:.72rem">Estimate: <b>₹${Number(j.estimate||0).toLocaleString('en-IN')}</b></div>
+        <div style="margin-top:6px;font-size:.72rem">💰 Estimate: <b>₹${Number(j.estimate||0).toLocaleString('en-IN')}</b> · Advance: <b>₹${Number(j.advance||0).toLocaleString('en-IN')}</b> · Delivery Paid: <b>₹${Number(j.deliveryPayment||0).toLocaleString('en-IN')}</b> · Balance: <b>₹${Number(j.balance||0).toLocaleString('en-IN')}</b></div>
+        ${Array.isArray(j.dealerSpares)&&j.dealerSpares.length?`<div style="margin-top:7px;font-size:.72rem"><b>🧰 Spare / Dealer:</b> ${j.dealerSpares.map(x=>esc(x.spare)+' → '+esc(x.dealer)).join(' · ')}</div>`:''}
         ${j.note?`<div style="margin-top:8px;font-size:.72rem"><b>Note:</b> ${esc(j.note)}</div>`:''}
       </div>`;
     document.getElementById('skRepairDetailModal').classList.add('active');
@@ -4448,8 +4495,8 @@ img{max-width:100%!important;}
       <div class="sk-rj-card" data-rj-id="${esc(j.id)}" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
-          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div></div>
+          <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')}<br>${esc(j.problem)}</div>
+          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div><div style="margin-top:5px;font-size:.68rem">💰 Estimate ₹${Number(j.estimate||0).toLocaleString('en-IN')} · Advance ₹${Number(j.advance||0).toLocaleString('en-IN')} · Paid ₹${Number(j.totalPaid||j.advance||0).toLocaleString('en-IN')} · Balance ₹${Number(j.balance||0).toLocaleString('en-IN')}</div>${Array.isArray(j.dealerSpares)&&j.dealerSpares.length?`<div style="margin-top:5px;font-size:.68rem">🧰 ${j.dealerSpares.map(x=>esc(x.spare)+' → '+esc(x.dealer)).join(' · ')}</div>`:''}</div>
           <div><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span></div>
         </div>
         <div class="sk-rj-actions">
@@ -4468,7 +4515,7 @@ img{max-width:100%!important;}
     let a=load().filter(j=>j.status==='Ready'||j.status==='Delivered');
     a=a.filter(j=>{
       const d=j.date||'';
-      return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.imei,j.problem,j.status,j.workType].join(' ').toLowerCase().includes(q));
+      return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.problem,j.status,j.workType].join(' ').toLowerCase().includes(q));
     });
     const ready=a.filter(j=>j.status==='Ready').sort(rjSortNewest);
     const delivered=a.filter(j=>j.status==='Delivered').sort(rjSortNewest);
@@ -4478,8 +4525,8 @@ img{max-width:100%!important;}
       <div class="sk-rj-card" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
-          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||(j.status==='Delivered'?'Delivered':'Ready for Delivery'))}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div></div>
+          <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')}<br>${esc(j.problem)}</div>
+          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||(j.status==='Delivered'?'Delivered':'Ready for Delivery'))}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div><div style="margin-top:5px;font-size:.68rem">💰 Estimate ₹${Number(j.estimate||0).toLocaleString('en-IN')} · Advance ₹${Number(j.advance||0).toLocaleString('en-IN')} · Paid ₹${Number(j.totalPaid||j.advance||0).toLocaleString('en-IN')} · Balance ₹${Number(j.balance||0).toLocaleString('en-IN')}</div>${Array.isArray(j.dealerSpares)&&j.dealerSpares.length?`<div style="margin-top:5px;font-size:.68rem">🧰 ${j.dealerSpares.map(x=>esc(x.spare)+' → '+esc(x.dealer)).join(' · ')}</div>`:''}</div>
           <span class="sk-rj-status">${esc(j.status)}</span>
         </div>
         ${j.status==='Ready'?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-deliver" onclick="event.stopPropagation();skRjDeliver('${j.id}')">🚚 Mark Delivered</button></div>`:''}
@@ -4495,11 +4542,11 @@ img{max-width:100%!important;}
     const from=skDmyToISO(document.getElementById('skRjFromDate').value||'')||'', to=skDmyToISO(document.getElementById('skRjToDate').value||'')||'', q=(document.getElementById('skRjHistorySearch').value||'').toLowerCase();
     const rows=load().filter(j=>['Ready','Delivered'].includes(j.status)).filter(j=>{
       const d=j.date||'';
-      return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.imei,j.problem,j.status].join(' ').toLowerCase().includes(q));
+      return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.problem,j.status].join(' ').toLowerCase().includes(q));
     });
     if(!rows.length){showToast('No filtered repair history to export');return}
     if(typeof XLSX==='undefined'){showToast('Excel library not available');return}
-    const data=rows.map(j=>({Date:j.date,Customer:j.customer,Phone:j.phone,Model:j.model,IMEI:j.imei,WorkType:j.workType,Status:j.status,Scheduled:j.schedule,Problem:j.problem,Estimate:j.estimate,Note:j.note}));
+    const data=rows.map(j=>({Date:j.date,Customer:j.customer,Phone:j.phone,Model:j.model,WorkType:j.workType,Status:j.status,Scheduled:j.schedule,Problem:j.problem,Estimate:j.estimate,Advance:j.advance,DeliveryPayment:j.deliveryPayment,TotalPaid:j.totalPaid,Balance:j.balance,DealerSpares:Array.isArray(j.dealerSpares)?j.dealerSpares.map(x=>x.spare+' → '+x.dealer).join(' | '):'',Note:j.note}));
     const ws=XLSX.utils.json_to_sheet(data), wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,'Repair History');
     XLSX.writeFile(wb,`SK_Mobiles_Repair_History_${from||'all'}_${to||'all'}.xlsx`);
@@ -4572,7 +4619,7 @@ img{max-width:100%!important;}
       var scheduleHtml=j.schedule ? '<div class="sk-ur-job-meta">🗓️ '+esc(j.schedule)+'</div>' : '';
       return '<div class="sk-ur-job" onclick="skUrgentOpenDetail(\''+esc(j.id)+'\')">' +
         '<div class="sk-ur-job-top"><div><div class="sk-ur-job-name">'+esc(j.customer)+' · '+esc(j.model)+'</div>' +
-        '<div class="sk-ur-job-meta">'+esc(j.date)+' · '+esc(j.status)+' · IMEI: '+esc(j.imei||'—')+'<br>'+esc(j.problem)+'</div></div><span class="sk-ur-badge">🚨 URGENT</span></div>' +
+        '<div class="sk-ur-job-meta">'+esc(j.date)+' · '+esc(j.status)+' · '+esc(j.problem)+'</div></div><span class="sk-ur-badge">🚨 URGENT</span></div>' +
         scheduleHtml+'</div>';
     }).join(''):'<div class="sk-rj-empty">No urgent repair jobs pending.</div>';
     const m=document.getElementById('skUrgentRepairModal');
@@ -7632,4 +7679,73 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
      if(typeof window.skRefreshRoleBadge==='function')window.skRefreshRoleBadge();
    }
  },300);
+})();
+
+
+/* SK MOBILES — Android Contact Picker for phone fields. No data is uploaded. */
+(function(){
+  'use strict';
+  const NAME_MAP={
+    skRjPhone:'skRjCustomer',
+    billCustPhone:'billCustName',
+    skCreditPhone:'skCreditName',
+    skCPPhone:'skCPName',
+    skWorkerProfilePhone:'skWorkerProfileName',
+    skWorkerEditPhone:'skWorkerEditName'
+  };
+  function isPhoneInput(el){
+    if(!el || el.tagName!=='INPUT' || el.disabled || el.type==='password') return false;
+    const id=String(el.id||'').toLowerCase(), name=String(el.name||'').toLowerCase(), ph=String(el.placeholder||'').toLowerCase();
+    return el.type==='tel' || /phone|mobile|contact/.test(id+' '+name+' '+ph);
+  }
+  async function pickContact(input){
+    if(!navigator.contacts?.select){
+      if(typeof showToast==='function')showToast('📇 Contact Picker is not supported in this browser');
+      return;
+    }
+    try{
+      const contacts=await navigator.contacts.select(['name','tel'],{multiple:false});
+      const c=contacts?.[0]; if(!c)return;
+      const phone=Array.isArray(c.tel)?String(c.tel[0]||'').trim():'';
+      const name=Array.isArray(c.name)?String(c.name[0]||'').trim():'';
+      if(phone) {
+        input.value=phone;
+        input.dispatchEvent(new Event('input',{bubbles:true}));
+        input.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      const targetId=NAME_MAP[input.id];
+      const nameEl=targetId?document.getElementById(targetId):null;
+      if(nameEl && name) {
+        nameEl.value=name;
+        nameEl.dispatchEvent(new Event('input',{bubbles:true}));
+        nameEl.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      if(typeof showToast==='function')showToast('📇 Contact selected');
+    }catch(e){
+      if(e?.name!=='AbortError' && typeof showToast==='function')showToast('📇 Contact selection cancelled or unavailable');
+    }
+  }
+  function enhance(root=document){
+    root.querySelectorAll?.('input').forEach(input=>{
+      if(!isPhoneInput(input) || input.dataset.contactPickerBound)return;
+      input.dataset.contactPickerBound='1';
+      const parent=input.parentElement;
+      if(!parent)return;
+      const wrap=document.createElement('div');
+      wrap.className='sk-phone-contact-wrap';
+      wrap.style.cssText='display:flex;align-items:center;gap:6px;width:100%';
+      parent.insertBefore(wrap,input);
+      wrap.appendChild(input);
+      input.style.flex='1 1 auto';
+      const b=document.createElement('button');
+      b.type='button'; b.className='sk-contact-picker-btn'; b.title='Choose from phone contacts'; b.setAttribute('aria-label','Choose contact');
+      b.textContent='📇';
+      b.style.cssText='flex:0 0 auto;min-width:42px;height:42px;border-radius:12px;border:1px solid var(--card-border,#d7dce5);background:var(--pill-bg,#f4f6fa);color:var(--text,#111);font-size:18px;cursor:pointer';
+      b.addEventListener('click',()=>pickContact(input));
+      wrap.appendChild(b);
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>enhance(document),100),{once:true});else setTimeout(()=>enhance(document),100);
+  const mo=new MutationObserver(m=>m.forEach(x=>x.addedNodes.forEach(n=>{if(n.nodeType===1)enhance(n)})));
+  mo.observe(document.documentElement,{childList:true,subtree:true});
 })();
