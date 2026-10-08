@@ -8271,88 +8271,392 @@ html[data-ui-card-surface="shadow"] .sk-rj-card[data-work-type="scheduled"],
 
 
 /* ============================================================
-   SK MOBILES — REQUESTED REPAIR / PHONE / TITLE POLISH ONLY
+   V5.2 FINAL TARGETED FIXES — ONLY REQUESTED UI/UX
    ============================================================ */
-/* Manager: edit/modify/delete controls are Admin-only and hidden for Manager. */
-body.sk-manager-mode .sk-manager-locked{display:none !important;}
 
-/* Pending repair problem: immediate red visual cue. */
-#skRepairJobsModal .sk-rj-problem-highlight{
-  display:block !important;
-  margin-top:5px !important;
-  padding:6px 8px !important;
-  border-radius:9px !important;
-  color:#b91c1c !important;
-  background:rgba(239,68,68,.08) !important;
-  border:1px solid rgba(239,68,68,.22) !important;
-  font-weight:750 !important;
-  line-height:1.45 !important;
-}
-
-/* Dealer selector belongs beside Delivery Status on the pending job card. */
-#skRepairJobsModal .sk-rj-dealer-inline{
-  display:flex !important;
-  align-items:center !important;
-  gap:6px !important;
-  margin-top:6px !important;
+/* 1) Customer/Credit cards: never overflow the viewport. */
+#skCreditLedgerPage,
+#skCreditLedgerPage > .modal-sheet,
+#skCreditLedgerPage #skCPMainView,
+#skCreditLedgerPage .skcp-list{
   min-width:0 !important;
-}
-#skRepairJobsModal .sk-rj-dealer-label{
-  flex:0 0 auto !important;
-  font-size:.67rem !important;
-  font-weight:850 !important;
-  color:var(--text-muted) !important;
-}
-#skRepairJobsModal .sk-rj-dealer-select{
-  min-width:0 !important;
-  flex:1 1 auto !important;
-  height:34px !important;
-  padding:5px 28px 5px 9px !important;
-  border:1px solid var(--card-border) !important;
-  border-radius:10px !important;
-  background:var(--pill-bg) !important;
-  color:var(--text) !important;
-  font-size:.72rem !important;
-  font-weight:800 !important;
-}
-#skRepairJobsModal .sk-rj-dealer-add{
-  flex:0 0 34px !important;
-  width:34px !important;
-  height:34px !important;
-  padding:0 !important;
-  border-radius:10px !important;
-  border:1px solid var(--card-border) !important;
-  background:var(--pill-bg) !important;
-  color:var(--text) !important;
-  font-size:18px !important;
-  font-weight:900 !important;
-}
-
-/* Contact picker is visually inside the phone field. */
-.sk-phone-contact-wrap{position:relative !important;width:100% !important;display:block !important;}
-.sk-phone-contact-wrap > input{width:100% !important;padding-right:48px !important;box-sizing:border-box !important;}
-.sk-phone-contact-wrap .sk-contact-picker-btn{position:absolute !important;right:6px !important;top:50% !important;transform:translateY(-50%) !important;z-index:3 !important;}
-
-/* Compact title/header cards across the app — title size stays readable. */
-.modal-title{
-  min-height:48px !important;
-  height:48px !important;
+  max-width:100% !important;
   box-sizing:border-box !important;
-  padding:9px 13px !important;
-  margin-bottom:8px !important;
-  line-height:1.15 !important;
+  overflow-x:hidden !important;
 }
-.modal-title > span{line-height:1.15 !important;}
-.modal-close-btn{
-  width:34px !important;
-  height:34px !important;
-  min-width:34px !important;
+#skCreditLedgerPage .skcp-row,
+#skCreditLedgerPage .sk-credit-customer{
+  min-width:0 !important;
+  max-width:100% !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+}
+#skCreditLedgerPage .skcp-row-main,
+#skCreditLedgerPage .sk-credit-main{
+  min-width:0 !important;
+  max-width:100% !important;
+  flex:1 1 auto !important;
+  overflow:hidden !important;
+}
+#skCreditLedgerPage .skcp-amt,
+#skCreditLedgerPage .sk-credit-balance{
+  flex:0 0 auto !important;
+  max-width:42% !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+#skCreditLedgerPage .skcp-sub,
+#skCreditLedgerPage .sk-credit-sub{
+  min-width:0 !important;
+  max-width:100% !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+@media(max-width:430px){
+  #skCreditLedgerPage .skcp-row{
+    gap:7px !important;
+    padding:9px !important;
+  }
+  #skCreditLedgerPage .skcp-row > .skcp-btn{
+    width:34px !important;
+    min-width:34px !important;
+    padding:5px !important;
+  }
+  #skCreditLedgerPage .skcp-amt{
+    font-size:.78rem !important;
+    max-width:38% !important;
+  }
+}
+
+/* 2) Phone contact picker: icon sits inside the phone field. */
+.sk-phone-contact-wrap{
+  position:relative !important;
+  display:block !important;
+  width:100% !important;
+  min-width:0 !important;
+}
+.sk-phone-contact-wrap > input{
+  width:100% !important;
+  box-sizing:border-box !important;
+  padding-right:48px !important;
+}
+.sk-contact-picker-btn{
+  position:absolute !important;
+  right:7px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  width:32px !important;
+  height:32px !important;
+  min-width:32px !important;
+  min-height:32px !important;
   padding:0 !important;
+  border-radius:9px !important;
+  border:0 !important;
+  background:transparent !important;
+  color:var(--primary) !important;
   display:inline-flex !important;
   align-items:center !important;
   justify-content:center !important;
+  font-size:17px !important;
+  line-height:1 !important;
+  box-shadow:none !important;
+  z-index:2 !important;
+  cursor:pointer !important;
 }
-@media(max-width:759px){
-  .modal-title{min-height:46px !important;height:46px !important;padding:8px 11px !important;margin-bottom:7px !important;}
-  .modal-close-btn{width:32px !important;height:32px !important;min-width:32px !important;}
+.sk-contact-picker-btn:active{
+  transform:translateY(-50%) scale(.92) !important;
 }
+
+/* 3) Search + Filter toolbar and filter panel. */
+#skCreditLedgerPage .skcp-toolbar{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto auto !important;
+  gap:7px !important;
+  align-items:center !important;
+  min-width:0 !important;
+}
+#skCreditLedgerPage .skcp-search-wrap{
+  position:relative !important;
+  min-width:0 !important;
+}
+#skCreditLedgerPage .skcp-search-wrap .form-input{
+  width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+  padding-left:42px !important;
+  padding-right:12px !important;
+  border-radius:18px !important;
+}
+#skCreditLedgerPage .skcp-search-icon{
+  position:absolute !important;
+  left:14px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  color:var(--text-muted) !important;
+  font-size:22px !important;
+  z-index:1 !important;
+}
+#skCreditLedgerPage .skcp-filter-open{
+  min-height:42px !important;
+  height:42px !important;
+  padding:0 12px !important;
+  border-radius:15px !important;
+  border:1px solid var(--card-border) !important;
+  background:var(--pill-bg) !important;
+  color:var(--primary) !important;
+  font-weight:900 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:5px !important;
+  cursor:pointer !important;
+}
+#skCreditLedgerPage .skcp-credit-action{
+  min-height:42px !important;
+  white-space:nowrap !important;
+}
+#skCreditLedgerPage .skcp-filters{
+  display:none !important;
+}
+.skcp-filter-modal .modal-sheet{
+  width:min(460px,calc(100% - 20px)) !important;
+  max-height:88vh !important;
+  padding:0 !important;
+  overflow-y:auto !important;
+}
+.skcp-filter-panel-body{
+  padding:12px 14px 14px !important;
+}
+.skcp-filter-group-title{
+  font-size:.65rem !important;
+  font-weight:950 !important;
+  color:var(--text-muted) !important;
+  letter-spacing:.06em !important;
+  margin:3px 0 7px !important;
+}
+.skcp-filter-choice-grid{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:7px !important;
+  margin-bottom:14px !important;
+}
+.skcp-filter-choice{
+  min-height:42px !important;
+  border-radius:13px !important;
+  border:1px solid var(--card-border) !important;
+  background:var(--pill-bg) !important;
+  color:var(--text) !important;
+  font-weight:850 !important;
+  cursor:pointer !important;
+}
+.skcp-filter-choice.active{
+  background:var(--primary) !important;
+  border-color:var(--primary) !important;
+  color:#fff !important;
+}
+.skcp-date-grid{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:8px !important;
+}
+.skcp-date-grid label{
+  font-size:.63rem !important;
+  color:var(--text-muted) !important;
+  font-weight:800 !important;
+}
+.skcp-date-grid input{
+  width:100% !important;
+  margin-top:4px !important;
+  box-sizing:border-box !important;
+}
+.skcp-filter-actions{
+  display:grid !important;
+  grid-template-columns:1fr 1.5fr !important;
+  gap:7px !important;
+  margin-top:14px !important;
+}
+@media(max-width:430px){
+  #skCreditLedgerPage .skcp-toolbar{
+    grid-template-columns:minmax(0,1fr) auto !important;
+  }
+  #skCreditLedgerPage .skcp-credit-action{
+    grid-column:1 / -1 !important;
+    width:100% !important;
+  }
+}
+
+/* 4) All modal title cards: compact header only; content controls untouched. */
+.modal-overlay > .modal-sheet > .modal-title{
+  min-height:50px !important;
+  height:auto !important;
+  margin:0 0 8px !important;
+  padding:6px 10px !important;
+  box-sizing:border-box !important;
+  border-radius:16px !important;
+  line-height:1.15 !important;
+}
+.modal-overlay > .modal-sheet > .modal-title .modal-close-btn{
+  flex:0 0 40px !important;
+  width:40px !important;
+  height:40px !important;
+  min-width:40px !important;
+  min-height:40px !important;
+  border-radius:12px !important;
+}
+@media(max-width:600px){
+  .modal-overlay > .modal-sheet > .modal-title{
+    min-height:48px !important;
+    padding:5px 9px !important;
+    margin-bottom:7px !important;
+  }
+  .modal-overlay > .modal-sheet > .modal-title .modal-close-btn{
+    width:38px !important;
+    height:38px !important;
+    min-width:38px !important;
+    min-height:38px !important;
+  }
+}
+
+/* Repair Jobs: compact problem/dealer/details presentation. */
+#skRepairJobsModal .sk-rj-problem-highlight{
+  margin-top:5px !important;
+  padding:6px 8px !important;
+  border-radius:9px !important;
+  background:rgba(239,68,68,.09) !important;
+  border:1px solid rgba(239,68,68,.25) !important;
+  color:#b91c1c !important;
+  line-height:1.35 !important;
+}
+#skRepairJobsModal .sk-rj-card[data-work-type="urgent"]{
+  border:1.5px solid #dc2626 !important;
+}
+#skRepairJobsModal .sk-rj-dealer-inline{
+  display:grid !important;
+  grid-template-columns:auto minmax(0,1fr) 38px !important;
+  align-items:center !important;
+  gap:6px !important;
+  margin-top:7px !important;
+  padding:6px 8px !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:11px !important;
+  background:var(--pill-bg) !important;
+}
+#skRepairJobsModal .sk-rj-dealer-label{
+  font-size:.63rem !important;
+  font-weight:900 !important;
+  color:var(--text-muted) !important;
+  white-space:nowrap !important;
+}
+#skRepairJobsModal .sk-rj-dealer-select{
+  min-width:0 !important;
+  width:100% !important;
+  height:34px !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:9px !important;
+  background:var(--input-bg) !important;
+  color:var(--text) !important;
+  font-size:.67rem !important;
+  padding:0 7px !important;
+}
+#skRepairJobsModal .sk-rj-dealer-add{
+  width:34px !important;
+  height:34px !important;
+  min-width:34px !important;
+  border-radius:9px !important;
+  border:1px solid var(--card-border) !important;
+  background:var(--card-bg) !important;
+  color:var(--primary) !important;
+  font-weight:950 !important;
+  cursor:pointer !important;
+}
+#skRepairJobsModal .sk-rj-money-line,
+#skRepairJobsModal .sk-rj-dealer-history{
+  margin-top:5px !important;
+  font-size:.68rem !important;
+}
+#skRepairJobsModal .sk-rj-history-admin-actions{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:6px !important;
+  margin-top:7px !important;
+}
+#skRepairDetailModal .sk-rj-detail-card{
+  background:var(--model-bg);
+  border:1px solid var(--card-border);
+  border-radius:15px;
+  padding:12px;
+}
+#skRepairDetailModal .sk-rj-detail-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:8px;
+}
+#skRepairDetailModal .sk-rj-detail-name{
+  font-weight:950;
+  font-size:.95rem;
+}
+#skRepairDetailModal .sk-rj-detail-sub{
+  margin-top:4px;
+  font-size:.7rem;
+  color:var(--text-muted);
+}
+#skRepairDetailModal .sk-rj-detail-badges{
+  display:flex;
+  gap:4px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+#skRepairDetailModal .sk-rj-detail-actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;
+  margin-top:9px;
+}
+#skRepairDetailModal .sk-rj-detail-grid{
+  display:grid;
+  gap:6px;
+  margin-top:10px;
+}
+#skRepairDetailModal .sk-rj-detail-row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:7px 8px;
+  border:1px solid var(--card-border);
+  border-radius:9px;
+  background:var(--card-bg);
+  font-size:.69rem;
+}
+#skRepairDetailModal .sk-rj-detail-row span{
+  color:var(--text-muted);
+  flex:0 0 auto;
+}
+#skRepairDetailModal .sk-rj-detail-row b{
+  text-align:right;
+  overflow-wrap:anywhere;
+}
+#skRepairDetailModal .sk-rj-detail-row.problem{
+  display:block;
+  background:rgba(239,68,68,.09);
+  border-color:rgba(239,68,68,.25);
+}
+#skRepairDetailModal .sk-rj-detail-row.problem b{
+  display:block;
+  text-align:left;
+  margin-top:4px;
+  color:#b91c1c;
+}
+@media(max-width:430px){
+  #skRepairDetailModal .sk-rj-detail-actions{
+    grid-template-columns:1fr 1fr;
+  }
+  #skRepairDetailModal .sk-rj-detail-actions .sk-rj-detail-edit{
+    grid-column:1 / -1;
+  }
+}
+
+.sk-contact-book-icon{width:19px !important;height:19px !important;display:block !important;fill:currentColor !important;}
+
+#skRepairJobsModal .sk-rj-dealer-readonly b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.68rem;color:var(--text);}
