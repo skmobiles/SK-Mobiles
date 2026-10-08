@@ -8268,3 +8268,91 @@ html[data-ui-card-surface="shadow"] .sk-rj-card[data-work-type="scheduled"],
     margin-top:4px !important;
   }
 }
+
+
+/* ============================================================
+   SK MOBILES — REQUESTED REPAIR / PHONE / TITLE POLISH ONLY
+   ============================================================ */
+/* Manager: edit/modify/delete controls are Admin-only and hidden for Manager. */
+body.sk-manager-mode .sk-manager-locked{display:none !important;}
+
+/* Pending repair problem: immediate red visual cue. */
+#skRepairJobsModal .sk-rj-problem-highlight{
+  display:block !important;
+  margin-top:5px !important;
+  padding:6px 8px !important;
+  border-radius:9px !important;
+  color:#b91c1c !important;
+  background:rgba(239,68,68,.08) !important;
+  border:1px solid rgba(239,68,68,.22) !important;
+  font-weight:750 !important;
+  line-height:1.45 !important;
+}
+
+/* Dealer selector belongs beside Delivery Status on the pending job card. */
+#skRepairJobsModal .sk-rj-dealer-inline{
+  display:flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  margin-top:6px !important;
+  min-width:0 !important;
+}
+#skRepairJobsModal .sk-rj-dealer-label{
+  flex:0 0 auto !important;
+  font-size:.67rem !important;
+  font-weight:850 !important;
+  color:var(--text-muted) !important;
+}
+#skRepairJobsModal .sk-rj-dealer-select{
+  min-width:0 !important;
+  flex:1 1 auto !important;
+  height:34px !important;
+  padding:5px 28px 5px 9px !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:10px !important;
+  background:var(--pill-bg) !important;
+  color:var(--text) !important;
+  font-size:.72rem !important;
+  font-weight:800 !important;
+}
+#skRepairJobsModal .sk-rj-dealer-add{
+  flex:0 0 34px !important;
+  width:34px !important;
+  height:34px !important;
+  padding:0 !important;
+  border-radius:10px !important;
+  border:1px solid var(--card-border) !important;
+  background:var(--pill-bg) !important;
+  color:var(--text) !important;
+  font-size:18px !important;
+  font-weight:900 !important;
+}
+
+/* Contact picker is visually inside the phone field. */
+.sk-phone-contact-wrap{position:relative !important;width:100% !important;display:block !important;}
+.sk-phone-contact-wrap > input{width:100% !important;padding-right:48px !important;box-sizing:border-box !important;}
+.sk-phone-contact-wrap .sk-contact-picker-btn{position:absolute !important;right:6px !important;top:50% !important;transform:translateY(-50%) !important;z-index:3 !important;}
+
+/* Compact title/header cards across the app — title size stays readable. */
+.modal-title{
+  min-height:48px !important;
+  height:48px !important;
+  box-sizing:border-box !important;
+  padding:9px 13px !important;
+  margin-bottom:8px !important;
+  line-height:1.15 !important;
+}
+.modal-title > span{line-height:1.15 !important;}
+.modal-close-btn{
+  width:34px !important;
+  height:34px !important;
+  min-width:34px !important;
+  padding:0 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+@media(max-width:759px){
+  .modal-title{min-height:46px !important;height:46px !important;padding:8px 11px !important;margin-bottom:7px !important;}
+  .modal-close-btn{width:32px !important;height:32px !important;min-width:32px !important;}
+}
