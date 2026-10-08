@@ -4313,7 +4313,7 @@ img{max-width:100%!important;}
     const job={
       id:id||('RJ-'+Date.now()),
       customer:document.getElementById('skRjCustomer').value.trim()||'Walk-in Customer',
-      phone:formatIndianPhone(document.getElementById('skRjPhone').value.trim()),
+      phone:document.getElementById('skRjPhone').value.trim(),
       model:document.getElementById('skRjModel').value.trim(),
       workType:document.getElementById('skRjWorkType').value,
       schedule:document.getElementById('skRjSchedule').value,
@@ -4325,8 +4325,8 @@ img{max-width:100%!important;}
       totalPaid:(Number(document.getElementById('skRjAdvance').value)||0)+(Number(existing?.deliveryPayment)||0),
       balance:Math.max(0,(Number(document.getElementById('skRjEstimate').value)||0)-((Number(document.getElementById('skRjAdvance').value)||0)+(Number(existing?.deliveryPayment)||0))),
       status:document.getElementById('skRjStatus').value,
-      dealerSpares:Array.isArray(existing?.dealerSpares)?existing.dealerSpares:[],
-      dealerName:String(existing?.dealerName||'').trim(),
+      dealerSpares:(document.getElementById('skRjDealerRows') ? collectDealerSpares() : (Array.isArray(existing?.dealerSpares)?existing.dealerSpares:[])),
+      dealer:existing?.dealer||'',
       note:document.getElementById('skRjNote').value.trim(),
       deliveryStatus: document.getElementById('skRjStatus').value==='Ready' ? 'Ready for Delivery' : (existing?.deliveryStatus||'Pending'),
       reworkReason: existing?.reworkReason||'',
@@ -4348,12 +4348,11 @@ img{max-width:100%!important;}
   };
 
   window.skRjEdit=function(id){
-    if(!skRjIsAdmin()){showToast?.('🔒 Admin only — Edit / Modify / Delete');return;}
     const j=load().find(x=>x.id===id); if(!j)return;
     skRjSwitchTab('jobs');
     document.getElementById('skRjEditId').value=j.id;
     document.getElementById('skRjCustomer').value=j.customer||'Walk-in Customer';
-    document.getElementById('skRjPhone').value=formatIndianPhone(j.phone||'');
+    document.getElementById('skRjPhone').value=j.phone||'';
     document.getElementById('skRjModel').value=j.model||'';
     document.getElementById('skRjWorkType').value=j.workType||'Normal';
     document.getElementById('skRjSchedule').value=j.schedule||'';
@@ -4364,6 +4363,8 @@ img{max-width:100%!important;}
     document.getElementById('skRjBalance').value='₹ '+Number(j.balance||Math.max(0,(Number(j.estimate)||0)-(Number(j.advance)||0)-(Number(j.deliveryPayment)||0))).toLocaleString('en-IN');
     document.getElementById('skRjStatus').value=j.status||'Received';
     document.getElementById('skRjNote').value=j.note||'';
+    const dealerRows=document.getElementById('skRjDealerRows'); if(dealerRows) dealerRows.innerHTML='';
+    (Array.isArray(j.dealerSpares)?j.dealerSpares:[]).forEach(x=>addDealerRow(x.spare,x.dealer));
     document.getElementById('skRjScheduleWrap').style.display=j.workType==='Scheduled'?'block':'none';
     document.getElementById('skRjSaveBtn').textContent='✏️ Update Repair Job';
     document.getElementById('skRjCancelEdit').style.display='block';
@@ -4371,7 +4372,6 @@ img{max-width:100%!important;}
   };
 
   window.skRjNext=function(id){
-    if(!skRjIsAdmin()){showToast?.('🔒 Admin only — Edit / Modify / Delete');return;}
     const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
     const old=a[i].status;
     const next=statusNext(old);
@@ -4387,7 +4387,7 @@ img{max-width:100%!important;}
   };
 
   window.skRjDeliver=function(id){
-    if(!skRjIsAdmin()){showToast?.('🔒 Admin only — Edit / Modify / Delete');return;}
+    if(String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase()==='manager'){showToast?.('🔒 Manager is view-only');return;}
     const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
     if(a[i].status!=='Ready'){ showToast('Repair job must be Ready before delivery'); return; }
     const estimate=Number(a[i].estimate)||0;
@@ -4410,7 +4410,7 @@ img{max-width:100%!important;}
   };
 
   window.skRjRework=function(id){
-    if(!skRjIsAdmin()){showToast?.('🔒 Admin only — Edit / Modify / Delete');return;}
+    if(String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase()==='manager'){showToast?.('🔒 Manager is view-only');return;}
     const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
     if(a[i].status!=='Delivered' && a[i].status!=='Ready'){ showToast('Rework is available after delivery'); return; }
     const reason=prompt('Enter the customer complaint / rework reason:', a[i].reworkReason||'');
@@ -4426,7 +4426,6 @@ img{max-width:100%!important;}
   };
 
   window.skRjDelete=function(id){
-    if(!skRjIsAdmin()){showToast?.('🔒 Admin only — Edit / Modify / Delete');return;}
     if(!confirm('Delete this repair job?\n\nThe job will be moved to Recycle Bin for 30 days.'))return;
     const sid=String(id);
     const current=load(), item=current.find(x=>String(x.id)===sid);
@@ -4446,13 +4445,13 @@ img{max-width:100%!important;}
   };
 
   window.skRjCallPhone=function(phone){
-    const digits=phoneDigits(phone);
+    const digits=typeof window.skIndianPhoneDigits==='function'?window.skIndianPhoneDigits(phone):String(phone||'').replace(/\D/g,'');
     if(!digits){ if(typeof showToast==='function')showToast('Repair phone number not available'); return; }
     window.location.href='tel:+'+digits;
   };
   window.skRjWhatsAppReady=function(id){
     const j=load().find(x=>x.id===id); if(!j)return;
-    const digits=phoneDigits(j.phone||'');
+    const digits=typeof window.skIndianPhoneDigits==='function'?window.skIndianPhoneDigits(j.phone):String(j.phone||'').replace(/\D/g,'');
     if(!digits){ if(typeof showToast==='function')showToast('Repair phone number not available'); return; }
     const name=String(j.customer||'Customer').trim();
     const msg=`Dear Mr./Mrs. ${name}, your mobile is ready. Your mobile is ready. Please visit the shop and collect it. Thank you - SK MOBILES.`;
@@ -4460,24 +4459,46 @@ img{max-width:100%!important;}
   };
 
   window.skRjShowDetail=function(id){
-    const j=load().find(x=>x.id===id); if(!j)return;
+    const j=load().find(x=>String(x.id)===String(id)); if(!j)return;
+    const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();
+    const adminOnly=role==='admin';
+    const dealerList=Array.isArray(j.dealerSpares)?j.dealerSpares:[];
+    const dealerHtml=dealerList.length
+      ? `<div class="sk-rj-detail-row"><span>🧰 Spare / Dealer</span><b>${dealerList.map(x=>esc(x.spare||'')+(x.dealer?' → '+esc(x.dealer):'')).join(' · ')}</b></div>`
+      : (j.dealer?`<div class="sk-rj-detail-row"><span>🏪 Dealer</span><b>${esc(j.dealer)}</b></div>`:'');
     document.getElementById('skRepairDetailContent').innerHTML=`
-      <div style="background:var(--model-bg);border:1px solid var(--card-border);border-radius:15px;padding:12px">
-        <div style="font-weight:900;font-size:.95rem">${esc(j.customer)} · ${esc(j.model)}</div>
-        <div style="font-size:.72rem;color:var(--text-muted);margin-top:5px">📱 Repair Phone: ${esc(formatIndianPhone(j.phone||'—'))}</div>
-        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
-          <button type="button" class="submit-btn" style="flex:1;min-width:135px;background:#2563eb" onclick="skRjCallPhone('${esc(j.phone||'')}')">📞 Call Repair Phone</button>
-          <button type="button" class="submit-btn whatsapp-green" style="flex:1;min-width:135px" onclick="skRjWhatsAppReady('${esc(j.id||'')}')">💬 WhatsApp</button>
+      <div class="sk-rj-detail-card">
+        <div class="sk-rj-detail-head">
+          <div>
+            <div class="sk-rj-detail-name">${esc(j.customer||'Customer')} · ${esc(j.model||'')}</div>
+            <div class="sk-rj-detail-sub">📱 ${esc(j.phone||'—')} · 📅 ${rjFmtDate(j.date)}</div>
+          </div>
+          <div class="sk-rj-detail-badges"><span class="sk-rj-status">${esc(j.status||'')}</span><span class="sk-rj-priority ${esc(String(j.workType||'Normal').toLowerCase())}">${esc(j.workType||'Normal')}</span></div>
         </div>
-        <div style="margin-top:9px;font-size:.76rem"><b>Problem / Repair:</b><br>${esc(j.problem)}</div>
-        <div style="margin-top:8px;font-size:.72rem;color:var(--text-muted)">📅 ${rjFmtDate(j.date)} · Status: <b>${esc(j.status)}</b> · Work: <b>${esc(j.workType)}</b></div>
-        ${j.schedule?`<div style="margin-top:6px;font-size:.72rem">🗓️ Scheduled: <b>${esc(j.schedule)}</b></div>`:''}
-        <div style="margin-top:6px;font-size:.72rem">💰 Estimate: <b>₹${Number(j.estimate||0).toLocaleString('en-IN')}</b> · Advance: <b>₹${Number(j.advance||0).toLocaleString('en-IN')}</b> · Delivery Paid: <b>₹${Number(j.deliveryPayment||0).toLocaleString('en-IN')}</b> · Balance: <b>₹${Number(j.balance||0).toLocaleString('en-IN')}</b></div>
-        ${j.dealerName?`<div style="margin-top:7px;font-size:.72rem"><b>🏪 Dealer:</b> ${esc(j.dealerName)}</div>`:''}
-        ${j.note?`<div style="margin-top:8px;font-size:.72rem"><b>Note:</b> ${esc(j.note)}</div>`:''}
-        ${String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase()==='admin'?`<div style="margin-top:10px"><button type="button" class="submit-btn sk-rj-detail-edit" style="width:100%;background:#2563eb" onclick="event.stopPropagation();skRjEdit('${esc(j.id)}')">✏️ Edit Repair Job</button></div>`:''}
+        <div class="sk-rj-detail-actions">
+          <button type="button" class="submit-btn" onclick="skRjCallPhone('${esc(j.phone||'')}')">📞 Call</button>
+          <button type="button" class="submit-btn whatsapp-green" onclick="skRjWhatsAppReady('${esc(j.id||'')}')">💬 WhatsApp</button>
+          ${adminOnly?`<button type="button" class="submit-btn sk-rj-detail-edit" onclick="skRjEdit('${esc(j.id||'')}');skCloseRepairDetail()">✏️ Edit</button>`:''}
+        </div>
+        <div class="sk-rj-detail-grid">
+          <div class="sk-rj-detail-row problem"><span>🔴 Problem / Repair</span><b>${esc(j.problem||'—')}</b></div>
+          <div class="sk-rj-detail-row"><span>👤 Customer</span><b>${esc(j.customer||'—')}</b></div>
+          <div class="sk-rj-detail-row"><span>📱 Phone</span><b>${esc(j.phone||'—')}</b></div>
+          <div class="sk-rj-detail-row"><span>📲 Model</span><b>${esc(j.model||'—')}</b></div>
+          <div class="sk-rj-detail-row"><span>🚚 Delivery Status</span><b>${esc(j.deliveryStatus|| (j.status==='Delivered'?'Delivered':j.status==='Ready'?'Ready for Delivery':'Pending'))}</b></div>
+          <div class="sk-rj-detail-row"><span>📅 Received</span><b>${rjFmtDate(j.date)}</b></div>
+          ${j.schedule?`<div class="sk-rj-detail-row"><span>🗓️ Scheduled</span><b>${esc(j.schedule)}</b></div>`:''}
+          <div class="sk-rj-detail-row"><span>💰 Estimate</span><b>₹${Number(j.estimate||0).toLocaleString('en-IN')}</b></div>
+          <div class="sk-rj-detail-row"><span>💵 Advance</span><b>₹${Number(j.advance||0).toLocaleString('en-IN')}</b></div>
+          <div class="sk-rj-detail-row"><span>💳 Delivery Payment</span><b>₹${Number(j.deliveryPayment||0).toLocaleString('en-IN')}</b></div>
+          <div class="sk-rj-detail-row"><span>💰 Total Paid</span><b>₹${Number(j.totalPaid||0).toLocaleString('en-IN')}</b></div>
+          <div class="sk-rj-detail-row"><span>⚖️ Balance</span><b>₹${Number(j.balance||0).toLocaleString('en-IN')}</b></div>
+          ${dealerHtml}
+          ${j.reworkReason?`<div class="sk-rj-detail-row"><span>↩️ Rework</span><b>${esc(j.reworkReason)}</b></div>`:''}
+          ${j.note?`<div class="sk-rj-detail-row"><span>📝 Note</span><b>${esc(j.note)}</b></div>`:''}
+        </div>
       </div>`;
-    document.getElementById('skRepairDetailModal').classList.add('active');
+    document.getElementById('skRepairDetailModal')?.classList.add('active');
     if(typeof window.skAppHistoryRepairOpen==='function')window.skAppHistoryRepairOpen('skRepairDetailModal',{detailId:id});
   };
 
@@ -4488,92 +4509,138 @@ img{max-width:100%!important;}
     return '#16a34a';
   };
 
-  function skRjIsAdmin(){ return String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase()==='admin'; }
-  function skRjDealerList(){
-    const set=new Set();
-    try{ const saved=JSON.parse(localStorage.getItem('sk_repair_dealers_v1')||'[]'); if(Array.isArray(saved)) saved.forEach(x=>{if(String(x||'').trim())set.add(String(x).trim())}); }catch(e){}
-    load().forEach(j=>{
-      if(j?.dealerName) set.add(String(j.dealerName).trim());
-      if(Array.isArray(j?.dealerSpares)) j.dealerSpares.forEach(x=>{if(x?.dealer)set.add(String(x.dealer).trim())});
-    });
-    return Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  function skRjDealerNames(){
+    const key='sk_repair_dealers_v1';
+    let names=[];
+    try{const x=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(x))names=x.map(v=>String(v||'').trim()).filter(Boolean);}catch(e){}
+    load().forEach(j=>(Array.isArray(j.dealerSpares)?j.dealerSpares:[]).forEach(x=>{const d=String(x?.dealer||'').trim();if(d&&!names.includes(d))names.push(d);}));
+    load().forEach(j=>{const d=String(j?.dealer||'').trim();if(d&&!names.includes(d))names.push(d);});
+    return names.slice(0,200);
   }
-  function skRjSaveDealerList(list){ try{localStorage.setItem('sk_repair_dealers_v1',JSON.stringify(Array.from(new Set(list.filter(Boolean)))))}catch(e){} }
-  window.skRjAddDealerName=function(id){
-    if(!skRjIsAdmin()){showToast?.('🔒 Admin only — Modify');return;}
-    const name=prompt('Enter new dealer name:',''); if(name===null)return;
-    const clean=String(name).trim(); if(!clean)return;
-    const list=skRjDealerList(); if(!list.some(x=>x.toLowerCase()===clean.toLowerCase())){list.push(clean);skRjSaveDealerList(list);}
-    window.skRjSetDealer(id,clean);
+  window.skRjAddDealerName=function(){
+    if(String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase()==='manager'){showToast?.('🔒 Manager is view-only');return;}
+    const name=prompt('Enter new dealer name:','');
+    if(name===null)return;
+    const clean=String(name).trim();
+    if(!clean)return;
+    const names=skRjDealerNames();
+    if(!names.some(x=>x.toLowerCase()===clean.toLowerCase()))names.push(clean);
+    localStorage.setItem('sk_repair_dealers_v1',JSON.stringify(names.slice(0,200)));
+    skRjRenderJobs();
+    showToast?.('🏪 Dealer added');
   };
-  window.skRjSetDealer=function(id,name){
-    if(!skRjIsAdmin()){showToast?.('🔒 Admin only — Modify');return;}
-    const a=load(), i=a.findIndex(x=>String(x.id)===String(id)); if(i<0)return;
-    a[i].dealerName=String(name||'').trim(); a[i].updatedAt=new Date().toISOString(); save(a);
-    skRjRenderJobs(); skRjRenderHistory();
+  window.skRjSetDealer=function(id,dealer){
+    if(String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase()==='manager'){showToast?.('🔒 Manager is view-only');return;}
+    const clean=String(dealer||'').trim();
+    const a=load(),i=a.findIndex(x=>String(x.id)===String(id));
+    if(i<0)return;
+    a[i].dealer=clean;
+    a[i].updatedAt=new Date().toISOString();
+    if(clean){
+      const names=skRjDealerNames();
+      if(!names.some(x=>x.toLowerCase()===clean.toLowerCase())){
+        names.push(clean);localStorage.setItem('sk_repair_dealers_v1',JSON.stringify(names.slice(0,200)));
+      }
+    }
+    save(a);skRjRenderJobs();skRjRenderHistory();skRjRenderHomeMetric();
+    showToast?.(clean?'🏪 Dealer saved':'🏪 Dealer cleared');
   };
-  function skRjDealerControl(j){
-    const dealers=skRjDealerList();
-    const selected=String(j.dealerName||'').trim();
-    const options=['<option value="">Dealer</option>'].concat(dealers.map(d=>`<option value="${esc(d)}" ${d===selected?'selected':''}>${esc(d)}</option>`)).join('');
-    const disabled=skRjIsAdmin()?'':' disabled title="Admin only — Modify"';
-    return `<div class="sk-rj-dealer-inline" onclick="event.stopPropagation()"><span class="sk-rj-dealer-label">🏪 Dealer</span><select class="sk-rj-dealer-select" onchange="skRjSetDealer('${esc(j.id)}',this.value)"${disabled}>${options}</select>${skRjIsAdmin()?`<button type="button" class="sk-rj-dealer-add" title="Add dealer" onclick="event.stopPropagation();skRjAddDealerName('${esc(j.id)}')">＋</button>`:''}</div>`;
-  }
 
   window.skRjRenderJobs=function(){
     const list=document.getElementById('skRjJobsList'); if(!list)return;
     let a=getPending();
     const focusId=String(window.__skUrgentFocusId||'');
     if(focusId) a.sort((x,y)=>(String(x.id)===focusId?-1:0)-(String(y.id)===focusId?-1:0));
-    document.getElementById('skRjPendingCount').textContent=a.length;
+    const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();
+    const isAdmin=role==='admin';
+    const isManager=role==='manager';
+    const dealers=skRjDealerNames();
+    const p=document.getElementById('skRjPendingCount');if(p)p.textContent=a.length;
     const hc=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
-    const hEl=document.getElementById('skRjHistoryCount'); if(hEl) hEl.textContent=hc;
-    list.innerHTML=a.length? a.map(j=>`
-      <div class="sk-rj-card" data-rj-id="${esc(j.id)}" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')">
+    const hEl=document.getElementById('skRjHistoryCount');if(hEl)hEl.textContent=hc;
+    list.innerHTML=a.length?a.map(j=>{
+      const work=String(j.workType||'Normal').trim().toLowerCase();
+      const dealer=String(j.dealer||'');
+      const dealerOptions=dealers.map(d=>`<option value="${esc(d)}" ${d===dealer?'selected':''}>${esc(d)}</option>`).join('');
+      const dealerControl=isManager
+        ? `<div class="sk-rj-dealer-inline sk-rj-dealer-readonly" onclick="event.stopPropagation()"><span class="sk-rj-dealer-label">🏪 Dealer</span><b>${esc(dealer||'Not selected')}</b></div>`
+        : `<div class="sk-rj-dealer-inline" onclick="event.stopPropagation()">
+        <span class="sk-rj-dealer-label">🏪 Dealer</span>
+        <select class="sk-rj-dealer-select" aria-label="Dealer" onchange="skRjSetDealer('${esc(j.id)}',this.value)">
+          <option value="">Select dealer</option>${dealerOptions}
+        </select>
+        <button type="button" class="sk-rj-dealer-add" title="Add dealer" onclick="event.stopPropagation();skRjAddDealerName()">＋</button>
+      </div>`;
+      const actions=isManager?'':`<div class="sk-rj-actions">
+        <button type="button" class="sk-rj-next" onclick="event.stopPropagation();skRjNext('${esc(j.id)}')">Next Status</button>
+        ${isAdmin?`<button type="button" class="sk-rj-edit" onclick="event.stopPropagation();skRjEdit('${esc(j.id)}')">✏️ Edit</button>
+        <button type="button" class="sk-rj-delete" onclick="event.stopPropagation();skRjDelete('${esc(j.id)}')">🗑️ Delete</button>`:''}
+      </div>`;
+      return `<div class="sk-rj-card ${work==='urgent'?'sk-rj-pending-urgent':''}" data-rj-id="${esc(j.id)}" data-work-type="${esc(work)}" onclick="skRjShowDetail('${esc(j.id)}')" title="Tap to view repair details">
         <div class="sk-rj-card-top">
-          <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(formatIndianPhone(j.phone||'—'))}</div>
-          <div class="sk-rj-problem-highlight"><b>🔴 Problem:</b> ${esc(j.problem)}</div>
-          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div>${skRjDealerControl(j)}<div style="margin-top:5px;font-size:.68rem">💰 Estimate ₹${Number(j.estimate||0).toLocaleString('en-IN')} · Advance ₹${Number(j.advance||0).toLocaleString('en-IN')} · Paid ₹${Number(j.totalPaid||j.advance||0).toLocaleString('en-IN')} · Balance ₹${Number(j.balance||0).toLocaleString('en-IN')}</div></div>
-          <div><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span></div>
+          <div class="sk-rj-card-main">
+            <div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
+            <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')}</div>
+            <div class="sk-rj-problem-highlight">🔴 <b>Problem:</b> ${esc(j.problem||'—')}</div>
+            <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div>
+            <div class="sk-rj-money-line">💰 Estimate ₹${Number(j.estimate||0).toLocaleString('en-IN')} · Advance ₹${Number(j.advance||0).toLocaleString('en-IN')} · Paid ₹${Number(j.totalPaid||j.advance||0).toLocaleString('en-IN')} · Balance ₹${Number(j.balance||0).toLocaleString('en-IN')}</div>
+          </div>
+          <div><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${esc(work)}">${esc(j.workType||'Normal')}</span></div>
         </div>
-        ${skRjIsAdmin()?`<div class="sk-rj-actions">
-          <button type="button" class="sk-rj-next" onclick="event.stopPropagation();skRjNext('${j.id}')">Next Status</button>
-          <button type="button" class="sk-rj-edit" onclick="event.stopPropagation();skRjEdit('${j.id}')">✏️ Edit</button>
-          <button type="button" class="sk-rj-delete" onclick="event.stopPropagation();skRjDelete('${j.id}')">🗑️ Delete</button>
-        </div>`:''}
-      </div>`).join(''):'<div class="sk-rj-empty">No pending repair jobs.</div>';
+        ${dealerControl}
+        ${actions}
+        <div class="sk-rj-open-hint">Tap to open full repair details →</div>
+      </div>`;
+    }).join(''):'<div class="sk-rj-empty">No pending repair jobs.</div>';
   };
 
   window.skRjRenderHistory=function(){
     const list=document.getElementById('skRjHistoryList'); if(!list)return;
-    const from=skDmyToISO(document.getElementById('skRjFromDate').value||'')||'';
-    const to=skDmyToISO(document.getElementById('skRjToDate').value||'')||'';
-    const q=(document.getElementById('skRjHistorySearch').value||'').toLowerCase();
-    let a=load().filter(j=>j.status==='Ready'||j.status==='Delivered');
-    a=a.filter(j=>{
-      const d=j.date||'';
-      return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.problem,j.status,j.workType].join(' ').toLowerCase().includes(q));
-    });
-    const ready=a.filter(j=>j.status==='Ready').sort(rjSortNewest);
-    const delivered=a.filter(j=>j.status==='Delivered').sort(rjSortNewest);
-    document.getElementById('skRjHistoryCount').textContent=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
-    const pEl=document.getElementById('skRjPendingCount'); if(pEl) pEl.textContent=load().filter(isPending).length;
-    const card=j=>`
-      <div class="sk-rj-card" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
-        <div class="sk-rj-card-top">
-          <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(formatIndianPhone(j.phone||'—'))}<br><span class="sk-rj-problem-highlight"><b>🔴 Problem:</b> ${esc(j.problem)}</span></div>
-          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||(j.status==='Delivered'?'Delivered':'Ready for Delivery'))}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div><div style="margin-top:5px;font-size:.68rem">💰 Estimate ₹${Number(j.estimate||0).toLocaleString('en-IN')} · Advance ₹${Number(j.advance||0).toLocaleString('en-IN')} · Paid ₹${Number(j.totalPaid||j.advance||0).toLocaleString('en-IN')} · Balance ₹${Number(j.balance||0).toLocaleString('en-IN')}</div>${j.dealerName?`<div style="margin-top:5px;font-size:.68rem">🏪 Dealer: <b>${esc(j.dealerName)}</b></div>`:''}</div>
-          <span class="sk-rj-status">${esc(j.status)}</span>
-        </div>
-        ${skRjIsAdmin()&&j.status==='Ready'?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-deliver" onclick="event.stopPropagation();skRjDeliver('${j.id}')">🚚 Mark Delivered</button></div>`:''}
-        ${skRjIsAdmin()&&j.status==='Delivered'?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-rework" onclick="event.stopPropagation();skRjRework('${j.id}')">↩️ Customer Rework</button></div>`:''}
-        <div style="margin-top:7px;font-size:.65rem;color:var(--primary);font-weight:800">Tap to open full repair details →</div>
-      </div>`;
-    list.innerHTML=(ready.length?`<div class="sk-rj-history-section-title ready">✅ Ready for Delivery <span>${ready.length}</span></div>${ready.map(card).join('')}`:'')
-      +(delivered.length?`<div class="sk-rj-history-section-title delivered">🚚 Delivered <span>${delivered.length}</span></div>${delivered.map(card).join('')}`:'')
-      ||'<div class="sk-rj-empty">No repair history found for selected filters.</div>';
+    try{
+      const from=typeof skDmyToISO==='function'?skDmyToISO(document.getElementById('skRjFromDate')?.value||'')||'':'';
+      const to=typeof skDmyToISO==='function'?skDmyToISO(document.getElementById('skRjToDate')?.value||'')||'':'';
+      const q=(document.getElementById('skRjHistorySearch')?.value||'').trim().toLowerCase();
+      const all=load();
+      let a=all.filter(j=>['Ready','Delivered'].includes(String(j.status||'')));
+      a=a.filter(j=>{
+        const d=typeof rjToISODate==='function'?rjToISODate(j.date||''):(j.date||'');
+        const hay=[j.customer,j.phone,j.model,j.problem,j.status,j.workType,j.deliveryStatus,j.dealer,j.note].join(' ').toLowerCase();
+        return (!from||d>=from)&&(!to||d<=to)&&(!q||hay.includes(q));
+      });
+      const ready=a.filter(j=>j.status==='Ready').sort(rjSortNewest);
+      const delivered=a.filter(j=>j.status==='Delivered').sort(rjSortNewest);
+      const h=document.getElementById('skRjHistoryCount');if(h)h.textContent=all.filter(j=>['Ready','Delivered'].includes(String(j.status||''))).length;
+      const p=document.getElementById('skRjPendingCount');if(p)p.textContent=all.filter(isPending).length;
+      const role=String(localStorage.getItem('sk_current_role_v1')||'').toLowerCase();
+      const adminOnly=role==='admin';
+      const makeCard=function(j){
+        const work=String(j.workType||'Normal').trim().toLowerCase();
+        const dealer=String(j.dealer||'');
+        return `<div class="sk-rj-card" data-work-type="${esc(work)}" onclick="skRjShowDetail('${esc(j.id)}')" title="Tap to view repair details">
+          <div class="sk-rj-card-top">
+            <div class="sk-rj-card-main">
+              <div class="sk-rj-name">${esc(j.customer||'Customer')} · ${esc(j.model||'')}</div>
+              <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status||'')} · 📱 ${esc(j.phone||'—')}</div>
+              <div class="sk-rj-problem-highlight">🔴 <b>Problem:</b> ${esc(j.problem||'—')}</div>
+              <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||(j.status==='Delivered'?'Delivered':'Ready for Delivery'))}</b></div>
+              <div class="sk-rj-money-line">💰 Estimate ₹${Number(j.estimate||0).toLocaleString('en-IN')} · Advance ₹${Number(j.advance||0).toLocaleString('en-IN')} · Delivery ₹${Number(j.deliveryPayment||0).toLocaleString('en-IN')} · Balance ₹${Number(j.balance||0).toLocaleString('en-IN')}</div>
+              ${dealer?`<div class="sk-rj-dealer-history">🏪 Dealer: <b>${esc(dealer)}</b></div>`:''}
+            </div>
+            <div><span class="sk-rj-status">${esc(j.status||'')}</span><span class="sk-rj-priority ${esc(work)}">${esc(j.workType||'Normal')}</span></div>
+          </div>
+          ${(!isManager&&j.status==='Ready')?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-deliver" onclick="event.stopPropagation();skRjDeliver('${esc(j.id)}')">🚚 Mark Delivered</button></div>`:''}
+          ${(!isManager&&j.status==='Delivered')?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-rework" onclick="event.stopPropagation();skRjRework('${esc(j.id)}')">↩️ Customer Rework</button></div>`:''}
+          ${adminOnly?`<div class="sk-rj-history-admin-actions"><button type="button" class="sk-rj-edit" onclick="event.stopPropagation();skRjEdit('${esc(j.id)}')">✏️ Edit</button><button type="button" class="sk-rj-delete" onclick="event.stopPropagation();skRjDelete('${esc(j.id)}')">🗑️ Delete</button></div>`:''}
+          <div class="sk-rj-open-hint">Tap to open full repair details →</div>
+        </div>`;
+      };
+      list.innerHTML=(ready.length?`<div class="sk-rj-history-section-title ready">✅ Ready for Delivery <span>${ready.length}</span></div>${ready.map(makeCard).join('')}`:'')
+        +(delivered.length?`<div class="sk-rj-history-section-title delivered">🚚 Delivered <span>${delivered.length}</span></div>${delivered.map(makeCard).join('')}`:'');
+      if(!list.innerHTML)list.innerHTML='<div class="sk-rj-empty">No repair history found for selected filters.</div>';
+    }catch(err){
+      console.error('Repair history render failed:',err);
+      list.innerHTML='<div class="sk-rj-empty">Unable to display repair history. Please try again.</div>';
+    }
   };
 
   window.skRjExportHistory=function(){
@@ -4645,7 +4712,7 @@ img{max-width:100%!important;}
 
   function load(){try{const a=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
   function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-  function urgentJobs(){return load().filter(j=>j.status!=='Delivered' && String(j.workType||'Normal').toLowerCase()==='urgent')}
+  function urgentJobs(){return load().filter(j=>['Received','Checking','Repairing'].includes(String(j.status||'')) && String(j.workType||'Normal').trim().toLowerCase()==='urgent')}
   function seen(){try{const a=JSON.parse(localStorage.getItem(SEEN)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
   function markSeen(ids){try{localStorage.setItem(SEEN,JSON.stringify(ids.slice(-100)))}catch(e){}}
 
@@ -5237,7 +5304,6 @@ img{max-width:100%!important;}
       if(!document.body)return;
       const currentRole=role();
       document.body.classList.toggle('sk-worker-mode',currentRole==='worker');
-      document.body.classList.toggle('sk-manager-mode',currentRole==='manager');
       skRefreshRoleBadge();
       document.querySelectorAll('.sk-worker-blocked,.sk-manager-locked').forEach(el=>{el.classList.remove('sk-worker-blocked','sk-manager-locked');el.removeAttribute('aria-disabled');});
       if(currentRole==='manager'){
@@ -6896,21 +6962,9 @@ window.skOpenPaymentForCurrent=function(){const c=currentC();if(c)openEntry('pay
 window.skOpenCreditForCurrent=function(){const c=currentC();if(c)openEntry('credit',c)}
 window.skOpenPaymentFor=function(e){const c=getCustomer(decodeURIComponent(e));if(c)openEntry('payment',c)}
 window.skOpenCreditFor=function(e){const c=getCustomer(decodeURIComponent(e));if(c)openEntry('credit',c)}
-function phoneDigits(p){
-  let d=String(p||'').replace(/\D/g,'');
-  if(d.startsWith('00')) d=d.slice(2);
-  if(d.length===11 && d.startsWith('0')) d=d.slice(1);
-  if(d.length===12 && d.startsWith('91')) return d;
-  if(d.length===10) return '91'+d;
-  return d;
-}
-function formatIndianPhone(p){
-  const d=phoneDigits(p);
-  return d.length===12 && d.startsWith('91') ? '+91 '+d.slice(2) : String(p||'').trim();
-}
-window.skFormatIndianPhone=formatIndianPhone;
+function phoneDigits(p){return typeof window.skIndianPhoneDigits==='function'?window.skIndianPhoneDigits(p):String(p||'').replace(/\D/g,'')}
 window.skWhatsAppFor=function(e){const c=getCustomer(decodeURIComponent(e));if(!c||!c.phone)return;window.open('https://wa.me/'+phoneDigits(c.phone)+'?text='+encodeURIComponent(`Hello ${c.name}, your pending credit balance at SK MOBILES is ${money(c.balance)}. Please contact us for payment details.`),'_blank')}
-window.skCallFor=function(e){const c=getCustomer(decodeURIComponent(e));if(c&&c.phone)window.location.href='tel:+'+phoneDigits(c.phone)}
+window.skCallFor=function(e){const c=getCustomer(decodeURIComponent(e));if(c&&c.phone)window.location.href='tel:'+phoneDigits(c.phone)}
 window.skWhatsAppCurrent=function(){if(currentCustomerKey)skWhatsAppFor(encodeURIComponent(currentCustomerKey))}
 window.skCallCurrent=function(){if(currentCustomerKey)skCallFor(encodeURIComponent(currentCustomerKey))}
 
@@ -7194,7 +7248,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 /* 🔒 SK V4.6 LOCKED CHANGE NOTE: All user-visible dates must display as DD-MM-YYYY. Bill History Delete uses Firebase Soft Delete and Firestore is the Bill History single source of truth. Do not alter these rules or unrelated app functions. */
 /* 🔒 SK V4.4 LOCKED CHANGE NOTE: Customer Credit uses OUTSTANDING, not Balance. Fully-paid bills must not open Payment. Payment receipts remain attached to the selected purchase bill. Customer address box is fixed-size. Do not alter these rules or unrelated app functions. */
 /* 🔒 SK V4.8 LOCKED CHANGE NOTE: Outstanding shortcut/filter and Home Outstanding use the bill-linked Customer Credit calculation. Do not alter unrelated app functions. */
-var skCPFilterMode='all', skCPSelectedKey='', skCPActionCustomer=null;
+var skCPFilterMode='all', skCPSelectedKey='', skCPActionCustomer=null, skCPFromDate='', skCPToDate='';
 function cpSafe(k,f){try{var v=JSON.parse(localStorage.getItem(k)||'');return v==null?f:v}catch(e){return f}}
 function cpBills(){var a=cpSafe('sk_bills',[]);return Array.isArray(a)?a:[]}
 function cpLedger(){var a=cpSafe('sk_credit_ledger_v1',[]);return Array.isArray(a)?a:[]}
@@ -7277,10 +7331,23 @@ function cpMatch(c,q){
  return vals.join(' ').toLowerCase().indexOf(q)!==-1;
 }
 function cpFilter(c){
- if(skCPFilterMode==='emi')return c.hasEmi && Number(c.emiBalance||0)>0;
- if(skCPFilterMode==='credit')return c.hasCredit && Number(c.creditBalance||0)>0;
- if(skCPFilterMode==='outstanding')return Number(c.balance||0)>0;
- if(skCPFilterMode==='complete')return c.balance<=0;
+ if(skCPFilterMode==='emi' && !(c.hasEmi && Number(c.emiBalance||0)>0))return false;
+ if(skCPFilterMode==='credit' && !(c.hasCredit && Number(c.creditBalance||0)>0))return false;
+ if(skCPFilterMode==='outstanding' && !(Number(c.balance||0)>0))return false;
+ if(skCPFilterMode==='complete' && !(c.balance<=0))return false;
+ if(skCPFromDate||skCPToDate){
+   var dates=[];
+   (c.bills||[]).forEach(function(x){if(x&&x.b&&x.b.date)dates.push(x.b.date)});
+   (c.entries||[]).forEach(function(e){if(e&&e.date)dates.push(e.date)});
+   var matched=dates.some(function(v){
+     var raw=String(v||'').trim(),iso='';
+     var m=raw.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+     if(m)iso=m[3]+'-'+String(Number(m[2])).padStart(2,'0')+'-'+String(Number(m[1])).padStart(2,'0');
+     else if(/^\d{4}-\d{1,2}-\d{1,2}/.test(raw)){var d=new Date(raw);if(!isNaN(d))iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+     return !!iso && (!skCPFromDate||iso>=skCPFromDate)&&(!skCPToDate||iso<=skCPToDate);
+   });
+   if(!matched)return false;
+ }
  return true;
 }
 function cpRow(c){
@@ -7303,6 +7370,40 @@ window.skCPRender=function(){
  var box=document.getElementById('skCPList');if(box)box.innerHTML=arr.length?arr.map(cpRow).join(''):'<div style="text-align:center;color:var(--text-muted);padding:28px">No customers found.</div>';
 };
 window.skCPFilter=function(f,btn){skCPFilterMode=f;document.querySelectorAll('#skCreditLedgerPage .skcp-filter').forEach(function(x){x.classList.remove('active')});if(btn)btn.classList.add('active');skCPRender()}
+window.skCPOpenFilterPanel=function(){
+ var m=document.getElementById('skCPFilterModal');if(!m)return;
+ document.querySelectorAll('#skCPFilterModal .skcp-filter-choice').forEach(function(x){x.classList.toggle('active',x.dataset.f===skCPFilterMode)});
+ var f=document.getElementById('skCPFilterFrom'),t=document.getElementById('skCPFilterTo');
+ if(f)f.value=skCPFromDate?skCPFromDate.split('-').reverse().join('/'):'';
+ if(t)t.value=skCPToDate?skCPToDate.split('-').reverse().join('/'):'';
+ m.classList.add('active');document.body.classList.add('modal-open');
+};
+window.skCPCloseFilterPanel=function(){
+ document.getElementById('skCPFilterModal')?.classList.remove('active');
+ if(!document.querySelector('.modal-overlay.active'))document.body.classList.remove('modal-open');
+};
+window.skCPApplyFilterChoice=function(f,btn){
+ skCPFilterMode=f;
+ document.querySelectorAll('#skCPFilterModal .skcp-filter-choice').forEach(function(x){x.classList.toggle('active',x===btn)});
+};
+window.skCPApplyFilterPanel=function(){
+ var f=document.getElementById('skCPFilterFrom')?.value||'',t=document.getElementById('skCPFilterTo')?.value||'';
+ function iso(v){
+   var s=String(v).trim(),m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+   return m?m[3]+'-'+String(Number(m[2])).padStart(2,'0')+'-'+String(Number(m[1])).padStart(2,'0'):'';
+ }
+ skCPFromDate=iso(f);skCPToDate=iso(t);
+ if(skCPFromDate&&skCPToDate&&skCPFromDate>skCPToDate){showToast?.('From Date must be before To Date');return;}
+ skCPRender();skCPCloseFilterPanel();
+};
+window.skCPClearFilters=function(){
+ skCPFilterMode='all';skCPFromDate='';skCPToDate='';
+ var f=document.getElementById('skCPFilterFrom'),t=document.getElementById('skCPFilterTo');
+ if(f)f.value='';if(t)t.value='';
+ document.querySelectorAll('#skCPFilterModal .skcp-filter-choice').forEach(function(x){x.classList.toggle('active',x.dataset.f==='all')});
+ skCPRender();
+};
+
 function cpShowMain(){document.getElementById('skCPMainView').style.display='block';document.getElementById('skCPDetailView').style.display='none';skCPRender()}
 function cpBillOptions(c,selected){
  var bs=c?c.bills:[];
@@ -7733,22 +7834,53 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
 })();
 
 
-/* SK MOBILES — Android Contact Picker for phone fields. No data is uploaded. */
+/* Credit filter panel interaction helpers */
+(function(){
+  const m=document.getElementById('skCPFilterModal');
+  if(!m)return;
+  m.addEventListener('click',function(e){if(e.target===m)window.skCPCloseFilterPanel?.();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&m.classList.contains('active'))window.skCPCloseFilterPanel?.();});
+})();
+
+/* SK MOBILES — compact in-field contact picker + Indian phone normalization */
 (function(){
   'use strict';
   const NAME_MAP={
     skRjPhone:'skRjCustomer',
-    billCustPhone:'billCustName',
     skCreditPhone:'skCreditName',
     skCPPhone:'skCPName',
     skWorkerProfilePhone:'skWorkerProfileName',
     skWorkerEditPhone:'skWorkerEditName'
   };
-  function isPhoneInput(el){
-    if(!el || el.tagName!=='INPUT' || el.disabled || el.type==='password') return false;
-    const id=String(el.id||'').toLowerCase(), name=String(el.name||'').toLowerCase(), ph=String(el.placeholder||'').toLowerCase();
-    return el.type==='tel' || /phone|mobile|contact/.test(id+' '+name+' '+ph);
+  const CONTACT_IDS=new Set(Object.keys(NAME_MAP));
+
+  function normalizeIndianPhoneDisplay(value){
+    let raw=String(value||'').trim();
+    if(!raw)return '';
+    let digits=raw.replace(/\D/g,'');
+    if(digits.startsWith('00'))digits=digits.slice(2);
+    if(digits.startsWith('91') && digits.length===12)digits=digits.slice(2);
+    if(digits.startsWith('0') && digits.length===11)digits=digits.slice(1);
+    if(digits.length===10)return '+91 '+digits;
+    return raw;
   }
+  function indianPhoneDigits(value){
+    let digits=String(value||'').replace(/\D/g,'');
+    if(digits.startsWith('00'))digits=digits.slice(2);
+    if(digits.startsWith('0') && digits.length===11)digits=digits.slice(1);
+    if(digits.startsWith('91') && digits.length===12)return digits;
+    if(digits.length===10)return '91'+digits;
+    return digits;
+  }
+  window.skNormalizeIndianPhoneDisplay=normalizeIndianPhoneDisplay;
+  window.skIndianPhoneDigits=indianPhoneDigits;
+
+  function isContactField(input){
+    if(!input || input.tagName!=='INPUT' || input.disabled || input.type==='password')return false;
+    if(input.closest('#billingModal'))return false; /* Billing modal: no contact icon */
+    return CONTACT_IDS.has(String(input.id||'')) || input.type==='tel';
+  }
+
   async function pickContact(input){
     if(!navigator.contacts?.select){
       if(typeof showToast==='function')showToast('📇 Contact Picker is not supported in this browser');
@@ -7756,17 +7888,17 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
     }
     try{
       const contacts=await navigator.contacts.select(['name','tel'],{multiple:false});
-      const c=contacts?.[0]; if(!c)return;
+      const c=contacts?.[0];if(!c)return;
       const phone=Array.isArray(c.tel)?String(c.tel[0]||'').trim():'';
       const name=Array.isArray(c.name)?String(c.name[0]||'').trim():'';
-      if(phone) {
-        input.value=window.skFormatIndianPhone?.(phone)||phone;
+      if(phone){
+        input.value=normalizeIndianPhoneDisplay(phone);
         input.dispatchEvent(new Event('input',{bubbles:true}));
         input.dispatchEvent(new Event('change',{bubbles:true}));
       }
       const targetId=NAME_MAP[input.id];
       const nameEl=targetId?document.getElementById(targetId):null;
-      if(nameEl && name) {
+      if(nameEl && name){
         nameEl.value=name;
         nameEl.dispatchEvent(new Event('input',{bubbles:true}));
         nameEl.dispatchEvent(new Event('change',{bubbles:true}));
@@ -7776,29 +7908,55 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
       if(e?.name!=='AbortError' && typeof showToast==='function')showToast('📇 Contact selection cancelled or unavailable');
     }
   }
+
   function enhance(root=document){
     root.querySelectorAll?.('input').forEach(input=>{
-      if(!isPhoneInput(input) || input.dataset.contactPickerBound)return;
+      if(!isContactField(input))return;
+      input.addEventListener('blur',function(){
+        const formatted=normalizeIndianPhoneDisplay(this.value);
+        if(formatted)this.value=formatted;
+      });
+      if(input.dataset.contactPickerBound)return;
       input.dataset.contactPickerBound='1';
-      const parent=input.parentElement;
-      if(!parent)return;
+      const parent=input.parentElement;if(!parent)return;
       const wrap=document.createElement('div');
       wrap.className='sk-phone-contact-wrap';
-      wrap.style.cssText='position:relative;display:block;width:100%';
       parent.insertBefore(wrap,input);
       wrap.appendChild(input);
-      input.style.width='100%';
-      input.style.paddingRight='50px';
-      input.addEventListener('blur',()=>{ const f=window.skFormatIndianPhone?.(input.value); if(f) input.value=f; });
       const b=document.createElement('button');
-      b.type='button'; b.className='sk-contact-picker-btn'; b.title='Choose from phone contacts'; b.setAttribute('aria-label','Choose contact');
-      b.textContent='📇';
-      b.style.cssText='position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;min-width:32px;padding:0;border-radius:9px;border:1px solid var(--card-border,#d7dce5);background:var(--pill-bg,#f4f6fa);color:var(--text,#111);font-size:15px;line-height:1;cursor:pointer';
+      b.type='button';
+      b.className='sk-contact-picker-btn';
+      b.title='Choose from phone contacts';
+      b.setAttribute('aria-label','Choose contact');
+      b.innerHTML='<svg class="sk-contact-book-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h13a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 18v-1.5h1V18a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5V6a.5.5 0 0 0-.5-.5H5a.5.5 0 0 0-.5.5v1.5h-1V6A1.5 1.5 0 0 1 5 4.5Zm3.5 4h5a2 2 0 1 1 0 4h-5a2 2 0 1 1 0-4Zm0 1a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2h-5Zm0 4.5h7v1h-7v-1Z" fill="currentColor"/><path d="M1.5 9h3v1h-3V9Zm0 3h3v1h-3v-1Zm0 3h3v1h-3v-1Z" fill="currentColor"/></svg>';
       b.addEventListener('click',()=>pickContact(input));
       wrap.appendChild(b);
     });
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>enhance(document),100),{once:true});else setTimeout(()=>enhance(document),100);
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>enhance(document),100),{once:true});
+  else setTimeout(()=>enhance(document),100);
   const mo=new MutationObserver(m=>m.forEach(x=>x.addedNodes.forEach(n=>{if(n.nodeType===1)enhance(n)})));
   mo.observe(document.documentElement,{childList:true,subtree:true});
+})();
+
+/* Normalize phone numbers before app actions save them, without changing data keys or schemas. */
+(function(){
+  const ids=['skRjPhone','skCreditPhone','skCPPhone','skWorkerProfilePhone','skWorkerEditPhone','billCustPhone'];
+  function apply(){
+    ids.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el&&typeof window.skNormalizeIndianPhoneDisplay==='function'&&document.activeElement!==el){
+        const v=window.skNormalizeIndianPhoneDisplay(el.value);
+        if(v)el.value=v;
+      }
+    });
+  }
+  document.addEventListener('change',e=>{
+    const el=e.target;
+    if(el&&ids.includes(el.id)&&typeof window.skNormalizeIndianPhoneDisplay==='function'){
+      const v=window.skNormalizeIndianPhoneDisplay(el.value);if(v)el.value=v;
+    }
+  },true);
+  window.addEventListener('DOMContentLoaded',()=>setTimeout(apply,250),{once:true});
 })();
