@@ -8905,3 +8905,25 @@ html body main#cardsContainer{
 #skAccessoriesList .sk-accessory-row .skAccSelect{opacity:0;width:0;height:0;min-width:0;margin:0;padding:0;pointer-events:none;transition:opacity .12s,width .12s;}
 #skAccessoriesList.sk-selection-mode .sk-accessory-row .skAccSelect{opacity:1;width:16px;height:16px;min-width:16px;margin:0 2px 0 0;pointer-events:auto;}
 #skAccessoriesList .sk-accessory-row.sk-selected{border-color:var(--primary) !important;background:var(--model-bg) !important;}
+
+
+/* V5.5.7 — consistent full-width mobile page sheets for Accessories and Repair Details. */
+@media (max-width: 600px) {
+  #skAccessoriesPage .modal-sheet,
+  #skRepairDetailModal .modal-sheet {
+    width: calc(100vw - 16px) !important;
+    max-width: none !important;
+    margin-left: auto !important; margin-right: auto !important;
+  }
+  #skAccessoriesPage .modal-sheet > div:nth-child(2),
+  #skRepairDetailModal #skRepairDetailContent {
+    width: 100% !important; min-width: 0 !important;
+  }
+}
+#skcpCustomerEditModal input { font: inherit; font-size: .82rem; }
+@media (max-width: 420px) {
+  #skcpCustomerEditModal > section { padding: 11px !important; }
+  #skcpCustomerEditModal #skcpCustomerEditForm { grid-template-columns: 1fr !important; }
+  #skcpCustomerEditModal #skcpCustomerEditForm > * { grid-column: 1 / -1 !important; }
+  #skcpCustomerEditModal #skcpCustomerEditForm > div[style*="repeat(3"] { grid-template-columns: 1fr 1fr 1fr !important; }
+}

@@ -7468,25 +7468,34 @@ function cpOpenDetail(c){
 window.skCPEditCustomer=function(k){
  var c=cpGetCustomers().find(function(x){return x.key===k});
  if(!c)return;
- var name=prompt('Edit customer name:',c.name||'');
- if(name===null)return;
- name=String(name).trim();
- if(!name){if(typeof showToast==='function')showToast('Customer name is required');return;}
- var phone=prompt('Edit phone number:',c.phone||'');
- if(phone===null)return;
- phone=String(phone).trim();
- var newKey=cpKey(name,phone);
- if(newKey!==k&&cpGetCustomers().some(function(x){return x.key===newKey})){if(typeof showToast==='function')showToast('A customer with this name and phone already exists');return;}
- var bills=cpBills();
- bills.forEach(function(b){if(cpKey(b.custName,b.phone)===k){b.custName=name;b.phone=phone;}});
- localStorage.setItem('sk_bills',JSON.stringify(bills));
- if(typeof savedBills!=='undefined')savedBills=bills;
- var ledger=cpLedger();
- ledger.forEach(function(e){if((e.key||cpKey(e.name,e.phone))===k){e.name=name;e.phone=phone;e.key=newKey;}});
- localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(ledger));
- if(typeof window.skCPBackToList==='function')window.skCPBackToList();
- if(typeof window.skCPRender==='function')window.skCPRender();
- if(typeof showToast==='function')showToast('Customer details updated');
+ var old=document.getElementById('skcpCustomerEditModal');if(old)old.remove();
+ var esc=typeof cpEsc==='function'?cpEsc:function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]})};
+ var entries=(c.entries||[]).filter(function(e){return String(e.source||'')!=='bill'}).slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))});
+ var modal=document.createElement('div');modal.id='skcpCustomerEditModal';
+ modal.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(15,23,42,.48);';
+ modal.innerHTML='<section role="dialog" aria-modal="true" aria-labelledby="skcpCustomerEditTitle" style="width:min(560px,100%);max-height:92dvh;overflow:auto;background:var(--card-bg,#fff);color:var(--text,#172033);border:1px solid var(--card-border,#cbd5e1);border-radius:18px;padding:15px;box-shadow:0 18px 50px rgba(15,23,42,.25)">'+
+ '<header style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px"><b id="skcpCustomerEditTitle" style="font-size:1rem">Edit Customer & Credit Details</b><button type="button" id="skcpCustomerEditClose" aria-label="Close" style="border:0;border-radius:50%;width:34px;height:34px;background:#fee2e2;color:#b91c1c;font-size:22px">×</button></header>'+
+ '<form id="skcpCustomerEditForm" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+ '<label style="display:flex;flex-direction:column;gap:5px;font-size:.78rem;font-weight:750">Customer name<input name="name" required value="'+esc(c.name||'')+'" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"></label>'+
+ '<label style="display:flex;flex-direction:column;gap:5px;font-size:.78rem;font-weight:750">Phone number<input name="phone" value="'+esc(c.phone||'')+'" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"></label>'+
+ '<div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px"><div style="padding:9px;border:1px solid var(--card-border);border-radius:10px"><small style="display:block;color:var(--text-muted)">Credit / EMI</small><b>'+cpMoney(c.credits)+'</b></div><div style="padding:9px;border:1px solid var(--card-border);border-radius:10px"><small style="display:block;color:var(--text-muted)">Payments</small><b>'+cpMoney(c.payments)+'</b></div><div style="padding:9px;border:1px solid var(--card-border);border-radius:10px"><small style="display:block;color:var(--text-muted)">Balance</small><b>'+cpMoney(c.balance)+'</b></div></div>'+
+ '<div style="grid-column:1/-1;font-size:.78rem;font-weight:850;margin-top:3px">Credit / Payment entries</div>'+
+ '<div style="grid-column:1/-1;display:grid;gap:7px">'+(entries.length?entries.map(function(e){var canEdit=String(e.source||'')!=='repair-job'&&!skCPRepairJobIdFromCredit(e);return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px;border:1px solid var(--card-border);border-radius:11px"><div style="min-width:0"><b style="font-size:.78rem">'+(e.type==='payment'?'Payment':'Credit')+' • '+cpMoney(e.amount)+'</b><div style="font-size:.67rem;color:var(--text-muted);overflow-wrap:anywhere">'+cpDateText(e.date)+' • '+esc(e.mode||'')+' • '+esc(e.details||'')+'</div></div>'+(canEdit?'<button type="button" data-entry-id="'+esc(encodeURIComponent(String(e.id||'')))+'" class="skcp-customer-entry-edit" style="flex:0 0 auto;padding:7px 10px;border:1px solid var(--card-border);border-radius:999px;background:var(--pill-bg);color:var(--text);font-weight:800">✏️ Edit entry</button>':'<span style="font-size:.65rem;color:var(--text-muted)">Edit from original job</span>')+'</div>'}).join(''):'<div style="font-size:.72rem;color:var(--text-muted);padding:8px 0">No manual credit/payment entries.</div>')+'</div>'+
+ '<div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:4px"><button type="button" id="skcpCustomerEditCancel" style="padding:10px 15px;border:1px solid var(--card-border,#cbd5e1);border-radius:999px;background:transparent;color:inherit">Cancel</button><button type="submit" style="padding:10px 16px;border:0;border-radius:999px;background:var(--primary,#2563eb);color:#fff;font-weight:850">Save Changes</button></div></form></section>';
+ document.body.appendChild(modal);
+ function close(){modal.remove()}
+ modal.querySelector('#skcpCustomerEditClose').onclick=close;modal.querySelector('#skcpCustomerEditCancel').onclick=close;
+ modal.addEventListener('click',function(ev){if(ev.target===modal)close()});
+ modal.querySelectorAll('.skcp-customer-entry-edit').forEach(function(btn){btn.onclick=function(){var id=btn.dataset.entryId;close();window.skCPEditLedgerEntry(id)}});
+ modal.querySelector('#skcpCustomerEditForm').addEventListener('submit',function(ev){
+  ev.preventDefault();var f=ev.currentTarget,name=f.elements.name.value.trim(),phone=f.elements.phone.value.trim();
+  if(!name){if(typeof showToast==='function')showToast('Customer name is required');return;}
+  var newKey=cpKey(name,phone);
+  if(newKey!==k&&cpGetCustomers().some(function(x){return x.key===newKey})){if(typeof showToast==='function')showToast('A customer with this name and phone already exists');return;}
+  var bills=cpBills();bills.forEach(function(b){if(cpKey(b.custName,b.phone)===k){b.custName=name;b.phone=phone;}});localStorage.setItem('sk_bills',JSON.stringify(bills));if(typeof savedBills!=='undefined')savedBills=bills;
+  var ledger=cpLedger();ledger.forEach(function(e){if((e.key||cpKey(e.name,e.phone))===k){e.name=name;e.phone=phone;e.key=newKey;}});localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(ledger));
+  close();if(typeof window.skCPBackToList==='function')window.skCPBackToList();if(typeof window.skCPRender==='function')window.skCPRender();if(typeof showToast==='function')showToast('Customer details updated');
+ });
 };
 window.skCPDeleteCustomer=async function(k){
  var c=cpGetCustomers().find(function(x){return x.key===k});
