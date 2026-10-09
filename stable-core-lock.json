@@ -1,14 +1,14 @@
 {
-  "lock_name": "SK MOBILES V5.0 Stable Core Lock",
-  "version": "V5.0",
-  "source": "SK-V5.0-stable-v18-LiveInvoice-PDF-EMI-Highlight-Fix.zip",
-  "policy": "Existing core files remain frozen unless the user explicitly approves a targeted fix. This V5.0 build includes the approved unified mobile page/popup presentation fix; existing business logic and data structures remain unchanged.",
+  "lock_name": "SK MOBILES V5.4 Audited Stable Core Lock",
+  "version": "V5.4",
+  "source": "SK-Mobiles-V5.4-Full-Audit-Performance-Fix.zip",
+  "policy": "V5.4 audited baseline. Preserve existing business logic, Firebase configuration/rules, storage keys and data structures unless a targeted change is explicitly approved.",
   "core_files": {
-    "index.html": "d5e46dcbde73faea6118aaec1ef6e43c670455ee75d995221b05dd3050918f09",
-    "js/app.js": "fd16719834fcaa2f9d3f4610c8dea08343fbb1f299f2cf05236c867db1401f0f",
-    "js/firebase-sync.js": "2bf592c6f1b49efecc5acbd12b87a3930767980fde3b169f09ae8925adf80d04",
-    "css/style.css": "1083a07e5bd131fe00a9a2cc8b6a14b34bca8448c8f5c9c1bafa0972360f432d",
-    "firestore.rules": "536abb19e8ea6b7b416561d937b391af77a718b77c3b922d334c5d27fc9f94d2",
+    "index.html": "f44cd051fa2aa974fe8f2ec7f56ae10fb195d19d8487df787fd13c259dc7e692",
+    "js/app.js": "b788c7f8fb81c3a3d71c90a47b9230bc32a5d1bb72d264f1cc20a0465136c8a5",
+    "js/firebase-sync.js": "36a8eab4bb8dece1b092f18a8c7e53bbaacb0523ed5272272b5557a2d184a255",
+    "css/style.css": "b0d6b2b878e3d31a90f9f51a5eafc242e15ebaa3994ef65d24f1d5609718bca0",
+    "firestore.rules": "3d2976de0b3e3c9789bab1ab39b75a6a7c36328c4e51f08862cea72bd56ed5f4",
     "FIREBASE_SETUP.txt": "d56888379e27efec0d40ec7d6b2132bbca912f102cd3aea006ee93e28947c791",
     "README.mdSK-V4.13 ( Stabled Version) V3": "fe0d2f1020279437a87d0d620312262bd71b1b8c515c1d991b76d5da3e1faa2c"
   }

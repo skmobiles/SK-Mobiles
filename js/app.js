@@ -4120,18 +4120,6 @@ img{max-width:100%!important;}
         });
     }
 
-    function saveDriveApiUrl() {
-      const val = document.getElementById('driveApiInput').value.trim();
-      if (!val) { showToast("Valid Web App URL enter seiyavum!"); return; }
-      localStorage.setItem('sk_drive_api', val);
-      showToast("Drive URL connected successfully!");
-    }
-
-    function fetchFromGoogleDrive() {
-      showToast("Google Drive-udan sync aagiradhu...");
-      setTimeout(() => { showToast("Sync completed successfully!"); }, 1500);
-    }
-
 (function(){
   'use strict';
   const KEY='skx_repair_jobs_v2';
@@ -4808,7 +4796,7 @@ img{max-width:100%!important;}
     if(urgentRenderQueued || !document.getElementById('homeMetricGrid')) return;
     urgentRenderQueued=true;
     requestAnimationFrame(()=>{ urgentRenderQueued=false; if(document.getElementById('homeMetricGrid')) renderCard(); });
-  }).observe(target,{childList:true,subtree:true});
+  }).observe(target,{childList:true,subtree:false});
   document.getElementById('skUrgentRepairModal')?.addEventListener('click',function(e){if(e.target===this)skCloseUrgentRepairModal()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')skCloseUrgentRepairModal()});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(install,180),{once:true});else setTimeout(install,180);

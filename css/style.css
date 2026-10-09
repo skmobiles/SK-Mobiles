@@ -8454,7 +8454,7 @@ html, body { max-width:100%; overflow-x:hidden; }
   #skRepairDetailModal .sk-rj-detail-finance{grid-template-columns:1fr}
 }
 
-/* V5.3 targeted fix: restore the existing primary navigation dock on mobile and desktop. */
+/* V5.4 audit: keep the existing primary navigation dock visible on mobile and desktop. */
 html body nav.bottom-nav{
   display:grid !important;
   visibility:visible !important;

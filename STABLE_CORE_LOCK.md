@@ -1,9 +1,9 @@
-# SK MOBILES — V5.0 STABLE CORE LOCK
+# SK MOBILES — V5.4 STABLE CORE LOCK
 
 ## Status
-**V5.0 is the frozen Stable Core baseline.**
+**V5.4 is the audited Stable Core baseline.**
 
-The existing application code in this package is treated as the Source of Truth for the V5.0 Stable Core. Future work must not modify, delete, rename, disable, or replace the locked core files unless explicit approval is given for a core change.
+The existing application code in this package is treated as the Source of Truth for the V5.4 Stable Core. Future work must not modify, delete, rename, disable, or replace the locked core files unless explicit approval is given for a core change.
 
 ## Locked core
 - `index.html`
@@ -29,7 +29,7 @@ Do not change existing Firebase configuration, Firestore structure, document IDs
 python tools/verify_stable_core.py
 ```
 
-A successful verification means the locked files still match the V5.0 baseline.
+A successful verification means the locked files still match the V5.4 baseline.
 
 ## Important limitation
 This package-level lock is a development/source-control safeguard. It does not make browser-side JavaScript physically unmodifiable. For GitHub enforcement, protect the stable branch/tag and require review before changes are merged.
