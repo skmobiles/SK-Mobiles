@@ -7401,27 +7401,51 @@ function skCPRepairJobIdFromCredit(e){
   return '';
 }
 window.skCPEditLedgerEntry=function(encodedId){
- var id=decodeURIComponent(String(encodedId||''));
- var ledger=cpLedger();
- var entry=ledger.find(function(e){return String(e.id||'')===id;});
- if(!entry){showToast?.('Credit/payment entry not found');return;}
- if(String(entry.source||'')==='bill'||String(entry.source||'')==='repair-job'||skCPRepairJobIdFromCredit(entry)){
-   showToast?.('This entry is linked to a bill or repair job. Edit it from the original record.');return;
- }
- var amountText=prompt('Edit amount (₹):',String(Number(entry.amount)||0)); if(amountText===null)return;
- var amount=Number(String(amountText).replace(/[,₹\s]/g,''));
- if(!Number.isFinite(amount)||amount<=0){showToast?.('Enter a valid amount');return;}
- var dateText=prompt('Edit date (DD/MM/YYYY):',typeof skISOToDmy==='function'?skISOToDmy(entry.date||''):String(entry.date||'')); if(dateText===null)return;
- var dateValue=typeof skDmyToISO==='function'?skDmyToISO(dateText):dateText;
- if(!dateValue){showToast?.('Enter a valid date');return;}
- var mode=prompt('Edit payment mode:',String(entry.mode||'Cash')); if(mode===null)return;
- var details=prompt('Edit details / note:',String(entry.details||'')); if(details===null)return;
- entry.amount=amount; entry.date=dateValue; entry.mode=String(mode).trim()||'Cash'; entry.details=String(details).trim();
- localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(ledger));
- if(typeof window.skCPRender==='function')window.skCPRender();
- if(typeof skCPSelectedKey!=='undefined'&&skCPSelectedKey){var c=cpGetCustomers().find(function(x){return x.key===skCPSelectedKey;});if(c)cpOpenDetail(c);}
- if(typeof currentCustomerKey!=='undefined'&&currentCustomerKey&&document.getElementById('skCreditCustomerModal')?.classList.contains('active')&&typeof window.skOpenCustomer==='function')window.skOpenCustomer(encodeURIComponent(currentCustomerKey));
- showToast?.('Credit/payment entry updated');
+  var id=decodeURIComponent(String(encodedId||''));
+  var ledger=cpLedger();
+  var entry=ledger.find(function(e){return String(e.id||'')===id;});
+  if(!entry){if(typeof showToast==='function')showToast('Credit/payment entry not found');return;}
+  if(String(entry.source||'')==='bill'||String(entry.source||'')==='repair-job'||skCPRepairJobIdFromCredit(entry)){
+    if(typeof showToast==='function')showToast('இந்த பதிவு Bill / Repair Job-உடன் இணைக்கப்பட்டுள்ளது. அசல் பதிவிலிருந்து திருத்தவும்.');return;
+  }
+  var old=document.getElementById('skcpLedgerEditModal');if(old)old.remove();
+  var esc=typeof cpEsc==='function'?cpEsc:function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var dateVal=typeof skISOToDmy==='function'?skISOToDmy(entry.date||''):String(entry.date||'');
+  var dueVal=entry.dueDate?(typeof skISOToDmy==='function'?skISOToDmy(entry.dueDate):String(entry.dueDate)):'';
+  var modal=document.createElement('div');modal.id='skcpLedgerEditModal';
+  modal.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(15,23,42,.48);';
+  modal.innerHTML='<div role="dialog" aria-modal="true" aria-labelledby="skcpEditTitle" style="width:min(520px,100%);max-height:90vh;overflow:auto;background:var(--card-bg,#fff);color:var(--text,#172033);border:1px solid var(--card-border,#cbd5e1);border-radius:18px;padding:16px;box-shadow:0 18px 50px rgba(15,23,42,.25)">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px"><b id="skcpEditTitle" style="font-size:1rem">Edit Credit / Payment</b><button type="button" id="skcpEditClose" aria-label="Close" style="border:0;border-radius:50%;width:34px;height:34px;background:#fee2e2;color:#b91c1c;font-size:22px">×</button></div>'+
+    '<form id="skcpLedgerEditForm" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+    '<label style="display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700">Customer name<input name="name" required value="'+esc(entry.name||'')+'" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"></label>'+
+    '<label style="display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700">Phone number<input name="phone" value="'+esc(entry.phone||'')+'" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"></label>'+
+    '<label style="display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700">Entry type<select name="type" style="padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"><option value="credit" '+(String(entry.type||'credit').toLowerCase()==='credit'?'selected':'')+'>Credit</option><option value="payment" '+(String(entry.type||'').toLowerCase()==='payment'?'selected':'')+'>Payment</option></select></label>'+
+    '<label style="display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700">Amount (₹)<input name="amount" type="number" min="0.01" step="0.01" required value="'+esc(Number(entry.amount)||0)+'" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"></label>'+
+    '<label style="display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700">Date (DD/MM/YYYY)<input name="date" required value="'+esc(dateVal)+'" placeholder="DD/MM/YYYY" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"></label>'+
+    '<label style="display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700">Payment mode<input name="mode" value="'+esc(entry.mode||'Cash')+'" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"></label>'+
+    '<label style="display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700;grid-column:1/-1">Full details / note<textarea name="details" rows="3" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit;resize:vertical">'+esc(entry.details||'')+'</textarea></label>'+
+    '<label style="display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700;grid-column:1/-1">Due date (optional)<input name="dueDate" value="'+esc(dueVal)+'" placeholder="DD/MM/YYYY" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"></label>'+
+    '<div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:4px"><button type="button" id="skcpEditCancel" style="padding:10px 16px;border:1px solid var(--card-border,#cbd5e1);border-radius:999px;background:transparent;color:inherit">Cancel</button><button type="submit" style="padding:10px 18px;border:0;border-radius:999px;background:var(--primary,#2563eb);color:#fff;font-weight:800">Save Changes</button></div></form></div>';
+  document.body.appendChild(modal);
+  function close(){modal.remove();}
+  modal.querySelector('#skcpEditClose').onclick=close;modal.querySelector('#skcpEditCancel').onclick=close;
+  modal.addEventListener('click',function(ev){if(ev.target===modal)close();});
+  modal.querySelector('#skcpLedgerEditForm').addEventListener('submit',function(ev){
+    ev.preventDefault();var f=ev.currentTarget;
+    var name=f.elements.name.value.trim(),phone=f.elements.phone.value.trim(),type=f.elements.type.value;
+    var amount=Number(f.elements.amount.value),dateText=f.elements.date.value.trim(),details=f.elements.details.value.trim(),mode=f.elements.mode.value.trim()||'Cash',dueText=f.elements.dueDate.value.trim();
+    if(!name){if(typeof showToast==='function')showToast('Customer name is required');return;}
+    if(!Number.isFinite(amount)||amount<=0){if(typeof showToast==='function')showToast('Enter a valid amount');return;}
+    var dateValue=typeof skDmyToISO==='function'?skDmyToISO(dateText):dateText;
+    if(!dateValue){if(typeof showToast==='function')showToast('Enter a valid date');return;}
+    var dueDate='';if(dueText){dueDate=typeof skDmyToISO==='function'?skDmyToISO(dueText):dueText;if(!dueDate){if(typeof showToast==='function')showToast('Enter a valid due date');return;}}
+    entry.name=name;entry.phone=phone;entry.key=customerKey(name,phone);entry.type=type;entry.amount=amount;entry.date=dateValue;entry.mode=mode;entry.details=details;entry.dueDate=dueDate;
+    localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(ledger));close();
+    if(typeof window.skCPRender==='function')window.skCPRender();
+    if(typeof skCPSelectedKey!=='undefined'&&skCPSelectedKey){var c=cpGetCustomers().find(function(x){return x.key===skCPSelectedKey;});if(c)cpOpenDetail(c);}
+    if(typeof currentCustomerKey!=='undefined'&&currentCustomerKey&&document.getElementById('skCreditCustomerModal')?.classList.contains('active')&&typeof window.skOpenCustomer==='function')window.skOpenCustomer(encodeURIComponent(currentCustomerKey));
+    if(typeof showToast==='function')showToast('Credit/payment entry updated');
+  });
 };
 
 function cpOpenDetail(c){
@@ -7438,7 +7462,7 @@ function cpOpenDetail(c){
  '<div class="skcp-bill-actions"><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(c.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ FULLY PAID</span>')+'</div></div>';
  if(bills.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">SALES BILL HISTORY</div>';html+=bills.map(function(x){var b=x.b;return '<div class="skcp-bill-card"><div class="skcp-bill-top"><div><b>'+cpEsc(b.id)+'</b> • '+cpEsc(b.model||'')+'<div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(b.date)+' • '+cpEsc(b.payMode||'')+'</div></div><b>'+cpMoney(b.balance||0)+'</b></div><div style="font-size:.63rem;margin-top:4px">Amount: '+cpMoney(b.price||0)+' • Advance: '+cpMoney(b.advance||0)+' • Outstanding: '+cpMoney(b.balance||0)+'</div><div class="skcp-bill-actions"><button class="skcp-btn" onclick="skCPViewBill('+x.idx+')">📄 Bill Details</button><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(b.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ PAID</span>')+'</div>'+
  (Array.isArray(b.paymentReceipts)&&b.paymentReceipts.length?'<div style="font-size:.59rem;color:var(--text-muted);margin-top:6px">Receipts: '+b.paymentReceipts.map(function(r){return '#'+cpEsc(String(r.id||'').slice(-6))+' '+cpMoney(r.amount)+' '+cpEsc(r.mode||'')+' '+cpDateText(r.date)}).join(' • ')+'</div>':'')+'</div>'}).join('')}
- if(entries.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">CREDIT / PAYMENT HISTORY</div>';html+=entries.map(function(e){var repairJobId=skCPRepairJobIdFromCredit(e);var isRepairCredit=!!repairJobId;var canEdit=String(e.source||'')!=='bill'&&String(e.source||'')!=='repair-job'&&!isRepairCredit;return '<div class="skcp-bill-card '+(isRepairCredit?'skcp-repair-credit-link':'')+'" '+(isRepairCredit?'role="button" tabindex="0" data-repair-job-id="'+cpEsc(repairJobId)+'" onclick="skCPOpenRepairJob(this.dataset.repairJobId)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();skCPOpenRepairJob(this.dataset.repairJobId)}"':'')+'><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>'+(e.type==='payment'?'💰 PAYMENT':'🧾 CREDIT')+' • '+cpMoney(e.amount)+'</b>'+(canEdit?'<button type="button" class="skcp-btn" style="flex:0 0 auto;padding:5px 9px;font-size:.62rem" onclick="event.stopPropagation();skCPEditLedgerEntry(\''+encodeURIComponent(String(e.id||''))+ '\')">✏️ Edit</button>':'')+'</div><div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(e.date)+' • '+cpEsc(e.mode||'')+' • '+cpEsc(e.details||'')+(e.billId?' • Bill #'+cpEsc(cpBillLast3(e.billId)):'')+'</div>'+(isRepairCredit?'<div class="skcp-open-job-hint">Tap to open repair job details →</div>':'')+'</div>'}).join('')}
+ if(entries.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">CREDIT / PAYMENT HISTORY</div>';html+=entries.map(function(e){var repairJobId=skCPRepairJobIdFromCredit(e);var isRepairCredit=!!repairJobId;var canEdit=String(e.source||'')!=='bill'&&String(e.source||'')!=='repair-job'&&!isRepairCredit;return '<div class="skcp-bill-card '+(isRepairCredit?'skcp-repair-credit-link':'')+'" '+(isRepairCredit?'role="button" tabindex="0" data-repair-job-id="'+cpEsc(repairJobId)+'" onclick="skCPOpenRepairJob(this.dataset.repairJobId)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();skCPOpenRepairJob(this.dataset.repairJobId)}"':'')+'><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>'+(e.type==='payment'?'💰 PAYMENT':'🧾 CREDIT')+' • '+cpMoney(e.amount)+'</b>'+(canEdit?'<button type="button" class="skcp-btn" style="flex:0 0 auto;padding:5px 9px;font-size:.62rem" onclick="event.stopPropagation();skCPEditLedgerEntry(\''+encodeURIComponent(String(e.id||''))+ '\')">✏️ Edit</button>':(isRepairCredit?'<button type="button" class="skcp-btn" style="flex:0 0 auto;padding:5px 9px;font-size:.62rem" onclick="event.stopPropagation();skCPOpenRepairJob(\''+cpEsc(repairJobId)+'\')">✏️ Edit Job</button>':''))+'</div><div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(e.date)+' • '+cpEsc(e.mode||'')+' • '+cpEsc(e.details||'')+(e.billId?' • Bill #'+cpEsc(cpBillLast3(e.billId)):'')+'</div>'+(isRepairCredit?'<div class="skcp-open-job-hint">Tap to open repair job details →</div>':'')+'</div>'}).join('')}
  document.getElementById('skCPDetailView').innerHTML=html;document.getElementById('skCPMainView').style.display='none';document.getElementById('skCPDetailView').style.display='block';
 }
 window.skCPEditCustomer=function(k){
@@ -7791,12 +7815,23 @@ function render(){
  const box=document.getElementById('skAccessoriesList');if(!box)return;
  const q=(document.getElementById('skAccessoriesSearch')?.value||'').trim().toLowerCase();
  const a=get().filter(x=>[x.name,x.category,x.brand,x.note].join(' ').toLowerCase().includes(q));
- box.innerHTML=a.length?a.map(x=>`<div style="display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--card-border);border-radius:14px;margin-bottom:8px;background:var(--card-bg);">
- <input type="checkbox" class="skAccSelect" data-id="${escA(x.id)}">
+ box.innerHTML=a.length?a.map(x=>`<div class="sk-accessory-row" data-sk-accessory-row="${escA(x.id)}" style="display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--card-border);border-radius:14px;margin-bottom:8px;background:var(--card-bg);">
+ <input type="checkbox" class="skAccSelect" data-id="${escA(x.id)}" aria-label="Select ${escA(x.name)}">
  ${x.image?`<img src="${x.image}" style="width:48px;height:48px;border-radius:10px;object-fit:cover;">`:`<div style="width:48px;height:48px;border-radius:10px;display:grid;place-items:center;background:var(--model-bg);font-size:22px;">⚡</div>`}
  <div style="min-width:0;flex:1"><b>${escA(x.name)}</b><div style="font-size:.68rem;color:var(--text-muted);">${escA(x.category||'')} ${x.brand?'• '+escA(x.brand):''} • Stock: ${Number(x.stock)||0}</div><div style="font-size:.68rem;color:var(--text-muted);">${x.price?'₹'+Number(x.price).toLocaleString('en-IN'):''} ${x.note?'• '+escA(x.note):''}</div></div>
  <button type="button" class="submit-btn" onclick="skEditAccessory('${escA(x.id)}')">Edit</button>
  </div>`).join(''):'<div style="padding:25px;text-align:center;color:var(--text-muted)">No accessories found.</div>';
+ bindLongPressSelection();
+ const allBtn=document.getElementById('skAccessoriesSelectAllBtn');if(allBtn){const checks=[...box.querySelectorAll('.skAccSelect')];allBtn.textContent=checks.length&&checks.every(cb=>cb.checked)?'☐ Clear Selection':'☑ Select All';}
+}
+function bindLongPressSelection(){
+ const box=document.getElementById('skAccessoriesList'); if(!box||box.dataset.skLongPressBound==='1')return; box.dataset.skLongPressBound='1';
+ let timer=null, target=null, moved=false, startX=0, startY=0;
+ box.addEventListener('pointerdown',function(e){const row=e.target.closest('.sk-accessory-row');if(!row||e.target.closest('button,input'))return;target=row;moved=false;startX=e.clientX;startY=e.clientY;timer=setTimeout(function(){if(!target||moved)return;box.classList.add('sk-selection-mode');const cb=target.querySelector('.skAccSelect');if(cb){cb.checked=!cb.checked;}target.classList.toggle('sk-selected',!!cb&&cb.checked);if(typeof showToast==='function')showToast('Selection mode: hold another item to select');},550);});
+ box.addEventListener('pointermove',function(e){if(Math.abs(e.clientX-startX)>10||Math.abs(e.clientY-startY)>10){moved=true;if(timer){clearTimeout(timer);timer=null;}}});
+ ['pointerup','pointercancel','pointerleave'].forEach(function(ev){box.addEventListener(ev,function(){if(timer){clearTimeout(timer);timer=null;}target=null;});});
+ box.addEventListener('change',function(e){if(e.target.matches('.skAccSelect')){const row=e.target.closest('.sk-accessory-row');if(row)row.classList.toggle('sk-selected',e.target.checked);if(!box.querySelector('.skAccSelect:checked'))box.classList.remove('sk-selection-mode');}});
+ box.addEventListener('contextmenu',function(e){if(e.target.closest('.sk-accessory-row'))e.preventDefault();});
 }
 function open(){document.getElementById('skAccessoriesPage')?.classList.add('active');document.body.classList.add('modal-open');render();}
 function close(){document.getElementById('skAccessoriesPage')?.classList.remove('active');document.body.classList.remove('modal-open');}
@@ -7823,6 +7858,13 @@ function saveItem(){
   const i=a.findIndex(x=>x.id===id);if(i>=0)a[i]=item;else a.unshift(item);save(a);cancel();showToast?.('Accessory saved');};
  if(file){const r=new FileReader();r.onload=()=>finish(String(r.result||''));r.readAsDataURL(file);}else finish('');
 }
+function toggleSelectAll(){
+ const box=document.getElementById('skAccessoriesList');if(!box)return;
+ const checks=[...box.querySelectorAll('.skAccSelect')];if(!checks.length){showToast?.('No accessories to select');return;}
+ const allChecked=checks.every(cb=>cb.checked);checks.forEach(cb=>{cb.checked=!allChecked;const row=cb.closest('.sk-accessory-row');if(row)row.classList.toggle('sk-selected',cb.checked);});
+ box.classList.toggle('sk-selection-mode',!allChecked);
+ const btn=document.getElementById('skAccessoriesSelectAllBtn');if(btn)btn.textContent=allChecked?'☑ Select All':'☐ Clear Selection';
+}
 function delSelected(){
  const ids=[...document.querySelectorAll('.skAccSelect:checked')].map(e=>e.dataset.id);if(!ids.length){showToast?.('Select accessories to delete');return;}
  if(!confirm('Delete selected accessories?'))return;save(get().filter(x=>!ids.includes(x.id)));showToast?.('Selected accessories deleted');
@@ -7847,7 +7889,7 @@ function importFile(input){
 function exportFile(){
  const blob=new Blob([JSON.stringify(get(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='SK-MOBILES-Accessories.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
-window.skOpenAccessoriesPage=open;window.skCloseAccessoriesPage=close;window.skNewAccessory=newItem;window.skEditAccessory=edit;window.skCancelAccessoryEdit=cancel;window.skSaveAccessory=saveItem;window.skDeleteSelectedAccessories=delSelected;window.skImportAccessoriesFile=importFile;window.skExportAccessories=exportFile;window.skRenderAccessories=render;
+window.skOpenAccessoriesPage=open;window.skCloseAccessoriesPage=close;window.skNewAccessory=newItem;window.skEditAccessory=edit;window.skCancelAccessoryEdit=cancel;window.skSaveAccessory=saveItem;window.skDeleteSelectedAccessories=delSelected;window.skToggleSelectAllAccessories=toggleSelectAll;window.skImportAccessoriesFile=importFile;window.skExportAccessories=exportFile;window.skRenderAccessories=render;
 window.addEventListener('storage',e=>{if(e.key===KEY)render();});
 window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStorage.setItem(KEY,JSON.stringify(DEFAULTS));});
 })();

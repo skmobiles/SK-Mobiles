@@ -126,9 +126,10 @@
           <button type="button" class="submit-btn" onclick="skCancelAccessoryEdit()">Cancel</button>
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <input id="skAccessoriesSearch" class="form-input" placeholder="Search accessories..." oninput="skRenderAccessories()">
-        <button type="button" class="submit-btn" onclick="skDeleteSelectedAccessories()">🗑 Delete Selected</button>
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap;">
+        <input id="skAccessoriesSearch" class="form-input" placeholder="Search accessories..." oninput="skRenderAccessories()" style="flex:1 1 150px;min-width:0;">
+        <button type="button" class="submit-btn" id="skAccessoriesSelectAllBtn" onclick="skToggleSelectAllAccessories()" style="flex:0 0 auto;">☑ Select All</button>
+        <button type="button" class="submit-btn" onclick="skDeleteSelectedAccessories()" style="flex:0 0 auto;">🗑 Delete Selected</button>
       </div>
       <div id="skAccessoriesList"></div>
     </div>

@@ -8900,3 +8900,8 @@ html body main#cardsContainer{
 #skRepairDetailModal .sk-rj-payment-summary>b{display:block;margin-bottom:4px;}
 #skRepairDetailModal .sk-rj-payment-summary>div{display:flex;justify-content:space-between;gap:8px;padding:3px 0;color:var(--text-muted);}
 .sk-credit-entry-edit{margin-top:5px;padding:4px 8px;border:1px solid var(--card-border);border-radius:8px;background:var(--badge-bg);color:var(--text);font-size:.62rem;font-weight:800;cursor:pointer;}
+
+/* V5.5.4: accessory selection controls appear only during long-press selection mode. */
+#skAccessoriesList .sk-accessory-row .skAccSelect{opacity:0;width:0;height:0;min-width:0;margin:0;padding:0;pointer-events:none;transition:opacity .12s,width .12s;}
+#skAccessoriesList.sk-selection-mode .sk-accessory-row .skAccSelect{opacity:1;width:16px;height:16px;min-width:16px;margin:0 2px 0 0;pointer-events:auto;}
+#skAccessoriesList .sk-accessory-row.sk-selected{border-color:var(--primary) !important;background:var(--model-bg) !important;}

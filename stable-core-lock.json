@@ -1,13 +1,13 @@
 {
-  "lock_name": "SK MOBILES V5.5.3 Stable Core Lock",
-  "version": "V5.5.3",
-  "source": "SK-Mobiles-V5.5.2-RepairHistory-AutoLogin-CompactFix.zip",
-  "policy": "V5.5.3 requested changes only: add editing for manual credit/payment history entries and simplify repair financial labels/history. Preserve existing bill-linked and repair-job-linked records, Firebase configuration/rules and existing data keys.",
+  "lock_name": "SK MOBILES V5.5.4 Stable Core Lock",
+  "version": "V5.5.4",
+  "source": "SK-Mobiles-V5.5.3-Credit-Repair-Edit-Simplified.zip",
+  "policy": "V5.5.4 requested changes only: edit full manual credit/payment details; hide accessory selection checkboxes until long-press selection mode. Preserve bill/repair-linked records, Firebase configuration/rules and existing data keys.",
   "core_files": {
-    "index.html": "6d3f87f04c6018115b4ca46e7569ec39117adb3f302c7343fbaf1a962ffdf553",
-    "js/app.js": "9d45462d9b20dcc2959a713775c8b94fec930a7dda869d605d34b9106101cd52",
+    "index.html": "52e688a1393541bc6dd3a4385e80b00c583dd709976586ff054811c9f3011a87",
+    "js/app.js": "947151a9b2e14662d897f4f9458238691ebeaae69dca3f14303d6e3b4dbeea80",
     "js/firebase-sync.js": "36a8eab4bb8dece1b092f18a8c7e53bbaacb0523ed5272272b5557a2d184a255",
-    "css/style.css": "312ed46b4ec5e8e69d618e80b84bd6cc9dc90af896c26f3622a325c3cc8c79d8",
+    "css/style.css": "18f60e670b405d6872a633b8fe3a70e0df97f5307fba1776992d6aefeba6383e",
     "firestore.rules": "3d2976de0b3e3c9789bab1ab39b75a6a7c36328c4e51f08862cea72bd56ed5f4",
     "FIREBASE_SETUP.txt": "d56888379e27efec0d40ec7d6b2132bbca912f102cd3aea006ee93e28947c791",
     "README.mdSK-V4.13 ( Stabled Version) V3": "fe0d2f1020279437a87d0d620312262bd71b1b8c515c1d991b76d5da3e1faa2c"
