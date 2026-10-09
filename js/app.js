@@ -3586,7 +3586,7 @@ window.deleteBillSafely=async function(billId){
   const bill=list[idx];
   const displayNo=bill.billNo||bill.id||id;
   const customer=bill.custName||'Customer';
-  if(!confirm('Delete this saved bill?\\n\\nBill: '+displayNo+'\\nCustomer: '+customer+'\\n\\nThis will move it to Recycle Bin for 30 days.'))return;
+  if(!confirm('Delete this saved bill?\n\nBill: '+displayNo+'\nCustomer: '+customer+'\n\nThis will move it to Recycle Bin for 30 days.'))return;
   try{
     if(typeof window.moveToTrash==='function') window.moveToTrash(bill,'bill',displayNo);
     const next=list.filter(function(_,i){return i!==idx});
@@ -4292,6 +4292,9 @@ img{max-width:100%!important;}
       problem:document.getElementById('skRjProblem').value.trim(),
       date:rjToISODate(document.getElementById('skRjDate').value)||today(),
       estimate:Number(document.getElementById('skRjEstimate').value)||0,
+      paidAmount:Math.max(0,Number(document.getElementById('skRjAdvancePayment').value)||0),
+      outstandingAmount:Math.max(0,(Number(document.getElementById('skRjEstimate').value)||0)-Math.max(0,Number(document.getElementById('skRjAdvancePayment').value)||0)),
+      paymentHistory:Array.isArray(existing?.paymentHistory)?existing.paymentHistory.slice():[],
       status:document.getElementById('skRjStatus').value,
       note:document.getElementById('skRjNote').value.trim(),
       deliveryStatus: status==='Delivered' ? 'Delivered' : (status==='Ready' ? 'Ready for Delivery' : (existing?.deliveryStatus||'Pending')),
@@ -4301,6 +4304,15 @@ img{max-width:100%!important;}
       updatedAt:new Date().toISOString()
     };
     if(!job.customer||!job.model||!job.problem){ showToast('Customer, Model & Problem required'); return false; }
+    if(job.paidAmount<0){ showToast('Advance payment cannot be negative'); return false; }
+    const previousPaid=Math.max(0,Number(existing?.paidAmount)||0);
+    if(job.paidAmount>previousPaid){
+      job.paymentHistory.push({amount:job.paidAmount-previousPaid,date:new Date().toISOString(),type:'Repair advance payment'});
+    } else if(job.paidAmount<previousPaid){
+      /* Editing the advance field must not silently erase earlier payment records. */
+      job.paidAmount=previousPaid;
+      job.outstandingAmount=Math.max(0,job.estimate-job.paidAmount);
+    }
     if(existing) a[a.findIndex(x=>x.id===id)]=job; else a.unshift(job);
     save(a); skRjResetForm(); skRjRenderJobs(); skRjRenderHomeMetric();
     if(typeof window.skUrgentRepairInstall==='function')window.skUrgentRepairInstall();
@@ -4326,6 +4338,7 @@ img{max-width:100%!important;}
     document.getElementById('skRjProblem').value=j.problem||'';
     document.getElementById('skRjDate').value=rjFmtDate(j.date||today());
     document.getElementById('skRjEstimate').value=j.estimate||'';
+    document.getElementById('skRjAdvancePayment').value=j.paidAmount||'';
     document.getElementById('skRjStatus').value=j.status||'Received';
     document.getElementById('skRjNote').value=j.note||'';
     document.getElementById('skRjScheduleWrap').style.display=j.workType==='Scheduled'?'block':'none';
@@ -4353,12 +4366,30 @@ img{max-width:100%!important;}
   window.skRjDeliver=function(id){
     const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
     if(a[i].status!=='Ready'){ showToast('Repair job must be Ready before delivery'); return; }
-    a[i].status='Delivered';
-    a[i].deliveryStatus='Delivered';
-    a[i].deliveredAt=new Date().toISOString();
-    a[i].updatedAt=new Date().toISOString();
+    const job=a[i];
+    const total=Math.max(0,Number(job.estimate)||0);
+    const alreadyPaid=Math.max(0,Number(job.paidAmount)||0);
+    const outstanding=Math.max(0,total-alreadyPaid);
+    const entered=prompt(
+      'Customer payment before delivery\nTotal: ₹'+total.toLocaleString('en-IN')+
+      '\nAlready paid: ₹'+alreadyPaid.toLocaleString('en-IN')+
+      '\nOutstanding: ₹'+outstanding.toLocaleString('en-IN')+
+      '\n\nEnter amount received now (enter 0 if no payment):',
+      String(outstanding)
+    );
+    if(entered===null)return;
+    const amount=Number(String(entered).replace(/[,₹\s]/g,''));
+    if(!Number.isFinite(amount)||amount<0){showToast('Enter a valid payment amount');return;}
+    job.paidAmount=alreadyPaid+amount;
+    job.outstandingAmount=Math.max(0,total-job.paidAmount);
+    job.paymentHistory=Array.isArray(job.paymentHistory)?job.paymentHistory:[];
+    if(amount>0)job.paymentHistory.push({amount, date:new Date().toISOString(), type:'Repair delivery payment'});
+    job.status='Delivered';
+    job.deliveryStatus='Delivered';
+    job.deliveredAt=new Date().toISOString();
+    job.updatedAt=new Date().toISOString();
     save(a); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
-    showToast('Repair job marked Delivered');
+    showToast('Payment recorded and repair job marked Delivered');
   };
 
   window.skRjRework=function(id){
@@ -4436,6 +4467,40 @@ img{max-width:100%!important;}
     return '#16a34a';
   };
 
+  const SK_RJ_DEALERS_KEY='skx_repair_spare_dealers_v1';
+  function skRjDealers(){
+    try { const v=JSON.parse(localStorage.getItem(SK_RJ_DEALERS_KEY)||'[]'); return Array.isArray(v)?v.filter(x=>typeof x==='string'&&x.trim()):[]; }
+    catch(e){ return []; }
+  }
+  window.skRjAddDealer=function(){
+    const name=prompt('Enter dealer name:');
+    if(name===null)return;
+    const clean=String(name).trim();
+    if(!clean){showToast('Dealer name is required');return;}
+    const dealers=skRjDealers();
+    if(!dealers.some(x=>x.toLowerCase()===clean.toLowerCase()))dealers.push(clean);
+    try{localStorage.setItem(SK_RJ_DEALERS_KEY,JSON.stringify(dealers));}catch(e){}
+    if(typeof window.skRjRenderJobs==='function')window.skRjRenderJobs();
+  };
+  window.skRjSetDealer=function(id,value){
+    const a=load(), i=a.findIndex(x=>String(x.id)===String(id)); if(i<0)return;
+    a[i].dealerName=String(value||'').trim();
+    a[i].updatedAt=new Date().toISOString();
+    save(a);
+    if(typeof showToast==='function')showToast(a[i].dealerName?'Dealer saved':'Dealer cleared');
+  };
+  function skRjDealerControl(j){
+    const dealers=skRjDealers();
+    const current=String(j.dealerName||'');
+    const options=['<option value="">Select dealer</option>']
+      .concat(dealers.map(d=>`<option value="${esc(d)}" ${d===current?'selected':''}>${esc(d)}</option>`))
+      .join('');
+    return `<div class="sk-rj-dealer-row" onclick="event.stopPropagation()">
+      <select aria-label="Spare parts dealer" class="sk-rj-dealer-select" onchange="skRjSetDealer('${esc(j.id)}',this.value)">${options}</select>
+      <button type="button" class="sk-rj-dealer-add" title="Add dealer" aria-label="Add dealer" onclick="event.stopPropagation();skRjAddDealer()">+</button>
+    </div>`;
+  }
+
   window.skRjRenderJobs=function(){
     const list=document.getElementById('skRjJobsList'); if(!list)return;
     let a=getPending();
@@ -4450,7 +4515,7 @@ img{max-width:100%!important;}
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
           <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div></div>
-          <div><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span></div>
+          <div class="sk-rj-status-dealer-row"><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span>${skRjDealerControl(j)}</div>
         </div>
         <div class="sk-rj-actions">
           <button type="button" class="sk-rj-next" onclick="event.stopPropagation();skRjNext('${j.id}')">Next Status</button>
@@ -4482,8 +4547,12 @@ img{max-width:100%!important;}
           <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||(j.status==='Delivered'?'Delivered':'Ready for Delivery'))}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div></div>
           <span class="sk-rj-status">${esc(j.status)}</span>
         </div>
-        ${j.status==='Ready'?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-deliver" onclick="event.stopPropagation();skRjDeliver('${j.id}')">🚚 Mark Delivered</button></div>`:''}
-        ${j.status==='Delivered'?`<div class="sk-rj-delivery-actions"><button type="button" class="sk-rj-rework" onclick="event.stopPropagation();skRjRework('${j.id}')">↩️ Customer Rework</button></div>`:''}
+        <div class="sk-rj-history-actions" onclick="event.stopPropagation()">
+          ${j.status==='Ready'?`<button type="button" class="sk-rj-deliver" onclick="skRjDeliver('${j.id}')">🚚 Mark Delivered</button>`:''}
+          ${j.status==='Delivered'?`<button type="button" class="sk-rj-rework" onclick="skRjRework('${j.id}')">↩️ Customer Rework</button>`:''}
+          <button type="button" class="sk-rj-edit" onclick="skRjEdit('${j.id}')">✏️ Edit</button>
+          <button type="button" class="sk-rj-delete" onclick="skRjDelete('${j.id}')">🗑️ Delete</button>
+        </div>
         <div style="margin-top:7px;font-size:.65rem;color:var(--primary);font-weight:800">Tap to open full repair details →</div>
       </div>`;
     list.innerHTML=(ready.length?`<div class="sk-rj-history-section-title ready">✅ Ready for Delivery <span>${ready.length}</span></div>${ready.map(card).join('')}`:'')
@@ -4560,7 +4629,7 @@ img{max-width:100%!important;}
 
   function load(){try{const a=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
   function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-  function urgentJobs(){return load().filter(j=>j.status!=='Delivered' && String(j.workType||'Normal').toLowerCase()==='urgent')}
+  function urgentJobs(){return load().filter(j=>['Received','Checking','Repairing'].includes(String(j.status||'')) && String(j.workType||'Normal').toLowerCase()==='urgent')}
   function seen(){try{const a=JSON.parse(localStorage.getItem(SEEN)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
   function markSeen(ids){try{localStorage.setItem(SEEN,JSON.stringify(ids.slice(-100)))}catch(e){}}
 
@@ -5220,7 +5289,7 @@ img{max-width:100%!important;}
       document.querySelectorAll('.sk-role-btn').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.role)));
       document.getElementById('skRoleLoginBtn')?.addEventListener('click',login);
       document.getElementById('skRolePin')?.addEventListener('keydown',e=>{if(e.key==='Enter')login();});
-      const r=role();if(r==='admin'||r==='worker'||r==='manager'){setRole(r);applyRestrictions();}else gate(true); skRefreshRoleBadge();
+      const r=role();if(r==='admin'||r==='worker'||r==='manager'){setRole(r);gate(false);applyRestrictions();}else gate(true); skRefreshRoleBadge();
       const img=document.getElementById('skLoginLogo');if(img)img.src=logo();
       addAdminButton();refreshAdminButton();guardFunctions();
       const obs=new MutationObserver(()=>{guardFunctions();addAdminButton();refreshAdminButton();if(role()==='worker'||role()==='manager')applyRestrictions();});
@@ -7075,7 +7144,7 @@ function skV43AddCustomerSummaryButton(){
       var snaps=JSON.parse(localStorage.getItem('sk_keep_snapshot_v1')||'[]').filter(function(s){return s.key===c.key});
       if(!snaps.length){if(typeof showToast==='function')showToast('No imported Keep snapshot');return}
       var s=snaps[snaps.length-1];
-      alert('Original Keep snapshot\\n\\nCustomer: '+s.name+'\\nDate: '+s.date+'\\nBalance noted: '+skV43Money(s.balanceSnapshot)+(s.emiText?'\\nEMI: '+s.emiText:''));
+      alert('Original Keep snapshot\n\nCustomer: '+s.name+'\nDate: '+s.date+'\nBalance noted: '+skV43Money(s.balanceSnapshot)+(s.emiText?'\nEMI: '+s.emiText:''));
     };row.appendChild(b);
   }
 }

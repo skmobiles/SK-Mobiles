@@ -925,7 +925,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="form-group"><label class="form-label">Model</label><input class="form-input" id="skRjModel" required=""/></div>
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-<div class="form-group"><label class="form-label">IMEI</label><input class="form-input" id="skRjImei"/></div>
+<input id="skRjImei" type="hidden" value=""/>
 <div class="form-group"><label class="form-label">Work Type</label>
 <select class="form-select" id="skRjWorkType">
 <option value="Urgent">🚨 Urgent</option><option selected="" value="Normal">🟢 Normal</option><option value="Scheduled">📅 Scheduled</option>
@@ -938,6 +938,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="form-group"><label class="form-label">Received Date</label><input class="form-input" id="skRjDate" type="text" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY"></div>
 <div class="form-group"><label class="form-label">Estimate</label><input class="form-input" id="skRjEstimate" min="0" type="number"/></div>
 </div>
+<div class="form-group"><label class="form-label">Advance Payment (₹)</label><input class="form-input" id="skRjAdvancePayment" min="0" step="0.01" inputmode="decimal" type="number" placeholder="Enter advance received"/></div>
 <div class="form-group"><label class="form-label">Status</label>
 <select class="form-select" id="skRjStatus">
 <option>Received</option><option>Checking</option><option>Repairing</option><option>Ready</option>
