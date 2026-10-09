@@ -4297,9 +4297,10 @@ img{max-width:100%!important;}
       paymentHistory:Array.isArray(existing?.paymentHistory)?existing.paymentHistory.slice():[],
       status:document.getElementById('skRjStatus').value,
       note:document.getElementById('skRjNote').value.trim(),
-      deliveryStatus: status==='Delivered' ? 'Delivered' : (status==='Ready' ? 'Ready for Delivery' : (existing?.deliveryStatus||'Pending')),
+      deliveryStatus: document.getElementById('skRjStatus').value==='Delivered' ? 'Delivered' : (document.getElementById('skRjStatus').value==='Ready' ? 'Ready for Delivery' : (existing?.deliveryStatus||'Pending')),
       reworkReason: existing?.reworkReason||'',
       reworkCount: Number(existing?.reworkCount)||0,
+      deliveredAt:existing?.deliveredAt||'',
       createdAt:existing?.createdAt||new Date().toISOString(),
       updatedAt:new Date().toISOString()
     };
@@ -4314,8 +4315,11 @@ img{max-width:100%!important;}
       job.outstandingAmount=Math.max(0,job.estimate-job.paidAmount);
     }
     if(existing) a[a.findIndex(x=>x.id===id)]=job; else a.unshift(job);
-    save(a); skRjResetForm(); skRjRenderJobs(); skRjRenderHomeMetric();
+    save(a); skRjResetForm(); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
     if(typeof window.skUrgentRepairInstall==='function')window.skUrgentRepairInstall();
+    if(existing && (existing.status==='Ready'||existing.status==='Delivered') && (job.status==='Ready'||job.status==='Delivered')){
+      skRjSwitchTab('history');
+    }
     showToast(existing?'Repair job updated':'Repair job saved');
     return false;
   };
@@ -4384,6 +4388,38 @@ img{max-width:100%!important;}
     job.outstandingAmount=Math.max(0,total-job.paidAmount);
     job.paymentHistory=Array.isArray(job.paymentHistory)?job.paymentHistory:[];
     if(amount>0)job.paymentHistory.push({amount, date:new Date().toISOString(), type:'Repair delivery payment'});
+
+    /* Add the unpaid repair balance to Customer Credit Ledger exactly once per repair job. */
+    if(job.outstandingAmount>0){
+      try{
+        const ledgerKey='sk_credit_ledger_v1';
+        const ledger=JSON.parse(localStorage.getItem(ledgerKey)||'[]');
+        const rows=Array.isArray(ledger)?ledger:[];
+        const existingCredit=rows.find(e=>String(e.repairJobId||'')===String(job.id)&&String(e.source||'')==='repair-job');
+        const customerKey=String(job.customer||'').trim().toLowerCase()+'|'+String(job.phone||'').replace(/\\D/g,'');
+        const creditEntry={
+          id:existingCredit?.id||('RJ-CREDIT-'+String(job.id)),
+          key:customerKey,
+          name:String(job.customer||'Walk-in Customer').trim(),
+          phone:String(job.phone||''),
+          type:'credit',
+          amount:job.outstandingAmount,
+          mode:'Credit',
+          date:new Date().toISOString().slice(0,10),
+          details:'Repair balance • Job '+String(job.id)+' • Estimate ₹'+total.toLocaleString('en-IN')+' • Paid ₹'+job.paidAmount.toLocaleString('en-IN'),
+          source:'repair-job',
+          repairJobId:String(job.id),
+          billId:'',
+          dueDate:''
+        };
+        if(existingCredit){ Object.assign(existingCredit,creditEntry); }
+        else { rows.push(creditEntry); }
+        localStorage.setItem(ledgerKey,JSON.stringify(rows));
+      }catch(err){
+        console.error('Repair credit ledger update failed:',err);
+        showToast('Warning: repair delivered, but credit ledger could not be updated');
+      }
+    }
     job.status='Delivered';
     job.deliveryStatus='Delivered';
     job.deliveredAt=new Date().toISOString();
@@ -4445,7 +4481,7 @@ img{max-width:100%!important;}
     document.getElementById('skRepairDetailContent').innerHTML=`
       <div style="background:var(--model-bg);border:1px solid var(--card-border);border-radius:15px;padding:12px">
         <div style="font-weight:900;font-size:.95rem">${esc(j.customer)} · ${esc(j.model)}</div>
-        <div style="font-size:.72rem;color:var(--text-muted);margin-top:5px">📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}</div>
+        <div style="font-size:.72rem;color:var(--text-muted);margin-top:5px">📱 Repair Phone: ${esc(j.phone||'—')}</div>
         <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
           <button type="button" class="submit-btn" style="flex:1;min-width:135px;background:#2563eb" onclick="skRjCallPhone('${esc(j.phone||'')}')">📞 Call Repair Phone</button>
           <button type="button" class="submit-btn whatsapp-green" style="flex:1;min-width:135px" onclick="skRjWhatsAppReady('${esc(j.id||'')}')">💬 WhatsApp</button>
@@ -4453,7 +4489,12 @@ img{max-width:100%!important;}
         <div style="margin-top:9px;font-size:.76rem"><b>Problem / Repair:</b><br>${esc(j.problem)}</div>
         <div style="margin-top:8px;font-size:.72rem;color:var(--text-muted)">📅 ${rjFmtDate(j.date)} · Status: <b>${esc(j.status)}</b> · Work: <b>${esc(j.workType)}</b></div>
         ${j.schedule?`<div style="margin-top:6px;font-size:.72rem">🗓️ Scheduled: <b>${esc(j.schedule)}</b></div>`:''}
-        <div style="margin-top:6px;font-size:.72rem">Estimate: <b>₹${Number(j.estimate||0).toLocaleString('en-IN')}</b></div>
+        <div class="sk-rj-detail-finance">
+          <div><span>Estimate</span><b>₹${Number(j.estimate||0).toLocaleString('en-IN')}</b></div>
+          <div><span>Advance / Paid</span><b>₹${Number(j.paidAmount||0).toLocaleString('en-IN')}</b></div>
+          <div><span>Outstanding</span><b>₹${Math.max(0,Number(j.outstandingAmount ?? (Number(j.estimate||0)-Number(j.paidAmount||0)))||0).toLocaleString('en-IN')}</b></div>
+          ${Array.isArray(j.paymentHistory)?j.paymentHistory.map(p=>`<div><span>${esc(p.type||'Payment')}</span><b>₹${Number(p.amount||0).toLocaleString('en-IN')}</b></div>`).join(''):''}
+        </div>
         ${j.note?`<div style="margin-top:8px;font-size:.72rem"><b>Note:</b> ${esc(j.note)}</div>`:''}
       </div>`;
     document.getElementById('skRepairDetailModal').classList.add('active');
@@ -4501,6 +4542,45 @@ img{max-width:100%!important;}
     </div>`;
   }
 
+
+  /* Contact picker buttons for phone-number fields. */
+  function skInstallContactButtons(){
+    const fields=Array.from(document.querySelectorAll('input')).filter(function(el){
+      if(el.disabled||el.type==='hidden'||el.type==='search')return false;
+      const id=String(el.id||'').toLowerCase();
+      if(/search|historysearch|cpssearch|creditsearch/.test(id))return false;
+      return el.type==='tel'||/(phone|mobile|contact)($|[a-z])/.test(id);
+    });
+    fields.forEach(function(input){
+      if(input.dataset.skContactButton==='1')return;
+      const wrap=input.parentElement;if(!wrap)return;
+      input.dataset.skContactButton='1';
+      wrap.classList.add('sk-contact-field-wrap');
+      input.classList.add('sk-contact-field-input');
+      const btn=document.createElement('button');
+      btn.type='button';btn.className='sk-contact-access-btn';
+      btn.title='Choose from contacts';btn.setAttribute('aria-label','Choose phone number from contacts');
+      btn.textContent='▣';
+      btn.addEventListener('click',async function(ev){
+        ev.preventDefault();ev.stopPropagation();
+        try{
+          if(navigator.contacts&&typeof navigator.contacts.select==='function'){
+            const selected=await navigator.contacts.select(['name','tel'],{multiple:false});
+            const item=selected&&selected[0];const tel=item&&item.tel&&item.tel[0];
+            if(tel){input.value=String(tel).replace(/[^0-9+]/g,'');input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));}
+            return;
+          }
+          if(typeof showToast==='function')showToast('Contact picker is not supported in this browser. Open this app in a supported mobile browser.');
+        }catch(err){if(err&&err.name!=='AbortError'&&typeof showToast==='function')showToast('Could not open contacts');}
+      });
+      wrap.appendChild(btn);
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',skInstallContactButtons);
+  else skInstallContactButtons();
+  const skContactObserver=new MutationObserver(function(){skInstallContactButtons()});
+  if(document.body)skContactObserver.observe(document.body,{childList:true,subtree:true});
+
   window.skRjRenderJobs=function(){
     const list=document.getElementById('skRjJobsList'); if(!list)return;
     let a=getPending();
@@ -4513,14 +4593,14 @@ img{max-width:100%!important;}
       <div class="sk-rj-card" data-rj-id="${esc(j.id)}" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
+          <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')}<br><span class="sk-rj-problem-highlight">${esc(j.problem)}</span></div>
           <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div></div>
           <div class="sk-rj-status-dealer-row"><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span>${skRjDealerControl(j)}</div>
         </div>
         <div class="sk-rj-actions">
-          <button type="button" class="sk-rj-next" onclick="event.stopPropagation();skRjNext('${j.id}')">Next Status</button>
           <button type="button" class="sk-rj-edit" onclick="event.stopPropagation();skRjEdit('${j.id}')">✏️ Edit</button>
           <button type="button" class="sk-rj-delete" onclick="event.stopPropagation();skRjDelete('${j.id}')">🗑️ Delete</button>
+          <button type="button" class="sk-rj-next" onclick="event.stopPropagation();skRjNext('${j.id}')">Next Status</button>
         </div>
       </div>`).join(''):'<div class="sk-rj-empty">No pending repair jobs.</div>';
   };
@@ -4543,15 +4623,15 @@ img{max-width:100%!important;}
       <div class="sk-rj-card" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')} · IMEI: ${esc(j.imei||'—')}<br>${esc(j.problem)}</div>
+          <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')}<br><span class="sk-rj-problem-highlight">${esc(j.problem)}</span></div>
           <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||(j.status==='Delivered'?'Delivered':'Ready for Delivery'))}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div></div>
           <span class="sk-rj-status">${esc(j.status)}</span>
         </div>
         <div class="sk-rj-history-actions" onclick="event.stopPropagation()">
-          ${j.status==='Ready'?`<button type="button" class="sk-rj-deliver" onclick="skRjDeliver('${j.id}')">🚚 Mark Delivered</button>`:''}
-          ${j.status==='Delivered'?`<button type="button" class="sk-rj-rework" onclick="skRjRework('${j.id}')">↩️ Customer Rework</button>`:''}
           <button type="button" class="sk-rj-edit" onclick="skRjEdit('${j.id}')">✏️ Edit</button>
           <button type="button" class="sk-rj-delete" onclick="skRjDelete('${j.id}')">🗑️ Delete</button>
+          ${j.status==='Ready'?`<button type="button" class="sk-rj-deliver" onclick="skRjDeliver('${j.id}')">🚚 Mark Delivered</button>`:''}
+          ${j.status==='Delivered'?`<button type="button" class="sk-rj-rework" onclick="skRjRework('${j.id}')">↩️ Customer Rework</button>`:''}
         </div>
         <div style="margin-top:7px;font-size:.65rem;color:var(--primary);font-weight:800">Tap to open full repair details →</div>
       </div>`;
@@ -7210,9 +7290,12 @@ function cpGetCustomers(){
    }).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
 
    c.billBalance=billBalance;
-   /* For customers with sales bills, the bill balance is the single source
-      of truth. Ledger-only customers continue to use their manual ledger. */
-   c.credits=c.bills.length?billBalance:manualCredits;
+   /* Repair-job credit is a separate outstanding balance, even when this customer also has sales bills. */
+   var repairBalance=manualEntries.filter(function(e){
+     return String(e.source||'')==='repair-job' && e.type==='credit';
+   }).reduce(function(a,e){return a+Math.max(0,Number(e.amount)||0)},0);
+   /* Sales bill balances remain authoritative for bills; repair balances are added separately. */
+   c.credits=c.bills.length?billBalance+repairBalance:manualCredits;
    c.payments=payments;
 
    c.creditBalance=c.bills.filter(function(x){return x.b.payMode==='Credit'}).reduce(function(a,x){
@@ -7227,7 +7310,7 @@ function cpGetCustomers(){
      return (e.type==='emi'||e.mode==='EMI');
    }).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
 
-   c.balance=c.bills.length ? billBalance : Math.max(0,manualCredits-payments);
+   c.balance=c.bills.length ? billBalance+repairBalance : Math.max(0,manualCredits-payments);
    c.hasCredit=c.bills.some(function(x){return x.b.payMode==='Credit'})||
      manualEntries.some(function(e){return e.type==='credit'&&e.mode!=='EMI'});
    c.hasEmi=c.bills.some(function(x){return x.b.payMode==='EMI'})||
@@ -7285,6 +7368,18 @@ function cpBillOptions(c,selected){
  }
  return '<option value="">Select sales bill</option>'+bs.map(function(x){var b=x.b;return '<option value="'+x.idx+'" '+(String(x.idx)===String(chosen)?'selected':'')+'>'+cpEsc(b.billNo||skBillNumberFromDateSeq(b.date,skExistingBillSeq(b)||1,false))+' • '+cpEsc(b.model||'')+' • '+cpMoney(b.balance||0)+'</option>'}).join('');
 }
+function skCPRepairJobIdFromCredit(e){
+  if(!e||typeof e!=='object')return '';
+  if(e.repairJobId)return String(e.repairJobId);
+  var id=String(e.id||'');
+  if(id.indexOf('RJ-CREDIT-')===0)return id.slice('RJ-CREDIT-'.length);
+  var details=String(e.details||'');
+  if(String(e.source||'')==='repair-job'||/repair\\s+balance/i.test(details)){
+    var m=details.match(/(?:^|[•|])\\s*Job\\s+([^•|]+)/i);
+    if(m)return String(m[1]).trim();
+  }
+  return '';
+}
 function cpOpenDetail(c){
  skCPSelectedKey=c.key;
  var bills=c.bills.slice().sort(function(a,b){return b.idx-a.idx});
@@ -7299,7 +7394,7 @@ function cpOpenDetail(c){
  '<div class="skcp-bill-actions"><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(c.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ FULLY PAID</span>')+'</div></div>';
  if(bills.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">SALES BILL HISTORY</div>';html+=bills.map(function(x){var b=x.b;return '<div class="skcp-bill-card"><div class="skcp-bill-top"><div><b>'+cpEsc(b.id)+'</b> • '+cpEsc(b.model||'')+'<div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(b.date)+' • '+cpEsc(b.payMode||'')+'</div></div><b>'+cpMoney(b.balance||0)+'</b></div><div style="font-size:.63rem;margin-top:4px">Amount: '+cpMoney(b.price||0)+' • Advance: '+cpMoney(b.advance||0)+' • Outstanding: '+cpMoney(b.balance||0)+'</div><div class="skcp-bill-actions"><button class="skcp-btn" onclick="skCPViewBill('+x.idx+')">📄 Bill Details</button><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(b.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ PAID</span>')+'</div>'+
  (Array.isArray(b.paymentReceipts)&&b.paymentReceipts.length?'<div style="font-size:.59rem;color:var(--text-muted);margin-top:6px">Receipts: '+b.paymentReceipts.map(function(r){return '#'+cpEsc(String(r.id||'').slice(-6))+' '+cpMoney(r.amount)+' '+cpEsc(r.mode||'')+' '+cpDateText(r.date)}).join(' • ')+'</div>':'')+'</div>'}).join('')}
- if(entries.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">CREDIT / PAYMENT HISTORY</div>';html+=entries.map(function(e){return '<div class="skcp-bill-card"><b>'+(e.type==='payment'?'💰 PAYMENT':'🧾 CREDIT')+' • '+cpMoney(e.amount)+'</b><div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(e.date)+' • '+cpEsc(e.mode||'')+' • '+cpEsc(e.details||'')+(e.billId?' • Bill #'+cpEsc(cpBillLast3(e.billId)):'')+'</div></div>'}).join('')}
+ if(entries.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">CREDIT / PAYMENT HISTORY</div>';html+=entries.map(function(e){var repairJobId=skCPRepairJobIdFromCredit(e);var isRepairCredit=!!repairJobId;return '<div class="skcp-bill-card '+(isRepairCredit?'skcp-repair-credit-link':'')+'" '+(isRepairCredit?'role="button" tabindex="0" data-repair-job-id="'+cpEsc(repairJobId)+'" onclick="skCPOpenRepairJob(this.dataset.repairJobId)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();skCPOpenRepairJob(this.dataset.repairJobId)}"':'')+'><b>'+(e.type==='payment'?'💰 PAYMENT':'🧾 CREDIT')+' • '+cpMoney(e.amount)+'</b><div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(e.date)+' • '+cpEsc(e.mode||'')+' • '+cpEsc(e.details||'')+(e.billId?' • Bill #'+cpEsc(cpBillLast3(e.billId)):'')+'</div>'+(isRepairCredit?'<div class="skcp-open-job-hint">Tap to open repair job details →</div>':'')+'</div>'}).join('')}
  document.getElementById('skCPDetailView').innerHTML=html;document.getElementById('skCPMainView').style.display='none';document.getElementById('skCPDetailView').style.display='block';
 }
 window.skCPDeleteCustomer=async function(k){
@@ -7342,7 +7437,7 @@ window.skCPDeleteCustomer=async function(k){
    if(typeof showToast==='function')showToast('❌ Customer delete failed');
  }
 };
-window.skCPOpenCustomer=function(k){var c=cpGetCustomers().find(function(x){return x.key===k});if(c)cpOpenDetail(c);else if(typeof showToast==='function')showToast('Customer not found')}
+window.skCPOpenRepairJob=function(id){var jobId=String(id||'');if(!jobId)return;var jobs=[];try{jobs=JSON.parse(localStorage.getItem('skx_repair_jobs_v2')||'[]')}catch(e){}if(!Array.isArray(jobs)||!jobs.some(function(j){return String(j.id)===jobId})){if(typeof showToast==='function')showToast('Repair job not found');return;}document.getElementById('skCreditLedgerModal')?.classList.remove('active');document.getElementById('skCreditLedgerPage')?.classList.remove('active');if(typeof window.skRjShowDetail==='function'){window.skRjShowDetail(jobId);}else if(typeof showToast==='function')showToast('Repair job details are unavailable');}; window.skCPOpenCustomer=function(k){var c=cpGetCustomers().find(function(x){return x.key===k});if(c)cpOpenDetail(c);else if(typeof showToast==='function')showToast('Customer not found')}
 window.skCPBackToList=cpShowMain;
 window.skCPBackToHome=function(){document.getElementById('skCreditLedgerPage').classList.remove('active')}
 window.skCPViewBill=function(idx){try{window.__skBillViewReturn='creditLedger';if(typeof viewSavedBill==='function'){viewSavedBill(idx)}else{}}catch(e){window.__skBillViewReturn=''}}

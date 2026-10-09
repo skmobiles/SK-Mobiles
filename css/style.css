@@ -8409,3 +8409,116 @@ html, body { max-width:100%; overflow-x:hidden; }
   line-height:1 !important;
   box-sizing:border-box !important;
 }
+
+/* Put Edit and Delete at the front of each repair card action row. */
+#skRepairJobsModal #skRjJobsList .sk-rj-actions,
+#skRepairJobsModal #skRjHistoryList .sk-rj-history-actions{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:7px !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+}
+#skRepairJobsModal #skRjJobsList .sk-rj-actions button,
+#skRepairJobsModal #skRjHistoryList .sk-rj-history-actions button{
+  width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+
+/* Repair problem text emphasis and full payment breakdown in detail view. */
+#skRepairJobsModal .sk-rj-problem-highlight{
+  color:#dc2626 !important;
+  font-weight:800 !important;
+}
+#skRepairDetailModal .sk-rj-detail-finance{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  margin-top:8px;
+}
+#skRepairDetailModal .sk-rj-detail-finance > div{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  min-width:0;
+  padding:8px;
+  border:1px solid var(--card-border);
+  border-radius:9px;
+  background:var(--badge-bg);
+  font-size:.72rem;
+}
+#skRepairDetailModal .sk-rj-detail-finance span{color:var(--text-muted)}
+#skRepairDetailModal .sk-rj-detail-finance b{color:var(--text);overflow-wrap:anywhere}
+@media(max-width:360px){
+  #skRepairDetailModal .sk-rj-detail-finance{grid-template-columns:1fr}
+}
+
+/* V5.3 targeted fix: restore the existing primary navigation dock on mobile and desktop. */
+html body nav.bottom-nav{
+  display:grid !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  pointer-events:auto !important;
+  position:fixed !important;
+  left:50% !important;
+  right:auto !important;
+  bottom:max(12px, env(safe-area-inset-bottom)) !important;
+  transform:translateX(-50%) !important;
+  width:calc(100% - 24px) !important;
+  max-width:440px !important;
+  min-height:66px !important;
+  height:66px !important;
+  grid-template-columns:repeat(5,minmax(0,1fr)) !important;
+  z-index:2147483000 !important;
+  overflow:visible !important;
+}
+html body nav.bottom-nav > button.nav-item{
+  display:flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  pointer-events:auto !important;
+}
+html body main#cardsContainer{
+  padding-bottom:96px !important;
+}
+
+/* Credit ledger repair-credit rows open their linked repair job. */
+#skCreditLedgerPage .skcp-repair-credit-link{
+  cursor:pointer;
+  border-color:var(--primary) !important;
+}
+#skCreditLedgerPage .skcp-repair-credit-link:focus-visible{
+  outline:2px solid var(--primary);
+  outline-offset:2px;
+}
+#skCreditLedgerPage .skcp-open-job-hint{
+  margin-top:5px;
+  color:var(--primary);
+  font-size:.62rem;
+  font-weight:800;
+}
+/* Small contact-access icon inside phone fields. */
+.sk-contact-field-wrap{position:relative !important;}
+.sk-contact-field-wrap input.sk-contact-field-input{padding-right:42px !important;}
+.sk-contact-access-btn{
+  position:absolute;
+  right:7px;
+  top:31px;
+  width:28px;
+  height:28px;
+  min-width:28px;
+  min-height:28px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--badge-border);
+  border-radius:8px;
+  background:var(--badge-bg);
+  color:var(--primary);
+  font-size:16px;
+  line-height:1;
+  cursor:pointer;
+  z-index:2;
+}
