@@ -8927,3 +8927,86 @@ html body main#cardsContainer{
   #skcpCustomerEditModal #skcpCustomerEditForm > * { grid-column: 1 / -1 !important; }
   #skcpCustomerEditModal #skcpCustomerEditForm > div[style*="repeat(3"] { grid-template-columns: 1fr 1fr 1fr !important; }
 }
+
+/* V5.5.8 — shared compact typography and consistent page/card sizing. */
+:root {
+  --sk-ui-font-size: 0.84rem;
+  --sk-ui-label-size: 0.72rem;
+  --sk-ui-small-size: 0.66rem;
+  --sk-ui-control-height: 36px;
+}
+/* Keep dynamically-created edit dialogs visually consistent with the app pages. */
+#skcpCustomerEditModal,
+#skcpCustomerEditModal * { box-sizing: border-box; }
+#skcpCustomerEditModal > section {
+  width: min(520px, calc(100vw - 24px)) !important;
+  max-height: 90dvh !important;
+  padding: 12px !important;
+  border-radius: 16px !important;
+  font-size: var(--sk-ui-font-size) !important;
+  line-height: 1.35 !important;
+}
+#skcpCustomerEditModal #skcpCustomerEditTitle { font-size: .88rem !important; line-height: 1.25 !important; }
+#skcpCustomerEditModal label { font-size: var(--sk-ui-label-size) !important; gap: 4px !important; }
+#skcpCustomerEditModal input,
+#skcpCustomerEditModal select,
+#skcpCustomerEditModal textarea {
+  min-height: 34px !important;
+  padding: 7px 9px !important;
+  border-radius: 9px !important;
+  font: inherit !important;
+  font-size: .76rem !important;
+}
+#skcpCustomerEditModal #skcpCustomerEditForm { gap: 8px !important; }
+#skcpCustomerEditModal #skcpCustomerEditForm > div[style*="repeat(3"] > div { padding: 7px !important; }
+#skcpCustomerEditModal #skcpCustomerEditForm > div[style*="repeat(3"] small { font-size: .60rem !important; }
+#skcpCustomerEditModal .skcp-customer-entry-edit,
+#skcpCustomerEditModal #skcpCustomerEditCancel,
+#skcpCustomerEditModal #skcpCustomerEditForm button[type="submit"] {
+  min-height: 32px !important; padding: 7px 10px !important; font-size: .72rem !important;
+}
+#skcpCustomerEditModal #skcpCustomerEditForm > div[style*="display:flex"][style*="justify-content:flex-end"] { gap: 7px !important; }
+/* Common app page surfaces: one border weight, compact radius and consistent spacing. */
+.page-card, .content-card, .summary-card, .history-card, .skcp-bill-card,
+.skcp-detail-box, .skcp-mini, .sk-accessory-row {
+  border-width: 1px;
+  border-radius: 13px;
+}
+@media (max-width: 600px) {
+  #skcpCustomerEditModal { padding: 10px !important; }
+  #skcpCustomerEditModal > section { width: calc(100vw - 20px) !important; padding: 11px !important; }
+  #skcpCustomerEditModal #skcpCustomerEditForm { grid-template-columns: 1fr 1fr !important; }
+  #skcpCustomerEditModal #skcpCustomerEditForm > label { min-width: 0 !important; }
+}
+@media (max-width: 360px) {
+  #skcpCustomerEditModal #skcpCustomerEditForm { grid-template-columns: 1fr !important; }
+  #skcpCustomerEditModal #skcpCustomerEditForm > label { grid-column: 1 / -1 !important; }
+  #skcpCustomerEditModal #skcpCustomerEditForm > div[style*="repeat(3"] { grid-template-columns: 1fr 1fr 1fr !important; }
+}
+
+
+/* V5.5.9 follow-up: simplify Bill History filters; remove oversized filter container. */
+#billHistoryView::after{content:none !important;}
+#billHistoryView .bill-filter-bar{
+  display:grid !important;
+  grid-template-columns:minmax(0,1.5fr) minmax(100px,.9fr) minmax(105px,.9fr) !important;
+  gap:5px !important;
+  padding:0 !important;
+  margin:4px 0 8px !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+#billHistoryView .bill-filter-bar .form-input{
+  width:100% !important; min-width:0 !important; min-height:36px !important; height:36px !important;
+  padding:6px 9px !important; font-size:.76rem !important; border-radius:9px !important;
+  box-shadow:none !important;
+}
+@media(max-width:420px){
+  #billHistoryView .bill-filter-bar{grid-template-columns:minmax(0,1fr) minmax(0,.85fr) !important;}
+  #billHistoryView #billHistorySearch{grid-column:1/-1 !important;}
+  #billHistoryView .bill-filter-bar .form-input{min-height:34px !important;height:34px !important;font-size:.72rem !important;}
+}
