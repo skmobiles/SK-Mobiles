@@ -19,6 +19,6 @@ for rel, expected in data["core_files"].items():
     else:
         print(f"OK: {rel}")
 if failed:
-    print("\nV5.4 STABLE CORE VERIFICATION FAILED.")
+    print("\nV5.5 STABLE CORE VERIFICATION FAILED.")
     sys.exit(1)
-print("\nV5.4 STABLE CORE VERIFIED — no locked core file changed.")
+print("\nV5.5 STABLE CORE VERIFIED — no locked core file changed.")
