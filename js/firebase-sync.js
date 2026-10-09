@@ -161,9 +161,10 @@
     if(!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
     auth = firebase.auth();
     db = firebase.firestore();
-    // Keep the Firebase session locally so the user is logged in automatically after refresh/reopen.
+    // Strict login mode: Firebase must not restore an old authenticated
+    // session automatically. Every login requires the email + password.
     try {
-      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(e){
+      auth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(function(e){
         console.warn("Firebase auth persistence setup failed:", e);
       });
     } catch(e) {

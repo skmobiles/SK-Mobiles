@@ -925,20 +925,19 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="form-group"><label class="form-label">Model</label><input class="form-input" id="skRjModel" required=""/></div>
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+<div class="form-group"><label class="form-label">IMEI</label><input class="form-input" id="skRjImei"/></div>
 <div class="form-group"><label class="form-label">Work Type</label>
 <select class="form-select" id="skRjWorkType">
 <option value="Urgent">🚨 Urgent</option><option selected="" value="Normal">🟢 Normal</option><option value="Scheduled">📅 Scheduled</option>
 </select>
 </div>
-<div class="form-group"><label class="form-label">Received Date</label><input class="form-input" id="skRjDate" type="text" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY"></div>
 </div>
 <div class="form-group" id="skRjScheduleWrap" style="display:none"><label class="form-label">Scheduled Date &amp; Time</label><input class="form-input" id="skRjSchedule" type="datetime-local"/></div>
 <div class="form-group"><label class="form-label">Problem / Repair Details</label><textarea class="form-input" id="skRjProblem" required="" rows="3"></textarea></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-<div class="form-group"><label class="form-label">Estimate</label><input class="form-input" id="skRjEstimate" min="0" type="number" inputmode="decimal"/></div>
-<div class="form-group"><label class="form-label">Advance Paid</label><input class="form-input" id="skRjAdvance" min="0" type="number" inputmode="decimal" value="0"/></div>
+<div class="form-group"><label class="form-label">Received Date</label><input class="form-input" id="skRjDate" type="text" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY"></div>
+<div class="form-group"><label class="form-label">Estimate</label><input class="form-input" id="skRjEstimate" min="0" type="number"/></div>
 </div>
-<div class="form-group"><label class="form-label">Balance</label><input class="form-input" id="skRjBalance" type="text" value="₹ 0" readonly/></div>
 <div class="form-group"><label class="form-label">Status</label>
 <select class="form-select" id="skRjStatus">
 <option>Received</option><option>Checking</option><option>Repairing</option><option>Ready</option>
@@ -954,7 +953,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 <div id="skRjHistoryView" style="display:none">
 <div class="sk-rj-filters">
-<div style="grid-column:1/-1"><label class="sk-rj-filter-label">Search</label><input class="form-input" id="skRjHistorySearch" oninput="skRjRenderHistory()" placeholder="Customer / phone / model"/></div>
+<div style="grid-column:1/-1"><label class="sk-rj-filter-label">Search</label><input class="form-input" id="skRjHistorySearch" oninput="skRjRenderHistory()" placeholder="Customer / phone / model / IMEI"/></div>
 <div><label class="sk-rj-filter-label">Starting Date</label><input class="form-input" id="skRjFromDate" onchange="skRjRenderHistory()" type="text" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY" data-dmy-date="1"></div>
 <div><label class="sk-rj-filter-label">Ending Date</label><input class="form-input" id="skRjToDate" onchange="skRjRenderHistory()" type="text" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY" data-dmy-date="1"></div>
 </div>
@@ -1185,41 +1184,20 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="skcp-stat"><b id="skCPOutstandingTotal">₹0</b><span>OUTSTANDING</span></div>
 </div>
 <div class="skcp-toolbar">
-  <div class="skcp-search-wrap">
-    <span class="skcp-search-icon" aria-hidden="true">⌕</span>
-    <input class="form-input" id="skCPSearch" oninput="skCPRender()" placeholder="Search name / phone / amount / bill last 3..." aria-label="Search customers"/>
-  </div>
-  <button type="button" class="skcp-filter-open" onclick="skCPOpenFilterPanel()" aria-label="Open filters">☷<span>Filter</span></button>
-  <button type="button" class="skcp-btn credit skcp-credit-action" onclick="skCPOpenAction('credit')">➕ Credit</button>
+<input class="form-input" id="skCPSearch" oninput="skCPRender()" placeholder="Search name / phone / amount / bill last 3..."/>
+<button class="skcp-btn credit" onclick="skCPOpenAction('credit')">➕ Credit</button>
+</div>
+<div class="skcp-filters">
+<button class="skcp-filter active" data-f="all" onclick="skCPFilter('all',this)">All</button>
+<button class="skcp-filter" data-f="emi" onclick="skCPFilter('emi',this)">EMI</button>
+<button class="skcp-filter" data-f="credit" onclick="skCPFilter('credit',this)">Credit</button>
+<button class="skcp-filter" data-f="outstanding" onclick="skCPFilter('outstanding',this)">Outstanding</button>
+<button class="skcp-filter" data-f="complete" onclick="skCPFilter('complete',this)">Completed</button>
 </div>
 <div class="skcp-list" id="skCPList"></div>
 </div>
 <div id="skCPDetailView" style="display:none"></div>
 </div>
-</div>
-<div class="modal-overlay skcp-filter-modal" id="skCPFilterModal" style="z-index:2147482950!important;" aria-modal="true" role="dialog">
-  <div class="modal-sheet skcp-filter-sheet">
-    <div class="modal-title"><span>☷ Filters</span><button class="modal-close-btn" type="button" onclick="skCPCloseFilterPanel()">✕</button></div>
-    <div class="skcp-filter-panel-body">
-      <div class="skcp-filter-group-title">FILTER TYPE</div>
-      <div class="skcp-filter-choice-grid">
-        <button type="button" class="skcp-filter-choice active" data-f="all" onclick="skCPApplyFilterChoice('all',this)">All</button>
-        <button type="button" class="skcp-filter-choice" data-f="emi" onclick="skCPApplyFilterChoice('emi',this)">EMI</button>
-        <button type="button" class="skcp-filter-choice" data-f="credit" onclick="skCPApplyFilterChoice('credit',this)">Credit</button>
-        <button type="button" class="skcp-filter-choice" data-f="outstanding" onclick="skCPApplyFilterChoice('outstanding',this)">Outstanding</button>
-        <button type="button" class="skcp-filter-choice" data-f="complete" onclick="skCPApplyFilterChoice('complete',this)">Completed</button>
-      </div>
-      <div class="skcp-filter-group-title">DATE RANGE</div>
-      <div class="skcp-date-grid">
-        <label>From Date<input class="form-input" id="skCPFilterFrom" type="text" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY" data-dmy-date="1"></label>
-        <label>To Date<input class="form-input" id="skCPFilterTo" type="text" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY" data-dmy-date="1"></label>
-      </div>
-      <div class="skcp-filter-actions">
-        <button type="button" class="skcp-btn" onclick="skCPClearFilters()">Reset</button>
-        <button type="button" class="skcp-btn credit" onclick="skCPApplyFilterPanel()">Apply Filters</button>
-      </div>
-    </div>
-  </div>
 </div>
 <div class="modal-overlay" id="skCreditActionModal" style="z-index:2147482900!important;">
 <div class="modal-sheet">
