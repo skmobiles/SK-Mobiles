@@ -156,19 +156,18 @@
     return ROLE_BY_EMAIL[String(email||"").trim().toLowerCase()] || "";
   }
 
-  function ensureFirebase(){
+  async function ensureFirebase(){
     if(!window.firebase) throw new Error("Firebase SDK not loaded.");
     if(!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
     auth = firebase.auth();
     db = firebase.firestore();
-    // Strict login mode: Firebase must not restore an old authenticated
-    // session automatically. Every login requires the email + password.
+    // Restore the signed-in Firebase session on this browser/device.
+    // Role and permissions are still revalidated by handleUser/ensureUserProfile.
     try {
-      auth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(function(e){
-        console.warn("Firebase auth persistence setup failed:", e);
-      });
+      await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     } catch(e) {
-      console.warn("Firebase auth persistence setup failed:", e);
+      console.warn("Firebase local persistence setup failed:", e);
+      throw e;
     }
     return true;
   }
@@ -1166,9 +1165,9 @@
     }
   }
 
-  function init(){
+  async function init(){
     try {
-      ensureFirebase();
+      await ensureFirebase();
       injectLoginUI();
       hookLocalBillWrites();
       hookCloudAutoBackup();
