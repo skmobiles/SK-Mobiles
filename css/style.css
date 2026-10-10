@@ -9720,232 +9720,64 @@ form[id$="MobileBillingForm"] + .bill-action-grid {
   }
 }
 
-/* V5.6.19 — Credit action Save button visibility fix (UI only) */
-#skCreditActionModal > .modal-sheet{
-  box-sizing:border-box;
-  max-height:calc(100vh - 24px) !important;
-  max-height:calc(100dvh - 24px) !important;
-  overflow-y:auto !important;
-  overscroll-behavior:contain;
-  padding-bottom:max(18px, env(safe-area-inset-bottom)) !important;
-  scrollbar-gutter:stable;
-}
-#skCreditActionModal > .modal-sheet > .submit-btn{
-  position:sticky !important;
-  bottom:0 !important;
-  z-index:5 !important;
-  display:block !important;
-  width:100% !important;
-  min-height:48px !important;
-  margin-top:12px !important;
-  flex-shrink:0;
-  box-shadow:0 -8px 18px rgba(15,23,42,.08);
-}
-@media(max-width:600px){
-  #skCreditActionModal.active{align-items:flex-start !important;padding:10px 8px !important;}
-  #skCreditActionModal.active > .modal-sheet{
-    width:100% !important;
-    max-width:100% !important;
-    max-height:calc(100vh - 20px) !important;
-    max-height:calc(100dvh - 20px) !important;
-    margin:0 auto !important;
-    border-radius:22px !important;
-  }
-}
-
-
-/* V5.6.20: Keep Credit Action form and Save control above the fixed bottom navigation. */
-#skCreditActionModal{
-  z-index:2147483600 !important;
-}
-#skCreditActionModal > .modal-sheet{
-  max-height:calc(100dvh - 20px) !important;
-  max-height:calc(100vh - 20px) !important;
-  overflow-y:auto !important;
-  overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;
-  padding-bottom:max(18px, env(safe-area-inset-bottom)) !important;
-}
-#skCreditActionModal > .modal-sheet > .submit-btn{
-  position:relative;
-  z-index:1;
-  display:block;
-  width:100%;
-  margin-bottom:4px;
-}
-
-/* V5.6.21 ROOT FIX: keep the primary navigation visible while the Credit Action
-   modal is open, and reserve enough scroll space so Save is never behind it. */
-html body nav.bottom-nav{
-  z-index:2147483646 !important;
-}
-#skCreditActionModal .modal-sheet{
-  max-height:calc(100dvh - 20px) !important;
-  max-height:calc(100vh - 20px) !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  overscroll-behavior:contain;
-  padding-bottom:calc(92px + env(safe-area-inset-bottom)) !important;
-  box-sizing:border-box !important;
-  scrollbar-gutter:stable;
-}
-#skCreditActionModal .submit-btn{
-  position:relative !important;
-  z-index:1 !important;
-  margin-bottom:8px !important;
-}
-@media(max-width:600px){
-  #skCreditActionModal .modal-sheet{
-    width:calc(100% - 20px) !important;
-    max-height:calc(100dvh - 16px) !important;
-    max-height:calc(100vh - 16px) !important;
-    padding-bottom:calc(100px + env(safe-area-inset-bottom)) !important;
-  }
-}
-
-
-/* V5.6.22 — Credit modal/navigation stacking-context root fix.
-   Keep the app navigation above this modal; Save remains in normal document flow. */
-#skCreditActionModal,
-#skCreditActionModal.active{
-  z-index:2147482000 !important;
-  isolation:auto !important;
-}
-html body nav.bottom-nav{
-  z-index:2147483000 !important;
-}
-#skCreditActionModal > .modal-sheet{
-  height:100dvh !important;
-  max-height:100dvh !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  padding-bottom:calc(150px + env(safe-area-inset-bottom, 0px)) !important;
-  overscroll-behavior:contain !important;
-  -webkit-overflow-scrolling:touch !important;
-}
-#skCreditActionModal > .modal-sheet > .submit-btn{
-  position:static !important;
-  inset:auto !important;
-  z-index:auto !important;
-  display:block !important;
-  width:100% !important;
-  min-height:48px !important;
-  margin:12px 0 8px !important;
-  box-shadow:none !important;
-}
-@media(max-width:600px){
-  #skCreditActionModal > .modal-sheet{
-    padding-bottom:calc(160px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-}
-
-
-/* V5.6.23 — Credit action modal must open ABOVE the current page and navigation.
-   Keep the page mounted underneath; only the modal overlay receives the top layer. */
-#skCreditActionModal,
-#skCreditActionModal.active {
+/* V5.6.27 — Single source of truth: Credit Action modal + bottom navigation. */
+#skCreditActionModal {
   position: fixed !important;
   inset: 0 !important;
-  z-index: 2147483647 !important;
-  isolation: isolate !important;
+  z-index: 2147483000 !important;
   display: none;
   align-items: flex-start !important;
   justify-content: center !important;
   overflow: hidden !important;
-  background: rgba(15, 23, 42, .42) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  padding: max(10px, env(safe-area-inset-top)) 8px max(10px, env(safe-area-inset-bottom)) !important;
   box-sizing: border-box !important;
+  padding: max(10px, env(safe-area-inset-top)) 8px max(10px, env(safe-area-inset-bottom)) !important;
+  background: rgba(15, 23, 42, .42) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
 }
 #skCreditActionModal.active { display: flex !important; }
 #skCreditActionModal > .modal-sheet {
   position: relative !important;
-  z-index: 1 !important;
   width: min(100%, 560px) !important;
   max-width: 560px !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
   max-height: calc(100vh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  max-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
   margin: 0 auto !important;
+  padding: 12px 12px calc(160px + env(safe-area-inset-bottom, 0px)) !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   overscroll-behavior: contain !important;
   -webkit-overflow-scrolling: touch !important;
   box-sizing: border-box !important;
-  padding: 10px 12px calc(92px + env(safe-area-inset-bottom)) !important;
-  border-radius: 22px !important;
-}
-#skCreditActionModal > .modal-sheet > .submit-btn {
-  position: static !important;
-  inset: auto !important;
-  z-index: auto !important;
-  display: block !important;
-  width: 100% !important;
-  min-height: 48px !important;
-  margin: 12px 0 8px !important;
-}
-/* The navigation remains below the active modal, but is unchanged on normal pages. */
-html body nav.bottom-nav { z-index: 9999 !important; }
-@media (max-width: 600px) {
-  #skCreditActionModal { padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) !important; }
-  #skCreditActionModal > .modal-sheet {
-    width: 100% !important;
-    max-width: 100% !important;
-    max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-    max-height: calc(100vh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-    padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important;
-    border-radius: 22px !important;
-  }
-}
-
-/* V5.6.24 — Render Credit Action modal at body root to escape ancestor stacking contexts. */
-body > #skCreditActionModal {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 2147483647 !important;
-  isolation: isolate !important;
-}
-body > #skCreditActionModal.active { display: flex !important; }
-
-/* V5.6.25 — Credit action form heading visibility + refreshed header.
-   Keep the existing fields and save logic; make the title a real sticky header
-   inside the scroll container so it cannot overlap the first form label. */
-#skCreditActionModal > .modal-sheet {
-  padding: 12px 12px calc(100px + env(safe-area-inset-bottom, 0px)) !important;
-  background: var(--card-bg, #f4f7ff) !important;
   border: 1px solid rgba(110, 135, 180, .22) !important;
   border-radius: 22px !important;
-  scroll-padding-top: 76px !important;
+  background: var(--card-bg, #f4f7ff) !important;
 }
 #skCreditActionModal > .modal-sheet > .modal-title {
   position: sticky !important;
   top: 0 !important;
-  z-index: 20 !important;
+  z-index: 2 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   gap: 12px !important;
-  min-height: 56px !important;
-  margin: -2px 0 14px !important;
-  padding: 8px 10px 8px 14px !important;
+  min-height: 54px !important;
+  margin: 0 0 14px !important;
+  padding: 7px 9px 7px 12px !important;
   border: 1px solid rgba(120, 140, 180, .20) !important;
   border-radius: 16px !important;
   background: var(--card-bg, #fff) !important;
   color: var(--text-color, #1f2937) !important;
   box-shadow: 0 4px 14px rgba(25, 45, 80, .06) !important;
-  line-height: 1.25 !important;
+  line-height: 1.3 !important;
 }
 #skCreditActionModal > .modal-sheet > .modal-title > span {
   display: block !important;
   min-width: 0 !important;
-  overflow: visible !important;
   color: inherit !important;
   font-size: 1rem !important;
   font-weight: 800 !important;
   line-height: 1.3 !important;
-  white-space: normal !important;
 }
 #skCreditActionModal > .modal-sheet > .modal-title .modal-close-btn {
   flex: 0 0 42px !important;
@@ -9954,18 +9786,41 @@ body > #skCreditActionModal.active { display: flex !important; }
   min-width: 42px !important;
   margin: 0 !important;
 }
-#skCreditActionModal > .modal-sheet > .form-group:first-of-type {
-  margin-top: 0 !important;
+#skCreditActionModal > .modal-sheet > .form-group { margin-bottom: 10px !important; }
+#skCreditActionModal > .modal-sheet > .submit-btn {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  min-height: 48px !important;
+  margin: 12px 0 8px !important;
+  z-index: auto !important;
 }
-#skCreditActionModal > .modal-sheet > .form-group {
-  position: relative !important;
-  z-index: 0 !important;
-  margin-bottom: 10px !important;
+/* Navigation intentionally sits above the modal overlay, so it remains usable/visible. */
+html body nav.bottom-nav {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
+  transform: translateX(-50%) !important;
+  z-index: 2147483647 !important;
+}
+html body nav.bottom-nav > button.nav-item {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 @media (max-width: 600px) {
-  #skCreditActionModal > .modal-sheet > .modal-title {
-    min-height: 54px !important;
-    margin-bottom: 14px !important;
-    padding: 7px 9px 7px 12px !important;
+  #skCreditActionModal { padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) !important; }
+  #skCreditActionModal > .modal-sheet {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 22px !important;
   }
 }
