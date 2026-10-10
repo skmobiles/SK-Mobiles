@@ -6872,7 +6872,28 @@ function addEntry(e){const a=ledger(),n=normalize(e);n.id=n.id||('CR-'+Date.now(
 function getCustomers(){
  const map={};
  ledger().map(normalize).forEach(e=>{const k=e.key||customerKey(e.name,e.phone);if(!map[k])map[k]={key:k,name:e.name,phone:e.phone,entries:[]};map[k].entries.push(e)});
- return Object.values(map).map(c=>{c.credits=c.entries.filter(e=>e.type==='credit').reduce((s,e)=>s+Number(e.amount||0),0);c.payments=c.entries.filter(e=>e.type==='payment').reduce((s,e)=>s+Number(e.amount||0),0);c.balance=Math.max(0,c.credits-c.payments);return c})
+ const today=new Date();today.setHours(0,0,0,0);
+ return Object.values(map).map(c=>{
+   c.credits=c.entries.filter(e=>e.type==='credit').reduce((s,e)=>s+Number(e.amount||0),0);
+   c.payments=c.entries.filter(e=>e.type==='payment').reduce((s,e)=>s+Number(e.amount||0),0);
+   c.balance=Math.max(0,c.credits-c.payments);
+   // Priority is based on the nearest unpaid EMI/credit due date already stored
+   // in the ledger. Past-due items come first, then upcoming dates, then no due date.
+   const dates=c.entries.filter(e=>Number(e.amount||0)>0 && (e.type==='emi'||e.type==='credit') && e.dueDate)
+     .map(e=>parseDate(e.dueDate)).filter(d=>d instanceof Date&&!isNaN(d))
+     .map(d=>{d.setHours(0,0,0,0);return d.getTime()});
+   c.nearestDueDate=dates.length?Math.min(...dates):null;
+   c.duePriority=c.nearestDueDate==null?2:(c.nearestDueDate<=today.getTime()?0:1);
+   return c;
+ }).sort((a,b)=>{
+   if(a.balance<=0&&b.balance>0)return 1;
+   if(b.balance<=0&&a.balance>0)return -1;
+   if(a.duePriority!==b.duePriority)return a.duePriority-b.duePriority;
+   if(a.nearestDueDate!=null&&b.nearestDueDate!=null&&a.nearestDueDate!==b.nearestDueDate)return a.nearestDueDate-b.nearestDueDate;
+   if(a.nearestDueDate!=null&&b.nearestDueDate==null)return -1;
+   if(b.nearestDueDate!=null&&a.nearestDueDate==null)return 1;
+   return a.name.localeCompare(b.name);
+ })
 }
 function getCustomer(k){return getCustomers().find(c=>c.key===k)||null}
 function openLedger(){skImportFromBills(true);skRenderCreditCustomers();document.getElementById('skCreditLedgerModal')?.classList.add('active');skCheckEmiReminders()}
@@ -7545,7 +7566,16 @@ window.skCPBackToList=cpShowMain;
 window.skCPBackToHome=function(){document.getElementById('skCreditLedgerPage').classList.remove('active')}
 window.skCPViewBill=function(idx){try{window.__skBillViewReturn='creditLedger';if(typeof viewSavedBill==='function'){viewSavedBill(idx)}else{}}catch(e){window.__skBillViewReturn=''}}
 function cpFillBillsForCustomer(c,idx){document.getElementById('skCPBill').innerHTML=cpBillOptions(c,idx);if(c){document.getElementById('skCPName').value=c.name||'';document.getElementById('skCPPhone').value=c.phone||''}}
+function cpEnsureActionModalAtBodyRoot(){
+ var modal=document.getElementById('skCreditActionModal');
+ if(modal && modal.parentElement!==document.body){
+   /* Escape page/modal ancestors that create stacking contexts (transform/filter/opacity). */
+   document.body.appendChild(modal);
+ }
+ return modal;
+}
 function cpResetForm(type,c,idx){
+ cpEnsureActionModalAtBodyRoot();
  document.getElementById('skCPActionType').value=type;document.getElementById('skCPActionTitle').textContent=type==='payment'?'💰 Payment':'➕ Credit';
  document.getElementById('skCPName').value=c?.name||'';document.getElementById('skCPPhone').value=c?.phone||'';
  document.getElementById('skCPBill').innerHTML=cpBillOptions(c,idx);document.getElementById('skCPAmount').value='';
