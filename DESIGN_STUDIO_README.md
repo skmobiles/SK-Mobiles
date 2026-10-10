@@ -14,3 +14,9 @@ Validation:
 - HTML parser: 334 IDs, no duplicate IDs
 - ZIP integrity: checked after packaging
 - Stable core verifier: fails because index.html and css/style.css differ from lock; js/app.js was already different from the lock in the supplied V5.6 ZIP. No claim of full browser testing; browser end-to-end testing remains pending.
+
+
+## V5.6.3 selection fix
+- Element picking listens to pointerdown (touch/mouse/stylus) with click fallback.
+- Settings modal is hidden during selection so page elements can receive the tap.
+- Press Escape to cancel selection; selected element is highlighted after returning to settings.

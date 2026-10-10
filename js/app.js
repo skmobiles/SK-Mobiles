@@ -7549,7 +7549,7 @@ function cpResetForm(type,c,idx){
  document.getElementById('skCPActionType').value=type;document.getElementById('skCPActionTitle').textContent=type==='payment'?'💰 Payment':'➕ Credit';
  document.getElementById('skCPName').value=c?.name||'';document.getElementById('skCPPhone').value=c?.phone||'';
  document.getElementById('skCPBill').innerHTML=cpBillOptions(c,idx);document.getElementById('skCPAmount').value='';
- document.getElementById('skCPAdvance').value='0';document.getElementById('skCPDate').value=cpDate();document.getElementById('skCPCategory').value='Mobile Sale';document.getElementById('skCPNote').value='';
+ document.getElementById('skCPAdvance').value='0';document.getElementById('skCPDate').value=cpDate();document.getElementById('skCPDueDate').value='';document.getElementById('skCPCategory').value='Mobile Sale';document.getElementById('skCPNote').value='';
  document.getElementById('skCPPaymentMode').value='Cash';document.getElementById('skCPEmiMode').value='none';document.getElementById('skCPEmiFields').style.display='none';
  document.getElementById('skCPAdvanceGroup').style.display=type==='payment'?'none':'block';
  document.getElementById('skCPPaymentModeGroup').style.display=type==='payment'?'block':'none';
@@ -7592,7 +7592,7 @@ function cpUpdateBill(idx,type,amount,advance,data,bsOverride){
  var net=Math.max(0,amount-advance);
  b.balance=Math.max(0,(Number(b.balance)||0)+net);b.advance=(Number(b.advance)||0)+Math.max(0,advance);
  b.creditAdjustments=Array.isArray(b.creditAdjustments)?b.creditAdjustments:[];
- b.creditAdjustments.push({id:'CR-'+Date.now(),date:data.date,amount:amount,advance:advance,balance:net,category:data.category,note:data.note||''});
+ b.creditAdjustments.push({id:'CR-'+Date.now(),date:data.date,dueDate:data.dueDate||'',amount:amount,advance:advance,balance:net,category:data.category,note:data.note||''});
  b.paymentReceipts.push({id:'RCP-CR-'+Date.now().toString().slice(-8),billId:b.id,date:data.date,amount:net,mode:'Credit',note:data.note||'',type:'credit'});
  return net;
 }
@@ -7603,6 +7603,8 @@ window.skCPSaveAction=function(){
  var amount=Math.max(0,Number(document.getElementById('skCPAmount')?.value)||0);
  var advance=type==='credit'?Math.max(0,Number(document.getElementById('skCPAdvance')?.value)||0):0;
  var date=document.getElementById('skCPDate')?.value||cpDate(); date=skDmyToISO(date)||todayISO();
+ var dueDateInput=(document.getElementById('skCPDueDate')?.value||'').trim();
+ var dueDate=dueDateInput?(skDmyToISO(dueDateInput)||dueDateInput):'';
  var billValue=document.getElementById('skCPBill')?.value||'';
  if(!name||amount<=0){showToast?.('Customer name and amount required');return;}
  if(type!=='payment'&&type!=='credit'){showToast?.('Invalid credit/payment action');return;}
@@ -7676,7 +7678,7 @@ window.skCPSaveAction=function(){
      cpSaveLedgerEntry({
        name:name,phone:phone,type:'credit',amount:netCredit,mode:'Credit',date:date,
        details:(note||'Credit entry')+' • Ledger only'+(advance>0?' • Advance '+cpMoney(advance):''),
-       source:'manual-credit-page',billId:'',dueDate:'',category:category,
+       source:'manual-credit-page',billId:'',dueDate:dueDate,category:category,
        originalAmount:amount,advance:advance
      });
      if(typeof skImportFromBills==='function')skImportFromBills(true);
@@ -7702,7 +7704,7 @@ window.skCPSaveAction=function(){
  if(type==='credit' && applied<=0){showToast?.('Credit amount after advance must be greater than zero');return;}
 
  try{
-   var update=cpUpdateBill(billIndex,type,amount,advance,{date:date,mode:mode,note:note,category:category},bills);
+   var update=cpUpdateBill(billIndex,type,amount,advance,{date:date,mode:mode,note:note,category:category,dueDate:dueDate},bills);
    if(type==='payment'&&update<=0){showToast?.('Payment could not be applied');return;}
 
    localStorage.setItem('sk_bills',JSON.stringify(bills));
@@ -7712,7 +7714,7 @@ window.skCPSaveAction=function(){
      name:name,phone:phone,type:type,amount:applied,mode:mode,date:date,
      details:(note|| (type==='payment'?'Payment received':'Credit entry'))+' • Bill '+String(bill.billNo||bill.id||''),
      source:type==='payment'?'payment-receipt':'manual-credit-page',
-     billId:String(bill.id||''),dueDate:''
+     billId:String(bill.id||''),dueDate:type==='credit'?dueDate:''
    });
 
    if(typeof skImportFromBills==='function')skImportFromBills(true);

@@ -391,28 +391,7 @@
     <label class="sk-ui-toggle-row"><span><b>Reduced Motion</b><small>Disable transitions and transforms</small></span><input type="checkbox" id="skUiMotion" onchange="skAppearanceSet('motion',this.checked)"><i></i></label>
   </div>
 </section>
-<!-- SK DESIGN STUDIO: visual selector + settings editor; UI-only styles are stored separately -->
-<section id="skDesignStudio" class="sk-design-studio" aria-label="SK MOBILES Design Studio">
-  <div class="sk-design-head"><div><span>DESIGN STUDIO</span><h3>Manual UI Editor</h3><p>Select a UI element, adjust it, preview instantly, then save.</p></div><button type="button" onclick="skDesignResetAll()" class="sk-design-quiet">Reset all</button></div>
-  <div class="sk-design-actions"><button type="button" id="skDesignSelectBtn" class="sk-design-primary" onclick="skDesignToggleSelect()">◎ Select element on page</button><button type="button" onclick="skDesignUndo()" class="sk-design-quiet">↶ Undo</button></div>
-  <div class="sk-design-selected"><small>SELECTED ELEMENT</small><strong id="skDesignSelectedName">None selected</strong><code id="skDesignSelectedPath">Choose “Select element on page” then tap an element.</code></div>
-  <div class="sk-design-grid">
-    <label>Width <input id="skDWidth" placeholder="auto" type="text" oninput="skDesignPreview()"></label>
-    <label>Height <input id="skDHeight" placeholder="auto" type="text" oninput="skDesignPreview()"></label>
-    <label>Font size <input id="skDFontSize" placeholder="inherit" type="text" oninput="skDesignPreview()"></label>
-    <label>Font weight <select id="skDFontWeight" onchange="skDesignPreview()"><option value="">Default</option><option>400</option><option>500</option><option>600</option><option>700</option><option>800</option></select></label>
-    <label>Padding <input id="skDPadding" placeholder="unchanged" type="text" oninput="skDesignPreview()"></label>
-    <label>Margin <input id="skDMargin" placeholder="unchanged" type="text" oninput="skDesignPreview()"></label>
-    <label>Gap <input id="skDGap" placeholder="unchanged" type="text" oninput="skDesignPreview()"></label>
-    <label>Corner radius <input id="skDRadius" placeholder="unchanged" type="text" oninput="skDesignPreview()"></label>
-    <label>Text colour <input id="skDTextColor" type="color" value="#1f2937" oninput="skDesignPreview()"></label>
-    <label>Background <input id="skDBackground" type="color" value="#ffffff" oninput="skDesignPreview()"></label>
-    <label>Border width <input id="skDBorderWidth" placeholder="unchanged" type="text" oninput="skDesignPreview()"></label>
-    <label>Alignment <select id="skDAlign" onchange="skDesignPreview()"><option value="">Default</option><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label>
-  </div>
-  <div class="sk-design-actions"><button type="button" onclick="skDesignSave()" class="sk-design-primary">Save selected style</button><button type="button" onclick="skDesignCancelPreview()" class="sk-design-quiet">Cancel preview</button><button type="button" onclick="skDesignResetSelected()" class="sk-design-quiet">Reset element</button></div>
-  <div class="sk-design-foot">UI-only editor. Avoid selecting data/action controls if you only intend to change the layout. Changes are saved locally on this device and do not modify Firebase records.</div>
-</section>
+
 <div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">🏪 SHOP PROFILE &amp; ADDRESS</div>
 <div style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
 <div class="form-group">
@@ -1234,6 +1213,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div class="form-group" id="skCPAdvanceGroup"><label class="form-label">Advance</label><input class="form-input" id="skCPAdvance" min="0" oninput="skCPRecalcForm()" type="number" value="0"/></div>
 <div class="form-group"><label class="form-label">New Balance</label><input class="form-input skcp-readonly" id="skCPBalance" readonly=""/></div>
 <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="skCPDate" inputmode="numeric" autocomplete="off" placeholder="dd/mm/yyyy" type="text"></div>
+<div class="form-group" id="skCPDueDateGroup"><label class="form-label">Due Date</label><input class="form-input" id="skCPDueDate" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY" type="text"></div>
 <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="skCPCategory"><option>Mobile Sale</option><option>Service / Repair</option><option>Accessory</option><option>Old Balance</option><option>Other</option></select></div>
 <div class="form-group" id="skCPPaymentModeGroup" style="display:none"><label class="form-label">Payment Mode</label><select class="form-select" id="skCPPaymentMode"><option>Cash</option><option>GPay</option><option>UPI</option><option>Account</option><option>Card</option><option>Other</option></select></div>
 <div class="form-group" id="skCPEmiGroup"><label class="form-label">EMI Options</label><select class="form-select" id="skCPEmiMode" onchange="skCPToggleEmi()"><option value="none">No EMI</option><option value="emi">EMI</option></select>
@@ -1320,96 +1300,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 })();
 </script>
 
-<script>
-(function(){
- const KEY='sk_design_studio_v1';
- const STYLE_KEYS=['width','height','fontSize','fontWeight','padding','margin','gap','borderRadius','borderWidth','textAlign','color','backgroundColor'];
- let selected=null, previewBefore=null, selecting=false, undoStack=[], originalInline=new WeakMap();
- const $=id=>document.getElementById(id);
- function read(){try{const v=JSON.parse(localStorage.getItem(KEY)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch(e){return {}}}
- function selector(el){
-   if(!el||el===document.body||el===document.documentElement)return 'body';
-   if(el.id)return '#'+CSS.escape(el.id);
-   const parts=[];let n=el;
-   while(n&&n.nodeType===1&&n!==document.body){
-     let part=n.tagName.toLowerCase();
-     const safe=[...n.classList].filter(c=>!/^active$|^selected$|^open$|^show$|^sk-design-target$/.test(c)).slice(0,2);
-     if(safe.length)part+='.'+safe.map(c=>CSS.escape(c)).join('.');
-     const siblings=n.parentElement?[...n.parentElement.children].filter(x=>x.tagName===n.tagName):[];
-     if(siblings.length>1)part+=':nth-of-type('+(siblings.indexOf(n)+1)+')';
-     parts.unshift(part); n=n.parentElement;
-     if(n&&n.id){parts.unshift('#'+CSS.escape(n.id));break}
-   }
-   return parts.join(' > ');
- }
- function safeTarget(el){return !!(el&&el.nodeType===1&&!el.closest('#skDesignStudio,#settingsModal .modal-title,#skFontPickerModal')&&!['SCRIPT','STYLE','HTML','BODY'].includes(el.tagName));}
- function styleSnapshot(el){const o={};STYLE_KEYS.forEach(k=>o[k]=el.style[k]||'');return o;}
- function apply(el,st){if(!el||!st)return;STYLE_KEYS.forEach(k=>{if(Object.prototype.hasOwnProperty.call(st,k)){const v=st[k];if(v===null||v==='')el.style[k]='';else el.style[k]=String(v)}});}
- function loadControls(st){
-   const map={skDWidth:'width',skDHeight:'height',skDFontSize:'fontSize',skDFontWeight:'fontWeight',skDPadding:'padding',skDMargin:'margin',skDGap:'gap',skDRadius:'borderRadius',skDBorderWidth:'borderWidth',skDAlign:'textAlign'};
-   Object.entries(map).forEach(([id,k])=>{if($(id))$(id).value=st[k]||''});
-   $('skDTextColor').value=st.color||'#1f2937';$('skDBackground').value=st.backgroundColor||'#ffffff';
- }
- function getStyles(){
-   const st={};const map={skDWidth:'width',skDHeight:'height',skDFontSize:'fontSize',skDFontWeight:'fontWeight',skDPadding:'padding',skDMargin:'margin',skDGap:'gap',skDRadius:'borderRadius',skDBorderWidth:'borderWidth',skDAlign:'textAlign'};
-   Object.entries(map).forEach(([id,k])=>{const v=$(id).value.trim();if(v)st[k]=v});
-   // Keep colours optional: empty/default values must not overwrite a page's theme.
-   const text=$('skDTextColor').dataset.changed==='1' ? $('skDTextColor').value : '';
-   const bg=$('skDBackground').dataset.changed==='1' ? $('skDBackground').value : '';
-   if(text)st.color=text;if(bg)st.backgroundColor=bg;
-   return st;
- }
- function restoreModal(){const m=$('settingsModal');if(m){m.style.display='';if(typeof toggleModal==='function'){try{toggleModal('settingsModal',true)}catch(e){}}}}
- function markSelected(el){
-   if(!safeTarget(el))return;
-   if(selected)selected.classList.remove('sk-design-target');selected=el;selected.classList.add('sk-design-target');
-   if(!originalInline.has(el))originalInline.set(el,el.getAttribute('style'));
-   previewBefore=null;
-   $('skDesignSelectedName').textContent=el.tagName.toLowerCase()+(el.id?' #'+el.id:'')+(el.classList.length?' .'+[...el.classList].filter(c=>c!=='sk-design-target').slice(0,2).join('.'):'');
-   $('skDesignSelectedPath').textContent=selector(el);
-   const saved=read()[selector(el)]||{};loadControls(saved);
-   $('skDTextColor').dataset.changed=saved.color?'1':'0';$('skDBackground').dataset.changed=saved.backgroundColor?'1':'0';
- }
- window.skDesignToggleSelect=function(){
-   selecting=!selecting;document.body.classList.toggle('sk-design-selecting',selecting);
-   $('skDesignSelectBtn').textContent=selecting?'✕ Stop selecting':'◎ Select element on page';
-   if(selecting){$('skDesignSelectedPath').textContent='Now tap the exact element to edit. Press Esc to cancel selection.';$('settingsModal').style.display='none';}
- };
- window.addEventListener('keydown',e=>{if(e.key==='Escape'&&selecting){selecting=false;document.body.classList.remove('sk-design-selecting');$('skDesignSelectBtn').textContent='◎ Select element on page';restoreModal();}});
- document.addEventListener('click',function(e){
-   if(!selecting)return;let el=e.target.closest('*');if(!safeTarget(el))return;
-   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();selecting=false;document.body.classList.remove('sk-design-selecting');markSelected(el);restoreModal();
- },{capture:true});
- window.skDesignPreview=function(){if(!selected)return;if(!previewBefore)previewBefore=styleSnapshot(selected);apply(selected,getStyles());};
- window.skDesignSave=function(){
-   if(!selected){alert('முதலில் Select element on page அழுத்தி ஒரு பகுதியைத் தேர்ந்தெடுக்கவும்.');return}
-   const key=selector(selected),data=read();undoStack.push({key,old:data[key]||null,element:selected,previous:styleSnapshot(selected)});data[key]=getStyles();
-   try{localStorage.setItem(KEY,JSON.stringify(data));previewBefore=null;if(typeof showToast==='function')showToast('UI style saved on this device');else alert('UI style saved on this device');}
-   catch(e){alert('Save முடியவில்லை. Browser storage space சரிபார்க்கவும்.')}
- };
- window.skDesignCancelPreview=function(){if(selected&&previewBefore){STYLE_KEYS.forEach(k=>selected.style[k]=previewBefore[k]||'');previewBefore=null;loadControls(read()[selector(selected)]||{});}};
- window.skDesignUndo=function(){
-   const x=undoStack.pop();if(!x){alert('Undo செய்ய மாற்றம் இல்லை.');return}
-   const data=read();if(x.old)data[x.key]=x.old;else delete data[x.key];
-   try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
-   if(x.element&&x.element.isConnected){STYLE_KEYS.forEach(k=>x.element.style[k]=x.previous[k]||'');apply(x.element,data[x.key]||{});if(selected===x.element)loadControls(data[x.key]||{});}
- };
- window.skDesignResetSelected=function(){
-   if(!selected)return;const key=selector(selected),data=read();delete data[key];
-   try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
-   // Remove only properties managed by Design Studio, preserving pre-existing inline styles and business UI state.
-   STYLE_KEYS.forEach(k=>selected.style[k]='');const orig=originalInline.get(selected);if(orig!==undefined&&orig!==null)selected.setAttribute('style',orig);
-   previewBefore=null;loadControls({});$('skDTextColor').dataset.changed='0';$('skDBackground').dataset.changed='0';
- };
- window.skDesignResetAll=function(){if(!confirm('Saved Design Studio styles மட்டும் reset செய்யவா?'))return;localStorage.removeItem(KEY);document.querySelectorAll('.sk-design-target').forEach(e=>e.classList.remove('sk-design-target'));selected=null;$('skDesignSelectedName').textContent='None selected';$('skDesignSelectedPath').textContent='Choose “Select element on page” then tap an element.';loadControls({});location.reload();};
- function restore(){const data=read();Object.entries(data).forEach(([sel,st])=>{try{const el=document.querySelector(sel);if(el&&!el.closest('#skDesignStudio'))apply(el,st)}catch(e){}})}
- $('skDTextColor').addEventListener('input',()=>{$('skDTextColor').dataset.changed='1'});$('skDBackground').addEventListener('input',()=>{$('skDBackground').dataset.changed='1'});
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',restore);else restore();
- // Re-apply saved styles to matching elements recreated by existing UI rendering, without touching app data.
- let restoreQueued=false;const mo=new MutationObserver(()=>{if(restoreQueued)return;restoreQueued=true;requestAnimationFrame(()=>{restoreQueued=false;restore()})});
- if(document.documentElement)mo.observe(document.documentElement,{childList:true,subtree:true});
-})();
-</script>
+<script>try { localStorage.removeItem('sk_design_studio_v1'); } catch(e) {}</script>
 
 <script src="js/app.js?v=5.4.1" defer></script>
 <script src="js/firebase-sync.js?v=5.4.1"></script>
