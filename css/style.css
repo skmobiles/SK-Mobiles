@@ -9142,3 +9142,580 @@ body.sk-design-selecting * { cursor: crosshair !important; }
     margin-bottom: 8px !important;
   }
 }
+
+
+/* V5.6.9 — one consistent vertical gap between UI boxes across the app */
+:root {
+  --sk-global-box-gap: 12px;
+}
+.bill-section,
+.form-section,
+.form-card,
+.page-section,
+.card,
+.app-card,
+.history-card,
+.repair-card,
+.customer-card,
+.skcp-card,
+.accessory-card,
+.modal-card {
+  margin-block: 0 !important;
+}
+.bill-section + .bill-section,
+.form-section + .form-section,
+.form-card + .form-card,
+.page-section + .page-section,
+.card + .card,
+.app-card + .app-card,
+.history-card + .history-card,
+.repair-card + .repair-card,
+.customer-card + .customer-card,
+.skcp-card + .skcp-card,
+.accessory-card + .accessory-card,
+.modal-card + .modal-card {
+  margin-top: var(--sk-global-box-gap) !important;
+}
+#newMobileBillingForm,
+#usedMobileBillingForm,
+#keypadMobileBillingForm,
+#skCreditLedgerPage .skcp-list,
+#skRepairHistoryList,
+#accessoryList {
+  row-gap: var(--sk-global-box-gap) !important;
+}
+@media (max-width: 520px) {
+  :root { --sk-global-box-gap: 12px; }
+}
+
+
+/* V5.6.10 — root cause fix: billing form has inline gap:14px and sections
+   are separated by form flex gap, not the generic card adjacency selectors. */
+#usedMobileBillingForm,
+#newMobileBillingForm,
+#keypadMobileBillingForm,
+form[id$="MobileBillingForm"] {
+  gap: 6px !important;
+  row-gap: 6px !important;
+}
+#usedMobileBillingForm > .bill-section,
+#newMobileBillingForm > .bill-section,
+#keypadMobileBillingForm > .bill-section,
+form[id$="MobileBillingForm"] > .bill-section {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+#usedMobileBillingForm > .bill-section + .bill-section,
+#newMobileBillingForm > .bill-section + .bill-section,
+#keypadMobileBillingForm > .bill-section + .bill-section,
+form[id$="MobileBillingForm"] > .bill-section + .bill-section {
+  margin-block: 0 !important;
+}
+#usedMobileBillingForm + .bill-action-grid,
+#newMobileBillingForm + .bill-action-grid,
+#keypadMobileBillingForm + .bill-action-grid,
+form[id$="MobileBillingForm"] + .bill-action-grid {
+  margin-top: 6px !important;
+}
+
+
+/* V5.6.11 — consistent compact title/header cards across the app */
+:root {
+  --sk-title-card-min-height: 54px;
+  --sk-title-card-padding-y: 10px;
+  --sk-title-card-padding-x: 14px;
+}
+.modal-header,
+.panel-header,
+.page-header,
+.section-header,
+.card-header,
+.drawer-header,
+[class*="title-card"],
+[class*="page-title"],
+[class*="modal-title"] {
+  box-sizing: border-box;
+}
+.modal-header,
+.panel-header,
+.page-header,
+.drawer-header,
+[class*="title-card"] {
+  min-height: var(--sk-title-card-min-height);
+  padding-top: var(--sk-title-card-padding-y) !important;
+  padding-bottom: var(--sk-title-card-padding-y) !important;
+}
+.modal-header > :first-child,
+.panel-header > :first-child,
+.page-header > :first-child,
+.drawer-header > :first-child {
+  margin-block: 0 !important;
+  line-height: 1.25 !important;
+}
+
+
+/* V5.6.12 — global compact spacing system (content-led sizing) */
+:root {
+  --sk-space-card: 10px;
+  --sk-space-section: 10px;
+  --sk-card-pad-y: 10px;
+  --sk-card-pad-x: 12px;
+}
+/* Dashboard and summary tiles: reduce excess height without clipping text. */
+.dashboard-card,
+.stat-card,
+.summary-card,
+.metric-card,
+.home-stat-card,
+.quick-stat-card {
+  box-sizing: border-box;
+  padding-block: var(--sk-card-pad-y) !important;
+  min-height: 0 !important;
+}
+/* Compact summaries: avoid oversized vertical padding on labels and values. */
+.dashboard-card .label,
+.stat-card .label,
+.summary-card .label,
+.metric-card .label,
+.home-stat-card .label,
+.quick-stat-card .label,
+.dashboard-card small,
+.stat-card small,
+.summary-card small,
+.metric-card small {
+  line-height: 1.25 !important;
+  margin-block: 0 !important;
+}
+.dashboard-card h1,
+.dashboard-card h2,
+.dashboard-card h3,
+.stat-card h1,
+.stat-card h2,
+.stat-card h3,
+.summary-card h1,
+.summary-card h2,
+.summary-card h3,
+.metric-card h1,
+.metric-card h2,
+.metric-card h3 {
+  line-height: 1.2 !important;
+  margin-block: 2px !important;
+}
+/* Common cards: reduce padding while preserving their natural height. */
+.customer-card,
+.repair-card,
+.history-card,
+.accessory-card,
+.credit-card,
+.ledger-card,
+.list-card {
+  box-sizing: border-box;
+  padding-block: var(--sk-card-pad-y);
+}
+/* Title bars: compact but allow wrapped headings and close buttons. */
+.modal-header,
+.panel-header,
+.page-header,
+.drawer-header,
+[class*="title-card"] {
+  min-height: 50px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+.modal-header > :first-child,
+.panel-header > :first-child,
+.page-header > :first-child,
+.drawer-header > :first-child {
+  line-height: 1.25 !important;
+}
+/* Do not force equal fixed heights; avoid clipping on mobile and long text. */
+.dashboard-card,
+.stat-card,
+.summary-card,
+.metric-card,
+.home-stat-card,
+.quick-stat-card,
+.customer-card,
+.repair-card,
+.history-card,
+.accessory-card,
+.credit-card,
+.ledger-card,
+.list-card,
+.modal-header,
+.panel-header,
+.page-header,
+.drawer-header {
+  height: auto !important;
+  overflow-wrap: anywhere;
+}
+
+
+/* V5.6.13 — screenshot-led spacing cleanup for actual component classes */
+.skcp-summary {
+  gap: 8px !important;
+  margin: 0 0 8px !important;
+}
+.skcp-stat {
+  box-sizing: border-box !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 7px 8px !important;
+}
+.skcp-stat b { line-height: 1.15 !important; margin: 0 0 2px !important; }
+.skcp-stat span { line-height: 1.15 !important; }
+#skCreditLedgerModal .modal-sheet,
+#skCreditActionModal .modal-sheet {
+  padding: 12px !important;
+}
+#skCreditLedgerModal .modal-title,
+#skCreditActionModal .modal-title {
+  min-height: 50px !important;
+  margin-bottom: 8px !important;
+  padding: 6px 0 8px !important;
+}
+#skCreditLedgerModal .sk-credit-summary {
+  gap: 6px !important;
+  margin-bottom: 8px !important;
+}
+#skCreditLedgerModal .sk-credit-stat {
+  padding: 7px !important;
+  min-height: 0 !important;
+}
+.billing-modern form[id$="MobileBillingForm"] {
+  gap: 8px !important;
+  row-gap: 8px !important;
+}
+.billing-modern form[id$="MobileBillingForm"] > .bill-section {
+  padding: 9px !important;
+  margin: 0 !important;
+}
+.billing-modern .bill-section-title {
+  margin-bottom: 5px !important;
+}
+.billing-modern .bill-action-grid {
+  gap: 8px !important;
+  padding: 6px !important;
+  margin: 6px 0 8px !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.billing-modern .bill-action-btn {
+  min-height: 40px !important;
+  padding: 7px 9px !important;
+  box-shadow: none !important;
+}
+.billing-modern .bill-section + .bill-section {
+  margin-top: 0 !important;
+}
+
+
+/* V5.6.14 — app-wide compact rhythm, scoped to actual reusable components */
+:root {
+  --sk-ui-space-xs: 4px;
+  --sk-ui-space-sm: 8px;
+  --sk-ui-space-md: 10px;
+  --sk-ui-card-pad: 10px;
+}
+/* Dialogs / title cards */
+.modal-overlay { padding: 8px !important; }
+.modal-sheet {
+  box-sizing: border-box !important;
+  padding: 12px !important;
+  border-radius: 22px 22px 18px 18px !important;
+}
+.modal-title {
+  font-size: .96rem !important;
+  line-height: 1.25 !important;
+  margin-bottom: 8px !important;
+  padding-bottom: 6px !important;
+}
+.modal-sheet .form-group { margin-bottom: 8px !important; }
+.modal-sheet .form-input,
+.modal-sheet .form-select {
+  min-height: 36px;
+  padding: 8px 10px !important;
+  border-radius: 11px !important;
+}
+.modal-sheet textarea.form-input { min-height: 56px; }
+/* Forms: reduce label and field spacing without changing field dimensions/data. */
+.form-group { margin-bottom: 8px !important; }
+.form-label {
+  line-height: 1.2 !important;
+  margin-bottom: 3px !important;
+}
+/* Billing: same compact section rhythm for customer/device/payment/action panels. */
+.billing-modern form[id$="MobileBillingForm"] {
+  gap: 8px !important;
+  row-gap: 8px !important;
+}
+.billing-modern form[id$="MobileBillingForm"] > .bill-section {
+  padding: 9px !important;
+  margin: 0 !important;
+  border-radius: 16px !important;
+}
+.billing-modern .bill-section-title {
+  line-height: 1.2 !important;
+  margin-bottom: 5px !important;
+}
+.billing-modern .bill-action-grid {
+  gap: 8px !important;
+  padding: 6px !important;
+  margin: 6px 0 8px !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.billing-modern .bill-action-btn {
+  min-height: 40px !important;
+  padding: 7px 9px !important;
+  box-shadow: none !important;
+}
+/* Customer Credit Ledger summary boxes */
+.skcp-summary { gap: 8px !important; margin-bottom: 8px !important; }
+.skcp-stat {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 7px 8px !important;
+  border-radius: 14px !important;
+}
+.skcp-stat b { line-height: 1.15 !important; margin-bottom: 2px !important; }
+.skcp-stat span { line-height: 1.15 !important; }
+/* Reusable list cards: content-led sizing; do not force a fixed height. */
+.sk-credit-customer,
+.sk-credit-stat,
+.skcp-history-item,
+.skcp-entry-card,
+.skcp-payment-card,
+.sk-rj-card,
+.sk-repair-card,
+.accessory-item,
+.accessory-card,
+.history-card,
+.customer-card {
+  box-sizing: border-box;
+  height: auto !important;
+}
+/* Keep all action groups compact while preserving tap targets. */
+.sk-credit-list,
+.skcp-list,
+.sk-rj-list,
+#accessoryList {
+  row-gap: 8px !important;
+}
+@media (max-width: 520px) {
+  .modal-overlay { padding: 6px !important; }
+  .modal-sheet { padding: 10px !important; }
+  .modal-title { margin-bottom: 7px !important; }
+  .billing-modern form[id$="MobileBillingForm"] { gap: 7px !important; }
+  .billing-modern form[id$="MobileBillingForm"] > .bill-section { padding: 8px !important; }
+}
+
+
+/* V5.6.15 — home dashboard cards: fix actual grid gap and excess card padding */
+#homeMetricGrid {
+  gap: 8px !important;
+  row-gap: 8px !important;
+  column-gap: 8px !important;
+}
+#homeMetricGrid .sk-home-metric-card {
+  box-sizing: border-box !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 8px 10px !important;
+  border-radius: 15px !important;
+  box-shadow: 0 4px 12px rgba(15,23,42,.05) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+#homeMetricGrid .sk-home-metric-card > div {
+  gap: 8px !important;
+  min-width: 0 !important;
+}
+#homeMetricGrid .sk-home-metric-icon {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 10px !important;
+  font-size: 1rem !important;
+  box-shadow: none !important;
+}
+#homeMetricGrid .sk-home-metric-card span {
+  line-height: 1.15 !important;
+}
+#skUrgentRepairCard {
+  margin-top: 6px !important;
+  padding: 8px 10px !important;
+  min-height: 0 !important;
+  gap: 8px !important;
+  border-radius: 14px !important;
+}
+#skUrgentRepairCard > div {
+  gap: 8px !important;
+}
+#skUrgentRepairCard .sk-ur-icon {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 9px !important;
+  font-size: 1rem !important;
+}
+@media (max-width: 600px) {
+  #homeMetricGrid { gap: 8px !important; }
+  #homeMetricGrid .sk-home-metric-card { padding: 8px !important; }
+}
+
+
+/* V5.6.16 — app-wide compact cards + title bars, including every modal page */
+:root {
+  --sk-compact-card-gap: 8px;
+  --sk-compact-card-pad: 10px;
+  --sk-compact-title-min-height: 48px;
+}
+/* All modal/dialog shells use a smaller, consistent inset without fixed heights. */
+.modal-overlay {
+  padding: 8px !important;
+}
+.modal-sheet {
+  box-sizing: border-box !important;
+  padding: 12px !important;
+  border-radius: 20px 20px 16px 16px !important;
+  max-height: calc(100dvh - 16px) !important;
+}
+/* Title/header bars across modal pages */
+.modal-title,
+.repair-spares-head,
+.sk-credit-title,
+.skcp-title,
+.drawer-header,
+.sk-backup-ui-heading,
+.sk-admin-title,
+.sk-rj-header,
+.sk-page-title,
+.page-header,
+.panel-header {
+  box-sizing: border-box !important;
+  min-height: var(--sk-compact-title-min-height) !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+  margin-bottom: 8px !important;
+  line-height: 1.25 !important;
+}
+.modal-title {
+  font-size: .96rem !important;
+  gap: 8px !important;
+}
+.modal-title .modal-close-btn,
+.repair-spares-head .modal-close-btn {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+/* Common repeated card families: content-led height and reduced inner whitespace. */
+.sk-home-metric-card,
+.sk-credit-customer,
+.skcp-stat,
+.skcp-history-item,
+.skcp-entry-card,
+.skcp-payment-card,
+.sk-rj-card,
+.sk-admin-box,
+.sk-ui-section,
+.sk-v42-profile-box,
+.sk-backup-ui-status,
+.repair-spares-info,
+.bill-section,
+.sk-home-action-btn,
+.sk-ui-choice,
+.sk-ui-card-choice {
+  box-sizing: border-box !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding-block: var(--sk-compact-card-pad) !important;
+}
+/* Consistent vertical rhythm inside modal forms on all feature pages. */
+.modal-sheet .form-group,
+.modal-sheet .sk-ui-section,
+.modal-sheet .sk-admin-box {
+  margin-bottom: 8px !important;
+}
+.modal-sheet .form-label {
+  margin-bottom: 3px !important;
+  line-height: 1.2 !important;
+}
+.modal-sheet .form-input,
+.modal-sheet .form-select {
+  min-height: 36px !important;
+  padding: 8px 10px !important;
+  border-radius: 11px !important;
+}
+/* Avoid extra spacing between adjacent cards; the container gap handles it. */
+.skcp-summary,
+#homeMetricGrid,
+#homeActionCardsContainer,
+#accessoryList,
+#skRepairHistoryList,
+.skcp-list,
+.sk-rj-list {
+  row-gap: var(--sk-compact-card-gap) !important;
+}
+#homeMetricGrid { gap: var(--sk-compact-card-gap) !important; }
+#skUrgentRepairCard {
+  margin-top: 6px !important;
+  padding: 8px 10px !important;
+}
+.billing-modern form[id$="MobileBillingForm"] {
+  gap: var(--sk-compact-card-gap) !important;
+  row-gap: var(--sk-compact-card-gap) !important;
+}
+.billing-modern form[id$="MobileBillingForm"] > .bill-section {
+  margin: 0 !important;
+  padding: 9px !important;
+}
+.billing-modern .bill-action-grid {
+  gap: 8px !important;
+  padding: 6px !important;
+  margin: 6px 0 8px !important;
+  box-shadow: none !important;
+}
+@media (max-width: 600px) {
+  .modal-overlay { padding: 6px !important; }
+  .modal-sheet {
+    padding: 10px !important;
+    max-height: calc(100dvh - 12px) !important;
+  }
+  .modal-title,
+  .repair-spares-head,
+  .sk-credit-title,
+  .skcp-title,
+  .drawer-header,
+  .sk-backup-ui-heading,
+  .sk-admin-title,
+  .sk-rj-header,
+  .sk-page-title,
+  .page-header,
+  .panel-header {
+    min-height: 46px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 7px !important;
+  }
+  .sk-home-metric-card,
+  .sk-credit-customer,
+  .skcp-stat,
+  .skcp-history-item,
+  .skcp-entry-card,
+  .skcp-payment-card,
+  .sk-rj-card,
+  .sk-admin-box,
+  .sk-ui-section,
+  .sk-v42-profile-box,
+  .sk-backup-ui-status,
+  .repair-spares-info,
+  .bill-section,
+  .sk-home-action-btn,
+  .sk-ui-choice,
+  .sk-ui-card-choice {
+    padding-block: 8px !important;
+  }
+}
