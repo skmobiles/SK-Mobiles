@@ -9824,3 +9824,44 @@ html body nav.bottom-nav > button.nav-item {
     border-radius: 22px !important;
   }
 }
+
+/* V5.6.28 — Sales Bill section width and side-gap refinement (single scoped block) */
+#billingModal.modal-overlay,
+#billingModal.modal-overlay.active {
+  box-sizing: border-box !important;
+  padding: 6px !important;
+}
+#billingModal .modal-sheet.billing-modern {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 720px !important;
+  margin-inline: auto !important;
+  padding: 12px !important;
+}
+#billingModal .billing-modern #billNewView,
+#billingModal .billing-modern #billHistoryView,
+#billingModal .billing-modern form,
+#billingModal .billing-modern .bill-section {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+#billingModal .billing-modern .bill-section {
+  padding: 10px !important;
+}
+@media (max-width: 600px) {
+  #billingModal.modal-overlay,
+  #billingModal.modal-overlay.active {
+    padding: 4px !important;
+  }
+  #billingModal .modal-sheet.billing-modern {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 10px !important;
+    border-radius: 20px !important;
+  }
+  #billingModal .billing-modern .bill-section {
+    padding: 9px !important;
+  }
+}
