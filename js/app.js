@@ -4661,7 +4661,7 @@ img{max-width:100%!important;}
   }
 
 
-  /* Contact picker buttons for phone-number fields. */
+  /* V5.6.48: native browser Contact Picker + paired name/phone autofill. */
   function skInstallContactButtons(){
     const fields=Array.from(document.querySelectorAll('input')).filter(function(el){
       if(el.disabled||el.type==='hidden'||el.type==='search')return false;
@@ -4671,25 +4671,57 @@ img{max-width:100%!important;}
     });
     fields.forEach(function(input){
       if(input.dataset.skContactButton==='1')return;
-      const wrap=input.parentElement;if(!wrap)return;
+      // The old implementation positioned the button against input.parentElement.
+      // In many forms that parent also contains the label, so 50% was calculated
+      // from the whole label+input group rather than the input itself.
+      let wrap=input.parentElement;if(!wrap)return;
       input.dataset.skContactButton='1';
-      wrap.classList.add('sk-contact-field-wrap');
+      const fieldWrap=document.createElement('span');
+      fieldWrap.className='sk-contact-field-wrap';
+      fieldWrap.setAttribute('data-sk-contact-wrap','1');
+      fieldWrap.style.display='block';
+      fieldWrap.style.position='relative';
+      fieldWrap.style.width='100%';
+      fieldWrap.style.minWidth='0';
       input.classList.add('sk-contact-field-input');
+      input.parentNode.insertBefore(fieldWrap,input);
+      fieldWrap.appendChild(input);
+      wrap=fieldWrap;
       const btn=document.createElement('button');
       btn.type='button';btn.className='sk-contact-access-btn';
-      btn.title='Choose from contacts';btn.setAttribute('aria-label','Choose phone number from contacts');
+      btn.title='Choose contact';btn.setAttribute('aria-label','Choose contact name and phone number');
       btn.textContent='▣';
       btn.addEventListener('click',async function(ev){
         ev.preventDefault();ev.stopPropagation();
         try{
-          if(navigator.contacts&&typeof navigator.contacts.select==='function'){
-            const selected=await navigator.contacts.select(['name','tel'],{multiple:false});
-            const item=selected&&selected[0];const tel=item&&item.tel&&item.tel[0];
-            if(tel){input.value=String(tel).replace(/[^0-9+]/g,'');input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));}
+          const picker=(navigator.contacts&&typeof navigator.contacts.select==='function')?navigator.contacts:null;
+          if(!picker){
+            if(typeof showToast==='function')showToast('Contact selection is not supported in this browser. Try Chrome on Android over HTTPS.');
             return;
           }
-          if(typeof showToast==='function')showToast('Contact picker is not supported in this browser. Open this app in a supported mobile browser.');
-        }catch(err){if(err&&err.name!=='AbortError'&&typeof showToast==='function')showToast('Could not open contacts');}
+          const selected=await picker.select(['name','tel'],{multiple:false});
+          const item=selected&&selected[0];if(!item)return;
+          const names=Array.isArray(item.name)?item.name:[];
+          const tels=Array.isArray(item.tel)?item.tel:[];
+          const chosenName=String(names[0]||'').trim();
+          const chosenTel=String(tels[0]||'').trim();
+          if(chosenTel){input.value=chosenTel.replace(/[^0-9+]/g,'');input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));}
+          if(chosenName){
+            let nameInput=null;
+            const id=String(input.id||'');
+            const knownPairs={billCustPhone:'billCustName',skCreditPhone:'skCreditName',skRjPhone:'skRjCustomer',skSandboxPhone:'skSandboxCustomer'};
+            const pairedId=knownPairs[id];
+            if(pairedId)nameInput=document.getElementById(pairedId);
+            if(!nameInput){
+              const scope=input.closest('.form-group, .form-row, .form-grid, form, .modal, .bill-section, label')||input.parentElement.parentElement;
+              if(scope)nameInput=scope.querySelector('input[id*="name" i], input[id*="customer" i], input[id*="party" i]');
+            }
+            if(nameInput&&!nameInput.disabled){nameInput.value=chosenName;nameInput.dispatchEvent(new Event('input',{bubbles:true}));nameInput.dispatchEvent(new Event('change',{bubbles:true}));}
+          }
+          if(typeof saveDraft==='function')saveDraft();
+          if(typeof updateBillPreview==='function')updateBillPreview();
+          if(typeof showToast==='function')showToast(chosenName?'Contact selected':'Phone number selected');
+        }catch(err){if(err&&err.name!=='AbortError'&&typeof showToast==='function')showToast('Could not open contacts. Check browser permission and HTTPS.');}
       });
       wrap.appendChild(btn);
     });
