@@ -1,0 +1,32 @@
+{
+  "id": "./",
+  "name": "SK MOBILES - Glass & Inventory Master",
+  "short_name": "SK MOBILES",
+  "description": "SK MOBILES billing, inventory and service management",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "./icons/sk-mobiles-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/sk-mobiles-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/sk-mobiles-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

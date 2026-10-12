@@ -11,6 +11,12 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
 <title>SK Mobiles - Glass &amp; Inventory Master</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SK MOBILES">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/sk-mobiles-192.png">
 <meta id="skThemeColorMeta" content="#f8fafc" name="theme-color"/>
 <!-- SK MOBILES embedded app icon / home-screen branding -->
 <meta content="SK Mobiles" name="application-name"/>
@@ -1436,6 +1442,17 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 })();
 </script>
 
+
+<script id="sk-pwa-register">
+(function(){
+  if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js', {scope:'./'}).catch(function(err){
+      console.warn('SK MOBILES offline support could not be enabled:', err);
+    });
+  }, {once:true});
+})();
+</script>
 </html>
 
 
