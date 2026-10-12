@@ -3846,6 +3846,63 @@ function viewSavedBill(idx) {
       if (typeof showToast === 'function') showToast('❌ Bill ID not found');
     }
 
+    // Customer touch signature: saved per bill number and rendered in the canonical invoice preview.
+    (function initSKCustomerSignature(){
+      const STORE_KEY = 'sk_customer_signatures_v1';
+      let initialized = false, drawing = false, hasInk = false, savedData = '';
+      const getBillKey = () => String(document.getElementById('pvBillNo')?.textContent || document.getElementById('pvBillNo')?.innerText || 'current').trim() || 'current';
+      const readStore = () => { try { const v = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); return v && typeof v === 'object' ? v : {}; } catch (_) { return {}; } };
+      const applySignature = (data) => {
+        const img = document.getElementById('pvCustomerSignatureImage');
+        if (!img) return;
+        if (data) { img.src = data; img.style.display = 'block'; } else { img.removeAttribute('src'); img.style.display = 'none'; }
+      };
+      const status = (message) => { const el = document.getElementById('skSignatureStatus'); if (el) el.textContent = message; };
+      const setup = () => {
+        const canvas = document.getElementById('skCustomerSignatureCanvas');
+        const clearBtn = document.getElementById('skClearCustomerSignature');
+        const saveBtn = document.getElementById('skSaveCustomerSignature');
+        if (!canvas || !clearBtn || !saveBtn) return;
+        if (initialized) { loadForCurrentBill(); return; }
+        initialized = true;
+        const ctx = canvas.getContext('2d');
+        const resize = () => {
+          const rect = canvas.getBoundingClientRect(); if (!rect.width) return;
+          const ratio = Math.max(1, window.devicePixelRatio || 1);
+          const old = hasInk ? canvas.toDataURL('image/png') : '';
+          canvas.width = Math.round(rect.width * ratio); canvas.height = Math.round(130 * ratio);
+          ctx.setTransform(ratio,0,0,ratio,0,0); ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#172554';
+          if (old) { const image = new Image(); image.onload = () => ctx.drawImage(image,0,0,rect.width,130); image.src = old; }
+        };
+        const point = (event) => { const r = canvas.getBoundingClientRect(); return {x:event.clientX-r.left,y:event.clientY-r.top}; };
+        canvas.addEventListener('pointerdown', e => { e.preventDefault(); canvas.setPointerCapture?.(e.pointerId); const p=point(e); drawing=true; hasInk=true; ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+        canvas.addEventListener('pointermove', e => { if(!drawing) return; e.preventDefault(); const p=point(e); ctx.lineTo(p.x,p.y); ctx.stroke(); });
+        const finish = e => { if(!drawing) return; drawing=false; try { if(e && canvas.hasPointerCapture?.(e.pointerId)) canvas.releasePointerCapture(e.pointerId); } catch(_){} };
+        canvas.addEventListener('pointerup',finish); canvas.addEventListener('pointercancel',finish); canvas.addEventListener('pointerleave',finish);
+        clearBtn.addEventListener('click', () => { ctx.clearRect(0,0,canvas.width,canvas.height); hasInk=false; savedData=''; applySignature(''); status('Signature cleared.'); });
+        saveBtn.addEventListener('click', () => {
+          if (!hasInk) { status('Please sign in the box before saving.'); return; }
+          try {
+            savedData=canvas.toDataURL('image/png'); const store=readStore(); store[getBillKey()]=savedData; localStorage.setItem(STORE_KEY,JSON.stringify(store)); applySignature(savedData); status('Signature saved and added to the invoice.');
+          } catch(err) { console.error('Customer signature save failed:',err); status('Could not save signature on this device.'); }
+        });
+        window.addEventListener('resize', () => { if (!drawing) resize(); });
+        resize(); loadForCurrentBill();
+      };
+      function loadForCurrentBill(){
+        const canvas=document.getElementById('skCustomerSignatureCanvas'); if(!canvas) return;
+        const key=String(document.getElementById('pvBillNo')?.textContent || document.getElementById('pvBillNo')?.innerText || 'current').trim() || 'current';
+        const store=readStore(); savedData=store[key] || ''; applySignature(savedData);
+        const ctx=canvas.getContext('2d'); if(!ctx) return;
+        const rect=canvas.getBoundingClientRect(); if(!rect.width) return;
+        if(savedData){ const img=new Image(); img.onload=()=>{ const ratio=Math.max(1,window.devicePixelRatio||1); ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0,rect.width,130); hasInk=true; }; img.src=savedData; }
+        else { ctx.clearRect(0,0,canvas.width,canvas.height); hasInk=false; }
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
+      // Bill number can change while the billing page stays open; refresh signature when the bill changes.
+      document.addEventListener('click', () => { if (initialized) setTimeout(loadForCurrentBill, 80); }, true);
+    })();
+
     function skCloneLiveInvoiceForOutput() {
       const source = document.getElementById('printableInvoiceCard');
       if (!source) return null;

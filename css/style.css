@@ -9955,3 +9955,16 @@ body:has(#billingModal.active) nav.bottom-nav {
 @media (max-width:600px){
   body{padding-bottom:calc(92px + env(safe-area-inset-bottom, 0px));}
 }
+
+
+/* V5.6.42 — compact signature pad aligned with invoice card styling */
+.sk-signature-panel{box-sizing:border-box;width:100%;max-width:100%;margin:8px 0 10px;padding:9px 10px;border:1px solid var(--card-border,#dbe4ee);border-radius:12px;background:var(--card-bg,#fff);color:var(--text,#1e293b);box-shadow:none;}
+.sk-signature-panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:.78rem;font-weight:700;color:var(--text,#1e293b);}
+.sk-signature-panel-head span{font-size:.68rem;font-weight:400;color:var(--text-muted,#64748b);}
+#skCustomerSignatureCanvas{display:block;width:100%;height:82px;box-sizing:border-box;border:1px dashed var(--card-border,#cbd5e1);border-radius:8px;background:#fff;touch-action:none;cursor:crosshair;}
+.sk-signature-actions{display:flex;gap:6px;margin-top:6px;}
+.sk-signature-actions button{min-height:32px;flex:1;border-radius:9px;padding:6px 10px;font-size:.78rem;font-weight:700;cursor:pointer;box-shadow:none;}
+.sk-signature-clear{background:var(--input-bg,#f8fafc);border:1px solid var(--card-border,#cbd5e1);color:var(--text,#334155);}
+.sk-signature-save{background:var(--primary-gradient,linear-gradient(135deg,#32a99f,#62beb2));border:1px solid var(--primary,#32a99f);color:#fff;}
+.sk-signature-status{margin-top:5px;color:var(--text-muted,#64748b);font-size:.66rem;line-height:1.35;}
+@media(max-width:600px){.sk-signature-panel{padding:8px 9px;border-radius:11px}.sk-signature-panel-head{align-items:center;flex-direction:row;gap:6px}#skCustomerSignatureCanvas{height:76px}.sk-signature-actions button{min-height:30px;padding:5px 8px}}
