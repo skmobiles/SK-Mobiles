@@ -137,6 +137,102 @@
 </div>
 
 <div class="toast" id="toast">Action Success!</div>
+<!-- SK Used Mobile Stock Management (additive module; existing billing/data keys preserved) -->
+<div class="modal-overlay" id="skUsedStockModal" style="z-index:12000;">
+ <div class="modal-sheet" style="max-width:980px;width:min(96vw,980px);max-height:92vh;overflow:auto;background:var(--card-bg);color:var(--text);border:1px solid var(--card-border);border-radius:20px;padding:16px;box-sizing:border-box;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:-16px;z-index:2;background:var(--card-bg);padding:8px 0 12px;border-bottom:1px solid var(--card-border);">
+   <div><div style="font-weight:900;font-size:1.05rem;">♻️ Used Mobile Stock</div><div style="font-size:.78rem;color:var(--text-muted);margin-top:3px;">Purchase · IMEI stock · Pricing · Sales & profit</div></div>
+   <button type="button" class="modal-close-btn" onclick="toggleModal('skUsedStockModal',false)" aria-label="Close Used Mobile Stock">✕</button>
+  </div>
+  <div id="skUsedStatsGrid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0;">
+   <div class="bill-section sk-ui-pad-10" ><small  class="sk-ui-muted-text">Total devices</small><div id="skUsedStatTotal"  class="sk-ui-section-title">0</div></div>
+   <div class="bill-section sk-ui-pad-10" ><small  class="sk-ui-muted-text">In stock</small><div id="skUsedStatStock"  class="sk-ui-section-title">0</div></div>
+   <div class="bill-section sk-ui-pad-10" ><small  class="sk-ui-muted-text">Sold</small><div id="skUsedStatSold"  class="sk-ui-section-title">0</div></div>
+   <div class="bill-section sk-ui-pad-10" ><small  class="sk-ui-muted-text">Sold profit</small><div id="skUsedStatProfit"  class="sk-ui-section-title">₹0</div></div>
+  </div>
+  <form id="skUsedPurchaseForm" class="bill-section" style="padding:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start;" onsubmit="event.preventDefault();skUsedSavePurchase();">
+   <div style="grid-column:1/-1;font-weight:850;">Add / Update Purchase</div>
+   <label class="form-label">Purchase Date<input class="form-input" id="skUsedDate" type="date" required></label>
+   <label class="form-label">Dealer Name<input class="form-input" id="skUsedDealer" required placeholder="Dealer name"></label>
+   <label class="form-label">Mobile Model<input class="form-input" id="skUsedModel" required placeholder="Brand / model"></label>
+   <label class="form-label">RAM<input class="form-input" id="skUsedRam" placeholder="4GB / 8GB"></label>
+   <label class="form-label">Storage<input class="form-input" id="skUsedStorage" placeholder="64GB / 128GB"></label>
+   <label class="form-label">Colour<input class="form-input" id="skUsedColour" placeholder="Colour"></label>
+   <label class="form-label">Full Kit<select class="form-input" id="skUsedKit"><option>Mobile Only</option><option>Full Kit</option><option>Box</option><option>Charger</option></select></label>
+   <label class="form-label">Purchase Price ₹<input class="form-input" id="skUsedCost" type="number" min="0" step="0.01" required></label>
+   <label class="form-label">Dealer Price ₹<input class="form-input" id="skUsedDealerPrice" type="number" min="0" step="0.01"></label>
+   <label class="form-label">Customer Price ₹<input class="form-input" id="skUsedCustomerPrice" type="number" min="0" step="0.01"></label>
+   <label class="form-label" style="grid-column:1/-1;">IMEI / Serial (unique)<input class="form-input" id="skUsedImei" required inputmode="numeric" placeholder="Enter device IMEI"></label>
+   <label class="form-label" style="grid-column:1/-1;">Notes / Issue<input class="form-input" id="skUsedIssue" placeholder="Condition, issue, accessories"></label>
+   <div style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;"><button class="submit-btn" type="submit">Save Purchase</button><button class="submit-btn sk-ui-pill-surface" type="button" onclick="skUsedResetForm()" >Clear</button><button class="submit-btn sk-ui-pill-surface" type="button" onclick="skUsedExportCSV()" >Export CSV</button><button class="submit-btn sk-ui-pill-surface" type="button" onclick="document.getElementById('skUsedImportFile').click()" >Import Excel / CSV</button><input id="skUsedImportFile" type="file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" style="display:none" onchange="window.skUsedImportCSV(this)"></div>
+  </form>
+  <div class="bill-section" style="padding:12px;margin-top:12px;">
+   <div class="sk-used-register-toolbar"><strong>Used Mobile Register</strong><div class="sk-used-register-tools"><input class="form-input" id="skUsedSearch" placeholder="Search model, dealer, IMEI, customer" oninput="skUsedRender()" aria-label="Search used mobile register"><button type="button" class="sk-used-all-clear" onclick="window.skUsedClearAll()">Inventory All Clear</button></div></div>
+   <div style="overflow:auto;margin-top:10px;"><table style="width:100%;border-collapse:collapse;min-width:760px;font-size:.82rem;"><thead><tr><th  class="sk-ui-cell-left">Device / IMEI</th><th  class="sk-ui-cell-left">Dealer</th><th  class="sk-ui-cell-right">Cost</th><th  class="sk-ui-cell-right">Dealer</th><th  class="sk-ui-cell-right">Customer</th><th  class="sk-ui-cell-left">Status / Sale</th><th style="padding:8px;">Actions</th></tr></thead><tbody id="skUsedRows"><tr><td colspan="7" style="padding:14px;text-align:center;color:var(--text-muted);">No used mobile records yet.</td></tr></tbody></table></div>
+  </div>
+  <div style="font-size:.75rem;color:var(--text-muted);margin-top:10px;">Records are stored separately in this browser using localStorage. This module does not automatically import the Excel file or sync this new register to Firebase.</div>
+ </div>
+</div>
+<style>
+#skUsedStockModal #skUsedPurchaseForm{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;align-items:start}#skUsedStockModal #skUsedPurchaseForm>.form-label{font-size:12px;line-height:1.25;min-width:0}#skUsedStockModal #skUsedPurchaseForm .form-input{min-height:40px;padding:9px 11px;font-size:14px;border-radius:10px}#skUsedStockModal #skUsedPurchaseForm>div[style*="grid-column:1/-1"]{grid-column:1/-1!important}#skUsedStockModal #skUsedPurchaseForm>div[style*="display:flex"]{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important}#skUsedStockModal #skUsedPurchaseForm>div[style*="display:flex"] button:first-child{grid-column:1/-1}#skUsedStockModal .modal-sheet{margin:auto;width:min(96vw,980px);max-height:90dvh;overflow:auto;overscroll-behavior:contain}#skUsedHomeCatalog{width:100%;max-width:100%;box-sizing:border-box}#skUsedHomeCatalog .sk-used-catalog-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}#skUsedHomeCatalog .sk-used-product-card{overflow-wrap:anywhere}#skUsedHomeCatalog button{min-height:40px;white-space:nowrap}@media(max-width:640px){#skUsedStatsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:min-content;align-content:start;gap:8px!important;margin:10px 0!important}#skUsedStatsGrid>.bill-section{height:auto!important;min-height:0!important;margin:0!important;padding:8px!important;align-self:start}#skUsedStockModal #skUsedPurchaseForm{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}#skUsedStockModal .modal-sheet{width:100%;max-height:94dvh;border-radius:18px 18px 0 0;padding:12px!important}#skUsedHomeCatalog .sk-used-catalog-grid{grid-template-columns:minmax(0,1fr)!important}}#skUsedStockModal .form-label{display:flex;flex-direction:column;gap:5px;font-size:.76rem;font-weight:750;color:var(--text-muted);min-width:0}#skUsedStockModal .form-input{width:100%;min-width:0;box-sizing:border-box}#skUsedStockModal th{border-bottom:1px solid var(--card-border);color:var(--text-muted)}#skUsedStockModal td{border-bottom:1px solid var(--card-border);padding:8px}#skUsedStockModal .sk-used-action{border:1px solid var(--card-border);background:var(--pill-bg);color:var(--text);border-radius:8px;padding:5px 8px;cursor:pointer}#skUsedStockModal .sk-used-sold{color:var(--danger);font-weight:800} @media(max-width:640px){#skUsedStockModal form{grid-template-columns:repeat(2,minmax(0,1fr))!important}#skUsedStockModal form label[style*="grid-column:1/-1"]{grid-column:1/-1!important}#skUsedStockModal>div{padding:12px!important}}
+
+/* V5.6.63: align Used Mobile catalog modal with the app's standard bill-page surfaces */
+#skUsedStockModal{padding:12px!important;box-sizing:border-box;}
+#skUsedStockModal .modal-sheet{font-family:var(--app-font,inherit);font-size:var(--app-font-size,14px);line-height:1.45;background:var(--page-bg,var(--bg,var(--card-bg)))!important;color:var(--text)!important;border:1px solid var(--card-border)!important;border-radius:22px!important;box-shadow:var(--card-shadow,0 12px 36px rgba(20,40,80,.14));padding:16px!important;}
+#skUsedStockModal .modal-sheet>div:first-child{border:1px solid var(--card-border);border-radius:14px;padding:10px 12px!important;top:0!important;margin-bottom:12px;background:var(--card-bg)!important;}
+#skUsedHomeCatalog{border:1px solid var(--card-border)!important;border-radius:16px!important;background:var(--card-bg)!important;padding:14px!important;margin:12px 0!important;}
+#skUsedHomeCatalog>div:first-child{gap:10px!important;align-items:center!important;margin-bottom:12px!important;}
+#skUsedHomeCatalog>div:first-child strong{font-family:var(--app-font,inherit)!important;font-size:1.05rem!important;font-weight:800!important;color:var(--text)!important;}
+#skUsedHomeCatalog .sk-used-product-card{font-family:var(--app-font,inherit)!important;font-size:.9rem!important;line-height:1.5!important;border:1px solid var(--card-border)!important;border-radius:16px!important;padding:14px!important;background:var(--card-bg)!important;color:var(--text)!important;box-shadow:0 3px 12px rgba(20,45,90,.05)!important;}
+#skUsedHomeCatalog .sk-used-product-card>div:first-child{font-size:1.02rem!important;font-weight:800!important;color:var(--text)!important;}
+#skUsedHomeCatalog input.form-input{border:1px solid var(--card-border)!important;border-radius:10px!important;min-height:40px!important;padding:9px 12px!important;font:inherit!important;background:var(--input-bg,var(--card-bg))!important;color:var(--text)!important;}
+#skUsedHomeCatalog button.submit-btn{border-radius:12px!important;font-family:var(--app-font,inherit)!important;font-size:.9rem!important;font-weight:750!important;}
+@media(max-width:640px){#skUsedStockModal{padding:0!important}#skUsedStockModal .modal-sheet{width:100%!important;max-height:96dvh!important;border-radius:20px 20px 0 0!important;padding:12px!important}#skUsedHomeCatalog{padding:10px!important;border-radius:14px!important}#skUsedHomeCatalog .sk-used-product-card{padding:12px!important}}
+
+/* V5.6.73: unified UI typography and compact interactive Used Mobile inventory cards */
+body{font-family:var(--app-font,inherit);font-size:var(--app-font-size,14px);}
+button,input,select,textarea{font-family:inherit;}
+#skUsedHomeCatalog{font-family:var(--app-font,inherit);font-size:var(--app-font-size,14px);line-height:1.4;}
+#skUsedHomeCatalog .sk-used-catalog-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+#skUsedHomeCatalog .sk-used-catalog-toolbar>strong{font:inherit;font-size:.95rem;font-weight:800;color:var(--text);}
+#skUsedHomeCatalog .sk-used-catalog-toolbar input{display:block;max-width:320px;width:100%;min-height:38px;padding:8px 11px;font:inherit;font-size:.88rem;box-sizing:border-box;outline-offset:2px;}#skUsedHomeCatalog .sk-used-catalog-results{min-width:0;}
+#skUsedHomeCatalog .sk-used-catalog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:8px;}
+#skUsedHomeCatalog .sk-used-product-card{cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease;padding:11px!important;border-radius:14px!important;font:inherit;line-height:1.4;}
+#skUsedHomeCatalog .sk-used-product-card:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+#skUsedHomeCatalog .sk-used-card-model{font-size:.96rem;font-weight:800;line-height:1.3;overflow-wrap:anywhere;}
+#skUsedHomeCatalog .sk-used-card-specs{font-size:.8rem;color:var(--text-muted);margin-top:4px;line-height:1.35;}
+#skUsedHomeCatalog .sk-used-card-imei{font-size:.8rem;margin-top:6px;overflow-wrap:anywhere;}
+#skUsedHomeCatalog .sk-used-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;flex-wrap:wrap;}
+#skUsedHomeCatalog .sk-used-card-price-label{font-size:.72rem;color:var(--text-muted);}
+#skUsedHomeCatalog .sk-used-card-price{font-size:1rem;font-weight:800;}
+#skUsedHomeCatalog .sk-used-card-status{font-size:.72rem;color:var(--success,#16803c);font-weight:750;margin-top:2px;}
+#skUsedHomeCatalog .sk-used-bill-button{width:auto!important;min-height:32px!important;padding:6px 9px!important;border-radius:10px!important;font:inherit!important;font-size:.76rem!important;font-weight:700!important;white-space:nowrap;}
+#skUsedHomeCatalog .sk-used-empty{padding:16px;text-align:center;color:var(--text-muted);font-size:.85rem;}
+.sk-used-detail-overlay{position:fixed;inset:0;z-index:2147483600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(12,24,45,.38);backdrop-filter:blur(5px);box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;}
+.sk-used-detail-sheet{width:min(100%,480px);max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain;background:var(--card-bg);color:var(--text);border:1px solid var(--card-border);border-radius:18px;padding:14px;box-shadow:var(--card-shadow,0 16px 42px rgba(20,40,80,.2));font:inherit;box-sizing:border-box;margin:auto;}
+.sk-used-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--card-border);}
+.sk-used-detail-head strong{display:block;font-size:1rem;font-weight:800;overflow-wrap:anywhere;}
+.sk-used-detail-head small{display:block;color:var(--text-muted);font-size:.78rem;margin-top:3px;}
+.sk-used-detail-close{border:1px solid var(--card-border);border-radius:50%;width:34px;height:34px;background:var(--pill-bg);color:var(--text);font-size:20px;cursor:pointer;flex:0 0 auto;}
+.sk-used-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0;}
+.sk-used-detail-field{min-width:0;padding:9px;border:1px solid var(--card-border);border-radius:10px;background:var(--page-bg,var(--bg,transparent));}
+.sk-used-detail-field small{display:block;font-size:.72rem;color:var(--text-muted);margin-bottom:3px;}
+.sk-used-detail-field strong{display:block;font-size:.86rem;font-weight:700;overflow-wrap:anywhere;}
+.sk-used-detail-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px;}
+.sk-used-detail-actions .submit-btn{width:100%;min-width:0;min-height:34px;padding:7px 6px;font:inherit;font-size:.8rem;white-space:normal;line-height:1.2;}
+.sk-used-detail-actions .sk-used-detail-danger{background:var(--danger-bg,#fff0f0);color:var(--danger,#c62828);border:1px solid var(--danger,#c62828);}
+@media(max-width:640px){#skUsedHomeCatalog .sk-used-catalog-toolbar{align-items:stretch;flex-direction:column;}#skUsedHomeCatalog .sk-used-catalog-toolbar input{max-width:none;}#skUsedHomeCatalog .sk-used-product-card{padding:10px!important;}#skUsedHomeCatalog .sk-used-bill-button{min-height:30px!important;padding:5px 8px!important;font-size:.72rem!important}.sk-used-detail-overlay{padding:10px;align-items:center;justify-content:center;z-index:2147483600}.sk-used-detail-sheet{width:100%;max-width:480px;max-height:calc(100dvh - 20px);overflow:auto;border-radius:16px;padding:11px}.sk-used-detail-grid{gap:6px;margin:9px 0}.sk-used-detail-field{padding:7px}.sk-used-detail-actions{position:sticky;bottom:0;padding:8px 0 0;background:var(--card-bg);}}
+
+/* V5.6.72: simplify Used Mobile Register toolbar and unify it with the app's compact card style */
+#skUsedStockModal .sk-used-register-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;min-width:0;}
+#skUsedStockModal .sk-used-register-toolbar>strong{font-family:var(--app-font,inherit);font-size:.92rem;font-weight:800;color:var(--text);}
+#skUsedStockModal #skUsedSearch{width:min(100%,340px);max-width:100%!important;min-height:40px;padding:9px 12px;font:inherit;font-size:.86rem;border:1px solid var(--card-border);border-radius:10px;background:var(--input-bg,var(--card-bg));color:var(--text);box-sizing:border-box;}
+#skUsedStockModal .bill-section{border-radius:16px;}
+#skUsedStockModal #skUsedRows td{vertical-align:middle;}
+#skUsedStockModal #skUsedRows .sk-used-action{font:inherit;font-size:.78rem;font-weight:700;white-space:nowrap;margin:2px;}
+@media(max-width:640px){#skUsedStockModal .sk-used-register-toolbar{align-items:stretch;flex-direction:column;}#skUsedStockModal #skUsedSearch{width:100%;}#skUsedStockModal .bill-section{padding:10px!important;}}
+</style>
+
 <!-- LEFT DRAWER MENU -->
 <div class="left-drawer" id="leftDrawer" onclick="toggleLeftDrawer(false)">
 <div class="left-drawer-content" onclick="event.stopPropagation()">
@@ -162,6 +258,9 @@
 <div class="drawer-group-title">TECHNICAL &amp; DATA</div>
 <button class="menu-drawer-btn" onclick="toggleModal('toolsOthersNoteModal', true); toggleLeftDrawer(false);">
 <span class="menu-icon-pod menu-icon-repair" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.5 5.5a4 4 0 0 0-5 5l-5.2 5.2a1.8 1.8 0 0 0 2.5 2.5l5.2-5.2a4 4 0 0 0 5-5l-2.2 2.2-2-2z"/><path d="M16 4l4 4"/></svg></span><span class="menu-btn-label">Tools &amp; Others Notes</span><span class="menu-arrow">›</span>
+</button>
+<button class="menu-drawer-btn" onclick="skUsedOpen(); skUsedShowManagement(); toggleLeftDrawer(false);">
+<span class="menu-icon-pod menu-icon-data" aria-hidden="true">📱</span><span class="menu-btn-label">Used Mobile Stock Management</span><span class="menu-arrow">›</span>
 </button>
 <button class="menu-drawer-btn" onclick="toggleModal('settingsModal', true); toggleLeftDrawer(false);">
 <span class="menu-icon-pod menu-icon-data" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15.5A2.5 2.5 0 0 0 16.5 21H7.5A2.5 2.5 0 0 1 5 18.5z"/><path d="M8 7h8M8 11h6"/></svg></span><span class="menu-btn-label">App Data Folder</span><span class="menu-arrow">›</span>
@@ -392,8 +491,8 @@
   </div>
 </section>
 
-<div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">🏪 SHOP PROFILE &amp; ADDRESS</div>
-<div style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
+<div  class="sk-ui-field-label">🏪 SHOP PROFILE &amp; ADDRESS</div>
+<div  class="sk-ui-model-card">
 <div class="form-group">
 <label class="form-label">Shop Name</label> <input class="form-input" id="cfgShopName" onchange="saveShopCustomConfig()" type="text" value="SK MOBILES"/>
 </div>
@@ -407,16 +506,16 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 </div>
 <!-- TERMS & CONDITIONS EDITOR WITH INDEPENDENT INTERNAL SCROLL FIX -->
-<div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">📜 TERMS &amp; CONDITIONS EDITOR</div>
-<div style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
+<div  class="sk-ui-field-label">📜 TERMS &amp; CONDITIONS EDITOR</div>
+<div  class="sk-ui-model-card">
 <textarea class="form-input" id="cfgTermsConditions" onchange="saveCustomTerms()" onwheel="event.stopPropagation()" rows="4" style="font-size:0.72rem; line-height:1.4; max-height:120px; overflow-y:auto;">1. Sold items are not returnable.
 2. 7 Days Testing Warranty only.
 3. No warranty for physical or liquid damage.
 4. Customer has checked the IMEI and device condition before purchase.</textarea>
 <button class="submit-btn" onclick="resetDefaultTerms()" style="margin-top:8px; padding:7px; font-size:0.74rem;" type="button">Reset Default Terms</button>
 </div>
-<div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">SHOP BRAND LOGO</div>
-<div style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
+<div  class="sk-ui-field-label">SHOP BRAND LOGO</div>
+<div  class="sk-ui-model-card">
 <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
 <img alt="Preview" id="settingsLogoPreview" onclick="document.getElementById('logoFileInput').click()" src="Logo.png" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:1px solid var(--card-border);background:#fff;"/>
 <div style="flex:1;">
@@ -430,8 +529,8 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <button class="submit-btn" onclick="resetShopLogo()" style="flex:1; padding:8px; font-size:0.76rem; background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text);">↺ Reset Default</button>
 </div>
 </div>
-<div class="sk-backup-ui-heading" style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">💾 DATA BACKUP &amp; RESTORE</div>
-<div class="sk-backup-ui-card" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
+<div class="sk-backup-ui-heading sk-ui-field-label" >💾 DATA BACKUP &amp; RESTORE</div>
+<div class="sk-backup-ui-card sk-ui-model-card" >
 <div class="sk-backup-ui-actions" style="display:flex; gap:14px;">
 <button class="submit-btn" onclick="exportAppDataBackup()" style="flex:1; padding:8px; font-size:0.75rem;">⬇️ Backup (JSON)</button>
 <button class="submit-btn" onclick="document.getElementById('importBackupInput').click()" style="flex:1; padding:8px; font-size:0.75rem; background:var(--pill-bg); border:1px solid var(--card-border); color:var(--text);">⬆️ Restore</button>
@@ -439,8 +538,8 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <input accept=".json" id="importBackupInput" onchange="importAppDataBackup(this)" style="display:none;" type="file"/>
 </div>
 <!-- CLOUD BACKUP: Firebase Firestore app-data backup. Keep this block unchanged unless cloud-backup behavior is intentionally modified. -->
-<div id="skCloudBackupSection" class="sk-backup-ui-heading" style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">☁️ CLOUD BACKUP</div>
-<div id="skCloudBackupBox" class="sk-backup-ui-card sk-cloud-backup-card" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
+<div id="skCloudBackupSection" class="sk-backup-ui-heading sk-ui-field-label" >☁️ CLOUD BACKUP</div>
+<div id="skCloudBackupBox" class="sk-backup-ui-card sk-cloud-backup-card sk-ui-model-card" >
 <div class="sk-backup-ui-description" style="font-size:0.70rem;color:var(--text-muted);line-height:1.45;margin-bottom:9px;">Firebase Cloud Backup saves the app's local data to the SK-MOBILES cloud. Auto Sync is enabled after Admin/Manager login; changes are uploaded after a short quiet period.</div>
 <div id="skRealtimeSyncStatus" class="sk-backup-ui-status" style="font-size:0.70rem;font-weight:900;color:var(--text);background:var(--pill-bg);border:1px solid var(--card-border);border-radius:10px;padding:8px;margin-bottom:8px;">⏳ Realtime Auto Sync: Connecting...</div>
 <div id="skCloudBackupStatus" class="sk-backup-ui-status" style="font-size:0.70rem;font-weight:800;color:var(--text);background:var(--pill-bg);border:1px solid var(--card-border);border-radius:10px;padding:8px;margin-bottom:8px;">☁️ Cloud Backup: Ready</div>
@@ -451,8 +550,8 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <div style="font-size:0.64rem;color:var(--text-muted);margin-top:7px;line-height:1.4;">Cloud Backup is separate from the existing JSON backup and App Data Folder backup. Do not remove this section.</div>
 </div>
 <!-- APP DATA FOLDER: Admin only. Browser writes a user-selected folder with section-wise JSON files. -->
-<div id="skAppDataFolderSection" class="sk-backup-ui-heading" style="font-size:0.76rem; color:var(--text-muted); margin-bottom:8px; font-weight:700;">📁 APP DATA FOLDER</div>
-<div id="skAppDataFolderBox" class="sk-backup-ui-card sk-app-folder-card" style="background:var(--model-bg); border:1px solid var(--card-border); border-radius:18px; padding:12px; margin-bottom:14px;">
+<div id="skAppDataFolderSection" class="sk-backup-ui-heading sk-ui-field-label" >📁 APP DATA FOLDER</div>
+<div id="skAppDataFolderBox" class="sk-backup-ui-card sk-app-folder-card sk-ui-model-card" >
 <div style="font-size:0.70rem;color:var(--text-muted);line-height:1.45;margin-bottom:9px;">All Local Storage data can be copied into <b>SK Mobiles</b> with section-wise sub-folders. This gives you a physical backup folder you can copy to another device/storage.</div>
 <div id="skAppDataFolderPath" style="font-size:0.70rem;font-weight:800;color:var(--text);background:var(--pill-bg);border:1px solid var(--card-border);border-radius:10px;padding:8px;margin-bottom:8px;word-break:break-word;">Folder not connected</div>
 <div style="display:flex;gap:7px;">
@@ -767,31 +866,31 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <th style="padding:7px;text-align:left;">Description</th>
 <th style="padding:7px;text-align:right;">Details</th>
 </tr>
-<tr style="border-bottom:1px solid #e2e8f0;">
-<td style="padding:7px;color:#475569;">Device Model</td>
+<tr  class="sk-ui-row-divider">
+<td  class="sk-ui-muted-cell">Device Model</td>
 <td id="pvDevice" style="padding:7px;text-align:right;font-weight:800;color:#0f172a;">---</td>
 </tr>
-<tr style="border-bottom:1px solid #e2e8f0;">
-<td style="padding:7px;color:#475569;">RAM / Storage / Colour</td>
+<tr  class="sk-ui-row-divider">
+<td  class="sk-ui-muted-cell">RAM / Storage / Colour</td>
 <td id="pvStorage" style="padding:7px;text-align:right;">---</td>
 </tr>
-<tr style="border-bottom:1px solid #e2e8f0;">
-<td style="padding:7px;color:#475569;">IMEI 1</td>
+<tr  class="sk-ui-row-divider">
+<td  class="sk-ui-muted-cell">IMEI 1</td>
 <td id="pvImei1" style="padding:7px;text-align:right;font-family:monospace;font-weight:700;">---</td>
 </tr>
-<tr id="pvImei2Row" style="border-bottom:1px solid #e2e8f0;">
-<td style="padding:7px;color:#475569;">IMEI 2</td>
+<tr id="pvImei2Row"  class="sk-ui-row-divider">
+<td  class="sk-ui-muted-cell">IMEI 2</td>
 <td id="pvImei2" style="padding:7px;text-align:right;font-family:monospace;">---</td>
 </tr>
-<tr style="border-bottom:1px solid #e2e8f0;">
-<td style="padding:7px;color:#475569;">Package</td>
+<tr  class="sk-ui-row-divider">
+<td  class="sk-ui-muted-cell">Package</td>
 <td id="pvPackage" style="padding:7px;text-align:right;font-weight:600;">Full Kit</td>
-</tr><tr style="border-bottom:1px solid #e2e8f0;">
-<td style="padding:7px;color:#475569;">Mobile Type</td>
+</tr><tr  class="sk-ui-row-divider">
+<td  class="sk-ui-muted-cell">Mobile Type</td>
 <td id="pvMobileType" style="padding:7px;text-align:right;font-weight:800;">New Mobile</td>
 </tr>
-<tr style="border-bottom:1px solid #e2e8f0;">
-<td style="padding:7px;color:#475569;">Payment Mode</td>
+<tr  class="sk-ui-row-divider">
+<td  class="sk-ui-muted-cell">Payment Mode</td>
 <td id="pvPayMode" style="padding:7px;text-align:right;font-weight:800;"><span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:8px;">Cash</span></td>
 </tr>
 <tr id="pvRowSalePrice" style="border-bottom:1px solid #e2e8f0;background:#f8fafc;">
@@ -799,7 +898,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 <td id="pvTotalPrice" style="padding:7px;text-align:right;font-weight:900;">₹ 0</td>
 </tr>
 <tr id="pvRowAdvance" style="border-bottom:1px solid #e2e8f0;display:none;">
-<td style="padding:7px;color:#475569;">Down Payment</td>
+<td  class="sk-ui-muted-cell">Down Payment</td>
 <td id="pvAdvance" style="padding:7px;text-align:right;color:#16a34a;font-weight:700;">₹ 0</td>
 </tr>
 <tr id="pvRowBalance" style="border-bottom:2px solid #0f172a;display:none;">
@@ -1338,3 +1437,28 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </script>
 
 </html>
+
+
+/* V5.6.79 — Used Mobile inventory clear action and mobile detail dialog sizing */
+#skUsedStockModal .sk-used-register-tools{display:flex;align-items:center;gap:8px;min-width:0;flex:1;justify-content:flex-end;}
+#skUsedStockModal .sk-used-all-clear{min-height:40px;padding:8px 12px;border:1px solid var(--danger,#c62828);border-radius:10px;background:var(--danger-bg,#fff0f0);color:var(--danger,#c62828);font:inherit;font-size:.82rem;font-weight:800;white-space:nowrap;cursor:pointer;}
+.sk-used-detail-overlay{padding:12px!important;}
+.sk-used-detail-sheet{width:min(100%,420px)!important;max-width:420px!important;font-family:var(--app-font,inherit)!important;font-size:var(--app-font-size,14px)!important;line-height:1.4!important;}
+.sk-used-detail-field{border:1px solid var(--card-border)!important;border-radius:10px!important;min-width:0!important;}
+.sk-used-detail-field small{font-size:.76rem!important;line-height:1.25!important;}
+.sk-used-detail-field strong{font-size:.9rem!important;line-height:1.3!important;overflow-wrap:anywhere!important;word-break:break-word!important;}
+.sk-used-detail-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;}
+.sk-used-detail-actions .submit-btn{min-height:38px!important;border-radius:10px!important;font-size:.82rem!important;padding:7px 4px!important;overflow-wrap:anywhere;}
+@media(max-width:640px){
+ #skUsedStockModal .sk-used-register-toolbar{align-items:stretch!important;}
+ #skUsedStockModal .sk-used-register-tools{display:grid;grid-template-columns:minmax(0,1fr);width:100%;}
+ #skUsedStockModal .sk-used-all-clear{width:100%;min-height:40px;}
+ .sk-used-detail-overlay{padding:12px!important;align-items:center!important;}
+ .sk-used-detail-sheet{width:100%!important;max-width:430px!important;max-height:calc(100dvh - 24px)!important;padding:12px!important;border-radius:16px!important;}
+ .sk-used-detail-head strong{font-size:1rem!important;line-height:1.3!important;}
+ .sk-used-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin:10px 0!important;}
+ .sk-used-detail-field{padding:8px!important;}
+ .sk-used-detail-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;}
+ .sk-used-detail-actions .submit-btn{min-height:40px!important;font-size:.78rem!important;white-space:normal!important;}
+}
+@media(max-width:360px){.sk-used-detail-grid{grid-template-columns:minmax(0,1fr)!important}.sk-used-detail-actions{grid-template-columns:minmax(0,1fr)!important}.sk-used-detail-actions .submit-btn{width:100%!important;}}
