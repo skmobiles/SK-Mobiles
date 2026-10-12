@@ -1,0 +1,35 @@
+SK MOBILES V5.6.33 — Static Audit Report
+
+Scope
+- Source: supplied SK-Mobiles-V5.6.32-Invoice-Preview-PDF-Print-Consistency-Fix.zip
+- Preserved application JavaScript and Firebase business logic; changed only the unified responsive CSS override, HTML metadata/cache-busting references, and this report.
+
+Changes made
+1. Consolidated the V5.6.27–V5.6.30 appended CSS patch blocks into one scoped V5.6.33 override block. Removed repeated competing declarations from those appended blocks.
+2. Corrected bottom navigation stacking: it remains above ordinary page content, but an active modal is layered above it so modal fields/actions are not covered by the navigation bar. Navigation remains available after closing the modal.
+3. Kept Credit Action modal as the only scroll container for its fields and added safe-area-aware bottom padding.
+4. Kept Credit Ledger page as its scroll owner; the list and sheet expand naturally instead of creating nested scrolling.
+5. Kept Sales Bill width constraints scoped to the Billing modal to reduce side gaps without changing field order or logic.
+6. Removed the duplicate `lang` attribute on the root HTML element.
+7. Updated CSS/JS query-string versions to V5.6.33 to avoid stale browser cache.
+
+Static checks performed
+- `node --check js/app.js`: PASS
+- `node --check js/firebase-sync.js`: PASS
+- CSS parser (tinycss2) top-level syntax errors: 0
+- Duplicate HTML IDs: 0
+- Duplicate root `lang` attribute: fixed; one `lang="en-GB"` remains
+- ZIP integrity: checked after packaging
+
+Important limitations
+- This is a static source audit, not a live functional test. Firebase authentication, Firestore reads/writes, Billing save/print/PDF/WhatsApp, repair workflows, EMI/credit calculations, backup/restore, and navigation taps were not exercised in a browser.
+- `tools/verify_stable_core.py` reports the stable-core lock verification as FAILED because index.html, app.js, firebase-sync.js, and style.css differ from the locked baseline. This check was not bypassed or rewritten. The application changes already present in the supplied ZIP are therefore not certified as matching the stable-core lock.
+- No functions were deleted merely because they appeared unused: static search alone cannot safely establish that inline HTML handlers, dynamically invoked functions, or Firebase callbacks are dead code.
+
+Recommended validation before production
+1. Test login and Admin/Manager/Worker permission flows.
+2. Create/save/print/download/share a bill; compare Preview, PDF, Print, and WhatsApp output.
+3. Test Credit creation, payment, due date entry, EMI, and outstanding calculations.
+4. Test Credit Ledger scrolling and navigation on a mobile viewport.
+5. Test repair create/edit/deliver/delete/recycle-bin flows.
+6. Test backup/restore and Firebase sync on a staging deployment.

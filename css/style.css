@@ -6483,6 +6483,9 @@ html[data-ui-card-radius] :is(.glass-card,.bill-section,.section-card,.stat-card
   color:#334155;
 }
 
+/* Export/print clones already contain one explicit type badge. Disable the live-preview pseudo badge there to prevent duplicates. */
+.sk-invoice-export-root #invoiceMainSheet > div:has(> div > #pvCustName)::before{content:none!important;display:none!important;}
+
 /* Keep the invoice's existing table/content alignment intact after the badge is added. */
 #billingModal #printableInvoiceCard{
   min-width:0 !important;
@@ -6801,7 +6804,7 @@ html[data-ui-mode="dark"][data-ui-surface="offwhite"] body,html[data-ui-mode="da
    Single canonical implementation. Five equal slots.
    Existing IDs and onclick handlers remain untouched.
    ============================================================ */
-.bottom-nav{position:fixed !important;bottom:12px !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:calc(100% - 24px) !important;max-width:440px !important;height:64px !important;display:grid !important;grid-template-columns:repeat(5,minmax(0,1fr)) !important;align-items:center !important;justify-items:stretch !important;gap:0 !important;padding:0 4px !important;margin:0 !important;box-sizing:border-box !important;background:rgba(255,255,255,.94) !important;backdrop-filter:blur(18px) !important;-webkit-backdrop-filter:blur(18px) !important;border-radius:26px !important;border:1px solid rgba(226,232,240,.85) !important;box-shadow:0 12px 30px rgba(0,0,0,.08) !important;z-index:9999 !important;overflow:visible !important;}
+.bottom-nav{position:fixed !important;bottom:calc(10px + env(safe-area-inset-bottom, 0px)) !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:calc(100% - 24px) !important;max-width:440px !important;height:64px !important;display:grid !important;grid-template-columns:repeat(5,minmax(0,1fr)) !important;align-items:center !important;justify-items:stretch !important;gap:0 !important;padding:0 4px !important;margin:0 !important;box-sizing:border-box !important;background:rgba(255,255,255,.94) !important;backdrop-filter:blur(18px) !important;-webkit-backdrop-filter:blur(18px) !important;border-radius:26px !important;border:1px solid rgba(226,232,240,.85) !important;box-shadow:0 12px 30px rgba(0,0,0,.08) !important;z-index:9999 !important;overflow:visible !important;}
 .bottom-nav > .nav-item{grid-row:1 !important;width:100% !important;max-width:100% !important;min-width:0 !important;height:64px !important;min-height:64px !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;gap:3px !important;margin:0 !important;padding:4px 0 !important;box-sizing:border-box !important;position:relative !important;appearance:none !important;-webkit-appearance:none !important;background:transparent !important;border:none !important;border-radius:0 !important;box-shadow:none !important;outline:none !important;color:#64748b !important;cursor:pointer !important;text-align:center !important;-webkit-tap-highlight-color:transparent !important;transition:transform .16s ease,color .16s ease !important;}
 .bottom-nav > .nav-item:not(#navHome){grid-column:auto !important;}
 .bottom-nav > .nav-item:not(#navHome):hover,.bottom-nav > .nav-item:not(#navHome):focus,.bottom-nav > .nav-item:not(#navHome):focus-visible,.bottom-nav > .nav-item:not(#navHome):active{background:transparent !important;border:none !important;box-shadow:none !important;outline:none !important;}
@@ -6815,7 +6818,7 @@ html[data-ui-mode="dark"][data-ui-surface="offwhite"] body,html[data-ui-mode="da
 .bottom-nav > #navHome:active::before{transform:translate(-50%,-50%) translateY(-16px) scale(.92) !important;}
 .bottom-nav > #navHome span{display:none !important;}
 .bottom-nav > #navHome svg{position:relative !important;z-index:2 !important;width:22px !important;height:22px !important;flex:0 0 22px !important;margin:0 !important;transform:translateY(-16px) !important;color:#fff !important;stroke-width:2.25 !important;filter:none !important;pointer-events:none !important;}
-@media(max-width:600px){.bottom-nav{width:calc(100% - 24px) !important;max-width:440px !important;height:64px !important;bottom:12px !important;padding:0 4px !important;}}
+@media(max-width:600px){.bottom-nav{width:calc(100% - 24px) !important;max-width:440px !important;height:64px !important;bottom:calc(10px + env(safe-area-inset-bottom, 0px)) !important;padding:0 4px !important;}}
 @media(prefers-reduced-motion:reduce){.bottom-nav,.bottom-nav > .nav-item,.bottom-nav > .nav-item::before,.bottom-nav > .nav-item svg{transition:none !important;}}
 
 /* ============================================================
@@ -9720,7 +9723,32 @@ form[id$="MobileBillingForm"] + .bill-action-grid {
   }
 }
 
-/* V5.6.27 — Single source of truth: Credit Action modal + bottom navigation. */
+/* SK MOBILES V5.6.33 — Unified responsive layout overrides.
+   One scoped source of truth for Credit, Credit Ledger, Billing and bottom navigation. */
+:root {
+  --sk-layout-gutter: 12px;
+  --sk-layout-radius: 18px;
+  --sk-layout-border: rgba(120, 150, 190, .28);
+}
+
+/* Bottom navigation stays available on normal pages, but never covers an active modal. */
+html body nav.bottom-nav {
+  position: fixed !important;
+  z-index: 1000 !important;
+  bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+  max-width: calc(100vw - 16px) !important;
+  box-sizing: border-box !important;
+}
+html body nav.bottom-nav > button.nav-item {
+  min-width: 0 !important;
+}
+body:has(#skCreditActionModal.active) nav.bottom-nav,
+body:has(#skCreditLedgerPage.active) nav.bottom-nav,
+body:has(#billingModal.active) nav.bottom-nav {
+  z-index: 900 !important;
+}
+
+/* Credit action sheet: modal owns its overlay and the sheet owns its scroll. */
 #skCreditActionModal {
   position: fixed !important;
   inset: 0 !important;
@@ -9730,7 +9758,7 @@ form[id$="MobileBillingForm"] + .bill-action-grid {
   justify-content: center !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
-  padding: max(10px, env(safe-area-inset-top)) 8px max(10px, env(safe-area-inset-bottom)) !important;
+  padding: max(10px, env(safe-area-inset-top, 0px)) 8px max(10px, env(safe-area-inset-bottom, 0px)) !important;
   background: rgba(15, 23, 42, .42) !important;
   -webkit-backdrop-filter: blur(8px) !important;
   backdrop-filter: blur(8px) !important;
@@ -9738,20 +9766,23 @@ form[id$="MobileBillingForm"] + .bill-action-grid {
 #skCreditActionModal.active { display: flex !important; }
 #skCreditActionModal > .modal-sheet {
   position: relative !important;
+  flex: 0 1 560px !important;
   width: min(100%, 560px) !important;
   max-width: 560px !important;
-  max-height: calc(100vh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-  max-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  max-height: calc(100vh - 20px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+  max-height: calc(100dvh - 20px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
   margin: 0 auto !important;
-  padding: 12px 12px calc(160px + env(safe-area-inset-bottom, 0px)) !important;
+  padding: 12px 12px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   overscroll-behavior: contain !important;
   -webkit-overflow-scrolling: touch !important;
   box-sizing: border-box !important;
-  border: 1px solid rgba(110, 135, 180, .22) !important;
+  border: 1px solid #c2e1df !important;
   border-radius: 22px !important;
-  background: var(--card-bg, #f4f7ff) !important;
+  background: #eaf5f4 !important;
+  color: #172238 !important;
+  box-shadow: 0 16px 42px rgba(23, 88, 89, .14) !important;
 }
 #skCreditActionModal > .modal-sheet > .modal-title {
   position: sticky !important;
@@ -9764,17 +9795,17 @@ form[id$="MobileBillingForm"] + .bill-action-grid {
   min-height: 54px !important;
   margin: 0 0 14px !important;
   padding: 7px 9px 7px 12px !important;
-  border: 1px solid rgba(120, 140, 180, .20) !important;
+  border: 1px solid #b9dcda !important;
   border-radius: 16px !important;
-  background: var(--card-bg, #fff) !important;
-  color: var(--text-color, #1f2937) !important;
+  background: #fff !important;
+  color: #172238 !important;
   box-shadow: 0 4px 14px rgba(25, 45, 80, .06) !important;
   line-height: 1.3 !important;
 }
 #skCreditActionModal > .modal-sheet > .modal-title > span {
   display: block !important;
   min-width: 0 !important;
-  color: inherit !important;
+  color: #172238 !important;
   font-size: 1rem !important;
   font-weight: 800 !important;
   line-height: 1.3 !important;
@@ -9785,138 +9816,9 @@ form[id$="MobileBillingForm"] + .bill-action-grid {
   height: 42px !important;
   min-width: 42px !important;
   margin: 0 !important;
-}
-#skCreditActionModal > .modal-sheet > .form-group { margin-bottom: 10px !important; }
-#skCreditActionModal > .modal-sheet > .submit-btn {
-  position: static !important;
-  display: block !important;
-  width: 100% !important;
-  min-height: 48px !important;
-  margin: 12px 0 8px !important;
-  z-index: auto !important;
-}
-/* Navigation intentionally sits above the modal overlay, so it remains usable/visible. */
-html body nav.bottom-nav {
-  display: grid !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  position: fixed !important;
-  left: 50% !important;
-  right: auto !important;
-  bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
-  transform: translateX(-50%) !important;
-  z-index: 2147483647 !important;
-}
-html body nav.bottom-nav > button.nav-item {
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-@media (max-width: 600px) {
-  #skCreditActionModal { padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) !important; }
-  #skCreditActionModal > .modal-sheet {
-    width: 100% !important;
-    max-width: 100% !important;
-    max-height: calc(100vh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-    max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-    padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)) !important;
-    border-radius: 22px !important;
-  }
-}
-
-/* V5.6.28 — Sales Bill section width and side-gap refinement (single scoped block) */
-#billingModal.modal-overlay,
-#billingModal.modal-overlay.active {
-  box-sizing: border-box !important;
-  padding: 6px !important;
-}
-#billingModal .modal-sheet.billing-modern {
-  box-sizing: border-box !important;
-  width: 100% !important;
-  max-width: 720px !important;
-  margin-inline: auto !important;
-  padding: 12px !important;
-}
-#billingModal .billing-modern #billNewView,
-#billingModal .billing-modern #billHistoryView,
-#billingModal .billing-modern form,
-#billingModal .billing-modern .bill-section {
-  box-sizing: border-box !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-}
-#billingModal .billing-modern .bill-section {
-  padding: 10px !important;
-}
-@media (max-width: 600px) {
-  #billingModal.modal-overlay,
-  #billingModal.modal-overlay.active {
-    padding: 4px !important;
-  }
-  #billingModal .modal-sheet.billing-modern {
-    width: 100% !important;
-    max-width: none !important;
-    padding: 10px !important;
-    border-radius: 20px !important;
-  }
-  #billingModal .billing-modern .bill-section {
-    padding: 9px !important;
-  }
-}
-
-/* V5.6.29 — Customer Credit Ledger mobile page scrolling root fix.
-   Keep one scroll owner (the full-screen ledger overlay), not a nested list. */
-#skCreditLedgerPage.active{
-  position:fixed !important;
-  inset:0 !important;
-  height:100vh !important;
-  height:100dvh !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch !important;
-  touch-action:pan-y !important;
-  overscroll-behavior-y:contain !important;
-  align-items:flex-start !important;
-  justify-content:flex-start !important;
-}
-#skCreditLedgerPage.active > .modal-sheet{
-  flex:0 0 auto !important;
-  height:auto !important;
-  min-height:0 !important;
-  max-height:none !important;
-  overflow:visible !important;
-  padding-bottom:calc(104px + env(safe-area-inset-bottom, 0px)) !important;
-  touch-action:pan-y !important;
-}
-#skCreditLedgerPage .skcp-list{
-  max-height:none !important;
-  height:auto !important;
-  overflow:visible !important;
-  -webkit-overflow-scrolling:auto !important;
-  touch-action:pan-y !important;
-}
-
-/* V5.6.30 — Credit Action form visual alignment with Sales Bill mint/teal UI.
-   Scoped to the Credit Action modal; layout, field IDs and business logic stay unchanged. */
-#skCreditActionModal > .modal-sheet {
-  background: #eaf5f4 !important;
-  border: 1px solid #c2e1df !important;
-  border-radius: 22px !important;
-  box-shadow: 0 16px 42px rgba(23, 88, 89, .14) !important;
-  color: #172238 !important;
-}
-#skCreditActionModal > .modal-sheet > .modal-title {
-  background: #ffffff !important;
-  border: 1px solid #b9dcda !important;
-  border-radius: 18px !important;
-  box-shadow: 0 5px 14px rgba(24, 94, 91, .07) !important;
-  color: #172238 !important;
-}
-#skCreditActionModal > .modal-sheet > .modal-title > span {
-  color: #172238 !important;
-  font-weight: 800 !important;
+  background: #fff0ef !important;
+  border: 1px solid #e7b7b4 !important;
+  color: #e9473f !important;
 }
 #skCreditActionModal > .modal-sheet .form-label {
   color: #52677d !important;
@@ -9925,7 +9827,7 @@ html body nav.bottom-nav > button.nav-item {
 #skCreditActionModal > .modal-sheet .form-input,
 #skCreditActionModal > .modal-sheet .form-select {
   min-height: 43px !important;
-  background: #ffffff !important;
+  background: #fff !important;
   border: 1px solid #c1dedd !important;
   border-radius: 12px !important;
   color: #172238 !important;
@@ -9945,16 +9847,111 @@ html body nav.bottom-nav > button.nav-item {
   background: #edf6f5 !important;
   border-color: #c6e0de !important;
 }
+#skCreditActionModal > .modal-sheet > .form-group { margin-bottom: 10px !important; }
 #skCreditActionModal > .modal-sheet > .submit-btn {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  min-height: 48px !important;
+  margin: 12px 0 8px !important;
+  z-index: auto !important;
   background: linear-gradient(105deg, #15988e, #62bcb3) !important;
   border: 1px solid rgba(13, 132, 124, .16) !important;
   border-radius: 16px !important;
-  color: #ffffff !important;
+  color: #fff !important;
   font-weight: 800 !important;
   box-shadow: 0 7px 16px rgba(21, 152, 142, .18) !important;
 }
-#skCreditActionModal > .modal-sheet > .modal-title .modal-close-btn {
-  background: #fff0ef !important;
-  border: 1px solid #e7b7b4 !important;
-  color: #e9473f !important;
+
+/* Credit ledger: the page is the only scroll container; list and sheet expand naturally. */
+#skCreditLedgerPage.active {
+  position: fixed !important;
+  inset: 0 !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+  overscroll-behavior-y: contain !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+}
+#skCreditLedgerPage.active > .modal-sheet {
+  flex: 0 0 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-bottom: 12px !important;
+  touch-action: pan-y !important;
+}
+#skCreditLedgerPage .skcp-list {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  -webkit-overflow-scrolling: auto !important;
+  touch-action: pan-y !important;
+}
+
+/* Billing modal: consistent horizontal fit without changing field order or behavior. */
+#billingModal.modal-overlay,
+#billingModal.modal-overlay.active {
+  box-sizing: border-box !important;
+  padding: 6px !important;
+}
+#billingModal .modal-sheet.billing-modern {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 720px !important;
+  min-width: 0 !important;
+  margin-inline: auto !important;
+  padding: 12px !important;
+}
+#billingModal .billing-modern #billNewView,
+#billingModal .billing-modern #billHistoryView,
+#billingModal .billing-modern form,
+#billingModal .billing-modern .bill-section {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+#billingModal .billing-modern .bill-section {
+  padding: 10px !important;
+  border-radius: var(--sk-layout-radius, 18px);
+}
+
+@media (max-width: 600px) {
+  #skCreditActionModal { padding: max(8px, env(safe-area-inset-top, 0px)) 8px max(8px, env(safe-area-inset-bottom, 0px)) !important; }
+  #skCreditActionModal > .modal-sheet {
+    flex-basis: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    max-height: calc(100dvh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    padding: 10px 10px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 20px !important;
+  }
+  #billingModal.modal-overlay,
+  #billingModal.modal-overlay.active { padding: 4px !important; }
+  #billingModal .modal-sheet.billing-modern {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 10px !important;
+    border-radius: 20px !important;
+  }
+  #billingModal .billing-modern .bill-section { padding: 9px !important; }
+}
+
+
+/* V5.6.34: keep floating navigation fully inside the viewport safe area. */
+.bottom-nav{
+  bottom:calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  transform:translate3d(-50%,0,0) !important;
+  max-height:64px !important;
+}
+@media (max-width:600px){
+  body{padding-bottom:calc(92px + env(safe-area-inset-bottom, 0px));}
 }

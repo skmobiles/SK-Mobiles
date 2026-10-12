@@ -1,0 +1,15 @@
+SK MOBILES V5.6.35 — Focused Regression Fix
+===========================================
+Base: V5.6.34 Navigation Bottom and Bill Output Fix
+
+Changes:
+- Added explicit NEW MOBILE / USED MOBILE / KEYPAD MOBILE badge to exported invoice clone.
+- Preserved canonical invoice ID on export root so invoice-scoped styles apply to PDF output.
+- Changed PDF download path to generate a non-empty Blob and trigger an explicit browser download.
+- Avoided placing the render holder far off-screen; configured a stable 750px render width.
+- Did not remove any existing app functions or alter billing calculations, Firebase sync, or business data structures.
+
+Static checks:
+- JavaScript syntax: PASS (node --check).
+- ZIP integrity: PASS.
+- Live PDF rendering/download and mobile browser testing: NOT RUN.

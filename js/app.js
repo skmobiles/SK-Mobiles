@@ -3859,6 +3859,14 @@ function viewSavedBill(idx) {
       const emi = previewClone.querySelector('#pvEmiScheduleSection');
       if (!main) return null;
 
+      // PDF/export uses the highlighted badge; hide the legacy "Mobile Type"
+      // table row to prevent the type appearing twice in exported documents.
+      const legacyMobileType = main.querySelector('#pvMobileType');
+      if (legacyMobileType) {
+        const row = legacyMobileType.closest('tr');
+        if (row) row.style.display = 'none';
+      }
+
       const root = document.createElement('div');
       root.className = 'sk-invoice-export-root';
       // Keep the invoice's canonical ID on the export root so all existing
@@ -3929,9 +3937,82 @@ function viewSavedBill(idx) {
         });
       }
 
+      // Recreate the same mobile-type badge used by the live preview and
+      // direct print path. The source preview hides the legacy table row with
+      // CSS, so without this explicit badge the exported PDF loses NEW/USED/KEYPAD.
+      const typeBadge = document.createElement('div');
+      typeBadge.className = 'sk-print-mobile-type-badge';
+      typeBadge.dataset.type = root.dataset.mobileType;
+      typeBadge.textContent = root.dataset.mobileType === 'used'
+        ? 'USED MOBILE'
+        : root.dataset.mobileType === 'keypad'
+          ? 'KEYPAD MOBILE'
+          : 'NEW MOBILE';
+      typeBadge.style.cssText = [
+        'display:inline-flex','align-items:center','min-height:28px','width:max-content',
+        'box-sizing:border-box','margin:0 0 9px','padding:5px 12px',
+        'border:1px solid #93c5fd','border-radius:9px','background:#eff6ff',
+        'color:#1d4ed8','font-size:11px','line-height:1','font-weight:900',
+        'letter-spacing:.035em','print-color-adjust:exact','-webkit-print-color-adjust:exact'
+      ].join(';');
+      if (root.dataset.mobileType === 'used') {
+        typeBadge.style.borderColor = '#f59e0b';
+        typeBadge.style.background = '#fef3c7';
+        typeBadge.style.color = '#92400e';
+      } else if (root.dataset.mobileType === 'keypad') {
+        typeBadge.style.borderColor = '#94a3b8';
+        typeBadge.style.background = '#f1f5f9';
+        typeBadge.style.color = '#334155';
+      }
+      const customerBlock = root.querySelector('#invoiceMainSheet > div:has(> div > #pvCustName)');
+      if (customerBlock) {
+        customerBlock.style.position = 'relative';
+        customerBlock.style.paddingTop = '9px';
+        customerBlock.insertBefore(typeBadge, customerBlock.firstChild);
+      }
+
       // The outer preview card is only a UI shell; output uses its actual
       // invoice children so the same bill appears in PDF/WhatsApp/Print.
       return root;
+    }
+
+    function skGetUnifiedInvoicePdfOptions(filename) {
+      return {
+        margin: [10, 10, 10, 10],
+        filename,
+        image: { type: 'jpeg', quality: 0.96 },
+        html2canvas: {
+          scale: 1.5,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          windowWidth: 794,
+          scrollX: 0,
+          scrollY: 0,
+          logging: false,
+          allowTaint: false
+        },
+        pagebreak: { mode: ['css', 'legacy'], before: ['.sk-invoice-export-page-2'] },
+        jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
+      };
+    }
+
+    function skCreateInvoiceExportHolder(clone) {
+      const holder = document.createElement('div');
+      holder.className = 'sk-invoice-export-holder';
+      holder.setAttribute('aria-hidden', 'true');
+      holder.style.cssText = [
+        'position:fixed','left:0','top:0','width:794px','max-width:794px',
+        'height:auto','padding:0','margin:0','background:#ffffff','z-index:-1',
+        'pointer-events:none','opacity:0.01','visibility:visible','overflow:visible',
+        'contain:layout style'
+      ].join(';');
+      clone.style.width = '100%';
+      clone.style.maxWidth = '100%';
+      clone.style.margin = '0';
+      clone.style.boxSizing = 'border-box';
+      holder.appendChild(clone);
+      document.body.appendChild(holder);
+      return holder;
     }
 
     function sendBillToWhatsAppAsPDF() {
@@ -3941,193 +4022,101 @@ function viewSavedBill(idx) {
         showToast?.('❌ PDF service is not loaded. Please try again.');
         return;
       }
-
       const activeBill = window.__skInvoiceExportBill || null;
       const phoneValue = activeBill?.phone ?? document.getElementById('billCustPhone')?.value ?? '';
       const rawPhone = String(phoneValue).replace(/\D/g, '');
-      const phone = rawPhone.length === 10
-        ? rawPhone
-        : (rawPhone.length === 12 && rawPhone.startsWith('91') ? rawPhone.slice(2) : rawPhone);
+      const phone = rawPhone.length === 10 ? rawPhone : (rawPhone.length === 12 && rawPhone.startsWith('91') ? rawPhone.slice(2) : rawPhone);
+      if (phone.length !== 10) { showToast?.('❌ Valid customer WhatsApp number not found'); return; }
 
-      if (phone.length !== 10) {
-        showToast?.('❌ Valid customer WhatsApp number not found');
-        return;
-      }
-
+      const billNo = (document.getElementById('pvBillNo')?.innerText || 'SK-Bill').trim();
+      const safeBillNo = billNo.replace(/[^\w-]/g, '_') || 'SK-Bill';
+      const filename = `SK_Mobiles_Invoice_${safeBillNo}.pdf`;
+      const holder = skCreateInvoiceExportHolder(clone);
+      const opt = skGetUnifiedInvoicePdfOptions(filename);
       showToast?.('📄 Preparing WhatsApp invoice PDF...');
-
-      const holder = document.createElement('div');
-      holder.style.position = 'fixed';
-      holder.style.left = '-99999px';
-      holder.style.top = '0';
-      holder.style.width = '750px';
-      holder.style.background = '#ffffff';
-      holder.setAttribute('aria-hidden', 'true');
-      holder.appendChild(clone);
-      document.body.appendChild(holder);
-
-      const opt = {
-        margin: [15, 15, 15, 15],
-        filename: ((document.getElementById('pvBillNo')?.innerText || 'SK-Bill') + '.pdf'),
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-        pagebreak: { mode: ['css', 'legacy'], before: ['.sk-invoice-export-page-2'] },
-        jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
-      };
 
       html2pdf().set(opt).from(clone).outputPdf('blob')
         .then((pdfBlob) => {
-          const billFileNo = (document.getElementById('pvBillNo')?.innerText || 'SK-Bill')
-            .trim().replace(/[^\w-]/g, '_');
-          const pdfFile = new File(
-            [pdfBlob],
-            `SK_Mobiles_Invoice_${billFileNo}.pdf`,
-            { type: 'application/pdf' }
-          );
-
+          if (!(pdfBlob instanceof Blob) || pdfBlob.size < 100 || pdfBlob.type !== 'application/pdf') throw new Error('PDF output is empty or invalid');
+          const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
           if (navigator.canShare && navigator.canShare({ files: [pdfFile] }) && navigator.share) {
-            return navigator.share({
-              files: [pdfFile],
-              title: 'SK Mobiles Invoice',
-              text: 'Here is your purchase invoice PDF from SK Mobiles, Dharmapuri.'
-            }).then(() => {
-              showToast?.('✅ Invoice PDF shared via WhatsApp');
-            }).catch((err) => {
-              if (err?.name !== 'AbortError') {
-                console.warn('Native share failed:', err);
-                throw err;
-              }
-            });
+            return navigator.share({ files: [pdfFile], title: 'SK Mobiles Invoice', text: 'Here is your purchase invoice PDF from SK Mobiles, Dharmapuri.' })
+              .then(() => showToast?.('✅ Invoice PDF shared'));
           }
-
-          return html2pdf().set(opt).from(clone).save().then(() => {
-            const name = activeBill?.custName || document.getElementById('billCustName')?.value || 'Customer';
-            const msg = `Hello ${name}, here is your bill invoice PDF from SK Mobiles. Thank you for shopping with us!`;
-            window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-            showToast?.('✅ Invoice PDF downloaded • WhatsApp opened');
-          });
+          // Fallback: download the same generated PDF, then open WhatsApp with a message.
+          const url = URL.createObjectURL(pdfBlob);
+          const a = document.createElement('a'); a.href = url; a.download = filename; a.style.display = 'none';
+          document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
+          const name = activeBill?.custName || document.getElementById('billCustName')?.value || 'Customer';
+          const msg = `Hello ${name}, here is your bill invoice PDF from SK Mobiles. Thank you for shopping with us!`;
+          window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+          showToast?.('✅ Invoice PDF downloaded • WhatsApp opened');
         })
-        .catch((err) => {
-          console.error('WhatsApp invoice PDF failed:', err);
-          showToast?.('❌ WhatsApp invoice PDF failed');
-        })
-        .finally(() => {
-          holder.remove();
-        });
+        .catch((err) => { console.error('WhatsApp invoice PDF failed:', err); showToast?.('❌ WhatsApp invoice PDF failed. Check browser Console.'); })
+        .finally(() => { try { holder.remove(); } catch (_) {} });
     }
 
     function printInvoiceDirect() {
-      // Print the exact Live Invoice Preview as the single source of truth.
-      const source = document.getElementById('printableInvoiceCard');
-      if (!source) { showToast?.('Live Invoice Preview not found'); return; }
-
-      const clone = source.cloneNode(true);
-
-      // Preserve the live-preview mobile-type highlight in the print document.
-      // The print window does not retain the billing modal wrapper, so the
-      // live :has(#mobileTypeUsed.active) selectors cannot determine the type.
-      const printMobileType = String(clone.querySelector('#pvMobileType')?.textContent || 'New Mobile').trim().toLowerCase();
-      clone.dataset.mobileType = printMobileType.includes('used')
-        ? 'used'
-        : printMobileType.includes('keypad')
-          ? 'keypad'
-          : 'new';
-
+      // Use the same canonical export clone as Download PDF and WhatsApp PDF.
+      const clone = skCloneLiveInvoiceForOutput();
+      if (!clone) { showToast?.('Live Invoice Preview not found'); return; }
       const w = window.open('', '_blank');
       if (!w) { showToast?.('Please allow popups to print!'); return; }
-
       const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"],style'))
-        .map(el => el.tagName.toLowerCase()==='link'
+        .map(el => el.tagName.toLowerCase() === 'link'
           ? `<link rel="stylesheet" href="${el.href}">`
-          : `<style>${el.textContent||''}</style>`)
-        .join('');
-
+          : `<style>${el.textContent || ''}</style>`).join('');
       const emi = clone.querySelector('#pvEmiScheduleSection');
-      if (emi && emi.style.display !== 'none') {
-        emi.style.breakBefore = 'page';
-        emi.style.pageBreakBefore = 'always';
-      }
-
-      const printBadge = clone.ownerDocument.createElement('div');
-      printBadge.className = 'sk-print-mobile-type-badge';
-      printBadge.dataset.type = clone.dataset.mobileType;
-      printBadge.textContent = clone.dataset.mobileType === 'used' ? 'USED MOBILE' : clone.dataset.mobileType === 'keypad' ? 'KEYPAD MOBILE' : 'NEW MOBILE';
-      const printCustomerBlock = clone.querySelector('#invoiceMainSheet > div:has(> div > #pvCustName)');
-      if (printCustomerBlock) printCustomerBlock.insertBefore(printBadge, printCustomerBlock.firstChild);
-
-      clone.removeAttribute('style');
-      clone.style.cssText = 'width:100%;max-width:100%;margin:0;padding:22px;background:#fff;color:#1e293b;box-sizing:border-box;font-family:"Plus Jakarta Sans",sans-serif;';
-
+      if (emi && emi.style.display !== 'none') { emi.style.breakBefore = 'page'; emi.style.pageBreakBefore = 'always'; }
+      clone.style.cssText = 'width:100%;max-width:100%;margin:0;padding:0;background:#fff;color:#1e293b;box-sizing:border-box;font-family:"Plus Jakarta Sans",Arial,sans-serif;';
       w.document.open();
       w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>SK MOBILES - Invoice</title>${styles}<style>
 @page{size:A4 portrait;margin:10mm}
-html,body{margin:0!important;padding:0!important;background:#fff!important;color:#1e293b!important;overflow:visible!important;}
+html,body{margin:0!important;padding:0!important;background:#fff!important;color:#1e293b!important;overflow:visible!important;width:100%!important;}
 body{font-family:"Plus Jakarta Sans",Arial,sans-serif!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
 .print-preview-host{width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;background:#fff!important;}
-#printableInvoiceCard{width:100%!important;max-width:100%!important;margin:0 auto!important;box-sizing:border-box!important;background:#fff!important;color:#1e293b!important;box-shadow:none!important;}
-.sk-print-mobile-type-badge{display:inline-flex!important;align-items:center!important;min-height:28px!important;width:max-content!important;box-sizing:border-box!important;margin:0 0 9px!important;padding:5px 12px!important;border:1px solid #93c5fd!important;border-radius:9px!important;background:#eff6ff!important;color:#1d4ed8!important;font-size:11px!important;line-height:1!important;font-weight:900!important;letter-spacing:.035em!important;}
+#printableInvoiceCard{width:100%!important;max-width:100%!important;margin:0 auto!important;padding:0!important;box-sizing:border-box!important;background:#fff!important;color:#1e293b!important;box-shadow:none!important;}
+.sk-invoice-export-root #invoiceMainSheet > div:has(> div > #pvCustName)::before{content:none!important;display:none!important;}
+.sk-print-mobile-type-badge{display:inline-flex!important;align-items:center!important;min-height:28px!important;width:max-content!important;box-sizing:border-box!important;margin:0 0 9px!important;padding:5px 12px!important;border:1px solid #93c5fd!important;border-radius:9px!important;background:#eff6ff!important;color:#1d4ed8!important;font-size:11px!important;line-height:1!important;font-weight:900!important;letter-spacing:.035em!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important;}
 .sk-print-mobile-type-badge[data-type="used"]{border-color:#f59e0b!important;background:#fef3c7!important;color:#92400e!important;}
 .sk-print-mobile-type-badge[data-type="keypad"]{border-color:#94a3b8!important;background:#f1f5f9!important;color:#334155!important;}
 img{max-width:100%!important;}
 @media print{body{background:#fff!important;}#printableInvoiceCard{box-shadow:none!important;}}
 </style></head><body><div class="print-preview-host">${clone.outerHTML}</div></body></html>`);
       w.document.close();
-
-      const printNow=()=>{
-        try{w.focus();w.print();}
-        finally{setTimeout(()=>{try{w.close();}catch(e){}},400);}
+      const printNow = () => { try { w.focus(); w.print(); } finally { setTimeout(() => { try { w.close(); } catch (_) {} }, 500); } };
+      const waitForReady = () => {
+        const images = Array.from(w.document.images); const links = Array.from(w.document.querySelectorAll('link[rel="stylesheet"]')); let pending = 0;
+        const done = () => { pending--; if (pending <= 0) setTimeout(printNow, 120); };
+        images.forEach(img => { if (!img.complete) { pending++; img.addEventListener('load', done, {once:true}); img.addEventListener('error', done, {once:true}); } });
+        links.forEach(link => { if (!link.sheet) { pending++; link.addEventListener('load', done, {once:true}); link.addEventListener('error', done, {once:true}); } });
+        if (pending === 0) setTimeout(printNow, 120);
       };
-      const waitForReady=()=>{
-        const images=Array.from(w.document.images);
-        const links=Array.from(w.document.querySelectorAll('link[rel="stylesheet"]'));
-        let pending=0;
-        const done=()=>{pending--;if(pending<=0)setTimeout(printNow,120);};
-        images.forEach(img=>{if(!img.complete){pending++;img.addEventListener('load',done,{once:true});img.addEventListener('error',done,{once:true});}});
-        links.forEach(link=>{if(!link.sheet){pending++;link.addEventListener('load',done,{once:true});link.addEventListener('error',done,{once:true});}});
-        if(pending===0)setTimeout(printNow,120);
-      };
-      setTimeout(waitForReady,80);
+      setTimeout(waitForReady, 100);
     }
 
     function downloadInvoicePDF() {
       const clone = skCloneLiveInvoiceForOutput();
       if (!clone) { showToast?.('❌ Live Invoice Preview not found'); return; }
-      if (typeof html2pdf !== 'function') {
-        showToast?.('❌ PDF service is not loaded. Please try again.');
-        return;
-      }
-
+      if (typeof html2pdf !== 'function') { showToast?.('❌ PDF service is not loaded. Please refresh the app and try again.'); return; }
+      const billNo = (document.getElementById('pvBillNo')?.innerText || 'SK-Bill').trim();
+      const safeBillNo = billNo.replace(/[^\w-]/g, '_') || 'SK-Bill';
+      const filename = `${safeBillNo}.pdf`;
+      const holder = skCreateInvoiceExportHolder(clone);
+      const opt = skGetUnifiedInvoicePdfOptions(filename);
       showToast?.('📄 Preparing invoice PDF...');
-
-      const holder = document.createElement('div');
-      holder.style.position = 'fixed';
-      holder.style.left = '-99999px';
-      holder.style.top = '0';
-      holder.style.width = '750px';
-      holder.style.background = '#ffffff';
-      holder.setAttribute('aria-hidden', 'true');
-      holder.appendChild(clone);
-      document.body.appendChild(holder);
-
-      const opt = {
-        margin: [15, 15, 15, 15],
-        filename: ((document.getElementById('pvBillNo')?.innerText || 'SK-Bill') + '.pdf'),
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-        pagebreak: { mode: ['css', 'legacy'], before: ['.sk-invoice-export-page-2'] },
-        jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
-      };
-
-      Promise.resolve()
-        .then(() => html2pdf().set(opt).from(clone).save())
-        .then(() => showToast?.('✅ Invoice PDF download started'))
-        .catch((err) => {
-          console.error('Invoice PDF download failed:', err);
-          showToast?.('❌ Invoice PDF download failed');
+      html2pdf().set(opt).from(clone).outputPdf('blob')
+        .then((blob) => {
+          if (!(blob instanceof Blob) || blob.size < 100 || blob.type !== 'application/pdf') throw new Error('PDF output is empty or invalid');
+          const url = URL.createObjectURL(blob);
+          const anchor = document.createElement('a');
+          anchor.href = url; anchor.download = filename; anchor.style.display = 'none';
+          document.body.appendChild(anchor); anchor.click(); anchor.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+          showToast?.('✅ Invoice PDF download started');
         })
-        .finally(() => {
-          holder.remove();
-        });
+        .catch((error) => { console.error('Invoice PDF download failed:', error); showToast?.('❌ PDF download failed. Check browser Console for the exact error.'); })
+        .finally(() => { try { holder.remove(); } catch (_) {} });
     }
 
 (function(){
