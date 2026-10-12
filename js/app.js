@@ -3861,6 +3861,13 @@ function viewSavedBill(idx) {
 
       const root = document.createElement('div');
       root.className = 'sk-invoice-export-root';
+      // Keep the invoice's canonical ID on the export root so all existing
+      // #printableInvoiceCard-scoped layout rules also apply to PDF/WhatsApp.
+      // Previously only invoiceMainSheet was exported, dropping those styles
+      // and making the PDF differ from the live preview.
+      root.id = 'printableInvoiceCard';
+      const mobileTypeText = String(previewClone.querySelector('#pvMobileType')?.textContent || 'New Mobile').trim().toLowerCase();
+      root.dataset.mobileType = mobileTypeText.includes('used') ? 'used' : mobileTypeText.includes('keypad') ? 'keypad' : 'new';
       root.style.width = '100%';
       root.style.maxWidth = '100%';
       root.style.margin = '0';
@@ -3868,6 +3875,9 @@ function viewSavedBill(idx) {
       root.style.background = '#ffffff';
       root.style.color = '#1e293b';
       root.style.boxSizing = 'border-box';
+      root.style.fontFamily = '"Plus Jakarta Sans", Arial, sans-serif';
+      root.style.color = '#1e293b';
+      root.style.background = '#ffffff';
 
       const page1 = document.createElement('div');
       page1.className = 'sk-invoice-export-page sk-invoice-export-page-1';

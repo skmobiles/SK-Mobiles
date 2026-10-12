@@ -9865,3 +9865,96 @@ html body nav.bottom-nav > button.nav-item {
     padding: 9px !important;
   }
 }
+
+/* V5.6.29 — Customer Credit Ledger mobile page scrolling root fix.
+   Keep one scroll owner (the full-screen ledger overlay), not a nested list. */
+#skCreditLedgerPage.active{
+  position:fixed !important;
+  inset:0 !important;
+  height:100vh !important;
+  height:100dvh !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+  touch-action:pan-y !important;
+  overscroll-behavior-y:contain !important;
+  align-items:flex-start !important;
+  justify-content:flex-start !important;
+}
+#skCreditLedgerPage.active > .modal-sheet{
+  flex:0 0 auto !important;
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  overflow:visible !important;
+  padding-bottom:calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+  touch-action:pan-y !important;
+}
+#skCreditLedgerPage .skcp-list{
+  max-height:none !important;
+  height:auto !important;
+  overflow:visible !important;
+  -webkit-overflow-scrolling:auto !important;
+  touch-action:pan-y !important;
+}
+
+/* V5.6.30 — Credit Action form visual alignment with Sales Bill mint/teal UI.
+   Scoped to the Credit Action modal; layout, field IDs and business logic stay unchanged. */
+#skCreditActionModal > .modal-sheet {
+  background: #eaf5f4 !important;
+  border: 1px solid #c2e1df !important;
+  border-radius: 22px !important;
+  box-shadow: 0 16px 42px rgba(23, 88, 89, .14) !important;
+  color: #172238 !important;
+}
+#skCreditActionModal > .modal-sheet > .modal-title {
+  background: #ffffff !important;
+  border: 1px solid #b9dcda !important;
+  border-radius: 18px !important;
+  box-shadow: 0 5px 14px rgba(24, 94, 91, .07) !important;
+  color: #172238 !important;
+}
+#skCreditActionModal > .modal-sheet > .modal-title > span {
+  color: #172238 !important;
+  font-weight: 800 !important;
+}
+#skCreditActionModal > .modal-sheet .form-label {
+  color: #52677d !important;
+  font-weight: 700 !important;
+}
+#skCreditActionModal > .modal-sheet .form-input,
+#skCreditActionModal > .modal-sheet .form-select {
+  min-height: 43px !important;
+  background: #ffffff !important;
+  border: 1px solid #c1dedd !important;
+  border-radius: 12px !important;
+  color: #172238 !important;
+  box-shadow: none !important;
+}
+#skCreditActionModal > .modal-sheet .form-input::placeholder {
+  color: #91a1b4 !important;
+  opacity: 1 !important;
+}
+#skCreditActionModal > .modal-sheet .form-input:focus,
+#skCreditActionModal > .modal-sheet .form-select:focus {
+  border-color: #43aaa2 !important;
+  box-shadow: 0 0 0 3px rgba(54, 166, 157, .13) !important;
+  outline: none !important;
+}
+#skCreditActionModal > .modal-sheet .skcp-readonly {
+  background: #edf6f5 !important;
+  border-color: #c6e0de !important;
+}
+#skCreditActionModal > .modal-sheet > .submit-btn {
+  background: linear-gradient(105deg, #15988e, #62bcb3) !important;
+  border: 1px solid rgba(13, 132, 124, .16) !important;
+  border-radius: 16px !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 7px 16px rgba(21, 152, 142, .18) !important;
+}
+#skCreditActionModal > .modal-sheet > .modal-title .modal-close-btn {
+  background: #fff0ef !important;
+  border: 1px solid #e7b7b4 !important;
+  color: #e9473f !important;
+}
