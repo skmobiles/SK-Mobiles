@@ -2,7 +2,10 @@
    SK MOBILES — GLOBAL TYPOGRAPHY + EDGE-TO-EDGE LAYOUT SOURCE OF TRUTH
    ============================================================ */
 *,*::before,*::after{box-sizing:border-box;}
-*{margin:0;padding:0;font-family:var(--app-font,'Plus Jakarta Sans'),-apple-system,sans-serif !important;-webkit-tap-highlight-color:transparent;}
+*:not(#printableInvoiceCard):not(#printableInvoiceCard *){margin:0;padding:0;font-family:var(--app-font,'Plus Jakarta Sans'),-apple-system,sans-serif !important;-webkit-tap-highlight-color:transparent;}
+/* Unified premium app typography: keep the selected UI font consistent while preserving invoice/print typography. */
+html,body,button,input,select,textarea{font-family:var(--app-font,'Plus Jakarta Sans'),-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+#printableInvoiceCard,#printableInvoiceCard *{font-family:inherit;}
 h1,h2,h3,h4,.stat-value,.card-title,.badge,strong{font-family:var(--app-font,'Plus Jakarta Sans'),sans-serif !important;font-weight:700 !important;letter-spacing:-0.02em !important;}
 html,body{width:100%;max-width:100%;margin:0;padding:0;overflow-x:hidden;background-color:#f8fafc;color:var(--text);min-height:100vh;scroll-behavior:smooth;} body.modal-open{overflow:hidden;} .app-viewport{width:100%;max-width:100%;min-width:0;min-height:100vh;margin:0;padding:0 10px 90px;box-sizing:border-box;overflow-x:hidden;} .app-viewport > *{min-width:0;max-width:100%;box-sizing:border-box;} .container,.page-container,.view-section,.tab-content,main,.billing-container{width:100%;max-width:100%;margin:0;padding:0;box-sizing:border-box;} .card,.form-section,.bill-card,.content-box,.panel{width:100%;max-width:100%;margin-left:0;margin-right:0;margin-bottom:12px;box-sizing:border-box;} .content-area{width:100%;max-width:100%;margin:0;padding:0;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;}
 ::-webkit-scrollbar{width:6px;height:6px;}
@@ -10283,4 +10286,108 @@ html body:has(#leftDrawer.active) nav.bottom-nav {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+
+/* V5.6.53 — consolidated Contact Picker layout fix.
+   The injected contact button and input share one grid cell. This avoids
+   centering against a label/field parent and avoids conflicting top:50% rules. */
+.sk-contact-field-wrap[data-sk-contact-wrap="1"] {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  isolation: isolate !important;
+  line-height: normal !important;
+}
+.sk-contact-field-wrap[data-sk-contact-wrap="1"] > input.sk-contact-field-input {
+  grid-area: 1 / 1 / 2 / 2 !important;
+  align-self: stretch !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding-right: 46px !important;
+  margin-inline: 0 !important;
+}
+.sk-contact-field-wrap[data-sk-contact-wrap="1"] > .sk-contact-access-btn {
+  grid-area: 1 / 1 / 2 / 2 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  float: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  margin: 0 5px 0 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  border: 1px solid var(--primary, #2563eb) !important;
+  border-radius: 50% !important;
+  background: var(--card-bg, #fff) !important;
+  color: var(--primary, #2563eb) !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  z-index: 2 !important;
+  cursor: pointer !important;
+}
+.sk-contact-field-wrap[data-sk-contact-wrap="1"] > .sk-contact-access-btn:focus-visible {
+  outline: 2px solid var(--primary, #2563eb) !important;
+  outline-offset: 2px !important;
+}
+
+/* Keep Repair modal headers theme-aware and visually consistent. */
+#skRepairJobsModal .modal-title,
+#skRepairDetailModal .modal-title,
+#skUrgentRepairModal .modal-title {
+  font-family: inherit !important;
+  color: var(--text, #172238) !important;
+  background: var(--card-bg, #fff) !important;
+  border-color: var(--card-border, #cbd5e1) !important;
+}
+#skRepairJobsModal .modal-title .modal-close-btn,
+#skRepairDetailModal .modal-title .modal-close-btn,
+#skUrgentRepairModal .modal-title .modal-close-btn {
+  flex: 0 0 38px !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  padding: 0 !important;
+  font-family: inherit !important;
+  font-size: 1.15rem !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+}
+
+/* V5.6.55: keep every left-drawer label on the user's selected App Font.
+   Scoped to the drawer only; invoice/print typography remains untouched. */
+#leftDrawer,
+#leftDrawer .left-drawer-content,
+#leftDrawer .drawer-header,
+#leftDrawer .drawer-title,
+#leftDrawer .drawer-group-title,
+#leftDrawer .menu-drawer-btn,
+#leftDrawer .menu-btn-label,
+#leftDrawer .menu-arrow,
+#leftDrawer #skDataFolderMenuBtn {
+  font-family: var(--app-font, 'Plus Jakarta Sans'), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+#leftDrawer .menu-drawer-btn,
+#leftDrawer #skDataFolderMenuBtn {
+  font-weight: 700;
 }
