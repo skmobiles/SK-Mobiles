@@ -705,11 +705,21 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 <div style="margin-top:12px;">
 <div style="font-weight:800;font-size:.78rem;color:var(--text-muted);margin-bottom:6px;">Live Invoice Preview</div>
-<div id="skCustomerSignaturePadPanel" class="sk-signature-panel" aria-label="Customer signature pad">
-  <div class="sk-signature-panel-head"><strong>✍️ Customer Signature</strong><span>Sign with finger or stylus</span></div>
-  <canvas id="skCustomerSignatureCanvas" aria-label="Draw customer signature"></canvas>
-  <div class="sk-signature-actions"><button type="button" id="skClearCustomerSignature" class="sk-signature-clear">Clear</button><button type="button" id="skSaveCustomerSignature" class="sk-signature-save">Save Signature</button></div>
-  <div id="skSignatureStatus" class="sk-signature-status" role="status">Draw your signature above, then tap Save Signature.</div>
+<div id="skCustomerSignaturePadPanel" class="sk-signature-panel sk-signature-launcher" aria-label="Customer signature">
+  <div class="sk-signature-panel-head"><strong>✍️ Bill Signatures</strong><span id="skSignatureLauncherStatus">Customer: Not signed · Sales: Not signed</span></div>
+  <button type="button" id="skOpenCustomerSignature" class="sk-signature-open">✍️ Add Customer / Sales Signature</button>
+  <div class="sk-signature-status">Open the signing page and choose who is signing.</div>
+</div>
+<div id="skSignatureModal" class="sk-signature-modal" aria-label="Sign invoice" aria-hidden="true">
+  <div class="sk-signature-modal-card" role="dialog" aria-modal="true" aria-labelledby="skSignatureModalTitle">
+    <div class="sk-signature-modal-head"><strong id="skSignatureModalTitle">✍️ Bill Signatures</strong><button type="button" id="skCloseCustomerSignature" class="sk-signature-close" aria-label="Close signature">×</button></div>
+    <label class="sk-signature-role-label" for="skSignatureRole">Who is signing?</label>
+    <select id="skSignatureRole" class="sk-signature-role"><option value="customer">Customer — Customer Signature</option><option value="sales">Sales Person — Authorized Signature / Seal</option></select>
+    <div class="sk-signature-modal-hint" id="skSignatureRoleHint">Customer signature will appear in the Customer Signature area on the bill.</div>
+    <canvas id="skCustomerSignatureCanvas" aria-label="Draw customer signature"></canvas>
+    <div class="sk-signature-actions"><button type="button" id="skClearCustomerSignature" class="sk-signature-clear">Clear</button><button type="button" id="skSaveCustomerSignature" class="sk-signature-save">Save Signature</button></div>
+    <div id="skSignatureStatus" class="sk-signature-status" role="status">Draw your signature above, then tap Save Signature.</div>
+  </div>
 </div>
 <div id="printableInvoiceCard" style="background:#fff;color:#1e293b;padding:22px;border-radius:20px;box-shadow:0 4px 16px rgba(0,0,0,.08);font-family:'Plus Jakarta Sans',sans-serif;">
 <div id="invoiceMainSheet">
@@ -817,7 +827,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea>
 </div>
 <div style="text-align:center;">
 <div style="font-weight:800; color:#0f172a; font-size:.76rem; margin-bottom:2px;">For SK MOBILES</div>
-<div style="border-bottom:1px solid #94a3b8; width:120px; height:10px; margin:auto;"></div>
+<div id="pvSalesSignatureSlot" style="position:relative;border-bottom:1px solid #94a3b8;width:120px;height:42px;margin:auto;display:flex;align-items:center;justify-content:center;overflow:hidden;"><img id="pvSalesSignatureImage" alt="Sales person signature" style="display:none;max-width:100%;max-height:40px;object-fit:contain;" /></div>
 <div style="margin-top:4px;">Authorized Signature / Seal</div>
 </div>
 </div>

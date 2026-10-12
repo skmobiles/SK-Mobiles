@@ -9968,3 +9968,38 @@ body:has(#billingModal.active) nav.bottom-nav {
 .sk-signature-save{background:var(--primary-gradient,linear-gradient(135deg,#32a99f,#62beb2));border:1px solid var(--primary,#32a99f);color:#fff;}
 .sk-signature-status{margin-top:5px;color:var(--text-muted,#64748b);font-size:.66rem;line-height:1.35;}
 @media(max-width:600px){.sk-signature-panel{padding:8px 9px;border-radius:11px}.sk-signature-panel-head{align-items:center;flex-direction:row;gap:6px}#skCustomerSignatureCanvas{height:76px}.sk-signature-actions button{min-height:30px;padding:5px 8px}}
+
+/* V5.6.43 — dedicated full-screen customer signature workspace */
+.sk-signature-launcher{padding:8px 10px!important;margin:6px 0 8px!important;border-radius:12px!important}
+.sk-signature-launcher .sk-signature-panel-head{margin-bottom:6px!important}
+.sk-signature-open{width:100%;min-height:38px;border:1px solid var(--primary,#32a99f);border-radius:10px;background:var(--primary-gradient,linear-gradient(135deg,#32a99f,#62beb2));color:#fff;font-weight:800;font-size:.84rem;cursor:pointer}
+.sk-signature-modal{display:none;position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.62);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:12px;box-sizing:border-box}
+.sk-signature-modal.is-open{display:flex}
+.sk-signature-modal-card{width:min(720px,100%);max-height:calc(100dvh - 24px);overflow:auto;box-sizing:border-box;background:var(--page-bg,#f8fafc);color:var(--text,#1e293b);border:1px solid var(--card-border,#dbe4ee);border-radius:18px;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.sk-signature-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:1rem;margin-bottom:8px}
+.sk-signature-close{width:38px;height:38px;border-radius:50%;border:1px solid var(--card-border,#dbe4ee);background:var(--card-bg,#fff);font-size:1.6rem;line-height:1;cursor:pointer;color:var(--text,#1e293b)}
+.sk-signature-modal-hint{font-size:.82rem;color:var(--text-muted,#64748b);margin:4px 0 12px}
+#skCustomerSignatureCanvas{height:clamp(220px,42vh,360px)!important;background:#fff!important;border:1px dashed #94a3b8!important;border-radius:12px!important;touch-action:none;cursor:crosshair}
+.sk-signature-modal .sk-signature-actions{gap:10px;margin-top:12px}
+.sk-signature-modal .sk-signature-actions button{min-height:44px;font-size:.9rem}
+.sk-signature-modal .sk-signature-status{font-size:.78rem;margin-top:9px}
+body.sk-signature-open{overflow:hidden!important;overscroll-behavior:none}
+@media(max-width:600px){.sk-signature-modal{padding:8px;align-items:center}.sk-signature-modal-card{padding:13px;border-radius:16px;max-height:calc(100dvh - 16px)}#skCustomerSignatureCanvas{height:clamp(230px,48vh,420px)!important}.sk-signature-modal .sk-signature-actions button{min-height:44px}}
+
+/* V5.6.44 — dual signature controls, matching existing SK MOBILES form styling */
+.sk-signature-role-label{display:block;margin:0 0 5px;font-size:.78rem;font-weight:800;color:var(--text,#1e293b)}
+.sk-signature-role{display:block;width:100%;min-height:42px;box-sizing:border-box;margin:0 0 10px;padding:9px 12px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--card-bg,#fff);color:var(--text,#1e293b);font:inherit;font-size:.86rem}
+#pvSalesSignatureImage{display:block;max-width:100%;max-height:40px;object-fit:contain}
+@media(max-width:600px){.sk-signature-role{min-height:40px;font-size:.82rem}.sk-signature-modal-card{width:100%}}
+
+/* V5.6.46 — signature launcher typography aligned with invoice preview */
+#skCustomerSignaturePadPanel.sk-signature-launcher{font-family:inherit;color:var(--text,#1e293b);background:var(--card-bg,#fff);border-color:var(--card-border,#dbe4ee);}
+#skCustomerSignaturePadPanel .sk-signature-panel-head{font-family:inherit;font-size:.76rem;line-height:1.35;font-weight:700;letter-spacing:0;color:var(--text,#334155);}
+#skCustomerSignaturePadPanel #skSignatureLauncherStatus{font-family:inherit;font-size:.68rem;line-height:1.4;font-weight:400;color:var(--text-muted,#64748b);text-align:right;}
+#skCustomerSignaturePadPanel .sk-signature-open{font-family:inherit;font-size:.82rem;font-weight:700;line-height:1.35;letter-spacing:0;min-height:38px;padding:8px 12px;border-radius:10px;border:1px solid var(--card-border,#cbd5e1);background:var(--input-bg,#f8fafc);color:var(--text,#1e293b);box-shadow:none;text-align:center;}
+#skCustomerSignaturePadPanel .sk-signature-status{font-family:inherit;font-size:.68rem;line-height:1.4;font-weight:400;color:var(--text-muted,#64748b);margin-top:5px;}
+.sk-signature-modal-card,.sk-signature-modal-card button,.sk-signature-modal-card select{font-family:inherit;letter-spacing:normal;}
+.sk-signature-modal-head{font-size:.95rem;font-weight:700;line-height:1.4;color:var(--text,#1e293b);}
+.sk-signature-role-label{font-size:.76rem;font-weight:700;}
+.sk-signature-modal-hint{font-size:.76rem;line-height:1.45;}
+@media(max-width:600px){#skCustomerSignaturePadPanel .sk-signature-panel-head{font-size:.74rem}#skCustomerSignaturePadPanel #skSignatureLauncherStatus{font-size:.64rem}#skCustomerSignaturePadPanel .sk-signature-open{font-size:.8rem;min-height:36px;padding:7px 10px}#skCustomerSignaturePadPanel .sk-signature-status{font-size:.66rem}}
