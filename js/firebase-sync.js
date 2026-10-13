@@ -403,28 +403,14 @@
     if(unsubscribeBills) unsubscribeBills();
     remoteReady = false;
     const ref = db.collection("shops").doc(SHOP_ID).collection("bills");
-    const snap = await ref.get();
-    const localBefore = localBills();
-    const remoteIds = new Set();
-    const mergedInitial = new Map();
-    snap.docs.forEach(d => {
-      const r = d.data() || {};
-      const id = String(r.id || d.id);
-      remoteIds.add(id);
-      if(r.isDeleted === true || r._deleted === true) return;
-      mergedInitial.set(id, Object.assign({}, r, {id}));
-    });
-    // Never discard a local bill that has not reached Firebase yet.
-    localBefore.forEach(b => {
-      const id = String(b?.id || b?.billId || b?.billNo || "");
-      if(id && !remoteIds.has(id)) mergedInitial.set(id, normalizeBill(b));
-    });
-    setLocalBills([...mergedInitial.values()].filter(Boolean));
-    remoteReady = true;
-    await uploadBills();
+    let initialized = false;
 
-    unsubscribeBills = ref.onSnapshot(snapshot => {
+    // Use the first realtime snapshot as the initial baseline. A separate ref.get()
+    // immediately before onSnapshot() downloaded every bill twice at login.
+    unsubscribeBills = ref.onSnapshot(async snapshot => {
       try {
+        // Do not establish the baseline from a possibly incomplete local cache.
+        if(!initialized && snapshot.metadata && snapshot.metadata.fromCache) return;
         const remoteIdsNow = new Set();
         const remoteMap = new Map();
         snapshot.docs.forEach(d => {
@@ -434,16 +420,25 @@
           if(r.isDeleted === true || r._deleted === true) return;
           remoteMap.set(id, Object.assign({}, r, {id}));
         });
+
         const localNow = localBills();
         const merged = new Map(remoteMap);
-        // Preserve only genuinely local/unpublished bills; Firebase tombstones win.
+        // Preserve local bills that have not reached Firebase yet; remote
+        // tombstones still win because their IDs remain in remoteIdsNow.
         localNow.forEach(b => {
           const id = String(b?.id || b?.billId || b?.billNo || "");
           if(id && !remoteIdsNow.has(id)) merged.set(id, normalizeBill(b));
         });
         setLocalBills([...merged.values()].filter(Boolean));
         lastKnownBillIds = new Set([...remoteMap.keys(), ...[...merged.keys()].filter(id => !remoteIdsNow.has(id))]);
-        if([...merged.keys()].some(id => !remoteIdsNow.has(id))) uploadBills().catch(()=>{});
+
+        if(!initialized){
+          initialized = true;
+          remoteReady = true;
+          await uploadBills();
+        } else if([...merged.keys()].some(id => !remoteIdsNow.has(id))){
+          uploadBills().catch(()=>{});
+        }
       } catch(e) {
         console.error("Bill snapshot error", e);
       }
@@ -558,47 +553,15 @@
     repairSyncReady = false;
     repairKnownRemote = new Map();
     const ref = db.collection("shops").doc(SHOP_ID).collection(REPAIR_COLLECTION);
+    let initialized = false;
+    let snapshotQueue = Promise.resolve();
 
-    try{
-      const snap = await ref.get();
-      const remoteMap = new Map();
-      const tombstones = new Map();
-      snap.docs.forEach(d=>{
-        const r = d.data() || {};
-        const id = String(r.id || d.id);
-        const meta = {
-          hash: r._deleted || r.isDeleted ? "" : syncHash(JSON.stringify(repairNormalize(r))),
-          updatedAt: Number(r._syncUpdatedAt) || repairTime(r),
-          deleted: r._deleted === true || r.isDeleted === true
-        };
-        repairKnownRemote.set(id, meta);
-        if(meta.deleted) tombstones.set(id, meta);
-        else remoteMap.set(id, repairNormalize(r));
-      });
-
-      const local = repairJobsLocal();
-      const merged = new Map(remoteMap);
-      local.forEach(job=>{
-        const id = String(job?.id || "");
-        if(!id) return;
-        const remote = remoteMap.get(id);
-        const remoteMeta = repairKnownRemote.get(id);
-        const localTime = repairTime(job);
-        const remoteTime = Number(remoteMeta?.updatedAt || 0);
-        if(!remote || localTime > remoteTime){
-          merged.set(id, repairNormalize(job));
-        } else if(remoteMeta?.deleted && localTime <= remoteTime){
-          merged.delete(id);
-        }
-      });
-
-      // If local contains jobs that are newer than cloud, keep them and upload.
-      // If cloud is newer, cloud becomes the local source of truth.
-      setRepairJobsLocal([...merged.values()].filter(Boolean));
-      repairSyncReady = true;
-      await uploadRepairJobs(false);
-
-      unsubscribeRepairJobs = ref.onSnapshot(snapshot=>{
+    // The initial onSnapshot contains the current collection and can serve as
+    // the baseline. Avoid reading the entire repairJobs collection with get()
+    // and then downloading it again when the listener starts.
+    unsubscribeRepairJobs = ref.onSnapshot(snapshot=>{
+      snapshotQueue = snapshotQueue.then(async ()=>{
+        if(!initialized && snapshot.metadata && snapshot.metadata.fromCache) return;
         if(repairApplyingRemote) return;
         try{
           const remoteMapNow = new Map();
@@ -636,19 +599,21 @@
           const oldRaw=JSON.stringify(local);
           const nextRaw=JSON.stringify(next);
           repairKnownRemote=remoteMetaNow;
-          if(oldRaw!==nextRaw){
-            setRepairJobsLocal(next);
+          if(oldRaw!==nextRaw) setRepairJobsLocal(next);
+
+          if(!initialized){
+            initialized=true;
+            repairSyncReady=true;
+            await uploadRepairJobs(false);
+          } else if(localWins){
+            uploadRepairJobs(false).catch(()=>{});
           }
-          if(localWins) uploadRepairJobs(false).catch(()=>{});
         }catch(e){ console.error("Repair Jobs realtime snapshot error",e); }
-      }, err=>{
-        console.error("Repair Jobs realtime listener error",err);
-        realtimeSyncStatus("❌ Realtime Sync error • Repair Jobs listener");
-      });
-    }catch(e){
-      console.error("Repair Jobs realtime initialization failed",e);
-      repairSyncReady=false;
-    }
+      }).catch(e=>console.error("Repair Jobs snapshot queue error",e));
+    }, err=>{
+      console.error("Repair Jobs realtime listener error",err);
+      realtimeSyncStatus("❌ Realtime Sync error • Repair Jobs listener");
+    });
   }
 
   // கிளவுடில் உள்ள அனைத்து sk_ டேட்டாக்களையும் நிகழ்நேரத்தில் கண்காணிக்கும் அமைப்பு
@@ -704,61 +669,66 @@
   async function startUniversalDataSync() {
     if (unsubscribeAllData) unsubscribeAllData();
     universalSyncStarted = false;
+    remoteReady = false;
     realtimeSyncStatus("⏳ Realtime Sync connecting...");
     universalLastSyncedHash.clear();
     const dataColRef = db.collection("shops").doc(SHOP_ID).collection("data");
+    let initialized = false;
+    let snapshotQueue = Promise.resolve();
 
-    try {
-      // Complete the first snapshot before accepting it as the sync baseline.
-      // This removes the login-time race where a local write could be mistaken
-      // for the current cloud state or vice versa.
-      const initial = await dataColRef.get();
-      const remoteKeys = new Set();
-      let hasChanges = false;
+    // Use one realtime listener for both initial reconciliation and ongoing
+    // changes. The former get()+onSnapshot() pattern read every sync document
+    // twice during login (once for get, again for the listener's first snapshot).
+    unsubscribeAllData = dataColRef.onSnapshot(snapshot => {
+      snapshotQueue = snapshotQueue.then(async () => {
+        if(!initialized && snapshot.metadata && snapshot.metadata.fromCache) return;
+        if(!initialized){
+          const remoteKeys = new Set();
+          let hasChanges = false;
+          const localWins = new Set();
 
-      const localWins = new Set();
-      initial.docs.forEach(doc => {
-        const key = String(doc.id);
-        if(!isSyncableKey(key)) return;
-        remoteKeys.add(key);
-        const data = doc.data() || {};
-        const cloudVal = data.data;
-        if(typeof cloudVal !== "string") return;
-        const remoteTime = Number(data.updatedAtMs || 0);
-        const localVal = localStorage.getItem(key);
-        const localTime = localChangeTime(key);
+          snapshot.docs.forEach(doc => {
+            const key = String(doc.id);
+            if(!isSyncableKey(key)) return;
+            remoteKeys.add(key);
+            const data = doc.data() || {};
+            const cloudVal = data.data;
+            if(typeof cloudVal !== "string") return;
+            const remoteTime = Number(data.updatedAtMs || 0);
+            const localVal = localStorage.getItem(key);
+            const localTime = localChangeTime(key);
 
-        // If this device changed the key after the cloud version it last saw,
-        // preserve that local write and publish it instead of blindly replacing
-        // it during login. This is the core fix for Manager/Admin divergence.
-        if(localVal !== null && localVal !== cloudVal && localTime > remoteTime){
-          localWins.add(key);
-          universalLastSyncedHash.set(key, syncHash(localVal));
+            if(localVal !== null && localVal !== cloudVal && localTime > remoteTime){
+              localWins.add(key);
+              universalLastSyncedHash.set(key, syncHash(localVal));
+              return;
+            }
+            if(cloudVal !== localVal){
+              applyingRemote = true;
+              try { localStorage.setItem(key, cloudVal); hasChanges = true; }
+              finally { applyingRemote = false; }
+            }
+            universalLastSyncedHash.set(key, syncHash(cloudVal));
+            markRemoteBaseline(key, remoteTime || Date.now());
+          });
+
+          // Mark initialized before awaits; queued snapshots are processed in
+          // order after this baseline reconciliation completes.
+          initialized = true;
+          remoteReady = true;
+          for(const key of localWins) await syncKeyToCloud(key, true);
+          await syncMissingLocalDataToCloud(snapshot);
+          universalSyncStarted = true;
+          realtimeSyncStatus("🟢 Realtime Auto Sync: ON • All app data connected");
+          if(hasChanges) refreshAllUI();
           return;
         }
 
-        if(cloudVal !== localVal){
-          applyingRemote = true;
-          try { localStorage.setItem(key, cloudVal); hasChanges = true; }
-          finally { applyingRemote = false; }
-        }
-        universalLastSyncedHash.set(key, syncHash(cloudVal));
-        markRemoteBaseline(key, remoteTime || Date.now());
-      });
-
-      remoteReady = true;
-      // Upload local-newer keys first, then publish any keys missing in cloud.
-      for(const key of localWins) await syncKeyToCloud(key, true);
-      await syncMissingLocalDataToCloud(initial);
-
-      // Register the realtime listener only after the initial baseline is ready.
-      unsubscribeAllData = dataColRef.onSnapshot(snapshot => {
         if (applyingRemote) return;
         let changed = false;
         snapshot.docChanges().forEach(change => {
           const key = String(change.doc.id);
           if(!isSyncableKey(key)) return;
-
           if(change.type === "removed"){
             if(localStorage.getItem(key) !== null){
               applyingRemote = true;
@@ -768,7 +738,6 @@
             universalLastSyncedHash.delete(key);
             return;
           }
-
           const data = change.doc.data() || {};
           const cloudVal = data.data;
           if(typeof cloudVal !== "string") return;
@@ -787,25 +756,15 @@
           }
           markRemoteBaseline(key, remoteTime || Date.now());
         });
-
-        // Initial catch-up is already completed before the realtime listener is attached.
-        // Avoid rescanning and resyncing every localStorage key on every snapshot.
         if(changed) refreshAllUI();
-      }, err => {
-        console.error("Universal data sync error", err);
-        realtimeSyncStatus("❌ Realtime Sync failed • Check Firebase connection/rules");
+      }).catch(e=>{
+        console.error("Universal data sync initialization/update failed", e);
+        realtimeSyncStatus("❌ Realtime Sync failed • " + (e?.code || e?.message || "Firebase error"));
       });
-
-      universalSyncStarted = true;
-      realtimeSyncStatus("🟢 Realtime Auto Sync: ON • All app data connected");
-      if(hasChanges) refreshAllUI();
-    } catch(e){
-      console.error("Universal data sync initialization failed", e);
-      universalSyncStarted = false;
-      remoteReady = false;
-      realtimeSyncStatus("❌ Realtime Sync failed • " + (e?.code || e?.message || "Firebase error"));
-      throw e;
-    }
+    }, err => {
+      console.error("Universal data sync error", err);
+      realtimeSyncStatus("❌ Realtime Sync failed • Check Firebase connection/rules");
+    });
   }
 
   function startSyncSafetyReconcile(){

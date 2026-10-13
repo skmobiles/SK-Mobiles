@@ -2098,8 +2098,9 @@ body:has(#skLoginModal.active) #leftDrawer {
   padding: 8px 10px !important;
   border-radius: 14px !important;
 }
+/* V5.6.104 — Keep customer list/detail visibility under existing JS control.
+   Do not force display:block here: skCPMainView is hidden when a customer detail opens. */
 #skCreditLedgerPage #skCPMainView {
-  display: block !important;
   min-width: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -2945,3 +2946,481 @@ html, body {
   }
 }
 
+
+
+/* V5.6.103 — Sales Bill History typography and spacing correction.
+   Presentation only: preserve existing values, IDs, data attributes and handlers. */
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px 13px !important;
+  margin: 0 0 10px !important;
+  border: 1px solid var(--card-border, #cbd5e1);
+  border-radius: 14px !important;
+  background: var(--card-bg, #fff);
+  box-sizing: border-box;
+  min-width: 0;
+}
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  line-height: 1.35;
+}
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: .82rem;
+  line-height: 1.4;
+}
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div > b {
+  font-size: .86rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > b {
+  flex: 0 0 auto;
+  font-size: .88rem;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+#skCreditLedgerPage .skcp-sales-bill-finance {
+  font-size: .74rem;
+  line-height: 1.45;
+  color: var(--text, #1e293b);
+  overflow-wrap: anywhere;
+}
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 1px;
+}
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-actions .skcp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: .72rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+#skCreditLedgerPage .skcp-sales-bill-paid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 8px;
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+#skCreditLedgerPage .skcp-sales-bill-receipts {
+  margin-top: 2px;
+  padding-top: 7px;
+  border-top: 1px solid var(--card-border, #e2e8f0);
+  color: var(--text-muted, #64748b);
+  font-size: .70rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  #skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) {
+    padding: 11px !important;
+    gap: 7px;
+  }
+  #skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div {
+    font-size: .78rem;
+  }
+  #skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div > b,
+  #skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > b {
+    font-size: .82rem;
+  }
+  #skCreditLedgerPage .skcp-sales-bill-finance {
+    font-size: .72rem;
+  }
+  #skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-actions .skcp-btn {
+    min-height: 34px;
+    font-size: .70rem;
+  }
+}
+
+
+/* ==========================================================================
+   V5.6.107 — UNIVERSAL UI POLISH LAYER
+   Presentation-only refinement across dashboard, billing, inventory, ledger,
+   repair, history, settings, forms, and dialogs. No business logic is defined here.
+   ========================================================================== */
+:root {
+  --sk105-space-1: 4px;
+  --sk105-space-2: 8px;
+  --sk105-space-3: 12px;
+  --sk105-radius-card: 14px;
+  --sk105-radius-panel: 16px;
+  --sk105-control-height: 42px;
+  --sk105-text-leading: 1.4;
+  --sk105-muted: var(--text-muted, #64748b);
+  --sk105-surface: var(--card-bg, #fff);
+  --sk105-border: var(--card-border, rgba(100, 116, 139, .24));
+}
+
+/* Universal safe sizing and legible text rhythm. */
+.app-viewport,
+.app-viewport :is(main, section, article, aside, header, footer, form, fieldset),
+.modal-overlay,
+.modal-overlay .modal-sheet,
+.drawer-sheet,
+#skCreditLedgerPage,
+#skRepairDetailModal #skRepairDetailContent {
+  box-sizing: border-box;
+  min-width: 0;
+}
+.app-viewport :is(p, small, label, .form-label, .field-label, .muted, .subtext, .helper-text),
+.modal-overlay :is(p, small, label, .form-label, .field-label, .muted, .subtext, .helper-text) {
+  line-height: var(--sk105-text-leading);
+}
+.app-viewport :is(h1, h2, h3, h4, .page-title, .section-title, .card-title),
+.modal-overlay :is(h1, h2, h3, h4, .page-title, .section-title, .card-title) {
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.app-viewport :is(.card, .panel, .content-box, .form-section, .form-card, .bill-section,
+  .history-card, .repair-card, .customer-card, .inventory-card, .accessory-card,
+  .summary-card, .stat-card, .metric-card, .ledger-card, .skcp-row, .sk-rj-card) {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.app-viewport :is(.card, .panel, .content-box, .form-section, .form-card, .history-card,
+  .repair-card, .customer-card, .inventory-card, .accessory-card, .ledger-card) {
+  border-radius: var(--sk105-radius-card);
+}
+
+/* Shared page rhythm: compact gaps, natural flow, no forced heights. */
+.app-viewport :is(.content-area, .page-content, .page-container, .view-section,
+  .tab-content, .form-grid, .fields-grid, .settings-grid, .inventory-list,
+  .customer-list, .ledger-list, .history-list, .record-list, .skcp-list) {
+  min-width: 0;
+  row-gap: var(--sk105-space-3);
+}
+.app-viewport :is(.section-header, .panel-header, .card-header, .page-header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sk105-space-2);
+  min-width: 0;
+}
+.app-viewport :is(.section-header, .panel-header, .card-header, .page-header) > * {
+  min-width: 0;
+}
+.app-viewport :is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
+  .metric-box, .skcp-stat, .sk-home-metric-card) {
+  min-height: 0;
+  padding: 9px 11px;
+  gap: 3px;
+}
+.app-viewport :is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
+  .metric-box, .skcp-stat, .sk-home-metric-card) :is(small, label, .label, .stat-label,
+  .metric-label, .summary-label, .count-label) {
+  margin: 0;
+  line-height: 1.2;
+}
+.app-viewport :is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
+  .metric-box, .skcp-stat, .sk-home-metric-card) :is(strong, b, .value, .stat-value,
+  .metric-value, .summary-value, .amount, .count) {
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+/* Consistent controls and input breathing room across forms. */
+.app-viewport :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+  select, textarea, .form-input, .form-select) {
+  box-sizing: border-box;
+  max-width: 100%;
+  line-height: 1.35;
+}
+.app-viewport :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+  select, .form-input, .form-select) {
+  min-height: var(--sk105-control-height);
+}
+.app-viewport :is(button, .btn, .submit-btn, .btn-primary, .btn-secondary, .skcp-btn) {
+  box-sizing: border-box;
+  line-height: 1.25;
+  text-align: center;
+}
+.app-viewport :is(.action-row, .action-toolbar, .list-toolbar, .search-toolbar, .filter-bar,
+  .sk-rj-history-actions, .sk-rj-actions, .skcp-bill-actions) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sk105-space-2);
+  min-width: 0;
+}
+.app-viewport :is(.table-responsive, .table-wrap, .table-container, .inventory-table-wrap) {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Modal sheets: one scroll owner, stable opaque headers and safe footer spacing. */
+.modal-overlay .modal-sheet {
+  max-width: min(960px, calc(100vw - 24px));
+  max-height: calc(100dvh - 20px);
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--sk105-radius-panel);
+}
+.modal-overlay .modal-title {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--header-glass, var(--card-bg, rgba(255,255,255,.97)));
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--sk105-border);
+}
+.modal-overlay .modal-title > :first-child {
+  min-width: 0;
+  line-height: 1.25;
+}
+.modal-overlay .modal-close-btn {
+  flex: 0 0 auto;
+}
+.modal-overlay .modal-actions,
+.modal-overlay .modal-footer,
+.modal-overlay .sheet-footer {
+  flex: 0 0 auto;
+  padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+}
+
+/* Repair Details: clearer hierarchy and better use of the available viewport. */
+#skRepairDetailModal .modal-sheet {
+  width: min(920px, calc(100vw - 24px));
+  padding: 12px;
+}
+#skRepairDetailModal .modal-title {
+  min-height: 48px;
+  margin: 0 0 10px;
+  padding: 7px 4px 10px;
+  font-size: .98rem;
+}
+#skRepairDetailModal #skRepairDetailContent {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#skRepairDetailModal #skRepairDetailContent > div {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .045);
+}
+#skRepairDetailModal #skRepairDetailContent > div > div:first-child {
+  font-size: 1rem !important;
+  line-height: 1.35;
+}
+#skRepairDetailModal #skRepairDetailContent > div > div:nth-child(2) {
+  margin-top: -4px !important;
+  font-size: .82rem !important;
+  line-height: 1.4;
+  color: var(--sk105-muted);
+}
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 0;
+}
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance > div {
+  min-width: 0;
+  gap: 4px;
+  padding: 10px 11px;
+  border-radius: 12px;
+  font-size: .78rem;
+  line-height: 1.35;
+}
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance span {
+  line-height: 1.3;
+}
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance b {
+  font-size: .9rem;
+  line-height: 1.25;
+}
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance .sk-rj-finance-due {
+  grid-column: 1 / -1;
+  border-color: var(--primary, #2563eb);
+  background: var(--badge-bg, rgba(37, 99, 235, .08));
+}
+#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary {
+  margin-top: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: .78rem;
+  line-height: 1.4;
+}
+#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary > b {
+  margin-bottom: 5px;
+  font-size: .82rem;
+}
+#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary > div {
+  align-items: flex-start;
+  gap: 12px;
+  padding: 5px 0;
+  line-height: 1.35;
+}
+#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary > div > :last-child {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-weight: 700;
+}
+#skRepairDetailModal #skRepairDetailContent button.submit-btn {
+  min-height: 42px;
+  border-radius: 12px;
+  font-size: .82rem;
+  font-weight: 800;
+}
+#skRepairDetailModal #skRepairDetailContent > div > div:last-child {
+  line-height: 1.45;
+}
+@media (min-width: 760px) {
+  #skRepairDetailModal .modal-sheet {
+    width: min(920px, calc(100vw - 48px));
+    padding: 16px;
+  }
+  #skRepairDetailModal #skRepairDetailContent > div {
+    padding: 18px !important;
+  }
+}
+@media (max-width: 520px) {
+  .modal-overlay .modal-sheet {
+    max-width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+  #skRepairDetailModal .modal-sheet {
+    padding: 10px;
+  }
+  #skRepairDetailModal #skRepairDetailContent > div {
+    padding: 11px !important;
+    gap: 8px;
+  }
+  #skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance > div {
+    padding: 8px 9px;
+    font-size: .74rem;
+  }
+  #skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance b {
+    font-size: .84rem;
+  }
+}
+@media (max-width: 359px) {
+  #skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance .sk-rj-finance-due {
+    grid-column: auto;
+  }
+}
+
+
+/* V5.6.107 — Universal UI typography and compact action-control alignment.
+   Scope excludes printable invoice output; no application handlers or data logic changed. */
+body button:not(#printableInvoiceCard button),
+body [role="button"]:not(#printableInvoiceCard [role="button"]) {
+  font-family: var(--app-font, inherit);
+  line-height: 1.3;
+  letter-spacing: normal;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Compact action pills and small utility controls use one readable type scale. */
+.skcp-btn,
+.sk-credit-btn,
+.skcp-filter,
+.skcp-back,
+.skcp-bill-actions button,
+.skcp-bill-actions .skcp-sales-bill-paid,
+.sk-credit-actions button,
+.sk-v43-entry-type button,
+.sk-v43-keep-actions button,
+.skcp-toolbar button,
+.skcp-filters button,
+.skcp-page-head button,
+.sk-credit-search-row button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.3;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.skcp-bill-actions .skcp-sales-bill-paid,
+.skcp-sales-bill-paid {
+  min-height: 30px;
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+/* Keep icons and labels from touching or drifting vertically in compact controls. */
+.skcp-btn > svg,
+.sk-credit-btn > svg,
+.skcp-filter > svg,
+.skcp-back > svg,
+.skcp-bill-actions button > svg,
+.sk-credit-actions button > svg {
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+}
+
+/* All ordinary app buttons inherit the same baseline without resizing primary actions. */
+body button:not(#printableInvoiceCard button) {
+  font-kerning: normal;
+  text-transform: none;
+}
+
+@media (max-width: 380px) {
+  .skcp-btn,
+  .sk-credit-btn,
+  .skcp-filter,
+  .skcp-back,
+  .skcp-bill-actions button,
+  .skcp-bill-actions .skcp-sales-bill-paid,
+  .sk-credit-actions button,
+  .sk-v43-entry-type button,
+  .sk-v43-keep-actions button,
+  .skcp-toolbar button,
+  .skcp-filters button,
+  .skcp-page-head button,
+  .sk-credit-search-row button {
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+}

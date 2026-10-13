@@ -1,5 +1,5 @@
 /* SK MOBILES PWA shell cache. Firebase/auth/firestore requests are never intercepted. */
-const CACHE_NAME = 'sk-mobiles-shell-v5.6.102';
+const CACHE_NAME = 'sk-mobiles-shell-v5.6.107';
 const APP_SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/premium-overrides.css', './js/app.js', './js/firebase-sync.js',
