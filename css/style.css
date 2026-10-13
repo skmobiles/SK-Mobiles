@@ -10905,3 +10905,22 @@ body{min-height:100vh;min-height:100dvh;}
     font-size: .74rem !important;
   }
 }
+
+
+/* ==========================================================================
+   SK MOBILES 5.6.97 — shared layout tokens (single source of truth)
+   ========================================================================== */
+:root {
+  --sk-compact-card-pad-y: 8px;
+  --sk-compact-card-pad-x: 12px;
+  --sk-compact-card-radius: 12px;
+  --sk-compact-section-gap: 12px;
+  --sk-compact-control-height: 40px;
+  --sk-compact-action-height: 44px;
+  --sk-compact-metric-gap: 3px;
+  --sk-compact-label-line-height: 1.25;
+  --sk-compact-value-line-height: 1.2;
+  --sk-modal-header-bg: var(--header-glass, var(--card-bg, rgba(255,255,255,.96)));
+  --sk-modal-header-border: var(--card-border, rgba(15,23,42,.10));
+}
+

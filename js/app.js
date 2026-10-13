@@ -1,3 +1,4 @@
+/* SK MOBILES 5.6.97 — visual design-system release; application logic retained. */
 
 const MASTER_INVENTORY = [
       {
@@ -4383,8 +4384,10 @@ img{max-width:100%!important;}
       problem:document.getElementById('skRjProblem').value.trim(),
       date:rjToISODate(document.getElementById('skRjDate').value)||today(),
       estimate:Number(document.getElementById('skRjEstimate').value)||0,
+      discountAmount:Math.max(0,Number(existing?.discountAmount)||0),
+      discountHistory:Array.isArray(existing?.discountHistory)?existing.discountHistory.slice():[],
       paidAmount:Math.max(0,Number(document.getElementById('skRjAdvancePayment').value)||0),
-      outstandingAmount:Math.max(0,(Number(document.getElementById('skRjEstimate').value)||0)-Math.max(0,Number(document.getElementById('skRjAdvancePayment').value)||0)),
+      outstandingAmount:Math.max(0,((Number(document.getElementById('skRjEstimate').value)||0)-Math.max(0,Number(existing?.discountAmount)||0))-Math.max(0,Number(document.getElementById('skRjAdvancePayment').value)||0)),
       paymentHistory:Array.isArray(existing?.paymentHistory)?existing.paymentHistory.slice():[],
       status:document.getElementById('skRjStatus').value,
       note:document.getElementById('skRjNote').value.trim(),
@@ -4403,7 +4406,7 @@ img{max-width:100%!important;}
     } else if(job.paidAmount<previousPaid){
       /* Editing the advance field must not silently erase earlier payment records. */
       job.paidAmount=previousPaid;
-      job.outstandingAmount=Math.max(0,job.estimate-job.paidAmount);
+      job.outstandingAmount=Math.max(0,job.estimate-Math.max(0,Number(job.discountAmount)||0)-job.paidAmount);
     }
     if(existing) a[a.findIndex(x=>x.id===id)]=job; else a.unshift(job);
     save(a); skRjResetForm(); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
@@ -4473,64 +4476,144 @@ img{max-width:100%!important;}
 
 
   window.skRjDeliver=function(id){
-    const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
+    const a=load(), i=a.findIndex(x=>String(x.id)===String(id)); if(i<0)return;
     if(a[i].status!=='Ready'){ showToast('Repair job must be Ready before delivery'); return; }
     const job=a[i];
     const total=Math.max(0,Number(job.estimate)||0);
     const alreadyPaid=Math.max(0,Number(job.paidAmount)||0);
-    const outstanding=Math.max(0,total-alreadyPaid);
-    const entered=prompt(
-      'Customer payment before delivery\nTotal: ₹'+total.toLocaleString('en-IN')+
+    const existingDiscount=Math.min(total,Math.max(0,Number(job.discountAmount)||0));
+    const maxAdditionalDiscount=Math.max(0,total-alreadyPaid-existingDiscount);
+    const discountInput=prompt(
+      'Discount at delivery (enter 0 if none)\nOriginal estimate: ₹'+total.toLocaleString('en-IN')+
+      '\nPreviously recorded discount: ₹'+existingDiscount.toLocaleString('en-IN')+
       '\nAlready paid: ₹'+alreadyPaid.toLocaleString('en-IN')+
-      '\nOutstanding: ₹'+outstanding.toLocaleString('en-IN')+
+      '\nMaximum additional discount: ₹'+maxAdditionalDiscount.toLocaleString('en-IN')+
+      '\n\nEnter additional discount amount:',
+      '0'
+    );
+    if(discountInput===null)return;
+    const discount=Number(String(discountInput).replace(/[,₹\s]/g,''));
+    if(!Number.isFinite(discount)||discount<0||discount>maxAdditionalDiscount){
+      showToast('Enter a valid discount not greater than ₹'+maxAdditionalDiscount.toLocaleString('en-IN'));
+      return;
+    }
+
+    let discountReason='';
+    let discountEvent=null;
+    if(discount>0){
+      const reasonChoice=prompt(
+        'Select discount reason by number:\n1. Customer bargain\n2. Special offer\n3. Service discount\n4. Other',
+        '1'
+      );
+      if(reasonChoice===null)return;
+      const reasons={'1':'Customer bargain','2':'Special offer','3':'Service discount','4':'Other'};
+      const choice=String(reasonChoice).trim();
+      if(!reasons[choice]){
+        showToast('Choose discount reason 1, 2, 3 or 4');
+        return;
+      }
+      discountReason=reasons[choice];
+      if(choice==='4'){
+        const customReason=prompt('Enter discount reason:');
+        if(customReason===null)return;
+        discountReason=String(customReason).trim();
+        if(!discountReason){showToast('Discount reason is required');return;}
+      }
+      discountEvent={
+        id:'RJ-DISCOUNT-'+String(job.id)+'-'+Date.now(),
+        amount:discount,
+        reason:discountReason,
+        date:new Date().toISOString(),
+        type:'Repair discount'
+      };
+    }
+
+    const netTotal=Math.max(0,total-existingDiscount-discount);
+    const outstandingBeforePayment=Math.max(0,netTotal-alreadyPaid);
+    const entered=prompt(
+      'Customer payment before delivery\nOriginal estimate: ₹'+total.toLocaleString('en-IN')+
+      '\nTotal discount: ₹'+(existingDiscount+discount).toLocaleString('en-IN')+
+      '\nFinal payable: ₹'+netTotal.toLocaleString('en-IN')+
+      '\nAlready paid: ₹'+alreadyPaid.toLocaleString('en-IN')+
+      '\nOutstanding before this payment: ₹'+outstandingBeforePayment.toLocaleString('en-IN')+
       '\n\nEnter amount received now (enter 0 if no payment):',
-      String(outstanding)
+      String(outstandingBeforePayment)
     );
     if(entered===null)return;
     const amount=Number(String(entered).replace(/[,₹\s]/g,''));
-    if(!Number.isFinite(amount)||amount<0){showToast('Enter a valid payment amount');return;}
-    job.paidAmount=alreadyPaid+amount;
-    job.outstandingAmount=Math.max(0,total-job.paidAmount);
-    job.paymentHistory=Array.isArray(job.paymentHistory)?job.paymentHistory:[];
-    if(amount>0)job.paymentHistory.push({amount, date:new Date().toISOString(), type:'Repair delivery payment'});
+    if(!Number.isFinite(amount)||amount<0){
+      showToast('Enter a valid payment amount');
+      return;
+    }
 
-    /* Add the unpaid repair balance to Customer Credit Ledger exactly once per repair job. */
-    if(job.outstandingAmount>0){
-      try{
-        const ledgerKey='sk_credit_ledger_v1';
-        const ledger=JSON.parse(localStorage.getItem(ledgerKey)||'[]');
-        const rows=Array.isArray(ledger)?ledger:[];
-        const existingCredit=rows.find(e=>String(e.repairJobId||'')===String(job.id)&&String(e.source||'')==='repair-job');
-        const customerKey=String(job.customer||'').trim().toLowerCase()+'|'+String(job.phone||'').replace(/\\D/g,'');
+    const now=new Date().toISOString();
+    job.discountAmount=existingDiscount+discount;
+    job.discountHistory=Array.isArray(job.discountHistory)?job.discountHistory:[];
+    if(discountEvent)job.discountHistory.push(discountEvent);
+    job.paidAmount=alreadyPaid+amount;
+    job.outstandingAmount=Math.max(0,netTotal-job.paidAmount);
+    job.paymentHistory=Array.isArray(job.paymentHistory)?job.paymentHistory:[];
+    if(amount>0)job.paymentHistory.push({amount, date:now, type:'Repair delivery payment'});
+
+    /* Discount entries are audit-only and are excluded from credit/payment totals. */
+    try{
+      const ledgerKey='sk_credit_ledger_v1';
+      const ledger=JSON.parse(localStorage.getItem(ledgerKey)||'[]');
+      const rows=Array.isArray(ledger)?ledger:[];
+      const customerKey=String(job.customer||'').trim().toLowerCase()+'|'+String(job.phone||'').replace(/\D/g,'');
+      if(discountEvent){
+        rows.push({
+          id:discountEvent.id,
+          key:customerKey,
+          name:String(job.customer||'Walk-in Customer').trim(),
+          phone:String(job.phone||''),
+          type:'discount',
+          amount:discountEvent.amount,
+          mode:'Discount',
+          date:now.slice(0,10),
+          details:'Repair discount • Job '+String(job.id)+' • Estimate ₹'+total.toLocaleString('en-IN')+' • Reason: '+discountEvent.reason,
+          source:'repair-discount',
+          repairJobId:String(job.id),
+          billId:'',
+          dueDate:''
+        });
+      }
+
+      /* Keep one authoritative outstanding record per repair job; remove stale balance when fully paid. */
+      const existingCreditIndex=rows.findIndex(e=>String(e.repairJobId||'')===String(job.id)&&String(e.source||'')==='repair-job');
+      if(job.outstandingAmount>0){
         const creditEntry={
-          id:existingCredit?.id||('RJ-CREDIT-'+String(job.id)),
+          id:existingCreditIndex>=0?rows[existingCreditIndex].id:('RJ-CREDIT-'+String(job.id)),
           key:customerKey,
           name:String(job.customer||'Walk-in Customer').trim(),
           phone:String(job.phone||''),
           type:'credit',
           amount:job.outstandingAmount,
           mode:'Credit',
-          date:new Date().toISOString().slice(0,10),
-          details:'Repair balance • Job '+String(job.id)+' • Estimate ₹'+total.toLocaleString('en-IN')+' • Paid ₹'+job.paidAmount.toLocaleString('en-IN'),
+          date:now.slice(0,10),
+          details:'Repair balance • Job '+String(job.id)+' • Estimate ₹'+total.toLocaleString('en-IN')+' • Discount ₹'+job.discountAmount.toLocaleString('en-IN')+' • Payable ₹'+netTotal.toLocaleString('en-IN')+' • Paid ₹'+job.paidAmount.toLocaleString('en-IN'),
           source:'repair-job',
           repairJobId:String(job.id),
           billId:'',
           dueDate:''
         };
-        if(existingCredit){ Object.assign(existingCredit,creditEntry); }
-        else { rows.push(creditEntry); }
-        localStorage.setItem(ledgerKey,JSON.stringify(rows));
-      }catch(err){
-        console.error('Repair credit ledger update failed:',err);
-        showToast('Warning: repair delivered, but credit ledger could not be updated');
+        if(existingCreditIndex>=0)rows[existingCreditIndex]=creditEntry;
+        else rows.push(creditEntry);
+      }else if(existingCreditIndex>=0){
+        rows.splice(existingCreditIndex,1);
       }
+      localStorage.setItem(ledgerKey,JSON.stringify(rows));
+    }catch(err){
+      console.error('Repair discount/credit ledger update failed:',err);
+      showToast('Warning: repair delivery saved, but the credit/discount ledger could not be updated');
     }
+
     job.status='Delivered';
     job.deliveryStatus='Delivered';
-    job.deliveredAt=new Date().toISOString();
-    job.updatedAt=new Date().toISOString();
+    job.deliveredAt=now;
+    job.updatedAt=now;
     save(a); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
-    showToast('Payment recorded and repair job marked Delivered');
+    showToast('Repair delivered; discount and payment recorded');
   };
 
   window.skRjRework=function(id){
@@ -4595,10 +4678,13 @@ img{max-width:100%!important;}
         <div style="margin-top:8px;font:inherit;font-size:12px;color:var(--text-muted)">📅 ${rjFmtDate(j.date)} · Status: <b>${esc(j.status)}</b> · Work: <b>${esc(j.workType)}</b></div>
         ${j.schedule?`<div style="margin-top:6px;font-size:.72rem">🗓️ Scheduled: <b>${esc(j.schedule)}</b></div>`:''}
         <div class="sk-rj-detail-finance">
-          <div><span>Total repair cost</span><b>₹${Number(j.estimate||0).toLocaleString('en-IN')}</b></div>
+          <div><span>Original estimate</span><b>₹${Number(j.estimate||0).toLocaleString('en-IN')}</b></div>
+          ${Number(j.discountAmount||0)>0?`<div><span>Total discount</span><b style="color:#16a34a">− ₹${Number(j.discountAmount||0).toLocaleString('en-IN')}</b></div>`:''}
+          <div><span>Final payable</span><b>₹${Math.max(0,Number(j.estimate||0)-Number(j.discountAmount||0)).toLocaleString('en-IN')}</b></div>
           <div><span>Total paid</span><b>₹${Number(j.paidAmount||0).toLocaleString('en-IN')}</b></div>
-          <div class="sk-rj-finance-due"><span>Balance to pay</span><b>₹${Math.max(0,Number(j.outstandingAmount ?? (Number(j.estimate||0)-Number(j.paidAmount||0)))||0).toLocaleString('en-IN')}</b></div>
+          <div class="sk-rj-finance-due"><span>Balance to pay</span><b>₹${Math.max(0,Number(j.outstandingAmount ?? (Number(j.estimate||0)-Number(j.discountAmount||0)-Number(j.paidAmount||0)))||0).toLocaleString('en-IN')}</b></div>
         </div>
+        ${Array.isArray(j.discountHistory)&&j.discountHistory.length?`<div class="sk-rj-payment-summary"><b>Discount history</b>${j.discountHistory.map(d=>`<div><span>${esc(d.date?rjFmtDate(d.date):'Date not recorded')} · ${esc(d.reason||'Discount')}</span><span>− ₹${Number(d.amount||0).toLocaleString('en-IN')}</span></div>`).join('')}</div>`:''}
         ${Array.isArray(j.paymentHistory)&&j.paymentHistory.length?`<div class="sk-rj-payment-summary"><b>Payments received</b>${j.paymentHistory.map(p=>`<div><span>${esc(p.date?rjFmtDate(p.date):'Date not recorded')}</span><span>₹${Number(p.amount||0).toLocaleString('en-IN')}</span></div>`).join('')}</div>`:''}
         ${j.note?`<div style="margin-top:8px;font-size:.72rem"><b>Note:</b> ${esc(j.note)}</div>`:''}
       </div>`;
@@ -4802,7 +4888,7 @@ img{max-width:100%!important;}
     });
     if(!rows.length){showToast('No filtered repair history to export');return}
     if(typeof XLSX==='undefined'){showToast('Excel library not available');return}
-    const data=rows.map(j=>({Date:j.date,Customer:j.customer,Phone:j.phone,Model:j.model,IMEI:j.imei,WorkType:j.workType,Status:j.status,Scheduled:j.schedule,Problem:j.problem,Estimate:j.estimate,Note:j.note}));
+    const data=rows.map(j=>({Date:j.date,Customer:j.customer,Phone:j.phone,Model:j.model,IMEI:j.imei,WorkType:j.workType,Status:j.status,Scheduled:j.schedule,Problem:j.problem,Estimate:j.estimate,Discount:j.discountAmount||0,DiscountReasons:(Array.isArray(j.discountHistory)?j.discountHistory.map(d=>d.reason||'').filter(Boolean).join('; '):''),FinalPayable:Math.max(0,Number(j.estimate||0)-Number(j.discountAmount||0)),Paid:j.paidAmount||0,Outstanding:j.outstandingAmount??Math.max(0,Number(j.estimate||0)-Number(j.discountAmount||0)-Number(j.paidAmount||0)),Note:j.note}));
     const ws=XLSX.utils.json_to_sheet(data), wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,'Repair History');
     XLSX.writeFile(wb,`SK_Mobiles_Repair_History_${from||'all'}_${to||'all'}.xlsx`);
@@ -4978,6 +5064,15 @@ img{max-width:100%!important;}
     document.getElementById('appHeaderLogo')?.setAttribute('src',src);
     document.getElementById('invoiceLogoImg')?.setAttribute('src',src);
     document.getElementById('settingsLogoPreview')?.setAttribute('src',src);
+    const loginLogo=document.getElementById('skLoginLogoImg');
+    if(loginLogo){
+      loginLogo.src=src;
+      loginLogo.onerror=function(){
+        this.style.display='none';
+        const fallback=this.nextElementSibling;
+        if(fallback) fallback.style.display='flex';
+      };
+    }
   }
   try{
     const m={name:'SK Mobiles',short_name:'SK Mobiles',display:'standalone',background_color:'#ffffff',theme_color:'#ffffff',icons:[{src:SK_ICON,sizes:'512x512',type:'image/png',purpose:'any maskable'}]};
@@ -5198,6 +5293,8 @@ img{max-width:100%!important;}
       toast(selectedRole==='admin'?'👑 Admin login successful':'👷 Worker login successful');
     }
     window.skLogout=async function(){
+      // UI fix: ensure the non-modal drawer closes before the login screen is shown.
+      if(typeof window.toggleLeftDrawer === 'function') window.toggleLeftDrawer(false);
       try{
         if(typeof window.skFirebaseLogout === 'function'){
           await window.skFirebaseLogout();
@@ -7596,7 +7693,7 @@ window.skCPEditLedgerEntry=function(encodedId){
     var dateValue=typeof skDmyToISO==='function'?skDmyToISO(dateText):dateText;
     if(!dateValue){if(typeof showToast==='function')showToast('Enter a valid date');return;}
     var dueDate='';if(dueText){dueDate=typeof skDmyToISO==='function'?skDmyToISO(dueText):dueText;if(!dueDate){if(typeof showToast==='function')showToast('Enter a valid due date');return;}}
-    entry.name=name;entry.phone=phone;entry.key=customerKey(name,phone);entry.type=type;entry.amount=amount;entry.date=dateValue;entry.mode=mode;entry.details=details;entry.dueDate=dueDate;
+    entry.name=name;entry.phone=phone;entry.key=cpKey(name,phone);entry.type=type;entry.amount=amount;entry.date=dateValue;entry.mode=mode;entry.details=details;entry.dueDate=dueDate;
     localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(ledger));close();
     if(typeof window.skCPRender==='function')window.skCPRender();
     if(typeof skCPSelectedKey!=='undefined'&&skCPSelectedKey){var c=cpGetCustomers().find(function(x){return x.key===skCPSelectedKey;});if(c)cpOpenDetail(c);}
@@ -7617,9 +7714,9 @@ function cpOpenDetail(c){
  var html='<div class="skcp-page-head"><button class="skcp-back" onclick="skCPBackToList()">← Back</button><div><b>'+cpEsc(c.name)+'</b><div style="font-size:.6rem;color:var(--text-muted)">📞 '+cpEsc(c.phone||'No phone')+'</div></div></div>'+
  '<div class="skcp-detail-box"><div class="skcp-detail-grid"><div class="skcp-mini"><b>'+cpMoney(c.balance)+'</b><span>CURRENT OUTSTANDING</span></div><div class="skcp-mini"><b>'+cpMoney(c.credits)+'</b><span>CREDIT / EMI</span></div><div class="skcp-mini"><b>'+cpMoney(c.payments)+'</b><span>PAYMENT</span></div></div>'+
  '<div class="skcp-bill-actions"><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(c.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ FULLY PAID</span>')+'</div></div>';
- if(bills.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">SALES BILL HISTORY</div>';html+=bills.map(function(x){var b=x.b;return '<div class="skcp-bill-card"><div class="skcp-bill-top"><div><b>'+cpEsc(b.id)+'</b> • '+cpEsc(b.model||'')+'<div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(b.date)+' • '+cpEsc(b.payMode||'')+'</div></div><b>'+cpMoney(b.balance||0)+'</b></div><div style="font-size:.63rem;margin-top:4px">Amount: '+cpMoney(b.price||0)+' • Advance: '+cpMoney(b.advance||0)+' • Outstanding: '+cpMoney(b.balance||0)+'</div><div class="skcp-bill-actions"><button class="skcp-btn" onclick="skCPViewBill('+x.idx+')">📄 Bill Details</button><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(b.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ PAID</span>')+'</div>'+
+ if(bills.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">SALES BILL HISTORY</div>';html+=bills.map(function(x){var b=x.b;var billTotal=Math.max(0,Number(b.price)||0);var billBalance=Math.max(0,Number(b.balance)||0);var isCreditBill=b.payMode==='Credit'||b.payMode==='EMI';var billPaid=isCreditBill?Math.max(0,Number(b.advance)||0):Math.max(0,billTotal-billBalance);return '<div class="skcp-bill-card"><div class="skcp-bill-top"><div><b>'+cpEsc(b.id)+'</b> • '+cpEsc(b.model||'')+'<div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(b.date)+' • '+cpEsc(b.payMode||'')+'</div></div><b>'+cpMoney(billTotal)+'</b></div><div style="font-size:.63rem;margin-top:4px">Amount: '+cpMoney(billTotal)+' • Paid: '+cpMoney(billPaid)+' • Outstanding: '+cpMoney(billBalance)+'</div><div class="skcp-bill-actions"><button class="skcp-btn" onclick="skCPViewBill('+x.idx+')">📄 Bill Details</button><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(billBalance>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ PAID</span>')+'</div>'+
  (Array.isArray(b.paymentReceipts)&&b.paymentReceipts.length?'<div style="font-size:.59rem;color:var(--text-muted);margin-top:6px">Receipts: '+b.paymentReceipts.map(function(r){return '#'+cpEsc(String(r.id||'').slice(-6))+' '+cpMoney(r.amount)+' '+cpEsc(r.mode||'')+' '+cpDateText(r.date)}).join(' • ')+'</div>':'')+'</div>'}).join('')}
- if(entries.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">CREDIT / PAYMENT HISTORY</div>';html+=entries.map(function(e){var repairJobId=skCPRepairJobIdFromCredit(e);var isRepairCredit=!!repairJobId;var canEdit=String(e.source||'')!=='bill'&&String(e.source||'')!=='repair-job'&&!isRepairCredit;return '<div class="skcp-bill-card '+(isRepairCredit?'skcp-repair-credit-link':'')+'" '+(isRepairCredit?'role="button" tabindex="0" data-repair-job-id="'+cpEsc(repairJobId)+'" onclick="skCPOpenRepairJob(this.dataset.repairJobId)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();skCPOpenRepairJob(this.dataset.repairJobId)}"':'')+'><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>'+(e.type==='payment'?'💰 PAYMENT':'🧾 CREDIT')+' • '+cpMoney(e.amount)+'</b>'+(canEdit?'<button type="button" class="skcp-btn" style="flex:0 0 auto;padding:5px 9px;font-size:.62rem" onclick="event.stopPropagation();skCPEditLedgerEntry(\''+encodeURIComponent(String(e.id||''))+ '\')">✏️ Edit</button>':(isRepairCredit?'<button type="button" class="skcp-btn" style="flex:0 0 auto;padding:5px 9px;font-size:.62rem" onclick="event.stopPropagation();skCPEditRepairJob(\''+cpEsc(repairJobId)+'\')">✏️ Edit Job</button>':''))+'</div><div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(e.date)+' • '+cpEsc(e.mode||'')+' • '+cpEsc(e.details||'')+(e.billId?' • Bill #'+cpEsc(cpBillLast3(e.billId)):'')+'</div>'+(isRepairCredit?'<div class="skcp-open-job-hint">Tap to open repair job details →</div>':'')+'</div>'}).join('')}
+ if(entries.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">CREDIT / PAYMENT HISTORY</div>';html+=entries.map(function(e){var repairJobId=skCPRepairJobIdFromCredit(e);var isRepairCredit=!!repairJobId;var canEdit=String(e.source||'')!=='bill'&&String(e.source||'')!=='repair-job'&&!isRepairCredit;return '<div class="skcp-bill-card '+(isRepairCredit?'skcp-repair-credit-link':'')+'" '+(isRepairCredit?'role="button" tabindex="0" data-repair-job-id="'+cpEsc(repairJobId)+'" onclick="skCPOpenRepairJob(this.dataset.repairJobId)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();skCPOpenRepairJob(this.dataset.repairJobId)}"':'')+'><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>'+(e.type==='payment'?'💰 PAYMENT':(e.type==='discount'?'🏷️ DISCOUNT':'🧾 CREDIT'))+' • '+(e.type==='discount'?'− ':'')+cpMoney(e.amount)+'</b>'+(canEdit?'<button type="button" class="skcp-btn" style="flex:0 0 auto;padding:5px 9px;font-size:.62rem" onclick="event.stopPropagation();skCPEditLedgerEntry(\''+encodeURIComponent(String(e.id||''))+ '\')">✏️ Edit</button>':(isRepairCredit?'<button type="button" class="skcp-btn" style="flex:0 0 auto;padding:5px 9px;font-size:.62rem" onclick="event.stopPropagation();skCPEditRepairJob(\''+cpEsc(repairJobId)+'\')">✏️ Edit Job</button>':''))+'</div><div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(e.date)+' • '+cpEsc(e.mode||'')+' • '+cpEsc(e.details||'')+(e.billId?' • Bill #'+cpEsc(cpBillLast3(e.billId)):'')+'</div>'+(isRepairCredit?'<div class="skcp-open-job-hint">Tap to open repair job details →</div>':'')+'</div>'}).join('')}
  document.getElementById('skCPDetailView').innerHTML=html;document.getElementById('skCPMainView').style.display='none';document.getElementById('skCPDetailView').style.display='block';
 }
 window.skCPEditCustomer=function(k){
@@ -7637,7 +7734,7 @@ window.skCPEditCustomer=function(k){
  '<label style="display:flex;flex-direction:column;gap:5px;font-size:.78rem;font-weight:750">Phone number<input name="phone" value="'+esc(c.phone||'')+'" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"></label>'+
  '<div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px"><div style="padding:9px;border:1px solid var(--card-border);border-radius:10px"><small style="display:block;color:var(--text-muted)">Credit / EMI</small><b>'+cpMoney(c.credits)+'</b></div><div style="padding:9px;border:1px solid var(--card-border);border-radius:10px"><small style="display:block;color:var(--text-muted)">Payments</small><b>'+cpMoney(c.payments)+'</b></div><div style="padding:9px;border:1px solid var(--card-border);border-radius:10px"><small style="display:block;color:var(--text-muted)">Balance</small><b>'+cpMoney(c.balance)+'</b></div></div>'+
  '<div style="grid-column:1/-1;font-size:.78rem;font-weight:850;margin-top:3px">Credit / Payment entries</div>'+
- '<div style="grid-column:1/-1;display:grid;gap:7px">'+(entries.length?entries.map(function(e){var canEdit=String(e.source||'')!=='repair-job'&&!skCPRepairJobIdFromCredit(e);return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px;border:1px solid var(--card-border);border-radius:11px"><div style="min-width:0"><b style="font-size:.78rem">'+(e.type==='payment'?'Payment':'Credit')+' • '+cpMoney(e.amount)+'</b><div style="font-size:.67rem;color:var(--text-muted);overflow-wrap:anywhere">'+cpDateText(e.date)+' • '+esc(e.mode||'')+' • '+esc(e.details||'')+'</div></div>'+(canEdit?'<button type="button" data-entry-id="'+esc(encodeURIComponent(String(e.id||'')))+'" class="skcp-customer-entry-edit" style="flex:0 0 auto;padding:7px 10px;border:1px solid var(--card-border);border-radius:999px;background:var(--pill-bg);color:var(--text);font-weight:800">✏️ Edit entry</button>':'<span style="font-size:.65rem;color:var(--text-muted)">Edit from original job</span>')+'</div>'}).join(''):'<div style="font:inherit;font-size:12px;color:var(--text-muted);padding:8px 0">No manual credit/payment entries.</div>')+'</div>'+
+ '<div style="grid-column:1/-1;display:grid;gap:7px">'+(entries.length?entries.map(function(e){var canEdit=String(e.source||'')!=='repair-job'&&!skCPRepairJobIdFromCredit(e);return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px;border:1px solid var(--card-border);border-radius:11px"><div style="min-width:0"><b style="font-size:.78rem">'+(e.type==='payment'?'Payment':(e.type==='discount'?'Discount':'Credit'))+' • '+(e.type==='discount'?'− ':'')+cpMoney(e.amount)+'</b><div style="font-size:.67rem;color:var(--text-muted);overflow-wrap:anywhere">'+cpDateText(e.date)+' • '+esc(e.mode||'')+' • '+esc(e.details||'')+'</div></div>'+(canEdit?'<button type="button" data-entry-id="'+esc(encodeURIComponent(String(e.id||'')))+'" class="skcp-customer-entry-edit" style="flex:0 0 auto;padding:7px 10px;border:1px solid var(--card-border);border-radius:999px;background:var(--pill-bg);color:var(--text);font-weight:800">✏️ Edit entry</button>':'<span style="font-size:.65rem;color:var(--text-muted)">Edit from original job</span>')+'</div>'}).join(''):'<div style="font:inherit;font-size:12px;color:var(--text-muted);padding:8px 0">No manual credit/payment entries.</div>')+'</div>'+
  '<div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:4px"><button type="button" id="skcpCustomerEditCancel" style="padding:10px 15px;border:1px solid var(--card-border,#cbd5e1);border-radius:999px;background:transparent;color:inherit">Cancel</button><button type="submit" style="padding:10px 16px;border:0;border-radius:999px;background:var(--primary,#2563eb);color:#fff;font-weight:850">Save Changes</button></div></form></section>';
  document.body.appendChild(modal);
  modal.style.setProperty('z-index','2147483647','important');

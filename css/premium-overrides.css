@@ -198,8 +198,8 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   width: min(100%, 760px);
   max-width: min(760px, 100%);
   max-height: calc(100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   border-radius: var(--sk-ui-radius-xl);
@@ -501,8 +501,8 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   width: min(100%, 560px);
   max-width: 560px;
   max-height: calc(100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
   overscroll-behavior: contain;
   border-radius: var(--sk-ui-radius-xl);
   border: var(--sk-ui-line);
@@ -1402,3 +1402,1546 @@ button,input,select,textarea{font-family:inherit;}
   #skUsedStatsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   #skGeneralPermissionsBox .sk-perm-row { padding-inline: 8px !important; }
 }
+
+
+/* ==========================================================================
+   SK MOBILES 5.6.92 — USED STOCK & DETAILS MICRO-LAYOUT
+   Scoped to existing Used Mobile Stock components; no JS/data changes.
+   ========================================================================== */
+#skUsedStockModal #skUsedStatsGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px 12px !important;
+  margin: 10px 0 14px !important;
+  padding: 8px 4px !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+#skUsedStockModal #skUsedStatsGrid > .bill-section {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  padding: 4px 2px !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+#skUsedStockModal #skUsedStatsGrid .sk-ui-muted-text {
+  margin: 0 !important;
+  font-size: .72rem !important;
+  line-height: 1.3 !important;
+  overflow-wrap: anywhere !important;
+}
+#skUsedStockModal #skUsedStatsGrid .sk-ui-section-title {
+  margin: 0 !important;
+  font-size: 1.05rem !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+  overflow-wrap: anywhere !important;
+}
+#skUsedStockModal #skUsedHomeCatalog,
+#skUsedStockModal .sk-used-catalog {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 10px 0 0 !important;
+}
+#skUsedStockModal .sk-used-catalog-results,
+#skUsedStockModal .sk-used-catalog-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+#skUsedStockModal .sk-used-product-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 3px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 10px 11px !important;
+  margin: 0 !important;
+  border: 1px solid var(--card-border, #cbd5e1) !important;
+  border-radius: 14px !important;
+  background: var(--card-bg, #fff) !important;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, .045) !important;
+  overflow: hidden !important;
+}
+#skUsedStockModal .sk-used-card-model {
+  min-width: 0 !important;
+  margin: 0 !important;
+  font-size: .91rem !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  overflow-wrap: anywhere !important;
+}
+#skUsedStockModal .sk-used-card-specs,
+#skUsedStockModal .sk-used-card-imei {
+  min-width: 0 !important;
+  margin: 0 !important;
+  font-size: .75rem !important;
+  line-height: 1.3 !important;
+  color: var(--text-muted, #64748b) !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+#skUsedStockModal .sk-used-card-imei strong {
+  color: var(--text, #0f172a) !important;
+  font-weight: 700 !important;
+}
+#skUsedStockModal .sk-used-card-footer {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin-top: 5px !important;
+}
+#skUsedStockModal .sk-used-card-footer > div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+}
+#skUsedStockModal .sk-used-card-price-label {
+  margin: 0 !important;
+  font-size: .68rem !important;
+  line-height: 1.25 !important;
+  color: var(--text-muted, #64748b) !important;
+}
+#skUsedStockModal .sk-used-card-price {
+  display: block !important;
+  margin: 0 !important;
+  font-size: .96rem !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+  overflow-wrap: anywhere !important;
+}
+#skUsedStockModal .sk-used-card-status {
+  margin: 0 !important;
+  color: #16a34a !important;
+  font-size: .69rem !important;
+  font-weight: 750 !important;
+  line-height: 1.25 !important;
+}
+#skUsedStockModal .sk-used-card-footer .sk-used-bill-button {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 0 11px !important;
+  border-radius: 9999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  font-size: .75rem !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+#skUsedDetailDialog {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 12050 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  background: rgba(15, 23, 42, .42) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+  backdrop-filter: blur(5px) !important;
+}
+#skUsedDetailDialog .sk-used-detail-sheet {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  width: min(100%, 420px) !important;
+  max-width: 420px !important;
+  max-height: calc(100dvh - 32px - env(safe-area-inset-bottom, 0px)) !important;
+  min-height: 0 !important;
+  padding: 14px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  border: 1px solid var(--card-border, rgba(148, 163, 184, .4)) !important;
+  border-radius: 20px !important;
+  background: var(--card-bg, #fff) !important;
+  color: var(--text, #0f172a) !important;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, .22) !important;
+}
+#skUsedDetailDialog .sk-used-detail-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  padding: 0 0 10px !important;
+  margin: 0 0 10px !important;
+  border-bottom: 1px solid var(--card-border, rgba(148, 163, 184, .35)) !important;
+  background: var(--card-bg, #fff) !important;
+}
+#skUsedDetailDialog .sk-used-detail-head > div {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+}
+#skUsedDetailDialog .sk-used-detail-head strong {
+  font-size: .98rem !important;
+  line-height: 1.3 !important;
+  overflow-wrap: anywhere !important;
+}
+#skUsedDetailDialog .sk-used-detail-head small {
+  font-size: .78rem !important;
+  line-height: 1.3 !important;
+  color: var(--text-muted, #64748b) !important;
+}
+#skUsedDetailDialog .sk-used-detail-close {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 38px !important;
+  width: 38px !important;
+  height: 38px !important;
+  padding: 0 !important;
+  border-radius: 9999px !important;
+  line-height: 1 !important;
+}
+#skUsedDetailDialog .sk-used-detail-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  margin: 0 0 12px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+#skUsedDetailDialog .sk-used-detail-field {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+  min-height: 54px !important;
+  padding: 8px 10px !important;
+  box-sizing: border-box !important;
+  border-radius: 11px !important;
+  border: 1px solid var(--card-border, #dbe4f0) !important;
+  background: var(--surface-bg, #f1f5f9) !important;
+}
+#skUsedDetailDialog .sk-used-detail-field small {
+  margin: 0 !important;
+  font-size: .69rem !important;
+  line-height: 1.3 !important;
+  color: var(--text-muted, #64748b) !important;
+}
+#skUsedDetailDialog .sk-used-detail-field strong {
+  margin: 0 !important;
+  font-size: .84rem !important;
+  line-height: 1.3 !important;
+  font-weight: 750 !important;
+  overflow-wrap: anywhere !important;
+}
+#skUsedDetailDialog .sk-used-detail-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px 10px !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 0 2px !important;
+  margin: 0 !important;
+}
+#skUsedDetailDialog .sk-used-detail-actions > button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 40px !important;
+  padding: 8px 12px !important;
+  border-radius: 9999px !important;
+  line-height: 1.3 !important;
+  font-size: .84rem !important;
+  font-weight: 700 !important;
+}
+#skUsedDetailDialog .sk-used-detail-actions > .sk-used-bill-button {
+  grid-column: 1 / -1 !important;
+  min-height: 42px !important;
+  margin-bottom: 0 !important;
+  background: var(--primary-color, #2563eb) !important;
+  color: #fff !important;
+}
+#skUsedDetailDialog .sk-used-detail-actions > .sk-used-detail-danger {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fca5a5 !important;
+}
+@media (min-width: 700px) {
+  #skUsedStockModal #skUsedStatsGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  #skUsedStockModal .sk-used-catalog-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+  }
+}
+@media (max-width: 380px) {
+  #skUsedStockModal .sk-used-card-footer {
+    align-items: stretch !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+  }
+  #skUsedStockModal .sk-used-card-footer .sk-used-bill-button {
+    width: 100% !important;
+  }
+  #skUsedDetailDialog {
+    padding: 10px !important;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  #skUsedDetailDialog .sk-used-detail-sheet {
+    padding: 11px !important;
+    max-height: calc(100dvh - 20px - env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+
+/* ==========================================================================
+   SK MOBILES 5.6.93 — LIVE USED-STOCK SELECTOR & FLOW SAFEGUARD
+   These selectors match the current HTML generated by js/app.js.
+   Presentation-only; application logic and data bindings remain untouched.
+   ========================================================================== */
+#skUsedStockModal > .modal-sheet {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+#skUsedStockModal #skUsedHomeCatalog {
+  position: static !important;
+  flex: 0 0 auto !important;
+  align-self: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+}
+#skUsedStockModal #skUsedCatalogResults,
+#skUsedStockModal #skUsedCatalogResults > .sk-used-catalog-grid {
+  position: static !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+}
+#skUsedStockModal #skUsedCatalogResults > .sk-used-catalog-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+}
+#skUsedStockModal #skUsedCatalogResults .sk-used-product-card {
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 10px 11px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+#skUsedStockModal #skUsedCatalogResults .sk-used-card-model,
+#skUsedStockModal #skUsedCatalogResults .sk-used-card-specs,
+#skUsedStockModal #skUsedCatalogResults .sk-used-card-imei {
+  display: block !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere !important;
+  line-height: 1.3 !important;
+}
+#skUsedStockModal #skUsedCatalogResults .sk-used-card-footer {
+  position: static !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+  height: auto !important;
+  margin-top: 6px !important;
+}
+#skUsedStockModal #skUsedCatalogResults .sk-used-card-footer > div {
+  position: static !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+}
+#skUsedStockModal #skUsedCatalogResults .sk-used-bill-button {
+  position: static !important;
+  flex: 0 0 auto !important;
+  align-self: flex-end !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+#skUsedDetailDialog .sk-used-detail-sheet {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+#skUsedDetailDialog .sk-used-detail-grid {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+#skUsedDetailDialog .sk-used-detail-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  flex: 0 0 auto !important;
+  gap: 8px 10px !important;
+  padding-bottom: 2px !important;
+}
+#skUsedDetailDialog .sk-used-detail-actions > button.sk-used-bill-button {
+  grid-column: 1 / -1 !important;
+}
+@media (max-width: 380px) {
+  #skUsedStockModal #skUsedCatalogResults .sk-used-card-footer {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+  #skUsedStockModal #skUsedCatalogResults .sk-used-bill-button {
+    align-self: stretch !important;
+    width: 100% !important;
+  }
+}
+
+
+/* ==========================================================================
+   SK MOBILES 5.6.94 — LOGIN, LOGOUT DRAWER & CREDIT LEDGER POLISH
+   UI-only. Existing IDs, login/auth flow, ledger data and handlers preserved.
+   ========================================================================== */
+
+/* Logout/login layering: never leave the drawer visible above the login modal. */
+#leftDrawer {
+  z-index: 2147483000 !important;
+}
+#leftDrawer:not(.active) {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+#skLoginModal {
+  z-index: 2147483646 !important;
+}
+#skLoginModal.active ~ #leftDrawer,
+body:has(#skLoginModal.active) #leftDrawer {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Simple, legible login card with the saved shop logo / embedded default logo. */
+#skLoginModal {
+  padding: 14px !important;
+  background: linear-gradient(145deg, #e8eefb 0%, #dbe5f8 100%) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+#skLoginModal .login-glass-card {
+  width: min(100%, 400px) !important;
+  max-width: 400px !important;
+  padding: 18px 16px 16px !important;
+  gap: 0 !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(148, 163, 184, .45) !important;
+  background: rgba(255,255,255,.88) !important;
+  color: #172033 !important;
+  box-shadow: 0 14px 36px rgba(15,23,42,.12) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  animation: none !important;
+}
+#skLoginModal .login-logo-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  margin: 0 0 12px !important;
+}
+#skLoginModal .login-logo-glow {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 64px !important;
+  height: 64px !important;
+  margin: 0 0 10px !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  background: #fff !important;
+  border: 1px solid #cbd5e1 !important;
+  filter: none !important;
+  box-shadow: 0 4px 12px rgba(37,99,235,.10) !important;
+}
+#skLoginModal #skLoginLogoImg {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+}
+#skLoginModal .fallback-logo {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  color: #fff !important;
+  font-size: 1.2rem !important;
+}
+#skLoginModal .login-brand-title {
+  color: #172033 !important;
+  font-size: 1.25rem !important;
+  letter-spacing: -.02em !important;
+  line-height: 1.25 !important;
+  margin: 0 0 4px !important;
+}
+#skLoginModal .login-brand-subtitle {
+  color: #64748b !important;
+  font-size: .78rem !important;
+  line-height: 1.35 !important;
+  margin: 0 !important;
+}
+#skLoginModal .login-role-pill {
+  width: 100% !important;
+  min-height: 34px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  margin: 0 0 12px !important;
+  padding: 7px 10px !important;
+  border-radius: 12px !important;
+  border: 1px solid #cbd5e1 !important;
+  background: rgba(255,255,255,.8) !important;
+  color: #64748b !important;
+  font-size: .72rem !important;
+  line-height: 1.3 !important;
+}
+#skLoginModal .login-form-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 9px !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+#skLoginModal .login-input-wrap {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  overflow: hidden !important;
+}
+#skLoginModal .login-input-icon {
+  position: absolute !important;
+  left: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 1 !important;
+  line-height: 1 !important;
+}
+#skLoginModal .login-modern-input {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  padding: 10px 12px 10px 40px !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: #172033 !important;
+  font-size: .9rem !important;
+  line-height: 1.35 !important;
+  box-shadow: none !important;
+}
+#skLoginModal .login-modern-input::placeholder {
+  color: #8794a8 !important;
+  opacity: 1 !important;
+}
+#skLoginModal .login-input-wrap:has(#loginPasswordInput) .login-modern-input {
+  padding-right: 64px !important;
+}
+#skLoginModal .login-password-toggle {
+  position: absolute !important;
+  right: 7px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  min-width: 44px !important;
+  min-height: 34px !important;
+  padding: 0 9px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 9999px !important;
+  background: #f8fafc !important;
+  color: #475569 !important;
+  font-size: .72rem !important;
+  font-weight: 700 !important;
+}
+#skLoginModal .login-submit-btn {
+  width: 100% !important;
+  min-height: 48px !important;
+  margin-top: 2px !important;
+  border-radius: 9999px !important;
+  background: #245be4 !important;
+  color: #fff !important;
+  border: 0 !important;
+  box-shadow: 0 8px 18px rgba(37,99,235,.18) !important;
+}
+#skLoginModal .login-footer-roles {
+  margin-top: 12px !important;
+  color: #64748b !important;
+  font-size: .7rem !important;
+  line-height: 1.3 !important;
+}
+#skLoginModal .login-status-msg {
+  margin: 0 !important;
+  font-size: .75rem !important;
+  line-height: 1.35 !important;
+}
+@media (max-width: 380px) {
+  #skLoginModal { padding: 10px !important; }
+  #skLoginModal .login-glass-card { padding: 15px 12px 13px !important; }
+  #skLoginModal .login-logo-glow { width: 56px !important; height: 56px !important; }
+}
+
+/* Customer Credit Ledger: compact page footprint and customer rows fit their content. */
+#skCreditLedgerPage {
+  box-sizing: border-box !important;
+  padding: 8px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+#skCreditLedgerPage > .modal-sheet {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  width: min(100%, 720px) !important;
+  max-width: 720px !important;
+  max-height: calc(100dvh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  padding: 10px !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+#skCreditLedgerPage > .modal-sheet > .modal-title {
+  flex: 0 0 auto !important;
+  min-height: 48px !important;
+  margin: 0 0 8px !important;
+  padding: 8px 10px !important;
+  border-radius: 14px !important;
+}
+#skCreditLedgerPage #skCPMainView {
+  display: block !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+#skCreditLedgerPage .skcp-summary {
+  gap: 6px !important;
+  margin: 0 0 8px !important;
+}
+#skCreditLedgerPage .skcp-stat {
+  min-height: 48px !important;
+  padding: 6px 8px !important;
+  border-radius: 12px !important;
+}
+#skCreditLedgerPage .skcp-stat b {
+  margin: 0 !important;
+  line-height: 1.15 !important;
+}
+#skCreditLedgerPage .skcp-stat span {
+  display: block !important;
+  margin-top: 2px !important;
+  line-height: 1.2 !important;
+}
+#skCreditLedgerPage .skcp-toolbar {
+  gap: 8px !important;
+  margin: 0 0 7px !important;
+}
+#skCreditLedgerPage .skcp-filters {
+  gap: 5px !important;
+  margin: 0 0 7px !important;
+  padding: 0 0 2px !important;
+}
+#skCreditLedgerPage .skcp-filter {
+  min-height: 32px !important;
+  padding: 5px 10px !important;
+}
+#skCreditLedgerPage .skcp-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 7px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 0 2px !important;
+}
+#skCreditLedgerPage .skcp-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-height: 0 !important;
+  padding: 8px 9px !important;
+  margin: 0 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 6px rgba(15,23,42,.035) !important;
+}
+#skCreditLedgerPage .skcp-row-main {
+  min-width: 0 !important;
+  gap: 2px !important;
+}
+#skCreditLedgerPage .skcp-name {
+  line-height: 1.25 !important;
+  overflow-wrap: anywhere !important;
+}
+#skCreditLedgerPage .skcp-sub {
+  margin-top: 1px !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+#skCreditLedgerPage .skcp-amt {
+  line-height: 1.2 !important;
+}
+#skCreditLedgerPage .skcp-bill {
+  margin-top: 1px !important;
+  line-height: 1.2 !important;
+}
+@media (min-width: 700px) {
+  #skCreditLedgerPage .skcp-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+
+/* ==========================================================================
+   SK MOBILES 5.6.95 — USED MOBILE INVENTORY GAP + DETAILS CONTENT FIT
+   Targeted UI-only fix for the two supplied screenshots.
+   No stock data, billing, pricing, or action handlers are changed.
+   ========================================================================== */
+
+/* Inventory view: collapse stacked margins and the mobile sheet's flex gap.
+   This removes the blank band between the four summary values and the catalog. */
+@media (max-width: 640px) {
+  #skUsedStockModal > .modal-sheet {
+    gap: 4px !important;
+    padding: 10px !important;
+  }
+  #skUsedStockModal > .modal-sheet > div:first-child {
+    margin: 0 0 4px !important;
+    padding: 6px 0 8px !important;
+  }
+  #skUsedStockModal #skUsedStatsGrid {
+    margin: 0 !important;
+    padding: 0 2px !important;
+    gap: 4px 10px !important;
+    flex: 0 0 auto !important;
+  }
+  #skUsedStockModal #skUsedStatsGrid > .bill-section {
+    min-height: 42px !important;
+    padding: 3px 2px !important;
+  }
+  #skUsedStockModal #skUsedHomeCatalog {
+    margin: 0 !important;
+    padding: 8px !important;
+    flex: 0 0 auto !important;
+  }
+  #skUsedStockModal #skUsedHomeCatalog .sk-used-catalog-toolbar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin: 0 0 8px !important;
+    padding: 0 !important;
+  }
+  #skUsedStockModal #skUsedCatalogResults,
+  #skUsedStockModal #skUsedCatalogResults > .sk-used-catalog-grid {
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 7px !important;
+  }
+}
+
+/* Detail popup: size the sheet to its actual content instead of stretching
+   the details grid into unused vertical space. Keep scrolling for short screens. */
+#skUsedDetailDialog .sk-used-detail-sheet {
+  height: auto !important;
+  min-height: 0 !important;
+  flex: 0 1 auto !important;
+}
+#skUsedDetailDialog .sk-used-detail-grid {
+  flex: 0 0 auto !important;
+  align-content: start !important;
+  grid-auto-rows: minmax(0, auto) !important;
+  margin-bottom: 9px !important;
+  overflow-x: hidden !important;
+}
+#skUsedDetailDialog .sk-used-detail-field {
+  min-height: 48px !important;
+  padding: 6px 9px !important;
+  gap: 2px !important;
+}
+#skUsedDetailDialog .sk-used-detail-actions {
+  gap: 7px 8px !important;
+}
+#skUsedDetailDialog .sk-used-detail-actions > button {
+  min-height: 38px !important;
+  padding: 7px 10px !important;
+}
+@media (max-height: 620px) {
+  #skUsedDetailDialog .sk-used-detail-sheet {
+    max-height: calc(100dvh - 20px - env(safe-area-inset-bottom, 0px)) !important;
+    overflow-y: auto !important;
+  }
+  #skUsedDetailDialog .sk-used-detail-grid {
+    flex: 0 1 auto !important;
+  }
+}
+
+
+/* ==========================================================================
+   SK MOBILES 5.6.97 — CONSOLIDATED RESPONSIVE COMPONENT LAYER
+   Scoped to existing app components; presentation only.
+   ========================================================================== */
+
+/* 1. Compact metric groups: explicit app selectors, no broad substring matching. */
+#skUsedStatsGrid,
+.skcp-summary,
+.sk-used-stock-summary,
+.used-stock-metrics,
+.stats-grid,
+.summary-grid,
+.metrics-grid {
+  gap: 8px;
+  margin-block: 10px 12px;
+}
+
+#skUsedStatsGrid > .bill-section,
+.skcp-summary > .skcp-stat,
+.sk-used-stock-summary > div,
+.used-stock-metrics > div,
+.stats-grid > .stat-card,
+.summary-grid > .summary-card,
+.metrics-grid > .metric-card {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--sk-compact-card-pad-y) var(--sk-compact-card-pad-x);
+  border-radius: var(--sk-compact-card-radius);
+}
+
+#skUsedStatsGrid > .bill-section,
+.skcp-summary > .skcp-stat,
+.sk-used-stock-summary > div,
+.used-stock-metrics > div,
+.stats-grid > .stat-card,
+.summary-grid > .summary-card,
+.metrics-grid > .metric-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sk-compact-metric-gap);
+}
+
+#skUsedStatsGrid .sk-ui-muted-text,
+.skcp-summary .skcp-stat > span,
+.sk-used-stock-summary > div > span:first-child,
+.used-stock-metrics > div > span:first-child,
+.stats-grid > .stat-card > :first-child,
+.summary-grid > .summary-card > :first-child,
+.metrics-grid > .metric-card > :first-child {
+  margin: 0;
+  line-height: var(--sk-compact-label-line-height);
+}
+
+#skUsedStatsGrid .sk-ui-section-title,
+.skcp-summary .skcp-stat > b,
+.sk-used-stock-summary > div > span:last-child,
+.used-stock-metrics > div > span:last-child,
+.stats-grid > .stat-card > :last-child,
+.summary-grid > .summary-card > :last-child,
+.metrics-grid > .metric-card > :last-child {
+  margin: 0;
+  line-height: var(--sk-compact-value-line-height);
+}
+
+/* 2. Modal scroll ownership: the overlay never scrolls; its sheet is the only
+      scroll container. This avoids nested/double scrollbars without changing DOM. */
+#settingsModal,
+#skUsedStockModal,
+#skCreditLedgerPage,
+#skUsedDetailDialog,
+.sk-used-detail-overlay {
+  overflow: hidden !important;
+  overscroll-behavior: contain;
+}
+
+#settingsModal > .modal-sheet,
+#skUsedStockModal > .modal-sheet,
+#skCreditLedgerPage > .modal-sheet,
+#skUsedDetailDialog .sk-used-detail-sheet,
+.sk-used-detail-overlay .sk-used-detail-sheet {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: calc(100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+#settingsModal > .modal-sheet,
+#skUsedStockModal > .modal-sheet,
+#skCreditLedgerPage > .modal-sheet {
+  width: min(980px, calc(100vw - 20px));
+  box-sizing: border-box;
+}
+
+#settingsModal > .modal-sheet > .modal-title,
+#skCreditLedgerPage > .modal-sheet > .modal-title,
+#skUsedDetailDialog .sk-used-detail-head {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-shrink: 0;
+  background: var(--sk-modal-header-bg);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--sk-modal-header-border);
+  padding-top: max(8px, env(safe-area-inset-top, 0px));
+  isolation: isolate;
+}
+
+/* Used Stock's existing first-child header has inline sticky positioning. */
+#skUsedStockModal > .modal-sheet > div:first-child {
+  position: sticky !important;
+  top: -12px !important;
+  z-index: 50 !important;
+  flex-shrink: 0;
+  background: var(--sk-modal-header-bg) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--sk-modal-header-border);
+  isolation: isolate;
+}
+
+#settingsModal > .modal-sheet > .modal-title,
+#skCreditLedgerPage > .modal-sheet > .modal-title {
+  margin: -1px 0 10px;
+}
+
+/* 3. Used mobile stock purchase form: two columns when space allows, no collision. */
+#skUsedStockModal #skUsedPurchaseForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 12px;
+  box-sizing: border-box;
+}
+
+#skUsedStockModal #skUsedPurchaseForm > *,
+#skUsedStockModal #skUsedPurchaseForm .form-label,
+#skUsedStockModal #skUsedPurchaseForm .form-input {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#skUsedStockModal #skUsedPurchaseForm .form-input,
+#skUsedStockModal #skUsedPurchaseForm input,
+#skUsedStockModal #skUsedPurchaseForm select,
+#skUsedStockModal #skUsedPurchaseForm textarea,
+#settingsModal input,
+#settingsModal select,
+#settingsModal textarea {
+  min-height: var(--sk-compact-control-height);
+  line-height: 1.35;
+  box-sizing: border-box;
+}
+
+#skUsedStockModal #skUsedPurchaseForm > div[style*="grid-column:1/-1"],
+#skUsedStockModal #skUsedPurchaseForm > div[style*="grid-column: 1 / -1"],
+#skUsedStockModal #skUsedPurchaseForm > div[style*="grid-column: span 2"] {
+  grid-column: 1 / -1;
+}
+
+/* 4. Details modal: balanced actions, natural height, safe bottom spacing. */
+#skUsedDetailDialog .sk-used-detail-sheet,
+.sk-used-detail-sheet {
+  width: min(100%, 440px);
+  padding: 14px;
+  border-radius: 20px;
+  box-sizing: border-box;
+}
+
+#skUsedDetailDialog .sk-used-detail-grid,
+.sk-used-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0 12px;
+}
+
+#skUsedDetailDialog .sk-used-detail-actions,
+.sk-used-detail-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  flex-shrink: 0;
+  width: 100%;
+  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+}
+
+#skUsedDetailDialog .sk-used-detail-actions > button,
+.sk-used-detail-actions > button {
+  min-width: 0;
+  min-height: 40px;
+}
+
+#skUsedDetailDialog .sk-used-detail-actions > button.sk-used-bill-button,
+#skUsedDetailDialog .sk-used-detail-actions > .sk-used-bill-button,
+.sk-used-detail-actions > .sk-used-bill-button {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: 2px;
+  border-radius: 9999px;
+}
+
+/* 5. Customer ledger summary, toolbar and pills. */
+.skcp-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.skcp-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block: 10px;
+}
+
+.skcp-toolbar > input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 38px;
+}
+
+.skcp-toolbar > button,
+.skcp-filters > button,
+.skcp-btn {
+  min-height: 38px;
+  box-sizing: border-box;
+  line-height: 1.2;
+}
+
+.skcp-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 8px 10px;
+}
+
+/* 6. Shared forms, cards and toolbars use consistent rhythm while retaining
+      each module's existing grid and responsive structure. */
+:is(.bill-section, .sk-ui-card, .sk-ui-panel, .skcp-stat, .sk-used-product-card) {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+:is(.modal-actions, .action-toolbar, .list-toolbar, .search-toolbar, .filter-bar) {
+  gap: 8px;
+  margin-block: 8px 10px;
+}
+
+:is(.search-input, input[type="search"], .search-box input, .search-bar input) {
+  min-height: 38px;
+  box-sizing: border-box;
+}
+
+:is(.filter-pill, .filter-chip, .action-pill, .ledger-action, .btn-compact) {
+  min-height: 38px;
+  padding-inline: 12px;
+  line-height: 1.2;
+  box-sizing: border-box;
+}
+
+/* 7. Responsive layouts: preserve two-column forms except on narrow phones. */
+@media (max-width: 479px) {
+  #skUsedStockModal > .modal-sheet {
+    width: calc(100vw - 12px);
+    max-height: calc(100dvh - 12px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    padding: 12px !important;
+  }
+  #skUsedStatsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  #skUsedStockModal #skUsedPurchaseForm {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #skUsedStockModal #skUsedPurchaseForm > div[style*="grid-column"] {
+    grid-column: 1 / -1;
+  }
+  #settingsModal > .modal-sheet,
+  #skCreditLedgerPage > .modal-sheet {
+    width: calc(100vw - 12px);
+    max-height: calc(100dvh - 12px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 359px) {
+  #skUsedDetailDialog .sk-used-detail-grid,
+  .sk-used-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+
+/* ========================================================================
+   SK MOBILES 5.6.98 — CREDIT LEDGER MICRO-LAYOUT FIX
+   Presentation-only correction for customer detail and linked repair history.
+   Existing IDs, markup generation, handlers, calculations and data are untouched.
+   ======================================================================== */
+#skCreditLedgerPage #skCPDetailView {
+  padding: 10px 12px 16px !important;
+  overflow-x: hidden !important;
+}
+#skCreditLedgerPage .skcp-page-head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-height: 38px !important;
+  margin: 0 0 8px !important;
+}
+#skCreditLedgerPage .skcp-page-head > div {
+  min-width: 0 !important;
+  line-height: 1.3 !important;
+}
+#skCreditLedgerPage .skcp-page-head > div > b {
+  display: block !important;
+  line-height: 1.3 !important;
+  overflow-wrap: anywhere !important;
+}
+#skCreditLedgerPage .skcp-page-head > div > div {
+  margin-top: 2px !important;
+  line-height: 1.25 !important;
+}
+#skCreditLedgerPage .skcp-back {
+  flex: 0 0 auto !important;
+  min-width: 42px !important;
+  min-height: 38px !important;
+  padding: 0 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+#skCreditLedgerPage .skcp-detail-box {
+  padding: 9px 10px !important;
+  margin: 0 0 10px !important;
+  border-radius: 14px !important;
+  box-sizing: border-box !important;
+}
+#skCreditLedgerPage .skcp-detail-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  gap: 7px !important;
+  margin: 0 0 7px !important;
+}
+#skCreditLedgerPage .skcp-mini {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  padding: 8px 9px !important;
+  border-radius: 11px !important;
+  box-sizing: border-box !important;
+}
+#skCreditLedgerPage .skcp-mini b {
+  font-size: clamp(.76rem, 2.2vw, .88rem) !important;
+  line-height: 1.2 !important;
+  overflow-wrap: anywhere !important;
+}
+#skCreditLedgerPage .skcp-mini span {
+  font-size: .59rem !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+#skCreditLedgerPage .skcp-detail-box > .skcp-bill-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 7px !important;
+  margin: 0 !important;
+}
+#skCreditLedgerPage .skcp-detail-box > .skcp-bill-actions .skcp-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  min-height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  font-size: .72rem !important;
+  line-height: 1.2 !important;
+}
+#skCreditLedgerPage #skCPDetailView > div[style*="CREDIT / PAYMENT HISTORY"],
+#skCreditLedgerPage #skCPDetailView > div[style*="SALES BILL HISTORY"] {
+  margin: 10px 0 6px !important;
+  line-height: 1.3 !important;
+  letter-spacing: .015em !important;
+}
+#skCreditLedgerPage .skcp-bill-card {
+  min-width: 0 !important;
+  margin: 0 0 8px !important;
+  padding: 10px 11px !important;
+  border-radius: 13px !important;
+  box-sizing: border-box !important;
+}
+#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:first-child {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+}
+#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:first-child > b {
+  min-width: 0 !important;
+  font-size: .82rem !important;
+  line-height: 1.3 !important;
+  overflow-wrap: anywhere !important;
+}
+#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link .skcp-btn {
+  flex: 0 0 auto !important;
+  min-height: 36px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  font-size: .68rem !important;
+  white-space: nowrap !important;
+}
+#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:nth-child(2) {
+  margin-top: 5px !important;
+  font-size: .68rem !important;
+  line-height: 1.45 !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+#skCreditLedgerPage .skcp-open-job-hint {
+  margin-top: 5px !important;
+  padding-top: 5px !important;
+  border-top: 1px solid color-mix(in srgb, var(--card-border) 65%, transparent) !important;
+  font-size: .68rem !important;
+  line-height: 1.35 !important;
+}
+@media (max-width: 480px) {
+  #skCreditLedgerPage #skCPDetailView { padding: 8px 9px 14px !important; }
+  #skCreditLedgerPage .skcp-detail-box { padding: 8px !important; }
+  #skCreditLedgerPage .skcp-detail-grid { gap: 5px !important; }
+  #skCreditLedgerPage .skcp-mini { padding: 7px 6px !important; }
+  #skCreditLedgerPage .skcp-mini span { font-size: .54rem !important; }
+  #skCreditLedgerPage .skcp-bill-card { padding: 9px !important; }
+  #skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:nth-child(2) { font-size: .66rem !important; }
+}
+
+
+
+/* ==========================================================================
+   SK MOBILES 5.6.99 — UNIVERSAL APPLICATION UI LAYER
+   Presentation-only rules. Preserve page logic, IDs, data attributes and handlers.
+   ========================================================================== */
+:root {
+  --sk-global-card-pad-y: 10px;
+  --sk-global-card-pad-x: 12px;
+  --sk-global-section-gap: 12px;
+  --sk-global-control-height: 42px;
+  --sk-global-metric-gap: 3px;
+  --sk-global-radius: 12px;
+  --sk-global-modal-header-bg: var(--header-bg, rgba(255,255,255,.96));
+}
+
+/* Prevent children from forcing page or grid overflow. */
+.app-viewport,
+.app-viewport > *,
+.view-section,
+.tab-content,
+.content-area,
+.modal-overlay,
+.modal-sheet,
+.modal-content,
+.modal-body,
+.form-section,
+.card,
+.panel,
+.content-box {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+:is(.view-section, .tab-content, .content-area, .page-section, .page-content) {
+  gap: var(--sk-global-section-gap);
+}
+
+/* Compact, consistent metric and summary grids across modules. */
+:is(
+  .stats-grid, .stat-grid, .summary-grid, .summary-cards, .metrics-grid,
+  .metric-grid, .dashboard-stats, .analytics-stats, .ledger-summary,
+  .credit-summary, .used-stock-metrics, .sk-used-stock-summary,
+  .skcp-summary-grid, .skcp-stats, [class*="metric-grid"],
+  [class*="summary-grid"], [class*="stats-grid"]
+) {
+  gap: 8px !important;
+  margin-block: 10px 12px !important;
+  min-width: 0 !important;
+}
+
+:is(
+  .stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
+  .metric-box, .ledger-stat, .credit-stat, .dashboard-stat,
+  .analytics-card, .skcp-mini, [class*="stat-card"],
+  [class*="metric-card"], [class*="summary-card"]
+) {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 8px 12px !important;
+  border-radius: var(--sk-global-radius) !important;
+  box-sizing: border-box !important;
+  gap: var(--sk-global-metric-gap) !important;
+  overflow-wrap: anywhere;
+}
+
+:is(
+  .stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
+  .metric-box, .ledger-stat, .credit-stat, .dashboard-stat,
+  .analytics-card, .skcp-mini, [class*="stat-card"],
+  [class*="metric-card"], [class*="summary-card"]
+) :is(small, label, .label, .stat-label, .metric-label, .summary-label, .sub-label) {
+  line-height: 1.2 !important;
+  margin-block: 0 !important;
+}
+
+:is(
+  .stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
+  .metric-box, .ledger-stat, .credit-stat, .dashboard-stat,
+  .analytics-card, .skcp-mini, [class*="stat-card"],
+  [class*="metric-card"], [class*="summary-card"]
+) :is(strong, b, .value, .stat-value, .metric-value, .summary-value, .count, .amount) {
+  line-height: 1.2 !important;
+  margin-block: 0 !important;
+}
+
+/* Shared section spacing: avoid excessive whitespace without forcing fixed heights. */
+:is(.card, .panel, .content-box, .form-section, .bill-card, .list-card) {
+  margin-block-end: 12px !important;
+}
+
+:is(.modal-title, .modal-header, .sheet-header, .panel-header, .section-header) {
+  line-height: 1.35;
+}
+
+:is(.modal-title, .modal-header, .sheet-header) {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--sk-global-modal-header-bg);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--card-border, rgba(15,23,42,.10));
+}
+
+/* Keep modal shells from producing nested outer scrollbars. */
+:is(.modal-sheet, .modal-dialog, .dialog-panel, .bottom-sheet, .sk-device-detail-dialog) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: calc(100dvh - 24px);
+  overflow: hidden;
+}
+
+:is(.modal-body, .modal-content-body, .sheet-body, .dialog-body) {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+:is(.modal-actions, .modal-footer, .sheet-footer, .dialog-actions) {
+  flex-shrink: 0;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+/* Consistent touch controls; preserve existing contextual colours and handlers. */
+button,
+[role="button"],
+input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+select,
+textarea {
+  box-sizing: border-box;
+}
+
+:is(.search-input, .search-box input, .search-bar input, input[type="search"]) {
+  min-height: 40px;
+  padding-block: 8px;
+}
+
+:is(.filter-pill, .filter-chip, .action-pill, .ledger-action, .btn-compact, button.btn-sm) {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1.25;
+}
+
+:is(.modal-actions, .action-row, .action-toolbar, .list-toolbar, .search-toolbar, .filter-bar) {
+  gap: 8px;
+}
+
+/* Forms use natural flow and safe two-column grids where their existing markup supports it. */
+:is(.form-grid, .fields-grid, .purchase-form-grid, .settings-grid, .theme-grid-selector) {
+  min-width: 0;
+  gap: 10px;
+}
+
+:is(.form-grid, .fields-grid, .purchase-form-grid) > *,
+:is(.settings-grid, .theme-grid-selector) > * {
+  min-width: 0;
+}
+
+input, select, textarea {
+  max-width: 100%;
+  line-height: 1.35;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* Record cards and table wrappers should not overlay adjacent content. */
+:is(.inventory-list, .used-mobile-list, .customer-list, .ledger-list, .history-list, .record-list) {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+:is(.table-responsive, .table-wrap, .table-container, .inventory-table-wrap) {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+:is(.inventory-card, .used-item-card, .customer-card, .ledger-card, .history-card, .sk-used-inventory-card) {
+  min-width: 0;
+  height: auto;
+  overflow-wrap: anywhere;
+}
+
+/* Mobile layout: protect fixed navigation and avoid horizontal overflow. */
+html, body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.app-viewport {
+  padding-bottom: calc(82px + env(safe-area-inset-bottom));
+}
+
+:is(.bottom-nav, .bottom-navigation, .app-bottom-nav, .mobile-bottom-nav) {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (max-width: 480px) {
+  :is(.stats-grid, .stat-grid, .summary-grid, .metrics-grid, .metric-grid, .ledger-summary, .credit-summary) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  :is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box, .metric-box) {
+    padding: 8px 9px !important;
+  }
+  :is(.modal-sheet, .modal-dialog, .dialog-panel, .bottom-sheet, .sk-device-detail-dialog) {
+    width: min(100%, 520px);
+    max-width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+}
+
+@media (max-width: 359px) {
+  :is(.stats-grid, .stat-grid, .summary-grid, .metrics-grid, .metric-grid, .ledger-summary, .credit-summary) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
