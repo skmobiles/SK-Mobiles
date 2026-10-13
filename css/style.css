@@ -10924,3 +10924,307 @@ body{min-height:100vh;min-height:100dvh;}
   --sk-modal-header-border: var(--card-border, rgba(15,23,42,.10));
 }
 
+
+
+/* V5.6.113 — targeted fixes: invoice export width, billing selector edges, toast lifecycle, persistent bottom navigation. */
+#billingModal .billing-tabs {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  border: 1px solid var(--card-border) !important;
+  gap: 4px !important;
+  padding: 3px !important;
+}
+#billingModal .billing-tab-btn {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  border: 1px solid transparent !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+#billingModal .mobile-type-tabs {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  gap: 6px !important;
+  overflow: visible !important;
+}
+#billingModal .mobile-type-btn {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  border-width: 1px !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+.toast {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  transition: transform .25s ease, opacity .2s ease, visibility 0s linear .25s !important;
+  will-change: transform, opacity !important;
+}
+.toast.show {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transition: transform .25s ease, opacity .2s ease, visibility 0s !important;
+}
+/* The shared bottom bar remains visible above page sheets; the drawer still disables its hit area. */
+html body nav.bottom-nav {
+  z-index: 2147483500 !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+html body:has(#leftDrawer.active) nav.bottom-nav {
+  pointer-events: none !important;
+}
+/* Export-only invoice clone: stable A4 content width independent of the phone viewport. */
+.sk-invoice-export-holder #printableInvoiceCard,
+.sk-invoice-export-holder #invoiceMainSheet,
+.sk-invoice-export-holder .sk-invoice-export-page {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+.sk-invoice-export-holder #invoiceMainSheet table {
+  width: 100% !important;
+  max-width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+}
+.sk-invoice-export-holder #invoiceMainSheet td,
+.sk-invoice-export-holder #invoiceMainSheet th {
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+
+/* ================================================================
+   V5.6.114 — DASHBOARD CARD MATCH + INVENTORY PAGE VISUAL REFRESH
+   Strictly presentation-only. Existing data, IDs, handlers and logic untouched.
+   ================================================================ */
+
+/* Keep dashboard action cards and metric cards on the same compact visual rhythm. */
+#homeActionCardsContainer .sk-home-action-row,
+#homeMetricGrid .sk-home-metric-card{
+  box-sizing:border-box!important;
+  min-width:0!important;
+  max-width:100%!important;
+  min-height:58px!important;
+  height:auto!important;
+  padding:8px 10px!important;
+  gap:9px!important;
+  border-radius:15px!important;
+  border:1px solid var(--card-border)!important;
+  background:var(--card-bg)!important;
+  box-shadow:0 3px 10px rgba(15,23,42,.045)!important;
+  align-items:center!important;
+}
+#homeActionCardsContainer .sk-home-action-row > div,
+#homeMetricGrid .sk-home-metric-card > div{min-width:0!important;max-width:100%!important;}
+#homeActionCardsContainer .sk-home-action-row .sk-home-action-icon,
+#homeMetricGrid .sk-home-metric-card .sk-home-metric-icon{
+  width:34px!important;height:34px!important;min-width:34px!important;flex:0 0 34px!important;
+  border-radius:11px!important;font-size:1rem!important;
+}
+#homeActionCardsContainer .sk-home-action-row [style*="font-size:11px"],
+#homeMetricGrid .sk-home-metric-card [style*="font-size:12px"]{
+  font-size:12px!important;line-height:1.25!important;font-weight:800!important;
+  overflow-wrap:anywhere!important;
+}
+#homeActionCardsContainer .sk-home-action-row [style*="font-size:9px"],
+#homeMetricGrid .sk-home-metric-card [style*="font-size:10px"]{
+  font-size:10px!important;line-height:1.25!important;overflow-wrap:anywhere!important;
+}
+#homeActionCardsContainer .sk-home-action-row > div:first-child,
+#homeMetricGrid .sk-home-metric-card > div:first-child{gap:9px!important;}
+
+/* Inventory / Tempered Glass / Display page: rebuild the visual hierarchy without
+   touching the card renderer, inventory records, filtering or order actions. */
+#headerSearchRow{
+  display:flex!important;gap:8px!important;align-items:stretch!important;
+  width:100%!important;max-width:100%!important;box-sizing:border-box!important;
+  padding:4px 0 7px!important;
+}
+#headerSearchRow .search-input{
+  flex:1 1 auto!important;width:0!important;min-width:0!important;max-width:100%!important;
+  height:44px!important;min-height:44px!important;box-sizing:border-box!important;
+  padding:10px 36px 10px 12px!important;border-radius:13px!important;font-size:14px!important;
+}
+#headerSearchRow .box-photo-scan-btn{
+  flex:0 0 auto!important;min-width:88px!important;max-width:112px!important;
+  min-height:44px!important;height:44px!important;padding:8px 11px!important;
+  border-radius:13px!important;font-size:12px!important;white-space:nowrap!important;
+}
+#cardsContainer:has(> .active-category-notice){
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-content:start!important;align-items:stretch!important;
+  gap:12px!important;padding:10px 12px calc(96px + env(safe-area-inset-bottom,0px))!important;
+  width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;
+}
+#cardsContainer:has(> .active-category-notice) > .active-category-notice{
+  grid-column:1/-1!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;
+  min-height:38px!important;margin:0!important;padding:9px 11px!important;
+  border-radius:13px!important;font-size:12px!important;line-height:1.3!important;
+}
+#cardsContainer:has(> .active-category-notice) .glass-card{
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;
+  width:100%!important;min-width:0!important;max-width:100%!important;height:auto!important;
+  margin:0!important;padding:11px!important;box-sizing:border-box!important;
+  overflow:hidden!important;border-radius:17px!important;
+  background:var(--card-bg)!important;border:1px solid var(--card-border)!important;
+  box-shadow:0 4px 14px rgba(15,23,42,.055)!important;gap:0!important;
+}
+#cardsContainer:has(> .active-category-notice) .card-header{
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:start!important;gap:7px!important;width:100%!important;min-width:0!important;
+  margin:0 0 7px!important;padding:0!important;
+}
+#cardsContainer:has(> .active-category-notice) .card-title-group{
+  display:block!important;width:auto!important;min-width:0!important;max-width:100%!important;
+  overflow:hidden!important;overflow-wrap:anywhere!important;word-break:normal!important;
+}
+#cardsContainer:has(> .active-category-notice) .card-sku-name{
+  display:block!important;margin:0!important;font-size:clamp(13px,1.6vw,15px)!important;
+  line-height:1.3!important;font-weight:800!important;letter-spacing:-.015em!important;
+  overflow-wrap:anywhere!important;word-break:normal!important;
+}
+#cardsContainer:has(> .active-category-notice) .glass-spec-badge{
+  display:inline-flex!important;max-width:100%!important;box-sizing:border-box!important;
+  margin:5px 0 0!important;padding:3px 7px!important;border-radius:999px!important;
+  font-size:10px!important;line-height:1.2!important;white-space:normal!important;
+}
+#cardsContainer:has(> .active-category-notice) .btn-quick-order{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  align-self:start!important;min-width:0!important;max-width:116px!important;width:auto!important;
+  min-height:34px!important;height:auto!important;padding:7px 9px!important;margin:0!important;
+  box-sizing:border-box!important;border-radius:999px!important;font-size:11px!important;
+  line-height:1.2!important;white-space:normal!important;text-align:center!important;
+  overflow-wrap:anywhere!important;flex:0 0 auto!important;
+}
+#cardsContainer:has(> .active-category-notice) .stock-control-panel{
+  width:100%!important;min-width:0!important;max-width:100%!important;min-height:38px!important;
+  margin:5px 0 7px!important;padding:7px 8px!important;box-sizing:border-box!important;
+  border-radius:12px!important;font-size:11px!important;line-height:1.3!important;
+}
+#cardsContainer:has(> .active-category-notice) .models-section{
+  width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;
+  padding:7px 0 0!important;box-sizing:border-box!important;border-top:1px solid var(--card-border)!important;
+}
+#cardsContainer:has(> .active-category-notice) .models-section > *{min-width:0!important;max-width:100%!important;}
+#cardsContainer:has(> .active-category-notice) .models-section [style*="font-size"],
+#cardsContainer:has(> .active-category-notice) .models-section .model-chip{
+  font-size:10px!important;line-height:1.35!important;overflow-wrap:anywhere!important;
+}
+#cardsContainer:has(> .active-category-notice) .models-section .model-chip{
+  display:inline-flex!important;max-width:100%!important;white-space:normal!important;
+  margin:2px 3px 2px 0!important;padding:3px 6px!important;border-radius:7px!important;
+}
+#cardsContainer:has(> .active-category-notice) .glass-card *{box-sizing:border-box!important;}
+
+/* Unified app typography: preserve the invoice/receipt print canvas exactly. */
+html{font-size:15px;}
+body :not(#printableInvoiceCard):not(#printableInvoiceCard *):not(.invoice-preview):not(.invoice-preview *):not(.print-only):not(.print-only *){text-size-adjust:100%;}
+button,input,select,textarea{font-family:var(--app-font,"Plus Jakarta Sans"),-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+@media(max-width:600px){
+  #cardsContainer:has(> .active-category-notice){grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;padding:8px 9px calc(96px + env(safe-area-inset-bottom,0px))!important;}
+  #cardsContainer:has(> .active-category-notice) .glass-card{padding:9px!important;border-radius:14px!important;}
+  #cardsContainer:has(> .active-category-notice) .card-header{grid-template-columns:minmax(0,1fr)!important;gap:6px!important;}
+  #cardsContainer:has(> .active-category-notice) .btn-quick-order{justify-self:start!important;max-width:100%!important;min-height:32px!important;font-size:11px!important;}
+  #cardsContainer:has(> .active-category-notice) .card-sku-name{font-size:13px!important;}
+  #headerSearchRow .box-photo-scan-btn{min-width:82px!important;padding:7px 8px!important;font-size:11px!important;}
+  #homeActionCardsContainer .sk-home-action-row,#homeMetricGrid .sk-home-metric-card{min-height:56px!important;padding:7px 8px!important;}
+}
+@media(max-width:360px){
+  #cardsContainer:has(> .active-category-notice){grid-template-columns:minmax(0,1fr)!important;}
+  #cardsContainer:has(> .active-category-notice) .card-header{grid-template-columns:minmax(0,1fr) auto!important;}
+}
+
+
+/* V5.6.115 — Copy Models button matches Add to Order button; scoped to inventory cards only. */
+#cardsContainer:has(> .active-category-notice) .copy-btn{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-height:32px!important;padding:4px 9px!important;box-sizing:border-box!important;
+  border:1px solid var(--badge-border)!important;border-radius:12px!important;
+  background:var(--badge-bg)!important;color:var(--primary)!important;
+  font-size:.65rem!important;font-weight:750!important;line-height:1.2!important;
+  white-space:nowrap!important;cursor:pointer!important;
+}
+#cardsContainer:has(> .active-category-notice) .copy-btn:active{transform:scale(.97);}
+
+
+/* V5.6.116 — Keep the shared bottom navigation visible on every app workspace, including Billing.
+   Only visibility/stacking and reserved content space are adjusted; navigation handlers are unchanged. */
+html body nav.bottom-nav {
+  display: grid !important;
+  position: fixed !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 2147483600 !important;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+}
+html body:has(#leftDrawer.active) nav.bottom-nav {
+  pointer-events: none !important;
+}
+@media (max-width: 600px) {
+  html body { padding-bottom: calc(94px + env(safe-area-inset-bottom, 0px)) !important; }
+}
+
+
+/* V5.6.117 — Root-cause fix: the older billing-specific :has() selector lowered
+   the nav to z-index:900 and overrode the global visible-nav rule. Keep the shared
+   nav above the Billing modal without changing any navigation handlers or page logic. */
+html body:has(#billingModal.active) nav.bottom-nav {
+  display: grid !important;
+  position: fixed !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 2147483600 !important;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+}
+/* Leave scrollable room for the persistent navigation at the end of Billing content. */
+#billingModal .modal-sheet.billing-modern {
+  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+
+/* SK APPEARANCE STUDIO CONTROL APPLICATION FIX v5.6.121 */
+html[data-ui-card-radius] #settingsModal .sk-ui-section,
+html[data-ui-card-radius] #settingsModal .sk-ui-preview,
+html[data-ui-card-radius] #settingsModal .sk-ui-preview-card,
+html[data-ui-card-radius] #settingsModal .sk-ui-profile,
+html[data-ui-card-radius] #settingsModal .sk-ui-choice,
+html[data-ui-card-radius] #settingsModal .sk-ui-card-choice,
+html[data-ui-card-radius] #settingsModal .sk-ui-accent,
+html[data-ui-card-radius] #settingsModal .sk-ui-toggle-row {
+  border-radius: var(--ui-card-radius) !important;
+}
+html[data-ui-button-radius] #settingsModal .sk-ui-studio button:not(.sk-ui-reset-btn) {
+  border-radius: var(--ui-button-radius) !important;
+}
+html[data-ui-surface="offwhite"] body,
+html[data-ui-surface="offwhite"] .app-viewport { background: #f8fafc !important; }
+html[data-ui-surface="slate"] body,
+html[data-ui-surface="slate"] .app-viewport { background: color-mix(in srgb, #64748b 7%, var(--page-bg)) !important; }
+html[data-ui-surface="classic"] body,
+html[data-ui-surface="classic"] .app-viewport { background: linear-gradient(145deg, var(--page-bg), color-mix(in srgb, var(--primary) 3%, var(--bg))) !important; }
+html[data-ui-scale="normal"] .app-viewport { font-size: 100% !important; }
+html[data-ui-motion="on"] *, html[data-ui-motion="on"] *::before, html[data-ui-motion="on"] *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; transform: none !important; }

@@ -1641,11 +1641,20 @@ const MASTER_INVENTORY = [
       }
     };
 
+    let skToastHideTimer = 0;
     function showToast(msg) {
       const toast = document.getElementById('toast');
-      toast.innerText = msg;
+      if (!toast) return;
+      toast.textContent = String(msg ?? '');
+      toast.classList.remove('show');
+      if (skToastHideTimer) clearTimeout(skToastHideTimer);
+      // Reflow ensures repeated notifications restart their entrance/exit cycle.
+      void toast.offsetWidth;
       toast.classList.add('show');
-      setTimeout(() => { toast.classList.remove('show'); }, 2200);
+      skToastHideTimer = setTimeout(() => {
+        toast.classList.remove('show');
+        skToastHideTimer = 0;
+      }, 2400);
     }
 
     const NAV_ICON_PACKS = {
@@ -3981,9 +3990,10 @@ function viewSavedBill(idx) {
       root.id = 'printableInvoiceCard';
       const mobileTypeText = String(previewClone.querySelector('#pvMobileType')?.textContent || 'New Mobile').trim().toLowerCase();
       root.dataset.mobileType = mobileTypeText.includes('used') ? 'used' : mobileTypeText.includes('keypad') ? 'keypad' : 'new';
-      root.style.width = '100%';
-      root.style.maxWidth = '100%';
-      root.style.margin = '0';
+      root.style.width = '774px';
+      root.style.maxWidth = '774px';
+      root.style.minWidth = '0';
+      root.style.margin = '0 auto';
       root.style.padding = '0';
       root.style.background = '#ffffff';
       root.style.color = '#1e293b';
@@ -3996,12 +4006,31 @@ function viewSavedBill(idx) {
       page1.className = 'sk-invoice-export-page sk-invoice-export-page-1';
       page1.style.width = '100%';
       page1.style.maxWidth = '100%';
+      page1.style.minWidth = '0';
+      page1.style.overflow = 'visible';
       page1.style.margin = '0';
       page1.style.padding = '0';
       page1.style.background = '#ffffff';
       page1.style.boxSizing = 'border-box';
       page1.appendChild(main);
       root.appendChild(page1);
+      main.style.width = '100%';
+      main.style.maxWidth = '100%';
+      main.style.minWidth = '0';
+      main.style.margin = '0';
+      main.style.boxSizing = 'border-box';
+      main.querySelectorAll('*').forEach((node) => {
+        node.style.boxSizing = 'border-box';
+        if (node.matches('table')) {
+          node.style.width = '100%';
+          node.style.maxWidth = '100%';
+          node.style.tableLayout = 'fixed';
+        }
+        if (node.matches('td, th')) {
+          node.style.overflowWrap = 'anywhere';
+          node.style.wordBreak = 'break-word';
+        }
+      });
 
       const isEmi = !!(emi && emi.style.display !== 'none');
       if (isEmi) {
@@ -4108,7 +4137,7 @@ function viewSavedBill(idx) {
       holder.style.cssText = [
         'position:fixed','left:0','top:0','width:794px','max-width:794px',
         'height:auto','padding:0','margin:0','background:#ffffff','z-index:-1',
-        'pointer-events:none','opacity:0.01','visibility:visible','overflow:visible',
+        'pointer-events:none','opacity:1','visibility:visible','overflow:visible',
         'contain:layout style'
       ].join(';');
       clone.style.width = '100%';
@@ -4210,17 +4239,12 @@ img{max-width:100%!important;}
       const holder = skCreateInvoiceExportHolder(clone);
       const opt = skGetUnifiedInvoicePdfOptions(filename);
       showToast?.('📄 Preparing invoice PDF...');
-      html2pdf().set(opt).from(clone).outputPdf('blob')
-        .then((blob) => {
-          if (!(blob instanceof Blob) || blob.size < 100 || blob.type !== 'application/pdf') throw new Error('PDF output is empty or invalid');
-          const url = URL.createObjectURL(blob);
-          const anchor = document.createElement('a');
-          anchor.href = url; anchor.download = filename; anchor.style.display = 'none';
-          document.body.appendChild(anchor); anchor.click(); anchor.remove();
-          setTimeout(() => URL.revokeObjectURL(url), 60000);
-          showToast?.('✅ Invoice PDF download started');
-        })
-        .catch((error) => { console.error('Invoice PDF download failed:', error); showToast?.('❌ PDF download failed. Check browser Console for the exact error.'); })
+      // Use html2pdf's built-in save flow so the generated PDF is handed
+      // directly to the browser download manager after the user gesture.
+      // The content source remains the cloned Live Invoice Preview above.
+      html2pdf().set(opt).from(clone).save()
+        .then(() => { showToast?.('✅ Invoice PDF download started'); })
+        .catch((error) => { console.error('Invoice PDF download failed:', error); showToast?.('❌ PDF download failed. Please retry or check browser download permissions.'); })
         .finally(() => { try { holder.remove(); } catch (_) {} });
     }
 
@@ -7132,6 +7156,8 @@ function openLedger(){skImportFromBills(true);skRenderCreditCustomers();document
 window.skOpenCreditLedger=openLedger;
 window.skCloseCreditLedger=function(){document.getElementById('skCreditLedgerModal')?.classList.remove('active')};
 window.skOpenRoleProfile=function(){
+ // Ensure profile opens as the foreground page and the side drawer closes, including capture-phase navigation.
+ if(typeof window.toggleLeftDrawer==='function')window.toggleLeftDrawer(false);
  const role=localStorage.getItem('sk_current_role_v1');
  if(role==='admin'){const c=document.getElementById('skAdminProfileWorkerCount'),w=safeJson('sk_workers_v1',[]);if(c)c.textContent=Array.isArray(w)?w.length:0;
    document.getElementById('skAdminProfileTitle')?.replaceChildren(document.createTextNode('👑 My Admin Profile'));

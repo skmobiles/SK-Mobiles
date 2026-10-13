@@ -1,60 +1,74 @@
 /* SK MOBILES PWA shell cache. Firebase/auth/firestore requests are never intercepted. */
-const CACHE_NAME = 'sk-mobiles-shell-v5.6.107';
+const CACHE_PREFIX = 'sk-mobiles-shell-';
+const CACHE_NAME = 'sk-mobiles-shell-v5.6.122';
 const APP_SHELL = [
-  './', './index.html', './manifest.webmanifest',
-  './css/style.css', './css/premium-overrides.css', './js/app.js', './js/firebase-sync.js',
-  './icons/sk-mobiles-192.png', './icons/sk-mobiles-512.png'
+  '/', '/index.html', '/manifest.webmanifest',
+  '/css/style.css', '/css/premium-overrides.css', '/js/app.js', '/js/firebase-sync.js',
+  '/icons/sk-mobiles-192.png', '/icons/sk-mobiles-512.png'
 ];
+
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    await Promise.all(APP_SHELL.map(async path => {
-      try { await cache.add(new Request(path, {cache:'reload'})); } catch (_) { /* optional asset; online load can retry */ }
+    // Require the document and manifest to cache successfully; optional assets may retry later.
+    await cache.add(new Request('/index.html', {cache:'reload'}));
+    await cache.add(new Request('/manifest.webmanifest', {cache:'reload'}));
+    await Promise.all(APP_SHELL.filter(p => p !== '/index.html' && p !== '/manifest.webmanifest').map(async path => {
+      try {
+        const response = await fetch(new Request(path, {cache:'reload'}));
+        if (response.ok) await cache.put(path, response);
+      } catch (_) { /* network may be temporarily unavailable */ }
     }));
     await self.skipWaiting();
   })());
 });
+
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(key => key.startsWith('sk-mobiles-shell-') && key !== CACHE_NAME).map(key => caches.delete(key)));
+    await Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map(key => caches.delete(key)));
     await self.clients.claim();
   })());
 });
+
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  // Never intercept Firebase, Google APIs, CDN dependencies, or other cross-origin traffic.
   if (url.origin !== self.location.origin) return;
-  // Keep navigation fresh, but allow the last successfully cached app shell to open offline.
+
   if (req.mode === 'navigate') {
     event.respondWith((async () => {
       try {
         const response = await fetch(req);
         if (response && response.ok) {
           const cache = await caches.open(CACHE_NAME);
-          cache.put('./index.html', response.clone()).catch(() => {});
+          await cache.put('/index.html', response.clone()).catch(() => {});
+          return response;
         }
-        return response;
+        // Hosting errors should not strand the installed app when a known-good shell exists.
+        const fallback = await caches.match('/index.html');
+        return fallback || response;
       } catch (_) {
-        return (await caches.match(req)) || (await caches.match('./index.html')) || new Response('SK MOBILES is offline. Connect to the internet and reopen the app.', {status:503, headers:{'Content-Type':'text/plain; charset=utf-8'}});
+        return (await caches.match('/index.html')) || new Response('SK MOBILES could not load. Check your connection and reopen the app.', {status:503, headers:{'Content-Type':'text/plain; charset=utf-8'}});
       }
     })());
     return;
   }
-  // Network-first for app files so deployments update; cached copies are fallback only.
+
   if (/\.(?:css|js|webmanifest|png|svg|ico)$/.test(url.pathname)) {
     event.respondWith((async () => {
       try {
         const response = await fetch(req);
         if (response && response.ok) {
           const cache = await caches.open(CACHE_NAME);
-          cache.put(req, response.clone()).catch(() => {});
+          await cache.put(req, response.clone()).catch(() => {});
+          return response;
         }
-        return response;
+        const fallback = await caches.match(req, {ignoreSearch:true});
+        return fallback || response;
       } catch (_) {
-        return (await caches.match(req)) || new Response('', {status:504});
+        return (await caches.match(req, {ignoreSearch:true})) || new Response('SK MOBILES resource unavailable. Reconnect and reopen the app.', {status:504, headers:{'Content-Type':'text/plain; charset=utf-8'}});
       }
     })());
   }

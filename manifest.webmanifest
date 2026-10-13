@@ -1,10 +1,10 @@
 {
-  "id": "./",
+  "id": "/",
   "name": "SK MOBILES - Glass & Inventory Master",
   "short_name": "SK MOBILES",
   "description": "SK MOBILES billing, inventory and service management",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#f8fafc",
