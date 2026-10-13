@@ -1,7 +1,0 @@
-SK MOBILES V5.6.53 — Static UI Fix Audit
-
-Input source: V5.6.52 ZIP uploaded by user.
-Detected source folder label was V5.6.43 despite ZIP filename V5.6.52; output folder is relabeled V5.6.53 to avoid that mismatch.
-Changes: appended a higher-priority consolidated CSS rule for the injected Contact Picker wrapper, using grid overlay instead of competing absolute/top:50% positioning rules; normalized Repair modal close-button sizing and theme-aware header colors.
-No JavaScript, Firebase config/rules, field IDs, data schema, or business logic changed.
-Validation: ZIP integrity and JavaScript syntax checked. No live mobile-browser visual test performed.
