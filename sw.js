@@ -1,8 +1,8 @@
 /* SK MOBILES PWA shell cache. Firebase/auth/firestore requests are never intercepted. */
-const CACHE_NAME = 'sk-mobiles-shell-v1';
+const CACHE_NAME = 'sk-mobiles-shell-v5.6.91';
 const APP_SHELL = [
   './', './index.html', './manifest.webmanifest',
-  './css/style.css', './js/app.js', './js/firebase-sync.js',
+  './css/style.css', './css/premium-overrides.css', './js/app.js', './js/firebase-sync.js',
   './icons/sk-mobiles-192.png', './icons/sk-mobiles-512.png'
 ];
 self.addEventListener('install', event => {
