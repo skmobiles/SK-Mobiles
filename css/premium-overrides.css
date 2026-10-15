@@ -3,7 +3,9 @@
    Additive presentation layer. No application behaviour is defined here.
    ============================================================ */
 
-:root {
+
+
+:root{
   --sk-ui-space-1: 4px;
   --sk-ui-space-2: 8px;
   --sk-ui-space-3: 12px;
@@ -25,7 +27,9 @@
   --sk-ui-focus-ring: 0 0 0 3px color-mix(in srgb, var(--primary, #2563eb) 20%, transparent);
 }
 
-html {
+
+
+html{
   min-width: 320px;
   min-height: 100%;
   scroll-padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
@@ -33,7 +37,9 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
-body {
+
+
+body{
   width: 100%;
   min-width: 320px;
   min-height: 100dvh;
@@ -41,29 +47,49 @@ body {
   overflow-wrap: break-word;
 }
 
-button, input, select, textarea {
+
+
+button,
+input,
+select,
+textarea{
   font: inherit;
   line-height: 1.35;
 }
 
-button {
+
+
+button{
   touch-action: manipulation;
   -webkit-appearance: none;
   appearance: none;
 }
 
-button:focus-visible, a:focus-visible, input:focus-visible,
-select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible{
   outline: 2px solid var(--primary, #2563eb);
   outline-offset: 2px;
   box-shadow: var(--sk-ui-focus-ring);
 }
 
-img, svg, video, canvas {
+
+
+img,
+svg,
+video,
+canvas{
   max-width: 100%;
 }
 
-.app-viewport {
+
+
+.app-viewport{
   width: 100%;
   max-width: none;
   min-width: 0;
@@ -73,26 +99,38 @@ img, svg, video, canvas {
   overflow-x: clip;
 }
 
-.app-header {
+
+
+.app-header{
   width: 100%;
   min-width: 0;
   padding-left: clamp(12px, 2.4vw, 24px);
   padding-right: clamp(12px, 2.4vw, 24px);
 }
 
-.header-row, .brand-logo-wrap {
+
+
+.header-row,
+.brand-logo-wrap{
   min-width: 0;
 }
 
-.brand-logo-wrap > div {
+
+
+.brand-logo-wrap > div{
   min-width: 0;
 }
 
-.app-name, .app-sub {
+
+
+.app-name,
+.app-sub{
   overflow-wrap: anywhere;
 }
 
-.content-area {
+
+
+.content-area{
   width: 100%;
   min-width: 0;
   max-width: none;
@@ -102,59 +140,122 @@ img, svg, video, canvas {
   overflow-x: clip;
 }
 
-.content-area > *, .app-viewport > * {
+
+
+.content-area > *,
+.app-viewport > *{
   min-width: 0;
 }
 
-.card, .glass-card, .inventory-card, .summary-card, .stat-card,
-.form-section, .section-card, .sk-card, .dashboard-card {
+
+
+.card,
+.glass-card,
+.inventory-card,
+.summary-card,
+.stat-card,
+.form-section,
+.section-card,
+.sk-card,
+.dashboard-card{
   min-width: 0;
   border-radius: var(--sk-ui-radius-lg);
 }
 
-.card, .glass-card, .inventory-card, .summary-card, .stat-card,
-.form-section, .section-card, .sk-card, .dashboard-card {
+
+
+.card,
+.glass-card,
+.inventory-card,
+.summary-card,
+.stat-card,
+.form-section,
+.section-card,
+.sk-card,
+.dashboard-card{
   box-shadow: var(--sk-ui-shadow-card);
 }
 
-h1, h2, h3, h4, h5, p, label, small, strong, span {
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+p,
+label,
+small,
+strong,
+span{
   overflow-wrap: break-word;
 }
 
-h1, h2, h3, h4 {
+
+
+h1,
+h2,
+h3,
+h4{
   line-height: 1.25;
   text-wrap: pretty;
 }
 
-p, label, .form-label, .help-text, .muted, small {
+
+
+p,
+label,
+.form-label,
+.help-text,
+.muted,
+small{
   line-height: var(--sk-ui-body-leading);
 }
 
-.form-input, .form-select, input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
-select, textarea {
+
+
+.form-input,
+.form-select,
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+select,
+textarea{
   min-width: 0;
   max-width: 100%;
   border-radius: var(--sk-ui-radius-md);
   line-height: 1.4;
 }
 
-.form-input, .form-select, input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]), select {
+
+
+.form-input,
+.form-select,
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+select{
   min-height: var(--sk-ui-control-standard);
 }
 
-textarea, textarea.form-input {
+
+
+textarea,
+textarea.form-input{
   min-height: 96px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   resize: vertical;
 }
 
-input::placeholder, textarea::placeholder {
+
+
+input::placeholder,
+textarea::placeholder{
   opacity: .78;
   line-height: 1.35;
 }
 
-input[type="checkbox"], input[type="radio"] {
+
+
+input[type="checkbox"],
+input[type="radio"]{
   width: 18px;
   height: 18px;
   min-height: 18px;
@@ -162,14 +263,23 @@ input[type="checkbox"], input[type="radio"] {
   accent-color: var(--primary, #2563eb);
 }
 
-input[type="file"] {
+
+
+input[type="file"]{
   height: auto;
   min-height: var(--sk-ui-control-standard);
   padding: 7px;
 }
 
-button, .submit-btn, .btn, .action-btn, .modal-close-btn,
-.login-password-toggle, .login-submit-btn, .sk-used-all-clear {
+
+
+button,
+.submit-btn,
+.btn,
+.action-btn,
+.modal-close-btn,
+.login-password-toggle,
+.login-submit-btn{
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -178,21 +288,29 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   overflow-wrap: anywhere;
 }
 
-.submit-btn, .login-submit-btn {
+
+
+.submit-btn,
+.login-submit-btn{
   min-height: var(--sk-ui-control-primary);
   border-radius: var(--sk-ui-radius-md);
   padding: 12px 16px;
   font-weight: 750;
 }
 
-.modal-overlay {
+
+
+.modal-overlay{
   box-sizing: border-box;
   padding: max(12px, env(safe-area-inset-top, 0px)) 12px
            max(12px, env(safe-area-inset-bottom, 0px));
   overscroll-behavior: contain;
 }
 
-.modal-sheet, .login-glass-card {
+
+
+.modal-sheet,
+.login-glass-card{
   box-sizing: border-box;
   min-width: 0;
   width: min(100%, 760px);
@@ -208,7 +326,9 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   scrollbar-gutter: stable;
 }
 
-.modal-title {
+
+
+.modal-title{
   position: sticky;
   top: 0;
   z-index: 5;
@@ -223,12 +343,16 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   border-bottom: var(--sk-ui-line);
 }
 
-.modal-title > span {
+
+
+.modal-title > span{
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.modal-close-btn {
+
+
+.modal-close-btn{
   flex: 0 0 40px;
   width: 40px;
   min-width: 40px;
@@ -237,18 +361,24 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   border-radius: var(--sk-ui-radius-pill);
 }
 
-.modal-sheet > :not(.modal-title) {
+
+
+.modal-sheet > :not(.modal-title){
   min-width: 0;
 }
 
-.search-wrapper {
+
+
+.search-wrapper{
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
 }
 
-.search-wrapper .search-input {
+
+
+.search-wrapper .search-input{
   flex: 1 1 auto;
   width: 100%;
   min-width: 0;
@@ -256,7 +386,9 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   padding-right: 42px;
 }
 
-.search-wrapper .search-icon-left {
+
+
+.search-wrapper .search-icon-left{
   position: absolute;
   z-index: 2;
   left: 14px;
@@ -265,15 +397,21 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   pointer-events: none;
 }
 
-.search-wrapper {
+
+
+.search-wrapper{
   position: relative;
 }
 
-.search-wrapper .clear-search-btn {
+
+
+.search-wrapper .clear-search-btn{
   flex: 0 0 auto;
 }
 
-.login-glass-card {
+
+
+.login-glass-card{
   width: min(100%, 480px);
   padding: clamp(20px, 4vw, 34px);
   margin: auto;
@@ -283,7 +421,9 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   -webkit-backdrop-filter: blur(18px);
 }
 
-#skLoginModal .login-input-wrap {
+
+
+#skLoginModal .login-input-wrap{
   position: relative;
   display: flex;
   align-items: center;
@@ -292,7 +432,9 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   gap: 6px;
 }
 
-#skLoginModal .login-input-icon {
+
+
+#skLoginModal .login-input-icon{
   position: absolute;
   left: 14px;
   top: 50%;
@@ -304,7 +446,9 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   line-height: 1;
 }
 
-#skLoginModal .login-modern-input {
+
+
+#skLoginModal .login-modern-input{
   flex: 1 1 auto;
   width: 100%;
   min-width: 0;
@@ -315,7 +459,9 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   text-overflow: ellipsis;
 }
 
-#skLoginModal .login-password-toggle {
+
+
+#skLoginModal .login-password-toggle{
   flex: 0 0 auto;
   min-height: 40px;
   padding: 8px 10px;
@@ -323,39 +469,51 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   white-space: nowrap;
 }
 
-#skLoginModal .login-submit-btn {
+
+
+#skLoginModal .login-submit-btn{
   display: flex;
   width: 100%;
   min-height: var(--sk-ui-control-primary);
   margin-top: 4px;
 }
 
-#skLoginModal .login-status-msg {
+
+
+#skLoginModal .login-status-msg{
   min-height: 20px;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
 
-#settingsModal .modal-sheet {
+
+
+#settingsModal .modal-sheet{
   width: min(100%, 1080px);
   max-width: 1080px;
 }
 
+
+
 #settingsModal #skUiAppearanceStudio,
 #settingsModal .sk-ui-studio,
 #settingsModal .sk-ui-preview,
-#settingsModal .sk-ui-sandbox {
+#settingsModal .sk-ui-sandbox{
   min-width: 0;
   max-width: 100%;
 }
 
-#settingsModal .sk-ui-studio {
+
+
+#settingsModal .sk-ui-studio{
   display: grid;
   gap: 16px;
   padding: clamp(12px, 2vw, 20px);
 }
 
-#settingsModal .sk-ui-studio-head {
+
+
+#settingsModal .sk-ui-studio-head{
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -366,41 +524,55 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   border-radius: var(--sk-ui-radius-lg);
 }
 
-#settingsModal .sk-ui-studio-head > div {
+
+
+#settingsModal .sk-ui-studio-head > div{
   flex: 1 1 240px;
   min-width: 0;
 }
 
-#settingsModal .sk-ui-studio-head h3 {
+
+
+#settingsModal .sk-ui-studio-head h3{
   font-size: clamp(1.1rem, 1.8vw, 1.45rem);
   line-height: 1.25;
 }
 
-#settingsModal .sk-ui-studio-head p {
+
+
+#settingsModal .sk-ui-studio-head p{
   max-width: 70ch;
   line-height: 1.45;
 }
 
-#settingsModal .sk-ui-reset-btn {
+
+
+#settingsModal .sk-ui-reset-btn{
   flex: 0 0 auto;
   min-height: 40px;
   max-width: 100%;
 }
 
-#settingsModal .sk-ui-preview {
+
+
+#settingsModal .sk-ui-preview{
   padding: clamp(10px, 2vw, 18px);
   border-radius: var(--sk-ui-radius-lg);
   overflow: hidden;
 }
 
-#settingsModal .sk-ui-sandbox-tabs {
+
+
+#settingsModal .sk-ui-sandbox-tabs{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
   min-width: 0;
 }
 
-#settingsModal .sk-ui-sandbox-tab {
+
+
+#settingsModal .sk-ui-sandbox-tab{
   display: flex;
   align-items: center;
   justify-content: center;
@@ -411,13 +583,17 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   overflow-wrap: anywhere;
 }
 
+
+
 #settingsModal .sk-ui-sandbox,
-#settingsModal .sk-ui-sandbox-pane {
+#settingsModal .sk-ui-sandbox-pane{
   min-height: 0;
   height: auto;
 }
 
-#settingsModal .sk-ui-sandbox-welcome {
+
+
+#settingsModal .sk-ui-sandbox-welcome{
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -427,23 +603,31 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   padding: clamp(12px, 2vw, 18px);
 }
 
-#settingsModal .sk-ui-sandbox-welcome > div {
+
+
+#settingsModal .sk-ui-sandbox-welcome > div{
   flex: 1 1 180px;
   min-width: 0;
 }
 
-#settingsModal .sk-ui-sandbox-balance {
+
+
+#settingsModal .sk-ui-sandbox-balance{
   max-width: 100%;
   overflow-wrap: anywhere;
 }
 
-#settingsModal .sk-ui-sandbox-shortcuts {
+
+
+#settingsModal .sk-ui-sandbox-shortcuts{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: clamp(6px, 1vw, 12px);
 }
 
-#settingsModal .sk-ui-sandbox-shortcuts button {
+
+
+#settingsModal .sk-ui-sandbox-shortcuts button{
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -455,13 +639,17 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   white-space: normal;
 }
 
-#settingsModal .sk-ui-sandbox-shortcuts span {
+
+
+#settingsModal .sk-ui-sandbox-shortcuts span{
   line-height: 1.3;
   text-align: center;
   overflow-wrap: anywhere;
 }
 
-#settingsModal .sk-ui-sandbox-primary {
+
+
+#settingsModal .sk-ui-sandbox-primary{
   display: flex;
   align-items: center;
   justify-content: center;
@@ -470,118 +658,60 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   white-space: normal;
 }
 
+
+
 #settingsModal .sk-ui-theme-grid,
 #settingsModal .sk-ui-theme-profiles,
 #settingsModal .sk-ui-choice-grid,
 #settingsModal .sk-ui-card-grid,
-#settingsModal .sk-ui-option-grid {
+#settingsModal .sk-ui-option-grid{
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
+
+
 
 #settingsModal button,
 #settingsModal input,
-#settingsModal select {
+#settingsModal select{
   max-width: 100%;
 }
 
-#settingsModal button {
+
+
+#settingsModal button{
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.sk-used-detail-overlay {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
 
-#skUsedDetailDialog .sk-used-detail-sheet,
-.sk-used-detail-sheet {
-  width: min(100%, 560px);
-  max-width: 560px;
-  max-height: calc(100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  overscroll-behavior: contain;
-  border-radius: var(--sk-ui-radius-xl);
-  border: var(--sk-ui-line);
-  background: color-mix(in srgb, var(--card-bg, #fff) 88%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--sk-ui-shadow-float);
-}
 
-.sk-used-detail-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-width: 0;
-}
 
-.sk-used-detail-head > * {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
 
-.sk-used-detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
 
-.sk-used-detail-field {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  padding: 12px;
-  border-radius: var(--sk-ui-radius-md);
-}
 
-.sk-used-detail-field small {
-  display: block;
-  margin-bottom: 3px;
-  line-height: 1.35;
-}
 
-.sk-used-detail-field strong {
-  display: block;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
 
-.sk-used-detail-actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  width: 100%;
-}
 
-.sk-used-detail-actions > button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-  min-height: var(--sk-ui-control-standard);
-  padding: 8px 10px;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
 
-#skUsedStockModal .sk-used-register-toolbar,
-#skUsedStockModal .sk-used-register-tools {
-  min-width: 0;
-  flex-wrap: wrap;
-}
 
-#skUsedStockModal .sk-used-register-tools {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
-.bottom-nav {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.bottom-nav{
   box-sizing: border-box;
   padding: 5px 6px calc(5px + env(safe-area-inset-bottom, 0px)) !important;
   min-width: 0;
@@ -593,7 +723,9 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   -webkit-backdrop-filter: blur(20px);
 }
 
-.bottom-nav .nav-item {
+
+
+.bottom-nav .nav-item{
   display: flex !important;
   flex-direction: column;
   align-items: center;
@@ -608,14 +740,18 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   overflow: visible;
 }
 
-.bottom-nav .nav-item svg {
+
+
+.bottom-nav .nav-item svg{
   display: block;
   flex: 0 0 20px;
   width: 20px;
   height: 20px;
 }
 
-.bottom-nav .nav-item span {
+
+
+.bottom-nav .nav-item span{
   display: block;
   max-width: 100%;
   font-size: clamp(9px, 1.8vw, 11px);
@@ -624,146 +760,182 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   overflow-wrap: anywhere;
 }
 
-.bottom-nav .nav-item#navHome {
+
+
+.bottom-nav .nav-item#navHome{
   align-self: center;
 }
 
+
+
 @media (min-width: 900px) {
-  .content-area {
+  
+.content-area{
     padding-left: clamp(20px, 3vw, 40px);
     padding-right: clamp(20px, 3vw, 40px);
   }
 
-  #settingsModal .modal-sheet {
+
+  
+#settingsModal .modal-sheet{
     max-width: 1120px;
   }
 
-  #settingsModal .sk-ui-studio {
+
+  
+#settingsModal .sk-ui-studio{
     grid-template-columns: minmax(0, 1fr);
   }
 
-  #settingsModal .sk-ui-sandbox-shortcuts button {
+
+  
+#settingsModal .sk-ui-sandbox-shortcuts button{
     min-height: 88px;
   }
 
-  .sk-used-detail-sheet {
-    max-width: 640px;
-  }
+
+  
 }
 
+
+
 @media (max-width: 640px) {
-  .app-header {
+  
+.app-header{
     padding-left: 12px;
     padding-right: 12px;
   }
 
-  .content-area {
+
+  
+.content-area{
     padding-left: 10px;
     padding-right: 10px;
     padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
   }
 
-  .modal-overlay {
+
+  
+.modal-overlay{
     align-items: center;
     padding: max(8px, env(safe-area-inset-top, 0px)) 8px
              max(8px, env(safe-area-inset-bottom, 0px));
   }
 
-  .modal-sheet {
+
+  
+.modal-sheet{
     width: 100%;
     max-width: 100%;
     max-height: calc(100dvh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     border-radius: 18px;
   }
 
-  .modal-title {
+
+  
+.modal-title{
     padding: 12px;
   }
 
-  #settingsModal .sk-ui-sandbox-tabs {
+
+  
+#settingsModal .sk-ui-sandbox-tabs{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  #settingsModal .sk-ui-theme-grid,
-  #settingsModal .sk-ui-theme-profiles,
-  #settingsModal .sk-ui-choice-grid,
-  #settingsModal .sk-ui-card-grid,
-  #settingsModal .sk-ui-option-grid {
+
+  
+#settingsModal .sk-ui-theme-grid,
+#settingsModal .sk-ui-theme-profiles,
+#settingsModal .sk-ui-choice-grid,
+#settingsModal .sk-ui-card-grid,
+#settingsModal .sk-ui-option-grid{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .sk-used-detail-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 7px;
-  }
 
-  .sk-used-detail-field {
-    padding: 9px;
-  }
+  
 
-  .sk-used-detail-actions {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-  }
+  
 
-  .sk-used-detail-actions > button {
-    min-height: 42px;
-    padding: 7px 4px;
-    font-size: .78rem;
-  }
+  
 
-  .bottom-nav {
+  
+
+  
+.bottom-nav{
     bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
     width: calc(100% - 16px) !important;
     max-width: 560px !important;
   }
+
 }
 
+
+
 @media (max-width: 380px) {
-  #skLoginModal .login-glass-card {
+  
+#skLoginModal .login-glass-card{
     padding: 18px 14px;
   }
 
-  #skLoginModal .login-modern-input {
+
+  
+#skLoginModal .login-modern-input{
     padding-left: 40px !important;
   }
 
-  #settingsModal .sk-ui-studio {
+
+  
+#settingsModal .sk-ui-studio{
     padding: 8px;
   }
 
-  #settingsModal .sk-ui-sandbox-shortcuts {
+
+  
+#settingsModal .sk-ui-sandbox-shortcuts{
     gap: 4px;
   }
 
-  .sk-used-detail-grid,
-  .sk-used-detail-actions {
-    grid-template-columns: minmax(0, 1fr);
-  }
+
+  
 }
 
+
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  
+*,
+*::before,
+*::after{
     scroll-behavior: auto !important;
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
+
 }
+
+
 
 /* ============================================================
    V5.6.89 — Modal header, detail actions, theme grid and swatch sync
    Scoped presentation fixes. No application logic is changed.
    ============================================================ */
 
+
+
 /* One scrolling surface per modal: the overlay never becomes a second scroller. */
-.modal-overlay,
-.sk-used-detail-overlay {
+
+
+.modal-overlay{
   overflow: hidden !important;
   overscroll-behavior: contain;
 }
 
-.modal-sheet {
+
+
+.modal-sheet{
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -775,7 +947,9 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   scrollbar-gutter: stable;
 }
 
-.modal-title {
+
+
+.modal-title{
   position: sticky !important;
   top: 0;
   z-index: 50 !important;
@@ -787,11 +961,17 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   border-bottom: 1px solid var(--card-border, rgba(0,0,0,.08));
 }
 
+
+
 /* The settings sheet uses a centered drag-handle above its sticky title. */
-#settingsModal .modal-sheet {
+
+
+#settingsModal .modal-sheet{
   position: relative;
 }
-#settingsModal .modal-sheet::before {
+
+
+#settingsModal .modal-sheet::before{
   content: "";
   position: absolute;
   top: 7px;
@@ -804,89 +984,38 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   transform: translateX(-50%);
   pointer-events: none;
 }
-#settingsModal .modal-title {
+
+
+#settingsModal .modal-title{
   padding-top: 22px;
 }
 
+
+
 /* Used-mobile details: header and footer stay fixed while only detail fields scroll. */
-#skUsedDetailDialog.sk-used-detail-overlay {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: max(12px, env(safe-area-inset-top, 0px)) 12px
-           max(12px, env(safe-area-inset-bottom, 0px)) !important;
-}
-#skUsedDetailDialog .sk-used-detail-sheet {
-  display: flex !important;
-  flex-direction: column !important;
-  width: min(100%, 560px) !important;
-  max-width: 560px !important;
-  max-height: calc(100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-  box-sizing: border-box !important;
-}
-#skUsedDetailDialog .sk-used-detail-head,
-#skUsedDetailDialog .sk-used-detail-actions {
-  flex: 0 0 auto !important;
-}
-#skUsedDetailDialog .sk-used-detail-grid {
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-gutter: stable;
-  padding: 1px;
-}
-#skUsedDetailDialog .sk-used-detail-actions {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-  width: 100% !important;
-  margin-top: 12px !important;
-}
-#skUsedDetailDialog .sk-used-detail-actions > button {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex: 1 1 0 !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 44px !important;
-  padding: 9px 12px !important;
-  border-radius: 12px !important;
-  white-space: normal !important;
-  line-height: 1.25 !important;
-  overflow-wrap: anywhere;
-}
-#skUsedDetailDialog .sk-used-detail-actions > .sk-used-bill-button {
-  grid-column: 1 / -1 !important;
-  min-height: 46px !important;
-  border-radius: 9999px !important;
-  background: var(--primary-color, var(--primary, #2563eb)) !important;
-  color: #fff !important;
-  border: 1px solid transparent !important;
-  font-weight: 700 !important;
-}
-#skUsedDetailDialog .sk-used-detail-actions > .sk-used-detail-danger {
-  background: #fee2e2 !important;
-  color: #b91c1c !important;
-  border: 1px solid #fca5a5 !important;
-}
-#skUsedDetailDialog .sk-used-detail-actions > button:disabled {
-  opacity: .55;
-  cursor: not-allowed;
-}
+
+
+
+
+
+
+
+
+
+
+
 
 /* Responsive 1-click profile cards: two columns except ultra-narrow devices. */
-#settingsModal .sk-ui-profile-grid {
+
+
+#settingsModal .sk-ui-profile-grid{
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 10px !important;
 }
-#settingsModal .sk-ui-profile-grid > .sk-ui-profile {
+
+
+#settingsModal .sk-ui-profile-grid > .sk-ui-profile{
   display: grid !important;
   grid-template-columns: 24px minmax(0, 1fr) !important;
   grid-template-rows: auto auto !important;
@@ -900,7 +1029,9 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   text-align: left !important;
   white-space: normal !important;
 }
-#settingsModal .sk-ui-profile-grid > .sk-ui-profile > span {
+
+
+#settingsModal .sk-ui-profile-grid > .sk-ui-profile > span{
   grid-column: 1;
   grid-row: 1 / span 2;
   display: flex;
@@ -910,24 +1041,34 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   min-width: 24px;
   line-height: 1.2;
 }
+
+
 #settingsModal .sk-ui-profile-grid > .sk-ui-profile > b,
-#settingsModal .sk-ui-profile-grid > .sk-ui-profile > small {
+#settingsModal .sk-ui-profile-grid > .sk-ui-profile > small{
   grid-column: 2;
   min-width: 0;
   margin: 0;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
-#settingsModal .sk-ui-profile-grid > .sk-ui-profile > b {
+
+
+#settingsModal .sk-ui-profile-grid > .sk-ui-profile > b{
   font-size: .82rem;
 }
-#settingsModal .sk-ui-profile-grid > .sk-ui-profile > small {
+
+
+#settingsModal .sk-ui-profile-grid > .sk-ui-profile > small{
   font-size: .72rem;
   opacity: .78;
 }
 
+
+
 /* Custom brand colour: keep the label and the swatch/hex pair in separate flex groups. */
-#settingsModal .sk-ui-custom-color {
+
+
+#settingsModal .sk-ui-custom-color{
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -941,21 +1082,29 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   background: var(--surface-bg, var(--model-bg, var(--card-bg, #fff))) !important;
   border: 1px solid var(--border-color, var(--card-border, rgba(100,116,139,.25))) !important;
 }
-#settingsModal .sk-ui-custom-color > div {
+
+
+#settingsModal .sk-ui-custom-color > div{
   display: flex !important;
   flex: 1 1 auto !important;
   flex-direction: column !important;
   min-width: 0 !important;
 }
-#settingsModal .sk-ui-custom-color > div b {
+
+
+#settingsModal .sk-ui-custom-color > div b{
   font-size: .8rem !important;
   line-height: 1.35;
 }
-#settingsModal .sk-ui-custom-color > div small {
+
+
+#settingsModal .sk-ui-custom-color > div small{
   font-size: .7rem !important;
   line-height: 1.35;
 }
-#settingsModal #skAppearanceCustomHex {
+
+
+#settingsModal #skAppearanceCustomHex{
   flex: 0 0 28px !important;
   width: 28px !important;
   min-width: 28px !important;
@@ -968,7 +1117,9 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   overflow: hidden;
   cursor: pointer;
 }
-#settingsModal #skAppearanceHexValue {
+
+
+#settingsModal #skAppearanceHexValue{
   flex: 0 0 auto;
   max-width: 100%;
   margin-left: 0 !important;
@@ -978,88 +1129,107 @@ button, .submit-btn, .btn, .action-btn, .modal-close-btn,
   overflow-wrap: normal;
 }
 
+
+
 /* Avoid clipping and keep fixed navigation clear of the device safe area. */
-.bottom-nav {
+
+
+.bottom-nav{
   box-sizing: border-box;
   padding-bottom: calc(5px + env(safe-area-inset-bottom, 0px)) !important;
 }
+
+
 @media (max-width: 479px) {
-  #skUsedDetailDialog .sk-used-detail-sheet {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 14px !important;
-  }
-  #skUsedDetailDialog .sk-used-detail-grid {
-    gap: 7px !important;
-  }
+  
+  
 }
+
+
 @media (max-width: 359px) {
-  #settingsModal .sk-ui-profile-grid {
+  
+#settingsModal .sk-ui-profile-grid{
     grid-template-columns: minmax(0, 1fr) !important;
   }
-  #skUsedDetailDialog .sk-used-detail-actions {
-    gap: 7px !important;
-  }
+
+  
 }
 
+
+
 /* V5.6.90 — stock module stylesheet relocated out of document body */
-#skUsedStockModal #skUsedPurchaseForm{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;align-items:start}#skUsedStockModal #skUsedPurchaseForm>.form-label{font-size:12px;line-height:1.25;min-width:0}#skUsedStockModal #skUsedPurchaseForm .form-input{min-height:40px;padding:9px 11px;font-size:14px;border-radius:10px}#skUsedStockModal #skUsedPurchaseForm>div[style*="grid-column:1/-1"]{grid-column:1/-1!important}#skUsedStockModal #skUsedPurchaseForm>div[style*="display:flex"]{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important}#skUsedStockModal #skUsedPurchaseForm>div[style*="display:flex"] button:first-child{grid-column:1/-1}#skUsedStockModal .modal-sheet{margin:auto;width:min(96vw,980px);max-height:90dvh;overflow:auto;overscroll-behavior:contain}#skUsedHomeCatalog{width:100%;max-width:100%;box-sizing:border-box}#skUsedHomeCatalog .sk-used-catalog-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}#skUsedHomeCatalog .sk-used-product-card{overflow-wrap:anywhere}#skUsedHomeCatalog button{min-height:40px;white-space:nowrap}@media(max-width:640px){#skUsedStatsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:min-content;align-content:start;gap:8px!important;margin:10px 0!important}#skUsedStatsGrid>.bill-section{height:auto!important;min-height:0!important;margin:0!important;padding:8px!important;align-self:start}#skUsedStockModal #skUsedPurchaseForm{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}#skUsedStockModal .modal-sheet{width:100%;max-height:94dvh;border-radius:18px 18px 0 0;padding:12px!important}#skUsedHomeCatalog .sk-used-catalog-grid{grid-template-columns:minmax(0,1fr)!important}}#skUsedStockModal .form-label{display:flex;flex-direction:column;gap:5px;font-size:.76rem;font-weight:750;color:var(--text-muted);min-width:0}#skUsedStockModal .form-input{width:100%;min-width:0;box-sizing:border-box}#skUsedStockModal th{border-bottom:1px solid var(--card-border);color:var(--text-muted)}#skUsedStockModal td{border-bottom:1px solid var(--card-border);padding:8px}#skUsedStockModal .sk-used-action{border:1px solid var(--card-border);background:var(--pill-bg);color:var(--text);border-radius:8px;padding:5px 8px;cursor:pointer}#skUsedStockModal .sk-used-sold{color:var(--danger);font-weight:800} @media(max-width:640px){#skUsedStockModal form{grid-template-columns:repeat(2,minmax(0,1fr))!important}#skUsedStockModal form label[style*="grid-column:1/-1"]{grid-column:1/-1!important}#skUsedStockModal>div{padding:12px!important}}
+
+ 
+
 
 /* V5.6.63: align Used Mobile catalog modal with the app's standard bill-page surfaces */
-#skUsedStockModal{padding:12px!important;box-sizing:border-box;}
-#skUsedStockModal .modal-sheet{font-family:var(--app-font,inherit);font-size:var(--app-font-size,14px);line-height:1.45;background:var(--page-bg,var(--bg,var(--card-bg)))!important;color:var(--text)!important;border:1px solid var(--card-border)!important;border-radius:22px!important;box-shadow:var(--card-shadow,0 12px 36px rgba(20,40,80,.14));padding:16px!important;}
-#skUsedStockModal .modal-sheet>div:first-child{border:1px solid var(--card-border);border-radius:14px;padding:10px 12px!important;top:0!important;margin-bottom:12px;background:var(--card-bg)!important;}
-#skUsedHomeCatalog{border:1px solid var(--card-border)!important;border-radius:16px!important;background:var(--card-bg)!important;padding:14px!important;margin:12px 0!important;}
-#skUsedHomeCatalog>div:first-child{gap:10px!important;align-items:center!important;margin-bottom:12px!important;}
-#skUsedHomeCatalog>div:first-child strong{font-family:var(--app-font,inherit)!important;font-size:1.05rem!important;font-weight:800!important;color:var(--text)!important;}
-#skUsedHomeCatalog .sk-used-product-card{font-family:var(--app-font,inherit)!important;font-size:.9rem!important;line-height:1.5!important;border:1px solid var(--card-border)!important;border-radius:16px!important;padding:14px!important;background:var(--card-bg)!important;color:var(--text)!important;box-shadow:0 3px 12px rgba(20,45,90,.05)!important;}
-#skUsedHomeCatalog .sk-used-product-card>div:first-child{font-size:1.02rem!important;font-weight:800!important;color:var(--text)!important;}
-#skUsedHomeCatalog input.form-input{border:1px solid var(--card-border)!important;border-radius:10px!important;min-height:40px!important;padding:9px 12px!important;font:inherit!important;background:var(--input-bg,var(--card-bg))!important;color:var(--text)!important;}
-#skUsedHomeCatalog button.submit-btn{border-radius:12px!important;font-family:var(--app-font,inherit)!important;font-size:.9rem!important;font-weight:750!important;}
-@media(max-width:640px){#skUsedStockModal{padding:0!important}#skUsedStockModal .modal-sheet{width:100%!important;max-height:96dvh!important;border-radius:20px 20px 0 0!important;padding:12px!important}#skUsedHomeCatalog{padding:10px!important;border-radius:14px!important}#skUsedHomeCatalog .sk-used-product-card{padding:12px!important}}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* V5.6.73: unified UI typography and compact interactive Used Mobile inventory cards */
+
+
 body{font-family:var(--app-font,inherit);font-size:var(--app-font-size,14px);}
-button,input,select,textarea{font-family:inherit;}
-#skUsedHomeCatalog{font-family:var(--app-font,inherit);font-size:var(--app-font-size,14px);line-height:1.4;}
-#skUsedHomeCatalog .sk-used-catalog-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
-#skUsedHomeCatalog .sk-used-catalog-toolbar>strong{font:inherit;font-size:.95rem;font-weight:800;color:var(--text);}
-#skUsedHomeCatalog .sk-used-catalog-toolbar input{display:block;max-width:320px;width:100%;min-height:38px;padding:8px 11px;font:inherit;font-size:.88rem;box-sizing:border-box;outline-offset:2px;}#skUsedHomeCatalog .sk-used-catalog-results{min-width:0;}
-#skUsedHomeCatalog .sk-used-catalog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:8px;}
-#skUsedHomeCatalog .sk-used-product-card{cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease;padding:11px!important;border-radius:14px!important;font:inherit;line-height:1.4;}
-#skUsedHomeCatalog .sk-used-product-card:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
-#skUsedHomeCatalog .sk-used-card-model{font-size:.96rem;font-weight:800;line-height:1.3;overflow-wrap:anywhere;}
-#skUsedHomeCatalog .sk-used-card-specs{font-size:.8rem;color:var(--text-muted);margin-top:4px;line-height:1.35;}
-#skUsedHomeCatalog .sk-used-card-imei{font-size:.8rem;margin-top:6px;overflow-wrap:anywhere;}
-#skUsedHomeCatalog .sk-used-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;flex-wrap:wrap;}
-#skUsedHomeCatalog .sk-used-card-price-label{font-size:.72rem;color:var(--text-muted);}
-#skUsedHomeCatalog .sk-used-card-price{font-size:1rem;font-weight:800;}
-#skUsedHomeCatalog .sk-used-card-status{font-size:.72rem;color:var(--success,#16803c);font-weight:750;margin-top:2px;}
-#skUsedHomeCatalog .sk-used-bill-button{width:auto!important;min-height:32px!important;padding:6px 9px!important;border-radius:10px!important;font:inherit!important;font-size:.76rem!important;font-weight:700!important;white-space:nowrap;}
-#skUsedHomeCatalog .sk-used-empty{padding:16px;text-align:center;color:var(--text-muted);font-size:.85rem;}
-.sk-used-detail-overlay{position:fixed;inset:0;z-index:2147483600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(12,24,45,.38);backdrop-filter:blur(5px);box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;}
-.sk-used-detail-sheet{width:min(100%,480px);max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain;background:var(--card-bg);color:var(--text);border:1px solid var(--card-border);border-radius:18px;padding:14px;box-shadow:var(--card-shadow,0 16px 42px rgba(20,40,80,.2));font:inherit;box-sizing:border-box;margin:auto;}
-.sk-used-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--card-border);}
-.sk-used-detail-head strong{display:block;font-size:1rem;font-weight:800;overflow-wrap:anywhere;}
-.sk-used-detail-head small{display:block;color:var(--text-muted);font-size:.78rem;margin-top:3px;}
-.sk-used-detail-close{border:1px solid var(--card-border);border-radius:50%;width:34px;height:34px;background:var(--pill-bg);color:var(--text);font-size:20px;cursor:pointer;flex:0 0 auto;}
-.sk-used-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0;}
-.sk-used-detail-field{min-width:0;padding:9px;border:1px solid var(--card-border);border-radius:10px;background:var(--page-bg,var(--bg,transparent));}
-.sk-used-detail-field small{display:block;font-size:.72rem;color:var(--text-muted);margin-bottom:3px;}
-.sk-used-detail-field strong{display:block;font-size:.86rem;font-weight:700;overflow-wrap:anywhere;}
-.sk-used-detail-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px;}
-.sk-used-detail-actions .submit-btn{width:100%;min-width:0;min-height:34px;padding:7px 6px;font:inherit;font-size:.8rem;white-space:normal;line-height:1.2;}
-.sk-used-detail-actions .sk-used-detail-danger{background:var(--danger-bg,#fff0f0);color:var(--danger,#c62828);border:1px solid var(--danger,#c62828);}
-@media(max-width:640px){#skUsedHomeCatalog .sk-used-catalog-toolbar{align-items:stretch;flex-direction:column;}#skUsedHomeCatalog .sk-used-catalog-toolbar input{max-width:none;}#skUsedHomeCatalog .sk-used-product-card{padding:10px!important;}#skUsedHomeCatalog .sk-used-bill-button{min-height:30px!important;padding:5px 8px!important;font-size:.72rem!important}.sk-used-detail-overlay{padding:10px;align-items:center;justify-content:center;z-index:2147483600}.sk-used-detail-sheet{width:100%;max-width:480px;max-height:calc(100dvh - 20px);overflow:auto;border-radius:16px;padding:11px}.sk-used-detail-grid{gap:6px;margin:9px 0}.sk-used-detail-field{padding:7px}.sk-used-detail-actions{position:sticky;bottom:0;padding:8px 0 0;background:var(--card-bg);}}
+
+
+button,
+input,
+select,
+textarea{font-family:inherit;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* V5.6.72: simplify Used Mobile Register toolbar and unify it with the app's compact card style */
-#skUsedStockModal .sk-used-register-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;min-width:0;}
-#skUsedStockModal .sk-used-register-toolbar>strong{font-family:var(--app-font,inherit);font-size:.92rem;font-weight:800;color:var(--text);}
-#skUsedStockModal #skUsedSearch{width:min(100%,340px);max-width:100%!important;min-height:40px;padding:9px 12px;font:inherit;font-size:.86rem;border:1px solid var(--card-border);border-radius:10px;background:var(--input-bg,var(--card-bg));color:var(--text);box-sizing:border-box;}
-#skUsedStockModal .bill-section{border-radius:16px;}
-#skUsedStockModal #skUsedRows td{vertical-align:middle;}
-#skUsedStockModal #skUsedRows .sk-used-action{font:inherit;font-size:.78rem;font-weight:700;white-space:nowrap;margin:2px;}
-@media(max-width:640px){#skUsedStockModal .sk-used-register-toolbar{align-items:stretch;flex-direction:column;}#skUsedStockModal #skUsedSearch{width:100%;}#skUsedStockModal .bill-section{padding:10px!important;}}
+
+
+
+
+
+
+
+
+
 
 
 /* ============================================================
@@ -1067,269 +1237,84 @@ button,input,select,textarea{font-family:inherit;}
    Source: relocated from the inline stock stylesheet in index.html.
    ============================================================ */
 
+
+
 /* The modal itself is the sole vertical scroll container. */
-#skUsedStockModal {
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  align-items: center;
-  justify-content: center;
-}
-#skUsedStockModal > .modal-sheet {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  gap: 12px !important;
-  position: relative !important;
-  box-sizing: border-box !important;
-  width: min(96vw, 980px) !important;
-  max-width: 980px !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: calc(100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
-  margin: auto !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  overscroll-behavior: contain !important;
-  -webkit-overflow-scrolling: touch !important;
-}
+
+
+
+
 
 /* Every major section remains in normal document flow. */
-#skUsedStockModal > .modal-sheet > #skUsedStatsGrid,
-#skUsedStockModal > .modal-sheet > #skUsedPurchaseForm,
-#skUsedStockModal > .modal-sheet > .bill-section,
-#skUsedStockModal > .modal-sheet > div:not(:first-child) {
-  position: static !important;
-  inset: auto !important;
-  float: none !important;
-  transform: none !important;
-  flex: 0 0 auto !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-  align-self: stretch !important;
-}
+
+
+
 
 /* Purchase form is a separate card; its fields may grid internally,
    but the form itself never overlays the register section. */
-#skUsedStockModal #skUsedPurchaseForm {
-  display: grid !important;
-  position: static !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  grid-auto-flow: row !important;
-  align-content: start !important;
-  align-items: start !important;
-  gap: 12px !important;
-  height: auto !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  padding: 16px !important;
-  border-radius: 16px !important;
-  overflow: visible !important;
-}
-#skUsedStockModal #skUsedPurchaseForm > * {
-  position: static !important;
-  float: none !important;
-  transform: none !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-#skUsedStockModal #skUsedPurchaseForm > .form-label {
-  display: flex !important;
-  flex-direction: column !important;
-  align-self: start !important;
-  gap: 6px !important;
-  width: 100% !important;
-  line-height: 1.4 !important;
-}
-#skUsedStockModal #skUsedPurchaseForm .form-input {
-  display: block !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  min-height: 42px !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-}
-#skUsedStockModal #skUsedPurchaseForm > div[style*="grid-column:1/-1"] {
-  grid-column: 1 / -1 !important;
-}
-#skUsedStockModal #skUsedPurchaseForm > div[style*="display:flex"] {
-  position: static !important;
-  display: flex !important;
-  flex-flow: row wrap !important;
-  align-items: center !important;
-  gap: 8px !important;
-  width: 100% !important;
-  grid-column: 1 / -1 !important;
-  margin: 0 !important;
-}
-#skUsedStockModal #skUsedPurchaseForm > div[style*="display:flex"] button {
-  flex: 0 1 auto !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  white-space: normal !important;
-}
+
+
+
+
+
+
+
+
+
 
 /* Register card is a distinct block below the form. */
-#skUsedStockModal > .modal-sheet > .bill-section:has(.sk-used-register-toolbar) {
-  display: flex !important;
-  flex-direction: column !important;
-  position: static !important;
-  gap: 12px !important;
-  height: auto !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  padding: 16px !important;
-  overflow: visible !important;
-}
-#skUsedStockModal .sk-used-register-toolbar,
-#skUsedStockModal .sk-used-register-tools {
-  position: static !important;
-  float: none !important;
-  transform: none !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  flex-wrap: wrap !important;
-}
-#skUsedStockModal .sk-used-register-toolbar {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 10px !important;
-  width: 100% !important;
-}
-#skUsedStockModal .sk-used-register-tools {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 8px !important;
-  flex: 1 1 280px !important;
-}
-#skUsedStockModal #skUsedSearch {
-  flex: 1 1 220px !important;
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-}
+
+
+
+
+
+
+
 
 /* The table wrapper scrolls horizontally only; vertical scrolling belongs
    to the modal sheet, preventing a nested vertical scrollbar. */
-#skUsedStockModal .sk-used-register-toolbar + div {
-  position: static !important;
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  height: auto !important;
-  max-height: none !important;
-  margin-top: 0 !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  overscroll-behavior-x: contain !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-#skUsedStockModal .sk-used-register-toolbar + div > table {
-  position: static !important;
-  width: 100% !important;
-  min-width: 760px !important;
-  max-width: none !important;
-  margin: 0 !important;
-  border-collapse: collapse !important;
-}
-#skUsedStockModal #skUsedRows tr,
-#skUsedStockModal #skUsedRows td,
-#skUsedStockModal #skUsedRows th {
-  position: static !important;
-  transform: none !important;
-  vertical-align: middle !important;
-}
-#skUsedStockModal #skUsedRows td:last-child {
-  min-width: 170px !important;
-  white-space: normal !important;
-}
-#skUsedStockModal #skUsedRows .sk-used-action {
-  display: inline-flex !important;
-  position: static !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  margin: 3px 4px 3px 0 !important;
-  max-width: 100% !important;
-  white-space: normal !important;
-  vertical-align: middle !important;
-}
+
+
+
+
+
+
+
 
 /* Do not let legacy selectors force children over one another. */
-#skUsedStockModal .modal-sheet > * {
-  flex-shrink: 0 !important;
-}
-#skUsedStockModal .modal-sheet > #skUsedPurchaseForm,
-#skUsedStockModal .modal-sheet > .bill-section {
-  order: initial !important;
-}
+
+
+
+
 @media (max-width: 640px) {
-  #skUsedStockModal {
-    padding: 0 !important;
-    align-items: stretch !important;
-  }
-  #skUsedStockModal > .modal-sheet {
-    width: 100% !important;
-    max-width: 100% !important;
-    max-height: calc(100dvh - env(safe-area-inset-top, 0px)) !important;
-    margin: 0 !important;
-    padding: 12px !important;
-    border-radius: 18px 18px 0 0 !important;
-    gap: 10px !important;
-  }
-  #skUsedStockModal #skUsedStatsGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-  #skUsedStockModal #skUsedPurchaseForm {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 10px !important;
-    padding: 12px !important;
-  }
-  #skUsedStockModal > .modal-sheet > .bill-section:has(.sk-used-register-toolbar) {
-    padding: 12px !important;
-  }
-  #skUsedStockModal .sk-used-register-toolbar {
-    align-items: stretch !important;
-    flex-direction: column !important;
-  }
-  #skUsedStockModal .sk-used-register-tools {
-    width: 100% !important;
-    flex: 1 1 auto !important;
-    justify-content: stretch !important;
-  }
-  #skUsedStockModal #skUsedSearch {
-    flex: 1 1 100% !important;
-    width: 100% !important;
-  }
+  
+  
+  
+  
+  
+  
+  
+  
 }
+
+
 @media (max-width: 420px) {
-  #skUsedStockModal #skUsedPurchaseForm {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-  #skUsedStockModal #skUsedPurchaseForm > div[style*="grid-column:1/-1"] {
-    grid-column: 1 / -1 !important;
-  }
-  #skUsedStockModal .sk-used-register-tools {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
-  #skUsedStockModal .sk-used-all-clear {
-    width: 100% !important;
-  }
+  
+  
+  
+  
 }
+
+
 
 
 /* ============================================================
    SK MOBILES 5.6.91 — MICRO LAYOUT POLISH
    Narrowly scoped overrides for the supplied screenshot defects.
    ============================================================ */
-#skGeneralPermissionsBox {
+
+
+#skGeneralPermissionsBox{
   display: flex !important;
   flex-direction: column !important;
   gap: 6px !important;
@@ -1337,48 +1322,66 @@ button,input,select,textarea{font-family:inherit;}
   border-radius: 14px !important;
   line-height: 1.35 !important;
 }
-#skGeneralPermissionsBox > div:first-child {
+
+
+#skGeneralPermissionsBox > div:first-child{
   margin: 0 0 2px !important;
   line-height: 1.35 !important;
 }
-#skGeneralPermissionsBox .sk-perm-row {
+
+
+#skGeneralPermissionsBox .sk-perm-row{
   padding: 8px 10px !important;
   min-height: 48px !important;
   border-radius: 12px !important;
 }
-#skGeneralPermissionsBox .sk-perm-title {
+
+
+#skGeneralPermissionsBox .sk-perm-title{
   font-size: .78rem !important;
   line-height: 1.3 !important;
 }
-#skGeneralPermissionsBox .sk-perm-status {
+
+
+#skGeneralPermissionsBox .sk-perm-status{
   margin-top: 2px !important;
   font-size: .68rem !important;
   line-height: 1.3 !important;
 }
-#skGeneralPermissionsBox .sk-perm-btn {
+
+
+#skGeneralPermissionsBox .sk-perm-btn{
   border-radius: 9999px !important;
   padding: 0 10px !important;
 }
+
+
 .sk-ui-model-card:has(#cfgShopName),
-.sk-ui-model-card:has(#cfgShopPhone) {
+.sk-ui-model-card:has(#cfgShopPhone){
   display: flex !important;
   flex-direction: column !important;
   gap: 10px !important;
 }
+
+
 .sk-ui-model-card:has(#cfgShopName) .form-group,
-.sk-ui-model-card:has(#cfgShopPhone) .form-group {
+.sk-ui-model-card:has(#cfgShopPhone) .form-group{
   width: 100% !important;
   min-width: 0 !important;
   margin: 0 !important;
 }
+
+
 .sk-ui-model-card:has(#cfgShopName) .form-label,
-.sk-ui-model-card:has(#cfgShopPhone) .form-label {
+.sk-ui-model-card:has(#cfgShopPhone) .form-label{
   display: block !important;
   margin-bottom: 5px !important;
   line-height: 1.3 !important;
 }
+
+
 .sk-ui-model-card:has(#cfgShopName) .form-input,
-.sk-ui-model-card:has(#cfgShopPhone) .form-input {
+.sk-ui-model-card:has(#cfgShopPhone) .form-input{
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
@@ -1386,348 +1389,77 @@ button,input,select,textarea{font-family:inherit;}
   padding: 9px 11px !important;
   line-height: 1.35 !important;
 }
-.sk-ui-model-card:has(#cfgShopPhone) #cfgShopPhone {
+
+
+.sk-ui-model-card:has(#cfgShopPhone) #cfgShopPhone{
   padding-right: 44px !important;
 }
-#skUsedStatsGrid > .bill-section {
-  gap: 2px !important;
-}
-#skUsedStatsGrid > .bill-section > small {
-  margin-bottom: 0 !important;
-}
-#skUsedStatsGrid > .bill-section > div {
-  margin-top: 0 !important;
-}
+
+
+
+
+
 @media (max-width: 360px) {
-  #skUsedStatsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-  #skGeneralPermissionsBox .sk-perm-row { padding-inline: 8px !important; }
+  
+  
+#skGeneralPermissionsBox .sk-perm-row{ padding-inline: 8px !important; }
+
 }
+
+
 
 
 /* ==========================================================================
    SK MOBILES 5.6.92 — USED STOCK & DETAILS MICRO-LAYOUT
    Scoped to existing Used Mobile Stock components; no JS/data changes.
    ========================================================================== */
-#skUsedStockModal #skUsedStatsGrid {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 8px 12px !important;
-  margin: 10px 0 14px !important;
-  padding: 8px 4px !important;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-}
-#skUsedStockModal #skUsedStatsGrid > .bill-section {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  justify-content: center !important;
-  gap: 2px !important;
-  min-width: 0 !important;
-  min-height: 48px !important;
-  padding: 4px 2px !important;
-  margin: 0 !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-#skUsedStockModal #skUsedStatsGrid .sk-ui-muted-text {
-  margin: 0 !important;
-  font-size: .72rem !important;
-  line-height: 1.3 !important;
-  overflow-wrap: anywhere !important;
-}
-#skUsedStockModal #skUsedStatsGrid .sk-ui-section-title {
-  margin: 0 !important;
-  font-size: 1.05rem !important;
-  line-height: 1.25 !important;
-  font-weight: 800 !important;
-  overflow-wrap: anywhere !important;
-}
-#skUsedStockModal #skUsedHomeCatalog,
-#skUsedStockModal .sk-used-catalog {
-  width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-  margin: 10px 0 0 !important;
-}
-#skUsedStockModal .sk-used-catalog-results,
-#skUsedStockModal .sk-used-catalog-grid {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  gap: 8px !important;
-  width: 100% !important;
-  min-width: 0 !important;
-}
-#skUsedStockModal .sk-used-product-card {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  gap: 3px !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-  padding: 10px 11px !important;
-  margin: 0 !important;
-  border: 1px solid var(--card-border, #cbd5e1) !important;
-  border-radius: 14px !important;
-  background: var(--card-bg, #fff) !important;
-  box-shadow: 0 2px 5px rgba(15, 23, 42, .045) !important;
-  overflow: hidden !important;
-}
-#skUsedStockModal .sk-used-card-model {
-  min-width: 0 !important;
-  margin: 0 !important;
-  font-size: .91rem !important;
-  font-weight: 800 !important;
-  line-height: 1.3 !important;
-  overflow-wrap: anywhere !important;
-}
-#skUsedStockModal .sk-used-card-specs,
-#skUsedStockModal .sk-used-card-imei {
-  min-width: 0 !important;
-  margin: 0 !important;
-  font-size: .75rem !important;
-  line-height: 1.3 !important;
-  color: var(--text-muted, #64748b) !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  word-break: normal !important;
-}
-#skUsedStockModal .sk-used-card-imei strong {
-  color: var(--text, #0f172a) !important;
-  font-weight: 700 !important;
-}
-#skUsedStockModal .sk-used-card-footer {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: flex-end !important;
-  justify-content: space-between !important;
-  gap: 10px !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  margin-top: 5px !important;
-}
-#skUsedStockModal .sk-used-card-footer > div {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  justify-content: flex-end !important;
-  gap: 2px !important;
-  min-width: 0 !important;
-}
-#skUsedStockModal .sk-used-card-price-label {
-  margin: 0 !important;
-  font-size: .68rem !important;
-  line-height: 1.25 !important;
-  color: var(--text-muted, #64748b) !important;
-}
-#skUsedStockModal .sk-used-card-price {
-  display: block !important;
-  margin: 0 !important;
-  font-size: .96rem !important;
-  line-height: 1.25 !important;
-  font-weight: 800 !important;
-  overflow-wrap: anywhere !important;
-}
-#skUsedStockModal .sk-used-card-status {
-  margin: 0 !important;
-  color: #16a34a !important;
-  font-size: .69rem !important;
-  font-weight: 750 !important;
-  line-height: 1.25 !important;
-}
-#skUsedStockModal .sk-used-card-footer .sk-used-bill-button {
-  flex: 0 0 auto !important;
-  min-width: 0 !important;
-  min-height: 34px !important;
-  height: 34px !important;
-  padding: 0 11px !important;
-  border-radius: 9999px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 5px !important;
-  font-size: .75rem !important;
-  font-weight: 750 !important;
-  line-height: 1.2 !important;
-  white-space: nowrap !important;
-}
-#skUsedDetailDialog {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 12050 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 16px !important;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  background: rgba(15, 23, 42, .42) !important;
-  -webkit-backdrop-filter: blur(5px) !important;
-  backdrop-filter: blur(5px) !important;
-}
-#skUsedDetailDialog .sk-used-detail-sheet {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 0 !important;
-  width: min(100%, 420px) !important;
-  max-width: 420px !important;
-  max-height: calc(100dvh - 32px - env(safe-area-inset-bottom, 0px)) !important;
-  min-height: 0 !important;
-  padding: 14px !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  border: 1px solid var(--card-border, rgba(148, 163, 184, .4)) !important;
-  border-radius: 20px !important;
-  background: var(--card-bg, #fff) !important;
-  color: var(--text, #0f172a) !important;
-  box-shadow: 0 18px 50px rgba(15, 23, 42, .22) !important;
-}
-#skUsedDetailDialog .sk-used-detail-head {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 10px !important;
-  flex: 0 0 auto !important;
-  min-width: 0 !important;
-  padding: 0 0 10px !important;
-  margin: 0 0 10px !important;
-  border-bottom: 1px solid var(--card-border, rgba(148, 163, 184, .35)) !important;
-  background: var(--card-bg, #fff) !important;
-}
-#skUsedDetailDialog .sk-used-detail-head > div {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 3px !important;
-  min-width: 0 !important;
-}
-#skUsedDetailDialog .sk-used-detail-head strong {
-  font-size: .98rem !important;
-  line-height: 1.3 !important;
-  overflow-wrap: anywhere !important;
-}
-#skUsedDetailDialog .sk-used-detail-head small {
-  font-size: .78rem !important;
-  line-height: 1.3 !important;
-  color: var(--text-muted, #64748b) !important;
-}
-#skUsedDetailDialog .sk-used-detail-close {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex: 0 0 38px !important;
-  width: 38px !important;
-  height: 38px !important;
-  padding: 0 !important;
-  border-radius: 9999px !important;
-  line-height: 1 !important;
-}
-#skUsedDetailDialog .sk-used-detail-grid {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 7px !important;
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  margin: 0 0 12px !important;
-  overflow-y: auto !important;
-  overscroll-behavior: contain !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-#skUsedDetailDialog .sk-used-detail-field {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  gap: 3px !important;
-  min-width: 0 !important;
-  min-height: 54px !important;
-  padding: 8px 10px !important;
-  box-sizing: border-box !important;
-  border-radius: 11px !important;
-  border: 1px solid var(--card-border, #dbe4f0) !important;
-  background: var(--surface-bg, #f1f5f9) !important;
-}
-#skUsedDetailDialog .sk-used-detail-field small {
-  margin: 0 !important;
-  font-size: .69rem !important;
-  line-height: 1.3 !important;
-  color: var(--text-muted, #64748b) !important;
-}
-#skUsedDetailDialog .sk-used-detail-field strong {
-  margin: 0 !important;
-  font-size: .84rem !important;
-  line-height: 1.3 !important;
-  font-weight: 750 !important;
-  overflow-wrap: anywhere !important;
-}
-#skUsedDetailDialog .sk-used-detail-actions {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 8px 10px !important;
-  flex: 0 0 auto !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  padding: 0 0 2px !important;
-  margin: 0 !important;
-}
-#skUsedDetailDialog .sk-used-detail-actions > button {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 40px !important;
-  padding: 8px 12px !important;
-  border-radius: 9999px !important;
-  line-height: 1.3 !important;
-  font-size: .84rem !important;
-  font-weight: 700 !important;
-}
-#skUsedDetailDialog .sk-used-detail-actions > .sk-used-bill-button {
-  grid-column: 1 / -1 !important;
-  min-height: 42px !important;
-  margin-bottom: 0 !important;
-  background: var(--primary-color, #2563eb) !important;
-  color: #fff !important;
-}
-#skUsedDetailDialog .sk-used-detail-actions > .sk-used-detail-danger {
-  background: #fee2e2 !important;
-  color: #b91c1c !important;
-  border: 1px solid #fca5a5 !important;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @media (min-width: 700px) {
-  #skUsedStockModal #skUsedStatsGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  }
-  #skUsedStockModal .sk-used-catalog-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    align-items: stretch !important;
-  }
+  
+  
 }
+
+
 @media (max-width: 380px) {
-  #skUsedStockModal .sk-used-card-footer {
-    align-items: stretch !important;
-    flex-direction: column !important;
-    gap: 7px !important;
-  }
-  #skUsedStockModal .sk-used-card-footer .sk-used-bill-button {
-    width: 100% !important;
-  }
-  #skUsedDetailDialog {
-    padding: 10px !important;
-    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-  #skUsedDetailDialog .sk-used-detail-sheet {
-    padding: 11px !important;
-    max-height: calc(100dvh - 20px - env(safe-area-inset-bottom, 0px)) !important;
-  }
+  
+  
+  
+  
 }
+
+
 
 
 /* ==========================================================================
@@ -1735,134 +1467,27 @@ button,input,select,textarea{font-family:inherit;}
    These selectors match the current HTML generated by js/app.js.
    Presentation-only; application logic and data bindings remain untouched.
    ========================================================================== */
-#skUsedStockModal > .modal-sheet {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-}
-#skUsedStockModal #skUsedHomeCatalog {
-  position: static !important;
-  flex: 0 0 auto !important;
-  align-self: stretch !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  height: auto !important;
-  max-height: none !important;
-  transform: none !important;
-  box-sizing: border-box !important;
-}
-#skUsedStockModal #skUsedCatalogResults,
-#skUsedStockModal #skUsedCatalogResults > .sk-used-catalog-grid {
-  position: static !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  height: auto !important;
-  max-height: none !important;
-  transform: none !important;
-  box-sizing: border-box !important;
-}
-#skUsedStockModal #skUsedCatalogResults > .sk-used-catalog-grid {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  gap: 8px !important;
-}
-#skUsedStockModal #skUsedCatalogResults .sk-used-product-card {
-  position: relative !important;
-  inset: auto !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  flex: 0 0 auto !important;
-  width: 100% !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  margin: 0 !important;
-  padding: 10px 11px !important;
-  box-sizing: border-box !important;
-  overflow: visible !important;
-}
-#skUsedStockModal #skUsedCatalogResults .sk-used-card-model,
-#skUsedStockModal #skUsedCatalogResults .sk-used-card-specs,
-#skUsedStockModal #skUsedCatalogResults .sk-used-card-imei {
-  display: block !important;
-  position: static !important;
-  width: auto !important;
-  height: auto !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  overflow-wrap: anywhere !important;
-  line-height: 1.3 !important;
-}
-#skUsedStockModal #skUsedCatalogResults .sk-used-card-footer {
-  position: static !important;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: flex-end !important;
-  justify-content: space-between !important;
-  gap: 8px !important;
-  width: 100% !important;
-  height: auto !important;
-  margin-top: 6px !important;
-}
-#skUsedStockModal #skUsedCatalogResults .sk-used-card-footer > div {
-  position: static !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  gap: 2px !important;
-  min-width: 0 !important;
-}
-#skUsedStockModal #skUsedCatalogResults .sk-used-bill-button {
-  position: static !important;
-  flex: 0 0 auto !important;
-  align-self: flex-end !important;
-  width: auto !important;
-  min-width: 0 !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  margin: 0 !important;
-  white-space: nowrap !important;
-}
-#skUsedDetailDialog .sk-used-detail-sheet {
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-}
-#skUsedDetailDialog .sk-used-detail-grid {
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-#skUsedDetailDialog .sk-used-detail-actions {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  flex: 0 0 auto !important;
-  gap: 8px 10px !important;
-  padding-bottom: 2px !important;
-}
-#skUsedDetailDialog .sk-used-detail-actions > button.sk-used-bill-button {
-  grid-column: 1 / -1 !important;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @media (max-width: 380px) {
-  #skUsedStockModal #skUsedCatalogResults .sk-used-card-footer {
-    align-items: stretch !important;
-    flex-direction: column !important;
-  }
-  #skUsedStockModal #skUsedCatalogResults .sk-used-bill-button {
-    align-self: stretch !important;
-    width: 100% !important;
-  }
+  
+  
 }
+
+
 
 
 /* ==========================================================================
@@ -1870,33 +1495,49 @@ button,input,select,textarea{font-family:inherit;}
    UI-only. Existing IDs, login/auth flow, ledger data and handlers preserved.
    ========================================================================== */
 
+
+
 /* Logout/login layering: never leave the drawer visible above the login modal. */
-#leftDrawer {
+
+
+#leftDrawer{
   z-index: 2147483000 !important;
 }
-#leftDrawer:not(.active) {
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-#skLoginModal {
-  z-index: 2147483646 !important;
-}
-#skLoginModal.active ~ #leftDrawer,
-body:has(#skLoginModal.active) #leftDrawer {
+
+
+#leftDrawer:not(.active){
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
+
+#skLoginModal{
+  z-index: 2147483646 !important;
+}
+
+
+#skLoginModal.active ~ #leftDrawer,
+body:has(#skLoginModal.active) #leftDrawer{
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+
+
 /* Simple, legible login card with the saved shop logo / embedded default logo. */
-#skLoginModal {
+
+
+#skLoginModal{
   padding: 14px !important;
   background: linear-gradient(145deg, #e8eefb 0%, #dbe5f8 100%) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
 }
-#skLoginModal .login-glass-card {
+
+
+#skLoginModal .login-glass-card{
   width: min(100%, 400px) !important;
   max-width: 400px !important;
   padding: 18px 16px 16px !important;
@@ -1910,13 +1551,17 @@ body:has(#skLoginModal.active) #leftDrawer {
   -webkit-backdrop-filter: blur(14px) !important;
   animation: none !important;
 }
-#skLoginModal .login-logo-container {
+
+
+#skLoginModal .login-logo-container{
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   margin: 0 0 12px !important;
 }
-#skLoginModal .login-logo-glow {
+
+
+#skLoginModal .login-logo-glow{
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1930,7 +1575,9 @@ body:has(#skLoginModal.active) #leftDrawer {
   filter: none !important;
   box-shadow: 0 4px 12px rgba(37,99,235,.10) !important;
 }
-#skLoginModal #skLoginLogoImg {
+
+
+#skLoginModal #skLoginLogoImg{
   display: block !important;
   width: 100% !important;
   height: 100% !important;
@@ -1940,7 +1587,9 @@ body:has(#skLoginModal.active) #leftDrawer {
   border-radius: 16px !important;
   background: #fff !important;
 }
-#skLoginModal .fallback-logo {
+
+
+#skLoginModal .fallback-logo{
   width: 100% !important;
   height: 100% !important;
   border-radius: 16px !important;
@@ -1948,20 +1597,26 @@ body:has(#skLoginModal.active) #leftDrawer {
   color: #fff !important;
   font-size: 1.2rem !important;
 }
-#skLoginModal .login-brand-title {
+
+
+#skLoginModal .login-brand-title{
   color: #172033 !important;
   font-size: 1.25rem !important;
   letter-spacing: -.02em !important;
   line-height: 1.25 !important;
   margin: 0 0 4px !important;
 }
-#skLoginModal .login-brand-subtitle {
+
+
+#skLoginModal .login-brand-subtitle{
   color: #64748b !important;
   font-size: .78rem !important;
   line-height: 1.35 !important;
   margin: 0 !important;
 }
-#skLoginModal .login-role-pill {
+
+
+#skLoginModal .login-role-pill{
   width: 100% !important;
   min-height: 34px !important;
   display: flex !important;
@@ -1977,14 +1632,18 @@ body:has(#skLoginModal.active) #leftDrawer {
   font-size: .72rem !important;
   line-height: 1.3 !important;
 }
-#skLoginModal .login-form-group {
+
+
+#skLoginModal .login-form-group{
   display: flex !important;
   flex-direction: column !important;
   gap: 9px !important;
   width: 100% !important;
   margin: 0 !important;
 }
-#skLoginModal .login-input-wrap {
+
+
+#skLoginModal .login-input-wrap{
   position: relative !important;
   display: flex !important;
   align-items: center !important;
@@ -1996,7 +1655,9 @@ body:has(#skLoginModal.active) #leftDrawer {
   background: #fff !important;
   overflow: hidden !important;
 }
-#skLoginModal .login-input-icon {
+
+
+#skLoginModal .login-input-icon{
   position: absolute !important;
   left: 12px !important;
   top: 50% !important;
@@ -2004,7 +1665,9 @@ body:has(#skLoginModal.active) #leftDrawer {
   z-index: 1 !important;
   line-height: 1 !important;
 }
-#skLoginModal .login-modern-input {
+
+
+#skLoginModal .login-modern-input{
   width: 100% !important;
   min-width: 0 !important;
   min-height: 48px !important;
@@ -2018,14 +1681,20 @@ body:has(#skLoginModal.active) #leftDrawer {
   line-height: 1.35 !important;
   box-shadow: none !important;
 }
-#skLoginModal .login-modern-input::placeholder {
+
+
+#skLoginModal .login-modern-input::placeholder{
   color: #8794a8 !important;
   opacity: 1 !important;
 }
-#skLoginModal .login-input-wrap:has(#loginPasswordInput) .login-modern-input {
+
+
+#skLoginModal .login-input-wrap:has(#loginPasswordInput) .login-modern-input{
   padding-right: 64px !important;
 }
-#skLoginModal .login-password-toggle {
+
+
+#skLoginModal .login-password-toggle{
   position: absolute !important;
   right: 7px !important;
   top: 50% !important;
@@ -2040,7 +1709,9 @@ body:has(#skLoginModal.active) #leftDrawer {
   font-size: .72rem !important;
   font-weight: 700 !important;
 }
-#skLoginModal .login-submit-btn {
+
+
+#skLoginModal .login-submit-btn{
   width: 100% !important;
   min-height: 48px !important;
   margin-top: 2px !important;
@@ -2050,32 +1721,50 @@ body:has(#skLoginModal.active) #leftDrawer {
   border: 0 !important;
   box-shadow: 0 8px 18px rgba(37,99,235,.18) !important;
 }
-#skLoginModal .login-footer-roles {
+
+
+#skLoginModal .login-footer-roles{
   margin-top: 12px !important;
   color: #64748b !important;
   font-size: .7rem !important;
   line-height: 1.3 !important;
 }
-#skLoginModal .login-status-msg {
+
+
+#skLoginModal .login-status-msg{
   margin: 0 !important;
   font-size: .75rem !important;
   line-height: 1.35 !important;
 }
+
+
 @media (max-width: 380px) {
-  #skLoginModal { padding: 10px !important; }
-  #skLoginModal .login-glass-card { padding: 15px 12px 13px !important; }
-  #skLoginModal .login-logo-glow { width: 56px !important; height: 56px !important; }
+  
+#skLoginModal{ padding: 10px !important; }
+
+  
+#skLoginModal .login-glass-card{ padding: 15px 12px 13px !important; }
+
+  
+#skLoginModal .login-logo-glow{ width: 56px !important; height: 56px !important; }
+
 }
 
+
+
 /* Customer Credit Ledger: compact page footprint and customer rows fit their content. */
-#skCreditLedgerPage {
+
+
+#skCreditLedgerPage{
   box-sizing: border-box !important;
   padding: 8px !important;
   align-items: center !important;
   justify-content: center !important;
   overflow: hidden !important;
 }
-#skCreditLedgerPage > .modal-sheet {
+
+
+#skCreditLedgerPage > .modal-sheet{
   display: flex !important;
   flex-direction: column !important;
   gap: 0 !important;
@@ -2091,52 +1780,74 @@ body:has(#skLoginModal.active) #leftDrawer {
   overscroll-behavior: contain !important;
   -webkit-overflow-scrolling: touch !important;
 }
-#skCreditLedgerPage > .modal-sheet > .modal-title {
+
+
+#skCreditLedgerPage > .modal-sheet > .modal-title{
   flex: 0 0 auto !important;
   min-height: 48px !important;
   margin: 0 0 8px !important;
   padding: 8px 10px !important;
   border-radius: 14px !important;
 }
+
+
 /* V5.6.104 — Keep customer list/detail visibility under existing JS control.
    Do not force display:block here: skCPMainView is hidden when a customer detail opens. */
-#skCreditLedgerPage #skCPMainView {
+
+
+#skCreditLedgerPage #skCPMainView{
   min-width: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
 }
-#skCreditLedgerPage .skcp-summary {
+
+
+#skCreditLedgerPage .skcp-summary{
   gap: 6px !important;
   margin: 0 0 8px !important;
 }
-#skCreditLedgerPage .skcp-stat {
+
+
+#skCreditLedgerPage .skcp-stat{
   min-height: 48px !important;
   padding: 6px 8px !important;
   border-radius: 12px !important;
 }
-#skCreditLedgerPage .skcp-stat b {
+
+
+#skCreditLedgerPage .skcp-stat b{
   margin: 0 !important;
   line-height: 1.15 !important;
 }
-#skCreditLedgerPage .skcp-stat span {
+
+
+#skCreditLedgerPage .skcp-stat span{
   display: block !important;
   margin-top: 2px !important;
   line-height: 1.2 !important;
 }
-#skCreditLedgerPage .skcp-toolbar {
+
+
+#skCreditLedgerPage .skcp-toolbar{
   gap: 8px !important;
   margin: 0 0 7px !important;
 }
-#skCreditLedgerPage .skcp-filters {
+
+
+#skCreditLedgerPage .skcp-filters{
   gap: 5px !important;
   margin: 0 0 7px !important;
   padding: 0 0 2px !important;
 }
-#skCreditLedgerPage .skcp-filter {
+
+
+#skCreditLedgerPage .skcp-filter{
   min-height: 32px !important;
   padding: 5px 10px !important;
 }
-#skCreditLedgerPage .skcp-list {
+
+
+#skCreditLedgerPage .skcp-list{
   display: flex !important;
   flex-direction: column !important;
   gap: 7px !important;
@@ -2144,7 +1855,9 @@ body:has(#skLoginModal.active) #leftDrawer {
   margin: 0 !important;
   padding: 0 0 2px !important;
 }
-#skCreditLedgerPage .skcp-row {
+
+
+#skCreditLedgerPage .skcp-row{
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
@@ -2154,33 +1867,49 @@ body:has(#skLoginModal.active) #leftDrawer {
   border-radius: 14px !important;
   box-shadow: 0 2px 6px rgba(15,23,42,.035) !important;
 }
-#skCreditLedgerPage .skcp-row-main {
+
+
+#skCreditLedgerPage .skcp-row-main{
   min-width: 0 !important;
   gap: 2px !important;
 }
-#skCreditLedgerPage .skcp-name {
+
+
+#skCreditLedgerPage .skcp-name{
   line-height: 1.25 !important;
   overflow-wrap: anywhere !important;
 }
-#skCreditLedgerPage .skcp-sub {
+
+
+#skCreditLedgerPage .skcp-sub{
   margin-top: 1px !important;
   line-height: 1.25 !important;
   white-space: normal !important;
   overflow-wrap: anywhere !important;
 }
-#skCreditLedgerPage .skcp-amt {
+
+
+#skCreditLedgerPage .skcp-amt{
   line-height: 1.2 !important;
 }
-#skCreditLedgerPage .skcp-bill {
+
+
+#skCreditLedgerPage .skcp-bill{
   margin-top: 1px !important;
   line-height: 1.2 !important;
 }
+
+
 @media (min-width: 700px) {
-  #skCreditLedgerPage .skcp-list {
+  
+#skCreditLedgerPage .skcp-list{
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
+
 }
+
+
 
 
 /* ==========================================================================
@@ -2189,82 +1918,39 @@ body:has(#skLoginModal.active) #leftDrawer {
    No stock data, billing, pricing, or action handlers are changed.
    ========================================================================== */
 
+
+
 /* Inventory view: collapse stacked margins and the mobile sheet's flex gap.
    This removes the blank band between the four summary values and the catalog. */
+
+
 @media (max-width: 640px) {
-  #skUsedStockModal > .modal-sheet {
-    gap: 4px !important;
-    padding: 10px !important;
-  }
-  #skUsedStockModal > .modal-sheet > div:first-child {
-    margin: 0 0 4px !important;
-    padding: 6px 0 8px !important;
-  }
-  #skUsedStockModal #skUsedStatsGrid {
-    margin: 0 !important;
-    padding: 0 2px !important;
-    gap: 4px 10px !important;
-    flex: 0 0 auto !important;
-  }
-  #skUsedStockModal #skUsedStatsGrid > .bill-section {
-    min-height: 42px !important;
-    padding: 3px 2px !important;
-  }
-  #skUsedStockModal #skUsedHomeCatalog {
-    margin: 0 !important;
-    padding: 8px !important;
-    flex: 0 0 auto !important;
-  }
-  #skUsedStockModal #skUsedHomeCatalog .sk-used-catalog-toolbar {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
-    margin: 0 0 8px !important;
-    padding: 0 !important;
-  }
-  #skUsedStockModal #skUsedCatalogResults,
-  #skUsedStockModal #skUsedCatalogResults > .sk-used-catalog-grid {
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 7px !important;
-  }
+  
+  
+  
+  
+  
+  
+  
 }
+
+
 
 /* Detail popup: size the sheet to its actual content instead of stretching
    the details grid into unused vertical space. Keep scrolling for short screens. */
-#skUsedDetailDialog .sk-used-detail-sheet {
-  height: auto !important;
-  min-height: 0 !important;
-  flex: 0 1 auto !important;
-}
-#skUsedDetailDialog .sk-used-detail-grid {
-  flex: 0 0 auto !important;
-  align-content: start !important;
-  grid-auto-rows: minmax(0, auto) !important;
-  margin-bottom: 9px !important;
-  overflow-x: hidden !important;
-}
-#skUsedDetailDialog .sk-used-detail-field {
-  min-height: 48px !important;
-  padding: 6px 9px !important;
-  gap: 2px !important;
-}
-#skUsedDetailDialog .sk-used-detail-actions {
-  gap: 7px 8px !important;
-}
-#skUsedDetailDialog .sk-used-detail-actions > button {
-  min-height: 38px !important;
-  padding: 7px 10px !important;
-}
+
+
+
+
+
+
+
 @media (max-height: 620px) {
-  #skUsedDetailDialog .sk-used-detail-sheet {
-    max-height: calc(100dvh - 20px - env(safe-area-inset-bottom, 0px)) !important;
-    overflow-y: auto !important;
-  }
-  #skUsedDetailDialog .sk-used-detail-grid {
-    flex: 0 1 auto !important;
-  }
+  
+  
 }
+
+
 
 
 /* ==========================================================================
@@ -2272,25 +1958,29 @@ body:has(#skLoginModal.active) #leftDrawer {
    Scoped to existing app components; presentation only.
    ========================================================================== */
 
+
+
 /* 1. Compact metric groups: explicit app selectors, no broad substring matching. */
-#skUsedStatsGrid,
+
+
+
 .skcp-summary,
-.sk-used-stock-summary,
 .used-stock-metrics,
 .stats-grid,
 .summary-grid,
-.metrics-grid {
+.metrics-grid{
   gap: 8px;
   margin-block: 10px 12px;
 }
 
-#skUsedStatsGrid > .bill-section,
+
+
+
 .skcp-summary > .skcp-stat,
-.sk-used-stock-summary > div,
 .used-stock-metrics > div,
 .stats-grid > .stat-card,
 .summary-grid > .summary-card,
-.metrics-grid > .metric-card {
+.metrics-grid > .metric-card{
   box-sizing: border-box;
   min-width: 0;
   min-height: 0;
@@ -2298,57 +1988,60 @@ body:has(#skLoginModal.active) #leftDrawer {
   border-radius: var(--sk-compact-card-radius);
 }
 
-#skUsedStatsGrid > .bill-section,
+
+
+
 .skcp-summary > .skcp-stat,
-.sk-used-stock-summary > div,
 .used-stock-metrics > div,
 .stats-grid > .stat-card,
 .summary-grid > .summary-card,
-.metrics-grid > .metric-card {
+.metrics-grid > .metric-card{
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: var(--sk-compact-metric-gap);
 }
 
-#skUsedStatsGrid .sk-ui-muted-text,
+
+
+
 .skcp-summary .skcp-stat > span,
-.sk-used-stock-summary > div > span:first-child,
 .used-stock-metrics > div > span:first-child,
 .stats-grid > .stat-card > :first-child,
 .summary-grid > .summary-card > :first-child,
-.metrics-grid > .metric-card > :first-child {
+.metrics-grid > .metric-card > :first-child{
   margin: 0;
   line-height: var(--sk-compact-label-line-height);
 }
 
-#skUsedStatsGrid .sk-ui-section-title,
+
+
+
 .skcp-summary .skcp-stat > b,
-.sk-used-stock-summary > div > span:last-child,
 .used-stock-metrics > div > span:last-child,
 .stats-grid > .stat-card > :last-child,
 .summary-grid > .summary-card > :last-child,
-.metrics-grid > .metric-card > :last-child {
+.metrics-grid > .metric-card > :last-child{
   margin: 0;
   line-height: var(--sk-compact-value-line-height);
 }
 
+
+
 /* 2. Modal scroll ownership: the overlay never scrolls; its sheet is the only
       scroll container. This avoids nested/double scrollbars without changing DOM. */
+
+
 #settingsModal,
-#skUsedStockModal,
-#skCreditLedgerPage,
-#skUsedDetailDialog,
-.sk-used-detail-overlay {
+#skCreditLedgerPage{
   overflow: hidden !important;
   overscroll-behavior: contain;
 }
 
+
+
 #settingsModal > .modal-sheet,
-#skUsedStockModal > .modal-sheet,
-#skCreditLedgerPage > .modal-sheet,
-#skUsedDetailDialog .sk-used-detail-sheet,
-.sk-used-detail-overlay .sk-used-detail-sheet {
+#skCreditLedgerPage > .modal-sheet{
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -2360,16 +2053,18 @@ body:has(#skLoginModal.active) #leftDrawer {
   scrollbar-gutter: stable;
 }
 
+
+
 #settingsModal > .modal-sheet,
-#skUsedStockModal > .modal-sheet,
-#skCreditLedgerPage > .modal-sheet {
+#skCreditLedgerPage > .modal-sheet{
   width: min(980px, calc(100vw - 20px));
   box-sizing: border-box;
 }
 
+
+
 #settingsModal > .modal-sheet > .modal-title,
-#skCreditLedgerPage > .modal-sheet > .modal-title,
-#skUsedDetailDialog .sk-used-detail-head {
+#skCreditLedgerPage > .modal-sheet > .modal-title{
   position: sticky;
   top: 0;
   z-index: 50;
@@ -2382,192 +2077,157 @@ body:has(#skLoginModal.active) #leftDrawer {
   isolation: isolate;
 }
 
+
+
 /* Used Stock's existing first-child header has inline sticky positioning. */
-#skUsedStockModal > .modal-sheet > div:first-child {
-  position: sticky !important;
-  top: -12px !important;
-  z-index: 50 !important;
-  flex-shrink: 0;
-  background: var(--sk-modal-header-bg) !important;
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--sk-modal-header-border);
-  isolation: isolate;
-}
+
+
+
 
 #settingsModal > .modal-sheet > .modal-title,
-#skCreditLedgerPage > .modal-sheet > .modal-title {
+#skCreditLedgerPage > .modal-sheet > .modal-title{
   margin: -1px 0 10px;
 }
 
+
+
 /* 3. Used mobile stock purchase form: two columns when space allows, no collision. */
-#skUsedStockModal #skUsedPurchaseForm {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: 10px;
-  width: 100%;
-  min-width: 0;
-  margin: 0 0 12px;
-  box-sizing: border-box;
-}
 
-#skUsedStockModal #skUsedPurchaseForm > *,
-#skUsedStockModal #skUsedPurchaseForm .form-label,
-#skUsedStockModal #skUsedPurchaseForm .form-input {
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-}
 
-#skUsedStockModal #skUsedPurchaseForm .form-input,
-#skUsedStockModal #skUsedPurchaseForm input,
-#skUsedStockModal #skUsedPurchaseForm select,
-#skUsedStockModal #skUsedPurchaseForm textarea,
+
+
+
+
+
 #settingsModal input,
 #settingsModal select,
-#settingsModal textarea {
+#settingsModal textarea{
   min-height: var(--sk-compact-control-height);
   line-height: 1.35;
   box-sizing: border-box;
 }
 
-#skUsedStockModal #skUsedPurchaseForm > div[style*="grid-column:1/-1"],
-#skUsedStockModal #skUsedPurchaseForm > div[style*="grid-column: 1 / -1"],
-#skUsedStockModal #skUsedPurchaseForm > div[style*="grid-column: span 2"] {
-  grid-column: 1 / -1;
-}
+
+
+
 
 /* 4. Details modal: balanced actions, natural height, safe bottom spacing. */
-#skUsedDetailDialog .sk-used-detail-sheet,
-.sk-used-detail-sheet {
-  width: min(100%, 440px);
-  padding: 14px;
-  border-radius: 20px;
-  box-sizing: border-box;
-}
 
-#skUsedDetailDialog .sk-used-detail-grid,
-.sk-used-detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin: 10px 0 12px;
-}
 
-#skUsedDetailDialog .sk-used-detail-actions,
-.sk-used-detail-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  flex-shrink: 0;
-  width: 100%;
-  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
-}
 
-#skUsedDetailDialog .sk-used-detail-actions > button,
-.sk-used-detail-actions > button {
-  min-width: 0;
-  min-height: 40px;
-}
 
-#skUsedDetailDialog .sk-used-detail-actions > button.sk-used-bill-button,
-#skUsedDetailDialog .sk-used-detail-actions > .sk-used-bill-button,
-.sk-used-detail-actions > .sk-used-bill-button {
-  grid-column: 1 / -1;
-  width: 100%;
-  min-height: 44px;
-  margin-bottom: 2px;
-  border-radius: 9999px;
-}
+
+
+
+
+
+
+
 
 /* 5. Customer ledger summary, toolbar and pills. */
-.skcp-summary {
+
+
+.skcp-summary{
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.skcp-toolbar {
+
+
+.skcp-toolbar{
   display: flex;
   align-items: center;
   gap: 8px;
   margin-block: 10px;
 }
 
-.skcp-toolbar > input {
+
+
+.skcp-toolbar > input{
   flex: 1 1 auto;
   min-width: 0;
   min-height: 38px;
 }
 
+
+
 .skcp-toolbar > button,
 .skcp-filters > button,
-.skcp-btn {
+.skcp-btn{
   min-height: 38px;
   box-sizing: border-box;
   line-height: 1.2;
 }
 
-.skcp-filters {
+
+
+.skcp-filters{
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-block: 8px 10px;
 }
 
+
+
 /* 6. Shared forms, cards and toolbars use consistent rhythm while retaining
       each module's existing grid and responsive structure. */
-:is(.bill-section, .sk-ui-card, .sk-ui-panel, .skcp-stat, .sk-used-product-card) {
+
+
+:is(.bill-section, .sk-ui-card, .sk-ui-panel, .skcp-stat){
   min-width: 0;
   box-sizing: border-box;
 }
 
-:is(.modal-actions, .action-toolbar, .list-toolbar, .search-toolbar, .filter-bar) {
+
+
+:is(.modal-actions, .action-toolbar, .list-toolbar, .search-toolbar, .filter-bar){
   gap: 8px;
   margin-block: 8px 10px;
 }
 
-:is(.search-input, input[type="search"], .search-box input, .search-bar input) {
+
+
+:is(.search-input, input[type="search"], .search-box input, .search-bar input){
   min-height: 38px;
   box-sizing: border-box;
 }
 
-:is(.filter-pill, .filter-chip, .action-pill, .ledger-action, .btn-compact) {
+
+
+:is(.filter-pill, .filter-chip, .action-pill, .ledger-action, .btn-compact){
   min-height: 38px;
   padding-inline: 12px;
   line-height: 1.2;
   box-sizing: border-box;
 }
 
+
+
 /* 7. Responsive layouts: preserve two-column forms except on narrow phones. */
+
+
 @media (max-width: 479px) {
-  #skUsedStockModal > .modal-sheet {
-    width: calc(100vw - 12px);
-    max-height: calc(100dvh - 12px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-    padding: 12px !important;
-  }
-  #skUsedStatsGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-  #skUsedStockModal #skUsedPurchaseForm {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  #skUsedStockModal #skUsedPurchaseForm > div[style*="grid-column"] {
-    grid-column: 1 / -1;
-  }
-  #settingsModal > .modal-sheet,
-  #skCreditLedgerPage > .modal-sheet {
+  
+  
+  
+  
+  
+#settingsModal > .modal-sheet,
+#skCreditLedgerPage > .modal-sheet{
     width: calc(100vw - 12px);
     max-height: calc(100dvh - 12px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   }
+
 }
 
+
+
 @media (max-width: 359px) {
-  #skUsedDetailDialog .sk-used-detail-grid,
-  .sk-used-detail-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  
 }
+
+
 
 
 
@@ -2576,31 +2236,43 @@ body:has(#skLoginModal.active) #leftDrawer {
    Presentation-only correction for customer detail and linked repair history.
    Existing IDs, markup generation, handlers, calculations and data are untouched.
    ======================================================================== */
-#skCreditLedgerPage #skCPDetailView {
+
+
+#skCreditLedgerPage #skCPDetailView{
   padding: 10px 12px 16px !important;
   overflow-x: hidden !important;
 }
-#skCreditLedgerPage .skcp-page-head {
+
+
+#skCreditLedgerPage .skcp-page-head{
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
   min-height: 38px !important;
   margin: 0 0 8px !important;
 }
-#skCreditLedgerPage .skcp-page-head > div {
+
+
+#skCreditLedgerPage .skcp-page-head > div{
   min-width: 0 !important;
   line-height: 1.3 !important;
 }
-#skCreditLedgerPage .skcp-page-head > div > b {
+
+
+#skCreditLedgerPage .skcp-page-head > div > b{
   display: block !important;
   line-height: 1.3 !important;
   overflow-wrap: anywhere !important;
 }
-#skCreditLedgerPage .skcp-page-head > div > div {
+
+
+#skCreditLedgerPage .skcp-page-head > div > div{
   margin-top: 2px !important;
   line-height: 1.25 !important;
 }
-#skCreditLedgerPage .skcp-back {
+
+
+#skCreditLedgerPage .skcp-back{
   flex: 0 0 auto !important;
   min-width: 42px !important;
   min-height: 38px !important;
@@ -2609,20 +2281,26 @@ body:has(#skLoginModal.active) #leftDrawer {
   align-items: center !important;
   justify-content: center !important;
 }
-#skCreditLedgerPage .skcp-detail-box {
+
+
+#skCreditLedgerPage .skcp-detail-box{
   padding: 9px 10px !important;
   margin: 0 0 10px !important;
   border-radius: 14px !important;
   box-sizing: border-box !important;
 }
-#skCreditLedgerPage .skcp-detail-grid {
+
+
+#skCreditLedgerPage .skcp-detail-grid{
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   align-items: stretch !important;
   gap: 7px !important;
   margin: 0 0 7px !important;
 }
-#skCreditLedgerPage .skcp-mini {
+
+
+#skCreditLedgerPage .skcp-mini{
   min-width: 0 !important;
   min-height: 0 !important;
   height: auto !important;
@@ -2632,25 +2310,33 @@ body:has(#skLoginModal.active) #leftDrawer {
   border-radius: 11px !important;
   box-sizing: border-box !important;
 }
-#skCreditLedgerPage .skcp-mini b {
+
+
+#skCreditLedgerPage .skcp-mini b{
   font-size: clamp(.76rem, 2.2vw, .88rem) !important;
   line-height: 1.2 !important;
   overflow-wrap: anywhere !important;
 }
-#skCreditLedgerPage .skcp-mini span {
+
+
+#skCreditLedgerPage .skcp-mini span{
   font-size: .59rem !important;
   line-height: 1.25 !important;
   letter-spacing: 0 !important;
   overflow-wrap: anywhere !important;
 }
-#skCreditLedgerPage .skcp-detail-box > .skcp-bill-actions {
+
+
+#skCreditLedgerPage .skcp-detail-box > .skcp-bill-actions{
   display: flex !important;
   flex-wrap: wrap !important;
   align-items: center !important;
   gap: 7px !important;
   margin: 0 !important;
 }
-#skCreditLedgerPage .skcp-detail-box > .skcp-bill-actions .skcp-btn {
+
+
+#skCreditLedgerPage .skcp-detail-box > .skcp-bill-actions .skcp-btn{
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -2661,33 +2347,43 @@ body:has(#skLoginModal.active) #leftDrawer {
   font-size: .72rem !important;
   line-height: 1.2 !important;
 }
+
+
 #skCreditLedgerPage #skCPDetailView > div[style*="CREDIT / PAYMENT HISTORY"],
-#skCreditLedgerPage #skCPDetailView > div[style*="SALES BILL HISTORY"] {
+#skCreditLedgerPage #skCPDetailView > div[style*="SALES BILL HISTORY"]{
   margin: 10px 0 6px !important;
   line-height: 1.3 !important;
   letter-spacing: .015em !important;
 }
-#skCreditLedgerPage .skcp-bill-card {
+
+
+#skCreditLedgerPage .skcp-bill-card{
   min-width: 0 !important;
   margin: 0 0 8px !important;
   padding: 10px 11px !important;
   border-radius: 13px !important;
   box-sizing: border-box !important;
 }
-#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:first-child {
+
+
+#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:first-child{
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   gap: 8px !important;
   min-width: 0 !important;
 }
-#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:first-child > b {
+
+
+#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:first-child > b{
   min-width: 0 !important;
   font-size: .82rem !important;
   line-height: 1.3 !important;
   overflow-wrap: anywhere !important;
 }
-#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link .skcp-btn {
+
+
+#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link .skcp-btn{
   flex: 0 0 auto !important;
   min-height: 36px !important;
   padding: 0 10px !important;
@@ -2695,29 +2391,51 @@ body:has(#skLoginModal.active) #leftDrawer {
   font-size: .68rem !important;
   white-space: nowrap !important;
 }
-#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:nth-child(2) {
+
+
+#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:nth-child(2){
   margin-top: 5px !important;
   font-size: .68rem !important;
   line-height: 1.45 !important;
   overflow-wrap: anywhere !important;
   word-break: normal !important;
 }
-#skCreditLedgerPage .skcp-open-job-hint {
+
+
+#skCreditLedgerPage .skcp-open-job-hint{
   margin-top: 5px !important;
   padding-top: 5px !important;
   border-top: 1px solid color-mix(in srgb, var(--card-border) 65%, transparent) !important;
   font-size: .68rem !important;
   line-height: 1.35 !important;
 }
+
+
 @media (max-width: 480px) {
-  #skCreditLedgerPage #skCPDetailView { padding: 8px 9px 14px !important; }
-  #skCreditLedgerPage .skcp-detail-box { padding: 8px !important; }
-  #skCreditLedgerPage .skcp-detail-grid { gap: 5px !important; }
-  #skCreditLedgerPage .skcp-mini { padding: 7px 6px !important; }
-  #skCreditLedgerPage .skcp-mini span { font-size: .54rem !important; }
-  #skCreditLedgerPage .skcp-bill-card { padding: 9px !important; }
-  #skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:nth-child(2) { font-size: .66rem !important; }
+  
+#skCreditLedgerPage #skCPDetailView{ padding: 8px 9px 14px !important; }
+
+  
+#skCreditLedgerPage .skcp-detail-box{ padding: 8px !important; }
+
+  
+#skCreditLedgerPage .skcp-detail-grid{ gap: 5px !important; }
+
+  
+#skCreditLedgerPage .skcp-mini{ padding: 7px 6px !important; }
+
+  
+#skCreditLedgerPage .skcp-mini span{ font-size: .54rem !important; }
+
+  
+#skCreditLedgerPage .skcp-bill-card{ padding: 9px !important; }
+
+  
+#skCreditLedgerPage .skcp-bill-card.skcp-repair-credit-link > div:nth-child(2){ font-size: .66rem !important; }
+
 }
+
+
 
 
 
@@ -2725,7 +2443,9 @@ body:has(#skLoginModal.active) #leftDrawer {
    SK MOBILES 5.6.99 — UNIVERSAL APPLICATION UI LAYER
    Presentation-only rules. Preserve page logic, IDs, data attributes and handlers.
    ========================================================================== */
-:root {
+
+
+:root{
   --sk-global-card-pad-y: 10px;
   --sk-global-card-pad-x: 12px;
   --sk-global-section-gap: 12px;
@@ -2735,7 +2455,11 @@ body:has(#skLoginModal.active) #leftDrawer {
   --sk-global-modal-header-bg: var(--header-bg, rgba(255,255,255,.96));
 }
 
+
+
 /* Prevent children from forcing page or grid overflow. */
+
+
 .app-viewport,
 .app-viewport > *,
 .view-section,
@@ -2748,34 +2472,31 @@ body:has(#skLoginModal.active) #leftDrawer {
 .form-section,
 .card,
 .panel,
-.content-box {
+.content-box{
   min-width: 0;
   box-sizing: border-box;
 }
 
-:is(.view-section, .tab-content, .content-area, .page-section, .page-content) {
+
+
+:is(.view-section, .tab-content, .content-area, .page-section, .page-content){
   gap: var(--sk-global-section-gap);
 }
 
+
+
 /* Compact, consistent metric and summary grids across modules. */
-:is(
-  .stats-grid, .stat-grid, .summary-grid, .summary-cards, .metrics-grid,
-  .metric-grid, .dashboard-stats, .analytics-stats, .ledger-summary,
-  .credit-summary, .used-stock-metrics, .sk-used-stock-summary,
-  .skcp-summary-grid, .skcp-stats, [class*="metric-grid"],
-  [class*="summary-grid"], [class*="stats-grid"]
-) {
+
+
+:is(.stats-grid, .stat-grid, .summary-grid, .summary-cards, .metrics-grid, .metric-grid, .dashboard-stats, .analytics-stats, .ledger-summary, .credit-summary, .used-stock-metrics, .skcp-summary-grid, .skcp-stats, [class*="metric-grid"], [class*="summary-grid"], [class*="stats-grid"]){
   gap: 8px !important;
   margin-block: 10px 12px !important;
   min-width: 0 !important;
 }
 
-:is(
-  .stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
-  .metric-box, .ledger-stat, .credit-stat, .dashboard-stat,
-  .analytics-card, .skcp-mini, [class*="stat-card"],
-  [class*="metric-card"], [class*="summary-card"]
-) {
+
+
+:is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box, .metric-box, .ledger-stat, .credit-stat, .dashboard-stat, .analytics-card, .skcp-mini, [class*="stat-card"], [class*="metric-card"], [class*="summary-card"]){
   min-height: 0 !important;
   height: auto !important;
   padding: 8px 12px !important;
@@ -2785,36 +2506,38 @@ body:has(#skLoginModal.active) #leftDrawer {
   overflow-wrap: anywhere;
 }
 
-:is(
-  .stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
-  .metric-box, .ledger-stat, .credit-stat, .dashboard-stat,
-  .analytics-card, .skcp-mini, [class*="stat-card"],
-  [class*="metric-card"], [class*="summary-card"]
-) :is(small, label, .label, .stat-label, .metric-label, .summary-label, .sub-label) {
+
+
+:is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box, .metric-box, .ledger-stat, .credit-stat, .dashboard-stat, .analytics-card, .skcp-mini, [class*="stat-card"], [class*="metric-card"], [class*="summary-card"]) :is(small, label, .label, .stat-label, .metric-label, .summary-label, .sub-label){
   line-height: 1.2 !important;
   margin-block: 0 !important;
 }
 
-:is(
-  .stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
-  .metric-box, .ledger-stat, .credit-stat, .dashboard-stat,
-  .analytics-card, .skcp-mini, [class*="stat-card"],
-  [class*="metric-card"], [class*="summary-card"]
-) :is(strong, b, .value, .stat-value, .metric-value, .summary-value, .count, .amount) {
+
+
+:is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box, .metric-box, .ledger-stat, .credit-stat, .dashboard-stat, .analytics-card, .skcp-mini, [class*="stat-card"], [class*="metric-card"], [class*="summary-card"]) :is(strong, b, .value, .stat-value, .metric-value, .summary-value, .count, .amount){
   line-height: 1.2 !important;
   margin-block: 0 !important;
 }
+
+
 
 /* Shared section spacing: avoid excessive whitespace without forcing fixed heights. */
-:is(.card, .panel, .content-box, .form-section, .bill-card, .list-card) {
+
+
+:is(.card, .panel, .content-box, .form-section, .bill-card, .list-card){
   margin-block-end: 12px !important;
 }
 
-:is(.modal-title, .modal-header, .sheet-header, .panel-header, .section-header) {
+
+
+:is(.modal-title, .modal-header, .sheet-header, .panel-header, .section-header){
   line-height: 1.35;
 }
 
-:is(.modal-title, .modal-header, .sheet-header) {
+
+
+:is(.modal-title, .modal-header, .sheet-header){
   position: sticky;
   top: 0;
   z-index: 50;
@@ -2824,8 +2547,12 @@ body:has(#skLoginModal.active) #leftDrawer {
   border-bottom: 1px solid var(--card-border, rgba(15,23,42,.10));
 }
 
+
+
 /* Keep modal shells from producing nested outer scrollbars. */
-:is(.modal-sheet, .modal-dialog, .dialog-panel, .bottom-sheet, .sk-device-detail-dialog) {
+
+
+:is(.modal-sheet, .modal-dialog, .dialog-panel, .bottom-sheet, .sk-device-detail-dialog){
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -2833,33 +2560,45 @@ body:has(#skLoginModal.active) #leftDrawer {
   overflow: hidden;
 }
 
-:is(.modal-body, .modal-content-body, .sheet-body, .dialog-body) {
+
+
+:is(.modal-body, .modal-content-body, .sheet-body, .dialog-body){
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 
-:is(.modal-actions, .modal-footer, .sheet-footer, .dialog-actions) {
+
+
+:is(.modal-actions, .modal-footer, .sheet-footer, .dialog-actions){
   flex-shrink: 0;
   padding-bottom: max(10px, env(safe-area-inset-bottom));
 }
 
+
+
 /* Consistent touch controls; preserve existing contextual colours and handlers. */
+
+
 button,
 [role="button"],
 input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
 select,
-textarea {
+textarea{
   box-sizing: border-box;
 }
 
-:is(.search-input, .search-box input, .search-bar input, input[type="search"]) {
+
+
+:is(.search-input, .search-box input, .search-bar input, input[type="search"]){
   min-height: 40px;
   padding-block: 8px;
 }
 
-:is(.filter-pill, .filter-chip, .action-pill, .ledger-action, .btn-compact, button.btn-sm) {
+
+
+:is(.filter-pill, .filter-chip, .action-pill, .ledger-action, .btn-compact, button.btn-sm){
   min-height: 38px;
   display: inline-flex;
   align-items: center;
@@ -2868,89 +2607,136 @@ textarea {
   line-height: 1.25;
 }
 
-:is(.modal-actions, .action-row, .action-toolbar, .list-toolbar, .search-toolbar, .filter-bar) {
+
+
+:is(.modal-actions, .action-row, .action-toolbar, .list-toolbar, .search-toolbar, .filter-bar){
   gap: 8px;
 }
 
+
+
 /* Forms use natural flow and safe two-column grids where their existing markup supports it. */
-:is(.form-grid, .fields-grid, .purchase-form-grid, .settings-grid, .theme-grid-selector) {
+
+
+:is(.form-grid, .fields-grid, .purchase-form-grid, .settings-grid, .theme-grid-selector){
   min-width: 0;
   gap: 10px;
 }
 
+
+
 :is(.form-grid, .fields-grid, .purchase-form-grid) > *,
-:is(.settings-grid, .theme-grid-selector) > * {
+:is(.settings-grid, .theme-grid-selector) > *{
   min-width: 0;
 }
 
-input, select, textarea {
+
+
+input,
+select,
+textarea{
   max-width: 100%;
   line-height: 1.35;
 }
 
-textarea {
+
+
+textarea{
   resize: vertical;
 }
 
+
+
 /* Record cards and table wrappers should not overlay adjacent content. */
-:is(.inventory-list, .used-mobile-list, .customer-list, .ledger-list, .history-list, .record-list) {
+
+
+:is(.inventory-list, .used-mobile-list, .customer-list, .ledger-list, .history-list, .record-list){
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-:is(.table-responsive, .table-wrap, .table-container, .inventory-table-wrap) {
+
+
+:is(.table-responsive, .table-wrap, .table-container, .inventory-table-wrap){
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-:is(.inventory-card, .used-item-card, .customer-card, .ledger-card, .history-card, .sk-used-inventory-card) {
+
+
+:is(.inventory-card, .used-item-card, .customer-card, .ledger-card, .history-card){
   min-width: 0;
   height: auto;
   overflow-wrap: anywhere;
 }
 
+
+
 /* Mobile layout: protect fixed navigation and avoid horizontal overflow. */
-html, body {
+
+
+html,
+body{
   max-width: 100%;
   overflow-x: clip;
 }
 
-.app-viewport {
+
+
+.app-viewport{
   padding-bottom: calc(82px + env(safe-area-inset-bottom));
 }
 
-:is(.bottom-nav, .bottom-navigation, .app-bottom-nav, .mobile-bottom-nav) {
+
+
+:is(.bottom-nav, .bottom-navigation, .app-bottom-nav, .mobile-bottom-nav){
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+
+
 @media (max-width: 480px) {
-  :is(.stats-grid, .stat-grid, .summary-grid, .metrics-grid, .metric-grid, .ledger-summary, .credit-summary) {
+  
+:is(.stats-grid, .stat-grid, .summary-grid, .metrics-grid, .metric-grid, .ledger-summary, .credit-summary){
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
-  :is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box, .metric-box) {
+
+  
+:is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box, .metric-box){
     padding: 8px 9px !important;
   }
-  :is(.modal-sheet, .modal-dialog, .dialog-panel, .bottom-sheet, .sk-device-detail-dialog) {
+
+  
+:is(.modal-sheet, .modal-dialog, .dialog-panel, .bottom-sheet, .sk-device-detail-dialog){
     width: min(100%, 520px);
     max-width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);
   }
+
 }
 
+
+
 @media (max-width: 359px) {
-  :is(.stats-grid, .stat-grid, .summary-grid, .metrics-grid, .metric-grid, .ledger-summary, .credit-summary) {
+  
+:is(.stats-grid, .stat-grid, .summary-grid, .metrics-grid, .metric-grid, .ledger-summary, .credit-summary){
     grid-template-columns: minmax(0, 1fr) !important;
   }
+
 }
+
+
 
 
 
 /* V5.6.103 — Sales Bill History typography and spacing correction.
    Presentation only: preserve existing values, IDs, data attributes and handlers. */
-#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) {
+
+
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link){
   display: flex;
   flex-direction: column;
   gap: 7px;
@@ -2962,7 +2748,9 @@ html, body {
   box-sizing: border-box;
   min-width: 0;
 }
-#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top {
+
+
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top{
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -2970,38 +2758,50 @@ html, body {
   min-width: 0;
   line-height: 1.35;
 }
-#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div {
+
+
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div{
   flex: 1 1 auto;
   min-width: 0;
   overflow-wrap: anywhere;
   font-size: .82rem;
   line-height: 1.4;
 }
-#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div > b {
+
+
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div > b{
   font-size: .86rem;
   font-weight: 800;
   line-height: 1.35;
 }
-#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > b {
+
+
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > b{
   flex: 0 0 auto;
   font-size: .88rem;
   line-height: 1.3;
   white-space: nowrap;
 }
-#skCreditLedgerPage .skcp-sales-bill-finance {
+
+
+#skCreditLedgerPage .skcp-sales-bill-finance{
   font-size: .74rem;
   line-height: 1.45;
   color: var(--text, #1e293b);
   overflow-wrap: anywhere;
 }
-#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-actions {
+
+
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-actions{
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 7px;
   margin-top: 1px;
 }
-#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-actions .skcp-btn {
+
+
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-actions .skcp-btn{
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3013,7 +2813,9 @@ html, body {
   line-height: 1.2;
   white-space: nowrap;
 }
-#skCreditLedgerPage .skcp-sales-bill-paid {
+
+
+#skCreditLedgerPage .skcp-sales-bill-paid{
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3027,7 +2829,9 @@ html, body {
   font-weight: 800;
   line-height: 1.2;
 }
-#skCreditLedgerPage .skcp-sales-bill-receipts {
+
+
+#skCreditLedgerPage .skcp-sales-bill-receipts{
   margin-top: 2px;
   padding-top: 7px;
   border-top: 1px solid var(--card-border, #e2e8f0);
@@ -3036,26 +2840,40 @@ html, body {
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
+
+
 @media (max-width: 480px) {
-  #skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) {
+  
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link){
     padding: 11px !important;
     gap: 7px;
   }
-  #skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div {
+
+  
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div{
     font-size: .78rem;
   }
-  #skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div > b,
-  #skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > b {
+
+  
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > div > b,
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-top > b{
     font-size: .82rem;
   }
-  #skCreditLedgerPage .skcp-sales-bill-finance {
+
+  
+#skCreditLedgerPage .skcp-sales-bill-finance{
     font-size: .72rem;
   }
-  #skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-actions .skcp-btn {
+
+  
+#skCreditLedgerPage .skcp-bill-card:not(.skcp-repair-credit-link) .skcp-bill-actions .skcp-btn{
     min-height: 34px;
     font-size: .70rem;
   }
+
 }
+
+
 
 
 /* ==========================================================================
@@ -3063,7 +2881,9 @@ html, body {
    Presentation-only refinement across dashboard, billing, inventory, ledger,
    repair, history, settings, forms, and dialogs. No business logic is defined here.
    ========================================================================== */
-:root {
+
+
+:root{
   --sk105-space-1: 4px;
   --sk105-space-2: 8px;
   --sk105-space-3: 12px;
@@ -3076,113 +2896,144 @@ html, body {
   --sk105-border: var(--card-border, rgba(100, 116, 139, .24));
 }
 
+
+
 /* Universal safe sizing and legible text rhythm. */
+
+
 .app-viewport,
 .app-viewport :is(main, section, article, aside, header, footer, form, fieldset),
 .modal-overlay,
 .modal-overlay .modal-sheet,
 .drawer-sheet,
 #skCreditLedgerPage,
-#skRepairDetailModal #skRepairDetailContent {
+#skRepairDetailModal #skRepairDetailContent{
   box-sizing: border-box;
   min-width: 0;
 }
+
+
 .app-viewport :is(p, small, label, .form-label, .field-label, .muted, .subtext, .helper-text),
-.modal-overlay :is(p, small, label, .form-label, .field-label, .muted, .subtext, .helper-text) {
+.modal-overlay :is(p, small, label, .form-label, .field-label, .muted, .subtext, .helper-text){
   line-height: var(--sk105-text-leading);
 }
+
+
 .app-viewport :is(h1, h2, h3, h4, .page-title, .section-title, .card-title),
-.modal-overlay :is(h1, h2, h3, h4, .page-title, .section-title, .card-title) {
+.modal-overlay :is(h1, h2, h3, h4, .page-title, .section-title, .card-title){
   line-height: 1.25;
   overflow-wrap: anywhere;
 }
-.app-viewport :is(.card, .panel, .content-box, .form-section, .form-card, .bill-section,
-  .history-card, .repair-card, .customer-card, .inventory-card, .accessory-card,
-  .summary-card, .stat-card, .metric-card, .ledger-card, .skcp-row, .sk-rj-card) {
+
+
+.app-viewport :is(.card, .panel, .content-box, .form-section, .form-card, .bill-section, .history-card, .repair-card, .customer-card, .inventory-card, .accessory-card, .summary-card, .stat-card, .metric-card, .ledger-card, .skcp-row, .sk-rj-card){
   min-width: 0;
   max-width: 100%;
   overflow-wrap: anywhere;
 }
-.app-viewport :is(.card, .panel, .content-box, .form-section, .form-card, .history-card,
-  .repair-card, .customer-card, .inventory-card, .accessory-card, .ledger-card) {
+
+
+.app-viewport :is(.card, .panel, .content-box, .form-section, .form-card, .history-card, .repair-card, .customer-card, .inventory-card, .accessory-card, .ledger-card){
   border-radius: var(--sk105-radius-card);
 }
 
+
+
 /* Shared page rhythm: compact gaps, natural flow, no forced heights. */
-.app-viewport :is(.content-area, .page-content, .page-container, .view-section,
-  .tab-content, .form-grid, .fields-grid, .settings-grid, .inventory-list,
-  .customer-list, .ledger-list, .history-list, .record-list, .skcp-list) {
+
+
+.app-viewport :is(.content-area, .page-content, .page-container, .view-section, .tab-content, .form-grid, .fields-grid, .settings-grid, .inventory-list, .customer-list, .ledger-list, .history-list, .record-list, .skcp-list){
   min-width: 0;
   row-gap: var(--sk105-space-3);
 }
-.app-viewport :is(.section-header, .panel-header, .card-header, .page-header) {
+
+
+.app-viewport :is(.section-header, .panel-header, .card-header, .page-header){
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--sk105-space-2);
   min-width: 0;
 }
-.app-viewport :is(.section-header, .panel-header, .card-header, .page-header) > * {
+
+
+.app-viewport :is(.section-header, .panel-header, .card-header, .page-header) > *{
   min-width: 0;
 }
-.app-viewport :is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
-  .metric-box, .skcp-stat, .sk-home-metric-card) {
+
+
+.app-viewport :is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box, .metric-box, .skcp-stat, .sk-home-metric-card){
   min-height: 0;
   padding: 9px 11px;
   gap: 3px;
 }
-.app-viewport :is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
-  .metric-box, .skcp-stat, .sk-home-metric-card) :is(small, label, .label, .stat-label,
-  .metric-label, .summary-label, .count-label) {
+
+
+.app-viewport :is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box, .metric-box, .skcp-stat, .sk-home-metric-card) :is(small, label, .label, .stat-label, .metric-label, .summary-label, .count-label){
   margin: 0;
   line-height: 1.2;
 }
-.app-viewport :is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box,
-  .metric-box, .skcp-stat, .sk-home-metric-card) :is(strong, b, .value, .stat-value,
-  .metric-value, .summary-value, .amount, .count) {
+
+
+.app-viewport :is(.stat-card, .summary-card, .metric-card, .stat-box, .summary-box, .metric-box, .skcp-stat, .sk-home-metric-card) :is(strong, b, .value, .stat-value, .metric-value, .summary-value, .amount, .count){
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
 
+
+
 /* Consistent controls and input breathing room across forms. */
-.app-viewport :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
-  select, textarea, .form-input, .form-select) {
+
+
+.app-viewport :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]), select, textarea, .form-input, .form-select){
   box-sizing: border-box;
   max-width: 100%;
   line-height: 1.35;
 }
-.app-viewport :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
-  select, .form-input, .form-select) {
+
+
+.app-viewport :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]), select, .form-input, .form-select){
   min-height: var(--sk105-control-height);
 }
-.app-viewport :is(button, .btn, .submit-btn, .btn-primary, .btn-secondary, .skcp-btn) {
+
+
+.app-viewport :is(button, .btn, .submit-btn, .btn-primary, .btn-secondary, .skcp-btn){
   box-sizing: border-box;
   line-height: 1.25;
   text-align: center;
 }
-.app-viewport :is(.action-row, .action-toolbar, .list-toolbar, .search-toolbar, .filter-bar,
-  .sk-rj-history-actions, .sk-rj-actions, .skcp-bill-actions) {
+
+
+.app-viewport :is(.action-row, .action-toolbar, .list-toolbar, .search-toolbar, .filter-bar, .sk-rj-history-actions, .sk-rj-actions, .skcp-bill-actions){
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--sk105-space-2);
   min-width: 0;
 }
-.app-viewport :is(.table-responsive, .table-wrap, .table-container, .inventory-table-wrap) {
+
+
+.app-viewport :is(.table-responsive, .table-wrap, .table-container, .inventory-table-wrap){
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
+
+
 /* Modal sheets: one scroll owner, stable opaque headers and safe footer spacing. */
-.modal-overlay .modal-sheet {
+
+
+.modal-overlay .modal-sheet{
   max-width: min(960px, calc(100vw - 24px));
   max-height: calc(100dvh - 20px);
   min-height: 0;
   overflow: hidden;
   border-radius: var(--sk105-radius-panel);
 }
-.modal-overlay .modal-title {
+
+
+.modal-overlay .modal-title{
   position: sticky;
   top: 0;
   z-index: 50;
@@ -3196,36 +3047,52 @@ html, body {
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--sk105-border);
 }
-.modal-overlay .modal-title > :first-child {
+
+
+.modal-overlay .modal-title > :first-child{
   min-width: 0;
   line-height: 1.25;
 }
-.modal-overlay .modal-close-btn {
+
+
+.modal-overlay .modal-close-btn{
   flex: 0 0 auto;
 }
+
+
 .modal-overlay .modal-actions,
 .modal-overlay .modal-footer,
-.modal-overlay .sheet-footer {
+.modal-overlay .sheet-footer{
   flex: 0 0 auto;
   padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
 }
 
+
+
 /* Repair Details: clearer hierarchy and better use of the available viewport. */
-#skRepairDetailModal .modal-sheet {
+
+
+#skRepairDetailModal .modal-sheet{
   width: min(920px, calc(100vw - 24px));
   padding: 12px;
 }
-#skRepairDetailModal .modal-title {
+
+
+#skRepairDetailModal .modal-title{
   min-height: 48px;
   margin: 0 0 10px;
   padding: 7px 4px 10px;
   font-size: .98rem;
 }
-#skRepairDetailModal #skRepairDetailContent {
+
+
+#skRepairDetailModal #skRepairDetailContent{
   min-width: 0;
   overflow-wrap: anywhere;
 }
-#skRepairDetailModal #skRepairDetailContent > div {
+
+
+#skRepairDetailModal #skRepairDetailContent > div{
   display: flex;
   flex-direction: column;
   gap: 9px;
@@ -3233,23 +3100,31 @@ html, body {
   border-radius: 16px !important;
   box-shadow: 0 8px 24px rgba(15, 23, 42, .045);
 }
-#skRepairDetailModal #skRepairDetailContent > div > div:first-child {
+
+
+#skRepairDetailModal #skRepairDetailContent > div > div:first-child{
   font-size: 1rem !important;
   line-height: 1.35;
 }
-#skRepairDetailModal #skRepairDetailContent > div > div:nth-child(2) {
+
+
+#skRepairDetailModal #skRepairDetailContent > div > div:nth-child(2){
   margin-top: -4px !important;
   font-size: .82rem !important;
   line-height: 1.4;
   color: var(--sk105-muted);
 }
-#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance {
+
+
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance{
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin-top: 0;
 }
-#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance > div {
+
+
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance > div{
   min-width: 0;
   gap: 4px;
   padding: 10px 11px;
@@ -3257,92 +3132,138 @@ html, body {
   font-size: .78rem;
   line-height: 1.35;
 }
-#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance span {
+
+
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance span{
   line-height: 1.3;
 }
-#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance b {
+
+
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance b{
   font-size: .9rem;
   line-height: 1.25;
 }
-#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance .sk-rj-finance-due {
+
+
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance .sk-rj-finance-due{
   grid-column: 1 / -1;
   border-color: var(--primary, #2563eb);
   background: var(--badge-bg, rgba(37, 99, 235, .08));
 }
-#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary {
+
+
+#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary{
   margin-top: 0;
   padding: 10px 12px;
   border-radius: 12px;
   font-size: .78rem;
   line-height: 1.4;
 }
-#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary > b {
+
+
+#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary > b{
   margin-bottom: 5px;
   font-size: .82rem;
 }
-#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary > div {
+
+
+#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary > div{
   align-items: flex-start;
   gap: 12px;
   padding: 5px 0;
   line-height: 1.35;
 }
-#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary > div > :last-child {
+
+
+#skRepairDetailModal #skRepairDetailContent .sk-rj-payment-summary > div > :last-child{
   flex: 0 0 auto;
   white-space: nowrap;
   font-weight: 700;
 }
-#skRepairDetailModal #skRepairDetailContent button.submit-btn {
+
+
+#skRepairDetailModal #skRepairDetailContent button.submit-btn{
   min-height: 42px;
   border-radius: 12px;
   font-size: .82rem;
   font-weight: 800;
 }
-#skRepairDetailModal #skRepairDetailContent > div > div:last-child {
+
+
+#skRepairDetailModal #skRepairDetailContent > div > div:last-child{
   line-height: 1.45;
 }
+
+
 @media (min-width: 760px) {
-  #skRepairDetailModal .modal-sheet {
+  
+#skRepairDetailModal .modal-sheet{
     width: min(920px, calc(100vw - 48px));
     padding: 16px;
   }
-  #skRepairDetailModal #skRepairDetailContent > div {
+
+  
+#skRepairDetailModal #skRepairDetailContent > div{
     padding: 18px !important;
   }
+
 }
+
+
 @media (max-width: 520px) {
-  .modal-overlay .modal-sheet {
+  
+.modal-overlay .modal-sheet{
     max-width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);
   }
-  #skRepairDetailModal .modal-sheet {
+
+  
+#skRepairDetailModal .modal-sheet{
     padding: 10px;
   }
-  #skRepairDetailModal #skRepairDetailContent > div {
+
+  
+#skRepairDetailModal #skRepairDetailContent > div{
     padding: 11px !important;
     gap: 8px;
   }
-  #skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance > div {
+
+  
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance > div{
     padding: 8px 9px;
     font-size: .74rem;
   }
-  #skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance b {
+
+  
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance b{
     font-size: .84rem;
   }
+
 }
+
+
 @media (max-width: 359px) {
-  #skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance {
+  
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance{
     grid-template-columns: minmax(0, 1fr);
   }
-  #skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance .sk-rj-finance-due {
+
+  
+#skRepairDetailModal #skRepairDetailContent .sk-rj-detail-finance .sk-rj-finance-due{
     grid-column: auto;
   }
+
 }
+
+
 
 
 /* V5.6.107 — Universal UI typography and compact action-control alignment.
    Scope excludes printable invoice output; no application handlers or data logic changed. */
+
+
 body button:not(#printableInvoiceCard button),
-body [role="button"]:not(#printableInvoiceCard [role="button"]) {
+body [role="button"]:not(#printableInvoiceCard [role="button"]){
   font-family: var(--app-font, inherit);
   line-height: 1.3;
   letter-spacing: normal;
@@ -3350,7 +3271,11 @@ body [role="button"]:not(#printableInvoiceCard [role="button"]) {
   -webkit-font-smoothing: antialiased;
 }
 
+
+
 /* Compact action pills and small utility controls use one readable type scale. */
+
+
 .skcp-btn,
 .sk-credit-btn,
 .skcp-filter,
@@ -3363,7 +3288,7 @@ body [role="button"]:not(#printableInvoiceCard [role="button"]) {
 .skcp-toolbar button,
 .skcp-filters button,
 .skcp-page-head button,
-.sk-credit-search-row button {
+.sk-credit-search-row button{
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
@@ -3379,8 +3304,10 @@ body [role="button"]:not(#printableInvoiceCard [role="button"]) {
   white-space: nowrap;
 }
 
+
+
 .skcp-bill-actions .skcp-sales-bill-paid,
-.skcp-sales-bill-paid {
+.skcp-sales-bill-paid{
   min-height: 30px;
   padding: 0 9px;
   font-size: 12px;
@@ -3388,49 +3315,65 @@ body [role="button"]:not(#printableInvoiceCard [role="button"]) {
   line-height: 1.25;
 }
 
+
+
 /* Keep icons and labels from touching or drifting vertically in compact controls. */
+
+
 .skcp-btn > svg,
 .sk-credit-btn > svg,
 .skcp-filter > svg,
 .skcp-back > svg,
 .skcp-bill-actions button > svg,
-.sk-credit-actions button > svg {
+.sk-credit-actions button > svg{
   flex: 0 0 auto;
   width: 1em;
   height: 1em;
 }
 
+
+
 /* All ordinary app buttons inherit the same baseline without resizing primary actions. */
-body button:not(#printableInvoiceCard button) {
+
+
+body button:not(#printableInvoiceCard button){
   font-kerning: normal;
   text-transform: none;
 }
 
+
+
 @media (max-width: 380px) {
-  .skcp-btn,
-  .sk-credit-btn,
-  .skcp-filter,
-  .skcp-back,
-  .skcp-bill-actions button,
-  .skcp-bill-actions .skcp-sales-bill-paid,
-  .sk-credit-actions button,
-  .sk-v43-entry-type button,
-  .sk-v43-keep-actions button,
-  .skcp-toolbar button,
-  .skcp-filters button,
-  .skcp-page-head button,
-  .sk-credit-search-row button {
+  
+.skcp-btn,
+.sk-credit-btn,
+.skcp-filter,
+.skcp-back,
+.skcp-bill-actions button,
+.skcp-bill-actions .skcp-sales-bill-paid,
+.sk-credit-actions button,
+.sk-v43-entry-type button,
+.sk-v43-keep-actions button,
+.skcp-toolbar button,
+.skcp-filters button,
+.skcp-page-head button,
+.sk-credit-search-row button{
     padding-inline: 8px;
     font-size: 12px;
   }
+
 }
+
+
 
 
 /* =====================================================================
    SK MOBILES 5.6.110 — UNIVERSAL COMPACT UI SPACING
    Visual-only layer: keep IDs, DOM structure, handlers and workflows intact.
    ===================================================================== */
-:root {
+
+
+:root{
   --sk-ui-page-gutter: 12px;
   --sk-ui-card-gap: 8px;
   --sk-ui-section-gap: 14px;
@@ -3443,15 +3386,21 @@ body button:not(#printableInvoiceCard button) {
   --sk-ui-body-line: 1.35;
 }
 
+
+
 /* Reduce excess gaps without forcing every layout into one fixed height. */
+
+
 .app-container,
 .app-content,
 .page-content,
 .page-container,
 main,
-.main-content {
+.main-content{
   gap: var(--sk-ui-card-gap);
 }
+
+
 
 .card,
 .glass-card,
@@ -3471,12 +3420,13 @@ main,
 .sk-card,
 .sk-ui-model-card,
 .sk-home-metric-card,
-.sk-used-product-card,
-.skcp-bill-card {
+.skcp-bill-card{
   box-sizing: border-box;
   padding: var(--sk-ui-card-pad-y) var(--sk-ui-card-pad-x);
   border-radius: var(--sk-ui-radius);
 }
+
+
 
 .form-section,
 .bill-section,
@@ -3487,18 +3437,24 @@ main,
 .modal-footer,
 .action-toolbar,
 .action-row,
-.header-row {
+.header-row{
   gap: var(--sk-ui-card-gap);
 }
 
+
+
 /* Tighten vertical rhythm inside content blocks; avoid changing invoice print. */
+
+
 .card-title,
 .section-title,
 .sk-ui-section-title,
-.modal-title {
+.modal-title{
   line-height: var(--sk-ui-title-line);
   margin-block: 0 6px;
 }
+
+
 
 .card p,
 .glass-card p,
@@ -3511,46 +3467,58 @@ main,
 .history-card p,
 .repair-card p,
 .accessory-card p,
-.sk-ui-model-card p,
-.sk-used-product-card p {
+.sk-ui-model-card p{
   line-height: var(--sk-ui-body-line);
   margin-block: 3px;
 }
 
+
+
 /* Compact standard controls while retaining comfortable touch targets. */
+
+
 body button:not(#printableInvoiceCard button),
 body input:not([type="checkbox"]):not([type="radio"]),
 body select,
 body .form-input,
 body .search-input,
-body textarea {
+body textarea{
   box-sizing: border-box;
 }
+
+
 
 body input:not([type="checkbox"]):not([type="radio"]),
 body select,
 body .form-input,
-body .search-input {
+body .search-input{
   min-height: var(--sk-ui-control-height);
   padding-block: 8px;
 }
 
-body button:not(#printableInvoiceCard button) {
+
+
+body button:not(#printableInvoiceCard button){
   min-height: 38px;
   line-height: 1.25;
 }
 
+
+
 .submit-btn,
 .action-btn,
 .login-submit-btn,
-.sk-used-bill-button,
 .skcp-btn,
-.sk-credit-btn {
+.sk-credit-btn{
   min-height: var(--sk-ui-action-height);
   padding-block: 8px;
 }
 
+
+
 /* Grids should use available width instead of stretching cards with fixed heights. */
+
+
 .stats-grid,
 .stat-grid,
 .summary-grid,
@@ -3562,28 +3530,37 @@ body button:not(#printableInvoiceCard button) {
 .sk-ui-card-grid,
 .sk-ui-option-grid,
 .sk-ui-choice-grid,
-.sk-ui-theme-grid,
-.sk-used-catalog-grid {
+.sk-ui-theme-grid{
   gap: var(--sk-ui-card-gap);
   align-items: stretch;
 }
 
+
+
 /* Modal sheets: compact padding, but keep scroll regions and safe-area behavior. */
-.modal-sheet {
+
+
+.modal-sheet{
   padding-inline: 12px;
 }
-.modal-body {
+
+
+.modal-body{
   padding-block: 10px;
 }
+
+
 .modal-actions,
-.sk-used-detail-actions,
 .skcp-bill-actions,
-.sk-credit-actions {
+.sk-credit-actions{
   gap: 8px;
 }
 
+
+
 @media (max-width: 480px) {
-  :root {
+  
+:root{
     --sk-ui-page-gutter: 10px;
     --sk-ui-card-gap: 7px;
     --sk-ui-section-gap: 12px;
@@ -3591,28 +3568,43 @@ body button:not(#printableInvoiceCard button) {
     --sk-ui-card-pad-x: 9px;
     --sk-ui-control-height: 42px;
   }
-  .app-container,
-  .app-content,
-  .page-content,
-  .page-container,
-  main,
-  .main-content {
+
+  
+.app-container,
+.app-content,
+.page-content,
+.page-container,
+main,
+.main-content{
     gap: var(--sk-ui-card-gap);
   }
-  .modal-sheet { padding-inline: 10px; }
-  .modal-body { padding-block: 8px; }
+
+  
+.modal-sheet{ padding-inline: 10px; }
+
+  
+.modal-body{ padding-block: 8px; }
+
 }
 
+
+
 @media (max-width: 360px) {
-  :root {
+  
+:root{
     --sk-ui-card-pad-x: 8px;
     --sk-ui-card-gap: 6px;
   }
+
 }
 
 
+
+
 /* V5.6.111 — Admin Control modal layout-only repair. Scoped to this modal. */
-#skAdminPanelModal > .modal-sheet {
+
+
+#skAdminPanelModal > .modal-sheet{
   display: block !important;
   box-sizing: border-box !important;
   height: auto !important;
@@ -3623,7 +3615,9 @@ body button:not(#printableInvoiceCard button) {
   overscroll-behavior: contain;
   padding: 0 0 12px !important;
 }
-#skAdminPanelModal > .modal-sheet > .sk-admin-box {
+
+
+#skAdminPanelModal > .modal-sheet > .sk-admin-box{
   position: relative !important;
   display: block !important;
   box-sizing: border-box !important;
@@ -3634,7 +3628,9 @@ body button:not(#printableInvoiceCard button) {
   flex: none !important;
   margin-bottom: 10px !important;
 }
-#skAdminPanelModal #skManagerPermissionList {
+
+
+#skAdminPanelModal #skManagerPermissionList{
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) !important;
   gap: 6px !important;
@@ -3643,7 +3639,9 @@ body button:not(#printableInvoiceCard button) {
   max-height: none !important;
   overflow: visible !important;
 }
-#skAdminPanelModal #skManagerPermissionList > * {
+
+
+#skAdminPanelModal #skManagerPermissionList > *{
   position: relative !important;
   box-sizing: border-box !important;
   width: 100% !important;
@@ -3654,36 +3652,50 @@ body button:not(#printableInvoiceCard button) {
   flex: none !important;
   white-space: normal !important;
 }
-#skAdminPanelModal > .modal-sheet > .submit-btn:last-child {
+
+
+#skAdminPanelModal > .modal-sheet > .submit-btn:last-child{
   display: block !important;
   position: relative !important;
   box-sizing: border-box !important;
   margin: 10px 14px 2px !important;
   width: calc(100% - 28px) !important;
 }
+
+
 @media (max-width: 600px) {
-  #skAdminPanelModal > .modal-sheet {
+  
+#skAdminPanelModal > .modal-sheet{
     max-height: 86vh !important;
     padding-bottom: 10px !important;
   }
-  #skAdminPanelModal > .modal-sheet > .submit-btn:last-child {
+
+  
+#skAdminPanelModal > .modal-sheet > .submit-btn:last-child{
     margin: 10px 10px 2px !important;
     width: calc(100% - 20px) !important;
   }
+
 }
+
+
 
 
 /* V5.6.112 — targeted fixes from user screenshots only.
    Profile navigation drawer close is handled in skOpenRoleProfile().
    These rules are scoped to Tools & Others Notes and Billing mobile-type filters. */
-#toolsOthersNoteModal {
+
+
+#toolsOthersNoteModal{
   box-sizing:border-box !important;
   padding:10px !important;
   overflow-y:auto !important;
   align-items:center !important;
   justify-content:center !important;
 }
-#toolsOthersNoteModal > .modal-sheet {
+
+
+#toolsOthersNoteModal > .modal-sheet{
   width:min(100%, 620px) !important;
   max-width:620px !important;
   max-height:calc(100dvh - 20px) !important;
@@ -3697,7 +3709,9 @@ body button:not(#printableInvoiceCard button) {
   flex-direction:column !important;
   gap:0 !important;
 }
-#toolsOthersNoteModal .tools-others-head {
+
+
+#toolsOthersNoteModal .tools-others-head{
   display:flex !important;
   align-items:center !important;
   justify-content:space-between !important;
@@ -3706,18 +3720,24 @@ body button:not(#printableInvoiceCard button) {
   margin:0 0 8px !important;
   flex:0 0 auto !important;
 }
-#toolsOthersNoteModal .tools-others-title {
+
+
+#toolsOthersNoteModal .tools-others-title{
   min-width:0 !important;
   flex:1 1 auto !important;
   font-size:clamp(.92rem, 3.8vw, 1.12rem) !important;
   line-height:1.25 !important;
   overflow-wrap:anywhere !important;
 }
-#toolsOthersNoteModal .tools-others-head .modal-close-btn {
+
+
+#toolsOthersNoteModal .tools-others-head .modal-close-btn{
   flex:0 0 auto !important;
   margin:0 !important;
 }
-#toolsOthersNoteModal .tools-others-info {
+
+
+#toolsOthersNoteModal .tools-others-info{
   width:100% !important;
   box-sizing:border-box !important;
   margin:0 0 8px !important;
@@ -3725,13 +3745,17 @@ body button:not(#printableInvoiceCard button) {
   line-height:1.45 !important;
   overflow-wrap:anywhere !important;
 }
-#toolsOthersNoteModal .tools-others-label {
+
+
+#toolsOthersNoteModal .tools-others-label{
   width:100% !important;
   box-sizing:border-box !important;
   margin:0 0 5px !important;
   line-height:1.35 !important;
 }
-#toolsOthersNoteModal .tools-others-note {
+
+
+#toolsOthersNoteModal .tools-others-note{
   width:100% !important;
   max-width:100% !important;
   min-width:0 !important;
@@ -3742,7 +3766,9 @@ body button:not(#printableInvoiceCard button) {
   margin:0 0 8px !important;
   flex:0 0 auto !important;
 }
-#toolsOthersNoteModal .tools-others-actions {
+
+
+#toolsOthersNoteModal .tools-others-actions{
   display:grid !important;
   grid-template-columns:repeat(2,minmax(0,1fr)) !important;
   align-items:stretch !important;
@@ -3750,7 +3776,9 @@ body button:not(#printableInvoiceCard button) {
   width:100% !important;
   margin:0 !important;
 }
-#toolsOthersNoteModal .tools-others-action {
+
+
+#toolsOthersNoteModal .tools-others-action{
   min-width:0 !important;
   width:100% !important;
   min-height:42px !important;
@@ -3760,13 +3788,25 @@ body button:not(#printableInvoiceCard button) {
   line-height:1.25 !important;
   overflow-wrap:anywhere !important;
 }
+
+
 @media (max-width:420px) {
-  #toolsOthersNoteModal { padding:6px !important; }
-  #toolsOthersNoteModal > .modal-sheet { padding:10px !important; max-height:calc(100dvh - 12px) !important; }
-  #toolsOthersNoteModal .tools-others-actions { gap:6px !important; }
-  #toolsOthersNoteModal .tools-others-action { font-size:.72rem !important; }
+  
+#toolsOthersNoteModal{ padding:6px !important; }
+
+  
+#toolsOthersNoteModal > .modal-sheet{ padding:10px !important; max-height:calc(100dvh - 12px) !important; }
+
+  
+#toolsOthersNoteModal .tools-others-actions{ gap:6px !important; }
+
+  
+#toolsOthersNoteModal .tools-others-action{ font-size:.72rem !important; }
+
 }
-#billingModal .mobile-type-tabs {
+
+
+#billingModal .mobile-type-tabs{
   display:grid !important;
   grid-template-columns:repeat(3,minmax(0,1fr)) !important;
   align-items:stretch !important;
@@ -3776,7 +3816,9 @@ body button:not(#printableInvoiceCard button) {
   box-sizing:border-box !important;
   margin:0 12px 9px !important;
 }
-#billingModal .mobile-type-btn {
+
+
+#billingModal .mobile-type-btn{
   display:flex !important;
   align-items:center !important;
   justify-content:center !important;
@@ -3794,11 +3836,18 @@ body button:not(#printableInvoiceCard button) {
 }
 
 
+
+
 /* V5.6.118 — Vivo X300 Pro PWA mobile layout corrections (394px CSS viewport).
    Scoped to Order List and Used Mobile Stock/Inventory UI only. */
+
+
 @media (max-width: 480px) {
-  /* Order row: reserve space for quantity/remove controls and let only details shrink. */
-  .sk-order-item-v39 {
+  
+/* Order row: reserve space for quantity/remove controls and let only details shrink. */
+
+  
+.sk-order-item-v39{
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
@@ -3809,25 +3858,33 @@ body button:not(#printableInvoiceCard button) {
     padding: 9px !important;
     overflow: hidden !important;
   }
-  .sk-order-item-v39 .sk-order-info {
+
+  
+.sk-order-item-v39 .sk-order-info{
     flex: 1 1 0% !important;
     width: 0 !important;
     min-width: 0 !important;
     overflow: hidden !important;
   }
-  .sk-order-item-v39 .sk-order-title,
-  .sk-order-item-v39 .sk-order-meta {
+
+  
+.sk-order-item-v39 .sk-order-title,
+.sk-order-item-v39 .sk-order-meta{
     min-width: 0 !important;
     overflow-wrap: anywhere !important;
   }
-  .sk-order-item-v39 .sk-order-qty {
+
+  
+.sk-order-item-v39 .sk-order-qty{
     flex: 0 0 54px !important;
     width: 54px !important;
     min-width: 54px !important;
     box-sizing: border-box !important;
     padding: 7px 3px !important;
   }
-  .sk-order-item-v39 .sk-order-remove {
+
+  
+.sk-order-item-v39 .sk-order-remove{
     flex: 0 0 auto !important;
     min-width: 44px !important;
     max-width: 64px !important;
@@ -3836,8 +3893,12 @@ body button:not(#printableInvoiceCard button) {
     white-space: nowrap !important;
   }
 
-  /* Search row: make the input shrink predictably; retain a touch-sized Add Item control. */
-  #headerSearchRow {
+
+  
+/* Search row: make the input shrink predictably; retain a touch-sized Add Item control. */
+
+  
+#headerSearchRow{
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: stretch !important;
@@ -3847,14 +3908,18 @@ body button:not(#printableInvoiceCard button) {
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  #headerSearchRow .search-input {
+
+  
+#headerSearchRow .search-input{
     flex: 1 1 0% !important;
     width: 0 !important;
     min-width: 0 !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  #headerSearchRow .box-photo-scan-btn {
+
+  
+#headerSearchRow .box-photo-scan-btn{
     flex: 0 0 auto !important;
     min-width: 78px !important;
     max-width: 102px !important;
@@ -3863,113 +3928,59 @@ body button:not(#printableInvoiceCard button) {
     white-space: nowrap !important;
   }
 
-  /* Used-stock stats and purchase form: reduce excess inter-section whitespace only. */
-  #skUsedStockModal #skUsedStatsGrid {
-    margin: 6px 0 8px !important;
-    gap: 7px !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    align-content: start !important;
-  }
-  #skUsedStockModal #skUsedStatsGrid > .bill-section {
-    min-width: 0 !important;
-    padding: 8px !important;
-    box-sizing: border-box !important;
-  }
-  #skUsedStockModal #skUsedPurchaseForm {
-    margin-top: 0 !important;
-    margin-bottom: 8px !important;
-    padding: 10px !important;
-    gap: 8px !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    box-sizing: border-box !important;
-  }
-  #skUsedStockModal #skUsedPurchaseForm > *,
-  #skUsedStockModal #skUsedPurchaseForm .form-label,
-  #skUsedStockModal #skUsedPurchaseForm .form-input {
-    min-width: 0 !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-  #skUsedStockModal #skUsedPurchaseForm > div[style*="display:flex"] {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 7px !important;
-    min-width: 0 !important;
-  }
-  #skUsedStockModal #skUsedPurchaseForm > div[style*="display:flex"] button {
-    width: 100% !important;
-    min-width: 0 !important;
-    min-height: 40px !important;
-    padding: 8px 7px !important;
-    box-sizing: border-box !important;
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    line-height: 1.25 !important;
-  }
 
-  /* Register remains horizontally scrollable by design; keep the table/cells from
+  
+/* Used-stock stats and purchase form: reduce excess inter-section whitespace only. */
+
+  
+  
+  
+  
+  
+  
+
+  
+/* Register remains horizontally scrollable by design; keep the table/cells from
      expanding the modal itself and compact the action column. */
-  #skUsedStockModal .sk-used-register-toolbar + div {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    box-sizing: border-box !important;
-  }
-  #skUsedStockModal .sk-used-register-toolbar + div > table {
-    width: max-content !important;
-    min-width: 760px !important;
-    max-width: none !important;
-    table-layout: auto !important;
-  }
-  #skUsedStockModal #skUsedRows td,
-  #skUsedStockModal #skUsedRows th {
-    box-sizing: border-box !important;
-    padding: 7px 8px !important;
-  }
-  #skUsedStockModal #skUsedRows td:last-child {
-    min-width: 150px !important;
-    white-space: normal !important;
-  }
-  #skUsedStockModal #skUsedRows .sk-used-action {
-    min-height: 34px !important;
-    margin: 2px !important;
-    padding: 6px 7px !important;
-    white-space: nowrap !important;
-  }
+
+  
+  
+  
+  
+  
 }
+
+
 
 
 /* ============================================================
    SK MOBILES 5.6.119 — MOBILE CONTROL SCALE + OVERFLOW GUARD
    UI-only correction based on the supplied Vivo screenshots.
    ============================================================ */
+
+
 @media (max-width: 480px) {
-  /* Prevent flex/grid children and long text from forcing cards wider. */
-  :is(.modal-sheet, .modal-content, .bill-section, .form-section, .card,
-      .settings-card, .sk-settings-card, .sk-ui-card, .sk-used-item,
-      .sk-used-product-card, .sk-used-catalog-card, #settingsModal,
-      #skUsedStockModal) {
-    min-width: 0 !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-  :is(.modal-sheet, .modal-content, .bill-section, .form-section, .card,
-      .settings-card, .sk-settings-card, .sk-ui-card, .sk-used-item,
-      .sk-used-product-card, .sk-used-catalog-card) :is(*, *::before, *::after) {
+  
+/* Prevent flex/grid children and long text from forcing cards wider. */
+
+  
+  
+:is(.modal-sheet, .modal-content, .bill-section, .form-section, .card, .settings-card, .sk-settings-card, .sk-ui-card) :is(*, *::before, *::after){
     box-sizing: border-box;
   }
-  :is(.modal-sheet, .modal-content, .bill-section, .form-section, .card,
-      .settings-card, .sk-settings-card, .sk-ui-card, .sk-used-item,
-      .sk-used-product-card, .sk-used-catalog-card) :is(p, span, label, small, strong, b, div) {
+
+  
+:is(.modal-sheet, .modal-content, .bill-section, .form-section, .card, .settings-card, .sk-settings-card, .sk-ui-card) :is(p, span, label, small, strong, b, div){
     overflow-wrap: anywhere;
     min-width: 0;
   }
 
-  /* Smaller, consistent controls; preserve existing button actions and labels. */
-  :is(button, .btn, .button, input[type="button"], input[type="submit"]) {
+
+  
+/* Smaller, consistent controls; preserve existing button actions and labels. */
+
+  
+:is(button, .btn, .button, input[type="button"], input[type="submit"]){
     min-width: 0;
     max-width: 100%;
     min-height: 38px !important;
@@ -3978,8 +3989,9 @@ body button:not(#printableInvoiceCard button) {
     font-size: 13px !important;
     box-sizing: border-box !important;
   }
-  :is(.sk-style-profile, .style-profile, .theme-option, .font-option,
-      .sk-theme-option, .sk-profile-option) {
+
+  
+:is(.sk-style-profile, .style-profile, .theme-option, .font-option, .sk-theme-option, .sk-profile-option){
     min-width: 0 !important;
     max-width: 100% !important;
     padding: 9px 10px !important;
@@ -3987,10 +3999,12 @@ body button:not(#printableInvoiceCard button) {
     box-sizing: border-box !important;
   }
 
-  /* Search fields: clear icon/placeholder collision and keep the field inside its row. */
-  :is(.search-input, .search-box input, .search-bar input, input[type="search"],
-      input[placeholder*="Search" i], input[placeholder*="model" i],
-      input[placeholder*="IMEI" i]) {
+
+  
+/* Search fields: clear icon/placeholder collision and keep the field inside its row. */
+
+  
+:is(.search-input, .search-box input, .search-bar input, input[type="search"], input[placeholder*="Search" i], input[placeholder*="model" i], input[placeholder*="IMEI" i]){
     width: 100%;
     min-width: 0 !important;
     max-width: 100% !important;
@@ -4000,19 +4014,26 @@ body button:not(#printableInvoiceCard button) {
     line-height: 1.3 !important;
     box-sizing: border-box !important;
   }
-  :is(.search-box, .search-bar, .search-field, .search-wrapper) {
+
+  
+:is(.search-box, .search-bar, .search-field, .search-wrapper){
     min-width: 0 !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  :is(.search-box, .search-bar, .search-field, .search-wrapper) :is(svg, i, .search-icon) {
+
+  
+:is(.search-box, .search-bar, .search-field, .search-wrapper) :is(svg, i, .search-icon){
     flex-shrink: 0 !important;
   }
 
-  /* Text areas and helper notes must wrap instead of escaping their card. */
-  textarea,
-  #settingsModal textarea,
-  #skUsedStockModal textarea {
+
+  
+/* Text areas and helper notes must wrap instead of escaping their card. */
+
+  
+textarea,
+#settingsModal textarea{
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
@@ -4024,51 +4045,53 @@ body button:not(#printableInvoiceCard button) {
     overflow-wrap: anywhere !important;
     box-sizing: border-box !important;
   }
-  :is(input, select, textarea) {
+
+  
+:is(input, select, textarea){
     max-width: 100% !important;
     min-width: 0;
     box-sizing: border-box !important;
   }
 
-  /* Compact stock cards and theme/style profile tiles without changing their content. */
-  #skUsedStockModal :is(.sk-used-catalog-card, .sk-used-item, .sk-used-product-card,
-      #skUsedCatalogResults > *, .sk-used-stock-card) {
-    padding: 10px !important;
-    margin-block: 5px !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    gap: 6px !important;
-  }
-  #skUsedStockModal :is(.sk-used-catalog-card, .sk-used-item, .sk-used-product-card) button {
-    min-height: 34px !important;
-    padding: 7px 10px !important;
-    font-size: 12px !important;
-    white-space: normal !important;
-  }
-  #settingsModal :is(.sk-style-profiles, .style-profiles, .theme-grid,
-      .font-grid, .sk-theme-grid, .sk-profile-grid) {
+
+  
+/* Compact stock cards and theme/style profile tiles without changing their content. */
+
+  
+  
+  
+#settingsModal :is(.sk-style-profiles, .style-profiles, .theme-grid, .font-grid, .sk-theme-grid, .sk-profile-grid){
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 8px !important;
     min-width: 0 !important;
     max-width: 100% !important;
   }
-  #settingsModal :is(.sk-style-profile, .style-profile, .theme-option, .font-option,
-      .sk-theme-option, .sk-profile-option) :is(h3, h4, p, span, small, div) {
+
+  
+#settingsModal :is(.sk-style-profile, .style-profile, .theme-option, .font-option, .sk-theme-option, .sk-profile-option) :is(h3, h4, p, span, small, div){
     min-width: 0 !important;
     max-width: 100% !important;
     overflow-wrap: anywhere !important;
   }
+
 }
+
+
 
 
 /* V5.6.122 — align the model-search glyph visually with the input text.
    Scope remains limited to the mobile header search control. */
+
+
 @media (max-width: 600px) {
-  #headerSearchRow {
+  
+#headerSearchRow{
     position: relative !important;
     min-width: 0 !important;
   }
-  #headerSearchRow .search-icon-left {
+
+  
+#headerSearchRow .search-icon-left{
     position: absolute !important;
     left: 12px !important;
     top: 47% !important;
@@ -4086,8 +4109,10 @@ body button:not(#printableInvoiceCard button) {
     pointer-events: none !important;
     z-index: 3 !important;
   }
-  #headerSearchRow #searchInput,
-  #headerSearchRow .search-input {
+
+  
+#headerSearchRow #searchInput,
+#headerSearchRow .search-input{
     flex: 1 1 0% !important;
     width: 0 !important;
     min-width: 0 !important;
@@ -4095,4 +4120,585 @@ body button:not(#printableInvoiceCard button) {
     padding-right: 12px !important;
     box-sizing: border-box !important;
   }
+
 }
+
+
+
+/* ============================================================
+   SK MOBILES HOME — TARGET REFERENCE REBUILD
+   Scoped exclusively to the Home dashboard; other screens retain
+   their existing layout and behaviour.
+   ============================================================ */
+
+
+.sk-home-header-actions,
+.home-search-scan-btn{display:none;}
+
+
+.app-sub-home{display:none;}
+
+
+body:has(#cardsContainer.sk-home-redesign){
+  background:#eef5ff!important;
+  background-image:radial-gradient(ellipse at 12% 0%,rgba(191,219,254,.34),transparent 38%),linear-gradient(180deg,#f6f9ff 0%,#edf4ff 100%)!important;
+}
+
+
+body:has(#cardsContainer.sk-home-redesign) .app-viewport{padding:0 12px calc(82px + env(safe-area-inset-bottom,0px))!important;background:transparent!important;overflow-x:clip!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .app-header{position:relative!important;top:auto!important;z-index:100!important;min-height:0!important;padding:10px 0 7px!important;border:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;gap:0!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .header-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;width:100%!important;min-width:0!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .brand-logo-wrap{display:flex!important;align-items:center!important;gap:9px!important;flex:1 1 auto!important;min-width:0!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .menu-icon-btn{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:1px solid rgba(255,255,255,.9)!important;border-radius:15px!important;background:rgba(255,255,255,.88)!important;color:#0f1b39!important;box-shadow:0 5px 18px rgba(37,99,235,.12)!important;font-size:23px!important;flex:0 0 38px!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-logo-img{width:48px!important;height:48px!important;flex:0 0 48px!important;border:2px solid rgba(255,255,255,.95)!important;box-shadow:0 4px 16px rgba(37,99,235,.12)!important;background:#fff!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .brand-logo-wrap>div{flex:1 1 auto!important;min-width:0!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .app-name{font-size:18px!important;line-height:1.08!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;color:#0e1837!important;background:none!important;-webkit-text-fill-color:#0e1837!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .app-sub-default{display:none!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .app-sub-home{display:block!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .app-sub{font-size:9px!important;line-height:1.2!important;margin-top:4px!important;color:#64799e!important;white-space:normal!important;overflow:hidden!important;max-height:22px!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) #skAppVersionBadge{display:none!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-header-actions{display:flex!important;align-items:center!important;gap:8px!important;flex:0 0 auto!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-header-icon{position:relative!important;width:38px!important;height:38px!important;flex:0 0 38px!important;border:1px solid rgba(255,255,255,.92)!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;background:rgba(255,255,255,.94)!important;color:#1b2d52!important;box-shadow:0 5px 17px rgba(37,99,235,.12)!important;padding:0!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-header-icon svg{width:20px!important;height:20px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-header-icon i{position:absolute!important;right:2px!important;top:2px!important;width:8px!important;height:8px!important;border-radius:50%!important;background:#fb3652!important;border:1px solid #fff!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-profile-btn{background:linear-gradient(145deg,#fff,#eef6ff)!important;color:#1475f8!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-profile-btn svg{width:23px!important;height:23px!important;stroke-width:2.2!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) #headerSearchRow{display:grid!important;grid-template-columns:minmax(0,1fr) 34px 80px!important;align-items:center!important;gap:7px!important;width:100%!important;margin:5px 0 9px!important;padding:0!important;position:relative!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) #headerSearchRow .search-input{grid-column:1!important;grid-row:1!important;width:100%!important;height:35px!important;min-height:35px!important;padding:0 30px 0 38px!important;border:1px solid #d7e5ff!important;border-radius:12px!important;background:rgba(255,255,255,.96)!important;color:#14213e!important;font-size:10px!important;box-shadow:0 5px 16px rgba(37,99,235,.10)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) #headerSearchRow .search-icon-left{left:12px!important;top:50%!important;transform:translateY(-50%)!important;font-size:0!important;color:#13234a!important;z-index:2!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) #headerSearchRow .search-icon-left:before{content:"";display:block;width:12px;height:12px;border:2px solid #17274c;border-radius:50%;}
+
+
+body:has(#cardsContainer.sk-home-redesign) #headerSearchRow .search-icon-left:after{content:"";display:block;width:6px;height:2px;background:#17274c;position:absolute;right:-4px;bottom:-2px;transform:rotate(48deg);border-radius:2px;}
+
+
+body:has(#cardsContainer.sk-home-redesign) #headerSearchRow .clear-search-btn{right:127px!important;top:50%!important;transform:translateY(-50%)!important;width:17px!important;height:17px!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) #headerSearchRow .home-search-scan-btn{grid-column:2!important;grid-row:1!important;width:34px!important;height:35px!important;min-width:34px!important;min-height:35px!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;border:1px solid #d9e6ff!important;border-radius:12px!important;background:#fff!important;color:#1b2c51!important;box-shadow:0 5px 16px rgba(37,99,235,.10)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) #headerSearchRow .home-search-scan-btn svg{width:19px!important;height:19px!important;fill:none!important;stroke:currentColor!important;stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) #headerSearchRow .box-photo-scan-btn{grid-column:3!important;grid-row:1!important;width:80px!important;height:35px!important;min-width:0!important;justify-content:center!important;gap:3px!important;padding:0 5px!important;border:0!important;border-radius:13px!important;background:linear-gradient(145deg,#477bff,#087cff 70%,#24c5f2)!important;color:#fff!important;font-size:10px!important;white-space:nowrap!important;box-shadow:0 6px 16px rgba(37,99,235,.18)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .content-area#cardsContainer{display:flex!important;flex-direction:column!important;gap:8px!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:0!important;margin:0!important;overflow:visible!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-hero{width:100%!important;min-width:0!important;overflow:hidden!important;border-radius:17px!important;border:1px solid rgba(255,255,255,.88)!important;background:#dbeafe!important;box-shadow:0 7px 20px rgba(59,130,246,.12)!important;aspect-ratio:3.85/1!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-hero img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;max-width:none!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metrics{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important;width:100%!important;min-width:0!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric{display:flex!important;align-items:center!important;gap:5px!important;min-width:0!important;width:100%!important;height:45px!important;min-height:45px!important;padding:5px!important;border:1px solid rgba(220,231,255,.9)!important;border-radius:13px!important;background:rgba(255,255,255,.91)!important;box-shadow:0 5px 14px rgba(37,99,235,.07)!important;text-align:left!important;overflow:hidden!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-icon svg{display:block!important;width:18px!important;height:18px!important;flex:0 0 18px!important;fill:none!important;stroke:currentColor!important;stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-icon{display:flex!important;align-items:center!important;justify-content:center!important;width:25px!important;height:29px!important;flex:0 0 25px!important;border-radius:9px!important;font-size:15px!important;font-weight:900!important;line-height:1!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-icon.purple{background:#f2e6ff!important;color:#9333ea!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-icon.blue{background:#e5f0ff!important;color:#1768ed!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-icon.rose{background:#ffe6ed!important;color:#f43f5e!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-icon.green{background:#ddfaec!important;color:#10a765!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-copy{display:flex!important;flex:1 1 auto!important;min-width:0!important;flex-direction:column!important;gap:2px!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-copy b{display:block!important;font-size:7.5px!important;line-height:1.05!important;color:#1a2947!important;font-weight:800!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-copy strong{display:block!important;font-size:10.5px!important;line-height:1.1!important;color:#1768ed!important;font-weight:950!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;letter-spacing:-.03em!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric:nth-child(1) .sk-home-v2-metric-copy strong{color:#9333ea!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric:nth-child(3) .sk-home-v2-metric-copy strong{color:#e11d48!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric:nth-child(4) .sk-home-v2-metric-copy strong{color:#d99a00!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-arrow{display:none!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-features{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important;min-width:0!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature{position:relative!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;isolation:isolate!important;width:100%!important;min-width:0!important;height:66px!important;min-height:66px!important;padding:6px 7px 6px 0!important;border:1px solid rgba(255,255,255,.95)!important;border-radius:15px!important;overflow:hidden!important;text-align:left!important;box-shadow:0 5px 15px rgba(37,99,235,.09)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature:after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature.glass{background:linear-gradient(125deg,#e1f3ff,#c9e9ff)!important;border-color:#b9e2ff!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature.used{background:linear-gradient(125deg,#f3eaff,#e7d4ff)!important;border-color:#dfc7ff!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature.stock{background:linear-gradient(125deg,#fff2df,#ffe5c6)!important;border-color:#ffdfb8!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature.accessories{background:linear-gradient(125deg,#e4fff2,#cdf9e6)!important;border-color:#c1f1dc!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature.repair{background:linear-gradient(125deg,#ffeaf0,#ffd8e2)!important;border-color:#ffc9d7!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature.other{background:linear-gradient(125deg,#e6f3ff,#cfe6ff)!important;border-color:#bfddff!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature>img{position:absolute!important;left:0!important;top:0!important;width:49%!important;height:100%!important;max-width:none!important;object-fit:cover!important;object-position:center!important;z-index:-1!important;pointer-events:none!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-copy{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:3px!important;width:52%!important;min-width:0!important;margin-left:auto!important;position:relative!important;z-index:1!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-copy b{display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;overflow:hidden!important;font-size:9.5px!important;line-height:1.12!important;font-weight:900!important;letter-spacing:-.025em!important;color:#111d38!important;overflow-wrap:anywhere!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-copy small{display:block!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;font-size:8px!important;line-height:1.1!important;color:#526b93!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-copy i{display:flex!important;align-items:center!important;justify-content:center!important;width:20px!important;height:20px!important;border-radius:50%!important;background:linear-gradient(135deg,#1686ff,#48c9ff)!important;color:#fff!important;font-style:normal!important;font-size:15px!important;line-height:1!important;margin-top:1px!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature.used .sk-home-v2-feature-copy i{background:linear-gradient(135deg,#8b3df5,#d946ef)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature.stock .sk-home-v2-feature-copy i{background:linear-gradient(135deg,#fb923c,#f97316)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature.accessories .sk-home-v2-feature-copy i{background:linear-gradient(135deg,#10b981,#34d399)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature.repair .sk-home-v2-feature-copy i{background:linear-gradient(135deg,#fb7185,#f43f5e)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-section{display:block!important;width:100%!important;min-width:0!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-section-heading{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;margin:1px 0 6px!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-section-heading h2{font-size:12px!important;line-height:1.2!important;font-weight:950!important;color:#101c39!important;letter-spacing:-.03em!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-section-heading>button{display:inline-flex!important;align-items:center!important;gap:4px!important;border:0!important;background:transparent!important;color:#4c6fb3!important;font-size:9px!important;font-weight:800!important;padding:3px 0!important;white-space:nowrap!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-quick-grid{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:6px!important;width:100%!important;min-width:0!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-quick{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;width:100%!important;min-width:0!important;height:44px!important;min-height:44px!important;padding:4px 2px!important;border:1px solid rgba(255,255,255,.92)!important;border-radius:12px!important;box-shadow:0 4px 12px rgba(37,99,235,.07)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-quick>span{display:flex!important;align-items:center!important;justify-content:center!important;width:22px!important;height:22px!important;font-size:16px!important;font-weight:900!important;line-height:1!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-quick>span svg{display:block!important;width:21px!important;height:21px!important;fill:none!important;stroke:currentColor!important;stroke-width:2.1!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-quick>b{font-size:7.5px!important;line-height:1!important;white-space:nowrap!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;font-weight:850!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-quick.blue{background:linear-gradient(135deg,#e5f2ff,#d7eaff)!important;color:#1768ed!important;border-color:#c7e0ff!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-quick.rose{background:linear-gradient(135deg,#fff0f3,#ffe2e9)!important;color:#e11d48!important;border-color:#ffd5df!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-quick.green{background:linear-gradient(135deg,#e7fff4,#d9fbed)!important;color:#059669!important;border-color:#c8f5df!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-quick.purple{background:linear-gradient(135deg,#f5edff,#ede2ff)!important;color:#7c3aed!important;border-color:#e4d7ff!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-quick.orange{background:linear-gradient(135deg,#fff4e7,#ffead5)!important;color:#ea580c!important;border-color:#ffe0c0!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;width:100%!important;min-width:0!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-card{display:flex!important;align-items:center!important;gap:5px!important;min-width:0!important;min-height:57px!important;padding:6px!important;border:1px solid rgba(221,232,255,.94)!important;border-radius:13px!important;background:rgba(255,255,255,.92)!important;box-shadow:0 4px 12px rgba(37,99,235,.07)!important;overflow:hidden!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-icon{display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 27px!important;width:27px!important;height:34px!important;border-radius:9px!important;font-size:15px!important;font-weight:900!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-icon svg{display:block!important;width:21px!important;height:21px!important;fill:none!important;stroke:currentColor!important;stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-icon.blue{background:#e2efff!important;color:#1673f8!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-icon.rose{background:#ffe7ee!important;color:#f05267!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-copy{display:flex!important;flex-direction:column!important;gap:3px!important;min-width:0!important;flex:1 1 auto!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-copy b{font-size:7.5px!important;line-height:1.1!important;color:#13213f!important;font-weight:900!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-copy strong{font-size:8.5px!important;line-height:1.1!important;color:#14945b!important;font-weight:900!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-copy small{font-size:7px!important;line-height:1.1!important;color:#64799e!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .bottom-nav{height:54px!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;border-radius:28px!important;background:rgba(255,255,255,.96)!important;box-shadow:0 10px 28px rgba(30,64,175,.12)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .bottom-nav>.nav-item{height:54px!important;min-height:54px!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .bottom-nav>.nav-item svg{width:19px!important;height:19px!important;flex-basis:19px!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .bottom-nav>.nav-item span{font-size:9px!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .bottom-nav>#navHome::before{width:58px!important;height:58px!important;transform:translate(-50%,-50%) translateY(-12px)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) .bottom-nav>#navHome svg{width:24px!important;height:24px!important;flex-basis:24px!important;transform:translateY(-12px)!important;}
+
+
+body:has(#cardsContainer.sk-home-redesign) #skUrgentRepairCard{grid-column:1/-1!important;width:100%!important;max-width:100%!important;margin-top:6px!important;}
+
+
+@media(max-width:360px){
+ 
+body:has(#cardsContainer.sk-home-redesign) .brand-logo-wrap{gap:6px!important;}
+
+ 
+body:has(#cardsContainer.sk-home-redesign) .app-name{font-size:16px!important;}
+
+ 
+body:has(#cardsContainer.sk-home-redesign) .app-sub{font-size:8px!important;}
+
+ 
+body:has(#cardsContainer.sk-home-redesign) .sk-home-header-actions{gap:5px!important;}
+
+ 
+body:has(#cardsContainer.sk-home-redesign) .sk-home-header-icon{width:32px!important;height:32px!important;flex-basis:32px!important;}
+
+ 
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric{gap:3px!important;padding:4px!important;}
+
+ 
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-icon{width:21px!important;flex-basis:21px!important;}
+
+ 
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-copy b{font-size:6.5px!important;}
+
+ 
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-copy strong{font-size:10px!important;}
+
+ 
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-copy b{font-size:8.5px!important;}
+
+ 
+body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-quick>b{font-size:6.5px!important;}
+
+}
+
+
+
+
+/* ============================================================
+   Used Mobile Stock styles are isolated in css/used-mobile-stock.css.
+   ============================================================ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 700px) {
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+/* The sheet is not scrollable. Only this main region scrolls; header and navigation stay in place. */
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+/* Desktop and mobile headings are distinct so mobile labels match the compact row grid. */
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+/* Navigation is a non-scrolling flex sibling, anchored to the bottom of the sheet. */
+
+  
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+}
+
+
+

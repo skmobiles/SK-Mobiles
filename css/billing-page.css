@@ -1,0 +1,53 @@
+/* SK MOBILES — Bill History / Billing modal shell geometry (v5.6.140)
+   Canonical root sizing replaces duplicate legacy shell dimensions.
+   History contents and all billing logic remain unchanged. */
+#billingModal.modal-overlay,
+#billingModal.modal-overlay.active {
+  box-sizing: border-box;
+  padding: 8px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+#billingModal .modal-sheet.billing-modern.sk-billing-page {
+  box-sizing: border-box;
+  width: min(100%, 860px);
+  max-width: 860px;
+  min-width: 0;
+  height: min(92dvh, 980px);
+  max-height: calc(100dvh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  min-height: 0;
+  margin: 0 auto;
+  padding: 12px;
+  border: 1px solid var(--card-border, #d7e3f7);
+  border-radius: 20px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+#billingModal .modal-sheet.billing-modern.sk-billing-page > .modal-title {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+#billingModal .modal-sheet.billing-modern.sk-billing-page > #billHistoryView,
+#billingModal .modal-sheet.billing-modern.sk-billing-page > #billNewView {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  #billingModal.modal-overlay,
+  #billingModal.modal-overlay.active { padding: 6px; }
+  #billingModal .modal-sheet.billing-modern.sk-billing-page {
+    width: 100%;
+    max-width: 100%;
+    height: calc(100dvh - 12px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100dvh - 12px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    padding: 10px;
+    border-radius: 18px;
+  }
+}

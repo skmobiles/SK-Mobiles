@@ -1,0 +1,299 @@
+/* SK MOBILES — Used Mobile Stock page
+   Single page-scoped visual implementation. Existing IDs and JS actions are retained. */
+#skUsedStockModal.sk-used-stock-overlay{
+  position:fixed;inset:0;z-index:12000;display:none;align-items:center;justify-content:center;
+  width:100%;height:100%;padding:12px;box-sizing:border-box;overflow:hidden;
+  background:rgba(20,39,75,.24);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+}
+#skUsedStockModal.sk-used-stock-overlay.active{display:flex}
+#skUsedStockModal .sk-used-stock-sheet{
+  width:min(96vw,980px);height:min(96dvh,1480px);max-width:980px;max-height:96dvh;
+  min-width:0;min-height:0;margin:0;padding:0;display:flex;flex-direction:column;overflow:hidden;
+  box-sizing:border-box;border:1px solid #dce7fb;border-radius:28px;
+  background:linear-gradient(145deg,#f8fbff 0%,#eef4ff 100%);color:#101a34;
+  box-shadow:0 24px 70px rgba(27,55,106,.20);
+}
+#skUsedStockModal .sk-used-stock-header{
+  flex:0 0 auto;min-height:108px;display:flex;align-items:center;gap:16px;padding:14px 18px;
+  background:rgba(255,255,255,.92);border-bottom:1px solid #e0eaff;box-sizing:border-box;
+}
+#skUsedStockModal .sk-used-back,#skUsedStockModal .sk-used-analytics{
+  width:72px;height:72px;flex:0 0 72px;display:grid;place-items:center;
+  border:1px solid #dce7fb;border-radius:24px;background:#f7faff;color:#182847;
+  box-shadow:0 6px 18px rgba(43,83,148,.08);cursor:pointer;
+}
+#skUsedStockModal .sk-used-back svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+#skUsedStockModal .sk-used-recycle-mark{width:68px;height:68px;flex:0 0 68px;display:grid;place-items:center;border-radius:22px;background:#eff5ff}
+#skUsedStockModal .sk-used-recycle-mark svg{width:54px;height:54px}
+#skUsedStockModal .sk-used-title-copy{flex:1;min-width:0}
+#skUsedStockModal .sk-used-title-copy h1{margin:0;color:#10172f;font-size:clamp(22px,3vw,34px);font-weight:850;line-height:1.15;letter-spacing:-.8px}
+#skUsedStockModal .sk-used-title-copy p{margin:7px 0 0;color:#5e7297;font-size:clamp(12px,1.8vw,20px);line-height:1.25}
+#skUsedStockModal .sk-used-analytics svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:2.7;stroke-linecap:round}
+#skUsedStockModal .sk-used-stock-scroll{
+  flex:1 1 auto;min-width:0;min-height:0;width:100%;padding:18px;box-sizing:border-box;
+  overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  scrollbar-gutter:stable;
+}
+#skUsedStockModal .sk-used-stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0 0 18px}
+#skUsedStockModal .sk-used-stat-card{
+  min-width:0;min-height:112px;display:flex;align-items:center;gap:14px;padding:16px;
+  border:1px solid #e0e9fb;border-radius:24px;background:rgba(255,255,255,.88);
+  box-shadow:0 7px 20px rgba(47,78,128,.045);box-sizing:border-box;
+}
+#skUsedStockModal .sk-used-stat-icon{width:72px;height:72px;flex:0 0 72px;display:grid;place-items:center;border-radius:22px;background:#e7f0ff;color:#075fff}
+#skUsedStockModal .sk-used-stat-icon svg{width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#skUsedStockModal .sk-used-stat-card>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+#skUsedStockModal .sk-used-stat-card small{color:#53688d;font-size:clamp(11px,1.4vw,18px);line-height:1.2;white-space:nowrap}
+#skUsedStockModal .sk-used-stat-card strong{color:#075fff;font-size:clamp(20px,2.8vw,34px);font-weight:850;line-height:1.1;white-space:nowrap}
+#skUsedStockModal .stat-green .sk-used-stat-icon{background:#e5f7ed;color:#0b9345}
+#skUsedStockModal .stat-green strong{color:#0b9345}
+#skUsedStockModal .stat-purple .sk-used-stat-icon{background:#f0e8ff;color:#7434ff}
+#skUsedStockModal .stat-purple strong{color:#7434ff}
+#skUsedStockModal .stat-orange .sk-used-stat-icon{background:#fff0df;color:#ff7900}
+#skUsedStockModal .stat-orange strong{color:#ff7900}
+#skUsedStockModal .sk-used-rupee{font-size:clamp(24px,2.6vw,34px);font-weight:850}
+#skUsedStockModal .sk-used-panel{min-width:0;margin:0 0 18px;padding:20px;border:1px solid #dce7fb;border-radius:24px;background:rgba(255,255,255,.92);box-shadow:0 8px 24px rgba(43,78,132,.05);box-sizing:border-box}
+#skUsedStockModal .sk-used-panel-heading,#skUsedStockModal .sk-used-register-heading{display:flex;align-items:center;gap:14px;min-width:0;margin:0 0 12px}
+#skUsedStockModal .sk-used-panel-icon{width:64px;height:64px;flex:0 0 64px;display:grid;place-items:center;border-radius:20px;background:#e5efff;color:#075fff}
+#skUsedStockModal .sk-used-panel-icon svg{width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#skUsedStockModal .sk-used-panel-heading h2,#skUsedStockModal .sk-used-register-heading h2{margin:0;color:#101a34;font-size:clamp(19px,2.2vw,28px);font-weight:850;line-height:1.15;letter-spacing:-.5px}
+#skUsedStockModal .sk-used-register-heading p{margin:5px 0 0;color:#64799d;font-size:clamp(12px,1.5vw,18px);line-height:1.2}
+#skUsedStockModal .sk-used-save-primary{width:100%;min-height:84px;display:flex;align-items:center;justify-content:center;gap:18px;padding:16px 20px;border:1px solid #1765ff;border-radius:26px;background:linear-gradient(110deg,#1765ff,#367fff);color:#fff;font:inherit;font-size:clamp(18px,2.4vw,28px);font-weight:850;box-shadow:0 8px 18px rgba(23,101,255,.16);cursor:pointer}
+#skUsedStockModal .sk-used-save-primary svg{width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+#skUsedStockModal .sk-used-action-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
+#skUsedStockModal .sk-used-action-secondary{min-width:0;min-height:76px;display:flex;align-items:center;justify-content:center;gap:12px;padding:12px;border:1px solid #d0e0ff;border-radius:24px;background:#f4f8ff;color:#385174;font:inherit;font-size:clamp(14px,1.8vw,22px);font-weight:750;white-space:nowrap;cursor:pointer}
+#skUsedStockModal .sk-used-action-secondary svg{width:30px;height:30px;flex:0 0 30px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#skUsedStockModal .action-export{background:#eef5ff;border-color:#c6dcff;color:#075fff}
+#skUsedStockModal .action-import{background:#edf9f2;border-color:#b9ecd0;color:#087d35}
+#skUsedStockModal .sk-used-purchase-form{position:relative;min-width:0;margin:0 0 18px;padding:22px;border:1px solid #dce7fb;border-radius:26px;background:rgba(255,255,255,.94);box-shadow:0 8px 22px rgba(45,78,132,.055);box-sizing:border-box}
+#skUsedStockModal .sk-used-form-heading{display:flex;align-items:center;gap:16px;min-width:0;margin:0 0 20px}
+#skUsedStockModal .sk-used-form-heading-icon{width:78px;height:78px;flex:0 0 78px;display:grid;place-items:center;border-radius:22px;background:#e6efff;color:#075fff}
+#skUsedStockModal .sk-used-form-heading-icon svg{width:48px;height:48px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#skUsedStockModal .sk-used-form-heading-copy{flex:1;min-width:0}
+#skUsedStockModal .sk-used-form-heading h2{margin:0;color:#101a34;font-size:clamp(22px,2.8vw,32px);font-weight:850;line-height:1.15;letter-spacing:-.6px}
+#skUsedStockModal .sk-used-form-heading p{margin:7px 0 0;color:#65799d;font-size:clamp(13px,1.8vw,20px);line-height:1.25}
+#skUsedStockModal .sk-used-form-close{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border:1px solid #dce7fb;border-radius:14px;background:#f4f7ff;color:#25395d;font-size:28px;cursor:pointer}
+#skUsedStockModal .sk-used-form-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:18px 28px}
+#skUsedStockModal .sk-used-form-grid .form-label:not(.sk-used-form-third):not(.sk-used-form-wide){grid-column:span 3}
+#skUsedStockModal .sk-used-field-date{grid-column:1/span 3;grid-row:1}
+#skUsedStockModal .sk-used-field-dealer{grid-column:4/span 3;grid-row:1}
+#skUsedStockModal .sk-used-field-model{grid-column:1/span 3;grid-row:2}
+#skUsedStockModal .sk-used-ram{grid-column:1/span 2;grid-row:3}
+#skUsedStockModal .sk-used-storage{grid-column:3/span 2;grid-row:3}
+#skUsedStockModal .sk-used-colour{grid-column:5/span 2;grid-row:3}
+#skUsedStockModal .sk-used-field-kit{grid-column:1/span 3;grid-row:4}
+#skUsedStockModal .sk-used-field-cost{grid-column:4/span 3;grid-row:4}
+#skUsedStockModal .sk-used-field-dealer-price{grid-column:1/span 3;grid-row:5}
+#skUsedStockModal .sk-used-field-customer-price{grid-column:4/span 3;grid-row:5}
+#skUsedStockModal .sk-used-field-imei{grid-column:1/span 6;grid-row:6}
+#skUsedStockModal .sk-used-field-issue{grid-column:1/span 6;grid-row:7}
+#skUsedStockModal .sk-used-form-grid .form-label{display:flex;flex-direction:column;gap:8px;min-width:0;color:#4b5d7e;font-size:clamp(13px,1.7vw,21px);font-weight:700;line-height:1.2}
+#skUsedStockModal .sk-used-form-grid .form-input{width:100%;min-width:0;min-height:62px;padding:12px 16px;border:1px solid #cfddf4;border-radius:15px;background:#fff;color:#111a34;font:inherit;font-size:clamp(14px,1.9vw,22px);font-weight:500;box-sizing:border-box;outline:none}
+#skUsedStockModal .sk-used-form-grid .form-input:focus{border-color:#6da0ff;box-shadow:0 0 0 3px rgba(23,101,255,.10)}
+#skUsedStockModal .sk-used-form-grid .form-input::placeholder{color:#8a9ab5;opacity:1}
+#skUsedStockModal .sk-used-form-grid textarea.form-input{min-height:104px;resize:vertical}
+#skUsedStockModal .sk-used-form-wide{grid-column:1/-1}
+#skUsedStockModal .sk-used-form-third{grid-column:span 2}
+#skUsedStockModal .sk-used-form-actions{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr);gap:18px;margin-top:22px}
+#skUsedStockModal .sk-used-form-actions button{min-width:0;min-height:76px;display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 18px;border:1px solid #cbd8ee;border-radius:22px;font:inherit;font-size:clamp(16px,2.1vw,25px);font-weight:800;cursor:pointer}
+#skUsedStockModal .sk-used-form-actions svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+#skUsedStockModal .sk-used-form-reset{background:#f3f7ff;color:#435878}
+#skUsedStockModal .sk-used-form-save{border-color:#1765ff!important;background:linear-gradient(110deg,#1765ff,#4d78ff)!important;color:#fff!important;box-shadow:0 8px 18px rgba(23,101,255,.17)}
+#skUsedStockModal .sk-used-form-submit-proxy{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+#skUsedStockModal .sk-used-search-row{display:flex;align-items:center;gap:14px;min-width:0;margin:0 0 14px}
+#skUsedStockModal .sk-used-search-box{height:70px;min-width:0;flex:1;display:flex;align-items:center;gap:12px;padding:0 16px;border:1px solid #cbdcff;border-radius:22px;background:#fff;box-sizing:border-box}
+#skUsedStockModal .sk-used-search-box svg{width:30px;height:30px;flex:0 0 30px;fill:none;stroke:#304a73;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#skUsedStockModal #skUsedSearch{width:100%;min-width:0;height:100%;padding:0;border:0;outline:0;background:transparent;color:#182441;font:inherit;font-size:clamp(14px,1.8vw,22px)}
+#skUsedStockModal #skUsedSearch::placeholder{color:#8592aa;opacity:1}
+#skUsedStockModal .sk-used-filter-button{width:70px;height:70px;flex:0 0 70px;display:grid;place-items:center;border:1px solid #cbdcff;border-radius:22px;background:#f1f6ff;color:#2c4775;cursor:pointer}
+#skUsedStockModal .sk-used-filter-button svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#skUsedStockModal .sk-used-filter-button.has-active-filters{background:#e4efff;border-color:#2b74ff;color:#075fff;box-shadow:0 0 0 2px rgba(43,116,255,.10)}
+#skUsedStockModal .sk-used-table-wrap{width:100%;min-width:0;overflow-x:auto;overflow-y:visible;border-radius:16px;-webkit-overflow-scrolling:touch}
+#skUsedStockModal .sk-used-register-table{width:100%;min-width:0;table-layout:fixed;border-collapse:separate;border-spacing:0 8px;color:#182440;font-size:15px}
+#skUsedStockModal .sk-used-register-table thead tr.sk-used-mobile-headings{display:none}
+#skUsedStockModal .sk-used-register-table thead th{padding:12px 10px;text-align:left;background:#f0f5ff;color:#566b90;font-weight:800;border-top:1px solid #e0e9fb;border-bottom:1px solid #e0e9fb;white-space:nowrap}
+#skUsedStockModal .sk-used-register-table thead th:first-child{border-left:1px solid #e0e9fb;border-radius:15px 0 0 15px;text-align:center;width:54px}
+#skUsedStockModal .sk-used-register-table thead th:nth-child(2){width:32%}
+#skUsedStockModal .sk-used-register-table thead th:nth-child(3){width:17%}
+#skUsedStockModal .sk-used-register-table thead th.col-price{width:13%}
+#skUsedStockModal .sk-used-register-table thead th:nth-child(5){width:15%;text-align:center}
+#skUsedStockModal .sk-used-register-table thead th:last-child{border-right:1px solid #e0e9fb;border-radius:0 15px 15px 0;width:88px;text-align:center}
+#skUsedStockModal .sk-used-register-table tbody tr{background:#fff;box-shadow:0 2px 7px rgba(44,77,132,.035)}
+#skUsedStockModal .sk-used-register-table tbody td{min-width:0;padding:11px 10px;vertical-align:middle;border-top:1px solid #e5edfb;border-bottom:1px solid #e5edfb}
+#skUsedStockModal .sk-used-register-table tbody td:first-child{border-left:1px solid #e5edfb;border-radius:16px 0 0 16px}
+#skUsedStockModal .sk-used-register-table tbody td:last-child{border-right:1px solid #e5edfb;border-radius:0 16px 16px 0}
+#skUsedStockModal .sk-used-number-cell{text-align:center;color:#50658a;font-size:18px}
+#skUsedStockModal .sk-used-device-cell{display:flex;align-items:center;gap:12px}
+#skUsedStockModal .sk-used-phone-thumb{width:34px;height:58px;flex:0 0 34px;display:grid;place-items:center;border-radius:7px;background:linear-gradient(145deg,#edf4ff,#d7e5fb)}
+#skUsedStockModal .sk-used-phone-thumb svg{width:24px;height:40px;fill:#15243f;stroke:#6d87b4;stroke-width:1.15;stroke-linejoin:round}
+#skUsedStockModal .sk-used-phone-thumb svg rect:nth-child(2){fill:var(--phone-accent);stroke:#a7bde4}
+#skUsedStockModal .sk-used-phone-thumb svg path{fill:none;stroke:#e7efff;stroke-width:.8}
+#skUsedStockModal .sk-used-device-copy{min-width:0;display:flex;flex-direction:column;gap:4px}
+#skUsedStockModal .sk-used-device-copy strong{color:#10182f;font-size:16px;font-weight:850;line-height:1.15;overflow-wrap:anywhere}
+#skUsedStockModal .sk-used-device-copy small{color:#5d7093;font-size:14px;line-height:1.15;overflow-wrap:anywhere}
+#skUsedStockModal .sk-used-dealer-cell{color:#263b61;font-size:15px;overflow-wrap:anywhere}
+#skUsedStockModal .sk-used-price-cell{color:#111a34;font-size:17px;font-weight:800;white-space:nowrap}
+#skUsedStockModal .sk-used-status-cell{text-align:center}
+#skUsedStockModal .sk-used-status{display:inline-flex;align-items:center;justify-content:center;min-width:92px;max-width:100%;padding:9px 12px;border-radius:14px;font-size:15px;font-weight:750;white-space:nowrap}
+#skUsedStockModal .sk-used-status.is-stock{color:#078139;background:#dff6e9}
+#skUsedStockModal .sk-used-status.is-sold{color:#075fff;background:#e3efff}
+#skUsedStockModal .sk-used-status.is-pending{color:#c45a08;background:#fff0df}
+#skUsedStockModal .sk-used-row-actions{display:flex;align-items:center;justify-content:center;gap:6px}
+#skUsedStockModal .sk-used-row-view,#skUsedStockModal .sk-used-row-menu summary{width:38px;height:42px;display:grid;place-items:center;flex:0 0 38px;padding:0;border:1px solid #d9e6fb;border-radius:50%;background:#fff;color:#31527f;box-shadow:0 3px 9px rgba(40,75,130,.08);cursor:pointer;list-style:none}
+#skUsedStockModal .sk-used-row-view .sk-used-chevron{display:block;color:#31527f;font-family:Arial,sans-serif;font-size:29px;font-weight:700;line-height:.8;transform:translateX(1px)}
+#skUsedStockModal .sk-used-row-menu summary svg{display:block;width:22px;height:22px;flex:0 0 22px;overflow:visible;fill:none;stroke:#31527f;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+#skUsedStockModal .sk-used-row-menu{position:relative}
+#skUsedStockModal .sk-used-row-menu summary::-webkit-details-marker{display:none}
+#skUsedStockModal .sk-used-row-menu-pop{position:fixed;left:8px;top:8px;right:auto;bottom:auto;z-index:2147483002;width:max-content;min-width:170px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);overflow-y:auto;padding:6px;border:1px solid #dbe6fa;border-radius:16px;background:#fff;box-shadow:0 12px 30px rgba(29,58,108,.22)}
+#skUsedStockModal .sk-used-row-menu-pop button{width:100%;display:block;padding:10px;border:0;border-radius:9px;background:#fff;color:#203554;text-align:left;font:inherit;font-size:13px;cursor:pointer}
+#skUsedStockModal .sk-used-row-menu-pop button:hover{background:#eff5ff}
+#skUsedStockModal .sk-used-row-menu-pop button.is-danger{color:#c62828}
+#skUsedStockModal .sk-used-row-menu-pop button:disabled{opacity:.45;cursor:not-allowed}
+#skUsedStockModal .sk-used-empty-cell{padding:24px!important;text-align:center;color:#647797}
+#skUsedStockModal .sk-used-storage-note{margin:8px 4px 0;color:#7a8aa5;font-size:11px;line-height:1.4}
+#skUsedStockModal .sk-used-bottom-nav{flex:0 0 auto;position:relative;z-index:2;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;min-height:88px;margin:0 18px 14px;padding:8px;border:1px solid #dce7fb;border-radius:36px;background:rgba(255,255,255,.97);box-shadow:0 10px 28px rgba(44,77,132,.10)}
+#skUsedStockModal .sk-used-bottom-nav button{position:relative;min-width:0;min-height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:4px;border:0;border-radius:18px;background:transparent;color:#101a32;font:inherit;font-size:15px;font-weight:650;white-space:nowrap;cursor:pointer}
+#skUsedStockModal .sk-used-bottom-nav button svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+#skUsedStockModal .sk-used-bottom-nav button.is-active{color:#075fff;font-weight:800}
+#skUsedStockModal .sk-used-bottom-nav button.is-active::before{content:"";position:absolute;top:-25px;width:82px;height:82px;border:4px solid #fff;border-radius:50%;background:linear-gradient(145deg,#2b7bff,#0758ed);box-shadow:0 7px 20px rgba(23,101,255,.32);z-index:0}
+#skUsedStockModal .sk-used-bottom-nav button.is-active svg{position:relative;z-index:1;width:34px;height:34px;color:#fff}
+#skUsedStockModal .sk-used-bottom-nav button.is-active span{position:relative;z-index:1}
+#skUsedFilterModal.sk-used-filter-overlay{z-index:12020;padding:16px;align-items:center;justify-content:center;background:rgba(16,31,60,.38);backdrop-filter:blur(5px)}
+#skUsedFilterModal .sk-used-filter-sheet{width:min(94vw,520px);max-height:90dvh;overflow:auto;padding:22px;border:1px solid #dce7fb;border-radius:24px;background:#fff;color:#15213b;box-shadow:0 22px 65px rgba(20,48,98,.25)}
+#skUsedFilterModal .sk-used-filter-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+#skUsedFilterModal .sk-used-filter-header h2{margin:0;font-size:22px;font-weight:850}
+#skUsedFilterModal .sk-used-filter-header button{width:38px;height:38px;border:1px solid #dce7fb;border-radius:12px;background:#f3f7ff;color:#203554;font-size:24px;cursor:pointer}
+#skUsedFilterModal .sk-used-filter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#skUsedFilterModal .sk-used-filter-grid label{display:flex;flex-direction:column;gap:7px;min-width:0;color:#4b5f80;font-size:13px;font-weight:750}
+#skUsedFilterModal .sk-used-filter-grid .form-input{width:100%;min-width:0;min-height:44px;padding:10px;border:1px solid #d3e0f7;border-radius:12px;background:#fff;color:#16213b;font:inherit;font-size:14px;box-sizing:border-box}
+#skUsedStockModal .sk-used-filter-button.has-active-filters{background:#e4efff;border-color:#2b74ff;color:#075fff}
+#skUsedFilterModal .sk-used-filter-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:20px}
+#skUsedFilterModal .sk-used-filter-actions button{min-height:44px;padding:10px 12px;border:1px solid #d6e2f8;border-radius:12px;background:#f5f8ff;color:#315078;font:inherit;font-size:13px;font-weight:750;cursor:pointer}
+#skUsedFilterModal .sk-used-filter-actions .sk-used-filter-apply{grid-column:1/-1;background:#1765ff;border-color:#1765ff;color:#fff}
+#skUsedFilterModal .sk-used-filter-actions .sk-used-filter-clearall{color:#c92b2b;background:#fff7f7;border-color:#ffd8d8}
+#skUsedDetailDialog.sk-used-detail-overlay,.sk-used-detail-overlay{position:fixed;inset:0;z-index:12030;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(16,31,60,.42);backdrop-filter:blur(5px)}
+#skUsedDetailDialog .sk-used-detail-sheet,.sk-used-detail-sheet{width:min(94vw,560px);max-height:90dvh;overflow:auto;border:1px solid #dce7fb;border-radius:22px;background:#fff;box-shadow:0 20px 60px rgba(20,48,98,.25);color:#15213b}
+#skUsedDetailDialog .sk-used-detail-head,.sk-used-detail-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px;border-bottom:1px solid #e2eafb}
+#skUsedDetailDialog .sk-used-detail-head>div,.sk-used-detail-head>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+#skUsedDetailDialog .sk-used-detail-head strong,.sk-used-detail-head strong{font-size:18px;font-weight:850}
+#skUsedDetailDialog .sk-used-detail-head small,.sk-used-detail-head small{color:#65799d;font-size:12px}
+#skUsedDetailDialog .sk-used-detail-close,.sk-used-detail-close{width:38px;height:38px;border:1px solid #dce7fb;border-radius:12px;background:#f4f7ff;font-size:24px;color:#25395d}
+#skUsedDetailDialog .sk-used-detail-grid,.sk-used-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:16px}
+#skUsedDetailDialog .sk-used-detail-field,.sk-used-detail-field{min-width:0;padding:12px;border:1px solid #e2eafb;border-radius:12px;background:#f8faff}
+#skUsedDetailDialog .sk-used-detail-field small,.sk-used-detail-field small{display:block;margin-bottom:5px;color:#667b9e;font-size:11px}
+#skUsedDetailDialog .sk-used-detail-field strong,.sk-used-detail-field strong{font-size:13px;overflow-wrap:anywhere}
+#skUsedDetailDialog .sk-used-detail-actions,.sk-used-detail-actions{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 16px}
+#skUsedDetailDialog .sk-used-detail-actions>button,.sk-used-detail-actions>button{flex:1;min-width:100px;min-height:42px;padding:9px 12px;border:1px solid #d4e1f8;border-radius:12px;background:#f3f7ff;color:#29466f;font-weight:750}
+#skUsedDetailDialog .sk-used-detail-actions>.sk-used-bill-button,.sk-used-detail-actions>.sk-used-bill-button{background:#1765ff;color:#fff;border-color:#1765ff}
+#skUsedDetailDialog .sk-used-detail-danger,.sk-used-detail-danger{color:#c62828!important;background:#fff7f7!important;border-color:#ffd8d8!important}
+body:has(#skUsedStockModal.active) nav.bottom-nav{display:none!important}
+
+@media(max-width:700px){
+  #skUsedStockModal.sk-used-stock-overlay{inset:0;width:100%;height:100dvh;max-width:100%;padding:8px;margin:0;align-items:stretch;justify-content:stretch;overflow:hidden;box-sizing:border-box}
+  #skUsedStockModal .sk-used-stock-sheet{width:100%;height:calc(100dvh - 16px);max-width:100%;max-height:calc(100dvh - 16px);min-height:0;border:1px solid #d8e4f8;border-radius:16px;box-shadow:0 8px 28px rgba(27,55,106,.14)}
+  #skUsedStockModal .sk-used-stock-header{min-height:78px;gap:8px;padding:9px 10px}
+  #skUsedStockModal .sk-used-back,#skUsedStockModal .sk-used-analytics{width:42px;height:42px;flex-basis:42px;border-radius:14px}
+  #skUsedStockModal .sk-used-back svg{width:23px;height:23px}
+  #skUsedStockModal .sk-used-recycle-mark{width:40px;height:40px;flex-basis:40px;border-radius:12px}
+  #skUsedStockModal .sk-used-recycle-mark svg{width:32px;height:32px}
+  #skUsedStockModal .sk-used-title-copy h1{font-size:clamp(15px,4.4vw,19px);letter-spacing:-.35px}
+  #skUsedStockModal .sk-used-title-copy p{margin-top:3px;font-size:clamp(8px,2.45vw,10px);line-height:1.2}
+  #skUsedStockModal .sk-used-analytics svg{width:21px;height:21px}
+  #skUsedStockModal .sk-used-stock-scroll{padding:10px 10px calc(20px + env(safe-area-inset-bottom));scrollbar-gutter:auto}
+  #skUsedStockModal .sk-used-stats-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:12px}
+  #skUsedStockModal .sk-used-stat-card{min-height:78px;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:7px;border-radius:14px}
+  #skUsedStockModal .sk-used-stat-icon{width:27px;height:27px;flex-basis:27px;border-radius:8px}
+  #skUsedStockModal .sk-used-stat-icon svg{width:17px;height:17px}
+  #skUsedStockModal .sk-used-stat-card>div{gap:2px}
+  #skUsedStockModal .sk-used-stat-card small{font-size:clamp(7px,2.15vw,9px);letter-spacing:-.15px}
+  #skUsedStockModal .sk-used-stat-card strong{font-size:clamp(12px,3.9vw,16px);letter-spacing:-.3px}
+  #skUsedStockModal .sk-used-rupee{font-size:clamp(11px,3.4vw,15px)}
+  #skUsedStockModal .sk-used-panel{padding:10px;margin-bottom:12px;border-radius:17px}
+  #skUsedStockModal .sk-used-panel-heading,#skUsedStockModal .sk-used-register-heading{gap:9px;margin-bottom:10px}
+  #skUsedStockModal .sk-used-panel-icon{width:42px;height:42px;flex-basis:42px;border-radius:13px}
+  #skUsedStockModal .sk-used-panel-icon svg{width:26px;height:26px}
+  #skUsedStockModal .sk-used-panel-heading h2,#skUsedStockModal .sk-used-register-heading h2{font-size:clamp(16px,4.7vw,20px)}
+  #skUsedStockModal .sk-used-register-heading p{margin-top:3px;font-size:11px}
+  #skUsedStockModal .sk-used-save-primary{min-height:48px;gap:9px;padding:8px 12px;border-radius:16px;font-size:14px}
+  #skUsedStockModal .sk-used-save-primary svg{width:22px;height:22px}
+  #skUsedStockModal .sk-used-action-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:7px}
+  #skUsedStockModal .sk-used-action-secondary{min-height:40px;gap:5px;padding:7px 5px;border-radius:14px;font-size:11px}
+  #skUsedStockModal .sk-used-action-secondary svg{width:17px;height:17px;flex-basis:17px}
+  #skUsedStockModal .action-import{grid-column:1/-1}
+  #skUsedStockModal .sk-used-purchase-form{padding:10px;margin-bottom:12px;border:1px solid #d8e4f8;border-radius:16px;box-shadow:0 3px 12px rgba(45,78,132,.045)}
+  #skUsedStockModal .sk-used-form-heading{gap:9px;margin-bottom:10px}
+  #skUsedStockModal .sk-used-form-heading-icon{width:42px;height:42px;flex-basis:42px;border-radius:13px}
+  #skUsedStockModal .sk-used-form-heading-icon svg{width:26px;height:26px}
+  #skUsedStockModal .sk-used-form-heading h2{font-size:clamp(17px,4.8vw,21px);letter-spacing:-.35px}
+  #skUsedStockModal .sk-used-form-heading p{margin-top:3px;font-size:11px}
+  #skUsedStockModal .sk-used-form-close{width:34px;height:34px;flex-basis:34px;border-radius:11px;font-size:22px}
+  #skUsedStockModal .sk-used-form-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px 10px;align-items:start}
+  #skUsedStockModal .sk-used-form-grid .form-label{gap:5px;font-size:11px}
+  #skUsedStockModal .sk-used-form-grid .form-input{min-height:42px;padding:9px 10px;border-radius:11px;font-size:12px}
+  #skUsedStockModal .sk-used-form-grid textarea.form-input{min-height:72px}
+  #skUsedStockModal .sk-used-form-wide{grid-column:1/-1}
+  #skUsedStockModal .sk-used-field-model{grid-column:1/-1}
+  #skUsedStockModal .sk-used-form-third{grid-column:span 2}
+  #skUsedStockModal .sk-used-form-actions{grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);gap:8px;margin-top:14px}
+  #skUsedStockModal .sk-used-form-actions button{min-height:48px;gap:6px;padding:8px 7px;border-radius:14px;font-size:13px}
+  #skUsedStockModal .sk-used-form-actions svg{width:20px;height:20px}
+  #skUsedStockModal .sk-used-search-row{gap:6px;margin-bottom:8px}
+  #skUsedStockModal .sk-used-search-box{height:42px;gap:7px;padding:0 8px;border-radius:13px}
+  #skUsedStockModal .sk-used-search-box svg{width:19px;height:19px;flex-basis:19px}
+  #skUsedStockModal #skUsedSearch{font-size:12px}
+  #skUsedStockModal .sk-used-filter-button{width:42px;height:42px;flex-basis:42px;border-radius:13px}
+  #skUsedStockModal .sk-used-filter-button svg{width:21px;height:21px}
+  #skUsedStockModal .sk-used-table-wrap{overflow:visible}
+  #skUsedStockModal .sk-used-register-table{display:block;width:100%;min-width:0;font-size:10px;border-spacing:0}
+  #skUsedStockModal .sk-used-register-table thead{display:block;width:100%}
+  #skUsedStockModal .sk-used-register-table thead tr.sk-used-desktop-headings{display:none}
+  #skUsedStockModal .sk-used-register-table thead tr.sk-used-mobile-headings{display:grid;grid-template-columns:22px minmax(0,1fr) 64px 54px;gap:4px;align-items:center;width:100%;padding:5px;margin-bottom:5px;border:1px solid #e0e9fb;border-radius:10px;background:#f0f5ff;box-sizing:border-box}
+  #skUsedStockModal .sk-used-register-table thead tr.sk-used-mobile-headings th{min-width:0;padding:2px 0;border:0;background:transparent;color:#566b90;font-size:8px;line-height:1.1;font-weight:800;white-space:normal;overflow-wrap:anywhere;text-align:left;width:auto}
+  #skUsedStockModal .sk-used-register-table thead tr.sk-used-mobile-headings th:first-child{text-align:center}
+  #skUsedStockModal .sk-used-register-table thead tr.sk-used-mobile-headings th:nth-child(3){text-align:right}
+  #skUsedStockModal .sk-used-register-table thead tr.sk-used-mobile-headings th:last-child{text-align:center}
+  #skUsedStockModal .sk-used-register-table tbody{display:grid;gap:6px;width:100%}
+  #skUsedStockModal .sk-used-register-table tbody tr{display:grid;grid-template-columns:22px minmax(0,1fr) 64px 54px;grid-template-rows:auto auto;align-items:center;column-gap:4px;padding:6px 5px;border:1px solid #e2ebfb;border-radius:14px;background:#fff;box-shadow:0 2px 7px rgba(44,77,132,.04);box-sizing:border-box}
+  #skUsedStockModal .sk-used-register-table tbody td{min-width:0;padding:3px 0;border:0!important;border-radius:0!important;background:transparent}
+  #skUsedStockModal .sk-used-number-cell{grid-column:1;grid-row:1/3;font-size:11px;text-align:center}
+  #skUsedStockModal .sk-used-device-cell{grid-column:2;grid-row:1;gap:5px;align-items:center}
+  #skUsedStockModal .sk-used-phone-thumb{width:22px;height:36px;flex-basis:22px;border-radius:5px}
+  #skUsedStockModal .sk-used-phone-thumb svg{width:16px;height:29px}
+  #skUsedStockModal .sk-used-device-copy{gap:2px}
+  #skUsedStockModal .sk-used-device-copy strong{font-size:10px;line-height:1.15}
+  #skUsedStockModal .sk-used-device-copy small{font-size:8px;line-height:1.15}
+  #skUsedStockModal .sk-used-dealer-cell{grid-column:2;grid-row:2;padding-left:27px!important;font-size:8px;line-height:1.15;color:#62769a;overflow-wrap:anywhere}
+  #skUsedStockModal .sk-used-price-cell{grid-column:3;grid-row:1;font-size:10px;text-align:right;white-space:nowrap}
+  #skUsedStockModal .sk-used-status-cell{grid-column:3;grid-row:2;text-align:right}
+  #skUsedStockModal .sk-used-status{min-width:0;padding:3px 4px;border-radius:7px;font-size:8px}
+  #skUsedStockModal .sk-used-row-actions{grid-column:4;grid-row:1/3;display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:3px;align-self:center}
+  #skUsedStockModal .sk-used-row-view,#skUsedStockModal .sk-used-row-menu summary{width:24px;height:28px;flex-basis:24px;border-radius:50%}
+  #skUsedStockModal .sk-used-row-view .sk-used-chevron{font-size:23px}
+  #skUsedStockModal .sk-used-row-menu summary svg{width:16px;height:16px;flex-basis:16px}
+  #skUsedStockModal .sk-used-row-menu-pop{position:fixed;right:auto;top:8px;bottom:auto}
+  #skUsedStockModal .sk-used-storage-note{font-size:9px}
+  #skUsedStockModal .sk-used-bottom-nav{position:relative;flex:0 0 auto;min-height:64px;margin:0 8px max(8px,env(safe-area-inset-bottom));padding:4px 3px;border:1px solid #d8e4f8;border-radius:22px;background:rgba(255,255,255,.98);box-shadow:0 5px 18px rgba(44,77,132,.12);isolation:isolate}
+  #skUsedStockModal .sk-used-bottom-nav button{min-height:54px;gap:3px;padding:3px 1px;font-size:clamp(8px,2.7vw,10px);letter-spacing:-.15px;white-space:nowrap;border-radius:12px}
+  #skUsedStockModal .sk-used-bottom-nav button svg{width:21px;height:21px}
+  #skUsedStockModal .sk-used-bottom-nav button.is-active::before{top:-13px;width:56px;height:56px;border-width:3px}
+  #skUsedStockModal .sk-used-bottom-nav button.is-active svg{width:24px;height:24px}
+  #skUsedFilterModal.sk-used-filter-overlay{padding:10px;align-items:flex-end}
+  #skUsedFilterModal .sk-used-filter-sheet{width:100%;max-width:none;max-height:88dvh;padding:18px 14px calc(18px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0}
+  #skUsedFilterModal .sk-used-filter-header h2{font-size:19px}
+  #skUsedFilterModal .sk-used-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  #skUsedFilterModal .sk-used-filter-grid label{font-size:12px}
+  #skUsedFilterModal .sk-used-filter-grid .form-input{min-height:42px;padding:8px;font-size:13px}
+  #skUsedFilterModal .sk-used-filter-actions{gap:7px;margin-top:16px}
+  #skUsedFilterModal .sk-used-filter-actions button{min-height:42px;padding:8px;font-size:12px}
+  #skUsedDetailDialog.sk-used-detail-overlay,.sk-used-detail-overlay{padding:10px;align-items:flex-end}
+  #skUsedDetailDialog .sk-used-detail-sheet,.sk-used-detail-sheet{width:100%;max-height:88dvh;border-radius:22px 22px 0 0}
+  #skUsedDetailDialog .sk-used-detail-grid,.sk-used-detail-grid{gap:8px;padding:12px}
+  #skUsedStockModal .sk-used-bottom-nav button.is-active::before{top:-13px}
+  #skUsedStockModal .sk-used-stock-sheet{overflow:hidden}
+  #skUsedStockModal .sk-used-stock-scroll{overscroll-behavior-y:contain}
+  #skUsedStockModal .sk-used-form-grid .form-label{margin:0;min-width:0}
+  #skUsedStockModal .sk-used-form-grid .form-input{max-width:100%}
+  #skUsedStockModal .sk-used-form-actions{margin-bottom:2px}
+}
+@media(min-width:701px){
+}

@@ -2941,6 +2941,7 @@ const MASTER_INVENTORY = [
       const container = document.getElementById('cardsContainer');
       const searchRow = document.getElementById('headerSearchRow');
       const catScroll = document.getElementById('catScroll');
+      if (currentFilter !== 'home') container?.classList.remove('sk-home-redesign');
 
       document.querySelectorAll('.bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
       if (currentFilter === 'home') {
@@ -2948,153 +2949,80 @@ const MASTER_INVENTORY = [
         if (searchRow) searchRow.style.display = 'none';
         if (catScroll) catScroll.style.display = 'none';
         
-        const metricCardsMap = {
-          'metric-spares': `
-            <div class="draggable-card sk-home-metric-card sk-home-metric-spares" data-card-id="metric-spares" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="toggleModal('repairSparesModal', true);">
-              <div style="display:flex;align-items:center;gap:14px;min-width:0;">
-                <div class="sk-home-metric-icon spares" style="width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;">🧰</div>
-                <div style="min-width:0;">
-                  <div style="font-size:12px;color:var(--text-muted);font-weight:800;">Repair Spares Orders</div>
-                  <div style="font-size:10px;color:var(--text-muted);font-weight:600;">Daily service spares note</div>
-                </div>
-              </div>
-              <span style="font-size:14px;color:var(--text-muted);font-weight:800;flex-shrink:0;">›</span>
-            </div>
-          `,
-          'metric-credit': `
-            <div class="draggable-card sk-home-metric-card sk-home-metric-credit" data-card-id="metric-credit" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="skOpenCreditLedger(); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div style="display:flex; align-items:center; gap:14px;">
-                <div class="sk-home-metric-icon credit" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">💳</div>
-                <div>
-                  <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Outstanding</div>
-                  <div style="font-size: 18px; font-weight: 950; color: #0284c7; line-height: 1.1;">${typeof window.skOutstandingTotalForHome === 'function' ? ('₹' + Number(window.skOutstandingTotalForHome() || 0).toLocaleString('en-IN')) : (typeof getCustomers === 'function' ? ('₹' + getCustomers().filter(c => Number(c.balance) > 0).reduce((s,c) => s + Number(c.balance || 0), 0).toLocaleString('en-IN')) : '₹0')}</div>
-                </div>
-              </div>
-              <span style="font-size: 14px; color: var(--text-muted); font-weight: 700;">›</span>
-            </div>
-          `,
-          'metric-repair': `
-            <div class="draggable-card sk-home-metric-card sk-home-metric-repair" data-card-id="metric-repair" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="skOpenPendingRepairJobs(); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div style="display:flex; align-items:center; gap:14px;">
-                <div class="sk-home-metric-icon repair" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">🔧</div>
-                <div>
-                  <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Pending Jobs</div>
-                  <div style="font-size: 18px; font-weight: 950; color: #e11d48; line-height: 1.1;">${(() => { try { const r=JSON.parse(localStorage.getItem('skx_repair_jobs_v2')||'[]'); return Array.isArray(r)?r.filter(j=>['Received','Checking','Repairing'].includes(String(j?.status||''))).length:0; } catch(e){ return 0; } })()}</div>
-                </div>
-              </div>
-              <span style="font-size: 14px; color: var(--text-muted); font-weight: 700;">›</span>
-            </div>
-          `,
-          'metric-bills': `
-            <div class="draggable-card sk-home-metric-card sk-home-metric-bills" data-card-id="metric-bills" draggable="true" style="min-height: 82px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="toggleModal('billingModal', true); switchBillTab('history'); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div style="display:flex; align-items:center; gap:14px;">
-                <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(124,58,237,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">🧾</div>
-                <div>
-                  <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Saved Bills</div>
-                  <div style="font-size: 18px; font-weight: 950; color: #7c3aed; line-height: 1.1;">${savedBills.length}</div>
-                </div>
-              </div>
-              <span style="font-size: 14px; color: var(--text-muted); font-weight: 700;">›</span>
-            </div>
-          `
+        container.classList.add('sk-home-redesign');
+        if (searchRow) searchRow.style.display = 'flex';
+        const escHome = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        const moneyHome = value => '₹' + Number(value || 0).toLocaleString('en-IN');
+        const lowLimitHome = parseInt(localStorage.getItem('sk_low_threshold')) || 3;
+        const lowCountHome = inventory.filter(item => Number(item.stock || 0) <= lowLimitHome).length;
+        // Consistent inline SVG icon family for the redesigned home page.
+        // These icons are presentation-only; existing actions and data flows remain unchanged.
+        const homeIcon = (name) => {
+          const paths = {
+            'file-text': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',
+            'credit-card': '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9h19M6 15h4"/>',
+            'wrench': '<path d="M14.7 6.3a5 5 0 0 0-6.4 6.4L3 18a2.1 2.1 0 0 0 3 3l5.3-5.3a5 5 0 0 0 6.4-6.4L14 13l-3-3z"/><path d="m14 5 5-2 2 2-2 5"/>',
+            'package': '<path d="m12 3 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8M12 13v9M7.5 5.5l9 5"/>',
+            'users': '<path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+            'package-plus': '<path d="m12 3 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 5-2.8M12 13v9M18 14v7M14.5 17.5h7"/>',
+            'chart': '<path d="M4 20V11M10 20V4M16 20v-7M22 20H2"/>',
+            'file-plus': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 12v6M9 15h6"/>'
+          };
+          return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths[name] || paths['package']}</svg>`;
         };
-
-        const defaultMetricOrder = ['metric-spares', 'metric-credit', 'metric-repair', 'metric-bills'];
-        let savedMetricOrder = defaultMetricOrder;
-        try {
-          const storedM = localStorage.getItem('sk_order_homeMetricGrid');
-          if (storedM) {
-            const p = JSON.parse(storedM);
-            if (Array.isArray(p) && p.length > 0) {
-              savedMetricOrder = p.map(id => id === 'metric-stock' ? 'metric-spares' : (id === 'metric-low' ? 'metric-credit' : (id === 'metric-orders' ? 'metric-repair' : id)));
-              if (!savedMetricOrder.includes('metric-spares')) savedMetricOrder.splice(0, 0, 'metric-spares');
-              if (!savedMetricOrder.includes('metric-credit')) savedMetricOrder.splice(1, 0, 'metric-credit');
-              savedMetricOrder = savedMetricOrder.filter((id, idx, arr) => arr.indexOf(id) === idx);
-            }
-          }
-        } catch(e) {}
-        const metricGridHTML = savedMetricOrder.map(id => metricCardsMap[id] || '').join('');
-
-        const actionCardsMap = {
-          'card-glass': `
-            <div data-card-id="card-glass" draggable="true" class="draggable-card sk-home-action-row sk-home-action-glass" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="currentFilter='glass'; renderCards(); window.scrollTo({top: 0, behavior: 'smooth'});">
-              <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
-                <div class="sk-home-action-icon glass" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">🛡️</div>
-                <div style="min-width: 0;">
-                  <div style="font-weight: 850; font-size: 14px; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tempered Glass</div>
-                  <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">View All Glass Stock</div>
-                </div>
-              </div>
-              <button class="sk-home-action-btn glass" style="width: 115px; height: 34px; background: var(--primary); color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Stock →</button>
-            </div>
-          `,
-          'card-display': `
-            <div data-card-id="card-display" draggable="true" class="draggable-card sk-used-workflow-matrix" style="width:100%;box-sizing:border-box;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
-              <div role="button" tabindex="0" class="sk-home-mini-matrix" style="min-width:0;height:56px;min-height:56px;box-sizing:border-box;background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:7px 8px;box-shadow:0 2px 6px rgba(0,0,0,.025);display:flex;align-items:center;gap:7px;cursor:pointer;" onclick="window.skUsedOpen?.();window.skUsedShowInventory?.();" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.skUsedOpen?.();window.skUsedShowInventory?.();}">
-                <div style="width:32px;height:32px;flex:0 0 32px;border-radius:10px;background:var(--pill-bg);border:1px solid var(--card-border);display:flex;align-items:center;justify-content:center;font-size:18px;">📱</div>
-                <div style="flex:1;min-width:0;"><div style="font-family:var(--app-font,inherit);font-weight:800;font-size:11px;color:var(--text);line-height:1.15;overflow-wrap:anywhere;">Used Mobile Inventory</div><div style="font-size:9px;color:var(--text-muted);margin-top:2px;line-height:1.15;">View available stock</div></div>
-                <span style="color:var(--text-muted);font-size:17px;flex-shrink:0;">›</span>
-              </div>
-              <div role="button" tabindex="0" class="sk-home-mini-matrix" style="min-width:0;height:56px;min-height:56px;box-sizing:border-box;background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:7px 8px;box-shadow:0 2px 6px rgba(0,0,0,.025);display:flex;align-items:center;gap:7px;cursor:pointer;" onclick="window.skUsedOpen?.();window.skUsedShowManagement?.();" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.skUsedOpen?.();window.skUsedShowManagement?.();}">
-                <div style="width:32px;height:32px;flex:0 0 32px;border-radius:10px;background:var(--pill-bg);border:1px solid var(--card-border);display:flex;align-items:center;justify-content:center;font-size:18px;">📦</div>
-                <div style="flex:1;min-width:0;"><div style="font-family:var(--app-font,inherit);font-weight:800;font-size:11px;color:var(--text);line-height:1.15;overflow-wrap:anywhere;">Used Mobile Stock</div><div style="font-size:9px;color:var(--text-muted);margin-top:2px;line-height:1.15;">Purchase · Pricing · Sales</div></div>
-                <span style="color:var(--text-muted);font-size:17px;flex-shrink:0;">›</span>
-              </div>
-            </div>
-          `,
-          'card-accessories': `
-            <div data-card-id="card-accessories" draggable="true" class="draggable-card sk-home-action-row sk-home-action-accessories" style="width: 100%; height: 58px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 0 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-sizing: border-box;" onclick="window.skOpenAccessoriesPage?.();">
-              <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
-                <div class="sk-home-action-icon accessories" style="width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">⚡</div>
-                <div style="min-width: 0;">
-                  <div style="font-weight: 850; font-size: 14px; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" >Accessories</div>
-                  <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">View OCA &amp; Spares</div>
-                </div>
-              </div>
-              <button class="sk-home-action-btn accessories" style="width: 115px; height: 34px; background: #059669; color: #ffffff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;">View Accessories →</button>
-            </div>
-          `,
-        };
-
-        const defaultActionOrder = ['card-glass', 'card-display', 'card-accessories'];
-        let savedActionOrder = defaultActionOrder;
-        try {
-          const storedA = localStorage.getItem('sk_order_homeActionCardsContainer');
-          if (storedA) {
-            const p = JSON.parse(storedA);
-            if (Array.isArray(p) && p.length > 0) savedActionOrder = p.filter(id => id !== 'card-tools');
-          }
-        } catch (e) {}
-        const actionCardsHTML = savedActionOrder.map(id => actionCardsMap[id] || '').join('');
+        const outstandingHome = typeof window.skOutstandingTotalForHome === 'function'
+          ? Number(window.skOutstandingTotalForHome() || 0)
+          : (typeof getCustomers === 'function' ? getCustomers().filter(c => Number(c.balance) > 0).reduce((sum,c) => sum + Number(c.balance || 0), 0) : 0);
+        let repairJobsHome = [];
+        try { const parsed = JSON.parse(localStorage.getItem('skx_repair_jobs_v2') || '[]'); repairJobsHome = Array.isArray(parsed) ? parsed : []; } catch (e) {}
+        const pendingRepairsHome = repairJobsHome.filter(job => ['Received','Checking','Repairing'].includes(String(job?.status || '')));
+        const metricDataHome = [
+          {id:'metric-bills',icon:'file-text',label:'Saved Bills',value:String(savedBills.length),tone:'purple',action:"toggleModal('billingModal',true);switchBillTab('history');"},
+          {id:'metric-credit',icon:'credit-card',label:'Outstanding',value:moneyHome(outstandingHome),tone:'blue',action:'window.skOpenCreditLedger?.();'},
+          {id:'metric-repair',icon:'wrench',label:'Pending Jobs',value:String(pendingRepairsHome.length),tone:'rose',action:'window.skOpenPendingRepairJobs?.();'},
+          {id:'metric-low',icon:'package',label:'Low Stock',value:String(lowCountHome),tone:'green',action:"currentFilter='low';renderCards();window.scrollTo({top:0,behavior:'smooth'});"}
+        ];
+        let metricOrderHome = [];
+        try { const oldOrder=JSON.parse(localStorage.getItem('sk_order_homeMetricGrid')||'[]'); if(Array.isArray(oldOrder)) metricOrderHome=oldOrder.map(id=>({'metric-spares':'metric-low','metric-stock':'metric-low','metric-orders':'metric-repair'}[id]||id)); } catch(e) {}
+        const orderedMetricDataHome = [...metricDataHome].sort((a,b)=>{const ai=metricOrderHome.indexOf(a.id),bi=metricOrderHome.indexOf(b.id);return (ai<0?999:ai)-(bi<0?999:bi)});
+        const metricHTML = orderedMetricDataHome.map(m => `<button type="button" class="sk-home-v2-metric draggable-card" data-card-id="${m.id}" draggable="true" onclick="${m.action}"><span class="sk-home-v2-metric-icon ${m.tone}">${homeIcon(m.icon)}</span><span class="sk-home-v2-metric-copy"><b>${m.label}</b><strong>${escHome(m.value)}</strong></span><span class="sk-home-v2-metric-arrow">›</span></button>`).join('');
+        const featureDataHome = [
+          {id:'card-glass',title:'Tempered Glass',sub:'View All Glass Stock',img:'sk-home-glass.png',tone:'glass',action:"currentFilter='glass';renderCards();window.scrollTo({top:0,behavior:'smooth'});"},
+          {id:'card-display',title:'Used Mobile Inventory',sub:'Add / Update Purchase',img:'sk-home-used-inventory.png',tone:'used',action:'window.skUsedOpenInventoryPage?.();'},
+          {id:'card-used-stock',title:'Used Mobile Stock',sub:'Purchase · Pricing · Sales',img:'sk-home-stock-box.png',tone:'stock',action:'window.skUsedOpen?.();window.skUsedShowManagement?.();'},
+          {id:'card-accessories',title:'Accessories',sub:'View OCA & Spares',img:'sk-home-accessories.png',tone:'accessories',action:'window.skOpenAccessoriesPage?.();'},
+          {id:'card-repair-spares',title:'Repair Spares Orders',sub:'Daily service spares note',img:'sk-home-repair.png',tone:'repair',action:"toggleModal('repairSparesModal',true);"},
+          {id:'card-other-inventory',title:'Other Inventory',sub:'Tools, Items & Others',img:'sk-home-other-stock.png',tone:'other',action:"currentFilter='all';renderCards();window.scrollTo({top:0,behavior:'smooth'});"}
+        ];
+        let featureOrderHome = [];
+        try { const oldOrder=JSON.parse(localStorage.getItem('sk_order_homeActionCardsContainer')||'[]'); if(Array.isArray(oldOrder)) featureOrderHome=oldOrder; } catch(e) {}
+        const orderedFeatureDataHome = [...featureDataHome].sort((a,b)=>{const ai=featureOrderHome.indexOf(a.id),bi=featureOrderHome.indexOf(b.id);return (ai<0?999:ai)-(bi<0?999:bi)});
+        const featureCards = orderedFeatureDataHome.map(c => `<button type="button" class="sk-home-v2-feature draggable-card ${c.tone}" data-card-id="${c.id}" draggable="true" onclick="${c.action}"><img src="./assets/${c.img}" alt="" loading="eager"><span class="sk-home-v2-feature-copy"><b>${c.title}</b><small>${c.sub}</small><i aria-hidden="true">→</i></span></button>`).join('');
+        const quickActions = [
+          {icon:'file-plus',label:'New Bill',tone:'blue',action:"toggleModal('billingModal',true);switchBillTab('new');"},
+          {icon:'wrench',label:'New Repair',tone:'rose',action:'window.skOpenRepairJobs?.();'},
+          {icon:'users',label:'Add Customer',tone:'green',action:'window.skOpenCreditLedger?.();'},
+          {icon:'package-plus',label:'Add Product',tone:'purple',action:'openItemEditor();'},
+          {icon:'chart',label:'Today Report',tone:'orange',action:"toggleModal('billingModal',true);switchBillTab('history');"}
+        ].map(q => `<button type="button" class="sk-home-v2-quick ${q.tone}" onclick="${q.action}"><span>${homeIcon(q.icon)}</span><b>${q.label}</b></button>`).join('');
+        const latestBillHome = Array.isArray(savedBills) ? savedBills[0] : null;
+        const latestRepairHome = pendingRepairsHome[0] || repairJobsHome[0] || null;
+        const latestStockHome = Array.isArray(inventory) ? inventory[0] : null;
+        const recentHTML = [
+          latestBillHome ? {icon:'file-text',tone:'blue',title:'Bill #' + (latestBillHome.billNo || latestBillHome.id || 'Recent'),value:moneyHome(latestBillHome.price || latestBillHome.total || latestBillHome.amount || 0),sub:escHome(latestBillHome.custName || latestBillHome.model || 'Saved bill')} : {icon:'file-text',tone:'blue',title:'Billing',value:'No bills yet',sub:'New bills will appear here'},
+          latestRepairHome ? {icon:'wrench',tone:'rose',title:'Repair #' + (latestRepairHome.id || 'Recent'),value:escHome(latestRepairHome.model || latestRepairHome.customer || 'Repair job'),sub:escHome(latestRepairHome.status || 'Repair activity')} : {icon:'wrench',tone:'rose',title:'Repair Jobs',value:'No recent jobs',sub:'Repair activity will appear here'},
+          latestStockHome ? {icon:'package',tone:'blue',title:'Stock Available',value:escHome(latestStockHome.title || 'Inventory item'),sub:`${Number(latestStockHome.stock || 0)} pcs · Inventory`} : {icon:'package',tone:'blue',title:'Stock Added',value:'No stock items',sub:'Inventory activity will appear here'}
+        ].map(r => `<div class="sk-home-v2-recent-card"><span class="sk-home-v2-recent-icon ${r.tone}">${homeIcon(r.icon)}</span><span class="sk-home-v2-recent-copy"><b>${r.title}</b><strong>${r.value}</strong><small>${r.sub}</small></span></div>`).join('');
 
         container.innerHTML = `
-          <!-- Compact Welcome Card (Fits in single view) -->
-          <div class="sk-home-welcome-banner" style="width: 100%; min-height: 100px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;">
-            <div>
-              <div class="sk-home-welcome-kicker" style="font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 2px;">Welcome to</div>
-              <div class="sk-home-welcome-title" style="font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 950; line-height: 1.15;">
-                <span style="color:var(--primary);">SK MOBILES</span>
-              </div>
-              <div class="sk-home-welcome-sub" style="font-size: 11.5px; margin-top: 3px; font-weight: 600;">Smart Billing &amp; Business Management</div>
-
-            </div>
-            <div class="sk-home-welcome-icon" style="font-size: 2.2rem; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">📱</div>
-          </div>
-
-          <!-- 4 Metric Cards Grid: All boxes are draggable and reorderable -->
-          <div id="homeMetricGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%;">
-            ${metricGridHTML}
-          </div>
-
-          <!-- Reorderable Long Action Cards (Compact 58px high, fits in screen) -->
-          <div id="homeActionCardsContainer" style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
-            ${actionCardsHTML}
-          </div>
+          <section class="sk-home-v2-hero" aria-label="SK Mobiles business banner"><img src="./assets/sk-home-hero.jpg" alt="SK Mobiles — Mobile sales, service, accessories and repair"/></section>
+          <section id="homeMetricGrid" class="sk-home-v2-metrics" aria-label="Business summary">${metricHTML}</section>
+          <section id="homeActionCardsContainer" class="sk-home-v2-features" aria-label="Inventory shortcuts">${featureCards}</section>
+          <section class="sk-home-v2-section"><div class="sk-home-v2-section-heading"><h2>Quick Actions</h2><button type="button" onclick="toggleLeftDrawer(true)">See All <span>→</span></button></div><div class="sk-home-v2-quick-grid">${quickActions}</div></section>
+          <section class="sk-home-v2-section sk-home-v2-recent-section"><div class="sk-home-v2-section-heading"><h2>Recent Activity</h2><button type="button" onclick="toggleModal('billingModal',true);switchBillTab('history');">View All <span>→</span></button></div><div class="sk-home-v2-recent-grid">${recentHTML}</div></section>
         `;
-
         setTimeout(() => {
-          const allDraggables = container.querySelectorAll('.draggable-card');
-          allDraggables.forEach(card => {
+          container.querySelectorAll('.draggable-card').forEach(card => {
             card.addEventListener('dragstart', handleCardDragStart);
             card.addEventListener('dragover', handleCardDragOver);
             card.addEventListener('dragleave', handleCardDragLeave);
@@ -3102,7 +3030,6 @@ const MASTER_INVENTORY = [
             card.addEventListener('dragend', handleCardDragEnd);
           });
         }, 50);
-
         syncInventorySelectionUI();
         loadRepairSparesNote();
         skPostRenderEnhancements();
@@ -3309,7 +3236,7 @@ const MASTER_INVENTORY = [
         autoSaveCurrentFormSilently();
         btnHist.classList.add('active');
         btnNew.classList.remove('active');
-        viewHist.style.display = 'block';
+        viewHist.style.display = 'flex';
         viewNew.style.display = 'none';
         renderBillHistory();
       }
@@ -3559,6 +3486,8 @@ const MASTER_INVENTORY = [
 
     function updateBillHistoryCount() {
       document.getElementById('billHistoryCount').innerText = savedBills.length;
+      const headingCount = document.getElementById('billHistoryHeadingCount');
+      if (headingCount) headingCount.innerText = savedBills.length;
     }
 
     // 🔒 SK V4.8 LOCKED: Bill History must render every synced bill safely and keep Delete visible.
@@ -3577,9 +3506,9 @@ const MASTER_INVENTORY = [
       });
       if(!filtered.length){container.innerHTML=`<div class="empty-state">${source.length?'No saved billing history matches this filter.':'No saved billing history found.'}</div>`;return;}
       filtered.forEach(b=>{
-        const item=document.createElement('div'); item.style.cssText="background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;";
+        const item=document.createElement('article'); item.className='bill-history-card';
         const billId=String(b.id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); const displayBillNo=b.billNo||skBillNumberFromDateSeq(b.date,skExistingBillSeq(b)||1,false); const safePrice=Number(b.price)||0;
-        item.innerHTML=`<div style="min-width:0;"><div style="font-weight:800;font-size:.88rem;color:var(--text);">${String(b.custName||'Customer')} (${String(b.model||'---')})</div><div style="font:inherit;font-size:12px;color:var(--text-muted);margin-top:2px;">🧾 ${displayBillNo} • 📞 ${String(b.phone||'---')} • ${skBillUiDate(b.date||'---')} • <span style="background:var(--pill-bg);padding:2px 6px;border-radius:6px;font-weight:700;">${String(b.payMode||'Cash')}</span></div><div style="font-weight:900;color:var(--primary);font-size:.84rem;margin-top:4px;">₹ ${safePrice.toLocaleString('en-IN')}</div></div><div style="display:flex;gap:6px;flex-shrink:0;"><button onclick="viewSavedBill(savedBills.findIndex(x=>x&&x.id==='${billId}'))" style="background:var(--pill-bg);border:1px solid var(--card-border);color:var(--text);border-radius:10px;width:34px;height:34px;cursor:pointer;" title="View Bill">👁️</button><button onclick="editSavedBill(savedBills.findIndex(x=>x&&x.id==='${billId}'))" style="background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.25);color:var(--primary);border-radius:10px;width:34px;height:34px;cursor:pointer;" title="Edit Bill">✏️</button><button onclick="deleteBillSafely('${billId}')" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:var(--danger);border-radius:10px;width:34px;height:34px;cursor:pointer;" title="Delete Bill">🗑️</button></div>`;
+        item.innerHTML=`<div class="bill-history-main"><div class="bill-history-name">${String(b.custName||'Customer')} (${String(b.model||'---')})</div><div class="bill-history-meta"><span class="bill-history-meta-item">🧾 ${displayBillNo}</span><span class="bill-history-meta-item">•</span><span class="bill-history-meta-item">📞 ${String(b.phone||'---')}</span><span class="bill-history-meta-item">📅 ${skBillUiDate(b.date||'---')}</span><span class="bill-history-pay-mode">${String(b.payMode||'Cash')}</span></div><div class="bill-history-amount">₹${safePrice.toLocaleString('en-IN')}</div></div><div class="bill-history-actions"><button type="button" class="bill-history-view" onclick="viewSavedBill(savedBills.findIndex(x=>x&&x.id==='${billId}'))" title="View Bill" aria-label="View bill">👁️</button><button type="button" class="bill-history-edit" onclick="editSavedBill(savedBills.findIndex(x=>x&&x.id==='${billId}'))" title="Edit Bill" aria-label="Edit bill">✏️</button><button type="button" class="bill-history-delete" onclick="deleteBillSafely('${billId}')" title="Delete Bill" aria-label="Delete bill">🗑️</button></div>`;
         container.appendChild(item);
       });
     }
@@ -4920,24 +4849,10 @@ img{max-width:100%!important;}
 
   window.skRjRenderHomeMetric=function(){
     const grid=document.getElementById('homeMetricGrid'); if(!grid)return;
+    const jobs=load().filter(j=>['Received','Checking','Repairing'].includes(String(j.status||'')));
+    const card=grid.querySelector('[data-card-id="metric-repair"]');
+    if(card){const value=card.querySelector('strong');if(value)value.textContent=String(jobs.length);return;}
     const old=document.getElementById('skHomeRepairMetric'); old?.remove();
-    /* Home card shows only genuinely pending repair work; Ready/Delivered remain in Repair History. */
-    const a=load().filter(j=>['Received','Checking','Repairing'].includes(String(j.status||'')));
-    const el=document.createElement('div');
-    el.id='skHomeRepairMetric'; el.className='draggable-card sk-home-rj-card';
-    el.draggable=true;
-    el.dataset.cardId='metric-repairs';
-    el.innerHTML=`<div style="display:flex;align-items:center;gap:14px">
-      <div style="width:38px;height:38px;border-radius:12px;background:rgba(239,68,68,.10);display:flex;align-items:center;justify-content:center;font-size:1.15rem">🔧</div>
-      <div><div style="font-size:12px;color:var(--text-muted);font-weight:700">Pending Repair Jobs</div>
-      <div class="sk-home-rj-count">${a.length}</div><div class="sk-home-rj-mini">${a.length?'Pending Jobs':'No Pending Jobs'}</div></div></div>
-      <span style="font-size:14px;color:var(--text-muted);font-weight:700">›</span>`;
-    el.onclick=function(){skOpenPendingRepairJobs()};
-    grid.appendChild(el);
-    if(window.handleCardDragStart){
-      el.addEventListener('dragstart',handleCardDragStart); el.addEventListener('dragover',handleCardDragOver);
-      el.addEventListener('dragleave',handleCardDragLeave); el.addEventListener('drop',handleCardDrop); el.addEventListener('dragend',handleCardDragEnd);
-    }
   };
 
   document.getElementById('skRjWorkType')?.addEventListener('change',function(){
@@ -8231,13 +8146,142 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   if(duplicate){alert('இந்த IMEI ஏற்கனவே பதிவு செய்யப்பட்டுள்ளது. Duplicate IMEI அனுமதிக்கப்படாது.');return;}
   const old=editing?rows.find(r=>String(r.imei)===editing):null;if(old&&old.status==='Sold'&&editing!==imei){alert('Sold device IMEI cannot be changed.');return;}
   const item={id:old?.id||('USED-'+Date.now()),date:$('skUsedDate').value,dealer,model,ram:$('skUsedRam')?.value.trim()||'',colour:$('skUsedColour').value.trim(),storage:$('skUsedStorage').value.trim(),kit:$('skUsedKit').value,cost,dealerPrice:Math.round((cost+1000)*100)/100,customerPrice:Math.round((cost+2000)*100)/100,imei,issue:$('skUsedIssue').value.trim(),status:old?.status||'In Stock',sale:old?.sale?{...old.sale,profit:(Number(old.sale.price)||0)-cost}:null,updatedAt:new Date().toISOString()};
-  if(old){rows[rows.indexOf(old)]=item;}else rows.unshift(item);write(rows);skUsedResetForm();skUsedRender();if(typeof showToast==='function')showToast('Used mobile purchase saved');
+  if(old){rows[rows.indexOf(old)]=item;}else rows.unshift(item);write(rows);skUsedResetForm();const purchaseForm=$('skUsedPurchaseForm');if(purchaseForm)purchaseForm.style.display=window.__skUsedInventoryPageMode?'block':'none';skUsedRender();if(typeof showToast==='function')showToast('Used mobile purchase saved');
  };
- window.skUsedEdit=function(imei){const r=read().find(x=>String(x.imei)===String(imei));if(!r)return;window.__skUsedEditingImei=r.imei;[['Date','date'],['Dealer','dealer'],['Model','model'],['Ram','ram'],['Colour','colour'],['Storage','storage'],['Kit','kit'],['Cost','cost'],['DealerPrice','dealerPrice'],['CustomerPrice','customerPrice'],['Imei','imei'],['Issue','issue']].forEach(([a,b])=>{const e=$('skUsed'+a);if(e)e.value=r[b]??'';});$('skUsedImei').readOnly=true;};
+ window.skUsedEdit=function(imei){const r=read().find(x=>String(x.imei)===String(imei));if(!r)return;const purchaseForm=$('skUsedPurchaseForm');if(purchaseForm){purchaseForm.style.display='block';purchaseForm.scrollIntoView({behavior:'smooth',block:'start'});}const actions=$('skUsedPurchaseActions');if(actions)actions.style.display='block';window.__skUsedEditingImei=r.imei;[['Date','date'],['Dealer','dealer'],['Model','model'],['Ram','ram'],['Colour','colour'],['Storage','storage'],['Kit','kit'],['Cost','cost'],['DealerPrice','dealerPrice'],['CustomerPrice','customerPrice'],['Imei','imei'],['Issue','issue']].forEach(([a,b])=>{const e=$('skUsed'+a);if(e)e.value=r[b]??'';});$('skUsedImei').readOnly=true;};
  window.skUsedDelete=function(imei){const rows=read(),r=rows.find(x=>String(x.imei)===String(imei));if(!r)return;const warning=r.status==='Sold'?'This device is SOLD. Deleting it will also remove its sale/profit record. Continue?':'Delete this used mobile purchase record?';if(!confirm(warning))return;write(rows.filter(x=>String(x.imei)!==String(imei)));skUsedRender();};
- window.skUsedClearAll=function(){const rows=read();if(!rows.length){if(typeof showToast==='function')showToast('Inventory is already empty');return;}const sold=rows.filter(r=>r.status==='Sold').length;const message='Delete ALL '+rows.length+' used mobile inventory records?'+(sold?'\nThis also removes '+sold+' sold-device sale/profit records.':'')+'\nThis action cannot be undone.';if(!confirm(message))return;write([]);window.skUsedResetForm();if($('skUsedSearch'))$('skUsedSearch').value='';skUsedRender();if(typeof window.skUsedRenderCatalogItems==='function')window.skUsedRenderCatalogItems();if(typeof showToast==='function')showToast('All used mobile inventory records deleted');};
- window.skUsedAddInventory=function(){window.skUsedResetForm();window.skUsedShowManagement();const form=$('skUsedPurchaseForm');form?.scrollIntoView({behavior:'smooth',block:'start'});$('skUsedModel')?.focus({preventScroll:true});};
- window.skUsedRender=function(){const rows=read();const q=String($('skUsedSearch')?.value||'').trim().toLowerCase();const filtered=rows.filter(r=>[r.model,r.dealer,r.imei,r.ram,r.storage,r.colour,r.kit,r.issue,r.status,r.sale?.customer,r.sale?.price,r.sale?.profit].some(v=>String(v??'').toLowerCase().includes(q)));$('skUsedStatTotal').textContent=String(rows.length);$('skUsedStatStock').textContent=String(rows.filter(r=>r.status!=='Sold').length);if($('skUsedStatSold'))$('skUsedStatSold').textContent=String(rows.filter(r=>r.status==='Sold').length);$('skUsedStatProfit').textContent=money(rows.reduce((a,r)=>a+(Number(r.sale?.profit)||0),0));const body=$('skUsedRows');if(!body)return;if(!filtered.length){body.innerHTML='<tr><td colspan="7" style="padding:14px;text-align:center;color:var(--text-muted);">No matching records.</td></tr>';return;}body.innerHTML=filtered.slice(0,1000).map(r=>`<tr><td><strong>${esc(r.model)}</strong><br><small>${esc(r.imei)} · ${esc(r.colour)} ${esc(r.storage)} · ${esc(r.kit)}</small></td><td>${esc(r.dealer)}</td><td style="text-align:right">${money(r.cost)}</td><td style="text-align:right">${money(r.dealerPrice)}</td><td style="text-align:right">${money(r.customerPrice)}</td><td><span class="${r.status==='Sold'?'sk-used-sold':''}">${esc(r.status)}</span>${r.sale?`<br><small>${esc(r.sale.customer)} · ${money(r.sale.price)} · Profit ${money(r.sale.profit)}</small>`:''}</td><td>${r.status==='Sold'?'':`<button class="sk-used-action" onclick="window.skUsedSelectForBill('${esc(r.imei)}')">Select for Bill</button> `}<button class="sk-used-action" onclick="skUsedEdit('${esc(r.imei)}')">Edit</button> <button class="sk-used-action" onclick="skUsedDelete('${esc(r.imei)}')">Delete</button></td></tr>`).join('');};
+ window.skUsedClearAll=function(){const rows=read();if(!rows.length){if(typeof showToast==='function')showToast('Inventory is already empty');return;}const sold=rows.filter(r=>r.status==='Sold').length;const message='Delete ALL '+rows.length+' used mobile inventory records?'+(sold?'\nThis also removes '+sold+' sold-device sale/profit records.':'')+'\nThis action cannot be undone.';if(!confirm(message))return;write([]);window.skUsedResetForm();if($('skUsedSearch'))$('skUsedSearch').value='';skUsedRender();if(typeof showToast==='function')showToast('All used mobile inventory records deleted');};
+ window.skUsedAddInventory=function(){window.__skUsedInventoryPageMode=false;window.skUsedResetForm();window.skUsedShowManagement();const form=$('skUsedPurchaseForm');if(form)form.style.display='block';form?.scrollIntoView({behavior:'smooth',block:'start'});$('skUsedModel')?.focus({preventScroll:true});};
+ window.skUsedRender=function(){
+  const rows=read();
+  const q=String($('skUsedSearch')?.value||'').trim().toLowerCase();
+  const filters=window.__skUsedFilters||{};
+  const filtered=rows.filter(r=>{
+   const searchable=[r.model,r.dealer,r.imei,r.ram,r.storage,r.colour,r.kit,r.issue,r.status,r.sale?.customer,r.sale?.price,r.sale?.profit].some(v=>String(v??'').toLowerCase().includes(q));
+   if(!searchable)return false;
+   const model=String(r.model||'');
+   const brand=model.trim().split(/\s+/)[0].toLowerCase();
+   if(filters.model&&!model.toLowerCase().includes(filters.model.toLowerCase()))return false;
+   if(filters.brand&&brand!==filters.brand.toLowerCase())return false;
+   if(filters.ram&&String(r.ram||'').toLowerCase()!==filters.ram.toLowerCase())return false;
+   if(filters.storage&&String(r.storage||'').toLowerCase()!==filters.storage.toLowerCase())return false;
+   const price=Number(r.cost)||0;
+   if(filters.minPrice!==''&&filters.minPrice!=null&&price<Number(filters.minPrice))return false;
+   if(filters.maxPrice!==''&&filters.maxPrice!=null&&price>Number(filters.maxPrice))return false;
+   return true;
+  });
+  $('skUsedStatTotal').textContent=String(rows.length);
+  $('skUsedStatStock').textContent=String(rows.filter(r=>r.status!=='Sold').length);
+  if($('skUsedStatSold'))$('skUsedStatSold').textContent=String(rows.filter(r=>r.status==='Sold').length);
+  $('skUsedStatProfit').textContent=money(rows.reduce((a,r)=>a+(Number(r.sale?.profit)||0),0));
+  const body=$('skUsedRows');if(!body)return;
+  if(!filtered.length){body.innerHTML='<tr><td colspan="6" class="sk-used-empty-cell">No matching used mobiles found.</td></tr>';return;}
+  body.innerHTML=filtered.slice(0,1000).map((r,i)=>{
+   const sold=r.status==='Sold';
+   const statusClass=sold?'is-sold':String(r.status||'').toLowerCase()==='pending'?'is-pending':'is-stock';
+   const imei=esc(r.imei);
+   const brandColor=['#2478ff','#7c3aed','#0f9f6e','#ea8a18','#e34b6f'][i%5];
+   return `<tr>
+    <td class="sk-used-number-cell">${i+1}</td>
+    <td class="sk-used-device-cell"><span class="sk-used-phone-thumb" style="--phone-accent:${brandColor}" aria-hidden="true"><svg viewBox="0 0 24 36"><rect x="3" y="1" width="18" height="34" rx="3.2"/><rect x="5.2" y="4" width="13.6" height="26" rx="1.4"/><path d="M9 2.8h6M10.5 32.4h3"/></svg></span><span class="sk-used-device-copy"><strong>${esc(r.model)}</strong><small>IMEI: ${imei}</small></span></td>
+    <td class="sk-used-dealer-cell">${esc(r.dealer)}</td>
+    <td class="sk-used-price-cell">${money(r.cost)}</td>
+    <td class="sk-used-status-cell"><span class="sk-used-status ${statusClass}">${esc(r.status||'In Stock')}</span></td>
+    <td class="sk-used-row-actions"><button type="button" class="sk-used-row-view" onclick="window.skUsedShowDetails('${imei}')" aria-label="View ${esc(r.model)} details" title="View details"><span class="sk-used-chevron" aria-hidden="true">›</span></button><details class="sk-used-row-menu"><summary aria-label="More actions" title="More actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></summary><div class="sk-used-row-menu-pop"><button type="button" ${sold?'disabled':''} onclick="window.skUsedSelectForBill('${imei}')">Select for Bill</button><button type="button" onclick="window.skUsedEdit('${imei}')">Edit</button><button type="button" class="is-danger" onclick="window.skUsedDelete('${imei}')">Delete</button></div></details></td>
+   </tr>`;
+  }).join('');
+  const active=Object.values(filters).some(v=>v!==''&&v!=null);
+  const filterButton=$('skUsedFilterButton');
+  if(filterButton)filterButton.classList.toggle('has-active-filters',!!active);
+ };
+ // Keep row action menus inside the visible viewport and close them on outside taps.
+ // Pointer-down dismissal handles touch, pen, and mouse consistently; clicks on the
+ // menu trigger and popup are excluded so the native details toggle and actions work.
+ document.addEventListener('pointerdown',function(event){
+  const modal=$('skUsedStockModal');
+  if(!modal||!modal.classList.contains('active'))return;
+  const menu=event.target.closest?.('#skUsedStockModal .sk-used-row-menu');
+  if(menu)return;
+  modal.querySelectorAll('.sk-used-row-menu[open]').forEach(item=>item.open=false);
+ },true);
+ document.addEventListener('click',function(event){
+  const modal=$('skUsedStockModal');
+  if(!modal||!modal.classList.contains('active'))return;
+  const clickedMenu=event.target.closest?.('#skUsedStockModal .sk-used-row-menu');
+  const clickedSummary=event.target.closest?.('#skUsedStockModal .sk-used-row-menu summary');
+  const allMenus=modal.querySelectorAll('.sk-used-row-menu');
+  if(clickedSummary&&clickedMenu){
+   allMenus.forEach(menu=>{if(menu!==clickedMenu)menu.open=false;});
+   requestAnimationFrame(()=>{
+    if(!clickedMenu.open)return;
+    const summary=clickedMenu.querySelector('summary');
+    const popup=clickedMenu.querySelector('.sk-used-row-menu-pop');
+    if(!summary||!popup)return;
+    const anchor=summary.getBoundingClientRect();
+    const margin=8;
+    const popupWidth=Math.min(Math.max(popup.offsetWidth,170),window.innerWidth-margin*2);
+    popup.style.width=popupWidth+'px';
+    popup.style.maxWidth=(window.innerWidth-margin*2)+'px';
+    const popupHeight=popup.offsetHeight;
+    let left=anchor.right-popupWidth;
+    left=Math.max(margin,Math.min(left,window.innerWidth-popupWidth-margin));
+    let top=anchor.bottom+5;
+    if(top+popupHeight>window.innerHeight-margin)top=anchor.top-popupHeight-5;
+    top=Math.max(margin,Math.min(top,window.innerHeight-popupHeight-margin));
+    popup.style.left=left+'px';popup.style.top=top+'px';popup.style.right='auto';popup.style.bottom='auto';
+    popup.style.zIndex='2147483002';
+   });
+   return;
+  }
+  if(clickedMenu&&event.target.closest?.('.sk-used-row-menu-pop')){
+   allMenus.forEach(menu=>menu.open=false);
+   return;
+  }
+  allMenus.forEach(menu=>menu.open=false);
+ },false);
+ const usedScroll=$('skUsedStockModal')?.querySelector('.sk-used-stock-scroll');
+ usedScroll?.addEventListener('scroll',()=>document.querySelectorAll('#skUsedStockModal .sk-used-row-menu[open]').forEach(menu=>menu.open=false),{passive:true});
+ window.skUsedPrimaryAction=function(){
+  const form=$('skUsedPurchaseForm');
+  if(!form)return;
+  if(getComputedStyle(form).display==='none'){
+   window.skUsedAddInventory();
+   return;
+  }
+  if(typeof form.requestSubmit==='function')form.requestSubmit();
+  else window.skUsedSavePurchase();
+ };
+ window.skUsedClearAction=function(){
+  const form=$('skUsedPurchaseForm');
+  if(form&&getComputedStyle(form).display==='none')window.skUsedAddInventory();
+  window.skUsedResetForm();
+ };
+ window.skUsedOpenFilters=function(){
+  const rows=read();
+  const fill=(id,values,first)=>{const el=$(id);if(!el)return;const old=el.value;el.innerHTML=`<option value="">${first}</option>`+[...new Set(values.map(v=>String(v||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if([...el.options].some(o=>o.value===old))el.value=old;};
+  fill('skUsedFilterBrand',rows.map(r=>String(r.model||'').trim().split(/\s+/)[0]),'All brands');
+  fill('skUsedFilterRam',rows.map(r=>r.ram),'Any RAM');
+  fill('skUsedFilterStorage',rows.map(r=>r.storage),'Any storage');
+  const f=window.__skUsedFilters||{};
+  if($('skUsedFilterModel'))$('skUsedFilterModel').value=f.model||'';
+  if($('skUsedFilterBrand'))$('skUsedFilterBrand').value=f.brand||'';
+  if($('skUsedFilterRam'))$('skUsedFilterRam').value=f.ram||'';
+  if($('skUsedFilterStorage'))$('skUsedFilterStorage').value=f.storage||'';
+  if($('skUsedFilterMinPrice'))$('skUsedFilterMinPrice').value=f.minPrice??'';
+  if($('skUsedFilterMaxPrice'))$('skUsedFilterMaxPrice').value=f.maxPrice??'';
+  if(typeof toggleModal==='function')toggleModal('skUsedFilterModal',true);else $('skUsedFilterModal')?.classList.add('active');
+ };
+ window.skUsedApplyFilters=function(){
+  window.__skUsedFilters={model:$('skUsedFilterModel')?.value.trim()||'',brand:$('skUsedFilterBrand')?.value||'',ram:$('skUsedFilterRam')?.value||'',storage:$('skUsedFilterStorage')?.value||'',minPrice:$('skUsedFilterMinPrice')?.value||'',maxPrice:$('skUsedFilterMaxPrice')?.value||''};
+  if(typeof toggleModal==='function')toggleModal('skUsedFilterModal',false);else $('skUsedFilterModal')?.classList.remove('active');
+  skUsedRender();
+ };
+ window.skUsedResetFilters=function(){
+  window.__skUsedFilters={model:'',brand:'',ram:'',storage:'',minPrice:'',maxPrice:''};
+  ['skUsedFilterModel','skUsedFilterBrand','skUsedFilterRam','skUsedFilterStorage','skUsedFilterMinPrice','skUsedFilterMaxPrice'].forEach(id=>{if($(id))$(id).value='';});
+  if($('skUsedSearch'))$('skUsedSearch').value='';
+  skUsedRender();
+ };
 
  window.skUsedShowDetails=function(imei){
   const r=read().find(x=>String(x.imei)===String(imei));if(!r)return;
@@ -8245,24 +8289,27 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   dlg.innerHTML='<section class="sk-used-detail-sheet"><header class="sk-used-detail-head"><div><strong>'+esc(r.model)+'</strong><small>Used mobile details</small></div><button type="button" class="sk-used-detail-close" aria-label="Close" onclick="document.getElementById(\'skUsedDetailDialog\').remove()">×</button></header><div class="sk-used-detail-grid">'+[['RAM',r.ram],['Storage',r.storage],['Colour',r.colour],['Full Kit',r.kit],['IMEI / Serial',r.imei],['Status',r.status],['Customer Price',money(r.customerPrice)],['Notes / Issue',r.issue||'—']].map(([k,v])=>'<div class="sk-used-detail-field"><small>'+esc(k)+'</small><strong>'+esc(v||'Not set')+'</strong></div>').join('')+'</div><footer class="sk-used-detail-actions"><button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedShowManagement();window.skUsedEdit(\''+esc(r.imei)+'\');document.getElementById(\'skUsedPurchaseForm\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">Edit</button><button type="button" class="submit-btn sk-used-detail-danger" onclick="window.skUsedDelete(\''+esc(r.imei)+'\');document.getElementById(\'skUsedDetailDialog\')?.remove();window.skUsedShowInventory()">Delete</button><button type="button" class="submit-btn sk-used-bill-button" '+(r.status==='Sold'?'disabled':'')+' onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Select for Bill</button></footer></section>';
   dlg.addEventListener('click',function(e){if(e.target===dlg)dlg.remove();},{once:true});
  };
- window.skUsedRenderCatalogItems=function(){
-  const catalog=$('skUsedHomeCatalog');if(!catalog)return;
-  const q=String($('skUsedCatalogSearch')?.value||'').trim().toLowerCase();
-  const rows=read();const items=rows.filter(r=>r.status!=='Sold'&&[r.model,r.dealer,r.imei,r.ram,r.colour,r.storage,r.kit,r.issue].some(v=>String(v??'').toLowerCase().includes(q)));
-  let results=$('skUsedCatalogResults');if(!results){results=document.createElement('div');results.id='skUsedCatalogResults';results.className='sk-used-catalog-results';catalog.appendChild(results);}
-  results.innerHTML=items.length?'<div class="sk-used-catalog-grid">'+items.map(r=>'<article class="sk-used-product-card" role="button" tabindex="0" aria-label="View '+esc(r.model)+' details" onclick="window.skUsedShowDetails(\''+esc(r.imei)+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();window.skUsedShowDetails(\''+esc(r.imei)+'\')}"><div class="sk-used-card-model">'+esc(r.model)+'</div><div class="sk-used-card-specs">'+esc(r.colour||'Colour not set')+' · '+esc(r.ram||'RAM not set')+' · '+esc(r.storage||'Storage not set')+' · '+esc(r.kit||'Kit not set')+'</div><div class="sk-used-card-imei">IMEI: <strong>'+esc(r.imei)+'</strong></div><div class="sk-used-card-footer"><div><div class="sk-used-card-price-label">Customer Price</div><strong class="sk-used-card-price">'+money(r.customerPrice)+'</strong><div class="sk-used-card-status">In Stock</div></div><button type="button" class="submit-btn sk-used-bill-button" onclick="event.stopPropagation();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Select for Bill →</button></div></article>').join('')+'</div>':'<div class="sk-used-empty">No matching used mobiles found.</div>';
- };
  window.skUsedShowInventory=function(){
-  const form=$('skUsedPurchaseForm');if(form)form.style.display='none';
-  const register=$('skUsedRows')?.closest('.bill-section');if(register)register.style.display='none';
-  let catalog=$('skUsedHomeCatalog');
-  if(!catalog){catalog=document.createElement('section');catalog.id='skUsedHomeCatalog';catalog.className='bill-section sk-used-catalog';catalog.style.cssText='padding:10px;margin:8px 0;max-width:100%;box-sizing:border-box;';const modal=$('skUsedStockModal');const sheet=modal?.querySelector('.modal-sheet');const stats=$('skUsedStatTotal')?.parentElement?.parentElement;if(sheet&&stats)sheet.insertBefore(catalog,stats.nextElementSibling);else sheet?.appendChild(catalog);}
-  catalog.style.display='block';
-  if(!$('skUsedCatalogSearch')){catalog.innerHTML='<div class="sk-used-catalog-toolbar"><strong>Used Mobile Inventory</strong><input class="form-input" id="skUsedCatalogSearch" type="search" autocomplete="off" placeholder="Search model / IMEI / colour" aria-label="Search used mobile inventory"></div><div id="skUsedCatalogResults" class="sk-used-catalog-results"></div>';const input=$('skUsedCatalogSearch');input.addEventListener('input',()=>window.skUsedRenderCatalogItems());}
-  window.skUsedRenderCatalogItems();
-  const stats=$('skUsedStatTotal')?.parentElement?.parentElement;if(stats)stats.style.display='none';
+  window.__skUsedInventoryPageMode=true;
+  const form=$('skUsedPurchaseForm');if(form)form.style.display='block';
+  const actions=$('skUsedPurchaseActions');if(actions)actions.style.display='none';
+  const register=$('skUsedRegisterPanel');if(register)register.style.display='none';
+  const stats=$('skUsedStatsGrid');if(stats)stats.style.display='grid';
+  const date=$('skUsedDate');if(date&&!date.value)date.value=new Date().toISOString().slice(0,10);
+  skUsedRender();
  };
-window.skUsedShowManagement=function(){const form=$('skUsedPurchaseForm');if(form)form.style.display='grid';const register=$('skUsedRows')?.closest('.bill-section');if(register)register.style.display='block';const catalog=$('skUsedHomeCatalog');if(catalog)catalog.style.display='none';const stats=$('skUsedStatTotal')?.parentElement?.parentElement;if(stats)stats.style.display='grid';};
+ window.skUsedOpenInventoryPage=function(){
+  window.skUsedOpen();
+  window.skUsedResetForm();
+  window.skUsedShowInventory();
+ };
+ window.skUsedShowManagement=function(){
+  window.__skUsedInventoryPageMode=false;
+  const form=$('skUsedPurchaseForm');if(form)form.style.display='none';
+  const actions=$('skUsedPurchaseActions');if(actions)actions.style.display='block';
+  const register=$('skUsedRegisterPanel');if(register)register.style.display='block';
+  const stats=$('skUsedStatsGrid');if(stats)stats.style.display='grid';
+ };
  window.skUsedSelectForBill=function(imei){
   const item=read().find(r=>String(r.imei)===String(imei)&&r.status!=='Sold');
   if(!item){alert('இந்த Used Mobile stock-ல் கிடைக்கவில்லை அல்லது ஏற்கெனவே விற்பனையாகியுள்ளது.');return;}
@@ -8314,7 +8361,7 @@ window.skUsedShowManagement=function(){const form=$('skUsedPurchaseForm');if(for
     existing.push({id:'USED-IMPORT-'+Date.now()+'-'+added,date:dateValue(get(row,'Date','Purchase Date')),dealer,model,ram:get(row,'RAM','Memory'),colour:get(row,'Colour','Color'),storage:get(row,'Storage'),kit:get(row,'Full Kit','Kit','Package')||'Mobile Only',cost,dealerPrice:dealerText!==''&&Number.isFinite(Number(dealerText))?Number(dealerText):Math.round((cost+1000)*100)/100,customerPrice:customerText!==''&&Number.isFinite(Number(customerText))?Number(customerText):Math.round((cost+2000)*100)/100,imei,issue:get(row,'Issue','Issu','Notes','Notes Issue'),status,sale,updatedAt:new Date().toISOString()});seen.add(imei);added++;if(sale)soldImported++;
    }
    if(!added){alert('புதிய valid stock record எதுவும் சேர்க்கப்படவில்லை. Duplicate IMEI: '+skipped+'; Invalid rows: '+invalid+'.');return;}
-   write(existing);skUsedRender();if(typeof window.skUsedShowInventory==='function'&&$('skUsedHomeCatalog')?.style.display!=='none')window.skUsedShowInventory();alert('Import முடிந்தது. Added: '+added+'; Sold records: '+soldImported+'; Duplicate IMEI skipped: '+skipped+'; Invalid rows skipped: '+invalid+'.');
+   write(existing);skUsedRender();if(window.__skUsedInventoryPageMode&&typeof window.skUsedShowInventory==='function')window.skUsedShowInventory();alert('Import முடிந்தது. Added: '+added+'; Sold records: '+soldImported+'; Duplicate IMEI skipped: '+skipped+'; Invalid rows skipped: '+invalid+'.');
   };
   const reader=new FileReader();reader.onload=function(){
    try{

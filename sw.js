@@ -1,10 +1,14 @@
 /* SK MOBILES PWA shell cache. Firebase/auth/firestore requests are never intercepted. */
 const CACHE_PREFIX = 'sk-mobiles-shell-';
-const CACHE_NAME = 'sk-mobiles-shell-v5.6.122';
+const CACHE_NAME = 'sk-mobiles-shell-v5.6.140';
 const APP_SHELL = [
   '/', '/index.html', '/manifest.webmanifest',
-  '/css/style.css', '/css/premium-overrides.css', '/js/app.js', '/js/firebase-sync.js',
-  '/icons/sk-mobiles-192.png', '/icons/sk-mobiles-512.png'
+  '/css/style.css', '/css/premium-overrides.css', '/css/used-mobile-stock.css', '/css/billing-page.css', '/js/app.js', '/js/firebase-sync.js',
+  '/icons/sk-mobiles-192.png', '/icons/sk-mobiles-512.png',
+  '/assets/sk-home-logo.png', '/assets/sk-home-hero.jpg',
+  '/assets/sk-home-glass.png', '/assets/sk-home-used-inventory.png',
+  '/assets/sk-home-stock-box.png', '/assets/sk-home-accessories.png',
+  '/assets/sk-home-repair.png', '/assets/sk-home-other-stock.png'
 ];
 
 self.addEventListener('install', event => {
