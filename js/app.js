@@ -2966,7 +2966,11 @@ const MASTER_INVENTORY = [
             'users': '<path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
             'package-plus': '<path d="m12 3 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 5-2.8M12 13v9M18 14v7M14.5 17.5h7"/>',
             'chart': '<path d="M4 20V11M10 20V4M16 20v-7M22 20H2"/>',
-            'file-plus': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 12v6M9 15h6"/>'
+            'file-plus': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 12v6M9 15h6"/>',
+            'shield': '<path d="M12 3 4 6v6c0 4.5 3.2 8 8 9 4.8-1 8-4.5 8-9V6z"/>',
+            'phone': '<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
+            'bolt': '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+            'toolbox': '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v8M3 13h18M11 13v2h2v-2"/>'
           };
           return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths[name] || paths['package']}</svg>`;
         };
@@ -2977,27 +2981,27 @@ const MASTER_INVENTORY = [
         try { const parsed = JSON.parse(localStorage.getItem('skx_repair_jobs_v2') || '[]'); repairJobsHome = Array.isArray(parsed) ? parsed : []; } catch (e) {}
         const pendingRepairsHome = repairJobsHome.filter(job => ['Received','Checking','Repairing'].includes(String(job?.status || '')));
         const metricDataHome = [
-          {id:'metric-bills',icon:'file-text',label:'Saved Bills',value:String(savedBills.length),tone:'purple',action:"toggleModal('billingModal',true);switchBillTab('history');"},
-          {id:'metric-credit',icon:'credit-card',label:'Outstanding',value:moneyHome(outstandingHome),tone:'blue',action:'window.skOpenCreditLedger?.();'},
-          {id:'metric-repair',icon:'wrench',label:'Pending Jobs',value:String(pendingRepairsHome.length),tone:'rose',action:'window.skOpenPendingRepairJobs?.();'},
-          {id:'metric-low',icon:'package',label:'Low Stock',value:String(lowCountHome),tone:'green',action:"currentFilter='low';renderCards();window.scrollTo({top:0,behavior:'smooth'});"}
+          {id:'metric-bills',icon:'file-text',label:'Saved Bills',value:String(savedBills.length),tone:'blue',action:"toggleModal('billingModal',true);switchBillTab('history');"},
+          {id:'metric-credit',icon:'credit-card',label:'Outstanding',value:moneyHome(outstandingHome),tone:'amber',action:'window.skOpenCreditLedger?.();'},
+          {id:'metric-repair',icon:'wrench',label:'Pending Jobs',value:String(pendingRepairsHome.length),tone:'green',action:'window.skOpenPendingRepairJobs?.();'},
+          {id:'metric-low',icon:'package',label:'Low Stock',value:String(lowCountHome),tone:'rose',action:"currentFilter='low';renderCards();window.scrollTo({top:0,behavior:'smooth'});"}
         ];
         let metricOrderHome = [];
         try { const oldOrder=JSON.parse(localStorage.getItem('sk_order_homeMetricGrid')||'[]'); if(Array.isArray(oldOrder)) metricOrderHome=oldOrder.map(id=>({'metric-spares':'metric-low','metric-stock':'metric-low','metric-orders':'metric-repair'}[id]||id)); } catch(e) {}
         const orderedMetricDataHome = [...metricDataHome].sort((a,b)=>{const ai=metricOrderHome.indexOf(a.id),bi=metricOrderHome.indexOf(b.id);return (ai<0?999:ai)-(bi<0?999:bi)});
         const metricHTML = orderedMetricDataHome.map(m => `<button type="button" class="sk-home-v2-metric draggable-card" data-card-id="${m.id}" draggable="true" onclick="${m.action}"><span class="sk-home-v2-metric-icon ${m.tone}">${homeIcon(m.icon)}</span><span class="sk-home-v2-metric-copy"><b>${m.label}</b><strong>${escHome(m.value)}</strong></span><span class="sk-home-v2-metric-arrow">›</span></button>`).join('');
         const featureDataHome = [
-          {id:'card-glass',title:'Tempered Glass',sub:'View All Glass Stock',img:'sk-home-glass.png',tone:'glass',action:"currentFilter='glass';renderCards();window.scrollTo({top:0,behavior:'smooth'});"},
-          {id:'card-display',title:'Used Mobile Inventory',sub:'Add / Update Purchase',img:'sk-home-used-inventory.png',tone:'used',action:'window.skUsedOpenInventoryPage?.();'},
-          {id:'card-used-stock',title:'Used Mobile Stock',sub:'Purchase · Pricing · Sales',img:'sk-home-stock-box.png',tone:'stock',action:'window.skUsedOpen?.();window.skUsedShowManagement?.();'},
-          {id:'card-accessories',title:'Accessories',sub:'View OCA & Spares',img:'sk-home-accessories.png',tone:'accessories',action:'window.skOpenAccessoriesPage?.();'},
-          {id:'card-repair-spares',title:'Repair Spares Orders',sub:'Daily service spares note',img:'sk-home-repair.png',tone:'repair',action:"toggleModal('repairSparesModal',true);"},
-          {id:'card-other-inventory',title:'Other Inventory',sub:'Tools, Items & Others',img:'sk-home-other-stock.png',tone:'other',action:"currentFilter='all';renderCards();window.scrollTo({top:0,behavior:'smooth'});"}
+          {id:'card-glass',title:'Tempered Glass',sub:'View All Glass Stock',img:'sk-home-glass.png',icon:'shield',tone:'glass',action:"currentFilter='glass';renderCards();window.scrollTo({top:0,behavior:'smooth'});"},
+          {id:'card-display',title:'Used Mobile Inventory',sub:'Add / Update Purchase',img:'sk-home-used-inventory.png',icon:'phone',tone:'used',action:'window.skUsedOpenInventoryPage?.();'},
+          {id:'card-used-stock',title:'Used Mobile Stock',sub:'Purchase · Pricing · Sales',img:'sk-home-stock-box.png',icon:'package',tone:'stock',action:'window.skUsedOpen?.();window.skUsedShowManagement?.();'},
+          {id:'card-accessories',title:'Accessories',sub:'View OCA & Spares',img:'sk-home-accessories.png',icon:'bolt',tone:'accessories',action:'window.skOpenAccessoriesPage?.();'},
+          {id:'card-repair-spares',title:'Repair Spares Orders',sub:'Daily service spares note',img:'sk-home-repair.png',icon:'toolbox',tone:'repair',action:"toggleModal('repairSparesModal',true);"},
+          {id:'card-other-inventory',title:'Other Inventory',sub:'Tools, Items & Others',img:'sk-home-other-stock.png',icon:'package',tone:'other',action:"currentFilter='all';renderCards();window.scrollTo({top:0,behavior:'smooth'});"}
         ];
         let featureOrderHome = [];
         try { const oldOrder=JSON.parse(localStorage.getItem('sk_order_homeActionCardsContainer')||'[]'); if(Array.isArray(oldOrder)) featureOrderHome=oldOrder; } catch(e) {}
         const orderedFeatureDataHome = [...featureDataHome].sort((a,b)=>{const ai=featureOrderHome.indexOf(a.id),bi=featureOrderHome.indexOf(b.id);return (ai<0?999:ai)-(bi<0?999:bi)});
-        const featureCards = orderedFeatureDataHome.map(c => `<button type="button" class="sk-home-v2-feature draggable-card ${c.tone}" data-card-id="${c.id}" draggable="true" onclick="${c.action}"><img src="./assets/${c.img}" alt="" loading="eager"><span class="sk-home-v2-feature-copy"><b>${c.title}</b><small>${c.sub}</small><i aria-hidden="true">→</i></span></button>`).join('');
+        const featureCards = orderedFeatureDataHome.map(c => `<button type="button" class="sk-home-v2-feature draggable-card ${c.tone}" data-card-id="${c.id}" draggable="true" onclick="${c.action}"><span class="sk-home-v2-feature-icon t-${c.tone}">${homeIcon(c.icon)}</span><span class="sk-home-v2-feature-copy"><b>${c.title}</b><small>${c.sub}</small><i aria-hidden="true">→</i></span></button>`).join('');
         const quickActions = [
           {icon:'file-plus',label:'New Bill',tone:'blue',action:"toggleModal('billingModal',true);switchBillTab('new');"},
           {icon:'wrench',label:'New Repair',tone:'rose',action:'window.skOpenRepairJobs?.();'},
@@ -3016,8 +3020,8 @@ const MASTER_INVENTORY = [
 
         container.innerHTML = `
           <section class="sk-home-v2-hero" aria-label="SK Mobiles business banner"><img src="./assets/sk-home-hero.jpg" alt="SK Mobiles — Mobile sales, service, accessories and repair"/></section>
-          <section id="homeMetricGrid" class="sk-home-v2-metrics" aria-label="Business summary">${metricHTML}</section>
-          <section id="homeActionCardsContainer" class="sk-home-v2-features" aria-label="Inventory shortcuts">${featureCards}</section>
+          <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Business Summary</h2></div><div id="homeMetricGrid" class="sk-home-v2-metrics" aria-label="Business summary">${metricHTML}</div></section>
+          <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Inventory &amp; Stock</h2><button type="button" onclick="currentFilter='all';renderCards();window.scrollTo({top:0,behavior:'smooth'});">View All <span>›</span></button></div><div id="homeActionCardsContainer" class="sk-home-v2-features" aria-label="Inventory shortcuts">${featureCards}</div></section>
           <section class="sk-home-v2-section"><div class="sk-home-v2-section-heading"><h2>Quick Actions</h2><button type="button" onclick="toggleLeftDrawer(true)">See All <span>→</span></button></div><div class="sk-home-v2-quick-grid">${quickActions}</div></section>
           <section class="sk-home-v2-section sk-home-v2-recent-section"><div class="sk-home-v2-section-heading"><h2>Recent Activity</h2><button type="button" onclick="toggleModal('billingModal',true);switchBillTab('history');">View All <span>→</span></button></div><div class="sk-home-v2-recent-grid">${recentHTML}</div></section>
         `;
@@ -5140,8 +5144,8 @@ img{max-width:100%!important;}
     function esc(v){return String(v||'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
     function populateLogin(){
       const sel=document.getElementById('skWorkerLoginSelect');if(!sel)return;
-      const a=workers();sel.innerHTML='<option value="">Select Worker</option>'+a.map(w=>'<option value="'+esc(w.id)+'">'+esc(w.name||w.id)+' — '+esc(w.id)+'</option>').join('');
-      if(a.length===0){const old=localStorage.getItem('sk_worker_pin_v1')||'1111';a.push({id:'WORKER-001',name:'Worker 1',password:old,phone:'',designation:'Worker',details:'',photo:DEFAULT_PHOTO});saveWorkers(a);sel.innerHTML='<option value="WORKER-001">Worker 1 — WORKER-001</option>';}
+      const a=workers();if(window.skPinSec&&a.some(w=>w.password&&!window.skPinSec.isHashed(w.password))){a.forEach(w=>{if(w.password&&!window.skPinSec.isHashed(w.password))w.password=window.skPinSec.hash(w.password);});saveWorkers(a);}sel.innerHTML='<option value="">Select Worker</option>'+a.map(w=>'<option value="'+esc(w.id)+'">'+esc(w.name||w.id)+' — '+esc(w.id)+'</option>').join('');
+      if(a.length===0){const old=window.skPinSec?window.skPinSec.hash(window.skPinSec.randomSecret()):'';a.push({id:'WORKER-001',name:'Worker 1',password:old,phone:'',designation:'Worker',details:'',photo:DEFAULT_PHOTO});saveWorkers(a);sel.innerHTML='<option value="WORKER-001">Worker 1 — WORKER-001</option>';}
     }
     function syncLoginVisibility(){
       const worker=document.querySelector('.sk-role-btn.active[data-role="worker"]');
@@ -5174,14 +5178,14 @@ img{max-width:100%!important;}
     };
     function fileToData(file,cb){if(!file){cb(null);return;}const r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(file);}
     window.skOpenWorkerEdit=function(index){if(!admin()){toast('🔒 Admin access only');return;}const a=workers(),w=index>=0?a[index]:{id:'',name:'',password:'',phone:'',designation:'Worker',details:'',photo:DEFAULT_PHOTO};
-      document.getElementById('skWorkerEditIndex').value=index;document.getElementById('skWorkerEditName').value=w.name||'';document.getElementById('skWorkerEditId').value=w.id||'';document.getElementById('skWorkerEditPassword').value=w.password||'';document.getElementById('skWorkerEditPhone').value=w.phone||'';document.getElementById('skWorkerEditDesignation').value=w.designation||'';document.getElementById('skWorkerEditDetails').value=w.details||'';document.getElementById('skWorkerEditPhotoPreview').src=w.photo||DEFAULT_PHOTO;document.getElementById('skWorkerEditPhoto').value='';document.getElementById('skWorkerEditModal').classList.add('active');
+      document.getElementById('skWorkerEditIndex').value=index;document.getElementById('skWorkerEditName').value=w.name||'';document.getElementById('skWorkerEditId').value=w.id||'';document.getElementById('skWorkerEditPassword').value='';document.getElementById('skWorkerEditPassword').placeholder=index>=0?'Leave blank to keep current password':'Set a password';document.getElementById('skWorkerEditPhone').value=w.phone||'';document.getElementById('skWorkerEditDesignation').value=w.designation||'';document.getElementById('skWorkerEditDetails').value=w.details||'';document.getElementById('skWorkerEditPhotoPreview').src=w.photo||DEFAULT_PHOTO;document.getElementById('skWorkerEditPhoto').value='';document.getElementById('skWorkerEditModal').classList.add('active');
     };
     window.skCloseWorkerEdit=function(){document.getElementById('skWorkerEditModal')?.classList.remove('active');};
     window.skSaveWorkerFromAdmin=function(){
       if(!admin()){toast('🔒 Admin access only');return;}const a=workers(),idx=parseInt(document.getElementById('skWorkerEditIndex').value,10);const name=document.getElementById('skWorkerEditName').value.trim(),id=document.getElementById('skWorkerEditId').value.trim(),password=document.getElementById('skWorkerEditPassword').value.trim();
-      if(!name||!id||!password){toast('Name, Worker ID and Password are required');return;}
+      if(!name||!id||(idx<0&&!password)){toast('Name, Worker ID and Password are required');return;}
       if(a.some((w,i)=>i!==idx&&w.id===id)){toast('Worker ID already exists');return;}
-      const base=idx>=0?a[idx]:{photo:DEFAULT_PHOTO};Object.assign(base,{name,id,password,phone:document.getElementById('skWorkerEditPhone').value.trim(),designation:document.getElementById('skWorkerEditDesignation').value.trim()||'Worker',details:document.getElementById('skWorkerEditDetails').value.trim()});
+      const base=idx>=0?a[idx]:{photo:DEFAULT_PHOTO};Object.assign(base,{name,id,password:password?window.skPinSec.hash(password):(base.password||''),phone:document.getElementById('skWorkerEditPhone').value.trim(),designation:document.getElementById('skWorkerEditDesignation').value.trim()||'Worker',details:document.getElementById('skWorkerEditDetails').value.trim()});
       const f=document.getElementById('skWorkerEditPhoto').files[0];fileToData(f,data=>{if(data)base.photo=data;if(idx>=0)a[idx]=base;else a.push(base);saveWorkers(a);populateLogin();renderAdminWorkers();toast(idx>=0?'Worker updated':'Worker added');skCloseWorkerEdit();});
     };
     window.skDeleteWorker=function(index){if(!admin())return;const a=workers();if(!a[index])return;if(!confirm('Delete this worker?\n\nThe worker will be moved to Recycle Bin for 30 days.'))return;const removed=a[index];if(typeof window.moveToTrash==='function')window.moveToTrash(removed,'worker',removed.name||removed.id);const id=removed.id;a.splice(index,1);saveWorkers(a);if(localStorage.getItem(CURRENT_WORKER_KEY)===id)localStorage.removeItem(CURRENT_WORKER_KEY);populateLogin();renderAdminWorkers();toast('Worker moved to Recycle Bin');};
@@ -5195,7 +5199,7 @@ img{max-width:100%!important;}
       },true);
       const login=document.getElementById('skRoleLoginBtn');
       document.addEventListener('click',function(e){if(e.target!==login)return;const active=document.querySelector('.sk-role-btn.active[data-role="worker"]');if(!active)return; e.preventDefault();e.stopImmediatePropagation();
-        const sel=document.getElementById('skWorkerLoginSelect'),pin=document.getElementById('skRolePin'),id=sel?.value||'',pw=pin?.value||'';const w=workers().find(x=>x.id===id);if(!w){document.getElementById('skRoleMsg').textContent='❌ Select a worker';return;}if(pw!==w.password){document.getElementById('skRoleMsg').textContent='❌ Wrong worker password';return;}localStorage.setItem('sk_current_worker_id_v1',w.id);localStorage.setItem('sk_current_role_v1','worker');document.getElementById('skRoleGate')?.classList.remove('sk-show');document.body.classList.add('sk-worker-mode');document.getElementById('skRolePin')?.blur();document.body.style.overflow='';window.scrollTo(0,0);if(typeof showToast==='function')showToast('👷 '+w.name+' login successful');
+        const sel=document.getElementById('skWorkerLoginSelect'),pin=document.getElementById('skRolePin'),id=sel?.value||'',pw=pin?.value||'';const w=workers().find(x=>x.id===id);if(!w){document.getElementById('skRoleMsg').textContent='❌ Select a worker';return;}const lk=window.skPinSec.lockedSeconds();if(lk>0){document.getElementById('skRoleMsg').textContent='⏳ Too many attempts. Try again in '+lk+'s';return;}if(!window.skPinSec.verify(w.password,pw)){const l2=window.skPinSec.recordFail();document.getElementById('skRoleMsg').textContent=l2>0?'⏳ Too many attempts. Try again in '+l2+'s':'❌ Wrong worker password';return;}window.skPinSec.recordSuccess();if(!window.skPinSec.isHashed(w.password)){w.password=window.skPinSec.hash(pw);const all=workers();const ix=all.findIndex(x=>x.id===w.id);if(ix>=0){all[ix].password=w.password;saveWorkers(all);}}localStorage.setItem('sk_current_worker_id_v1',w.id);localStorage.setItem('sk_current_role_v1','worker');document.getElementById('skRoleGate')?.classList.remove('sk-show');document.body.classList.add('sk-worker-mode');document.getElementById('skRolePin')?.blur();document.body.style.overflow='';window.scrollTo(0,0);if(typeof showToast==='function')showToast('👷 '+w.name+' login successful');
       },true);
       document.querySelectorAll('.sk-role-btn').forEach(b=>b.addEventListener('click',()=>setTimeout(syncLoginVisibility,0)));
     }
@@ -5205,13 +5209,11 @@ img{max-width:100%!important;}
 (function(){
     'use strict';
     const ROLE_KEY='sk_current_role_v1', ADMIN_PIN_KEY='sk_admin_pin_v1', WORKER_PIN_KEY='sk_worker_pin_v1';
-    const DEFAULT_ADMIN_PIN='1234', DEFAULT_WORKER_PIN='1111';
-    let selectedRole='admin';
+        let selectedRole='admin';
     function role(){return localStorage.getItem(ROLE_KEY)||'';}
     function admin(){return role()==='admin';}
     function pinKey(r){return r==='admin'?ADMIN_PIN_KEY:WORKER_PIN_KEY;}
-    function pin(r){return localStorage.getItem(pinKey(r))||(r==='admin'?DEFAULT_ADMIN_PIN:DEFAULT_WORKER_PIN);}
-    function toast(t){if(typeof showToast==='function')showToast(t);}
+        function toast(t){if(typeof showToast==='function')showToast(t);}
     function setRole(r){localStorage.setItem(ROLE_KEY,r);document.body.classList.toggle('sk-worker-mode',r==='worker');}
     function gate(show){const modern=document.getElementById('skLoginModal');const g=document.getElementById('skRoleGate');if(modern){modern.classList.toggle('active',!!show);if(g)g.classList.remove('sk-show');return;}if(g)g.classList.toggle('sk-show',show);}
     function logo(){return localStorage.getItem('sk_custom_logo')||window.SK_MOBILES_EMBEDDED_LOGO||'Logo.png';}
@@ -5219,7 +5221,9 @@ img{max-width:100%!important;}
     function choose(r){selectedRole=r;document.querySelectorAll('.sk-role-btn').forEach(b=>b.classList.toggle('active',b.dataset.role===r));const p=document.getElementById('skRolePin');if(p){p.value='';p.placeholder=r==='admin'?'Admin PIN':'Worker PIN';p.focus();}message('');}
     function login(){
       const p=(document.getElementById('skRolePin')?.value||'').trim();
-      if(p!==pin(selectedRole)){message('❌ Wrong PIN');return;}
+      const lk=window.skPinSec.lockedSeconds();if(lk>0){message('⏳ Too many attempts. Try again in '+lk+'s');return;}
+      if(!window.skPinSec.matchesRole(selectedRole,p)){const l2=window.skPinSec.recordFail();message(l2>0?'⏳ Too many attempts. Try again in '+l2+'s':'❌ Wrong PIN');return;}
+      window.skPinSec.recordSuccess();const wasBootstrap=window.skPinSec.usingBootstrapPin(selectedRole);window.skPinSec.upgradeRolePin(selectedRole,p);
       setRole(selectedRole);
       skRefreshRoleBadge();
       gate(false);
@@ -5230,6 +5234,7 @@ img{max-width:100%!important;}
       refreshAdminButton();
       setTimeout(()=>{gate(false);applyRestrictions();},0);
       toast(selectedRole==='admin'?'👑 Admin login successful':'👷 Worker login successful');
+      if(wasBootstrap)setTimeout(function(){let v='';for(let i=0;i<3&&!/^\d{4,12}$/.test(v);i++){v=(window.prompt('🔐 Security: set a new Admin PIN now (4-12 digits). The factory default PIN must be changed.')||'').trim();if(!v)break;}if(/^\d{4,12}$/.test(v)){window.skPinSec.setRolePin('admin',v);toast('Admin PIN updated');}else toast('⚠️ Default PIN still active — change it in Settings');},400);
     }
     window.skLogout=async function(){
       // UI fix: ensure the non-modal drawer closes before the login screen is shown.
@@ -5354,7 +5359,7 @@ img{max-width:100%!important;}
     window.skRefreshRoleBadge=skRefreshRoleBadge;
     window.skOpenAdminPanel=function(){if(!admin()){toast('🔒 Admin access only');return;}const r=document.getElementById('skAdminCurrentRole');if(r)r.textContent='👑 Admin — Full Access';document.getElementById('skAdminPanelModal')?.classList.add('active');skRenderManagerPermissions();};
     window.skCloseAdminPanel=function(){document.getElementById('skAdminPanelModal')?.classList.remove('active');};
-    window.skChangePin=function(r){if(!admin()){toast('🔒 Admin access only');return;}const id=r==='admin'?'skNewAdminPin':'skNewWorkerPin';const v=(document.getElementById(id)?.value||'').trim();if(!/^\d{4,12}$/.test(v)){toast('PIN must be 4-12 digits');return;}localStorage.setItem(pinKey(r),v);document.getElementById(id).value='';toast((r==='admin'?'Admin':'Worker')+' PIN updated');};
+    window.skChangePin=function(r){if(!admin()){toast('🔒 Admin access only');return;}const id=r==='admin'?'skNewAdminPin':'skNewWorkerPin';const v=(document.getElementById(id)?.value||'').trim();if(!/^\d{4,12}$/.test(v)){toast('PIN must be 4-12 digits');return;}window.skPinSec.setRolePin(r,v);document.getElementById(id).value='';toast((r==='admin'?'Admin':'Worker')+' PIN updated');};
 
     function mark(el){if(el&&!el.classList.contains('sk-worker-blocked'))el.classList.add('sk-worker-blocked');}
     function workerSettingAllowed(el){
@@ -5606,9 +5611,8 @@ img{max-width:100%!important;}
     pinEl.addEventListener('input',function(){
       const roleBtn=document.querySelector('.sk-role-btn.active');
       const role=(roleBtn&&roleBtn.dataset.role)||'admin';
-      const key=role==='worker'?'sk_worker_pin_v1':'sk_admin_pin_v1';
-      const expected=localStorage.getItem(key)||(role==='worker'?'1111':'1234');
-      if(String(pinEl.value||'')===String(expected)){
+      const typed=String(pinEl.value||'');
+      if(typed.length>=4&&window.skPinSec.lockedSeconds()===0&&window.skPinSec.matchesRole(role,typed)){
         btn.click();
         setTimeout(function(){
           const gate=document.getElementById('skRoleGate');
@@ -5947,9 +5951,8 @@ img{max-width:100%!important;}
     function tryLogin(){
       var active=document.querySelector('.sk-role-btn.active');
       var role=(active&&active.getAttribute('data-role'))||'admin';
-      var key=role==='worker'?'sk_worker_pin_v1':'sk_admin_pin_v1';
-      var expected=localStorage.getItem(key)||(role==='worker'?'1111':'1234');
-      if(String(pin.value||'').trim()===String(expected)){btn.click();}
+      var typed=String(pin.value||'').trim();
+      if(typed.length>=4&&window.skPinSec.lockedSeconds()===0&&window.skPinSec.matchesRole(role,typed)){btn.click();}
     }
     pin.addEventListener('input',tryLogin);
     pin.addEventListener('keyup',tryLogin);
