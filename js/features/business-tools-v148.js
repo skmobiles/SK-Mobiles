@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.2 — Daily closing report and credit reminders.
+/* SK MOBILES v5.7.3 — Daily closing report and credit reminders.
    Read-only over existing data (sk_bills, sk_credit_ledger_v1, skx_repair_jobs_v2). The only value this file writes is
    sk_credit_reminder_log_v1 (which customer was reminded on which day). */
 (function(){

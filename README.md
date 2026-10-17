@@ -220,3 +220,6 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 ## V5.7.2
 - Home Quick Actions: "Edit" lets you choose your own 5 buttons (20 to pick from); saved on this device.
 - Dark-mode button in the home header (works with the Appearance settings); dark header title colour fixed.
+
+## V5.7.3
+- Firebase free-quota saver: old cloud-backup clean-up runs once a day per device and deletes at most 1,000 documents a day (was 3,000 per run), so it no longer exhausts the 20K deletes / 50K reads daily limits.

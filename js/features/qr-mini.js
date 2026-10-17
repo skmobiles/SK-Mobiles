@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.2 — tiny offline QR code generator (byte mode, error correction M, versions 1-20).
+/* SK MOBILES v5.7.3 — tiny offline QR code generator (byte mode, error correction M, versions 1-20).
    window.skQrMatrix(text) -> array of rows of 0/1;  window.skQrDataUrl(text, size) -> PNG data URL. */
 (function(){
 'use strict';
