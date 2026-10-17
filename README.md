@@ -178,3 +178,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - **Customers page**: new Edit (name / phone) and Merge buttons on each customer, and a banner when one name has more than one account. Merge re-points every bill, repair job and credit entry to the final name + phone (history stays date-wise), keeps the due-date override, and offers a 15 s Undo. File `js/features/customer-merge.js`.
 - **Outstanding**: ledger-only credit of a customer who also has bills (for example after merging) is now included in the outstanding total (minus ledger-only payments).
 - **Home**: Recent Activity cards open the bill / repair / stock item they show; View All opens one newest-first list of bills, repairs, used-stock purchases and credit entries (`js/features/recent-activity.js`). View All / See All are plain links (no tall box).
+
+## V5.6.163
+- Phone field: tapping the field opens the number pad; the contact picker opens only from the contact icon.
+- Price list: now drawn directly on a canvas (no external library, works offline). Share image and PDF (A4, multi-page) both work; preview is exactly what is sent.
+- Every search box gets a small (x) button that clears all text at once.
+- Settings: Full Pill button radius no longer turns option tiles into ovals.

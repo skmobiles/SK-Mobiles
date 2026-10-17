@@ -4732,12 +4732,7 @@ img{max-width:100%!important;}
         }catch(err){if(!auto&&err&&err.name!=='AbortError'&&typeof showToast==='function')showToast('Could not open contacts. Check browser permission and HTTPS.');}
       };
       btn.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();pickContact(false);});
-      /* Tapping an empty phone field opens the phone's contact list; cancel it and type normally. */
-      input.addEventListener('click',function(){
-        if(input.value||input.readOnly||input.disabled)return;
-        if(!(navigator.contacts&&typeof navigator.contacts.select==='function'))return;
-        pickContact(true);
-      });
+      /* Contact picker opens only from the contact icon; tapping the field just opens the number pad. */
       wrap.appendChild(btn);
     });
   }
