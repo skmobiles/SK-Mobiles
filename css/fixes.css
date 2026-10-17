@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.157 — final layout fixes (loaded last). */
+/* SK MOBILES v5.6.158 — final layout fixes (loaded last). */
 /* Any inline icon without its own size rule can never balloon to fill its box. */
 :where(svg.st-svg){width:20px;height:20px;flex:none}
 /* Tools & Others note page spacing */
@@ -71,3 +71,13 @@ html body .sk-exch-toggle small{font-weight:500;color:var(--text-muted,#64748b)}
 html body .sk-exch-toggle b{color:#16a34a;font-size:.82rem}
 html body .sk-exch-fields{grid-template-columns:1fr 1fr;gap:10px;padding:0 12px 12px}
 html body .sk-exch-note{font-size:.68rem;color:var(--text-muted,#64748b)}
+
+/* Short popups open in the centre of the screen (popup-center.js adds .sk-pop-center) */
+html:not(#a) body .sk-pop-center:is(.modal-overlay,.sk-used-filter-overlay,.sk-used-detail-overlay){align-items:center!important;justify-content:center!important;padding:16px!important}
+html:not(#a) body .sk-pop-center:is(.modal-overlay,.sk-used-filter-overlay,.sk-used-detail-overlay)>:first-child{align-self:center!important;margin:0 auto!important;border-radius:24px!important;max-height:86vh!important;max-height:86dvh!important;width:100%!important;max-width:440px!important;padding-bottom:20px!important}
+html body #skCPDetailView .skcp-hist-btn{flex:1 1 100%;grid-column:1/-1;width:100%}
+
+/* Used stock view chips */
+html body .sk-used-view-chips{display:flex;gap:6px;margin:8px 0}
+html body .sk-used-view-chips button{flex:1;height:38px;min-height:0!important;border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);border-radius:12px;font-size:.78rem;font-weight:700;cursor:pointer}
+html body .sk-used-view-chips button.on{background:var(--primary,#2563eb);border-color:var(--primary,#2563eb);color:#fff}

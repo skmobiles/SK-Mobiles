@@ -7966,6 +7966,8 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   const filtered=rows.filter(r=>{
    const searchable=[r.model,r.dealer,r.imei,r.ram,r.storage,r.colour,r.kit,r.issue,r.status,r.sale?.customer,r.sale?.price,r.sale?.profit].some(v=>String(v??'').toLowerCase().includes(q));
    if(!searchable)return false;
+   if(window.__skUsedView==='stock'&&r.status==='Sold')return false;
+   if(window.__skUsedView==='sold'&&r.status!=='Sold')return false;
    const model=String(r.model||'');
    const brand=model.trim().split(/\s+/)[0].toLowerCase();
    if(filters.model&&!model.toLowerCase().includes(filters.model.toLowerCase()))return false;

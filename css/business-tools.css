@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.157 — daily report and credit reminders. */
+/* SK MOBILES v5.6.158 — daily report and credit reminders. */
 
 /* ---------- daily report ---------- */
 html body :is(#skDailyReportModal,#skCreditRemindModal,#skMonthReportModal,#skDealerModal,#skCreditRangeModal,#skPriceListModal):is(#skDailyReportModal,#skCreditRemindModal,#skMonthReportModal,#skDealerModal,#skCreditRangeModal,#skPriceListModal) .skdr-nav{display:flex;align-items:center;gap:8px;margin:2px 0 10px}
@@ -128,3 +128,7 @@ html body :is(#skDailyReportModal,#skMonthReportModal,#skDealerModal,#skCreditRa
 html body :is(#skDailyReportModal,#skMonthReportModal,#skDealerModal,#skCreditRangeModal,#skPriceListModal):is(#skDailyReportModal,#skMonthReportModal,#skDealerModal,#skCreditRangeModal,#skPriceListModal) .skdr-actions .submit-btn{width:100%;margin:0}
 html body #skCreditRangeModal#skCreditRangeModal .skcrg-dates input{background:var(--input-bg,#fff);color:var(--text)}
 html body #skCreditRangeModal#skCreditRangeModal .skcrg-dates label{display:block}
+html body #skPriceListModal#skPriceListModal .skpl-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}
+html body #skPriceListModal#skPriceListModal .skpl-seg button{border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);border-radius:12px;height:40px;font-size:.78rem;font-weight:700;cursor:pointer;min-height:0!important}
+html body #skPriceListModal#skPriceListModal .skpl-seg button.on{background:var(--primary,#2563eb);border-color:var(--primary,#2563eb);color:#fff}
+html body #skPriceListModal#skPriceListModal .skpl-opts{flex-wrap:wrap;gap:8px 14px}

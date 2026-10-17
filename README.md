@@ -147,3 +147,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 
 ## V5.6.157
 - Old cloud backups are now removed gradually (max 3,000 document deletes per day) so the Firestore free-plan limit of 20,000 deletes/day is never used up by clean-up.
+
+## V5.6.158
+- **Price List**: Customer price / Dealer price switch, kit and notes line, accessories and used mobiles toggles.
+- **Popups**: short popup windows (Recycle Bin, filters, login…) open in the centre of the screen; tall pages keep full height.
+- **Customer ledger**: "Send history" button sends the customer's credit bills, credit/payment history and outstanding on WhatsApp.
+- **Used Mobile Stock**: All / In stock / Sold switch above the register.
