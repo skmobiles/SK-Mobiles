@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.1 — Bulk WhatsApp: pick who (all / dues / EMI / recent / inactive customers) and a ready message
+/* SK MOBILES v5.7.2 — Bulk WhatsApp: pick who (all / dues / EMI / recent / inactive customers) and a ready message
    (festival offer, due reminder, EMI reminder, thank you). Every customer gets one row with a Send button that opens
    WhatsApp with the message already written using their name and amount. WhatsApp itself does not allow a message to
    be sent to many people automatically, so the "Send next" button moves through the list one tap at a time.

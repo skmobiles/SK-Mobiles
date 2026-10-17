@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.1 — Stock aging: used mobiles that are still unsold after 30 / 60 / 90+ days, oldest first, with the money
+/* SK MOBILES v5.7.2 — Stock aging: used mobiles that are still unsold after 30 / 60 / 90+ days, oldest first, with the money
    locked in them and a one-tap way to reduce the customer price. Only the customer price of the chosen mobile changes,
    and only when you tap Save. */
 (function(){

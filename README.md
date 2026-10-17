@@ -216,3 +216,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 
 ## V5.7.1
 - App icon / splash: sharp full-resolution SK MOBILES logo (any + maskable icons with safe zone, white splash background) instead of the blurry blue "SK" icon.
+
+## V5.7.2
+- Home Quick Actions: "Edit" lets you choose your own 5 buttons (20 to pick from); saved on this device.
+- Dark-mode button in the home header (works with the Appearance settings); dark header title colour fixed.

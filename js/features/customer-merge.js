@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.1 — Customers page: "Edit" a customer (name / phone) and "Merge" two accounts of the same person.
+/* SK MOBILES v5.7.2 — Customers page: "Edit" a customer (name / phone) and "Merge" two accounts of the same person.
    Every bill, repair job and credit-ledger entry of the old account(s) is re-pointed to the final name + phone, so
    the history stays complete and the date-wise order of the ledger is unchanged. A 15 second Undo is offered.
    Nothing is deleted: only the customer name / phone fields of existing records change. */

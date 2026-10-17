@@ -2867,13 +2867,13 @@ const MASTER_INVENTORY = [
         try { const oldOrder=JSON.parse(localStorage.getItem('sk_order_homeActionCardsContainer')||'[]'); if(Array.isArray(oldOrder)) featureOrderHome=oldOrder; } catch(e) {}
         const orderedFeatureDataHome = [...featureDataHome].sort((a,b)=>{const ai=featureOrderHome.indexOf(a.id),bi=featureOrderHome.indexOf(b.id);return (ai<0?999:ai)-(bi<0?999:bi)});
         const featureCards = orderedFeatureDataHome.map(c => `<button type="button" class="sk-home-v2-feature draggable-card ${c.tone}" data-card-id="${c.id}" draggable="true" onclick="${c.action}"><span class="sk-home-v2-feature-icon t-${c.tone}">${homeIcon(c.icon)}</span><span class="sk-home-v2-feature-copy"><b>${c.title}</b><small>${c.sub}</small><i aria-hidden="true">→</i></span></button>`).join('');
-        const quickActions = [
+        const quickActions = (window.skQuickPinned ? window.skQuickPinned() : [
           {icon:'file-plus',label:'New Bill',tone:'blue',action:"toggleModal('billingModal',true);switchBillTab('new');"},
           {icon:'wrench',label:'New Repair',tone:'rose',action:'window.skOpenRepairJobs?.();'},
           {icon:'users',label:'Add Customer',tone:'green',action:'window.skOpenCreditLedger?.();'},
           {icon:'package-plus',label:'Add Product',tone:'purple',action:'openItemEditor();'},
           {icon:'chart',label:'Today Report',tone:'orange',action:'window.skOpenDailyReport?.();'}
-        ].map(q => `<button type="button" class="sk-home-v2-quick ${q.tone}" onclick="${q.action}"><span>${homeIcon(q.icon)}</span><b>${q.label}</b></button>`).join('');
+        ]).map(q => `<button type="button" class="sk-home-v2-quick ${q.tone}" onclick="${q.action}"><span>${homeIcon(q.icon)}</span><b>${q.label}</b></button>`).join('');
         const latestBillHome = (window.skRaLatest && window.skRaLatest('bill')) || (Array.isArray(savedBills) ? savedBills[0] : null);
         const latestRepairHome = (window.skRaLatest && window.skRaLatest('job')) || pendingRepairsHome[0] || repairJobsHome[0] || null;
         const latestStockHome = Array.isArray(inventory) ? inventory[0] : null;
@@ -2890,7 +2890,7 @@ const MASTER_INVENTORY = [
           <section class="sk-home-v2-hero" aria-label="SK Mobiles business banner"><img src="./assets/sk-home-hero.jpg" alt="SK Mobiles — Mobile sales, service, accessories and repair"/></section>
           <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Business Summary</h2></div><div id="homeMetricGrid" class="sk-home-v2-metrics" aria-label="Business summary">${metricHTML}</div></section>
           <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Shop Tools</h2><button type="button" onclick="toggleLeftDrawer(true)">More <span>›</span></button></div><div id="homeActionCardsContainer" class="sk-home-v2-features" aria-label="Shop tools">${featureCards}</div></section>
-          <section class="sk-home-v2-section"><div class="sk-home-v2-section-heading"><h2>Quick Actions</h2><button type="button" onclick="toggleLeftDrawer(true)">See All <span>→</span></button></div><div class="sk-home-v2-quick-grid">${quickActions}</div></section>
+          <section class="sk-home-v2-section"><div class="sk-home-v2-section-heading"><h2>Quick Actions</h2><span style="display:flex;gap:8px;align-items:center"><button type="button" onclick="window.skQuickEdit&&window.skQuickEdit()" aria-label="Choose quick actions">✎ Edit</button><button type="button" onclick="toggleLeftDrawer(true)">See All <span>→</span></button></span></div><div class="sk-home-v2-quick-grid">${quickActions}</div></section>
           <section class="sk-home-v2-section sk-home-v2-recent-section"><div class="sk-home-v2-section-heading"><h2>Recent Activity</h2><button type="button" onclick="window.skOpenRecentActivity?window.skOpenRecentActivity():(toggleModal('billingModal',true),switchBillTab('history'))">View All <span>→</span></button></div><div class="sk-home-v2-recent-grid">${recentHTMLDone}</div></section>
         `;
         setTimeout(() => {

@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.1 — every calendar (date) field shows the date as dd/mm/yyyy, whatever the phone's language/region is.
+/* SK MOBILES v5.7.2 — every calendar (date) field shows the date as dd/mm/yyyy, whatever the phone's language/region is.
    The stored value stays ISO (yyyy-mm-dd) so all existing code works unchanged; only what is displayed changes. */
 (function(){
 'use strict';
