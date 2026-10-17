@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.155 — Daily closing report and credit reminders.
+/* SK MOBILES v5.6.157 — Daily closing report and credit reminders.
    Read-only over existing data (sk_bills, sk_credit_ledger_v1, skx_repair_jobs_v2). The only value this file writes is
    sk_credit_reminder_log_v1 (which customer was reminded on which day). */
 (function(){
@@ -156,12 +156,20 @@ function dueKeyFor(c){
   });
   return best;
 }
+function daysPending(c,t){
+  var first='';
+  (c.bills||[]).forEach(function(x){if(num(x.b.balance)>0){var k=toKey(x.b.date);if(k&&(!first||k<first))first=k}});
+  (c.entries||[]).forEach(function(e){if((e.type==='credit'||e.type==='emi')&&String(e.source||'')!=='bill'&&!e.billId&&num(e.amount)>0){var k=toKey(e.date);if(k&&(!first||k<first))first=k}});
+  if(!first)return -1;
+  var a=first.split('-'),b=t.split('-');
+  return Math.max(0,Math.round((Date.UTC(+b[0],+b[1]-1,+b[2])-Date.UTC(+a[0],+a[1]-1,+a[2]))/86400000));
+}
 function reminderRows(){
   var cs=[];try{cs=typeof window.skCPGetCustomers==='function'?window.skCPGetCustomers():[]}catch(e){}
   var t=today();
   return cs.filter(function(c){return num(c.balance)>0}).map(function(c){
     var due=dueKeyFor(c);
-    return {key:c.key,name:c.name,phone:c.phone||'',balance:num(c.balance),due:due,overdue:!!due&&due<t,soon:!!due&&due>=t}
+    return {key:c.key,name:c.name,phone:c.phone||'',balance:num(c.balance),due:due,overdue:!!due&&due<t,soon:!!due&&due>=t,days:daysPending(c,t)}
   }).sort(function(a,b){
     if(a.overdue!==b.overdue)return a.overdue?-1:1;
     if(a.due&&b.due&&a.due!==b.due)return a.due<b.due?-1:1;
@@ -190,9 +198,10 @@ function renderRemind(){
   if(!rows.length){box.innerHTML='<div class="skdr-empty">No pending credit. 🎉</div>';return}
   box.innerHTML=rows.map(function(r){
     var tag=r.overdue?'<i class="skcr-tag bad">Overdue '+dmy(r.due)+'</i>':(r.due?'<i class="skcr-tag">Due '+dmy(r.due)+'</i>':'');
+    var ago=r.days>=0?'<i class="skcr-tag'+(r.days>=30?' bad':'')+'">'+r.days+' days pending</i>':'';
     var sent=log[r.key]===t?'<i class="skcr-tag ok">Reminded today</i>':'';
     var can=!!digits(r.phone);
-    return '<div class="skcr-row"><div class="skcr-main"><b>'+esc(r.name)+'</b><small>'+(can?esc(r.phone):'No phone')+'</small><div>'+tag+sent+'</div></div>'+
+    return '<div class="skcr-row"><div class="skcr-main"><b>'+esc(r.name)+'</b><small>'+(can?esc(r.phone):'No phone')+'</small><div>'+ago+tag+sent+'</div></div>'+
       '<div class="skcr-amt">'+money(r.balance)+'</div>'+
       '<button type="button" class="skcp-btn skcr-wa" '+(can?'':'disabled ')+'onclick="skCreditRemind(\''+encodeURIComponent(r.key)+'\')" aria-label="WhatsApp reminder">💬</button></div>';
   }).join('');

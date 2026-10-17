@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.155 — Bill WhatsApp popup, Customer history, Warranty tracker, Undo delete.
+/* SK MOBILES v5.6.157 — Bill WhatsApp popup, Customer history, Warranty tracker, Undo delete.
    Additive only: reads existing data; writes only warrantyDays/warrantyEnd on a bill and restores
    data the user explicitly undoes. Existing business logic is wrapped, never replaced. */
 (function(){
@@ -129,6 +129,7 @@ function billMessage(b){
   var cr=(b.payMode==='Credit'||b.payMode==='EMI');
   var L=['*'+shopName()+'*','Bill No: '+(b.billNo||b.id),'Date: '+(b.date||''),'Customer: '+(b.custName||''),'Item: '+item];
   if(b.imei1)L.push('IMEI: '+b.imei1);
+  if(b.exchange&&b.exchange.value>0){L.push('Sale price: '+money(b.grossPrice));L.push('Old mobile exchange'+(b.exchange.model?' ('+b.exchange.model+')':'')+': -'+money(b.exchange.value))}
   L.push('Total: '+money(b.price));
   if(cr){L.push('Advance: '+money(b.advance));L.push('Balance: '+money(b.balance))}
   L.push('Payment: '+(b.payMode||'Cash'));

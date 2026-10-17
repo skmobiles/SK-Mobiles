@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.155 — Dealer payment tracker.
+/* SK MOBILES v5.6.157 — Dealer payment tracker.
    Bought = used-mobile purchases (dealer + purchase price) + repair spare-part purchases (dealer + amount).
    Paid   = payments entered here (key skx_dealer_payments_v1, synced like every other skx_ key).
    Balance = Bought - Paid. Only purchases on/after the "count from" date are included, so old, already-settled
@@ -31,7 +31,7 @@ function compute(){
     var k=n.toLowerCase();if(!map[k])map[k]={name:n,bought:0,paid:0,buys:[],pays:[]};return map[k];
   }
   arr(USED_KEY).forEach(function(r){
-    var d=get(r.dealer);if(!d)return;var dt=toKey(r.date);
+    if(r.exchange)return;var d=get(r.dealer);if(!d)return;var dt=toKey(r.date);
     if(dt&&dt<start)return;
     d.bought+=num(r.cost);d.buys.push({date:dt,label:(r.model||'Used mobile')+(r.imei?' • '+String(r.imei).slice(-6):''),amount:num(r.cost)});
   });

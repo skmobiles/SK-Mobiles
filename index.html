@@ -2,7 +2,7 @@
 
 <html lang="en-GB" data-theme="light">
 <head>
-<meta name="sk-app-version" content="5.6.155">
+<meta name="sk-app-version" content="5.6.157">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
@@ -30,13 +30,13 @@
 <script>
 (function(){try{var r=document.documentElement,t=localStorage.getItem('sk_theme');if(t)r.setAttribute('data-theme',t);var meta=document.getElementById('skThemeColorMeta');var c={light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',sunset:'#ffedd5',emerald:'#d1fae5',rose:'#ffe4e6',midnight:'#111827',graphite:'#111827',lime:'#0f1a05',dark:'#050811',cyber:'#03040a',obsidian:'#000000',aurora:'#cffafe',crimson:'#ffe4e6',mint:'#ccfbf1',solar:'#000000',nebula:'#17102f',forest:'#062e1c',glacier:'#e0f2fe',magenta:'#2b092f','apple-light':'#f5f5f7','apple-dark':'#000000'}[t||'light'];if(meta&&c)meta.setAttribute('content',c);}catch(e){}})();
 </script>
-<link href="./css/fonts.css?v=5.6.155" rel="stylesheet" type="text/css"/>
-<link href="./css/style.css?v=5.6.155" rel="stylesheet" type="text/css"/>
-<link href="./css/premium-overrides.css?v=5.6.155" rel="stylesheet" type="text/css"/>
-<link href="./css/used-mobile-stock.css?v=5.6.155" rel="stylesheet" type="text/css"/>
-<link href="./css/billing-page.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/colorful-ui.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/polish-v143.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/invoice-unified.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/settings-v145.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/screens-v145.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/bottom-nav.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/appearance.css?v=5.6.155" rel="stylesheet" type="text/css"/>
-<link href="./css/fixes.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/shop-tools.css?v=5.6.155" rel="stylesheet" type="text/css"/>
-<link href="./css/business-tools.css?v=5.6.155" rel="stylesheet" type="text/css"/><script>
+<link href="./css/fonts.css?v=5.6.157" rel="stylesheet" type="text/css"/>
+<link href="./css/style.css?v=5.6.157" rel="stylesheet" type="text/css"/>
+<link href="./css/premium-overrides.css?v=5.6.157" rel="stylesheet" type="text/css"/>
+<link href="./css/used-mobile-stock.css?v=5.6.157" rel="stylesheet" type="text/css"/>
+<link href="./css/billing-page.css?v=5.6.157" rel="stylesheet" type="text/css"/><link href="./css/colorful-ui.css?v=5.6.157" rel="stylesheet" type="text/css"/><link href="./css/polish-v143.css?v=5.6.157" rel="stylesheet" type="text/css"/><link href="./css/invoice-unified.css?v=5.6.157" rel="stylesheet" type="text/css"/><link href="./css/settings-v145.css?v=5.6.157" rel="stylesheet" type="text/css"/><link href="./css/screens-v145.css?v=5.6.157" rel="stylesheet" type="text/css"/><link href="./css/bottom-nav.css?v=5.6.157" rel="stylesheet" type="text/css"/><link href="./css/appearance.css?v=5.6.157" rel="stylesheet" type="text/css"/>
+<link href="./css/fixes.css?v=5.6.157" rel="stylesheet" type="text/css"/><link href="./css/shop-tools.css?v=5.6.157" rel="stylesheet" type="text/css"/>
+<link href="./css/business-tools.css?v=5.6.157" rel="stylesheet" type="text/css"/><script>
 (function(){try{
   var s=JSON.parse(localStorage.getItem('sk_appearance_settings')||'null');
   if(!s)return;
@@ -314,7 +314,7 @@
 </button>
 
 <div class="drawer-footer-badge">
-<span>SK Mobiles Master • V5.6.155</span>
+<span>SK Mobiles Master • V5.6.157</span>
 <span>Dharmapuri, Tamil Nadu</span>
 </div>
 </div>
@@ -597,6 +597,14 @@ Dharmapuri, Tamil Nadu 636705 .</textarea></div></div><div class="st-field"><spa
 <label class="form-label">Down Payment (₹)</label> <input class="form-input" id="billAdvance" min="0" onfocus="handleInputClear(this)" oninput="saveDraft(); calculateBillMath()" placeholder="5000" type="number" value="0"/>
 </div>
 </div>
+<div id="exchangeBox" class="sk-exch">
+<button type="button" class="sk-exch-toggle" id="exchToggle" onclick="skToggleExchange()" aria-expanded="false"><span>🔁 Old mobile exchange <small>(optional)</small></span><b id="exchSummary"></b></button>
+<div id="exchangeFields" class="sk-exch-fields" style="display:none;">
+<div><label class="form-label">Old mobile model</label><input class="form-input" id="billExchModel" oninput="saveDraft(); calculateBillMath()" placeholder="e.g. Redmi Note 8" type="text"></div>
+<div><label class="form-label">Exchange value (₹)</label><input class="form-input" id="billExchValue" min="0" onfocus="handleInputClear(this)" oninput="saveDraft(); calculateBillMath()" placeholder="3000" type="number"></div>
+<div style="grid-column:1/-1;"><label class="form-label">Old mobile IMEI</label><input class="form-input" id="billExchImei" oninput="saveDraft()" placeholder="IMEI (optional)" type="text" inputmode="numeric"></div>
+<div class="sk-exch-note" style="grid-column:1/-1;">Exchange value is deducted from the sale price. The old mobile is added to Used Mobile stock when the bill is saved.</div>
+</div></div>
 <div id="balanceDueContainer" style="display:none;justify-content:space-between;align-items:center;background:rgba(37,99,235,.08);padding:9px 12px;border-radius:14px;margin-top:8px;">
 <span style="font-size:.74rem;color:var(--text-muted);">Balance Due</span> <span id="billBalanceDisplay" style="font-weight:900;font-size:1rem;color:var(--danger);">₹ 0</span>
 </div>
@@ -831,7 +839,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea></div></div><div class="st-field"><spa
 <img alt="SK MOBILES" class="sk-logo-img" id="appHeaderLogo" onclick="document.getElementById('logoFileInput').click()" src="./assets/sk-home-logo.png" title="Click to change logo"/>
 <div>
 <div class="app-name" id="appHeaderTitle">SK MOBILES</div>
-<div class="app-sub"><span class="app-sub-default">Tempered Glass &amp; Inventory Master</span><span class="app-sub-home">Smart Billing &amp; Business Management</span> <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V5.6.155</span></div>
+<div class="app-sub"><span class="app-sub-default">Tempered Glass &amp; Inventory Master</span><span class="app-sub-home">Smart Billing &amp; Business Management</span> <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V5.6.157</span></div>
 </div>
 </div>
 <div class="sk-home-header-actions" aria-label="Home shortcuts">
@@ -1268,27 +1276,31 @@ Dharmapuri, Tamil Nadu 636705 .</textarea></div></div><div class="st-field"><spa
 
 <script>try { localStorage.removeItem('sk_design_studio_v1'); } catch(e) {}</script>
 
-<script src="js/features/pin-security.js?v=5.6.155" defer></script>
-<script src="js/features/colorful-ui.js?v=5.6.155" defer></script>
-<script src="js/features/settings-v145.js?v=5.6.155" defer></script>
-<script src="js/features/date-fields-v145.js?v=5.6.155" defer></script>
-<script src="js/features/backup-status.js?v=5.6.155"></script>
-<script src="js/features/shop-tools-v151.js?v=5.6.155"></script>
-<script src="js/features/scanner-v152.js?v=5.6.155"></script>
-<script src="js/features/qr-mini.js?v=5.6.155"></script>
-<script src="js/features/invoice-upi.js?v=5.6.155"></script>
-<script src="js/features/month-report.js?v=5.6.155"></script>
-<script src="js/features/cloud-guard.js?v=5.6.155"></script>
-<script src="js/features/repair-photos.js?v=5.6.155"></script>
-<script src="js/features/dealer-tracker.js?v=5.6.155"></script>
-<script src="js/features/global-search.js?v=5.6.155"></script>
-<script src="js/features/business-tools-v148.js?v=5.6.155" defer></script>
-<script src="js/features/form-icons-v145.js?v=5.6.155" defer></script>
-<script src="js/app.js?v=5.6.155" defer></script>
-<script src="js/firebase-sync.js?v=5.6.155"></script>
+<script src="js/features/pin-security.js?v=5.6.157" defer></script>
+<script src="js/features/colorful-ui.js?v=5.6.157" defer></script>
+<script src="js/features/settings-v145.js?v=5.6.157" defer></script>
+<script src="js/features/date-fields-v145.js?v=5.6.157" defer></script>
+<script src="js/features/backup-status.js?v=5.6.157"></script>
+<script src="js/features/shop-tools-v151.js?v=5.6.157"></script>
+<script src="js/features/scanner-v152.js?v=5.6.157"></script>
+<script src="js/features/qr-mini.js?v=5.6.157"></script>
+<script src="js/features/invoice-upi.js?v=5.6.157"></script>
+<script src="js/features/month-report.js?v=5.6.157"></script>
+<script src="js/features/cloud-guard.js?v=5.6.157"></script>
+<script src="js/features/repair-photos.js?v=5.6.157"></script>
+<script src="js/features/dealer-tracker.js?v=5.6.157"></script>
+<script src="js/features/global-search.js?v=5.6.157"></script>
+<script src="js/features/credit-range.js?v=5.6.157"></script>
+<script src="js/features/exchange.js?v=5.6.157"></script>
+<script src="js/features/repair-ready.js?v=5.6.157"></script>
+<script src="js/features/price-list.js?v=5.6.157"></script>
+<script src="js/features/business-tools-v148.js?v=5.6.157" defer></script>
+<script src="js/features/form-icons-v145.js?v=5.6.157" defer></script>
+<script src="js/app.js?v=5.6.157" defer></script>
+<script src="js/firebase-sync.js?v=5.6.157"></script>
 
 <script>
-/* V5.6.155: mount fixed navigation under body so transformed page wrappers
+/* V5.6.157: mount fixed navigation under body so transformed page wrappers
    cannot clip its lower edge or trap position:fixed inside a stacking context. */
 (function(){
   function mountSkBottomNav(){

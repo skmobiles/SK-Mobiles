@@ -1443,7 +1443,7 @@ const MASTER_INVENTORY = [
     function autoSaveCurrentFormSilently() {
       const custName = document.getElementById('billCustName').value.trim();
       const model = document.getElementById('billModel').value.trim();
-      const price = parseFloat(document.getElementById('billTotalPrice').value) || 0;
+      const price = skBillNetPrice();
       if (custName && model && price > 0) {
         const billDate = `${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
         const newEntry = {
@@ -2590,6 +2590,7 @@ const MASTER_INVENTORY = [
         payMode: currentPayMode,
         mobileType: currentMobileType,
         price: document.getElementById('billTotalPrice').value,
+        exchModel: (document.getElementById('billExchModel') || {}).value || '', exchImei: (document.getElementById('billExchImei') || {}).value || '', exchValue: (document.getElementById('billExchValue') || {}).value || '',
         advance: document.getElementById('billAdvance').value,
         emiMonths: document.getElementById('billEmiMonths').value,
         emiInterest: document.getElementById('billEmiInterest').value,
@@ -2616,6 +2617,7 @@ const MASTER_INVENTORY = [
         document.getElementById('billImei1').value = d.imei1 || '';
         document.getElementById('billImei2').value = d.imei2 || '';
         document.getElementById('billTotalPrice').value = d.price || '';
+        ['billExchModel:exchModel','billExchImei:exchImei','billExchValue:exchValue'].forEach(x => { const [id, k] = x.split(':'); const el = document.getElementById(id); if (el) el.value = d[k] || ''; });
         document.getElementById('billAdvance').value = d.advance || '0';
         document.getElementById('billEmiMonths').value = d.emiMonths || '3';
         document.getElementById('billEmiInterest').value = d.emiInterest || '0';
@@ -3158,8 +3160,18 @@ const MASTER_INVENTORY = [
       updateBillPreview();
     }
 
+    /* Old-mobile exchange: the price field holds the sale price; the exchange value is deducted from it. */
+    function skBillExchangeData() {
+      const g = id => (document.getElementById(id) || {}).value || '';
+      return { model: g('billExchModel').trim(), imei: g('billExchImei').trim(), value: Math.max(0, parseFloat(g('billExchValue')) || 0) };
+    }
+    function skBillGrossPrice() { return parseFloat(document.getElementById('billTotalPrice').value) || 0; }
+    function skBillNetPrice() { return Math.max(0, skBillGrossPrice() - skBillExchangeData().value); }
+    window.skBillNetPrice = skBillNetPrice;
+    window.skBillExchangeData = skBillExchangeData;
+
     function calculateBillMath() {
-      const total = parseFloat(document.getElementById('billTotalPrice').value) || 0;
+      const total = skBillNetPrice();
       const isCreditOrEmi = (currentPayMode === 'EMI' || currentPayMode === 'Credit');
       const advance = isCreditOrEmi ? (parseFloat(document.getElementById('billAdvance').value) || 0) : 0;
       const balance = Math.max(0, total - advance);
@@ -3256,7 +3268,7 @@ const MASTER_INVENTORY = [
       document.getElementById('pvPackage').innerText = document.getElementById('billPackage').value;
       document.getElementById('pvPayMode').innerHTML = `<span style="background:var(--pill-bg);color:var(--text);padding:2px 8px;border-radius:8px;">${currentPayMode}</span>`;
 
-      const total = parseFloat(document.getElementById('billTotalPrice').value) || 0;
+      const total = skBillNetPrice();
       const isCreditOrEmi = (currentPayMode === 'EMI' || currentPayMode === 'Credit');
       const advance = isCreditOrEmi ? (parseFloat(document.getElementById('billAdvance').value) || 0) : 0;
       const balance = Math.max(0, total - advance);
@@ -3288,13 +3300,14 @@ const MASTER_INVENTORY = [
       if (editId) {
         const bill = savedBills.find(b => b && String(b.id) === editId);
         if (!bill) { window.__skEditingBillId=''; showToast('❌ Bill not found'); return; }
-        const price = parseFloat(document.getElementById('billTotalPrice').value) || 0;
+        const price = skBillNetPrice();
         const advance = parseFloat(document.getElementById('billAdvance').value) || 0;
         if (!document.getElementById('billCustName').value.trim() || !document.getElementById('billModel').value.trim() || price <= 0) { showToast('❌ Customer, model and sale price are required'); return; }
         const set = (key,id) => { bill[key] = document.getElementById(id)?.value || ''; };
         set('custName','billCustName'); set('phone','billCustPhone'); set('address','billCustAddress'); set('brand','billBrand'); set('model','billModel');
         set('ram','billRam'); set('storage','billStorage'); set('color','billColor'); set('imei1','billImei1'); set('imei2','billImei2'); set('package','billPackage');
         bill.mobileType=currentMobileType; bill.payMode=currentPayMode; bill.price=price; bill.advance=advance;
+        { const ex=skBillExchangeData(); if(ex.value>0){ bill.grossPrice=skBillGrossPrice(); bill.exchange=Object.assign({},bill.exchange||{},ex); } else { delete bill.grossPrice; delete bill.exchange; } }
         bill.emiMonths=parseInt(document.getElementById('billEmiMonths').value,10)||0; bill.emiInterest=parseFloat(document.getElementById('billEmiInterest').value)||0;
         bill.emiStartDate=document.getElementById('billEmiStartDate').value||''; bill.creditDueDate=document.getElementById('billCreditDate').value||'';
         bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-advance):0;
@@ -3306,8 +3319,9 @@ const MASTER_INVENTORY = [
       const billDate = `${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
       const custName = document.getElementById('billCustName').value.trim();
       const model = document.getElementById('billModel').value.trim();
-      const price = parseFloat(document.getElementById('billTotalPrice').value) || 0;
-      if (!custName || !model || price <= 0) { showToast('❌ Customer, model and sale price are required'); return; }
+      const price = skBillNetPrice();
+      const exch = skBillExchangeData();
+      if (!custName || !model || skBillGrossPrice() <= 0) { showToast('❌ Customer, model and sale price are required'); return; }
       const isCreditOrEmi = currentPayMode === 'Credit' || currentPayMode === 'EMI';
       const newEntry = {
         id: `SK-B-${Date.now().toString().slice(-8)}`,
@@ -3327,10 +3341,11 @@ const MASTER_INVENTORY = [
         emiStartDate: document.getElementById('billEmiStartDate').value || '', creditDueDate: document.getElementById('billCreditDate').value || '',
         emiHtml: currentPayMode === 'EMI' ? document.getElementById('pvEmiScheduleTbody').innerHTML : ''
       };
+      if (exch.value > 0) { newEntry.grossPrice = skBillGrossPrice(); newEntry.exchange = exch; }
       if (typeof window.skUsedCanSell === 'function' && !window.skUsedCanSell(newEntry)) return;
       savedBills.unshift(newEntry);
       localStorage.setItem('sk_bills', JSON.stringify(savedBills));
-      try { if (typeof window.skUsedRecordBillSale === 'function') window.skUsedRecordBillSale(newEntry); } catch (e) { console.warn('Used stock sale linkage skipped:', e); }
+      try { if (typeof window.skUsedRecordBillSale === 'function') window.skUsedRecordBillSale(newEntry.grossPrice ? Object.assign({}, newEntry, { price: newEntry.grossPrice }) : newEntry); } catch (e) { console.warn('Used stock sale linkage skipped:', e); }
       updateBillHistoryCount(); renderBillHistory(); clearDraft();
       window.__skEditingBillId='';
       const saveBtn=document.querySelector('.bill-action-save'); if(saveBtn){const sp=saveBtn.querySelector('span:last-child');if(sp)sp.textContent='Save Bill';}
@@ -3432,7 +3447,7 @@ function editSavedBill(idx) {
       switchBillTab('new');
       const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v==null?'':v;};
       selectMobileType(b.mobileType || 'New Mobile');
-      set('billCustName',b.custName);set('billCustPhone',b.phone);set('billCustAddress',b.address);set('billBrand',b.brand);set('billModel',b.model);set('billRam',b.ram);set('billStorage',b.storage);set('billColor',b.color);set('billImei1',b.imei1);set('billImei2',b.imei2);set('billPackage',b.package);set('billTotalPrice',b.price);set('billAdvance',b.advance||0);set('billEmiMonths',b.emiMonths||3);set('billEmiInterest',b.emiInterest||0);set('billEmiStartDate',b.emiStartDate||'');set('billCreditDate',b.creditDueDate||'');
+      set('billCustName',b.custName);set('billCustPhone',b.phone);set('billCustAddress',b.address);set('billBrand',b.brand);set('billModel',b.model);set('billRam',b.ram);set('billStorage',b.storage);set('billColor',b.color);set('billImei1',b.imei1);set('billImei2',b.imei2);set('billPackage',b.package);set('billTotalPrice',b.grossPrice!=null?b.grossPrice:b.price);set('billExchModel',b.exchange&&b.exchange.model);set('billExchImei',b.exchange&&b.exchange.imei);set('billExchValue',b.exchange&&b.exchange.value);set('billAdvance',b.advance||0);set('billEmiMonths',b.emiMonths||3);set('billEmiInterest',b.emiInterest||0);set('billEmiStartDate',b.emiStartDate||'');set('billCreditDate',b.creditDueDate||'');
       currentPayMode=b.payMode||'Cash';
       if(typeof selectPayMode==='function')selectPayMode(currentPayMode);
       if(typeof calculateBillMath==='function')calculateBillMath();

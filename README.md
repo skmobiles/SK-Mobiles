@@ -136,3 +136,14 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - **Cloud backup guard / Storage Health**: auto backup on first open of the day and after 21:00, only the last 14 backups are kept.
 - **Dark mode**: dark page surface, readable labels and softer borders on every screen.
 - No change to core sync, Firebase config or data keys.
+
+## V5.6.156
+- **Credit List** (drawer / Credit Reminders): date-to-date, customer-wise pending credit with days pending; WhatsApp statement per customer, WhatsApp list, PDF.
+- **Credit Reminders** now show "N days pending".
+- **Old mobile exchange** on the bill: exchange value is deducted from the sale price, the invoice shows sale price / exchange / amount payable, and the old mobile is added to Used Mobile stock (cost = exchange value). Used-stock profit still uses the full sale price.
+- **Repair Ready**: when a job becomes Ready, a popup offers a one-tap WhatsApp message (model + balance).
+- **Price List** (drawer): used mobiles in stock + priced accessories; share as image, PDF or text.
+- Offline billing verified (shell cached by the service worker, data kept locally and uploaded on the next online open). Core sync untouched.
+
+## V5.6.157
+- Old cloud backups are now removed gradually (max 3,000 document deletes per day) so the Firestore free-plan limit of 20,000 deletes/day is never used up by clean-up.

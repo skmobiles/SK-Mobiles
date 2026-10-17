@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.155 — Cloud guard for the Firebase free plan.
+/* SK MOBILES v5.6.157 — Cloud guard for the Firebase free plan.
    1. Automatic backup: first open of the day + after closing time (only when data changed).
    2. Keeps only the newest backup of each of the last 14 days (older ones are deleted, incl. sub-collections).
    3. Storage Health page: size of every data key vs the 1 MB Firestore document limit, backup status, read estimate.
@@ -6,7 +6,7 @@
 (function(){
 'use strict';
 var SHOP='SK-MOBILES',ROOT='cloudBackups',META='bk_guard_v1';
-var KEEP_DAYS=14,CLOSE_HOUR=21,DOC_WARN=700*1024,DOC_LIMIT=1000*1024;
+var KEEP_DAYS=14,CLOSE_HOUR=21,DELETE_BUDGET=3000,DOC_WARN=700*1024,DOC_LIMIT=1000*1024;
 var SKIP=/^(bk_|sk_current_|sk_recovery_backup_|sk_theme|sk_appearance|sk_bill_draft|sk_font|sk_icon|sk_last_|sk_sync_)/;
 
 function toast(t){if(typeof window.showToast==='function')window.showToast(t)}
@@ -28,15 +28,17 @@ function db(){try{return window.firebase&&firebase.firestore?firebase.firestore(
 function backupsCol(){var d=db();return d?d.collection('shops').doc(SHOP).collection(ROOT):null}
 
 /* ---------- pruning ---------- */
-async function deleteBackup(ref){
+async function deleteBackup(ref,budget){
   var d=db();
   var items=await ref.collection('items').get();
   for(var i=0;i<items.docs.length;i++){
+    if(budget&&budget.left<=0)throw new Error('daily delete budget used');
     var it=items.docs[i],chunks=await it.ref.collection('chunks').get(),batch=d.batch(),n=0;
     for(var j=0;j<chunks.docs.length;j++){batch.delete(chunks.docs[j].ref);n++;if(n>=400){await batch.commit();batch=d.batch();n=0}}
     batch.delete(it.ref);await batch.commit();
+    if(budget)budget.left-=chunks.docs.length+1;
   }
-  await ref.delete();
+  await ref.delete();if(budget)budget.left-=1;
 }
 /* decide which backup docs to delete: keep newest complete backup of each of the last KEEP_DAYS days */
 function planPrune(docs,now){
@@ -53,12 +55,18 @@ function planPrune(docs,now){
   if(!keep.some(function(r){return r.ok})){var firstOk=del.filter(function(r){return r.ok})[0];if(firstOk){del.splice(del.indexOf(firstOk),1);keep.push(firstOk)}}
   return {keep:keep,del:del};
 }
+/* Firestore free plan allows 20,000 deletes per day, so old backups are removed gradually (DELETE_BUDGET per day). */
 async function prune(){
   var col=backupsCol();if(!col)return {deleted:0,kept:0};
   var snap=await col.orderBy('createdAtMs','desc').limit(120).get();
   var plan=planPrune(snap.docs,Date.now());
-  for(var i=0;i<plan.del.length;i++){try{await deleteBackup(plan.del[i].doc.ref)}catch(e){console.warn('prune failed for one backup',e)}}
-  return {deleted:plan.del.length,kept:plan.keep.length};
+  var m=meta(),today=dayKey(Date.now()),usedBefore=m.delDay===today?(m.delUsed||0):0;
+  var budget={left:DELETE_BUDGET-usedBefore},start=budget.left,done=0;
+  for(var i=0;i<plan.del.length&&budget.left>0;i++){
+    try{await deleteBackup(plan.del[i].doc.ref,budget);done++}catch(e){console.warn('prune stopped',e);break}
+  }
+  m=meta();m.delDay=today;m.delUsed=usedBefore+(start-budget.left);saveMeta(m);
+  return {deleted:done,kept:plan.keep.length,pending:plan.del.length-done};
 }
 window.skCloudPrune=prune;window.__skGuardTick=function(){return tick()};
 window.__skPlanPrune=planPrune;

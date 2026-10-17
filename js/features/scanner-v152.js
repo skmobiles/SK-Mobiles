@@ -1,10 +1,10 @@
-/* SK MOBILES v5.6.155 — IMEI / serial barcode scanner.
+/* SK MOBILES v5.6.157 — IMEI / serial barcode scanner.
    Adds a camera button inside every IMEI field. Uses the phone's built-in BarcodeDetector (Chrome Android);
    falls back to the ZXing library (loaded on first use) when BarcodeDetector is not available.
    Only fills the field the user tapped; no stored data is touched. */
 (function(){
 'use strict';
-var IDS=['billImei1','billImei2','skUsedImei'];
+var IDS=['billImei1','billImei2','billExchImei','skUsedImei'];
 var ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M7 9v6M10 9v6M13 9v6M16 9v6"/></svg>';
 var ZX_URL='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
 var FORMATS=['code_128','code_39','code_93','ean_13','ean_8','itf','codabar','upc_a','upc_e','data_matrix','qr_code'];
