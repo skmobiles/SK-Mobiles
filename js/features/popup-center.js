@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.0 — Short popup windows open in the centre of the screen.
+/* SK MOBILES v5.7.1 — Short popup windows open in the centre of the screen.
    Tall pages (billing, settings, lists…) keep their full-height layout. A popup counts as "short" when its content
    is less than ~80% of the screen height; this is re-checked when the content grows or shrinks. */
 (function(){

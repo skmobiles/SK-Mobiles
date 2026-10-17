@@ -1,4 +1,4 @@
-/* SK Mobiles v5.7.0 — adds a small coloured icon in front of every form label.
+/* SK Mobiles v5.7.1 — adds a small coloured icon in front of every form label.
    Purely visual: labels/inputs/ids/handlers are untouched. */
 (function(){
   'use strict';

@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.0 — Backup to phone: one-tap JSON or Excel download, one-tap restore from a backup file, and a weekly
+/* SK MOBILES v5.7.1 — Backup to phone: one-tap JSON or Excel download, one-tap restore from a backup file, and a weekly
    reminder bar. This is on top of the existing cloud backup. The "last downloaded" time is kept only on this phone. */
 (function(){
 'use strict';
