@@ -1425,8 +1425,8 @@ const MASTER_INVENTORY = [
 
     function handleNewBillClick() {
       window.__skInvoiceExportBill=null;
-      window.__skEditingBillId='';
       autoSaveCurrentFormSilently();
+      window.__skEditingBillId='';
       document.getElementById('usedMobileBillingForm').reset();
       const saveBtn=document.querySelector('.bill-action-save'); if(saveBtn){const sp=saveBtn.querySelector('span:last-child');if(sp)sp.textContent='Save Bill';}
       document.getElementById('billAdvance').value = "0";
@@ -1441,6 +1441,7 @@ const MASTER_INVENTORY = [
     }
 
     function autoSaveCurrentFormSilently() {
+      if (window.__skEditingBillId) return; /* editing an existing bill: never create a second copy */
       const custName = document.getElementById('billCustName').value.trim();
       const model = document.getElementById('billModel').value.trim();
       const price = skBillNetPrice();
@@ -1464,7 +1465,7 @@ const MASTER_INVENTORY = [
           monthlyEmi: parseFloat(document.getElementById('billMonthlyEmi')?.value) || 0,
           emiHtml: currentPayMode === 'EMI' ? document.getElementById('pvEmiScheduleTbody').innerHTML : ''
         };
-        const exists = savedBills.some(b => b.custName === newEntry.custName && b.model === newEntry.model && b.price === newEntry.price && b.phone === newEntry.phone);
+        const exists = savedBills.some(b => b && b.custName === newEntry.custName && b.model === newEntry.model && Number(b.price) === Number(newEntry.price) && (!document.getElementById('billCustPhone').value || String(b.phone||'') === String(newEntry.phone)) && (b.date === billDate || String(b.imei1||'') === String(newEntry.imei1)));
         if (!exists) { savedBills.unshift(newEntry); localStorage.setItem('sk_bills', JSON.stringify(savedBills)); updateBillHistoryCount(); clearDraft(); }
       }
     }
@@ -3342,6 +3343,10 @@ const MASTER_INVENTORY = [
         emiHtml: currentPayMode === 'EMI' ? document.getElementById('pvEmiScheduleTbody').innerHTML : ''
       };
       if (exch.value > 0) { newEntry.grossPrice = skBillGrossPrice(); newEntry.exchange = exch; }
+      /* Duplicate guard: the same bill (date, customer, phone, model, IMEI, amount, pay mode) must never be saved twice, e.g. by a double tap. */
+      if (savedBills.some(b => b && b.date === billDate && b.custName === custName && String(b.phone||'') === String(newEntry.phone) && b.model === model && String(b.imei1||'') === String(newEntry.imei1) && Number(b.price) === Number(price) && b.payMode === currentPayMode)) {
+        showToast('⚠️ This bill is already saved'); switchBillTab('history'); return;
+      }
       if (typeof window.skUsedCanSell === 'function' && !window.skUsedCanSell(newEntry)) return;
       savedBills.unshift(newEntry);
       localStorage.setItem('sk_bills', JSON.stringify(savedBills));

@@ -160,3 +160,8 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - **Layout**: Order List sheet is centred; in-sheet scrollbars hidden so pages no longer look pushed off screen.
 - **Newest first** (display only): bill history, used stock register, customers, credit customers, credit entries, orders, global search bills.
 - **Credit ledger**: customers without bills no longer show an outstanding amount in the list after their credit is fully paid.
+
+## V5.6.160
+- **Duplicate bills fixed**: editing a saved bill and then pressing New Bill / closing no longer creates a second copy; Save Bill refuses to save the exact same bill twice.
+- **Used Mobile Stock**: Bill button and the 3-dot menu now sit inside the row card, aligned in every row.
+- **Used Mobile Stock form**: Save Purchase / Reset buttons are no longer hidden behind the bottom navigation bar.

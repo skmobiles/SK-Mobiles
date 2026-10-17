@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.159 — UPI "Scan & Pay" QR on the invoice (Settings → Shop Profile → UPI ID).
+/* SK MOBILES v5.6.160 — UPI "Scan & Pay" QR on the invoice (Settings → Shop Profile → UPI ID).
    Needs js/features/qr-mini.js. Shows only when a UPI ID is saved. */
 (function(){
 'use strict';
