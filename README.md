@@ -223,3 +223,6 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 
 ## V5.7.3
 - Firebase free-quota saver: old cloud-backup clean-up runs once a day per device and deletes at most 1,000 documents a day (was 3,000 per run), so it no longer exhausts the 20K deletes / 50K reads daily limits.
+
+## V5.7.4
+- Cloud backup now runs only when data changed: 5 minutes after the last change, at most 1 per 30 minutes and 8 per day per device. No change = no backup (the fixed open/close-time backups are removed).

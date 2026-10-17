@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.3 — Home extras: (1) choose your own 5 Quick Action buttons, (2) dark-mode button in the home header.
+/* SK MOBILES v5.7.4 — Home extras: (1) choose your own 5 Quick Action buttons, (2) dark-mode button in the home header.
    Both are saved on this device only (skdev_ keys, not synced). No business data is read or written. */
 (function(){
 'use strict';

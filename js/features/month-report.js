@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.3 — Month-end report (sales, profit, best sellers, repairs, credit collected) + Excel / PDF / WhatsApp.
+/* SK MOBILES v5.7.4 — Month-end report (sales, profit, best sellers, repairs, credit collected) + Excel / PDF / WhatsApp.
    Read-only over existing data. */
 (function(){
 'use strict';
