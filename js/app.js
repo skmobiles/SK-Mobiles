@@ -1,3 +1,4 @@
+window.skStamp=function(ms){var d=ms?new Date(ms):new Date();if(isNaN(d.getTime()))return '';var p=function(n){return String(n).padStart(2,'0')},h=d.getHours(),ap=h>=12?'PM':'AM';h=h%12||12;return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+', '+p(h)+':'+p(d.getMinutes())+' '+ap};
 /* SK MOBILES 5.6.97 — visual design-system release; application logic retained. */
 
 const MASTER_INVENTORY = [
@@ -1351,8 +1352,9 @@ const MASTER_INVENTORY = [
       updateOrderBadge();
     }
 
+    /* Tapping a field keeps its current value (edit in place); it is no longer cleared on focus. */
     function handleInputClear(el) {
-      el.value = '';
+      /* intentionally empty */
     }
 
     // Repair Tools & IC Spares — isolated implementation.
@@ -1425,8 +1427,8 @@ const MASTER_INVENTORY = [
 
     function handleNewBillClick() {
       window.__skInvoiceExportBill=null;
-      window.__skEditingBillId='';
       autoSaveCurrentFormSilently();
+      window.__skEditingBillId='';
       document.getElementById('usedMobileBillingForm').reset();
       const saveBtn=document.querySelector('.bill-action-save'); if(saveBtn){const sp=saveBtn.querySelector('span:last-child');if(sp)sp.textContent='Save Bill';}
       document.getElementById('billAdvance').value = "0";
@@ -1441,6 +1443,7 @@ const MASTER_INVENTORY = [
     }
 
     function autoSaveCurrentFormSilently() {
+      if (window.__skEditingBillId) return; /* editing an existing bill: never create a second copy */
       const custName = document.getElementById('billCustName').value.trim();
       const model = document.getElementById('billModel').value.trim();
       const price = skBillNetPrice();
@@ -1464,7 +1467,7 @@ const MASTER_INVENTORY = [
           monthlyEmi: parseFloat(document.getElementById('billMonthlyEmi')?.value) || 0,
           emiHtml: currentPayMode === 'EMI' ? document.getElementById('pvEmiScheduleTbody').innerHTML : ''
         };
-        const exists = savedBills.some(b => b.custName === newEntry.custName && b.model === newEntry.model && b.price === newEntry.price && b.phone === newEntry.phone);
+        const exists = savedBills.some(b => b && b.custName === newEntry.custName && b.model === newEntry.model && Number(b.price) === Number(newEntry.price) && (!document.getElementById('billCustPhone').value || String(b.phone||'') === String(newEntry.phone)) && (b.date === billDate || String(b.imei1||'') === String(newEntry.imei1)));
         if (!exists) { savedBills.unshift(newEntry); localStorage.setItem('sk_bills', JSON.stringify(savedBills)); updateBillHistoryCount(); clearDraft(); }
       }
     }
@@ -1591,7 +1594,7 @@ const MASTER_INVENTORY = [
         if(modalId==='billingModal'){switchBillTab('new');restoreDraft();updateBillPreview();}
         bringModalToFront(modal); requestAnimationFrame(()=>bringModalToFront(modal));
         if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal(modalId,true);
-      }else{modal.classList.remove('active');document.body.classList.remove('modal-open');if(modalId==='viewBillModal'){const r=window.__skBillViewReturn||'';window.__skBillViewReturn='';if(r!=='creditLedger')toggleModal('billingModal',true);}if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal(modalId,false);}
+      }else{modal.classList.remove('active');document.body.classList.remove('modal-open');if(modalId==='billingModal'&&window.__skEditingBillId){try{skBillResetForm();}catch(e){}}if(modalId==='viewBillModal'){const r=window.__skBillViewReturn||'';window.__skBillViewReturn='';if(r!=='creditLedger')toggleModal('billingModal',true);}if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal(modalId,false);}
     }
 
     function toggleLeftDrawer(show) {
@@ -2575,6 +2578,7 @@ const MASTER_INVENTORY = [
     }
 
     function saveDraft() {
+      if (window.__skEditingBillId) return; /* an edit in progress is not a new-bill draft */
       const draft = {
         custName: document.getElementById('billCustName').value,
         phone: document.getElementById('billCustPhone').value,
@@ -2828,6 +2832,9 @@ const MASTER_INVENTORY = [
             'shield': '<path d="M12 3 4 6v6c0 4.5 3.2 8 8 9 4.8-1 8-4.5 8-9V6z"/>',
             'phone': '<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
             'bolt': '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+            'tag': '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/>',
+            'star': '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+            'handshake': '<path d="M3 11l4-4 4 2 3-2 4 4v5l-4 3-3-1-3 1-5-3z"/><path d="M9 15l2 2"/>',
             'toolbox': '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v8M3 13h18M11 13v2h2v-2"/>'
           };
           return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths[name] || paths['package']}</svg>`;
@@ -2849,38 +2856,42 @@ const MASTER_INVENTORY = [
         const orderedMetricDataHome = [...metricDataHome].sort((a,b)=>{const ai=metricOrderHome.indexOf(a.id),bi=metricOrderHome.indexOf(b.id);return (ai<0?999:ai)-(bi<0?999:bi)});
         const metricHTML = orderedMetricDataHome.map(m => `<button type="button" class="sk-home-v2-metric draggable-card" data-card-id="${m.id}" draggable="true" onclick="${m.action}"><span class="sk-home-v2-metric-icon ${m.tone}">${homeIcon(m.icon)}</span><span class="sk-home-v2-metric-copy"><b>${m.label}</b><strong${m.small?' class="sk-home-v2-metric-sub"':''}>${escHome(m.value)}</strong></span><span class="sk-home-v2-metric-arrow">›</span></button>`).join('');
         const featureDataHome = [
-          {id:'card-glass',title:'Tempered Glass',sub:'View All Glass Stock',img:'sk-home-glass.png',icon:'shield',tone:'glass',action:"currentFilter='glass';renderCards();window.scrollTo({top:0,behavior:'smooth'});"},
           {id:'card-display',title:'Used Mobile Inventory',sub:'Add / Update Purchase',img:'sk-home-used-inventory.png',icon:'phone',tone:'used',action:'window.skUsedOpenInventoryPage?.();'},
           {id:'card-used-stock',title:'Used Mobile Stock',sub:'Purchase · Pricing · Sales',img:'sk-home-stock-box.png',icon:'package',tone:'stock',action:'window.skUsedOpen?.();window.skUsedShowManagement?.();'},
-          {id:'card-accessories',title:'Accessories',sub:'View OCA & Spares',img:'sk-home-accessories.png',icon:'bolt',tone:'accessories',action:'window.skOpenAccessoriesPage?.();'},
-          {id:'card-other-inventory',title:'Other Inventory',sub:'Tools, Items & Others',img:'sk-home-other-stock.png',icon:'package',tone:'other',action:"currentFilter='all';renderCards();window.scrollTo({top:0,behavior:'smooth'});"}
+          {id:'card-price',title:'Price List',sub:'Share with customers',icon:'tag',tone:'price',action:'window.skOpenPriceList?.();'},
+          {id:'card-review',title:'Reviews & Offers',sub:'Ask rating · send offers',icon:'star',tone:'review',action:'window.skOpenReviews?.();'},
+          {id:'card-month',title:'Monthly Report',sub:'Sales · profit · repairs',icon:'chart',tone:'month',action:'window.skOpenMonthReport?.();'},
+          {id:'card-dealer',title:'Dealer Payments',sub:'Credit purchases to pay',icon:'handshake',tone:'dealer',action:'window.skOpenDealerTracker?.();'}
         ];
         let featureOrderHome = [];
         try { const oldOrder=JSON.parse(localStorage.getItem('sk_order_homeActionCardsContainer')||'[]'); if(Array.isArray(oldOrder)) featureOrderHome=oldOrder; } catch(e) {}
         const orderedFeatureDataHome = [...featureDataHome].sort((a,b)=>{const ai=featureOrderHome.indexOf(a.id),bi=featureOrderHome.indexOf(b.id);return (ai<0?999:ai)-(bi<0?999:bi)});
         const featureCards = orderedFeatureDataHome.map(c => `<button type="button" class="sk-home-v2-feature draggable-card ${c.tone}" data-card-id="${c.id}" draggable="true" onclick="${c.action}"><span class="sk-home-v2-feature-icon t-${c.tone}">${homeIcon(c.icon)}</span><span class="sk-home-v2-feature-copy"><b>${c.title}</b><small>${c.sub}</small><i aria-hidden="true">→</i></span></button>`).join('');
-        const quickActions = [
+        const quickActions = (window.skQuickPinned ? window.skQuickPinned() : [
           {icon:'file-plus',label:'New Bill',tone:'blue',action:"toggleModal('billingModal',true);switchBillTab('new');"},
           {icon:'wrench',label:'New Repair',tone:'rose',action:'window.skOpenRepairJobs?.();'},
           {icon:'users',label:'Add Customer',tone:'green',action:'window.skOpenCreditLedger?.();'},
           {icon:'package-plus',label:'Add Product',tone:'purple',action:'openItemEditor();'},
           {icon:'chart',label:'Today Report',tone:'orange',action:'window.skOpenDailyReport?.();'}
-        ].map(q => `<button type="button" class="sk-home-v2-quick ${q.tone}" onclick="${q.action}"><span>${homeIcon(q.icon)}</span><b>${q.label}</b></button>`).join('');
-        const latestBillHome = Array.isArray(savedBills) ? savedBills[0] : null;
-        const latestRepairHome = pendingRepairsHome[0] || repairJobsHome[0] || null;
+        ]).map(q => `<button type="button" class="sk-home-v2-quick ${q.tone}" onclick="${q.action}"><span>${homeIcon(q.icon)}</span><b>${q.label}</b></button>`).join('');
+        const latestBillHome = (window.skRaLatest && window.skRaLatest('bill')) || (Array.isArray(savedBills) ? savedBills[0] : null);
+        const latestRepairHome = (window.skRaLatest && window.skRaLatest('job')) || pendingRepairsHome[0] || repairJobsHome[0] || null;
         const latestStockHome = Array.isArray(inventory) ? inventory[0] : null;
         const recentHTML = [
           latestBillHome ? {icon:'file-text',tone:'blue',title:'Bill #' + (latestBillHome.billNo || latestBillHome.id || 'Recent'),value:moneyHome(latestBillHome.price || latestBillHome.total || latestBillHome.amount || 0),sub:escHome(latestBillHome.custName || latestBillHome.model || 'Saved bill')} : {icon:'file-text',tone:'blue',title:'Billing',value:'No bills yet',sub:'New bills will appear here'},
           latestRepairHome ? {icon:'wrench',tone:'rose',title:'Repair #' + (latestRepairHome.id || 'Recent'),value:escHome(latestRepairHome.model || latestRepairHome.customer || 'Repair job'),sub:escHome(latestRepairHome.status || 'Repair activity')} : {icon:'wrench',tone:'rose',title:'Repair Jobs',value:'No recent jobs',sub:'Repair activity will appear here'},
           latestStockHome ? {icon:'package',tone:'blue',title:'Stock Available',value:escHome(latestStockHome.title || 'Inventory item'),sub:`${Number(latestStockHome.stock || 0)} pcs · Inventory`} : {icon:'package',tone:'blue',title:'Stock Added',value:'No stock items',sub:'Inventory activity will appear here'}
-        ].map(r => `<div class="sk-home-v2-recent-card"><span class="sk-home-v2-recent-icon ${r.tone}">${homeIcon(r.icon)}</span><span class="sk-home-v2-recent-copy"><b>${r.title}</b><strong>${r.value}</strong><small>${r.sub}</small></span></div>`).join('');
+        ];
+        const recentRowsHome = (window.skRaHome && window.skRaHome()) || [];
+        const recentShownHome = window.skRaHome ? (recentRowsHome.length ? recentRowsHome.map(r => ({icon:r.icon,tone:r.tone,title:escHome(r.title),value:escHome(r.amt || r.sub),sub:escHome((r.amt ? r.sub + ' · ' : '') + r.date)})) : [{icon:'file-text',tone:'blue',title:'Today',value:'No activity yet',sub:'New bills and repairs will appear here'}]) : recentHTML;
+        const recentHTMLDone = recentShownHome.map((r,ri) => `<div class="sk-home-v2-recent-card" role="button" tabindex="0" onclick="window.skRaTop?window.skRaTop(${ri}):(window.skRecentCard&&window.skRecentCard(${ri}))"><span class="sk-home-v2-recent-icon ${r.tone}">${homeIcon(r.icon)}</span><span class="sk-home-v2-recent-copy"><b>${r.title}</b><strong>${r.value}</strong><small>${r.sub}</small></span></div>`).join('');
 
         container.innerHTML = `
           <section class="sk-home-v2-hero" aria-label="SK Mobiles business banner"><img src="./assets/sk-home-hero.jpg" alt="SK Mobiles — Mobile sales, service, accessories and repair"/></section>
           <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Business Summary</h2></div><div id="homeMetricGrid" class="sk-home-v2-metrics" aria-label="Business summary">${metricHTML}</div></section>
-          <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Inventory &amp; Stock</h2><button type="button" onclick="currentFilter='all';renderCards();window.scrollTo({top:0,behavior:'smooth'});">View All <span>›</span></button></div><div id="homeActionCardsContainer" class="sk-home-v2-features" aria-label="Inventory shortcuts">${featureCards}</div></section>
-          <section class="sk-home-v2-section"><div class="sk-home-v2-section-heading"><h2>Quick Actions</h2><button type="button" onclick="toggleLeftDrawer(true)">See All <span>→</span></button></div><div class="sk-home-v2-quick-grid">${quickActions}</div></section>
-          <section class="sk-home-v2-section sk-home-v2-recent-section"><div class="sk-home-v2-section-heading"><h2>Recent Activity</h2><button type="button" onclick="toggleModal('billingModal',true);switchBillTab('history');">View All <span>→</span></button></div><div class="sk-home-v2-recent-grid">${recentHTML}</div></section>
+          <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Shop Tools</h2><button type="button" onclick="toggleLeftDrawer(true)">More <span>›</span></button></div><div id="homeActionCardsContainer" class="sk-home-v2-features" aria-label="Shop tools">${featureCards}</div></section>
+          <section class="sk-home-v2-section"><div class="sk-home-v2-section-heading"><h2>Quick Actions</h2><span style="display:flex;gap:8px;align-items:center"><button type="button" onclick="window.skQuickEdit&&window.skQuickEdit()" aria-label="Choose quick actions">✎ Edit</button><button type="button" onclick="toggleLeftDrawer(true)">See All <span>→</span></button></span></div><div class="sk-home-v2-quick-grid">${quickActions}</div></section>
+          <section class="sk-home-v2-section sk-home-v2-recent-section"><div class="sk-home-v2-section-heading"><h2>Recent Activity</h2><button type="button" onclick="window.skOpenRecentActivity?window.skOpenRecentActivity():(toggleModal('billingModal',true),switchBillTab('history'))">View All <span>→</span></button></div><div class="sk-home-v2-recent-grid">${recentHTMLDone}</div></section>
         `;
         setTimeout(() => {
           container.querySelectorAll('.draggable-card').forEach(card => {
@@ -3295,6 +3306,18 @@ const MASTER_INVENTORY = [
       if (termsEl) termsEl.innerText = getMobileTerms(currentMobileType) + (window.skWarrantyLine ? window.skWarrantyLine({warrantyDays:(document.getElementById('billWarranty')||{}).value,date:''}) : '');
     }
 
+    /* Empties the New Bill form completely (used after Save / Update and when an edit is abandoned). */
+    function skBillResetForm() {
+      window.__skEditingBillId='';
+      const f=document.getElementById('usedMobileBillingForm'); if(f)f.reset();
+      ['billExchModel','billExchImei','billExchValue'].forEach(id=>{const e=document.getElementById(id); if(e)e.value='';});
+      const set=(id,v)=>{const e=document.getElementById(id); if(e)e.value=v;};
+      set('billAdvance','0'); set('billEmiMonths','3'); set('billEmiInterest','0');
+      const sb=document.querySelector('.bill-action-save'); if(sb){const sp=sb.querySelector('span:last-child'); if(sp)sp.textContent='Save Bill';}
+      clearDraft(); selectPayMode('Cash'); updateBillPreview();
+    }
+    window.skBillResetForm = skBillResetForm;
+
     function saveUsedBill() {
       const editId = String(window.__skEditingBillId || '');
       if (editId) {
@@ -3314,7 +3337,7 @@ const MASTER_INVENTORY = [
         bill.emiHtml=currentPayMode==='EMI'?document.getElementById('pvEmiScheduleTbody').innerHTML:'';
         localStorage.setItem('sk_bills',JSON.stringify(savedBills)); window.__skEditingBillId='';
         const btn=document.querySelector('.bill-action-save'); if(btn){const sp=btn.querySelector('span:last-child');if(sp)sp.textContent='Save Bill';}
-        updateBillHistoryCount(); renderBillHistory(); updateBillPreview(); showToast('✅ Bill updated successfully'); switchBillTab('history'); return;
+        updateBillHistoryCount(); renderBillHistory(); skBillResetForm(); showToast('✅ Bill updated successfully'); switchBillTab('history'); return;
       }
       const billDate = `${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
       const custName = document.getElementById('billCustName').value.trim();
@@ -3342,6 +3365,10 @@ const MASTER_INVENTORY = [
         emiHtml: currentPayMode === 'EMI' ? document.getElementById('pvEmiScheduleTbody').innerHTML : ''
       };
       if (exch.value > 0) { newEntry.grossPrice = skBillGrossPrice(); newEntry.exchange = exch; }
+      /* Duplicate guard: the same bill (date, customer, phone, model, IMEI, amount, pay mode) must never be saved twice, e.g. by a double tap. */
+      if (savedBills.some(b => b && b.date === billDate && b.custName === custName && String(b.phone||'') === String(newEntry.phone) && b.model === model && String(b.imei1||'') === String(newEntry.imei1) && Number(b.price) === Number(price) && b.payMode === currentPayMode)) {
+        showToast('⚠️ This bill is already saved'); switchBillTab('history'); return;
+      }
       if (typeof window.skUsedCanSell === 'function' && !window.skUsedCanSell(newEntry)) return;
       savedBills.unshift(newEntry);
       localStorage.setItem('sk_bills', JSON.stringify(savedBills));
@@ -3679,7 +3706,10 @@ function viewSavedBill(idx) {
       let initialized = false, drawing = false, hasInk = false, savedData = '', activeRole = 'customer';
       const getBillKey = () => String(document.getElementById('pvBillNo')?.textContent || document.getElementById('pvBillNo')?.innerText || 'current').trim() || 'current';
       const readStore = () => { try { const v = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); return v && typeof v === 'object' ? v : {}; } catch (_) { return {}; } };
-      const normalized = value => typeof value === 'string' ? {customer:value, sales:''} : (value && typeof value === 'object' ? {customer:value.customer || '', sales:value.sales || ''} : {customer:'',sales:''});
+      const DEFAULT_SALES_KEY = 'sk_default_sales_signature_v1';
+      const defaultSales = () => { try { return localStorage.getItem(DEFAULT_SALES_KEY) || ''; } catch (_) { return ''; } };
+      /* the authorised (sales) signature is saved once and used on every bill until it is cleared */
+      const normalized = value => typeof value === 'string' ? {customer:value, sales:defaultSales()} : (value && typeof value === 'object' ? {customer:value.customer || '', sales:value.sales || defaultSales()} : {customer:'',sales:defaultSales()});
       const currentSignatures = () => normalized(readStore()[getBillKey()]);
       const applySignatures = value => {
         const sigs = normalized(value);
@@ -3708,10 +3738,10 @@ function viewSavedBill(idx) {
         const roleCopy=()=>{
           activeRole=roleSelect.value==='sales'?'sales':'customer';
           if(title) title.textContent=activeRole==='customer'?'✍️ Customer Signature':'✍️ Sales Person Signature';
-          if(hint) hint.textContent=activeRole==='customer'?'This signature will appear in the Customer Signature area on the bill.':'This signature will appear in the Authorized Signature / Seal area on the bill.';
+          if(hint) hint.textContent=activeRole==='customer'?'This signature will appear in the Customer Signature area on the bill.':'Sign once — this authorised signature is used on every bill. Tap Clear to remove it. (Appears in the Authorized Signature / Seal area on the bill.)';
           loadCanvasForRole();
         };
-        const openSignature=()=>{if(!modal)return;modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');document.body.classList.add('sk-signature-open');setTimeout(()=>{resize();roleCopy();},60);};
+        const openSignature=()=>{if(!modal)return;if(modal.parentNode!==document.body)document.body.appendChild(modal);modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');document.body.classList.add('sk-signature-open');setTimeout(()=>{resize();roleCopy();},60);};
         const closeSignature=()=>{if(!modal)return;modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('sk-signature-open');};
         openBtn?.addEventListener('click',openSignature); closeBtn?.addEventListener('click',closeSignature);
         modal?.addEventListener('click',e=>{if(e.target===modal)closeSignature();});
@@ -3723,24 +3753,52 @@ function viewSavedBill(idx) {
           const ratio=Math.max(1,window.devicePixelRatio||1);
           let old=''; try{if(hasInk)old=canvas.toDataURL('image/png');}catch(_){}
           canvas.width=Math.round(rect.width*ratio);canvas.height=Math.round(rect.height*ratio);
-          ctx.setTransform(ratio,0,0,ratio,0,0);ctx.lineWidth=2.4;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#172554';
+          ctx.setTransform(ratio,0,0,ratio,0,0);ctx.lineWidth=3.6;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#0b1b4d';
           if(old){const image=new Image();image.onload=()=>ctx.drawImage(image,0,0,rect.width,rect.height);image.src=old;}
         };
         const point=event=>{const r=canvas.getBoundingClientRect();return{x:event.clientX-r.left,y:event.clientY-r.top};};
-        canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture?.(e.pointerId);const p=point(e);drawing=true;hasInk=true;ctx.beginPath();ctx.moveTo(p.x,p.y);});
-        canvas.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+        let strokes=[],cur=null,last=null;
+        canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture?.(e.pointerId);const p=point(e);drawing=true;hasInk=true;cur=[p];strokes.push(cur);last=p;ctx.beginPath();ctx.arc(p.x,p.y,ctx.lineWidth/2,0,6.2832);ctx.fillStyle=ctx.strokeStyle;ctx.fill();});
+        canvas.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();const p=point(e);cur.push(p);const m={x:(last.x+p.x)/2,y:(last.y+p.y)/2};ctx.beginPath();ctx.moveTo(last.mx!==undefined?last.mx:last.x,last.mx!==undefined?last.my:last.y);ctx.quadraticCurveTo(last.x,last.y,m.x,m.y);ctx.stroke();p.mx=m.x;p.my=m.y;last=p;});
         const finish=e=>{if(!drawing)return;drawing=false;try{if(e&&canvas.hasPointerCapture?.(e.pointerId))canvas.releasePointerCapture(e.pointerId);}catch(_){}};
         canvas.addEventListener('pointerup',finish);canvas.addEventListener('pointercancel',finish);canvas.addEventListener('pointerleave',finish);
+        /* Redraw the signature level and neat: straighten the slant, crop to the ink, centre it and use a bold, even pen,
+           so every signature looks clean and the same size on the bill whatever way it was drawn. */
+        const neat=(st)=>{
+          try{
+            const pts=[];st.forEach(s=>s.forEach(p=>pts.push(p)));if(pts.length<2)return '';
+            let mx=0,my=0;pts.forEach(p=>{mx+=p.x;my+=p.y});mx/=pts.length;my/=pts.length;
+            let sxx=0,sxy=0;pts.forEach(p=>{sxx+=(p.x-mx)*(p.x-mx);sxy+=(p.x-mx)*(p.y-my)});
+            let ang=sxx>1?Math.atan2(sxy,sxx):0;if(Math.abs(ang)>0.6)ang=0;
+            const c=Math.cos(-ang),sn=Math.sin(-ang);
+            const rot=st.map(s=>s.map(p=>({x:(p.x-mx)*c-(p.y-my)*sn,y:(p.x-mx)*sn+(p.y-my)*c})));
+            let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;rot.forEach(s=>s.forEach(p=>{x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x);y1=Math.max(y1,p.y)}));
+            const w=Math.max(x1-x0,8),h=Math.max(y1-y0,8),W=480,H=140,pad=10,lw=6;
+            const k=Math.min((W-2*pad)/w,(H-2*pad)/h);
+            const o=document.createElement('canvas');o.width=W;o.height=H;const g=o.getContext('2d');
+            g.lineWidth=lw;g.lineCap='round';g.lineJoin='round';g.strokeStyle='#0b1b4d';g.fillStyle='#0b1b4d';
+            const ox=(W-w*k)/2-x0*k,oy=(H-h*k)/2-y0*k;
+            rot.forEach(s=>{
+              const q=s.map(p=>({x:p.x*k+ox,y:p.y*k+oy}));
+              if(q.length===1){g.beginPath();g.arc(q[0].x,q[0].y,lw/2,0,6.2832);g.fill();return}
+              g.beginPath();g.moveTo(q[0].x,q[0].y);
+              for(let i=1;i<q.length-1;i++){g.quadraticCurveTo(q[i].x,q[i].y,(q[i].x+q[i+1].x)/2,(q[i].y+q[i+1].y)/2);}
+              g.lineTo(q[q.length-1].x,q[q.length-1].y);g.stroke();
+            });
+            return o.toDataURL('image/png');
+          }catch(_){return '';}
+        };
         clearBtn.addEventListener('click',()=>{
           // Clear the selected role immediately in the canvas, persisted store, and live invoice.
           ctx.clearRect(0,0,canvas.width,canvas.height);
-          hasInk=false;
+          hasInk=false;strokes=[];
           savedData='';
           try {
             const store=readStore();
             const billKey=getBillKey();
             const sigs=normalized(store[billKey]);
             sigs[activeRole]='';
+            if(activeRole==='sales'){try{localStorage.removeItem(DEFAULT_SALES_KEY);}catch(_){} sigs.sales='';}
             if(!sigs.customer && !sigs.sales) delete store[billKey];
             else store[billKey]=sigs;
             localStorage.setItem(STORE_KEY,JSON.stringify(store));
@@ -3755,13 +3813,13 @@ function viewSavedBill(idx) {
         saveBtn.addEventListener('click',()=>{
           if(!hasInk){status('Please sign in the box before saving.');return;}
           try{
-            savedData=canvas.toDataURL('image/png');const store=readStore();const sigs=normalized(store[getBillKey()]);sigs[activeRole]=savedData;store[getBillKey()]=sigs;localStorage.setItem(STORE_KEY,JSON.stringify(store));applySignatures(sigs);refreshLauncher();status((activeRole==='customer'?'Customer':'Sales person')+' signature saved and added to the invoice.');
+            savedData=strokes.length?(neat(strokes)||canvas.toDataURL('image/png')):canvas.toDataURL('image/png');strokes=[];if(activeRole==='sales'){try{localStorage.setItem(DEFAULT_SALES_KEY,savedData);}catch(_){}}const store=readStore();const sigs=normalized(store[getBillKey()]);sigs[activeRole]=savedData;store[getBillKey()]=sigs;localStorage.setItem(STORE_KEY,JSON.stringify(store));applySignatures(sigs);refreshLauncher();status((activeRole==='customer'?'Customer':'Sales person')+' signature saved and added to the invoice.');
             setTimeout(()=>{if(modal){modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('sk-signature-open');}},350);
           }catch(err){console.error('Signature save failed:',err);status('Could not save signature on this device.');}
         });
         function loadCanvasForRole(){
           const sigs=currentSignatures();savedData=sigs[activeRole]||'';const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;
-          ctx.clearRect(0,0,canvas.width,canvas.height);hasInk=false;
+          ctx.clearRect(0,0,canvas.width,canvas.height);hasInk=false;strokes=[];
           if(savedData){const img=new Image();img.onload=()=>{ctx.drawImage(img,0,0,rect.width,rect.height);hasInk=true;};img.src=savedData;}
           status(savedData?'Existing signature loaded. You can redraw and save to replace it.':'Sign in the box, then tap Save Signature.');
         }
@@ -4713,12 +4771,7 @@ img{max-width:100%!important;}
         }catch(err){if(!auto&&err&&err.name!=='AbortError'&&typeof showToast==='function')showToast('Could not open contacts. Check browser permission and HTTPS.');}
       };
       btn.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();pickContact(false);});
-      /* Tapping an empty phone field opens the phone's contact list; cancel it and type normally. */
-      input.addEventListener('click',function(){
-        if(input.value||input.readOnly||input.disabled)return;
-        if(!(navigator.contacts&&typeof navigator.contacts.select==='function'))return;
-        pickContact(true);
-      });
+      /* Contact picker opens only from the contact icon; tapping the field just opens the number pad. */
       wrap.appendChild(btn);
     });
   }
@@ -5331,7 +5384,14 @@ img{max-width:100%!important;}
       const el=document.getElementById('skTopRoleBadge'); if(!el)return;
       const r=String(localStorage.getItem(ROLE_KEY)||'').toLowerCase();
       const map={admin:'👑 Admin',manager:'👔 Manager',worker:'👷 Worker'};
-      el.textContent=map[r]||''; el.style.display=map[r]?'inline-flex':'none';
+      el.textContent=map[r]||''; el.style.display='none'; /* the role is shown on the profile icon instead (no overlap in the header) */
+      const pb=document.querySelector('.sk-home-profile-btn');
+      if(pb){
+        if(!pb.dataset.skSvg)pb.dataset.skSvg=pb.innerHTML;
+        const ic={admin:'<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',manager:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',worker:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8 6.2 21l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>'}[r];
+        pb.innerHTML=ic?'<svg viewBox="0 0 24 24" aria-hidden="true">'+ic+'</svg>':pb.dataset.skSvg;
+        pb.title=map[r]?('Profile — '+map[r].replace(/^\S+\s/,'')):'Profile';
+      }
     }
     window.skRefreshRoleBadge=skRefreshRoleBadge;
     window.skOpenAdminPanel=function(){if(!admin()){toast('🔒 Admin access only');return;}const r=document.getElementById('skAdminCurrentRole');if(r)r.textContent='👑 Admin — Full Access';document.getElementById('skAdminPanelModal')?.classList.add('active');skRenderManagerPermissions();};
@@ -5795,7 +5855,7 @@ img{max-width:100%!important;}
           await w.close();
         }
       }
-      updateFolderText('📁 '+APP_FOLDER+' ✓ Synced '+new Date().toLocaleString());
+      updateFolderText('📁 '+APP_FOLDER+' ✓ Synced '+window.skStamp());
       return true;
     }catch(e){
       updateFolderText('📁 '+APP_FOLDER+' ⚠ Sync failed');
@@ -6756,7 +6816,7 @@ img{max-width:100%!important;}
           await w.close();
         }
       }
-      var now=new Date().toLocaleString();
+      var now=window.skStamp();
       var path=document.getElementById('skAppDataFolderPath');
       if(path)path.textContent='📁 '+APP_FOLDER+' ✓ Synced '+now;
       setStatusV40('Last auto sync: '+now);
@@ -7307,7 +7367,16 @@ function cpGetCustomers(){
      return String(e.source||'')==='repair-job' && e.type==='credit';
    }).reduce(function(a,e){return a+Math.max(0,Number(e.amount)||0)},0);
    /* Sales bill balances remain authoritative for bills; repair balances are added separately. */
-   c.credits=c.bills.length?billBalance+repairBalance:manualCredits;
+   /* Ledger-only credit (no sales bill, not a repair job) of a customer who also has sales bills was ignored before.
+      It is now added, minus the ledger-only payments, so merged / mixed accounts never lose outstanding. */
+   var extraLedger=0;
+   if(c.bills.length){
+     var plainCredits=manualEntries.filter(function(e){return (e.type==='credit'||e.type==='emi')&&String(e.source||'')!=='repair-job'}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+     var plainPays=manualEntries.filter(function(e){return e.type==='payment'&&String(e.source||'')!=='repair-job'}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+     extraLedger=Math.max(0,plainCredits-plainPays);
+   }
+   c.extraLedger=extraLedger;
+   c.credits=c.bills.length?billBalance+repairBalance+extraLedger:manualCredits;
    c.payments=payments;
 
    c.creditBalance=c.bills.filter(function(x){return x.b.payMode==='Credit'}).reduce(function(a,x){
@@ -7322,7 +7391,7 @@ function cpGetCustomers(){
      return (e.type==='emi'||e.mode==='EMI');
    }).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
 
-   c.balance=c.bills.length ? billBalance+repairBalance : Math.max(0,manualCredits-payments);
+   c.balance=c.bills.length ? billBalance+repairBalance+extraLedger : Math.max(0,manualCredits-payments);
    /* Customers without bills: the Credit / EMI filter totals must also subtract the payments, like c.balance does. */
    if(!c.bills.length){
      var payLeft=payments;
@@ -7350,6 +7419,11 @@ function cpMatch(c,q){
  var vals=[c.name,c.phone,String(c.balance),c.lastBill&&c.lastBill.id,c.bills.map(function(x){return x.b.id}).join(' '),c.bills.map(function(x){return x.b.model}).join(' ')];
  return vals.join(' ').toLowerCase().indexOf(q)!==-1;
 }
+function cpAvStyle(name){
+ var P=[['#f97316','#ef4444'],['#10b981','#059669'],['#8b5cf6','#6366f1'],['#0ea5e9','#2563eb'],['#ec4899','#db2777'],['#f59e0b','#d97706'],['#14b8a6','#0d9488'],['#ef4444','#be123c']];
+ var h=0,t=String(name||'?');for(var k=0;k<t.length;k++)h=(h*31+t.charCodeAt(k))>>>0;
+ var c=P[h%P.length];return 'background:linear-gradient(145deg,'+c[0]+','+c[1]+') !important;color:#fff !important;border-radius:50% !important';
+}
 function cpFilter(c){
  if(skCPFilterMode==='emi')return c.hasEmi && Number(c.emiBalance||0)>0;
  if(skCPFilterMode==='credit')return c.hasCredit && Number(c.creditBalance||0)>0;
@@ -7364,7 +7438,7 @@ function cpRow(c){
  if(skCPFilterMode==='credit')displayBalance=Number(c.creditBalance||0);
  var displayMode=skCPFilterMode==='emi'?'EMI':(skCPFilterMode==='credit'?'Credit':mode);
  return '<div class="skcp-row" data-k="'+encodeURIComponent(c.key)+'" onclick="skCPOpenCustomer(decodeURIComponent(this.dataset.k))">'+
- '<div class="sk-credit-avatar">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div>'+
+ '<div class="sk-credit-avatar" style="'+cpAvStyle(c.name)+'">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div>'+
  '<div class="skcp-row-main"><div class="skcp-name">'+cpEsc(c.name)+'</div><div class="skcp-sub">📞 '+cpEsc(c.phone||'No phone')+' • '+displayMode+' • Bill #'+cpEsc(last3)+'</div></div>'+
  '<div><div class="skcp-amt">'+cpMoney(displayBalance)+'</div><div class="skcp-bill">'+(displayBalance>0?'OUTSTANDING':'COMPLETED')+'</div></div>'+
  (displayBalance>0&&cpDigits(c.phone)?'<button type="button" class="skcp-btn" style="color:#15803d;border-color:rgba(22,163,74,.3);flex:0 0 auto" title="WhatsApp reminder" onclick="event.stopPropagation();skCreditRemind(encodeURIComponent(decodeURIComponent(this.dataset.k)))" data-k="'+encodeURIComponent(c.key)+'">💬</button>':'')+
@@ -7461,7 +7535,7 @@ function cpOpenDetail(c){
      payment receipts and manual ledger entries visible. */
   return String(e.source||'')!=='bill';
 }).sort(function(a,b){var x=skBillDateKey(a.date)||'',y=skBillDateKey(b.date)||'';return x<y?1:x>y?-1:0});
- var html='<div class="skcp-page-head"><button class="skcp-back" onclick="skCPBackToList()">← Back</button><div class="sk-credit-avatar skcp-det-av">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div><div class="skcp-det-who"><b>'+cpEsc(c.name)+'</b><div style="font-size:.72rem;color:var(--text-muted);line-height:1.35;margin-top:3px">📞 '+cpEsc(c.phone||'No phone')+'</div></div></div>'+
+ var html='<div class="skcp-page-head"><button class="skcp-back" onclick="skCPBackToList()">← Back</button><div class="sk-credit-avatar skcp-det-av" style="'+cpAvStyle(c.name)+'">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div><div class="skcp-det-who"><b>'+cpEsc(c.name)+'</b><div style="font-size:.72rem;color:var(--text-muted);line-height:1.35;margin-top:3px">📞 '+cpEsc(c.phone||'No phone')+'</div></div></div>'+
  '<div class="skcp-detail-box"><div class="skcp-detail-grid"><div class="skcp-mini"><b>'+cpMoney(c.balance)+'</b><span>CURRENT OUTSTANDING</span></div><div class="skcp-mini"><b>'+cpMoney(c.credits)+'</b><span>CREDIT / EMI</span></div><div class="skcp-mini"><b>'+cpMoney(c.payments)+'</b><span>PAYMENT</span></div></div>'+
  '<div class="skcp-bill-actions"><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(c.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ FULLY PAID</span>')+'</div></div>';
  if(bills.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">SALES BILL HISTORY</div>';html+=bills.map(function(x){var b=x.b;var billTotal=Math.max(0,Number(b.price)||0);var billBalance=Math.max(0,Number(b.balance)||0);var isCreditBill=b.payMode==='Credit'||b.payMode==='EMI';var billPaid=isCreditBill?Math.max(0,Number(b.advance)||0):Math.max(0,billTotal-billBalance);return '<div class="skcp-bill-card"><div class="skcp-bill-top"><div><b>'+cpEsc(b.id)+'</b> • '+cpEsc(b.model||'')+'<div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(b.date)+' • '+cpEsc(b.payMode||'')+'</div></div><b>'+cpMoney(billTotal)+'</b></div><div class="skcp-sales-bill-finance">Amount: '+cpMoney(billTotal)+' • Paid: '+cpMoney(billPaid)+' • Outstanding: '+cpMoney(billBalance)+'</div><div class="skcp-bill-actions"><button class="skcp-btn" onclick="skCPViewBill('+x.idx+')">📄 Bill Details</button><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(billBalance>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span class="skcp-sales-bill-paid">✓ PAID</span>')+'</div>'+
@@ -7746,7 +7820,10 @@ window.skCPSaveAction=function(){
 };
 function cpOpenPage(){
  if(typeof skImportFromBills==='function')skImportFromBills(true);
- document.getElementById('skCreditLedgerPage').classList.add('active');cpShowMain();
+ document.getElementById('skCreditLedgerPage').classList.add('active');
+ /* the list always opens on the Credit filter */
+ skCPFilterMode='credit';document.querySelectorAll('#skCreditLedgerPage .skcp-filter').forEach(function(x){x.classList.toggle('active',x.dataset.f==='credit')});
+ cpShowMain();
 }
 window.skOpenCreditLedger=cpOpenPage;
 })();
@@ -7780,7 +7857,7 @@ window.skOpenCreditLedger=cpOpenPage;
   window.renderRecycleBinUI=function(){
     const c=document.getElementById('recycleBinItemsContainer');if(!c)return;purgeExpiredTrash();const list=readRecycle();
     if(!list.length){c.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:.85rem;">Trash is empty.</div>';return;}
-    c.innerHTML=list.slice().reverse().map(item=>{const d=new Date(item.deletedAt),valid=!isNaN(d.getTime()),days=valid?Math.max(0,30-Math.floor((Date.now()-d.getTime())/86400000)):0;return `<div class="sk-trash-row"><div style="min-width:0"><div style="font-weight:800;font-size:.85rem">${esc(item.title||item.type)}</div><div style="font-size:.68rem;color:var(--text-muted)">${esc(item.type)} • Deleted: ${valid?d.toLocaleDateString('en-GB'):'Unknown'} • ${days} day(s) remaining</div></div><div class="sk-trash-actions"><button type="button" onclick="restoreFromTrash('${esc(item.trashId)}')" style="background:var(--primary);color:#fff">🔄 Restore</button><button type="button" onclick="permanentlyDeleteTrash('${esc(item.trashId)}')" style="background:rgba(239,68,68,.12);color:#dc2626">🗑️ Delete</button></div></div>`}).join('');
+    c.innerHTML=list.slice().reverse().map(item=>{const d=new Date(item.deletedAt),valid=!isNaN(d.getTime()),days=valid?Math.max(0,30-Math.floor((Date.now()-d.getTime())/86400000)):0;return `<div class="sk-trash-row"><div style="min-width:0"><div style="font-weight:800;font-size:.85rem">${esc(item.title||item.type)}</div><div style="font-size:.68rem;color:var(--text-muted)">${esc(item.type)} • Deleted: ${valid?window.skStamp(d.getTime()).split(",")[0]:'Unknown'} • ${days} day(s) remaining</div></div><div class="sk-trash-actions"><button type="button" onclick="restoreFromTrash('${esc(item.trashId)}')" style="background:var(--primary);color:#fff">🔄 Restore</button><button type="button" onclick="permanentlyDeleteTrash('${esc(item.trashId)}')" style="background:rgba(239,68,68,.12);color:#dc2626">🗑️ Delete</button></div></div>`}).join('');
   };
   async function restoreCloudBill(id){try{if(window.firebase?.auth&&firebase.auth().currentUser&&firebase.firestore){await firebase.firestore().collection('shops').doc('SK-MOBILES').collection('bills').doc(String(id)).set({id:String(id),isDeleted:false,_deleted:false,deletedAt:null,_syncUpdatedAt:Date.now(),_syncUpdatedBy:firebase.auth().currentUser.uid},{merge:true});}}catch(e){console.warn('Recycle Bin cloud bill restore failed:',e);}}
   window.restoreFromTrash=async function(trashId){

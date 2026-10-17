@@ -160,3 +160,63 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - **Layout**: Order List sheet is centred; in-sheet scrollbars hidden so pages no longer look pushed off screen.
 - **Newest first** (display only): bill history, used stock register, customers, credit customers, credit entries, orders, global search bills.
 - **Credit ledger**: customers without bills no longer show an outstanding amount in the list after their credit is fully paid.
+
+## V5.6.160
+- **Duplicate bills fixed**: editing a saved bill and then pressing New Bill / closing no longer creates a second copy; Save Bill refuses to save the exact same bill twice.
+- **Used Mobile Stock**: Bill button and the 3-dot menu now sit inside the row card, aligned in every row.
+- **Used Mobile Stock form**: Save Purchase / Reset buttons are no longer hidden behind the bottom navigation bar.
+
+## V5.6.161
+- **Customer ledger**: Credit / Payment buttons show proper icons (were white boxes). "Send history" now opens a popup with From / To dates and Today / 7 days / 1 month / All; the full history of the chosen period is sent (no 15/25 entry limit).
+- **Credit list**: opens on the Credit filter; filter chips fill the row; customer avatars are round and coloured per customer. **Credit Reminders**: each customer has a "Change date / Set due date" button (key `skx_credit_due_override_v1`).
+- **Home header**: the floating role badge no longer overlaps the profile icon; the profile icon itself shows the role (crown / briefcase / wrench).
+- **Billing**: after Save or Update the New Bill form is empty, also when you return later; abandoning an edit does not leave its data in the New Bill form.
+- **Fields keep their data** when tapped (billing fields no longer clear on focus).
+
+## V5.6.162
+- **Flicker fixed**: the popup-centering script re-toggled the class of every popup in an endless loop (~500 DOM changes per second). It now does nothing when nothing changes (3 changes in 3 s).
+- **Customers page**: new Edit (name / phone) and Merge buttons on each customer, and a banner when one name has more than one account. Merge re-points every bill, repair job and credit entry to the final name + phone (history stays date-wise), keeps the due-date override, and offers a 15 s Undo. File `js/features/customer-merge.js`.
+- **Outstanding**: ledger-only credit of a customer who also has bills (for example after merging) is now included in the outstanding total (minus ledger-only payments).
+- **Home**: Recent Activity cards open the bill / repair / stock item they show; View All opens one newest-first list of bills, repairs, used-stock purchases and credit entries (`js/features/recent-activity.js`). View All / See All are plain links (no tall box).
+
+## V5.6.163
+- Phone field: tapping the field opens the number pad; the contact picker opens only from the contact icon.
+- Price list: now drawn directly on a canvas (no external library, works offline). Share image and PDF (A4, multi-page) both work; preview is exactly what is sent.
+- Every search box gets a small (x) button that clears all text at once.
+- Settings: Full Pill button radius no longer turns option tiles into ovals.
+
+## V5.6.164
+- Merge / Edit customer popups redesigned (even padding, coloured icons, pill-safe buttons). Shared `.skpop` popup style for all new popups.
+- Customer details: name, phone, alternate phone, address, e-mail, notes (key `skx_customer_profiles_v1`). Tap the customer name on the credit ledger page to edit; address shows under the phone. Profile follows rename / merge and is restored by Undo.
+- Every calendar field shows dd/mm/yyyy (stored value stays ISO). Remaining text dates (trash, sync stamps, customer bills) switched to dd/mm/yyyy.
+- Bulk WhatsApp (drawer): group + message template, one-tap Send per customer / Send next.
+- Stock aging (drawer): unsold used mobiles 30/60/90+ days, money locked, reduce customer price.
+- Backup & Restore (drawer): JSON / Excel download, one-tap restore, weekly reminder bar.
+- Customer QR: QR holds a link to `/view.html` with a compressed summary of the latest bills inside the link. No data uploaded. `sw.js` now caches `/index.html` only for the real app page.
+
+## V5.6.165
+- Credit List and Customer Credit Ledger now show the same balance (ledger payments are netted off the oldest dues first).
+- Undo bars hide automatically after 5 seconds.
+- Tempered Glass long-press bar (Cancel / Select All / Delete) is one clean row.
+- Home Recent Activity cards show the newest bill / repair and open the same item.
+- New "Reviews & Offers": separate saved contacts (mobile buyers, finished repairs), WhatsApp review-link request and offers.
+- Used Mobile Stock page: 4 small stat boxes in one row, compact purchase buttons, search + All/In stock/Sold above them.
+
+## V5.6.166
+- Walk-in Customer accounts are never suggested for merging; merge list rows no longer cut off.
+- Signature opens as its own centred popup; pen is bolder and smoothed, signature is straightened, cropped and centred; the authorised (sales) signature is saved once and used on every bill until cleared.
+- Home Recent Activity shows the 3 newest activities of any kind (newest first, same-day order fixed) and each opens its item.
+- Home: Tempered Glass, Accessories and Other Inventory cards removed; new Shop Tools tiles (Price List, Reviews & Offers, Monthly Report, Dealer Payments).
+- Dealer Payments: purchases count as paid by default; only ones marked "Pay later" are owed.
+
+## V5.7
+- Used Mobile Stock: search box is back under "Used Mobile Register".
+- Home Recent Activity shows only today's 3 newest activities.
+- Layout/alignment audit across all pages.
+
+## V5.7.1
+- App icon / splash: sharp full-resolution SK MOBILES logo (any + maskable icons with safe zone, white splash background) instead of the blurry blue "SK" icon.
+
+## V5.7.2
+- Home Quick Actions: "Edit" lets you choose your own 5 buttons (20 to pick from); saved on this device.
+- Dark-mode button in the home header (works with the Appearance settings); dark header title colour fixed.

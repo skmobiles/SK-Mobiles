@@ -14,7 +14,9 @@ html:not(#a):not(#b)[data-ui-card-radius] :is(.sk-home-v2-hero,.sk-home-v2-card,
 html:not(#a):not(#b)[data-ui-card-radius] :is(.sk-home-v2-hero img){border-radius:var(--ui-card-radius)!important}
 
 /* ---------- button radius (cards that are <button>s follow the card radius) ---------- */
-html:not(#a):not(#b)[data-ui-button-radius] button:not(.modal-close-btn):not(.drawer-close-btn):not(#navHome):not(.draggable-card):not(.sk-home-v2-feature):not(.sk-home-v2-metric):not(.st-profile):not(.st-row-btn):not(.st-reset-row){border-radius:var(--ui-button-radius)!important}
+html:not(#a):not(#b)[data-ui-button-radius] button:not(.modal-close-btn):not(.drawer-close-btn):not(#navHome):not(.draggable-card):not(.sk-home-v2-feature):not(.sk-home-v2-metric):not(.st-profile):not(.st-row-btn):not(.st-reset-row):not(.st-rad):not(.st-choice):not(.st-bs):not(.sk-keepr){border-radius:var(--ui-button-radius)!important}
+/* Settings option tiles are tall multi-line cards: Full Pill must not turn them into ovals */
+html:not(#a):not(#b)[data-ui-button-radius] button:is(.st-rad,.st-choice,.st-bs){border-radius:18px!important}
 
 /* ---------- card surface ---------- */
 html:not(#a):not(#b)[data-ui-card-surface="blur"] :is(.sk-home-v2-hero,.sk-home-v2-card,.sk-home-v2-recent-card,.sk-home-v2-feature,.sk-home-v2-metric,.bill-section,.bill-action-grid,.bill-history-card,.skcp-stat,.skcp-row,.sk-rj-card,.sk-used-stat-card,.sk-used-panel,.sk-used-stock-header,.sk-accessory-row,.st-section,.st-tilecard,.st-details,.st-note,.st-logo-card,.st-toggles,.skdr-card,.skdr-hero,.skcr-row,.sk-signature-panel,.modal-title,.billing-tabs,.sk-rj-tabs,.sk-perm-row){backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}

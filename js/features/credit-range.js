@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.159 — Credit List (date to date): customer-wise pending credit for a chosen period,
+/* SK MOBILES v5.7.2 — Credit List (date to date): customer-wise pending credit for a chosen period,
    with days pending, WhatsApp (whole list or one customer statement) and PDF. Read-only over existing data. */
 (function(){
 'use strict';
@@ -32,13 +32,19 @@ function build(){
     var items=[];
     (c.bills||[]).forEach(function(x){
       var b=x.b,bal=num(b.balance),k=toKey(b.date);
-      if(bal>0&&inR(k))items.push({date:k,label:[b.brand,b.model].filter(Boolean).join(' ')||'Bill '+(b.billNo||''),total:num(b.price),paid:Math.max(0,num(b.price)-bal),balance:bal});
+      if(bal>0&&k)items.push({date:k,label:[b.brand,b.model].filter(Boolean).join(' ')||'Bill '+(b.billNo||''),total:num(b.price),paid:Math.max(0,num(b.price)-bal),balance:bal});
     });
     (c.entries||[]).forEach(function(e){
       if((e.type==='credit'||e.type==='emi')&&String(e.source||'')!=='bill'&&!e.billId&&num(e.amount)>0){
-        var k=toKey(e.date);if(inR(k))items.push({date:k,label:String(e.source||'')==='repair-job'?'Repair job':(e.note||'Credit'),total:num(e.amount),paid:0,balance:num(e.amount)});
+        var k=toKey(e.date);if(k)items.push({date:k,label:String(e.source||'')==='repair-job'?'Repair job':(e.note||'Credit'),total:num(e.amount),paid:0,balance:num(e.amount)});
       }
     });
+    items.sort(function(a,b){return a.date<b.date?-1:1});
+    /* Payments recorded in the ledger are not on the bills themselves: take them off the oldest credit first, so this list
+       always agrees with the Customer Credit Ledger balance (c.balance), whatever period is chosen. */
+    var all=items.reduce(function(a,i){return a+i.balance},0),left=Math.max(0,all-num(c.balance));
+    items.forEach(function(i){if(left<=0)return;var cut=Math.min(i.balance,left);i.balance-=cut;i.paid+=cut;left-=cut});
+    items=items.filter(function(i){return i.balance>0&&inR(i.date)});
     if(!items.length)return;
     items.sort(function(a,b){return a.date<b.date?-1:1});
     var bal=items.reduce(function(a,i){return a+i.balance},0);

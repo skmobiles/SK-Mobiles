@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.159 — IMEI / serial barcode scanner.
+/* SK MOBILES v5.7.2 — IMEI / serial barcode scanner.
    Adds a camera button inside every IMEI field. Uses the phone's built-in BarcodeDetector (Chrome Android);
    falls back to the ZXing library (loaded on first use) when BarcodeDetector is not available.
    Only fills the field the user tapped; no stored data is touched. */

@@ -1,5 +1,5 @@
-/* SK MOBILES v5.6.159 — "Send history" button on a customer's ledger (Customer Credit / Outstanding page).
-   Builds the customer's statement from the same data the ledger shows (credit bills, credit/payment entries,
+/* SK MOBILES v5.7.2 — "Send history" button on a customer's ledger (Customer Credit / Outstanding page).
+   Opens a date-range popup (Today / 7 days / 1 month / All / From-To) and builds the customer's statement from the same data the ledger shows (credit bills, credit/payment entries,
    outstanding) and opens WhatsApp with it. Read-only; nothing else on the page changes. */
 (function(){
 'use strict';
@@ -24,38 +24,88 @@ function currentCustomer(){
   try{list=window.skCPGetCustomers()}catch(e){}
   return list.filter(function(c){return c.key===key})[0]||null;
 }
-function statement(c){
-  var L=['*'+shopName()+' — Account statement*','Customer: '+c.name+(c.phone?' ('+c.phone+')':''),''];
-  L.push('Outstanding now: '+money(c.balance),'Total credit / EMI: '+money(c.credits),'Payments received: '+money(c.payments),'');
-  var bills=(c.bills||[]).filter(function(x){var b=x.b;return b.payMode==='Credit'||b.payMode==='EMI'||num(b.balance)>0});
+function p2(n){return String(n).padStart(2,'0')}
+function keyOf(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
+function isoToKey(v){return String(v||'').replace(/-/g,'')}
+var cust=null,from='',to='';
+function inRange(dateVal){
+  if(!from&&!to)return true;
+  var k=sortKey(dateVal);if(!k)return true;
+  if(from&&k<isoToKey(from))return false;
+  if(to&&k>isoToKey(to))return false;
+  return true;
+}
+function period(){
+  if(!from&&!to)return 'All dates';
+  return (from?dmy(from):'Start')+' to '+(to?dmy(to):dmy(keyOf(new Date())));
+}
+function pick(c){
+  var bills=(c.bills||[]).filter(function(x){var b=x.b;return (b.payMode==='Credit'||b.payMode==='EMI'||num(b.balance)>0)&&inRange(b.date)});
   bills.sort(function(a,b){return sortKey(a.b.date)<sortKey(b.b.date)?-1:1});
-  if(bills.length){
-    L.push('*Credit bills*');
-    bills.slice(-15).forEach(function(x){
-      var b=x.b,total=num(b.price),bal=num(b.balance),paid=Math.max(0,total-bal);
-      L.push('• '+dmy(b.date)+' '+(b.model||'Bill')+' — Total '+money(total)+', Paid '+money(paid)+', Balance '+money(bal));
-    });
-    L.push('');
-  }
-  var ents=(c.entries||[]).filter(function(e){return String(e.source||'')!=='bill'});
+  var ents=(c.entries||[]).filter(function(e){return String(e.source||'')!=='bill'&&inRange(e.date)});
   ents.sort(function(a,b){return sortKey(a.date)<sortKey(b.date)?-1:1});
-  if(ents.length){
-    L.push('*Credit / payment history*');
-    ents.slice(-25).forEach(function(e){
-      var tag=e.type==='payment'?'Payment':(e.type==='discount'?'Discount':'Credit');
-      L.push('• '+dmy(e.date)+' '+tag+' '+money(e.amount)+(e.note?' ('+e.note+')':''));
+  return {bills:bills,ents:ents};
+}
+function statement(c){
+  var r=pick(c);
+  var L=['*'+shopName()+' — Account statement*','Customer: '+c.name+(c.phone?' ('+c.phone+')':''),'Period: '+period(),''];
+  var paid=r.ents.filter(function(e){return e.type==='payment'}).reduce(function(a,e){return a+num(e.amount)},0);
+  L.push('Outstanding now: '+money(c.balance),'Payments in this period: '+money(paid),'');
+  if(r.bills.length){
+    L.push('*Credit bills*');
+    r.bills.forEach(function(x){
+      var b=x.b,total=num(b.price),bal=num(b.balance),pd=Math.max(0,total-bal);
+      L.push('• '+dmy(b.date)+' '+(b.model||'Bill')+' — Total '+money(total)+', Paid '+money(pd)+', Balance '+money(bal));
     });
-    if(ents.length>25)L.push('(older entries not shown)');
     L.push('');
   }
+  if(r.ents.length){
+    L.push('*Credit / payment history*');
+    r.ents.forEach(function(e){
+      var tag=e.type==='payment'?'Payment':(e.type==='discount'?'Discount':'Credit');
+      L.push('• '+dmy(e.date)+' '+tag+' '+money(e.amount)+(e.note||e.details?' ('+(e.note||e.details)+')':''));
+    });
+    L.push('');
+  }
+  if(!r.bills.length&&!r.ents.length)L.push('No entries in this period.','');
   L.push('Thank you 🙏');
   return L.join('\n');
 }
+function renderSummary(){
+  var box=document.getElementById('skCPHistSummary');if(!box||!cust)return;
+  var r=pick(cust),paid=r.ents.filter(function(e){return e.type==='payment'}).reduce(function(a,e){return a+num(e.amount)},0);
+  box.innerHTML='<div class="skcph-sum"><b>'+r.bills.length+'</b><small>credit bills</small></div><div class="skcph-sum"><b>'+r.ents.length+'</b><small>entries</small></div><div class="skcph-sum"><b>'+money(paid)+'</b><small>payments</small></div>';
+}
+window.skCPHistSet=function(which,v){if(which==='from')from=v||'';else to=v||'';renderSummary()};
+window.skCPHistPreset=function(n){
+  var d=new Date();to=keyOf(d);
+  if(n==='all'){from='';to=''}else if(n==='month'){var s=new Date();s.setMonth(s.getMonth()-1);from=keyOf(s)}else if(n===0){from=to}else{var t=new Date();t.setDate(t.getDate()-n);from=keyOf(t)}
+  var f=document.getElementById('skCPHistFrom'),t2=document.getElementById('skCPHistTo');if(f)f.value=from;if(t2)t2.value=to;renderSummary();
+};
+function ensureModal(){
+  if(document.getElementById('skCPHistModal'))return;
+  var el=document.createElement('div');el.className='modal-overlay';el.id='skCPHistModal';
+  el.innerHTML='<div class="modal-sheet skpop skcph-sheet"><div class="modal-title"><span>📤 Send history</span><button class="modal-close-btn" onclick="toggleModal(\'skCPHistModal\',false)">✕</button></div>'+
+   '<div id="skCPHistWho" class="skcph-who"></div>'+
+   '<div class="skcrg-dates"><label>From<input type="date" id="skCPHistFrom" onchange="skCPHistSet(\'from\',this.value)"/></label><label>To<input type="date" id="skCPHistTo" onchange="skCPHistSet(\'to\',this.value)"/></label></div>'+
+   '<div class="skcrg-chips"><button type="button" onclick="skCPHistPreset(0)">Today</button><button type="button" onclick="skCPHistPreset(7)">7 days</button><button type="button" onclick="skCPHistPreset(\'month\')">1 month</button><button type="button" onclick="skCPHistPreset(\'all\')">All</button></div>'+
+   '<div id="skCPHistSummary" class="skcph-sums"></div>'+
+   '<div class="skcph-actions"><button type="button" class="submit-btn whatsapp-green" onclick="skCPHistSend()">📤 Send on WhatsApp</button></div></div>';
+  document.body.appendChild(el);
+}
+window.skCPHistSend=function(){
+  if(!cust){toast('Customer not found');return}
+  var d=digits(cust.phone);if(d.length>10)d=d.slice(-10);
+  if(d.length!==10){toast('No phone number — opening WhatsApp without a number');d=''}
+  window.open('https://wa.me/'+(d?'91'+d:'')+'?text='+encodeURIComponent(statement(cust)),'_blank','noopener');
+  if(typeof window.toggleModal==='function')window.toggleModal('skCPHistModal',false);
+};
 window.skCPSendHistory=function(){
   var c=currentCustomer();if(!c){toast('Customer not found');return}
-  var d=digits(c.phone);if(d.length>10)d=d.slice(-10);
-  if(d.length!==10){toast('No phone number — opening WhatsApp without a number');d=''}
-  window.open('https://wa.me/'+(d?'91'+d:'')+'?text='+encodeURIComponent(statement(c)),'_blank','noopener');
+  cust=c;ensureModal();
+  var w=document.getElementById('skCPHistWho');if(w)w.textContent=c.name+(c.phone?' • '+c.phone:'');
+  skCPHistPreset('all');
+  if(typeof window.toggleModal==='function')window.toggleModal('skCPHistModal',true);
 };
 function inject(){
   var view=document.getElementById('skCPDetailView');if(!view||view.style.display==='none')return;

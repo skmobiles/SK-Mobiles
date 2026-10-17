@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.159 — final layout fixes (loaded last). */
+/* SK MOBILES v5.7.2 — final layout fixes (loaded last). */
 /* Any inline icon without its own size rule can never balloon to fill its box. */
 :where(svg.st-svg){width:20px;height:20px;flex:none}
 /* Tools & Others note page spacing */
@@ -82,12 +82,244 @@ html body .sk-used-view-chips{display:flex;gap:6px;margin:8px 0}
 html body .sk-used-view-chips button{flex:1;height:38px;min-height:0!important;border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);border-radius:12px;font-size:.78rem;font-weight:700;cursor:pointer}
 html body .sk-used-view-chips button.on{background:var(--primary,#2563eb);border-color:var(--primary,#2563eb);color:#fff}
 
-/* v5.6.159 - keep every full-screen sheet centred and hide the in-sheet scrollbar so nothing looks pushed off screen */
+/* v5.7.2 - keep every full-screen sheet centred and hide the in-sheet scrollbar so nothing looks pushed off screen */
 html body .modal-overlay .modal-sheet{margin-left:auto !important;margin-right:auto !important;scrollbar-width:none}
 html body .modal-overlay .modal-sheet::-webkit-scrollbar,html body #skCreditLedgerPage *::-webkit-scrollbar,html body #skCreditLedgerPage::-webkit-scrollbar{width:0 !important;height:0 !important;display:none}
 html body #skCreditLedgerPage,html body #skCreditLedgerPage *{scrollbar-width:none}
 
-/* v5.6.159 - Bill button on used stock rows / detail dialog */
+/* v5.7.2 - Bill button on used stock rows / detail dialog */
 html body #skUsedStockModal .sk-used-bill-btn{display:inline-flex;align-items:center;gap:4px;height:34px;padding:0 10px;border:0;border-radius:17px;background:var(--accent,#2563eb);color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex:0 0 auto}
 html body #skUsedStockModal .sk-used-bill-btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 html body #skUsedStockModal .sk-used-bill-btn:active{transform:scale(.96)}
+
+/* v5.7.2 - last buttons of the Used Mobile Stock page must clear the bottom navigation bar */
+html body #skUsedStockModal main.sk-used-stock-scroll{padding-bottom:calc(var(--nav-h,66px) + 64px + env(safe-area-inset-bottom,0px)) !important}
+
+/* v5.7.2 - used stock row: Bill button + menu fit inside the card */
+html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-register-table tbody tr{grid-template-columns:22px minmax(0,1fr) auto 92px !important}
+html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-row-actions{gap:4px !important;justify-content:flex-end !important;min-width:0;width:92px}
+html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-bill-btn{height:30px !important;padding:0 8px !important;font-size:11px !important;border-radius:15px !important;flex:0 0 auto}
+html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-bill-btn svg{width:13px !important;height:13px !important}
+html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-row-menu{flex:0 0 28px;width:28px}
+html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-row-menu summary{width:28px !important;height:30px !important;flex:0 0 28px !important;min-width:28px !important}
+html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-row-menu summary svg{width:16px !important;height:16px !important;flex:0 0 16px !important}
+html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-price-cell,html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-status-cell{padding-right:4px !important}
+
+/* v5.7.2 - Credit list: filter chips fill the row (no empty gap on the right) */
+html:not(#a) body #skCreditLedgerPage#skCreditLedgerPage .skcp-filters{display:flex !important;gap:6px !important;overflow:visible !important;padding:2px 0 6px !important;width:100%}
+html:not(#a) body #skCreditLedgerPage#skCreditLedgerPage .skcp-filters .skcp-filter{flex:1 1 auto !important;min-width:0 !important;padding:0 4px !important;font-size:.74rem !important;text-align:center;justify-content:center}
+
+/* v5.7.2 - header: role is shown on the profile icon, the floating badge is hidden so nothing overlaps */
+html body #skTopRoleBadge{display:none !important}
+
+/* v5.7.2 - home section links (View All / See All) are plain links, not tall boxes */
+html:not(#a) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-section-heading>button{height:auto !important;min-height:0 !important;width:auto !important;padding:4px 2px !important;box-shadow:none !important;background:transparent !important;border:0 !important}
+html:not(#a) body .sk-home-v2-recent-card{cursor:pointer;-webkit-tap-highlight-color:transparent}
+html:not(#a) body .sk-home-v2-recent-card:active{transform:scale(.98)}
+
+/* v5.7.2 - Recent Activity list */
+html:not(#a) body #skRecentModal#skRecentModal .skra-chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+html:not(#a) body #skRecentModal#skRecentModal .skra-chips button{border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);border-radius:99px;padding:6px 12px;font-size:.74rem;font-weight:800}
+html:not(#a) body #skRecentModal#skRecentModal .skra-chips button.active{background:var(--primary,#2563eb);color:#fff;border-color:transparent}
+html:not(#a) body #skRecentModal#skRecentModal .skra-row{display:flex;align-items:center;gap:10px;width:100%;padding:10px;margin:0 0 8px;border:1px solid var(--card-border,#dbe4f5);border-radius:14px;background:var(--card-bg,#fff);color:var(--text);text-align:left}
+html:not(#a) body #skRecentModal#skRecentModal .skra-ic{font-size:1.2rem;flex:0 0 auto}
+html:not(#a) body #skRecentModal#skRecentModal .skra-main{flex:1;min-width:0}
+html:not(#a) body #skRecentModal#skRecentModal .skra-main b{display:block;font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html:not(#a) body #skRecentModal#skRecentModal .skra-main small,html:not(#a) body #skRecentModal#skRecentModal .skra-side small{display:block;font-size:.68rem;color:var(--text-muted,#64748b);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html:not(#a) body #skRecentModal#skRecentModal .skra-side{text-align:right;flex:0 0 auto}
+html:not(#a) body #skRecentModal#skRecentModal .skra-side em{font-style:normal;font-weight:800;font-size:.82rem;display:block}
+html:not(#a) body #skRecentModal#skRecentModal .skra-empty{text-align:center;color:var(--text-muted,#64748b);padding:24px}
+
+/* v5.7.2 - customer edit / merge */
+
+/* ===== v5.7.2 search box clear (x) ===== */
+html body .sk-sc-wrap{position:relative;display:block;width:100%}
+html body .sk-sc-wrap>input{width:100%!important;box-sizing:border-box!important;padding-right:44px!important}
+html body .sk-sc-btn{display:none!important;position:absolute;right:10px;top:50%;transform:translateY(-50%);width:26px!important;height:26px!important;min-width:0!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:50%!important;background:rgba(100,116,139,.22)!important;box-shadow:none!important;align-items:center;justify-content:center;cursor:pointer;z-index:2}
+html body .sk-sc-wrap.has>.sk-sc-btn{display:inline-flex!important}
+html body .sk-sc-btn svg{width:14px;height:14px;fill:none;stroke:#475569;stroke-width:2.6;stroke-linecap:round}
+html[data-ui-mode="dark"] body .sk-sc-btn{background:rgba(148,163,184,.3)!important}
+html[data-ui-mode="dark"] body .sk-sc-btn svg{stroke:#e2e8f0}
+html body .sk-sc-wrap>input::-webkit-search-cancel-button,html body .sk-sc-wrap>input::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}
+html body #skPriceListModal#skPriceListModal :is(.skpl-seg,.skpl-opts,#skPlBody,#skPlActions){margin-left:14px;margin-right:14px}
+html body #skPriceListModal#skPriceListModal #skPlBody{margin-top:6px;margin-bottom:12px}
+html body #skUsedStockModal#skUsedStockModal .sk-used-search-box #skUsedSearch:focus{box-shadow:none!important;border:0!important;background:transparent!important;outline:0!important}
+html body #skUsedStockModal#skUsedStockModal .sk-used-search-box:focus-within{border-color:var(--primary,#2563eb)}
+
+/* ===== v5.7.2 shared popup design (.skpop): even side gutters, tinted notes, icon labels, pill-safe buttons ===== */
+html:not(#a) body .modal-sheet.skpop{height:auto!important;min-height:0!important;max-height:90dvh!important;overflow:auto;align-self:flex-start;padding-bottom:18px!important}
+html:not(#a) body .skpop>:not(.modal-title){margin-left:16px!important;margin-right:16px!important}
+html:not(#a) body .skpop-note{display:flex;gap:9px;align-items:flex-start;margin-top:12px!important;margin-bottom:4px!important;padding:11px 13px!important;border-radius:14px;border:1px solid color-mix(in srgb,var(--primary,#2563eb) 22%,transparent);background:color-mix(in srgb,var(--primary,#2563eb) 8%,transparent);font-size:.78rem;line-height:1.45;color:var(--text)}
+html:not(#a) body .skpop-note .ski{flex:0 0 auto;margin-top:1px!important}
+html:not(#a) body .skpop-fld{display:block;margin-top:13px!important}
+html:not(#a) body .skpop-fld>span{display:flex;align-items:center;gap:7px;margin-bottom:6px!important;font-size:.74rem;font-weight:800;color:var(--text-muted,#64748b)}
+html:not(#a) body .skpop-fld input,html:not(#a) body .skpop-fld textarea,html:not(#a) body .skpop-fld select{width:100%;box-sizing:border-box;margin:0!important;padding:12px 14px!important;border:1px solid var(--card-border,#dbe4f5);border-radius:14px!important;font-size:.9rem;background:var(--input-bg,#fff);color:var(--text);font-family:inherit}
+html:not(#a) body .skpop-fld textarea{min-height:76px;resize:vertical}
+html:not(#a) body .skpop-fld input:focus,html:not(#a) body .skpop-fld textarea:focus{outline:0;border-color:var(--primary,#2563eb);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary,#2563eb) 18%,transparent)}
+html:not(#a) body .skpop-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+html:not(#a) body .skpop-actions{display:flex;gap:10px;margin-top:18px!important}
+html:not(#a) body .skpop-actions .submit-btn{flex:1;width:auto;margin:0!important}
+html:not(#a) body .skpop-search{display:block;width:calc(100% - 32px)!important;box-sizing:border-box;margin-top:12px!important;padding:12px 14px!important;border:1px solid var(--card-border,#dbe4f5);border-radius:14px!important;background:var(--input-bg,#fff);color:var(--text);font-size:.88rem}
+html:not(#a) body .skpop-list{max-height:38vh;overflow:auto;margin-top:10px!important;display:flex;flex-direction:column;gap:8px;padding:2px!important}
+html:not(#a) body .skpop .sk-keepr{border-radius:16px!important}
+html:not(#a) body .skcm-opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);padding:10px 12px!important;box-shadow:none}
+html:not(#a) body .skcm-opt .skcm-av{flex:0 0 40px;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem}
+html:not(#a) body .skcm-opt .skcm-tx{flex:1;min-width:0}
+html:not(#a) body .skcm-opt b{display:block;font-size:.88rem}
+html:not(#a) body .skcm-opt small{display:block;font-size:.68rem;color:var(--text-muted,#64748b);margin-top:2px!important;line-height:1.3}
+html:not(#a) body .skcm-opt i.same{font-style:normal;font-size:.6rem;font-weight:800;color:#b45309;background:rgba(245,158,11,.18);border-radius:99px;padding:1px 7px!important;margin-left:5px!important}
+html:not(#a) body .skcm-opt.sel{border-color:var(--primary,#2563eb);background:color-mix(in srgb,var(--primary,#2563eb) 9%,var(--card-bg,#fff));box-shadow:0 0 0 2px color-mix(in srgb,var(--primary,#2563eb) 28%,transparent)}
+html:not(#a) body .skcm-opt.sel::after{content:"✓";flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--primary,#2563eb);color:#fff;font-size:.8rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+html:not(#a) body .skcm-final{margin-top:6px!important;padding:2px 0 0!important}
+html:not(#a) body .skcm-row{display:flex;gap:10px;margin:10px 0!important}
+html:not(#a) body .skcm-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);padding:10px 12px!important;font-size:.8rem;font-weight:800}
+html:not(#a) body .skcm-dup{display:flex;align-items:center;gap:9px;width:100%;margin:8px 0!important;padding:11px 13px!important;border:1px solid #f59e0b;background:rgba(245,158,11,.12);color:var(--text);font-size:.76rem;font-weight:800;text-align:left}
+html:not(#a) body .skcm-dgroup{border:1px solid var(--card-border,#dbe4f5);border-radius:16px;padding:10px 12px!important;margin-top:12px!important;background:var(--card-bg,#fff)}
+html:not(#a) body .skcm-drow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:9px 0!important;border-top:1px dashed var(--card-border,#e5ecf8);font-size:.8rem}
+html:not(#a) body .skcm-drow small{display:block;font-size:.67rem;color:var(--text-muted,#64748b)}
+html:not(#a) body .skcm-drow .skcm-btn{flex:1 1 100%;font-size:.72rem;padding:8px!important}
+html:not(#a) body .skcm-empty{text-align:center;color:var(--text-muted,#64748b);padding:16px!important;font-size:.8rem}
+html:not(#a) body .skcm-addr{margin-top:4px!important;font-size:.72rem;line-height:1.35;color:var(--text-muted,#64748b);display:flex;gap:5px;align-items:flex-start}
+html:not(#a) body .skcp-det-who{cursor:pointer}
+html:not(#a) body .skcp-det-who>b::after{content:"";display:inline-block;width:15px;height:15px;margin-left:7px!important;vertical-align:-2px;background:var(--primary,#2563eb);-webkit-mask:var(--ico-pencil) center/contain no-repeat;mask:var(--ico-pencil) center/contain no-repeat;opacity:.85}
+
+/* ===== v5.7.2 dd/mm/yyyy date fields ===== */
+html:not(#a) body .sk-dmy{position:relative;display:block;width:100%}
+html:not(#a) body .sk-dmy>input[type="date"]{width:100%;box-sizing:border-box;-webkit-text-fill-color:transparent;color:transparent!important}
+html:not(#a) body .sk-dmy>input[type="date"]::-webkit-datetime-edit{opacity:0}
+html:not(#a) body .sk-dmy-txt{position:absolute;left:0;right:34px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text);white-space:nowrap;overflow:hidden;line-height:1.2}
+html:not(#a) body .sk-dmy-txt.empty{color:var(--text-muted,#94a3b8)}
+
+/* ===== v5.7.2 bulk WhatsApp / stock aging / backup / QR ===== */
+html:not(#a) body .skbk-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px!important}
+html:not(#a) body .skbk-chip{border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);padding:7px 12px!important;font-size:.72rem;font-weight:700;min-height:0;cursor:pointer;border-radius:99px!important}
+html:not(#a) body .skbk-chip.on{background:var(--primary,#2563eb);border-color:var(--primary,#2563eb);color:#fff}
+html:not(#a) body .skbk-hint{display:block;margin-top:4px!important;font-size:.66rem;color:var(--text-muted,#64748b)}
+html:not(#a) body .skbk-meta{margin-top:12px!important;font-size:.72rem;font-weight:700;color:var(--text-muted,#64748b)}
+html:not(#a) body .skbk-rows{display:flex;flex-direction:column;gap:8px;margin-top:8px!important;max-height:36vh;overflow:auto;padding:2px!important}
+html:not(#a) body .skbk-row{display:flex;align-items:center;gap:11px;padding:9px 11px!important;border:1px solid var(--card-border,#dbe4f5);border-radius:16px;background:var(--card-bg,#fff)}
+html:not(#a) body .skbk-row .skcm-av{flex:0 0 38px;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+html:not(#a) body .skbk-row .skcm-tx{flex:1;min-width:0}
+html:not(#a) body .skbk-row b{display:block;font-size:.85rem}
+html:not(#a) body .skbk-row small{display:block;font-size:.67rem;color:var(--text-muted,#64748b)}
+html:not(#a) body .skbk-row.done{opacity:.6}
+html:not(#a) body .skbk-send{border:0;background:#16a34a;color:#fff;padding:8px 14px!important;font-size:.74rem;font-weight:800;min-height:0;cursor:pointer}
+html:not(#a) body .skbk-row.done .skbk-send{background:#94a3b8}
+html:not(#a) body .skbk-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px!important}
+html:not(#a) body .skbk-tile{border:1px solid var(--card-border,#dbe4f5);border-radius:14px;padding:9px 6px!important;text-align:center;background:var(--card-bg,#fff)}
+html:not(#a) body .skbk-tile b{display:block;font-size:1rem;color:var(--text)}
+html:not(#a) body .skbk-tile small{font-size:.62rem;font-weight:700;color:var(--text-muted,#64748b)}
+html:not(#a) body .skag-row{padding:11px 12px!important;border:1px solid var(--card-border,#dbe4f5);border-radius:16px;background:var(--card-bg,#fff)}
+html:not(#a) body .skag-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+html:not(#a) body .skag-top b{display:block;font-size:.88rem}
+html:not(#a) body .skag-top small{display:block;font-size:.67rem;color:var(--text-muted,#64748b);margin-top:2px!important}
+html:not(#a) body .skag-age{flex:0 0 auto;font-size:.72rem;font-weight:800;border-radius:99px;padding:4px 10px!important;color:#fff;background:#f59e0b}
+html:not(#a) body .skag-age.o{background:#ea580c}html:not(#a) body .skag-age.r{background:#dc2626}html:not(#a) body .skag-age.g{background:#16a34a}
+html:not(#a) body .skag-pr{display:flex;gap:14px;margin-top:8px!important;font-size:.74rem;color:var(--text-muted,#64748b)}
+html:not(#a) body .skag-pr b{color:var(--text)}
+html:not(#a) body .skag-edit{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px!important;align-items:center}
+html:not(#a) body .skag-edit input{flex:1 1 110px;min-width:0;padding:9px 12px!important;border:1px solid var(--card-border,#dbe4f5);border-radius:12px!important;background:var(--input-bg,#fff);color:var(--text);font-size:.85rem}
+html:not(#a) body .skag-edit button{border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);padding:7px 10px!important;font-size:.7rem;font-weight:700;min-height:0;border-radius:99px!important}
+html:not(#a) body .skag-edit button.go{background:var(--primary,#2563eb);color:#fff;border-color:var(--primary,#2563eb)}
+html:not(#a) body .skag-reduce{margin-top:9px!important;width:100%;border:1px solid var(--primary,#2563eb);background:transparent;color:var(--primary,#2563eb);padding:8px!important;font-size:.76rem;font-weight:800;min-height:0}
+html:not(#a) body .skbkp-stat{display:flex;align-items:center;gap:11px;padding:12px 13px!important;margin-top:12px!important;border:1px solid var(--card-border,#dbe4f5);border-radius:16px;background:var(--card-bg,#fff)}
+html:not(#a) body .skbkp-stat b{display:block;font-size:.86rem}
+html:not(#a) body .skbkp-stat small{display:block;font-size:.69rem;color:var(--text-muted,#64748b);margin-top:2px!important}
+html:not(#a) body .skbkp-stat.warn{border-color:#f59e0b;background:rgba(245,158,11,.1)}
+html:not(#a) body .skbkp-btns{display:flex;flex-direction:column;gap:9px;margin-top:14px!important}
+html:not(#a) body .skbkp-btns .submit-btn{width:100%;margin:0!important}
+html:not(#a) body .skbkp-tog{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px!important;font-size:.8rem;font-weight:700}
+html:not(#a) body .skbkp-tog input{width:20px;height:20px}
+html:not(#a) body .skbk-bar{position:fixed;left:12px;right:12px;bottom:92px;z-index:2147483640;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px!important;border-radius:16px;background:#1e293b;color:#fff;font-size:.8rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+html:not(#a) body .skbk-bar button{border:0;border-radius:10px!important;padding:8px 12px!important;font-weight:800;font-size:.76rem;cursor:pointer;min-height:0}
+html:not(#a) body .skbk-bar .go{background:#38bdf8;color:#0c4a6e}html:not(#a) body .skbk-bar .later{background:transparent;color:#cbd5e1}
+html:not(#a) body .skqr-box{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:14px!important;padding:16px!important;border:1px solid var(--card-border,#dbe4f5);border-radius:18px;background:#fff}
+html:not(#a) body .skqr-box img{width:min(78vw,300px);height:auto;image-rendering:pixelated}
+html:not(#a) body .skqr-box b{font-size:.95rem;color:#0f172a}html:not(#a) body .skqr-box small{font-size:.7rem;color:#64748b;text-align:center}
+html:not(#a) body .skqr-row{display:flex;gap:10px;margin:10px 0!important}
+
+html:not(#a) body .skun-bar{padding:11px 14px!important}
+html:not(#a) body .sk-dmy>input[type="date"]{padding-left:12px!important;padding-right:34px!important}
+html:not(#a) body .sk-dmy-txt{left:12px!important}
+html:not(#a) body :is(.skbk-row b,.skag-top b,.skcm-opt b,.skbkp-stat b,.skbk-tile b,.skcu-item b,.skcu-item>span){color:var(--text)!important}
+
+/* v5.7.2 selection bar (Cancel / Select All / Delete): one full-width row */
+html:not(#a) body #cardsContainer > #skTemperedSelectBar.sk-active,
+html:not(#a) body #cardsContainer.sk-tempered-selection-mode > #skTemperedSelectBar{
+  grid-column:1/-1!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+  align-items:stretch!important;justify-content:space-between!important;gap:8px!important;width:100%!important;
+  box-sizing:border-box!important;padding:8px!important;margin:0 0 8px!important;position:sticky;top:0;z-index:30;
+  background:var(--card,#fff);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+html:not(#a) body #skTemperedSelectBar .sk-select-action{
+  flex:1 1 0!important;min-width:0!important;width:auto!important;min-height:42px;padding:8px 6px!important;margin:0!important;
+  white-space:nowrap!important;writing-mode:horizontal-tb!important;font-size:.8rem!important;border-radius:12px!important;
+  display:flex!important;align-items:center;justify-content:center;text-align:center}
+
+/* v5.7.2 review-link row */
+html:not(#a) body .skrv-link{display:flex!important;gap:8px;align-items:stretch}
+html:not(#a) body .skrv-link input{flex:1 1 auto!important;min-width:0!important;width:auto!important}
+html:not(#a) body .skrv-link .submit-btn{flex:0 0 auto!important;width:auto!important;min-width:84px;margin:0!important;padding:0 18px!important}
+
+/* v5.7.2 used mobile stock: 4 small stat boxes in one row, compact actions, search above the actions */
+html:not(#a) body #skUsedStockModal #skUsedStatsGrid:not([style*="none"]){display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;margin:0 0 8px!important}
+html:not(#a) body #skUsedStockModal #skUsedStatsGrid .sk-used-stat-card{flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;padding:7px 8px!important;gap:3px!important;border-radius:14px!important;min-width:0}
+html:not(#a) body #skUsedStockModal #skUsedStatsGrid .sk-used-stat-icon{width:22px!important;height:22px!important;flex:0 0 22px!important;border-radius:8px!important}
+html:not(#a) body #skUsedStockModal #skUsedStatsGrid .sk-used-stat-icon svg{width:13px!important;height:13px!important}
+html:not(#a) body #skUsedStockModal #skUsedStatsGrid .sk-used-rupee{font-size:.8rem!important}
+html:not(#a) body #skUsedStockModal #skUsedStatsGrid .sk-used-stat-card small{font-size:.6rem!important;line-height:1.1;white-space:nowrap}
+html:not(#a) body #skUsedStockModal #skUsedStatsGrid .sk-used-stat-card strong{font-size:.95rem!important;white-space:nowrap;line-height:1.15}
+html:not(#a) body #skUsedStockModal #skUsedPurchaseActions{padding:8px!important;margin:0 0 10px!important;flex-wrap:nowrap!important;gap:6px!important;align-items:stretch!important}
+html:not(#a) body #skUsedStockModal #skUsedPurchaseActions .sk-used-panel-heading{display:none!important}
+html:not(#a) body #skUsedStockModal #skUsedPurchaseActions .sk-used-save-primary{width:auto!important;flex:1 1 0!important;min-height:44px!important;padding:4px 6px!important;gap:4px!important;font-size:.72rem!important;border-radius:14px!important;flex-direction:column}
+html:not(#a) body #skUsedStockModal #skUsedPurchaseActions .sk-used-save-primary svg{width:16px!important;height:16px!important}
+html:not(#a) body #skUsedStockModal #skUsedPurchaseActions .sk-used-action-grid{display:contents!important}
+html:not(#a) body #skUsedStockModal #skUsedPurchaseActions .sk-used-action-secondary{flex:1 1 0!important;width:auto!important;min-height:44px!important;padding:4px 6px!important;font-size:.72rem!important;gap:2px!important;border-radius:14px!important;line-height:1.1}
+html:not(#a) body #skUsedStockModal #skUsedPurchaseActions .sk-used-action-secondary svg{width:16px!important;height:16px!important}
+html:not(#a) body #skUsedStockModal .sk-used-findbar{margin:0 0 8px!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
+html:not(#a) body #skUsedStockModal .sk-used-findbar .sk-used-search-row{margin:0 0 6px!important}
+html:not(#a) body #skUsedStockModal .sk-used-findbar .sk-used-view-chips{margin:0!important}
+html:not(#a) body #skUsedStockModal #skUsedPurchaseActions:not([style*="none"]){display:flex!important}
+html:not(#a) body #skUsedStockModal.sk-used-form-page .sk-used-findbar{display:none!important}
+
+/* v5.7.2 merge list rows: let long details wrap instead of being cut off */
+html:not(#a) body .skcm-opt{height:auto!important;min-height:64px!important;overflow:visible!important;align-items:center!important}
+html:not(#a) body .skcm-opt .skcm-tx{min-width:0;line-height:1.3}
+html:not(#a) body .skcm-opt .skcm-tx small{display:block;white-space:normal;line-height:1.3}
+
+/* v5.7.2 home "Shop Tools": compact modern 3-column tiles */
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer.sk-home-v2-features{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature{flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;gap:6px!important;min-height:112px!important;padding:12px 6px!important;border-radius:18px!important;grid-column:auto!important;width:auto!important;justify-content:flex-start!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature-icon{width:44px!important;height:44px!important;margin:0!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature-copy{text-align:center!important;min-width:0}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature-copy b{font-size:.76rem!important;line-height:1.2!important;display:block}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature-copy small{font-size:.62rem!important;line-height:1.2!important;display:block;margin-top:2px}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature > :last-child:not(.sk-home-v2-feature-copy):not(.sk-home-v2-feature-icon){display:none!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature::after,html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature::before{display:none!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature-copy i{display:none!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature{overflow:hidden!important;padding:12px 4px!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature-copy small{white-space:normal!important;overflow-wrap:anywhere}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature-copy b{white-space:normal!important;overflow-wrap:anywhere}
+
+/* v5.7.2 signature popup: its own centred popup with proper spacing */
+html:not(#a) body .sk-signature-modal{padding:16px!important}
+html:not(#a) body .sk-signature-modal .sk-signature-modal-card{padding:16px!important;width:min(520px,100%)!important;max-height:calc(100dvh - 32px)!important;border-radius:22px!important;box-shadow:0 24px 60px rgba(15,23,42,.35)!important;background:var(--card,#fff)!important;border:0!important}
+html:not(#a) body .sk-signature-modal #skCustomerSignatureCanvas{display:block;width:100%!important;height:230px!important;margin:8px 0 10px!important;background:#fff;border:2px dashed #94a3b8;border-radius:16px}
+html:not(#a) body .sk-signature-modal .sk-signature-role{width:100%;margin:6px 0!important;padding:10px 12px!important;border-radius:14px!important}
+html:not(#a) body .sk-signature-modal .sk-signature-actions{display:flex!important;gap:10px!important}
+html:not(#a) body .sk-signature-modal .sk-signature-actions button{flex:1 1 0;margin:0!important}
+html:not(#a) body .sk-signature-modal .sk-signature-modal-head{margin-bottom:6px}
+html:not(#a) body .sk-signature-modal .sk-signature-close{width:38px;height:38px;border-radius:50%!important;padding:0!important}
+html:not(#a) body .sk-signature-modal .sk-signature-modal-hint,html:not(#a) body .sk-signature-modal .sk-signature-status{padding:0 2px}
+
+/* v5.7 payment mode buttons: show full names on small phones */
+html:not(#a) body .pay-mode-btn{padding:8px 2px!important;font-size:.74rem!important;overflow:visible!important;text-overflow:clip!important;white-space:nowrap!important;gap:3px!important;min-width:0!important;letter-spacing:0!important}
+html:not(#a) body .pay-mode-btn svg,html:not(#a) body .pay-mode-btn .ski{width:14px!important;height:14px!important;flex:0 0 14px!important}
+
+/* v5.7.2 home header: room for the dark-mode button */
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-header-actions{gap:4px!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-header-actions .sk-home-header-icon{width:34px!important;height:34px!important;flex:0 0 34px!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-header-actions .sk-home-header-icon svg{width:18px!important;height:18px!important}
+html:is([data-theme="dark"],[data-theme="obsidian"],[data-theme="midnight"],[data-theme="apple-dark"],[data-theme="forest"],[data-theme="crimson"],[data-theme="cyber"]) body .app-header .app-name{color:#f1f5f9!important}
+html:not(#a) body:has(#cardsContainer.sk-home-redesign) .app-header .app-name{font-size:1.05rem!important;white-space:nowrap}
+html:not(#a):not(#b):is([data-theme="dark"],[data-theme="obsidian"],[data-theme="midnight"],[data-theme="apple-dark"],[data-theme="forest"],[data-theme="crimson"],[data-theme="cyber"]) body #appHeaderTitle.app-name,
+html:not(#a):not(#b):is([data-theme="dark"],[data-theme="obsidian"],[data-theme="midnight"],[data-theme="apple-dark"],[data-theme="forest"],[data-theme="crimson"],[data-theme="cyber"]) body .app-header .app-name{color:#f1f5f9!important;-webkit-text-fill-color:#f1f5f9!important;background:none!important}

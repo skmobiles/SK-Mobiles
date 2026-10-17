@@ -246,3 +246,16 @@ html body #skUsedDetailDialog .f-notes{--fc:#64748b}
 html body #skUsedDetailDialog .sk-used-detail-actions{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))!important;grid-template-columns:1fr 1fr!important}
 html body #skUsedDetailDialog .sk-used-detail-actions>.sk-used-bill-button{grid-column:1/-1}
 html body #skUsedDetailDialog .sk-used-detail-actions>.sk-used-detail-danger{background:#fef2f2!important;color:#dc2626!important;border:1px solid #fecaca!important}
+html.sk-cui .ski[data-i="link"]{--ic:var(--ico-link)}
+html.sk-cui .ski[data-i="pin"]{--ic:var(--ico-pin)}
+html.sk-cui .ski[data-i="mail"]{--ic:var(--ico-mail)}
+html.sk-cui .ski[data-i="megaphone"]{--ic:var(--ico-megaphone)}
+html.sk-cui .ski[data-i="qr"]{--ic:var(--ico-qr)}
+html.sk-cui .ski[data-i="clock"]{--ic:var(--ico-clock)}
+html.sk-cui .ski[data-i="trend"]{--ic:var(--ico-trend)}
+
+/* v5.7.2 home shop tools tiles */
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-icon.t-price{--c:var(--cui-green)}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-icon.t-review{--c:var(--cui-amber)}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-icon.t-month{--c:var(--cui-teal)}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-icon.t-dealer{--c:var(--cui-red)}
