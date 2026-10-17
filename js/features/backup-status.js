@@ -1,4 +1,4 @@
-/* SK Mobiles v5.6.158 — Home backup status button.
+/* SK Mobiles v5.6.159 — Home backup status button.
    Green = every change is backed up to the cloud, Red = changes not backed up yet.
    Tap = cloud backup now; if cloud backup is not possible, the app restarts. */
 (function(){

@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.158 — final layout fixes (loaded last). */
+/* SK MOBILES v5.6.159 — final layout fixes (loaded last). */
 /* Any inline icon without its own size rule can never balloon to fill its box. */
 :where(svg.st-svg){width:20px;height:20px;flex:none}
 /* Tools & Others note page spacing */
@@ -81,3 +81,13 @@ html body #skCPDetailView .skcp-hist-btn{flex:1 1 100%;grid-column:1/-1;width:10
 html body .sk-used-view-chips{display:flex;gap:6px;margin:8px 0}
 html body .sk-used-view-chips button{flex:1;height:38px;min-height:0!important;border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);border-radius:12px;font-size:.78rem;font-weight:700;cursor:pointer}
 html body .sk-used-view-chips button.on{background:var(--primary,#2563eb);border-color:var(--primary,#2563eb);color:#fff}
+
+/* v5.6.159 - keep every full-screen sheet centred and hide the in-sheet scrollbar so nothing looks pushed off screen */
+html body .modal-overlay .modal-sheet{margin-left:auto !important;margin-right:auto !important;scrollbar-width:none}
+html body .modal-overlay .modal-sheet::-webkit-scrollbar,html body #skCreditLedgerPage *::-webkit-scrollbar,html body #skCreditLedgerPage::-webkit-scrollbar{width:0 !important;height:0 !important;display:none}
+html body #skCreditLedgerPage,html body #skCreditLedgerPage *{scrollbar-width:none}
+
+/* v5.6.159 - Bill button on used stock rows / detail dialog */
+html body #skUsedStockModal .sk-used-bill-btn{display:inline-flex;align-items:center;gap:4px;height:34px;padding:0 10px;border:0;border-radius:17px;background:var(--accent,#2563eb);color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex:0 0 auto}
+html body #skUsedStockModal .sk-used-bill-btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+html body #skUsedStockModal .sk-used-bill-btn:active{transform:scale(.96)}

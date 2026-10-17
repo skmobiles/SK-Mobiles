@@ -153,3 +153,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - **Popups**: short popup windows (Recycle Bin, filters, login…) open in the centre of the screen; tall pages keep full height.
 - **Customer ledger**: "Send history" button sends the customer's credit bills, credit/payment history and outstanding on WhatsApp.
 - **Used Mobile Stock**: All / In stock / Sold switch above the register.
+
+## V5.6.159
+- **Android Back button** now steps back one level on every page (ledger detail -> ledger list -> home, bill view -> billing -> home, used stock detail/form, repair detail, price list, drawer...). `js/features/back-nav.js` owns modal history; the old per-modal history hooks in app.js are disabled.
+- **Used Mobile Stock**: "Bill" button on each row and "Bill this mobile" in the detail dialog open Billing with brand, model, RAM, storage, colour, IMEI, price and Used tab filled.
+- **Layout**: Order List sheet is centred; in-sheet scrollbars hidden so pages no longer look pushed off screen.
+- **Newest first** (display only): bill history, used stock register, customers, credit customers, credit entries, orders, global search bills.
+- **Credit ledger**: customers without bills no longer show an outstanding amount in the list after their credit is fully paid.
