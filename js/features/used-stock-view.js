@@ -18,6 +18,12 @@ function inject(){
     return '<button type="button" data-v="'+x[0]+'" class="'+(get()===x[0]?'on':'')+'" onclick="skUsedSetView(\''+x[0]+'\')">'+x[1]+'</button>';
   }).join('');
   row.parentNode.insertBefore(d,row.nextSibling);
+  /* v5.6.165: search + All/In stock/Sold sit right above the purchase action buttons */
+  var acts=document.getElementById('skUsedPurchaseActions');
+  if(acts&&!document.getElementById('skUsedFindBar')){
+    var f=document.createElement('section');f.id='skUsedFindBar';f.className='sk-used-findbar';
+    acts.parentNode.insertBefore(f,acts);f.appendChild(row);f.appendChild(d);
+  }
 }
 function boot(){inject();if(window.__skUsedView!=='all'&&typeof window.skUsedRender==='function')setTimeout(function(){try{window.skUsedRender()}catch(e){}},300)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();

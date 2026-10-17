@@ -4,7 +4,7 @@
   "source": "User-approved V5.6.165: flicker fix, customer edit/merge, recent activity",
   "policy": "Approved V5.6.1 Design Studio UI changes are included in this new baseline. Future changes to locked core files must be reviewed and the lock must not be silently regenerated. Preserve business logic, Firebase configuration/rules and existing data keys.",
   "core_files": {
-    "index.html": "d7824c99de1e25f59ee8871413573ffb99983721a74e1133002dc2528a91bb0f",
+    "index.html": "07efd0215f18463447aad8b6435b5312ca0e433b96d2e7eaa833ee4141fc3458",
     "js/app.js": "5b02e0acc311deaf00071fc79b12f530ff2fa57374e0c4ac048d0f8023260a69",
     "js/firebase-sync.js": "7e0c80c7cb2f36ba19f7d4743138b5898674f37860b95b2b41740e0350b00bc6",
     "js/features/pin-security.js": "adde7413b65e7676169be8670d31494abd364f14a263681faa577fa07d08a0db",
@@ -25,10 +25,10 @@
     "css/appearance.css": "fee1c84967bdc64ae6cbaeb159d46b7991115c0b87d09d4e345a8c7198b42957",
     "css/fonts.css": "56d92b67f350ad559b08d3bf1bf3c2321ee6a6dd79a7cb091e9a2c1889888d27",
     "js/features/backup-status.js": "9b784c97ed00f6a12b2644059271d28581900ca68848c3a1a46c941670fc4d5e",
-    "sw.js": "db32ec98f11bfa7a2acf7906fda36984c2c6541424e952c6504934890ecaa4db",
+    "sw.js": "f5ae2dd21d8b2d7a42c4127286de723e1973f485cdfd66cef7080864a221bb81",
     "css/shop-tools.css": "cedcd45e00ddc67deaa8c3371b15f996f2535a7e8a130293732cc8d39845919f",
     "js/features/shop-tools-v151.js": "5d55f862d25a67e7070d3b88c883fcbfce274d17122e2003ed715336ac0b1f5b",
-    "css/fixes.css": "3ad5d32125abb8aeda1e2b86c63a31cf65a14f7d1af121aa41f7937a80960dc2",
+    "css/fixes.css": "d07bb024c53a15649d24e7aafbf523686a3c29cb3ab6751fde59c9ef09b0df81",
     "js/features/scanner-v152.js": "738561a06c6777c3ff0089b4b901cb16b589d29d75e1ef864d73701dd8160d8e",
     "js/features/qr-mini.js": "ee1afaa7e95330363dede0a42fbfeec57afc2f0cfcbc857e4259ffc284478f35",
     "js/features/invoice-upi.js": "cfd17f9db43c1b6d76939d1c41416028e3145e10111a3b9f67a285a14ed25cdc",
@@ -43,7 +43,7 @@
     "js/features/price-list.js": "35b95ee94a1c00892cb71b20da87ee97a30583001c653071873c5d87afb1220b",
     "js/features/popup-center.js": "861c07b86d49be4b22c05897335260d02b1e29fe3bf8864cf9b0d922c2a0e570",
     "js/features/credit-history.js": "6a975111e1bcb880adf67f4e50971fb42adbe6249dbafb12cd71ab8f807e6d43",
-    "js/features/used-stock-view.js": "b6d6177b96971dbf44a6499dd4f32563b9f2b1f8e7fe2b168437b7e834ed314f",
+    "js/features/used-stock-view.js": "1ff007351760ca2dc1c4ce21c40c65b24f04d074c3c8560540411232c51ce308",
     "js/features/back-nav.js": "d47e4d4508f45fe2dd49dbedb55f27bf02f08fc6191935672cbc889d859ee12f",
     "js/features/customer-merge.js": "449fc4ab2390aa0898a6b2040328ae6d7ae7eda9c1b591c209c4fe275a8bb428",
     "js/features/recent-activity.js": "077d7dc0080d0135909aa0e1033fa047881389ddcab4345fa15fbf3983ee785f",
@@ -55,6 +55,7 @@
     "js/features/customer-qr.js": "f710a1312d0f773821aedd6e883c31ee1bcf00ccb890ca5f1fcb3b718b17d178",
     "js/features/date-dmy.js": "c1c64fdfe590182d3ca2b42cc6d511ad7930defe3248b60c3c1ff223ecfb8c5d",
     "view.html": "c97248b57c93ee6f3b2a815a59381ebde058561f19d275d0d65e4b616afeaf32",
-    "js/features/review-requests.js": "ec2848d4240a01ba82ab9a8e5927ea0d6606b145af639698b607d1ba3d708672"
+    "js/features/review-requests.js": "ec2848d4240a01ba82ab9a8e5927ea0d6606b145af639698b607d1ba3d708672",
+    "js/features/no-flicker.js": "c3dc8cbe85bee1e003a287ae0b8c6952d1f8986513bed30430220244c6825747"
   }
 }
