@@ -184,3 +184,12 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Price list: now drawn directly on a canvas (no external library, works offline). Share image and PDF (A4, multi-page) both work; preview is exactly what is sent.
 - Every search box gets a small (x) button that clears all text at once.
 - Settings: Full Pill button radius no longer turns option tiles into ovals.
+
+## V5.6.164
+- Merge / Edit customer popups redesigned (even padding, coloured icons, pill-safe buttons). Shared `.skpop` popup style for all new popups.
+- Customer details: name, phone, alternate phone, address, e-mail, notes (key `skx_customer_profiles_v1`). Tap the customer name on the credit ledger page to edit; address shows under the phone. Profile follows rename / merge and is restored by Undo.
+- Every calendar field shows dd/mm/yyyy (stored value stays ISO). Remaining text dates (trash, sync stamps, customer bills) switched to dd/mm/yyyy.
+- Bulk WhatsApp (drawer): group + message template, one-tap Send per customer / Send next.
+- Stock aging (drawer): unsold used mobiles 30/60/90+ days, money locked, reduce customer price.
+- Backup & Restore (drawer): JSON / Excel download, one-tap restore, weekly reminder bar.
+- Customer QR: QR holds a link to `/view.html` with a compressed summary of the latest bills inside the link. No data uploaded. `sw.js` now caches `/index.html` only for the real app page.

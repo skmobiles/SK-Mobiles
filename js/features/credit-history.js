@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.163 — "Send history" button on a customer's ledger (Customer Credit / Outstanding page).
+/* SK MOBILES v5.6.164 — "Send history" button on a customer's ledger (Customer Credit / Outstanding page).
    Opens a date-range popup (Today / 7 days / 1 month / All / From-To) and builds the customer's statement from the same data the ledger shows (credit bills, credit/payment entries,
    outstanding) and opens WhatsApp with it. Read-only; nothing else on the page changes. */
 (function(){
@@ -85,7 +85,7 @@ window.skCPHistPreset=function(n){
 function ensureModal(){
   if(document.getElementById('skCPHistModal'))return;
   var el=document.createElement('div');el.className='modal-overlay';el.id='skCPHistModal';
-  el.innerHTML='<div class="modal-sheet skcph-sheet"><div class="modal-title"><span>📤 Send history</span><button class="modal-close-btn" onclick="toggleModal(\'skCPHistModal\',false)">✕</button></div>'+
+  el.innerHTML='<div class="modal-sheet skpop skcph-sheet"><div class="modal-title"><span>📤 Send history</span><button class="modal-close-btn" onclick="toggleModal(\'skCPHistModal\',false)">✕</button></div>'+
    '<div id="skCPHistWho" class="skcph-who"></div>'+
    '<div class="skcrg-dates"><label>From<input type="date" id="skCPHistFrom" onchange="skCPHistSet(\'from\',this.value)"/></label><label>To<input type="date" id="skCPHistTo" onchange="skCPHistSet(\'to\',this.value)"/></label></div>'+
    '<div class="skcrg-chips"><button type="button" onclick="skCPHistPreset(0)">Today</button><button type="button" onclick="skCPHistPreset(7)">7 days</button><button type="button" onclick="skCPHistPreset(\'month\')">1 month</button><button type="button" onclick="skCPHistPreset(\'all\')">All</button></div>'+

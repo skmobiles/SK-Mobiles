@@ -1,3 +1,4 @@
+window.skStamp=function(ms){var d=ms?new Date(ms):new Date();if(isNaN(d.getTime()))return '';var p=function(n){return String(n).padStart(2,'0')},h=d.getHours(),ap=h>=12?'PM':'AM';h=h%12||12;return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+', '+p(h)+':'+p(d.getMinutes())+' '+ap};
 /* SK MOBILES 5.6.97 — visual design-system release; application logic retained. */
 
 const MASTER_INVENTORY = [
@@ -5816,7 +5817,7 @@ img{max-width:100%!important;}
           await w.close();
         }
       }
-      updateFolderText('📁 '+APP_FOLDER+' ✓ Synced '+new Date().toLocaleString());
+      updateFolderText('📁 '+APP_FOLDER+' ✓ Synced '+window.skStamp());
       return true;
     }catch(e){
       updateFolderText('📁 '+APP_FOLDER+' ⚠ Sync failed');
@@ -6777,7 +6778,7 @@ img{max-width:100%!important;}
           await w.close();
         }
       }
-      var now=new Date().toLocaleString();
+      var now=window.skStamp();
       var path=document.getElementById('skAppDataFolderPath');
       if(path)path.textContent='📁 '+APP_FOLDER+' ✓ Synced '+now;
       setStatusV40('Last auto sync: '+now);
@@ -7818,7 +7819,7 @@ window.skOpenCreditLedger=cpOpenPage;
   window.renderRecycleBinUI=function(){
     const c=document.getElementById('recycleBinItemsContainer');if(!c)return;purgeExpiredTrash();const list=readRecycle();
     if(!list.length){c.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:.85rem;">Trash is empty.</div>';return;}
-    c.innerHTML=list.slice().reverse().map(item=>{const d=new Date(item.deletedAt),valid=!isNaN(d.getTime()),days=valid?Math.max(0,30-Math.floor((Date.now()-d.getTime())/86400000)):0;return `<div class="sk-trash-row"><div style="min-width:0"><div style="font-weight:800;font-size:.85rem">${esc(item.title||item.type)}</div><div style="font-size:.68rem;color:var(--text-muted)">${esc(item.type)} • Deleted: ${valid?d.toLocaleDateString('en-GB'):'Unknown'} • ${days} day(s) remaining</div></div><div class="sk-trash-actions"><button type="button" onclick="restoreFromTrash('${esc(item.trashId)}')" style="background:var(--primary);color:#fff">🔄 Restore</button><button type="button" onclick="permanentlyDeleteTrash('${esc(item.trashId)}')" style="background:rgba(239,68,68,.12);color:#dc2626">🗑️ Delete</button></div></div>`}).join('');
+    c.innerHTML=list.slice().reverse().map(item=>{const d=new Date(item.deletedAt),valid=!isNaN(d.getTime()),days=valid?Math.max(0,30-Math.floor((Date.now()-d.getTime())/86400000)):0;return `<div class="sk-trash-row"><div style="min-width:0"><div style="font-weight:800;font-size:.85rem">${esc(item.title||item.type)}</div><div style="font-size:.68rem;color:var(--text-muted)">${esc(item.type)} • Deleted: ${valid?window.skStamp(d.getTime()).split(",")[0]:'Unknown'} • ${days} day(s) remaining</div></div><div class="sk-trash-actions"><button type="button" onclick="restoreFromTrash('${esc(item.trashId)}')" style="background:var(--primary);color:#fff">🔄 Restore</button><button type="button" onclick="permanentlyDeleteTrash('${esc(item.trashId)}')" style="background:rgba(239,68,68,.12);color:#dc2626">🗑️ Delete</button></div></div>`}).join('');
   };
   async function restoreCloudBill(id){try{if(window.firebase?.auth&&firebase.auth().currentUser&&firebase.firestore){await firebase.firestore().collection('shops').doc('SK-MOBILES').collection('bills').doc(String(id)).set({id:String(id),isDeleted:false,_deleted:false,deletedAt:null,_syncUpdatedAt:Date.now(),_syncUpdatedBy:firebase.auth().currentUser.uid},{merge:true});}}catch(e){console.warn('Recycle Bin cloud bill restore failed:',e);}}
   window.restoreFromTrash=async function(trashId){

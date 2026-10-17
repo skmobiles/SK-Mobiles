@@ -14,7 +14,7 @@ html:not(#a):not(#b)[data-ui-card-radius] :is(.sk-home-v2-hero,.sk-home-v2-card,
 html:not(#a):not(#b)[data-ui-card-radius] :is(.sk-home-v2-hero img){border-radius:var(--ui-card-radius)!important}
 
 /* ---------- button radius (cards that are <button>s follow the card radius) ---------- */
-html:not(#a):not(#b)[data-ui-button-radius] button:not(.modal-close-btn):not(.drawer-close-btn):not(#navHome):not(.draggable-card):not(.sk-home-v2-feature):not(.sk-home-v2-metric):not(.st-profile):not(.st-row-btn):not(.st-reset-row):not(.st-rad):not(.st-choice):not(.st-bs){border-radius:var(--ui-button-radius)!important}
+html:not(#a):not(#b)[data-ui-button-radius] button:not(.modal-close-btn):not(.drawer-close-btn):not(#navHome):not(.draggable-card):not(.sk-home-v2-feature):not(.sk-home-v2-metric):not(.st-profile):not(.st-row-btn):not(.st-reset-row):not(.st-rad):not(.st-choice):not(.st-bs):not(.sk-keepr){border-radius:var(--ui-button-radius)!important}
 /* Settings option tiles are tall multi-line cards: Full Pill must not turn them into ovals */
 html:not(#a):not(#b)[data-ui-button-radius] button:is(.st-rad,.st-choice,.st-bs){border-radius:18px!important}
 

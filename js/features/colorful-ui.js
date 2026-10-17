@@ -66,6 +66,13 @@
     tag:'<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z"/><path d="M7 7h.01"/>',
     chevron:'<path d="m9 6 6 6-6 6"/>',
     call:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
+    link:'<path d="M10 13a5 5 0 0 0 7.1 0l3-3a5 5 0 0 0-7.1-7.1l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.1 0l-3 3a5 5 0 0 0 7.1 7.1l1.7-1.7"/>',
+    pin:'<path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/>',
+    mail:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/>',
+    megaphone:'<path d="M3 11v3a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/>',
+    qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    trend:'<path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
     cloud:'<path d="M17.5 19a4.5 4.5 0 1 0-1-8.9A6 6 0 0 0 4.4 12 3.5 3.5 0 0 0 6 19z"/><path d="m9 13 2 2 4-4"/>'
   };
 
@@ -80,7 +87,7 @@
     '📜':['history','purple'],'🟢':['dot','green'],'☑':['check','blue'],'💰':['money','amber'],'📝':['note','blue'],
     '🔄':['recycle','sky'],'🔒':['lock','slate'],'⬇':['download','blue'],'⬆':['upload','blue'],'🧑':['user','blue'],
     '🖼':['image','purple'],'🏪':['store','orange'],'🏷':['tag','orange'],'📊':['chart','orange'],'📅':['calendar','blue'],
-    '🔍':['search','blue'],'📂':['folder','amber'],'✏':['pencil','orange'],'📞':['call','green'],'🛒':['cart','orange'],'ℹ':['info','blue']
+    '🔍':['search','blue'],'📂':['folder','amber'],'✏':['pencil','orange'],'📞':['call','green'],'🛒':['cart','orange'],'ℹ':['info','blue'],'🔗':['link','blue'],'📍':['pin','red'],'✉':['mail','blue'],'📣':['megaphone','orange'],'📤':['upload','green'],'📥':['download','blue'],'⏰':['clock','amber'],'📲':['whatsapp','green'],'📉':['trend','red'],'🔲':['qr','slate']
   };
   var EMO_RE = new RegExp('^\\s*(' + Object.keys(E).join('|') + ')[\\uFE0F\\u200D]*\\s*');
 
@@ -93,7 +100,7 @@
     skCreditEntryModal:['card','amber'], skEmiReminderModal:['bell','amber'], skWorkerProfileModal:['user','blue'],
     skWorkerEditModal:['user','blue'], skAdminProfileModal:['crown','amber'], skRepairDetailModal:['wrench','green'],
     skUrgentRepairModal:['alert','red'], skKeepImportModal:['upload','blue'],
-    skUsedFilterModal:['search','blue'], skCreditActionModal:['money','amber'], skSignatureModal:['note','blue']
+    skCmEditModal:['pencil','orange'], skCmMergeModal:['link','blue'], skCmDupModal:['alert','orange'], skRecentModal:['history','purple'], skBulkModal:['whatsapp','green'], skAgingModal:['hourglass','amber'], skBackupModal:['cloud','blue'], skQrModal:['qr','purple'], skCPHistModal:['upload','green'], skUsedFilterModal:['search','blue'], skCreditActionModal:['money','amber'], skSignatureModal:['note','blue']
   };
 
   /* headers that are not .modal-title: selector -> [icon, colour] */

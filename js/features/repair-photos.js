@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.163 — Repair job photos (max 3, compressed ~25-40 KB each, saved inside the job).
+/* SK MOBILES v5.6.164 — Repair job photos (max 3, compressed ~25-40 KB each, saved inside the job).
    Photos are removed automatically 90 days after delivery (the job itself stays). Firebase Storage is paid-only,
    so the images are kept tiny and stored in the job record. */
 (function(){

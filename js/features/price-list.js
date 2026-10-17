@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.163 — Price list / catalogue: used mobiles in stock (customer price) and accessories with a price,
+/* SK MOBILES v5.6.164 — Price list / catalogue: used mobiles in stock (customer price) and accessories with a price,
    shared as an image (WhatsApp share sheet), PDF, or plain text. Read-only over existing data. */
 (function(){
 'use strict';

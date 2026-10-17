@@ -1,4 +1,4 @@
-/* SK Mobiles v5.6.163 — Home backup status button.
+/* SK Mobiles v5.6.164 — Home backup status button.
    Green = every change is backed up to the cloud, Red = changes not backed up yet.
    Tap = cloud backup now; if cloud backup is not possible, the app restarts. */
 (function(){
@@ -14,7 +14,7 @@
     var r=role(); btn.style.display=(r==='admin'||r==='manager')?'':'none';
     var s=running?'busy':(state.backupMs&&state.backupMs>=state.changeMs?'ok':'due');
     btn.setAttribute('data-state',s);
-    var t=state.backupMs?new Date(state.backupMs).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'never';
+    var t=state.backupMs?window.skStamp(state.backupMs):'never';
     btn.title=s==='ok'?'Cloud backup up to date • '+t:s==='busy'?'Backing up…':'Not backed up • last: '+t+' • tap to backup';
     btn.setAttribute('aria-label',btn.title);
   }

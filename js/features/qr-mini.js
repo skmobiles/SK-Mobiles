@@ -1,11 +1,14 @@
-/* SK MOBILES v5.6.163 — tiny offline QR code generator (byte mode, error correction M, versions 1-10).
+/* SK MOBILES v5.6.164 — tiny offline QR code generator (byte mode, error correction M, versions 1-20).
    window.skQrMatrix(text) -> array of rows of 0/1;  window.skQrDataUrl(text, size) -> PNG data URL. */
 (function(){
 'use strict';
 /* [totalCodewords, ecPerBlock, blocksGroup1, dataPerBlockGroup1, blocksGroup2, dataPerBlockGroup2] for level M */
 var VER=[null,[26,10,1,16,0,0],[44,16,1,28,0,0],[70,26,1,44,0,0],[100,18,2,32,0,0],[134,24,2,43,0,0],[172,16,4,27,0,0],
- [196,18,4,31,0,0],[242,22,2,38,2,39],[292,22,3,36,2,37],[346,26,4,43,1,44]];
+ [196,18,4,31,0,0],[242,22,2,38,2,39],[292,22,3,36,2,37],[346,26,4,43,1,44],
+ /* versions 11-20 (checked module-for-module against an independent encoder) */
+ [404,30,1,50,4,51],[466,22,6,36,2,37],[532,22,8,37,1,38],[581,24,4,40,5,41],[655,24,5,41,5,42],[733,28,7,45,3,46],[815,28,10,46,1,47],[901,26,9,43,4,44],[991,26,3,44,11,45],[1085,26,3,41,13,42]];
 var ALIGN=[null,[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50]];
+(function(){for(var v=11;v<VER.length;v++){var last=4*v+10,cnt=Math.floor(v/7)+2,step=Math.ceil((last-6)/(cnt-1)/2)*2,a=[6];for(var i=cnt-2;i>=0;i--)a.push(last-step*i);ALIGN[v]=a}})();
 
 /* GF(256) */
 var EXP=new Array(512),LOG=new Array(256);
@@ -23,7 +26,7 @@ function rsEc(data,n){
 function utf8(str){return unescape(encodeURIComponent(str)).split('').map(function(c){return c.charCodeAt(0)})}
 
 function pickVersion(len){
-  for(var v=1;v<=10;v++){
+  for(var v=1;v<VER.length;v++){
     var info=VER[v],data=info[2]*info[3]+info[4]*info[5];
     var cap=Math.floor((data*8-4-(v<10?8:16))/8);
     if(len<=cap)return v;

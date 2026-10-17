@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.163 — Old mobile exchange on a bill.
+/* SK MOBILES v5.6.164 — Old mobile exchange on a bill.
    The exchange value is deducted from the sale price (handled in app.js: skBillNetPrice). This module:
    - toggles the exchange fields, shows the exchange lines on the invoice preview / saved bill view,
    - adds the old mobile to Used Mobile stock (cost = exchange value) when a NEW bill is saved. */

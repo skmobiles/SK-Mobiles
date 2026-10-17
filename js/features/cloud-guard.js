@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.163 — Cloud guard for the Firebase free plan.
+/* SK MOBILES v5.6.164 — Cloud guard for the Firebase free plan.
    1. Automatic backup: first open of the day + after closing time (only when data changed).
    2. Keeps only the newest backup of each of the last 14 days (older ones are deleted, incl. sub-collections).
    3. Storage Health page: size of every data key vs the 1 MB Firestore document limit, backup status, read estimate.
@@ -119,7 +119,7 @@ function renderHealth(extra){
   h+='<div class="sksh-card"><h4>📦 Phone storage</h4><div class="sksh-bar"><i style="width:'+pct+'%" class="'+(pct>80?'bad':pct>60?'warn':'ok')+'"></i></div>'+
      '<div class="sksh-row"><span>Used (approx.)</span><b>'+kb(s.total)+' / ~5 MB</b></div></div>';
   h+='<div class="sksh-card"><h4>☁️ Cloud backup</h4>'+
-     '<div class="sksh-row"><span>Last backup</span><b>'+(m.lastBackupMs?esc(new Date(m.lastBackupMs).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})):'Never')+'</b></div>'+
+     '<div class="sksh-row"><span>Last backup</span><b>'+(m.lastBackupMs?esc(window.skStamp(m.lastBackupMs)):'Never')+'</b></div>'+
      '<div class="sksh-row"><span>Auto backup</span><b>First open + after '+CLOSE_HOUR+':00</b></div>'+
      '<div class="sksh-row"><span>History kept</span><b>Last '+KEEP_DAYS+' days</b></div>'+(extra?'<div class="sksh-note">'+esc(extra)+'</div>':'')+
      '<div class="sksh-actions"><button type="button" class="submit-btn" onclick="skShBackup()">☁️ Backup now</button><button type="button" class="submit-btn" onclick="skShPrune()">🧹 Clean old backups</button></div></div>';

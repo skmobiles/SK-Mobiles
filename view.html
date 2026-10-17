@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Bill History</title>
+<style>
+:root{--bg:#f1f5fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--blue:#2563eb;--red:#dc2626;--green:#16a34a}
+@media(prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--line:#334155}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;-webkit-text-size-adjust:100%}
+.head{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:26px 18px 56px}
+.head h1{margin:0;font-size:1.3rem;letter-spacing:.02em;text-transform:uppercase}.head p{margin:5px 0 0;font-size:.82rem;opacity:.85}
+.wrap{max-width:520px;margin:-38px auto 30px;padding:0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 6px 18px rgba(15,23,42,.07)}
+.who{display:flex;align-items:center;gap:12px}.av{width:46px;height:46px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.2rem}
+.who b{font-size:1.05rem}.who small{display:block;color:var(--muted);font-size:.74rem;margin-top:2px}
+.bal{margin-top:14px;padding:12px 14px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;font-weight:800;background:rgba(22,163,74,.1);color:var(--green)}
+.bal.due{background:rgba(220,38,38,.1);color:var(--red)}
+h2{font-size:.78rem;margin:18px 4px 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.bill{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.bill b{display:block;font-size:.92rem}.bill small{color:var(--muted);font-size:.72rem}
+.bill .amt{text-align:right;font-weight:800;white-space:nowrap}.bill .amt em{display:block;font-style:normal;color:var(--red);font-size:.7rem;font-weight:700}
+.call{display:block;text-align:center;text-decoration:none;background:var(--blue);color:#fff;font-weight:800;padding:13px;border-radius:14px;margin-top:6px}
+.foot{text-align:center;color:var(--muted);font-size:.7rem;margin-top:14px}
+</style></head><body>
+<div class="head"><h1 id="shop">Bill History</h1><p>Your purchase summary</p></div>
+<div class="wrap" id="app"><div class="card">Loading…</div></div>
+<script>
+(function(){
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
+function money(n){return '₹'+Math.round(+n||0).toLocaleString('en-IN')}
+function fromB64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+async function decode(h){
+  var kind=h.charAt(0),bytes=fromB64u(h.slice(1));
+  if(kind==='z'){var ds=new DecompressionStream('deflate-raw');return new Response(new Blob([bytes]).stream().pipeThrough(ds)).text()}
+  return new TextDecoder().decode(bytes);
+}
+(async function(){
+  var app=document.getElementById('app');
+  try{
+    var d=JSON.parse(await decode(location.hash.slice(1)));
+    document.getElementById('shop').textContent=d.s||'Bill History';document.title=(d.s||'Shop')+' – Bill History';
+    var h='<div class="card"><div class="who"><span class="av">'+esc(String(d.n||'?').charAt(0).toUpperCase())+'</span><span><b>'+esc(d.n)+'</b><small>Updated '+esc(d.u||'')+'</small></span></div>'+
+      '<div class="bal'+(d.t>0?' due':'')+'"><span>'+(d.t>0?'Balance to pay':'No balance due')+'</span><span>'+(d.t>0?money(d.t):'✓')+'</span></div></div>';
+    h+='<h2>Your bills</h2>';
+    if(!d.b||!d.b.length)h+='<div class="card">No bills yet.</div>';
+    (d.b||[]).forEach(function(b){h+='<div class="card bill"><span><b>'+esc(b[1])+'</b><small>'+esc(b[0])+'</small></span><span class="amt">'+money(b[2])+(b[3]>0?'<em>Balance '+money(b[3])+'</em>':'')+'</span></div>'});
+    if(d.sp)h+='<a class="call" href="tel:'+esc(String(d.sp).replace(/[^\d+]/g,''))+'">Call '+esc(d.s||'shop')+'</a>';
+    h+='<div class="foot">This is a summary of your latest bills. For the full statement please contact the shop.</div>';
+    app.innerHTML=h;
+  }catch(e){app.innerHTML='<div class="card">This QR link could not be read. Please ask the shop for a new QR.</div>'}
+})();
+})();
+</script></body></html>
