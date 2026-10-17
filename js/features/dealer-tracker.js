@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.2 — Dealer payment tracker.
+/* SK MOBILES v5.7.3 — Dealer payment tracker.
    Bought = used-mobile purchases (dealer + purchase price) + repair spare-part purchases (dealer + amount).
    Paid   = payments entered here (key skx_dealer_payments_v1, synced like every other skx_ key).
    Purchases are treated as already paid; only ones marked "Pay later" count as owed. Balance = credit purchases - Paid. Only purchases on/after the "count from" date are included, so old, already-settled

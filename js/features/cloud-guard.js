@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.2 — Cloud guard for the Firebase free plan.
+/* SK MOBILES v5.7.3 — Cloud guard for the Firebase free plan.
    1. Automatic backup: first open of the day + after closing time (only when data changed).
    2. Keeps only the newest backup of each of the last 14 days (older ones are deleted, incl. sub-collections).
    3. Storage Health page: size of every data key vs the 1 MB Firestore document limit, backup status, read estimate.
@@ -6,7 +6,7 @@
 (function(){
 'use strict';
 var SHOP='SK-MOBILES',ROOT='cloudBackups',META='bk_guard_v1';
-var KEEP_DAYS=14,CLOSE_HOUR=21,DELETE_BUDGET=3000,DOC_WARN=700*1024,DOC_LIMIT=1000*1024;
+var KEEP_DAYS=14,CLOSE_HOUR=21,DELETE_BUDGET=1000,DOC_WARN=700*1024,DOC_LIMIT=1000*1024;
 var SKIP=/^(bk_|sk_current_|sk_recovery_backup_|sk_theme|sk_appearance|sk_bill_draft|sk_font|sk_icon|sk_last_|sk_sync_)/;
 
 function toast(t){if(typeof window.showToast==='function')window.showToast(t)}
@@ -58,6 +58,9 @@ function planPrune(docs,now){
 /* Firestore free plan allows 20,000 deletes per day, so old backups are removed gradually (DELETE_BUDGET per day). */
 async function prune(){
   var col=backupsCol();if(!col)return {deleted:0,kept:0};
+  /* once per day per device: every prune reads up to 120 backup records, so repeating it wastes the free read quota */
+  var m0=meta(),t0=dayKey(Date.now());if(m0.pruneDay===t0&&!window.__skForcePrune)return {deleted:0,kept:0,pending:0,skipped:true};
+  m0.pruneDay=t0;saveMeta(m0);
   var snap=await col.orderBy('createdAtMs','desc').limit(120).get();
   var plan=planPrune(snap.docs,Date.now());
   var m=meta(),today=dayKey(Date.now()),usedBefore=m.delDay===today?(m.delUsed||0):0;

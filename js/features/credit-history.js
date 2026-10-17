@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.2 — "Send history" button on a customer's ledger (Customer Credit / Outstanding page).
+/* SK MOBILES v5.7.3 — "Send history" button on a customer's ledger (Customer Credit / Outstanding page).
    Opens a date-range popup (Today / 7 days / 1 month / All / From-To) and builds the customer's statement from the same data the ledger shows (credit bills, credit/payment entries,
    outstanding) and opens WhatsApp with it. Read-only; nothing else on the page changes. */
 (function(){
