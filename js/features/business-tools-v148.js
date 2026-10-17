@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.160 — Daily closing report and credit reminders.
+/* SK MOBILES v5.6.161 — Daily closing report and credit reminders.
    Read-only over existing data (sk_bills, sk_credit_ledger_v1, skx_repair_jobs_v2). The only value this file writes is
    sk_credit_reminder_log_v1 (which customer was reminded on which day). */
 (function(){
@@ -146,8 +146,11 @@ window.skDrCopy=function(){
    ============================================================ */
 var LOG_KEY='sk_credit_reminder_log_v1';
 function remindLog(){var v=read(LOG_KEY,{});return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
+var DUE_KEY='skx_credit_due_override_v1';
+function dueMap(){var v=read(DUE_KEY,{});return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
 function dueKeyFor(c){
   var best='';
+  var man=dueMap()[c.key];if(man&&toKey(man))return toKey(man);
   (c.entries||[]).forEach(function(e){
     if((e.type==='emi'||e.type==='credit')&&e.dueDate&&num(e.amount)>0){var k=toKey(e.dueDate);if(k&&(!best||k<best))best=k}
   });
@@ -169,7 +172,7 @@ function reminderRows(){
   var t=today();
   return cs.filter(function(c){return num(c.balance)>0}).map(function(c){
     var due=dueKeyFor(c);
-    return {key:c.key,name:c.name,phone:c.phone||'',balance:num(c.balance),due:due,overdue:!!due&&due<t,soon:!!due&&due>=t,days:daysPending(c,t)}
+    return {key:c.key,name:c.name,phone:c.phone||'',manual:!!dueMap()[c.key],balance:num(c.balance),due:due,overdue:!!due&&due<t,soon:!!due&&due>=t,days:daysPending(c,t)}
   }).sort(function(a,b){
     if(a.overdue!==b.overdue)return a.overdue?-1:1;
     if(a.due&&b.due&&a.due!==b.due)return a.due<b.due?-1:1;
@@ -192,6 +195,13 @@ window.skCreditRemind=function(encKey){
   if(document.getElementById('skCreditRemindModal')?.classList.contains('active'))renderRemind();
   updateRemindStrip();
 };
+window.skCrSetDue=function(encKey,v){
+  var k=decodeURIComponent(encKey),m=dueMap();
+  if(v)m[k]=v;else delete m[k];
+  try{localStorage.setItem(DUE_KEY,JSON.stringify(m))}catch(e){}
+  toast(v?'Due date set to '+dmy(v):'Due date reset');
+  renderRemind();updateRemindStrip();
+};
 function renderRemind(){
   var box=document.getElementById('skCrBody');if(!box)return;
   var rows=reminderRows(),log=remindLog(),t=today();
@@ -201,7 +211,8 @@ function renderRemind(){
     var ago=r.days>=0?'<i class="skcr-tag'+(r.days>=30?' bad':'')+'">'+r.days+' days pending</i>':'';
     var sent=log[r.key]===t?'<i class="skcr-tag ok">Reminded today</i>':'';
     var can=!!digits(r.phone);
-    return '<div class="skcr-row"><div class="skcr-main"><b>'+esc(r.name)+'</b><small>'+(can?esc(r.phone):'No phone')+'</small><div>'+ago+tag+sent+'</div></div>'+
+    var dt='<label class="skcr-datebtn">📅 <span>'+(r.due?'Change date':'Set due date')+'</span><input type="date" value="'+esc(r.due||'')+'" onchange="skCrSetDue(\''+encodeURIComponent(r.key)+'\',this.value)" aria-label="Due date"></label>'+(r.manual?'<button type="button" class="skcr-dateclr" onclick="skCrSetDue(\''+encodeURIComponent(r.key)+'\',\'\')" aria-label="Reset due date">↺</button>':'');
+    return '<div class="skcr-row"><div class="skcr-main"><b>'+esc(r.name)+'</b><small>'+(can?esc(r.phone):'No phone')+'</small><div>'+ago+tag+sent+'</div><div class="skcr-datewrap">'+dt+'</div></div>'+
       '<div class="skcr-amt">'+money(r.balance)+'</div>'+
       '<button type="button" class="skcp-btn skcr-wa" '+(can?'':'disabled ')+'onclick="skCreditRemind(\''+encodeURIComponent(r.key)+'\')" aria-label="WhatsApp reminder">💬</button></div>';
   }).join('');

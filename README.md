@@ -165,3 +165,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - **Duplicate bills fixed**: editing a saved bill and then pressing New Bill / closing no longer creates a second copy; Save Bill refuses to save the exact same bill twice.
 - **Used Mobile Stock**: Bill button and the 3-dot menu now sit inside the row card, aligned in every row.
 - **Used Mobile Stock form**: Save Purchase / Reset buttons are no longer hidden behind the bottom navigation bar.
+
+## V5.6.161
+- **Customer ledger**: Credit / Payment buttons show proper icons (were white boxes). "Send history" now opens a popup with From / To dates and Today / 7 days / 1 month / All; the full history of the chosen period is sent (no 15/25 entry limit).
+- **Credit list**: opens on the Credit filter; filter chips fill the row; customer avatars are round and coloured per customer. **Credit Reminders**: each customer has a "Change date / Set due date" button (key `skx_credit_due_override_v1`).
+- **Home header**: the floating role badge no longer overlaps the profile icon; the profile icon itself shows the role (crown / briefcase / wrench).
+- **Billing**: after Save or Update the New Bill form is empty, also when you return later; abandoning an edit does not leave its data in the New Bill form.
+- **Fields keep their data** when tapped (billing fields no longer clear on focus).

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SK MOBILES v5.6.160 — screens polish: credit ledger, payment popup,
+   SK MOBILES v5.6.161 — screens polish: credit ledger, payment popup,
    date fields (calendar icon), compact forms, equal-width button rows.
    Presentation only. Loaded last.
    ========================================================================== */
@@ -71,7 +71,8 @@ html body #skCreditLedgerPage #skCPDetailView .skcp-detail-box > .skcp-bill-acti
 html body #skCreditLedgerPage #skCPDetailView .skcp-detail-box > .skcp-bill-actions .skcp-btn{width:100%!important;min-height:46px!important;margin:0!important;flex:1 1 0!important}
 html body #skCreditLedgerPage #skCPDetailView .skcp-detail-box > .skcp-bill-actions .skcp-btn.credit{background:linear-gradient(135deg,#2563eb,#4f46e5)!important;color:#fff!important;border-color:transparent!important}
 html body #skCreditLedgerPage #skCPDetailView .skcp-detail-box > .skcp-bill-actions .skcp-btn.pay{background:linear-gradient(135deg,#16a34a,#22c55e)!important;color:#fff!important;border-color:transparent!important}
-html body #skCreditLedgerPage #skCPDetailView .skcp-detail-box > .skcp-bill-actions .skcp-btn.credit .ski,html body #skCreditLedgerPage #skCPDetailView .skcp-detail-box > .skcp-bill-actions .skcp-btn.pay .ski{background-color:#fff!important}
+html body #skCreditLedgerPage #skCPDetailView .skcp-detail-box > .skcp-bill-actions .skcp-btn.credit .ski,html body #skCreditLedgerPage #skCPDetailView .skcp-detail-box > .skcp-bill-actions .skcp-btn.pay .ski{background:transparent!important}
+html body #skCreditLedgerPage #skCPDetailView .skcp-detail-box > .skcp-bill-actions .skcp-btn.credit .ski::before,html body #skCreditLedgerPage #skCPDetailView .skcp-detail-box > .skcp-bill-actions .skcp-btn.pay .ski::before{background:#fff!important}
 
 /* ---------- Repair Details (screen 11) ---------- */
 html body #skRepairDetailContent .rjd{display:flex;flex-direction:column;gap:10px;padding:2px 0 8px}

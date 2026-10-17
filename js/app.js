@@ -1351,8 +1351,9 @@ const MASTER_INVENTORY = [
       updateOrderBadge();
     }
 
+    /* Tapping a field keeps its current value (edit in place); it is no longer cleared on focus. */
     function handleInputClear(el) {
-      el.value = '';
+      /* intentionally empty */
     }
 
     // Repair Tools & IC Spares — isolated implementation.
@@ -1592,7 +1593,7 @@ const MASTER_INVENTORY = [
         if(modalId==='billingModal'){switchBillTab('new');restoreDraft();updateBillPreview();}
         bringModalToFront(modal); requestAnimationFrame(()=>bringModalToFront(modal));
         if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal(modalId,true);
-      }else{modal.classList.remove('active');document.body.classList.remove('modal-open');if(modalId==='viewBillModal'){const r=window.__skBillViewReturn||'';window.__skBillViewReturn='';if(r!=='creditLedger')toggleModal('billingModal',true);}if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal(modalId,false);}
+      }else{modal.classList.remove('active');document.body.classList.remove('modal-open');if(modalId==='billingModal'&&window.__skEditingBillId){try{skBillResetForm();}catch(e){}}if(modalId==='viewBillModal'){const r=window.__skBillViewReturn||'';window.__skBillViewReturn='';if(r!=='creditLedger')toggleModal('billingModal',true);}if(typeof window.skAppHistoryModal==='function')window.skAppHistoryModal(modalId,false);}
     }
 
     function toggleLeftDrawer(show) {
@@ -2576,6 +2577,7 @@ const MASTER_INVENTORY = [
     }
 
     function saveDraft() {
+      if (window.__skEditingBillId) return; /* an edit in progress is not a new-bill draft */
       const draft = {
         custName: document.getElementById('billCustName').value,
         phone: document.getElementById('billCustPhone').value,
@@ -3296,6 +3298,18 @@ const MASTER_INVENTORY = [
       if (termsEl) termsEl.innerText = getMobileTerms(currentMobileType) + (window.skWarrantyLine ? window.skWarrantyLine({warrantyDays:(document.getElementById('billWarranty')||{}).value,date:''}) : '');
     }
 
+    /* Empties the New Bill form completely (used after Save / Update and when an edit is abandoned). */
+    function skBillResetForm() {
+      window.__skEditingBillId='';
+      const f=document.getElementById('usedMobileBillingForm'); if(f)f.reset();
+      ['billExchModel','billExchImei','billExchValue'].forEach(id=>{const e=document.getElementById(id); if(e)e.value='';});
+      const set=(id,v)=>{const e=document.getElementById(id); if(e)e.value=v;};
+      set('billAdvance','0'); set('billEmiMonths','3'); set('billEmiInterest','0');
+      const sb=document.querySelector('.bill-action-save'); if(sb){const sp=sb.querySelector('span:last-child'); if(sp)sp.textContent='Save Bill';}
+      clearDraft(); selectPayMode('Cash'); updateBillPreview();
+    }
+    window.skBillResetForm = skBillResetForm;
+
     function saveUsedBill() {
       const editId = String(window.__skEditingBillId || '');
       if (editId) {
@@ -3315,7 +3329,7 @@ const MASTER_INVENTORY = [
         bill.emiHtml=currentPayMode==='EMI'?document.getElementById('pvEmiScheduleTbody').innerHTML:'';
         localStorage.setItem('sk_bills',JSON.stringify(savedBills)); window.__skEditingBillId='';
         const btn=document.querySelector('.bill-action-save'); if(btn){const sp=btn.querySelector('span:last-child');if(sp)sp.textContent='Save Bill';}
-        updateBillHistoryCount(); renderBillHistory(); updateBillPreview(); showToast('✅ Bill updated successfully'); switchBillTab('history'); return;
+        updateBillHistoryCount(); renderBillHistory(); skBillResetForm(); showToast('✅ Bill updated successfully'); switchBillTab('history'); return;
       }
       const billDate = `${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
       const custName = document.getElementById('billCustName').value.trim();
@@ -5336,7 +5350,14 @@ img{max-width:100%!important;}
       const el=document.getElementById('skTopRoleBadge'); if(!el)return;
       const r=String(localStorage.getItem(ROLE_KEY)||'').toLowerCase();
       const map={admin:'👑 Admin',manager:'👔 Manager',worker:'👷 Worker'};
-      el.textContent=map[r]||''; el.style.display=map[r]?'inline-flex':'none';
+      el.textContent=map[r]||''; el.style.display='none'; /* the role is shown on the profile icon instead (no overlap in the header) */
+      const pb=document.querySelector('.sk-home-profile-btn');
+      if(pb){
+        if(!pb.dataset.skSvg)pb.dataset.skSvg=pb.innerHTML;
+        const ic={admin:'<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',manager:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',worker:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8 6.2 21l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>'}[r];
+        pb.innerHTML=ic?'<svg viewBox="0 0 24 24" aria-hidden="true">'+ic+'</svg>':pb.dataset.skSvg;
+        pb.title=map[r]?('Profile — '+map[r].replace(/^\S+\s/,'')):'Profile';
+      }
     }
     window.skRefreshRoleBadge=skRefreshRoleBadge;
     window.skOpenAdminPanel=function(){if(!admin()){toast('🔒 Admin access only');return;}const r=document.getElementById('skAdminCurrentRole');if(r)r.textContent='👑 Admin — Full Access';document.getElementById('skAdminPanelModal')?.classList.add('active');skRenderManagerPermissions();};
@@ -7355,6 +7376,11 @@ function cpMatch(c,q){
  var vals=[c.name,c.phone,String(c.balance),c.lastBill&&c.lastBill.id,c.bills.map(function(x){return x.b.id}).join(' '),c.bills.map(function(x){return x.b.model}).join(' ')];
  return vals.join(' ').toLowerCase().indexOf(q)!==-1;
 }
+function cpAvStyle(name){
+ var P=[['#f97316','#ef4444'],['#10b981','#059669'],['#8b5cf6','#6366f1'],['#0ea5e9','#2563eb'],['#ec4899','#db2777'],['#f59e0b','#d97706'],['#14b8a6','#0d9488'],['#ef4444','#be123c']];
+ var h=0,t=String(name||'?');for(var k=0;k<t.length;k++)h=(h*31+t.charCodeAt(k))>>>0;
+ var c=P[h%P.length];return 'background:linear-gradient(145deg,'+c[0]+','+c[1]+') !important;color:#fff !important;border-radius:50% !important';
+}
 function cpFilter(c){
  if(skCPFilterMode==='emi')return c.hasEmi && Number(c.emiBalance||0)>0;
  if(skCPFilterMode==='credit')return c.hasCredit && Number(c.creditBalance||0)>0;
@@ -7369,7 +7395,7 @@ function cpRow(c){
  if(skCPFilterMode==='credit')displayBalance=Number(c.creditBalance||0);
  var displayMode=skCPFilterMode==='emi'?'EMI':(skCPFilterMode==='credit'?'Credit':mode);
  return '<div class="skcp-row" data-k="'+encodeURIComponent(c.key)+'" onclick="skCPOpenCustomer(decodeURIComponent(this.dataset.k))">'+
- '<div class="sk-credit-avatar">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div>'+
+ '<div class="sk-credit-avatar" style="'+cpAvStyle(c.name)+'">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div>'+
  '<div class="skcp-row-main"><div class="skcp-name">'+cpEsc(c.name)+'</div><div class="skcp-sub">📞 '+cpEsc(c.phone||'No phone')+' • '+displayMode+' • Bill #'+cpEsc(last3)+'</div></div>'+
  '<div><div class="skcp-amt">'+cpMoney(displayBalance)+'</div><div class="skcp-bill">'+(displayBalance>0?'OUTSTANDING':'COMPLETED')+'</div></div>'+
  (displayBalance>0&&cpDigits(c.phone)?'<button type="button" class="skcp-btn" style="color:#15803d;border-color:rgba(22,163,74,.3);flex:0 0 auto" title="WhatsApp reminder" onclick="event.stopPropagation();skCreditRemind(encodeURIComponent(decodeURIComponent(this.dataset.k)))" data-k="'+encodeURIComponent(c.key)+'">💬</button>':'')+
@@ -7466,7 +7492,7 @@ function cpOpenDetail(c){
      payment receipts and manual ledger entries visible. */
   return String(e.source||'')!=='bill';
 }).sort(function(a,b){var x=skBillDateKey(a.date)||'',y=skBillDateKey(b.date)||'';return x<y?1:x>y?-1:0});
- var html='<div class="skcp-page-head"><button class="skcp-back" onclick="skCPBackToList()">← Back</button><div class="sk-credit-avatar skcp-det-av">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div><div class="skcp-det-who"><b>'+cpEsc(c.name)+'</b><div style="font-size:.72rem;color:var(--text-muted);line-height:1.35;margin-top:3px">📞 '+cpEsc(c.phone||'No phone')+'</div></div></div>'+
+ var html='<div class="skcp-page-head"><button class="skcp-back" onclick="skCPBackToList()">← Back</button><div class="sk-credit-avatar skcp-det-av" style="'+cpAvStyle(c.name)+'">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div><div class="skcp-det-who"><b>'+cpEsc(c.name)+'</b><div style="font-size:.72rem;color:var(--text-muted);line-height:1.35;margin-top:3px">📞 '+cpEsc(c.phone||'No phone')+'</div></div></div>'+
  '<div class="skcp-detail-box"><div class="skcp-detail-grid"><div class="skcp-mini"><b>'+cpMoney(c.balance)+'</b><span>CURRENT OUTSTANDING</span></div><div class="skcp-mini"><b>'+cpMoney(c.credits)+'</b><span>CREDIT / EMI</span></div><div class="skcp-mini"><b>'+cpMoney(c.payments)+'</b><span>PAYMENT</span></div></div>'+
  '<div class="skcp-bill-actions"><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(c.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ FULLY PAID</span>')+'</div></div>';
  if(bills.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">SALES BILL HISTORY</div>';html+=bills.map(function(x){var b=x.b;var billTotal=Math.max(0,Number(b.price)||0);var billBalance=Math.max(0,Number(b.balance)||0);var isCreditBill=b.payMode==='Credit'||b.payMode==='EMI';var billPaid=isCreditBill?Math.max(0,Number(b.advance)||0):Math.max(0,billTotal-billBalance);return '<div class="skcp-bill-card"><div class="skcp-bill-top"><div><b>'+cpEsc(b.id)+'</b> • '+cpEsc(b.model||'')+'<div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(b.date)+' • '+cpEsc(b.payMode||'')+'</div></div><b>'+cpMoney(billTotal)+'</b></div><div class="skcp-sales-bill-finance">Amount: '+cpMoney(billTotal)+' • Paid: '+cpMoney(billPaid)+' • Outstanding: '+cpMoney(billBalance)+'</div><div class="skcp-bill-actions"><button class="skcp-btn" onclick="skCPViewBill('+x.idx+')">📄 Bill Details</button><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(billBalance>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span class="skcp-sales-bill-paid">✓ PAID</span>')+'</div>'+
@@ -7751,7 +7777,10 @@ window.skCPSaveAction=function(){
 };
 function cpOpenPage(){
  if(typeof skImportFromBills==='function')skImportFromBills(true);
- document.getElementById('skCreditLedgerPage').classList.add('active');cpShowMain();
+ document.getElementById('skCreditLedgerPage').classList.add('active');
+ /* the list always opens on the Credit filter */
+ skCPFilterMode='credit';document.querySelectorAll('#skCreditLedgerPage .skcp-filter').forEach(function(x){x.classList.toggle('active',x.dataset.f==='credit')});
+ cpShowMain();
 }
 window.skOpenCreditLedger=cpOpenPage;
 })();
