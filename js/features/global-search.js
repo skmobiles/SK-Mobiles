@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.158 — Search everywhere: one box finds bills (customer, phone, bill no., IMEI, model),
+/* SK MOBILES v5.6.159 — Search everywhere: one box finds bills (customer, phone, bill no., IMEI, model),
    repair jobs (customer, phone, model, IMEI, job id) and used-mobile stock (IMEI, model, dealer, buyer).
    Read-only; opens the existing detail screens. Opened from the scan-style button next to the home search box. */
 (function(){
@@ -28,7 +28,9 @@ function search(q){
     var h=hay(r.imei,r.model,r.dealer,r.sale&&r.sale.customer,r.sale&&r.sale.phone);
     if(h.indexOf(q)>=0)out.used.push(r);
   });
-  out.bills.reverse();
+  /* newest first: saved bills are stored newest-first, sort by bill date to be safe */
+  var dk=function(d){var m=String(d||'').match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})/);return m?(m[3].length===2?'20'+m[3]:m[3])+('0'+m[2]).slice(-2)+('0'+m[1]).slice(-2):String(d||'').replace(/\D/g,'').slice(0,8)};
+  out.bills=out.bills.map(function(x,i){return {x:x,i:i,k:dk(x.b.date)}}).sort(function(a,b){return a.k<b.k?1:a.k>b.k?-1:a.i-b.i}).map(function(o){return o.x});
   return out;
 }
 function section(title,count,rows){

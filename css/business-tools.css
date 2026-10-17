@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.158 — daily report and credit reminders. */
+/* SK MOBILES v5.6.159 — daily report and credit reminders. */
 
 /* ---------- daily report ---------- */
 html body :is(#skDailyReportModal,#skCreditRemindModal,#skMonthReportModal,#skDealerModal,#skCreditRangeModal,#skPriceListModal):is(#skDailyReportModal,#skCreditRemindModal,#skMonthReportModal,#skDealerModal,#skCreditRangeModal,#skPriceListModal) .skdr-nav{display:flex;align-items:center;gap:8px;margin:2px 0 10px}

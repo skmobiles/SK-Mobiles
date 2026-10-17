@@ -3381,7 +3381,7 @@ const MASTER_INVENTORY = [
         return matchesQuery&&matchesPay&&matchesDate&&matchesType;
       });
       if(!filtered.length){container.innerHTML=`<div class="empty-state">${source.length?'No saved '+(typeof currentMobileType==='string'?currentMobileType:'New Mobile')+' bills match this filter.':'No saved billing history found.'}</div>`;return;}
-      filtered.forEach(b=>{
+      filtered.map((b,i)=>({b,i,k:skBillDateKey(b.date)||''})).sort((x,y)=>x.k<y.k?1:x.k>y.k?-1:x.i-y.i).map(x=>x.b).forEach(b=>{
         const item=document.createElement('article'); item.className='bill-history-card';
         const billId=String(b.id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); const displayBillNo=b.billNo||skBillNumberFromDateSeq(b.date,skExistingBillSeq(b)||1,false); const safePrice=Number(b.price)||0;
         item.innerHTML=`<div class="bill-history-main"><div class="bill-history-name">${String(b.custName||'Customer')} (${String(b.model||'---')})</div><div class="bill-history-meta"><span class="bill-history-meta-item">🧾 ${displayBillNo}</span><span class="bill-history-meta-item">•</span><span class="bill-history-meta-item">📞 ${String(b.phone||'---')}</span><span class="bill-history-meta-item">📅 ${skBillUiDate(b.date||'---')}</span><span class="bill-history-pay-mode">${String(b.payMode||'Cash')}</span></div><div class="bill-history-amount">₹${safePrice.toLocaleString('en-IN')}</div></div><div class="bill-history-actions"><button type="button" class="bill-history-edit" onclick="editSavedBill(savedBills.findIndex(x=>x&&x.id==='${billId}'))" title="Edit Bill" aria-label="Edit bill">✏️</button><button type="button" class="bill-history-delete" onclick="deleteBillSafely('${billId}')" title="Delete Bill" aria-label="Delete bill">🗑️</button></div>`;
@@ -5014,23 +5014,23 @@ img{max-width:100%!important;}
     const filter=cat==='all'?'home':cat,st=currentState();
     if(st.filter!==filter||st.modal)pushAppState({filter:filter,modal:null});
   };
-  window.skAppHistoryDrawer=function(show){
+  window.skAppHistoryDrawer=function(show){ return; /* handled by back-nav.js */
     if(restoring)return;
     const st=currentState();
     if(show){if(st.modal!=='leftDrawer')pushAppState({filter:(typeof currentFilter==='string'?currentFilter:'home'),modal:'leftDrawer'});}
     else if(st.modal==='leftDrawer')history.replaceState({skMobilesApp:true,filter:st.filter||'home',modal:null},document.title,location.href);
   };
-  window.skAppHistoryModal=function(id,show){
+  window.skAppHistoryModal=function(id,show){ return; /* handled by back-nav.js */
     if(restoring)return;
     const st=currentState();
     if(show){if(st.modal!==id||st.filter!==(typeof currentFilter==='string'?currentFilter:'home'))pushAppState({filter:(typeof currentFilter==='string'?currentFilter:'home'),modal:id});}
     else if(st.modal===id)history.replaceState({skMobilesApp:true,filter:st.filter||'home',modal:null},document.title,location.href);
   };
-  window.skAppHistoryRepairOpen=function(id,extra){
+  window.skAppHistoryRepairOpen=function(id,extra){ return; /* handled by back-nav.js */
     if(restoring)return;
     pushAppState(Object.assign({filter:(typeof currentFilter==='string'?currentFilter:'home'),modal:id},extra||{}));
   };
-  window.skAppHistoryRepairClose=function(id){
+  window.skAppHistoryRepairClose=function(id){ return; /* handled by back-nav.js */
     if(restoring)return;
     const st=currentState();
     if(st.modal===id)history.replaceState({skMobilesApp:true,filter:st.filter||'home',modal:null},document.title,location.href);
@@ -6419,7 +6419,7 @@ img{max-width:100%!important;}
         (list.length ? '🔍 No matching orders found.' : '📦 No orders added yet.') +
         '</div>';
     }else{
-      filtered.forEach(function(order){
+      filtered.slice().reverse().forEach(function(order){
         var row = document.createElement('div');
         row.className = 'sk-order-item-v39';
 
@@ -7323,6 +7323,13 @@ function cpGetCustomers(){
    }).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
 
    c.balance=c.bills.length ? billBalance+repairBalance : Math.max(0,manualCredits-payments);
+   /* Customers without bills: the Credit / EMI filter totals must also subtract the payments, like c.balance does. */
+   if(!c.bills.length){
+     var payLeft=payments;
+     var creditLeft=Math.max(0,c.creditBalance-payLeft);payLeft=Math.max(0,payLeft-c.creditBalance);
+     c.creditBalance=creditLeft;
+     c.emiBalance=Math.max(0,c.emiBalance-payLeft);
+   }
    c.hasCredit=c.bills.some(function(x){return x.b.payMode==='Credit'})||
      manualEntries.some(function(e){return e.type==='credit'&&e.mode!=='EMI'});
    c.hasEmi=c.bills.some(function(x){return x.b.payMode==='EMI'})||
@@ -7366,6 +7373,8 @@ function cpRow(c){
 }
 window.skCPRender=function(){
  var all=cpGetCustomers(),q=document.getElementById('skCPSearch')?.value||'',arr=all.filter(cpFilter).filter(function(c){return cpMatch(c,q)});
+ var lastKey=function(c){var m='';c.bills.forEach(function(x){var k=skBillDateKey(x.b.date)||'';if(k>m)m=k});(c.entries||[]).forEach(function(e){var k=skBillDateKey(e.date)||'';if(k>m)m=k});return m};
+ arr=arr.map(function(c,i){return {c:c,i:i,k:lastKey(c)}}).sort(function(a,b){return a.k<b.k?1:a.k>b.k?-1:a.i-b.i}).map(function(x){return x.c});
  var ac=document.getElementById('skCPAllCount'),cc=document.getElementById('skCPCreditCount'),ec=document.getElementById('skCPEmiCount'),bt=document.getElementById('skCPOutstandingTotal');
  if(ac)ac.textContent=all.length;if(cc)cc.textContent=all.filter(function(c){return c.hasCredit}).length;if(ec)ec.textContent=all.filter(function(c){return c.hasEmi}).length;if(bt)bt.textContent=cpMoney(all.reduce(function(a,c){return a+c.balance},0));
  var box=document.getElementById('skCPList');if(box)box.innerHTML=arr.length?arr.map(cpRow).join(''):'<div style="text-align:center;color:var(--text-muted);padding:28px">No customers found.</div>';
@@ -7451,7 +7460,7 @@ function cpOpenDetail(c){
      shown above. Do not show them as extra credit history rows. Keep actual
      payment receipts and manual ledger entries visible. */
   return String(e.source||'')!=='bill';
-}).sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))});
+}).sort(function(a,b){var x=skBillDateKey(a.date)||'',y=skBillDateKey(b.date)||'';return x<y?1:x>y?-1:0});
  var html='<div class="skcp-page-head"><button class="skcp-back" onclick="skCPBackToList()">← Back</button><div class="sk-credit-avatar skcp-det-av">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div><div class="skcp-det-who"><b>'+cpEsc(c.name)+'</b><div style="font-size:.72rem;color:var(--text-muted);line-height:1.35;margin-top:3px">📞 '+cpEsc(c.phone||'No phone')+'</div></div></div>'+
  '<div class="skcp-detail-box"><div class="skcp-detail-grid"><div class="skcp-mini"><b>'+cpMoney(c.balance)+'</b><span>CURRENT OUTSTANDING</span></div><div class="skcp-mini"><b>'+cpMoney(c.credits)+'</b><span>CREDIT / EMI</span></div><div class="skcp-mini"><b>'+cpMoney(c.payments)+'</b><span>PAYMENT</span></div></div>'+
  '<div class="skcp-bill-actions"><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(c.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ FULLY PAID</span>')+'</div></div>';
@@ -7465,7 +7474,7 @@ window.skCPEditCustomer=function(k){
  if(!c)return;
  var old=document.getElementById('skcpCustomerEditModal');if(old)old.remove();
  var esc=typeof cpEsc==='function'?cpEsc:function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]})};
- var entries=(c.entries||[]).filter(function(e){return String(e.source||'')!=='bill'}).slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))});
+ var entries=(c.entries||[]).filter(function(e){return String(e.source||'')!=='bill'}).slice().sort(function(a,b){var x=skBillDateKey(a.date)||'',y=skBillDateKey(b.date)||'';return x<y?1:x>y?-1:0});
  var modal=document.createElement('div');modal.id='skcpCustomerEditModal';
  modal.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(15,23,42,.48);';
  modal.innerHTML='<section role="dialog" aria-modal="true" aria-labelledby="skcpCustomerEditTitle" style="width:min(560px,100%);max-height:92dvh;overflow:auto;background:var(--card-bg,#fff);color:var(--text,#172033);border:1px solid var(--card-border,#cbd5e1);border-radius:18px;padding:15px;box-shadow:0 18px 50px rgba(15,23,42,.25)">'+
@@ -7985,6 +7994,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   $('skUsedStatProfit').textContent=money(rows.reduce((a,r)=>a+(Number(r.sale?.profit)||0),0));
   const body=$('skUsedRows');if(!body)return;
   if(!filtered.length){body.innerHTML='<tr><td colspan="6" class="sk-used-empty-cell">No matching used mobiles found.</td></tr>';return;}
+  filtered.map((r,i)=>({r,i,k:skBillDateKey(r.date||r.createdAt||'')||''})).sort((x,y)=>x.k<y.k?1:x.k>y.k?-1:y.i-x.i).forEach((x,j)=>{filtered[j]=x.r});
   body.innerHTML=filtered.slice(0,1000).map((r,i)=>{
    const sold=r.status==='Sold';
    const statusClass=sold?'is-sold':String(r.status||'').toLowerCase()==='pending'?'is-pending':'is-stock';
@@ -7996,7 +8006,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
     <td class="sk-used-dealer-cell">${esc(r.dealer)}</td>
     <td class="sk-used-price-cell">${money(r.cost)}</td>
     <td class="sk-used-status-cell"><span class="sk-used-status ${statusClass}">${esc(r.status||'In Stock')}</span></td>
-    <td class="sk-used-row-actions"><details class="sk-used-row-menu"><summary aria-label="More actions" title="More actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></summary><div class="sk-used-row-menu-pop"><button type="button" ${sold?'disabled':''} onclick="window.skUsedSelectForBill('${imei}')">Select for Bill</button><button type="button" onclick="window.skUsedEdit('${imei}')">Edit</button><button type="button" class="is-danger" onclick="window.skUsedDelete('${imei}')">Delete</button></div></details></td>
+    <td class="sk-used-row-actions">${sold?'':`<button type="button" class="sk-used-bill-btn" aria-label="Bill this mobile" title="Bill this mobile" onclick="event.stopPropagation();window.skUsedSelectForBill('${imei}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span>Bill</span></button>`}<details class="sk-used-row-menu"><summary aria-label="More actions" title="More actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></summary><div class="sk-used-row-menu-pop"><button type="button" ${sold?'disabled':''} onclick="window.skUsedSelectForBill('${imei}')">Select for Bill</button><button type="button" onclick="window.skUsedEdit('${imei}')">Edit</button><button type="button" class="is-danger" onclick="window.skUsedDelete('${imei}')">Delete</button></div></details></td>
    </tr>`;
   }).join('');
   if(!body.__skTap){body.__skTap=1;body.addEventListener('click',function(e){
@@ -8102,7 +8112,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  window.skUsedShowDetails=function(imei){
   const r=read().find(x=>String(x.imei)===String(imei));if(!r)return;
   let dlg=$('skUsedDetailDialog');if(!dlg){dlg=document.createElement('div');dlg.id='skUsedDetailDialog';dlg.className='sk-used-detail-overlay';dlg.setAttribute('role','dialog');dlg.setAttribute('aria-modal','true');document.body.appendChild(dlg);}
-  dlg.innerHTML='<section class="sk-used-detail-sheet"><header class="sk-used-detail-head"><button type="button" class="sk-used-detail-close sk-used-detail-back" aria-label="Back" onclick="document.getElementById(\'skUsedDetailDialog\').remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4-8 8 8 8"/></svg></button><div class="sk-used-detail-title"><strong>'+esc(r.model)+'</strong><small>Used mobile details</small></div><span class="sk-used-detail-status '+(r.status==='Sold'?'is-sold':'is-stock')+'">'+esc(r.status||'In Stock')+'</span></header><div class="sk-used-detail-grid">'+[['RAM',r.ram,'ram'],['Storage',r.storage,'storage'],['Colour',r.colour,'colour'],['Full Kit',r.kit,'kit'],['IMEI / Serial',r.imei,'imei'],['Status',r.status,'status'],['Customer Price',money(r.customerPrice),'price'],['Notes / Issue',r.issue||'—','notes']].map(([k,v,c])=>'<div class="sk-used-detail-field f-'+c+(c==='imei'||c==='notes'?' is-wide':'')+'"><span class="sk-ud-ic"><svg viewBox="0 0 24 24" aria-hidden="true">'+(UD_ICONS[c]||'')+'</svg></span><div class="sk-ud-tx"><small>'+esc(k)+'</small><strong>'+esc(v||'Not set')+'</strong></div></div>').join('')+'</div><footer class="sk-used-detail-actions"><button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedShowManagement();window.skUsedEdit(\''+esc(r.imei)+'\');document.getElementById(\'skUsedPurchaseForm\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">Edit</button><button type="button" class="submit-btn sk-used-detail-danger" onclick="window.skUsedDelete(\''+esc(r.imei)+'\');document.getElementById(\'skUsedDetailDialog\')?.remove();window.skUsedShowManagement()">Delete</button><button type="button" class="submit-btn sk-used-bill-button" '+(r.status==='Sold'?'disabled':'')+' onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Select for Bill</button></footer></section>';
+  dlg.innerHTML='<section class="sk-used-detail-sheet"><header class="sk-used-detail-head"><button type="button" class="sk-used-detail-close sk-used-detail-back" aria-label="Back" onclick="document.getElementById(\'skUsedDetailDialog\').remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4-8 8 8 8"/></svg></button><div class="sk-used-detail-title"><strong>'+esc(r.model)+'</strong><small>Used mobile details</small></div><span class="sk-used-detail-status '+(r.status==='Sold'?'is-sold':'is-stock')+'">'+esc(r.status||'In Stock')+'</span></header><div class="sk-used-detail-grid">'+[['RAM',r.ram,'ram'],['Storage',r.storage,'storage'],['Colour',r.colour,'colour'],['Full Kit',r.kit,'kit'],['IMEI / Serial',r.imei,'imei'],['Status',r.status,'status'],['Customer Price',money(r.customerPrice),'price'],['Notes / Issue',r.issue||'—','notes']].map(([k,v,c])=>'<div class="sk-used-detail-field f-'+c+(c==='imei'||c==='notes'?' is-wide':'')+'"><span class="sk-ud-ic"><svg viewBox="0 0 24 24" aria-hidden="true">'+(UD_ICONS[c]||'')+'</svg></span><div class="sk-ud-tx"><small>'+esc(k)+'</small><strong>'+esc(v||'Not set')+'</strong></div></div>').join('')+'</div><footer class="sk-used-detail-actions">'+(r.status==='Sold'?'':'<button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Bill this mobile</button>')+'<button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedShowManagement();window.skUsedEdit(\''+esc(r.imei)+'\');document.getElementById(\'skUsedPurchaseForm\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">Edit</button><button type="button" class="submit-btn sk-used-detail-danger" onclick="window.skUsedDelete(\''+esc(r.imei)+'\');document.getElementById(\'skUsedDetailDialog\')?.remove();window.skUsedShowManagement()">Delete</button><button type="button" class="submit-btn sk-used-bill-button" '+(r.status==='Sold'?'disabled':'')+' onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Select for Bill</button></footer></section>';
   dlg.addEventListener('click',function(e){if(e.target===dlg)dlg.remove();},{once:true});
  };
  window.skUsedShowInventory=function(){
