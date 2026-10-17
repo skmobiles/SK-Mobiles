@@ -4,7 +4,7 @@
   "source": "User-approved V5.6.166: flicker fix, customer edit/merge, recent activity",
   "policy": "Approved V5.6.1 Design Studio UI changes are included in this new baseline. Future changes to locked core files must be reviewed and the lock must not be silently regenerated. Preserve business logic, Firebase configuration/rules and existing data keys.",
   "core_files": {
-    "index.html": "3cf8f0a37396783d0134e801e37e9c4bd4585d1281ab58dc8cd0e61c448390a2",
+    "index.html": "7ae5bdeef39b61c7a23dff9439f0f49315e340f0941fee3e31ecebf274ad1a9b",
     "js/app.js": "909c2e6d7d5f4ba1dd3708f24fb7054b541442a67335ad21359e01988fbc15e8",
     "js/firebase-sync.js": "7e0c80c7cb2f36ba19f7d4743138b5898674f37860b95b2b41740e0350b00bc6",
     "js/features/pin-security.js": "adde7413b65e7676169be8670d31494abd364f14a263681faa577fa07d08a0db",

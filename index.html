@@ -1335,7 +1335,17 @@ Dharmapuri, Tamil Nadu 636705 .</textarea></div></div><div class="st-field"><spa
 (function(){
   if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('/sw.js', {scope:'/'}).catch(function(err){
+    var had = !!navigator.serviceWorker.controller, done = false;
+    /* a new app version took over: reload once so the new screens show (skipped while something is open or being typed) */
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if (!had || done) return; done = true;
+      var ae = document.activeElement, typing = ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName);
+      if (typing || document.querySelector('.modal-overlay.active')) return;
+      location.reload();
+    });
+    navigator.serviceWorker.register('/sw.js', {scope:'/'}).then(function(reg){
+      document.addEventListener('visibilitychange', function(){ if (!document.hidden) { try { reg.update(); } catch (e) {} } });
+    }).catch(function(err){
       console.warn('SK MOBILES offline support could not be enabled:', err);
     });
   }, {once:true});
