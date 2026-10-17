@@ -139,8 +139,7 @@
 #skUsedStockModal .sk-used-status.is-sold{color:#075fff;background:#e3efff}
 #skUsedStockModal .sk-used-status.is-pending{color:#c45a08;background:#fff0df}
 #skUsedStockModal .sk-used-row-actions{display:flex;align-items:center;justify-content:center;gap:6px}
-#skUsedStockModal .sk-used-row-view,#skUsedStockModal .sk-used-row-menu summary{width:38px;height:42px;display:grid;place-items:center;flex:0 0 38px;padding:0;border:1px solid #d9e6fb;border-radius:50%;background:#fff;color:#31527f;box-shadow:0 3px 9px rgba(40,75,130,.08);cursor:pointer;list-style:none}
-#skUsedStockModal .sk-used-row-view .sk-used-chevron{display:block;color:#31527f;font-family:Arial,sans-serif;font-size:29px;font-weight:700;line-height:.8;transform:translateX(1px)}
+#skUsedStockModal .sk-used-row-menu summary{width:38px;height:42px;display:grid;place-items:center;flex:0 0 38px;padding:0;border:1px solid #d9e6fb;border-radius:50%;background:#fff;color:#31527f;box-shadow:0 3px 9px rgba(40,75,130,.08);cursor:pointer;list-style:none}
 #skUsedStockModal .sk-used-row-menu summary svg{display:block;width:22px;height:22px;flex:0 0 22px;overflow:visible;fill:none;stroke:#31527f;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 #skUsedStockModal .sk-used-row-menu{position:relative}
 #skUsedStockModal .sk-used-row-menu summary::-webkit-details-marker{display:none}
@@ -151,13 +150,13 @@
 #skUsedStockModal .sk-used-row-menu-pop button:disabled{opacity:.45;cursor:not-allowed}
 #skUsedStockModal .sk-used-empty-cell{padding:24px!important;text-align:center;color:#647797}
 #skUsedStockModal .sk-used-storage-note{margin:8px 4px 0;color:#7a8aa5;font-size:11px;line-height:1.4}
-#skUsedStockModal .sk-used-bottom-nav{flex:0 0 auto;position:relative;z-index:2;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;min-height:88px;margin:0 18px 14px;padding:8px;border:1px solid #dce7fb;border-radius:36px;background:rgba(255,255,255,.97);box-shadow:0 10px 28px rgba(44,77,132,.10)}
-#skUsedStockModal .sk-used-bottom-nav button{position:relative;min-width:0;min-height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:4px;border:0;border-radius:18px;background:transparent;color:#101a32;font:inherit;font-size:15px;font-weight:650;white-space:nowrap;cursor:pointer}
-#skUsedStockModal .sk-used-bottom-nav button svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
-#skUsedStockModal .sk-used-bottom-nav button.is-active{color:#075fff;font-weight:800}
-#skUsedStockModal .sk-used-bottom-nav button.is-active::before{content:"";position:absolute;top:-25px;width:82px;height:82px;border:4px solid #fff;border-radius:50%;background:linear-gradient(145deg,#2b7bff,#0758ed);box-shadow:0 7px 20px rgba(23,101,255,.32);z-index:0}
-#skUsedStockModal .sk-used-bottom-nav button.is-active svg{position:relative;z-index:1;width:34px;height:34px;color:#fff}
-#skUsedStockModal .sk-used-bottom-nav button.is-active span{position:relative;z-index:1}
+
+
+
+
+
+
+
 #skUsedFilterModal.sk-used-filter-overlay{z-index:12020;padding:16px;align-items:center;justify-content:center;background:rgba(16,31,60,.38);backdrop-filter:blur(5px)}
 #skUsedFilterModal .sk-used-filter-sheet{width:min(94vw,520px);max-height:90dvh;overflow:auto;padding:22px;border:1px solid #dce7fb;border-radius:24px;background:#fff;color:#15213b;box-shadow:0 22px 65px rgba(20,48,98,.25)}
 #skUsedFilterModal .sk-used-filter-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
@@ -186,7 +185,7 @@
 #skUsedDetailDialog .sk-used-detail-actions>button,.sk-used-detail-actions>button{flex:1;min-width:100px;min-height:42px;padding:9px 12px;border:1px solid #d4e1f8;border-radius:12px;background:#f3f7ff;color:#29466f;font-weight:750}
 #skUsedDetailDialog .sk-used-detail-actions>.sk-used-bill-button,.sk-used-detail-actions>.sk-used-bill-button{background:#1765ff;color:#fff;border-color:#1765ff}
 #skUsedDetailDialog .sk-used-detail-danger,.sk-used-detail-danger{color:#c62828!important;background:#fff7f7!important;border-color:#ffd8d8!important}
-body:has(#skUsedStockModal.active) nav.bottom-nav{display:none!important}
+
 
 @media(max-width:700px){
   #skUsedStockModal.sk-used-stock-overlay{inset:0;width:100%;height:100dvh;max-width:100%;padding:8px;margin:0;align-items:stretch;justify-content:stretch;overflow:hidden;box-sizing:border-box}
@@ -267,16 +266,15 @@ body:has(#skUsedStockModal.active) nav.bottom-nav{display:none!important}
   #skUsedStockModal .sk-used-status-cell{grid-column:3;grid-row:2;text-align:right}
   #skUsedStockModal .sk-used-status{min-width:0;padding:3px 4px;border-radius:7px;font-size:8px}
   #skUsedStockModal .sk-used-row-actions{grid-column:4;grid-row:1/3;display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:3px;align-self:center}
-  #skUsedStockModal .sk-used-row-view,#skUsedStockModal .sk-used-row-menu summary{width:24px;height:28px;flex-basis:24px;border-radius:50%}
-  #skUsedStockModal .sk-used-row-view .sk-used-chevron{font-size:23px}
+  #skUsedStockModal .sk-used-row-menu summary{width:24px;height:28px;flex-basis:24px;border-radius:50%}
   #skUsedStockModal .sk-used-row-menu summary svg{width:16px;height:16px;flex-basis:16px}
   #skUsedStockModal .sk-used-row-menu-pop{position:fixed;right:auto;top:8px;bottom:auto}
   #skUsedStockModal .sk-used-storage-note{font-size:9px}
-  #skUsedStockModal .sk-used-bottom-nav{position:relative;flex:0 0 auto;min-height:64px;margin:0 8px max(8px,env(safe-area-inset-bottom));padding:4px 3px;border:1px solid #d8e4f8;border-radius:22px;background:rgba(255,255,255,.98);box-shadow:0 5px 18px rgba(44,77,132,.12);isolation:isolate}
-  #skUsedStockModal .sk-used-bottom-nav button{min-height:54px;gap:3px;padding:3px 1px;font-size:clamp(8px,2.7vw,10px);letter-spacing:-.15px;white-space:nowrap;border-radius:12px}
-  #skUsedStockModal .sk-used-bottom-nav button svg{width:21px;height:21px}
-  #skUsedStockModal .sk-used-bottom-nav button.is-active::before{top:-13px;width:56px;height:56px;border-width:3px}
-  #skUsedStockModal .sk-used-bottom-nav button.is-active svg{width:24px;height:24px}
+  
+  
+  
+  
+  
   #skUsedFilterModal.sk-used-filter-overlay{padding:10px;align-items:flex-end}
   #skUsedFilterModal .sk-used-filter-sheet{width:100%;max-width:none;max-height:88dvh;padding:18px 14px calc(18px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0}
   #skUsedFilterModal .sk-used-filter-header h2{font-size:19px}
@@ -288,12 +286,11 @@ body:has(#skUsedStockModal.active) nav.bottom-nav{display:none!important}
   #skUsedDetailDialog.sk-used-detail-overlay,.sk-used-detail-overlay{padding:10px;align-items:flex-end}
   #skUsedDetailDialog .sk-used-detail-sheet,.sk-used-detail-sheet{width:100%;max-height:88dvh;border-radius:22px 22px 0 0}
   #skUsedDetailDialog .sk-used-detail-grid,.sk-used-detail-grid{gap:8px;padding:12px}
-  #skUsedStockModal .sk-used-bottom-nav button.is-active::before{top:-13px}
+  
   #skUsedStockModal .sk-used-stock-sheet{overflow:hidden}
   #skUsedStockModal .sk-used-stock-scroll{overscroll-behavior-y:contain}
   #skUsedStockModal .sk-used-form-grid .form-label{margin:0;min-width:0}
   #skUsedStockModal .sk-used-form-grid .form-input{max-width:100%}
   #skUsedStockModal .sk-used-form-actions{margin-bottom:2px}
 }
-@media(min-width:701px){
-}
+

@@ -1,0 +1,438 @@
+/* SK MOBILES V5.6.143 — consistency polish layer (presentation only, loaded last).
+ * One type scale, one title style, one icon size system, readable fonts (>= 11.5px), even boxes.
+ * Business logic, IDs and handlers are untouched.
+ */
+
+html.sk-cui{
+  --p-title:1.1rem;       /* page / popup title            */
+  --p-sect:1rem;          /* section heading inside a page */
+  --p-label:.8rem;        /* form labels (12.8px)          */
+  --p-body:.9rem;         /* body / inputs (14.4px)        */
+  --p-small:.75rem;       /* captions (12px)               */
+  --p-field-h:46px;
+  --p-radius:14px;
+}
+
+/* ======================================================================
+   A. ICON SIZE SYSTEM — fixed px (was em-based, so icons looked uneven)
+   ====================================================================== */
+html.sk-cui .ski-in{width:18px!important;height:18px!important;margin-right:8px!important;transform:none!important}
+html.sk-cui label .ski-in,html.sk-cui .form-label .ski-in{width:16px!important;height:16px!important;margin-right:6px!important}
+html.sk-cui h2 .ski-in,html.sk-cui h3 .ski-in,html.sk-cui .sk-admin-title .ski-in{width:20px!important;height:20px!important}
+html.sk-cui .ski-tile{width:40px!important;height:40px!important;border-radius:13px!important;margin-right:12px!important;flex:none}
+html.sk-cui .ski-tile::before{width:22px!important;height:22px!important}
+html.sk-cui .bill-section-title .ski-tile{width:34px!important;height:34px!important;border-radius:11px!important;margin-right:10px!important}
+html.sk-cui .bill-section-title .ski-tile::before{width:19px!important;height:19px!important}
+
+/* ======================================================================
+   B. ONE TITLE STYLE — every popup / page header looks the same
+   ====================================================================== */
+html.sk-cui .modal-title,
+html.sk-cui .repair-spares-head,
+html.sk-cui .tools-others-head,
+html.sk-cui .drawer-header,
+html.sk-cui #skUsedStockModal .sk-used-stock-header{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
+  min-height:62px!important;padding:10px 12px!important;margin:0 0 12px!important;box-sizing:border-box!important;
+  border-radius:20px!important;background:var(--card-bg)!important;border:1px solid var(--card-border)!important;
+  box-shadow:0 8px 24px rgba(37,99,235,.08)!important;
+}
+html.sk-cui .modal-title > span,html.sk-cui .modal-title > div,
+html.sk-cui .repair-spares-title,html.sk-cui .tools-others-title,html.sk-cui .drawer-title,
+html.sk-cui .sk-used-title-copy h1{
+  display:flex;align-items:center;min-width:0;margin:0!important;
+  font-size:var(--p-title)!important;font-weight:800!important;line-height:1.2!important;letter-spacing:0!important;color:var(--text)!important;
+}
+html.sk-cui .repair-spares-title .ski-tile,html.sk-cui .tools-others-title .ski-tile{width:40px!important;height:40px!important}
+html.sk-cui .repair-spares-title .ski-tile::before,html.sk-cui .tools-others-title .ski-tile::before{width:22px!important;height:22px!important}
+/* the one close button */
+html.sk-cui .modal-overlay .modal-title .modal-close-btn,
+html.sk-cui .repair-spares-head .modal-close-btn,html.sk-cui .tools-others-head .modal-close-btn,
+html.sk-cui .drawer-close-btn,html.sk-cui #skUsedFilterModal .sk-used-filter-header button,
+html.sk-cui #skUsedStockModal .sk-used-back,html.sk-cui #skUsedStockModal .sk-used-analytics{
+  width:40px!important;height:40px!important;min-width:40px!important;flex:0 0 40px!important;padding:0!important;
+  display:inline-grid!important;place-items:center!important;border-radius:50%!important;font-size:18px!important;line-height:1!important;
+  background:color-mix(in srgb,var(--cui-slate) 12%,transparent)!important;
+  border:1px solid color-mix(in srgb,var(--cui-slate) 16%,transparent)!important;color:var(--text)!important;box-shadow:none!important;
+}
+html.sk-cui #skUsedStockModal .sk-used-back svg,html.sk-cui #skUsedStockModal .sk-used-analytics svg{width:20px!important;height:20px!important}
+/* section headings inside a page */
+html.sk-cui .sk-used-panel-heading h2,
+html.sk-cui .sk-used-register-heading h2,
+html.sk-cui .sk-used-form-heading h2,
+html.sk-cui .bill-history-heading h2 {
+  font-size:var(--p-sect)!important;font-weight:800!important;line-height:1.2!important;letter-spacing:0!important;margin:0!important;color:var(--text)!important}
+html.sk-cui .sk-used-register-heading p,html.sk-cui .sk-used-form-heading p,html.sk-cui .sk-used-title-copy p{
+  font-size:var(--p-small)!important;line-height:1.3!important;margin:2px 0 0!important;color:var(--text-muted)!important;letter-spacing:0!important}
+html.sk-cui .drawer-header{border-radius:20px!important}
+html.sk-cui .drawer-title{gap:0}
+
+/* ======================================================================
+   C. BOTTOM NAV NEVER HIDES CONTENT
+   ====================================================================== */
+html.sk-cui .modal-overlay:not(#skUsedStockModal):not(#skUsedFilterModal):not(#skLoginModal):not(#skAccessoriesPage):not(#longPressMenuModal):not(#billingModal) > .modal-sheet{
+  padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
+html.sk-cui #skAccessoriesPage > .modal-sheet{padding-bottom:0!important}
+html.sk-cui #skAccessoriesPage > .modal-sheet > div:last-child{padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
+
+/* ======================================================================
+   D. FONT FLOOR — nothing readable below ~11.5px (invoice preview excluded)
+   ====================================================================== */
+html.sk-cui label.form-label,html.sk-cui .form-label{font-size:var(--p-label)!important;font-weight:700!important}
+html.sk-cui .sk-top-role-badge{font-size:11px!important}
+html.sk-cui .app-sub-home,html.sk-cui .app-sub-default{font-size:10.5px!important}
+
+html.sk-cui .mobile-type-btn,html.sk-cui .billing-tab-btn{font-size:.8rem!important;min-height:44px}
+html.sk-cui .models-count-text{font-size:11.5px!important}
+html.sk-cui .copy-btn{font-size:11.5px!important}
+html.sk-cui .model-chip{font-size:11.5px!important;padding:4px 9px!important}
+html.sk-cui .stock-status-badge{font-size:11.5px!important}
+html.sk-cui .btn-quick-order{font-size:12px!important}
+html.sk-cui .skcp-sub{font-size:11.5px!important}
+html.sk-cui .skcp-bill{font-size:11px!important}
+html.sk-cui .sk-admin-title,html.sk-cui .sk-v42-profile-label,html.sk-cui .drawer-group-title{font-size:11px!important}
+html.sk-cui .sk-signature-status{font-size:11.5px!important}
+html.sk-cui .sk-rj-filter-label{font-size:11.5px!important}
+html.sk-cui .sk-rj-export,html.sk-cui #skAccessoriesPage .submit-btn{font-size:.8rem!important}
+html.sk-cui .bill-history-meta-item,html.sk-cui .bill-history-pay-mode{font-size:12px!important}
+html.sk-cui #settingsModal .sk-perm-status,
+html.sk-cui #settingsModal .sk-v40-label {font-size:11.5px!important}
+html.sk-cui .tools-others-action,html.sk-cui .repair-spares-action{font-size:.9rem!important}
+html.sk-cui #skAdminPanelModal .sk-admin-box label,html.sk-cui #skManagerPermissionList label{font-size:.85rem!important}
+
+/* ======================================================================
+   E. USED MOBILE STOCK — even boxes, readable fonts (phone layout)
+   ====================================================================== */
+html.sk-cui #skUsedStockModal .sk-used-stock-header{margin:0!important;border-radius:0!important;border-width:0 0 1px 0!important;box-shadow:none!important;
+  min-height:68px!important;padding:10px 12px!important;gap:10px!important;background:var(--card-bg)!important}
+html.sk-cui #skUsedStockModal .sk-used-recycle-mark{width:40px!important;height:40px!important;flex:0 0 40px!important;border-radius:13px!important;background:color-mix(in srgb,var(--cui-green) 13%,transparent)!important}
+html.sk-cui #skUsedStockModal .sk-used-recycle-mark svg{width:24px!important;height:24px!important}
+html.sk-cui #skUsedStockModal .sk-used-panel-icon,html.sk-cui #skUsedStockModal .sk-used-form-heading-icon{
+  width:36px!important;height:36px!important;flex:0 0 36px!important;border-radius:12px!important;display:grid;place-items:center}
+html.sk-cui #skUsedStockModal .sk-used-panel-icon svg,html.sk-cui #skUsedStockModal .sk-used-form-heading-icon svg{width:20px!important;height:20px!important}
+html.sk-cui #skUsedStockModal .sk-used-panel-heading,html.sk-cui #skUsedStockModal .sk-used-register-heading,html.sk-cui #skUsedStockModal .sk-used-form-heading{
+  display:flex!important;align-items:center!important;gap:10px!important;margin:0 0 12px!important}
+html.sk-cui #skUsedStockModal .sk-used-form-close{width:36px!important;height:36px!important;flex:0 0 36px!important;border-radius:50%!important;font-size:18px!important;padding:0}
+html.sk-cui #skUsedStockModal .sk-used-panel,html.sk-cui #skUsedStockModal .sk-used-purchase-form{padding:14px!important;margin:0 0 14px!important;border-radius:20px!important;background:var(--card-bg)!important;border:1px solid var(--card-border)!important}
+
+@media(max-width:700px){
+  /* header */
+  html.sk-cui #skUsedStockModal .sk-used-title-copy h1{font-size:var(--p-title)!important}
+  /* stats: 2 x 2, icon left, text right */
+  html.sk-cui #skUsedStockModal .sk-used-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;margin:0 0 14px!important}
+  html.sk-cui #skUsedStockModal .sk-used-stat-card{flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;
+    min-height:74px!important;padding:12px!important;border-radius:18px!important}
+  html.sk-cui #skUsedStockModal .sk-used-stat-icon{width:44px!important;height:44px!important;flex:0 0 44px!important;border-radius:14px!important}
+  html.sk-cui #skUsedStockModal .sk-used-stat-icon svg{width:24px!important;height:24px!important}
+  html.sk-cui #skUsedStockModal .sk-used-stat-card small{font-size:.78rem!important;letter-spacing:0!important;white-space:normal!important;line-height:1.2!important;font-weight:600!important;color:var(--text-muted)!important}
+  html.sk-cui #skUsedStockModal .sk-used-stat-card strong{font-size:1.3rem!important;letter-spacing:0!important;line-height:1.15!important}
+  html.sk-cui #skUsedStockModal .sk-used-rupee{font-size:1.25rem!important}
+  html.sk-cui #skUsedStockModal .sk-used-stat-card>div{gap:3px!important}
+
+  /* purchase actions */
+  html.sk-cui #skUsedStockModal .sk-used-save-primary{min-height:50px!important;font-size:.95rem!important;border-radius:15px!important;gap:10px!important}
+  html.sk-cui #skUsedStockModal .sk-used-save-primary svg{width:22px!important;height:22px!important}
+  html.sk-cui #skUsedStockModal .sk-used-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;margin-top:10px!important}
+  html.sk-cui #skUsedStockModal .sk-used-action-secondary{min-height:46px!important;font-size:.85rem!important;border-radius:14px!important;gap:8px!important;padding:8px 6px!important}
+  html.sk-cui #skUsedStockModal .sk-used-action-secondary svg{width:20px!important;height:20px!important;flex:0 0 20px!important}
+
+  /* search + filter */
+  html.sk-cui #skUsedStockModal .sk-used-search-row{gap:8px!important;margin:0 0 12px!important}
+  html.sk-cui #skUsedStockModal .sk-used-search-box{height:var(--p-field-h)!important;border-radius:14px!important;padding:0 12px!important;gap:8px!important}
+  html.sk-cui #skUsedStockModal .sk-used-search-box svg{width:20px!important;height:20px!important;flex:0 0 20px!important}
+  html.sk-cui #skUsedStockModal #skUsedSearch{font-size:.88rem!important}
+  html.sk-cui #skUsedStockModal .sk-used-filter-button{width:var(--p-field-h)!important;height:var(--p-field-h)!important;flex:0 0 var(--p-field-h)!important;border-radius:14px!important}
+  html.sk-cui #skUsedStockModal .sk-used-filter-button svg{width:22px!important;height:22px!important}
+
+  /* register: one readable card per device */
+  html.sk-cui #skUsedStockModal .sk-used-register-table thead tr.sk-used-mobile-headings{grid-template-columns:24px minmax(0,1fr) 80px 76px!important;padding:8px 8px!important;border-radius:12px!important}
+  html.sk-cui #skUsedStockModal .sk-used-register-table thead tr.sk-used-mobile-headings th{font-size:11px!important;font-weight:700!important;letter-spacing:.02em}
+  html.sk-cui #skUsedStockModal .sk-used-register-table tbody{gap:8px!important}
+  html.sk-cui #skUsedStockModal .sk-used-register-table tbody tr{grid-template-columns:24px minmax(0,1fr) 80px 76px!important;column-gap:4px!important;row-gap:2px!important;
+    padding:10px 8px!important;border-radius:16px!important;min-height:76px}
+  html.sk-cui #skUsedStockModal .sk-used-number-cell{font-size:.8rem!important}
+  html.sk-cui #skUsedStockModal .sk-used-phone-thumb{width:26px!important;height:42px!important;flex:0 0 26px!important;border-radius:7px!important}
+  html.sk-cui #skUsedStockModal .sk-used-phone-thumb svg{width:18px!important;height:32px!important}
+  html.sk-cui #skUsedStockModal .sk-used-device-cell{gap:8px!important}
+  html.sk-cui #skUsedStockModal .sk-used-device-copy{gap:2px!important}
+  html.sk-cui #skUsedStockModal .sk-used-device-copy strong{font-size:.82rem!important;line-height:1.2!important;font-weight:800!important}
+  html.sk-cui #skUsedStockModal .sk-used-device-copy small{font-size:.72rem!important;line-height:1.2!important}
+  html.sk-cui #skUsedStockModal .sk-used-dealer-cell{font-size:.72rem!important;line-height:1.25!important;padding-left:34px!important;color:var(--text-muted)!important}
+  html.sk-cui #skUsedStockModal .sk-used-price-cell{font-size:.9rem!important;font-weight:800!important}
+  html.sk-cui #skUsedStockModal .sk-used-status{font-size:.7rem!important;font-weight:800!important;padding:4px 9px!important;border-radius:9px!important;min-width:62px!important}
+  html.sk-cui #skUsedStockModal .sk-used-row-actions{gap:6px!important}
+  html.sk-cui #skUsedStockModal .sk-used-row-menu summary{width:34px!important;height:34px!important;flex:0 0 34px!important;border-radius:50%!important}
+  html.sk-cui #skUsedStockModal .sk-used-row-menu summary svg{width:18px!important;height:18px!important;flex:0 0 18px!important}
+  html.sk-cui #skUsedStockModal .sk-used-storage-note{font-size:.7rem!important}
+  html.sk-cui #skUsedStockModal .sk-used-empty-cell{font-size:.85rem!important}
+
+  /* Add / Update Purchase — same 2-column grid, same field height */
+  html.sk-cui #skUsedStockModal .sk-used-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px 10px!important}
+  html.sk-cui #skUsedStockModal .sk-used-form-grid > .form-label{grid-row:auto!important;grid-column:span 1!important;position:relative;gap:6px!important;margin:0!important}
+  html.sk-cui #skUsedStockModal .sk-used-form-grid > .sk-used-field-model,
+  html.sk-cui #skUsedStockModal .sk-used-form-grid > .sk-used-field-customer-price,
+  html.sk-cui #skUsedStockModal .sk-used-form-grid > .sk-used-field-imei,
+  html.sk-cui #skUsedStockModal .sk-used-form-grid > .sk-used-field-issue{grid-column:1/-1!important}
+  html.sk-cui #skUsedStockModal .sk-used-form-grid .form-label{font-size:var(--p-label)!important;color:var(--text-muted)!important}
+  html.sk-cui #skUsedStockModal .sk-used-form-grid .form-input{height:var(--p-field-h)!important;min-height:var(--p-field-h)!important;padding:0 12px 0 40px!important;border-radius:12px!important;
+    font-size:.88rem!important;font-weight:500!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;appearance:none;-webkit-appearance:none}
+  html.sk-cui #skUsedStockModal .sk-used-form-grid select.form-input{background-repeat:no-repeat;background-position:right 12px center;padding-right:34px!important}
+  html.sk-cui #skUsedStockModal .sk-used-form-grid textarea.form-input{height:auto!important;min-height:84px!important;padding:12px 12px 12px 40px!important}
+  html.sk-cui #skUsedStockModal .sk-used-form-grid > .form-label::after{content:"";position:absolute;left:12px;bottom:13px;width:20px;height:20px;pointer-events:none;
+    background:var(--c,var(--cui-blue));-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
+  html.sk-cui #skUsedStockModal .sk-used-form-grid > .sk-used-field-issue::after{bottom:auto;top:auto;bottom:62px}
+  html.sk-cui #skUsedStockModal .sk-used-field-date{--c:var(--cui-blue);--ic:var(--ico-calendar)}
+  html.sk-cui #skUsedStockModal .sk-used-field-dealer{--c:var(--cui-orange);--ic:var(--ico-store)}
+  html.sk-cui #skUsedStockModal .sk-used-field-model{--c:var(--cui-purple);--ic:var(--ico-phone)}
+  html.sk-cui #skUsedStockModal .sk-used-ram{--c:var(--cui-teal);--ic:var(--ico-chip)}
+  html.sk-cui #skUsedStockModal .sk-used-storage{--c:var(--cui-sky);--ic:var(--ico-layers)}
+  html.sk-cui #skUsedStockModal .sk-used-colour{--c:var(--cui-rose);--ic:var(--ico-sparkle)}
+  html.sk-cui #skUsedStockModal .sk-used-field-kit{--c:var(--cui-orange);--ic:var(--ico-box)}
+  html.sk-cui #skUsedStockModal .sk-used-field-cost{--c:var(--cui-green);--ic:var(--ico-money)}
+  html.sk-cui #skUsedStockModal .sk-used-field-dealer-price{--c:var(--cui-amber);--ic:var(--ico-tag)}
+  html.sk-cui #skUsedStockModal .sk-used-field-customer-price{--c:var(--cui-purple);--ic:var(--ico-tag)}
+  html.sk-cui #skUsedStockModal .sk-used-field-imei{--c:var(--cui-slate);--ic:var(--ico-barcode)}
+  html.sk-cui #skUsedStockModal .sk-used-field-issue{--c:var(--cui-blue);--ic:var(--ico-note)}
+  html.sk-cui #skUsedStockModal .sk-used-form-actions{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)!important;gap:10px!important;margin-top:16px!important}
+  html.sk-cui #skUsedStockModal .sk-used-form-actions button{min-height:50px!important;font-size:.92rem!important;border-radius:15px!important;gap:8px!important}
+  html.sk-cui #skUsedStockModal .sk-used-form-actions svg{width:20px!important;height:20px!important}
+
+  /* in-page bottom nav: even labels */
+  
+}
+
+/* ======================================================================
+   F. USED STOCK FILTER SHEET — fits the screen, colourful, even fields
+   ====================================================================== */
+html.sk-cui #skUsedFilterModal.sk-used-filter-overlay{padding:0!important;align-items:flex-end!important;justify-content:center!important}
+html.sk-cui #skUsedFilterModal .sk-used-filter-sheet{
+  position:relative!important;top:auto!important;left:auto!important;bottom:auto!important;right:auto!important;
+  width:calc(100% - 20px)!important;max-width:520px!important;margin:0 10px calc(10px + env(safe-area-inset-bottom))!important;
+  max-height:calc(100dvh - 28px)!important;padding:14px!important;border-radius:24px!important;box-sizing:border-box!important;overflow-y:auto!important;
+  background:var(--card-bg)!important;border:1px solid var(--card-border)!important}
+html.sk-cui #skUsedFilterModal .sk-used-filter-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px!important}
+html.sk-cui #skUsedFilterModal .sk-used-filter-header h2{display:flex;align-items:center;margin:0!important;font-size:var(--p-title)!important;font-weight:800!important;letter-spacing:0!important}
+html.sk-cui #skUsedFilterModal .sk-used-filter-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px 10px!important}
+html.sk-cui #skUsedFilterModal .sk-used-filter-grid label{position:relative;display:flex;flex-direction:column;gap:6px;min-width:0;font-size:var(--p-label)!important;font-weight:700!important;color:var(--text-muted)!important}
+html.sk-cui #skUsedFilterModal .sk-used-filter-grid .form-input{width:100%!important;height:var(--p-field-h)!important;min-height:var(--p-field-h)!important;padding:0 10px 0 38px!important;
+  border-radius:12px!important;font-size:.88rem!important;box-sizing:border-box!important}
+html.sk-cui #skUsedFilterModal .sk-used-filter-grid label::after{content:"";position:absolute;left:11px;bottom:13px;width:20px;height:20px;pointer-events:none;
+  background:var(--c);-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
+html.sk-cui #skUsedFilterModal .sk-used-filter-grid label:nth-child(1){--c:var(--cui-purple);--ic:var(--ico-phone)}
+html.sk-cui #skUsedFilterModal .sk-used-filter-grid label:nth-child(2){--c:var(--cui-orange);--ic:var(--ico-tag)}
+html.sk-cui #skUsedFilterModal .sk-used-filter-grid label:nth-child(3){--c:var(--cui-teal);--ic:var(--ico-chip)}
+html.sk-cui #skUsedFilterModal .sk-used-filter-grid label:nth-child(4){--c:var(--cui-sky);--ic:var(--ico-layers)}
+html.sk-cui #skUsedFilterModal .sk-used-filter-grid label:nth-child(5){--c:var(--cui-green);--ic:var(--ico-money)}
+html.sk-cui #skUsedFilterModal .sk-used-filter-grid label:nth-child(6){--c:var(--cui-amber);--ic:var(--ico-money)}
+html.sk-cui #skUsedFilterModal .sk-used-filter-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:16px!important}
+html.sk-cui #skUsedFilterModal .sk-used-filter-actions button{min-height:48px!important;border-radius:14px!important;font-size:.88rem!important;font-weight:800!important;
+  display:inline-flex!important;align-items:center;justify-content:center;gap:8px;padding:8px 10px!important}
+html.sk-cui #skUsedFilterModal .sk-used-filter-actions button::before{content:"";width:18px;height:18px;flex:none;background:currentColor;
+  -webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
+html.sk-cui #skUsedFilterModal .sk-used-filter-reset{--ic:var(--ico-refresh);color:var(--cui-blue)!important;background:color-mix(in srgb,var(--cui-blue) 9%,var(--card-bg))!important;border-color:color-mix(in srgb,var(--cui-blue) 25%,transparent)!important}
+html.sk-cui #skUsedFilterModal .sk-used-filter-clearall{--ic:var(--ico-trash);color:#dc2626!important;background:color-mix(in srgb,var(--cui-red) 8%,var(--card-bg))!important;border-color:color-mix(in srgb,var(--cui-red) 28%,transparent)!important}
+html.sk-cui #skUsedFilterModal .sk-used-filter-actions .sk-used-filter-apply{--ic:var(--ico-check);grid-column:1/-1;color:#fff!important;background:linear-gradient(110deg,#1765ff,#367fff)!important;border-color:#1765ff!important}
+
+/* ======================================================================
+   G. ADD / EDIT ITEM POPUP — even icons, even fields
+   ====================================================================== */
+html.sk-cui #itemEditorModal .form-group{margin-bottom:12px}
+html.sk-cui #itemEditorModal .form-input,html.sk-cui #itemEditorModal select.form-input{width:100%!important;min-height:var(--p-field-h)!important;padding:0 14px!important;border-radius:12px!important;font-size:.88rem!important;box-sizing:border-box!important}
+html.sk-cui #itemEditorModal textarea.form-input{padding:12px 14px!important;min-height:92px!important}
+html.sk-cui #itemEditorModal input[type=file].form-input{padding:6px!important;height:auto!important}
+html.sk-cui input[type=file]::file-selector-button{margin-right:12px;padding:8px 14px;border:0;border-radius:10px;background:color-mix(in srgb,var(--cui-blue) 14%,transparent);color:var(--cui-blue);font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}
+html.sk-cui #itemEditorModal .submit-btn{display:flex!important;align-items:center;justify-content:center;width:100%!important;min-height:48px!important;padding:10px 14px!important;
+  font-size:.9rem!important;font-weight:800!important;border-radius:14px!important}
+html.sk-cui #itemEditorModal #skDownloadLastExcelBtn,html.sk-cui #itemEditorModal button[onclick*="downloadInventoryExcelTemplate"]{background:color-mix(in srgb,var(--cui-blue) 10%,var(--card-bg))!important;color:var(--cui-blue)!important;border:1px solid color-mix(in srgb,var(--cui-blue) 28%,transparent)!important;box-shadow:none!important}
+html.sk-cui #itemEditorModal #skDownloadLastExcelBtn .ski-in,html.sk-cui #itemEditorModal button[onclick*="downloadInventoryExcelTemplate"] .ski-in{--c:var(--cui-blue)}
+html.sk-cui #itemEditorModal #skDeleteLastExcelBtn{width:36px!important;height:36px!important;border-radius:12px!important;display:inline-grid!important;place-items:center;padding:0!important}
+html.sk-cui #itemEditorModal #skDeleteLastExcelBtn .ski-in{margin:0!important;width:18px!important;height:18px!important}
+html.sk-cui #itemEditorModal .modal-sheet > div[style*="text-align:center"]{display:flex;align-items:center;gap:10px;font-size:.72rem!important;font-weight:800;letter-spacing:.08em;color:var(--text-muted)!important}
+html.sk-cui #itemEditorModal .modal-sheet > div[style*="text-align:center"]::before,html.sk-cui #itemEditorModal .modal-sheet > div[style*="text-align:center"]::after{content:"";flex:1;height:1px;background:var(--card-border)}
+html.sk-cui #itemEditorModal #itemModalList > div:first-child{font-size:var(--p-sect)!important;font-weight:800!important}
+html.sk-cui #itemEditorModal #itemModalListContent > div{padding:12px!important;border-radius:14px!important}
+html.sk-cui #itemEditorModal #itemModalListContent > div > div:first-child > div:first-child{font-size:.85rem!important}
+html.sk-cui #itemEditorModal #itemModalListContent > div > div:first-child > div:last-child{font-size:.78rem!important}
+html.sk-cui #itemEditorModal .modal-sheet > div[style*="background:var(--badge-bg)"]{font-size:.78rem!important;line-height:1.5!important;padding:12px 14px!important;border-radius:14px!important}
+html.sk-cui #itemEditorModal .modal-sheet div[style*="font-size:.68rem"]{font-size:.76rem!important;line-height:1.5!important;border-radius:14px!important;padding:12px!important}
+
+/* ======================================================================
+   H. ACCESSORIES, REPAIR TABS, SETTINGS, CREDIT — alignment fixes
+   ====================================================================== */
+html.sk-cui #skAccessoriesPage #skAccessoryEditor > div[style*="grid"]{gap:10px!important}
+html.sk-cui #skAccessoriesPage #skAccessoryEditor .form-input{min-height:var(--p-field-h)!important;width:100%!important;box-sizing:border-box!important;border-radius:12px!important;font-size:.88rem!important}
+html.sk-cui #skAccessoriesPage #skAccImage{grid-column:1/-1;padding:6px!important;height:auto!important}
+html.sk-cui #skAccessoriesPage #skAccNote{margin-top:10px;width:100%!important;box-sizing:border-box!important;min-height:76px}
+html.sk-cui #skAccessoriesPage #skAccessoryEditor .submit-btn{flex:1 1 0;min-height:46px!important;border-radius:14px!important;font-size:.88rem!important}
+html.sk-cui #skAccessoriesPage div:has(> #skAccessoriesSearch){display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+html.sk-cui #skAccessoriesPage #skAccessoriesSearch{grid-column:1/-1;flex:none!important;width:100%!important;min-height:var(--p-field-h)!important;border-radius:12px!important}
+html.sk-cui #skAccessoriesPage div:has(> #skAccessoriesSearch) .submit-btn{width:100%!important;min-height:46px!important;border-radius:14px!important}
+html.sk-cui #skAccessoriesPage > .modal-sheet > div:last-child > div:first-child{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+html.sk-cui #skAccessoriesPage > .modal-sheet > div:last-child > div:first-child .submit-btn{min-height:46px!important;padding:6px!important;font-size:.78rem!important;border-radius:14px!important;white-space:nowrap}
+
+html.sk-cui #skRepairJobsModal .sk-rj-tabs{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) minmax(0,1fr)!important}
+html.sk-cui #skRepairJobsModal .sk-rj-tab{white-space:nowrap!important;min-height:44px!important;padding:8px 6px!important;font-size:.8rem!important;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+html.sk-cui #skRepairJobsModal .sk-rj-tab span{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:color-mix(in srgb,var(--cui-slate) 16%,transparent);font-size:.7rem;font-weight:800}
+
+html.sk-cui #settingsModal > .modal-sheet{padding-left:14px!important;padding-right:14px!important;box-sizing:border-box!important}
+html.sk-cui #settingsModal .modal-title{margin-left:0!important;margin-right:0!important;width:100%!important}
+
+html.sk-cui #skCreditEntryModal .modal-title,html.sk-cui #skCreditCustomerModal .modal-title,html.sk-cui #skEmiReminderModal .modal-title{margin-bottom:14px!important}
+html.sk-cui #skCreditEntryModal .form-input,html.sk-cui #skCreditEntryModal select.form-select{min-height:var(--p-field-h)!important;border-radius:12px!important;font-size:.88rem!important;box-sizing:border-box!important}
+
+/* inventory card text and header badges */
+html.sk-cui .active-category-notice{font-size:.9rem!important}
+
+/* ======================================================================
+   I. HOME — Business Summary boxes all equal; Repair Spares Orders card
+   ====================================================================== */
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card .sk-home-v2-metric{min-height:78px!important;height:78px!important;box-sizing:border-box!important}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric[data-card-id="metric-low"] .sk-home-v2-metric-copy b{
+  color:var(--text)!important;font-weight:800!important;font-size:.88rem!important;line-height:1.2!important}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric strong.sk-home-v2-metric-sub{
+  font-size:.72rem!important;font-weight:500!important;line-height:1.25!important;color:var(--text-muted)!important;margin-top:2px}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-copy b,
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-copy strong{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;max-width:100%}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-copy strong:not(.sk-home-v2-metric-sub){color:var(--cui-blue)!important}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric[data-card-id="metric-repair"] .sk-home-v2-metric-copy strong{color:#dc2626!important}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-copy{flex:1 1 auto;min-width:0}
+
+/* ======================================================================
+   J. round-2 fixes
+   ====================================================================== */
+/* credit entry / EMI popups: same grey close button as everywhere */
+html.sk-cui #skCreditEntryModal > .modal-sheet > .modal-title .modal-close-btn,
+html.sk-cui #skEmiReminderModal > .modal-sheet > .modal-title .modal-close-btn,
+html.sk-cui #skCreditCustomerModal > .modal-sheet > .modal-title .modal-close-btn{
+  width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;flex:0 0 40px!important;border-radius:50%!important;
+  background:color-mix(in srgb,var(--cui-slate) 12%,transparent)!important;border:1px solid color-mix(in srgb,var(--cui-slate) 16%,transparent)!important;
+  color:var(--text)!important;box-shadow:none!important;font-size:18px!important}
+/* drawer */
+html.sk-cui #leftDrawer .drawer-title::before{display:none!important}
+html.sk-cui #leftDrawer .drawer-header{margin:0 0 14px!important}
+html.sk-cui #skDataFolderMenuBtn{display:flex;align-items:center;min-height:52px;font-size:.9rem;font-weight:700;border-radius:16px}
+/* accessories top buttons: icon above text so nothing is cut */
+html.sk-cui #skAccessoriesPage > .modal-sheet > div:last-child > div:first-child .submit-btn{display:flex!important;flex-direction:column!important;align-items:center;justify-content:center;gap:4px;
+  min-height:60px!important;line-height:1.15!important;white-space:normal!important;text-align:center}
+html.sk-cui #skAccessoriesPage > .modal-sheet > div:last-child > div:first-child .submit-btn .ski-in{margin:0!important;width:20px!important;height:20px!important}
+/* bill history rows: tidy meta line */
+html.sk-cui .bill-history-meta{display:flex!important;flex-wrap:wrap;align-items:center;gap:4px 12px!important}
+html.sk-cui .bill-history-meta > .bill-history-meta-item:nth-child(2){display:none!important}
+html.sk-cui .bill-history-meta-item{display:inline-flex;align-items:center;white-space:nowrap}
+html.sk-cui .bill-history-meta-item .ski-in{margin-right:5px!important;width:15px!important;height:15px!important}
+/* home Business Summary boxes: a little more room for text */
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card .sk-home-v2-metric{padding:10px 24px 10px 10px!important;gap:8px!important}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-icon{width:42px!important;height:42px!important}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-metric-icon svg{width:22px!important;height:22px!important}
+html.sk-cui #skDataFolderMenuBtn{display:none!important}
+html.sk-cui #skCreditActionModal > .modal-sheet > .modal-title .modal-close-btn,
+html.sk-cui #skCreditActionModal .modal-title .modal-close-btn{
+  width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;flex:0 0 40px!important;border-radius:50%!important;
+  background:color-mix(in srgb,var(--cui-slate) 12%,transparent)!important;border:1px solid color-mix(in srgb,var(--cui-slate) 16%,transparent)!important;
+  color:var(--text)!important;box-shadow:none!important;font-size:18px!important}
+
+/* ======================================================================
+   K. v5.6.144
+   ====================================================================== */
+
+/* K1. Bill History: the list scrolls all the way down to the screen edge
+   (clearance for the nav lives INSIDE the list, so there is no empty band). */
+html body #billingModal .modal-sheet.billing-modern.sk-billing-page{padding-bottom:0!important}
+html body #billingModal .modal-sheet #billNewView{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important}
+html body #billingModal .modal-sheet #billHistoryView{
+  padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important;
+  margin-bottom:0!important;
+}
+
+/* K2. Used purchase form is its own page (no stats / actions / register) */
+html body #skUsedStockModal.sk-used-form-page .sk-used-purchase-form{display:block;margin-top:2px}
+html body #skUsedStockModal.sk-used-form-page .sk-used-title-copy p{visibility:visible}
+
+/* K3. Used mobile details = a proper full page above everything */
+html body #skUsedDetailDialog.sk-used-detail-overlay{
+  position:fixed!important;inset:0!important;z-index:2147483100!important;
+  display:flex!important;align-items:stretch!important;justify-content:center!important;
+  padding:0!important;background:var(--bg,#eef3ff)!important;backdrop-filter:none!important;
+}
+html body #skUsedDetailDialog .sk-used-detail-sheet{
+  width:100%!important;max-width:560px!important;height:100dvh!important;max-height:100dvh!important;
+  display:flex!important;flex-direction:column!important;border:0!important;border-radius:0!important;
+  background:var(--bg,#eef3ff)!important;box-shadow:none!important;overflow:hidden!important;
+}
+html body #skUsedDetailDialog .sk-used-detail-head{
+  flex:0 0 auto;display:flex!important;align-items:center!important;gap:12px!important;
+  margin:max(10px,env(safe-area-inset-top,0px)) 12px 8px!important;padding:10px 12px!important;
+  border:1px solid color-mix(in srgb,var(--primary,#2563eb) 14%,var(--card-border,#dbe4f5))!important;border-radius:22px!important;
+  background:linear-gradient(120deg,color-mix(in srgb,var(--primary,#2563eb) 12%,#fff),#fff 70%)!important;
+  box-shadow:0 10px 26px rgba(37,99,235,.12)!important;
+}
+html body #skUsedDetailDialog .sk-used-detail-back{
+  width:40px!important;height:40px!important;flex:0 0 40px!important;padding:0!important;display:grid!important;place-items:center!important;
+  border-radius:50%!important;background:#fff!important;border:1px solid #dce7fb!important;color:#15213b!important;
+}
+html body #skUsedDetailDialog .sk-used-detail-back svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+html body #skUsedDetailDialog .sk-used-detail-title{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+html body #skUsedDetailDialog .sk-used-detail-title strong{font-size:1.1rem;font-weight:800;line-height:1.2;overflow-wrap:anywhere}
+html body #skUsedDetailDialog .sk-used-detail-title small{font-size:.8rem;color:#65799d}
+html body #skUsedDetailDialog .sk-used-detail-status{flex:0 0 auto;padding:6px 12px;border-radius:999px;font-size:.78rem;font-weight:800}
+html body #skUsedDetailDialog .sk-used-detail-status.is-stock{background:#dcfce7;color:#166534}
+html body #skUsedDetailDialog .sk-used-detail-status.is-sold{background:#fee2e2;color:#991b1b}
+html body #skUsedDetailDialog .sk-used-detail-grid{
+  flex:1 1 auto;overflow-y:auto;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;padding:6px 12px 16px!important;align-content:start;
+}
+html body #skUsedDetailDialog .sk-used-detail-field{
+  min-width:0;padding:12px 14px!important;border:1px solid #e2eafb!important;border-radius:16px!important;background:#fff!important;
+  border-left:4px solid var(--fc,#2563eb)!important;
+}
+html body #skUsedDetailDialog .sk-used-detail-field.is-wide{grid-column:1/-1}
+html body #skUsedDetailDialog .sk-used-detail-field small{display:block;margin:0 0 4px;font-size:.78rem;font-weight:700;color:#65799d}
+html body #skUsedDetailDialog .sk-used-detail-field strong{font-size:.98rem;font-weight:800;color:#15213b;overflow-wrap:anywhere}
+
+
+
+
+html body #skUsedDetailDialog .sk-used-detail-actions{
+  flex:0 0 auto;display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;
+  padding:12px 12px calc(14px + env(safe-area-inset-bottom,0px))!important;
+  background:#fff!important;border-top:1px solid #e2eafb!important;box-shadow:0 -8px 22px rgba(37,99,235,.08)!important;
+}
+html body #skUsedDetailDialog .sk-used-detail-actions>button{min-height:48px!important;border-radius:14px!important;font-size:.95rem!important;font-weight:800!important}
+html body #skUsedDetailDialog .sk-used-detail-actions>.sk-used-bill-button{grid-column:1/-1!important}
+
+/* K4. MODERN PAGE HEADERS — one soft gradient bar everywhere */
+html.sk-cui .modal-title,
+html.sk-cui .repair-spares-head,
+html.sk-cui .tools-others-head,
+html.sk-cui .drawer-header,
+html.sk-cui #skUsedStockModal .sk-used-stock-header {
+  border:1px solid color-mix(in srgb,var(--primary) 14%,var(--card-border))!important;
+  border-radius:22px!important;
+  background:linear-gradient(120deg,color-mix(in srgb,var(--primary) 12%,var(--card-bg)) 0%,var(--card-bg) 72%)!important;
+  box-shadow:0 10px 26px color-mix(in srgb,var(--primary) 14%,transparent),inset 0 1px 0 rgba(255,255,255,.75)!important;
+}
+html.sk-cui .modal-overlay .modal-title .modal-close-btn,
+html.sk-cui .repair-spares-head .modal-close-btn,html.sk-cui .tools-others-head .modal-close-btn,
+html.sk-cui .drawer-close-btn,
+html.sk-cui #skUsedStockModal .sk-used-back,html.sk-cui #skUsedStockModal .sk-used-analytics{
+  background:var(--card-bg)!important;border:1px solid color-mix(in srgb,var(--primary) 16%,var(--card-border))!important;
+  box-shadow:0 4px 10px rgba(15,23,42,.08)!important;
+}
+
+/* ======================================================================
+   L. v5.6.144 — TABLET / LAPTOP / PC: centred, comfortable widths
+   ====================================================================== */
+@media (min-width:768px){
+  html body .modal-overlay.active{display:flex!important;justify-content:center!important}
+  html body .modal-overlay.active > .modal-sheet{margin-left:auto!important;margin-right:auto!important}
+  html body #skRepairJobsModal > .modal-sheet{width:min(100%,1000px)!important;max-width:1000px!important}
+}
+@media (min-width:900px){
+  html body .app-viewport{max-width:1180px!important;margin-left:auto!important;margin-right:auto!important}
+  html body .sk-home-v2-hero{max-height:340px!important;overflow:hidden!important}
+  html body .sk-home-v2-hero img{width:100%!important;height:340px!important;object-fit:cover!important;object-position:center!important}
+  html body #billingModal .modal-sheet,html body #orderModal .modal-sheet,html body #skAccessoriesPage .modal-sheet{width:min(100%,860px)!important}
+}
+@media (min-width:1280px){
+  html body .app-viewport{max-width:1280px!important}
+}

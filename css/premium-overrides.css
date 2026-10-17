@@ -151,13 +151,8 @@ canvas{
 
 .card,
 .glass-card,
-.inventory-card,
-.summary-card,
 .stat-card,
-.form-section,
-.section-card,
-.sk-card,
-.dashboard-card{
+.form-section {
   min-width: 0;
   border-radius: var(--sk-ui-radius-lg);
 }
@@ -166,13 +161,8 @@ canvas{
 
 .card,
 .glass-card,
-.inventory-card,
-.summary-card,
 .stat-card,
-.form-section,
-.section-card,
-.sk-card,
-.dashboard-card{
+.form-section {
   box-shadow: var(--sk-ui-shadow-card);
 }
 
@@ -206,9 +196,8 @@ h4{
 p,
 label,
 .form-label,
-.help-text,
 .muted,
-small{
+small {
   line-height: var(--sk-ui-body-leading);
 }
 
@@ -496,62 +485,35 @@ button,
 
 
 #settingsModal #skUiAppearanceStudio,
-#settingsModal .sk-ui-studio,
 #settingsModal .sk-ui-preview,
-#settingsModal .sk-ui-sandbox{
+#settingsModal .sk-ui-sandbox {
   min-width: 0;
   max-width: 100%;
 }
 
 
 
-#settingsModal .sk-ui-studio{
-  display: grid;
-  gap: 16px;
-  padding: clamp(12px, 2vw, 20px);
-}
 
 
 
-#settingsModal .sk-ui-studio-head{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-width: 0;
-  flex-wrap: wrap;
-  padding: clamp(12px, 2vw, 18px);
-  border-radius: var(--sk-ui-radius-lg);
-}
 
 
 
-#settingsModal .sk-ui-studio-head > div{
-  flex: 1 1 240px;
-  min-width: 0;
-}
 
 
 
-#settingsModal .sk-ui-studio-head h3{
-  font-size: clamp(1.1rem, 1.8vw, 1.45rem);
-  line-height: 1.25;
-}
 
 
 
-#settingsModal .sk-ui-studio-head p{
-  max-width: 70ch;
-  line-height: 1.45;
-}
 
 
 
-#settingsModal .sk-ui-reset-btn{
-  flex: 0 0 auto;
-  min-height: 40px;
-  max-width: 100%;
-}
+
+
+
+
+
+
 
 
 
@@ -660,15 +622,7 @@ button,
 
 
 
-#settingsModal .sk-ui-theme-grid,
-#settingsModal .sk-ui-theme-profiles,
-#settingsModal .sk-ui-choice-grid,
-#settingsModal .sk-ui-card-grid,
-#settingsModal .sk-ui-option-grid{
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
+
 
 
 
@@ -711,60 +665,23 @@ button,
 
 
 
-.bottom-nav{
-  box-sizing: border-box;
-  padding: 5px 6px calc(5px + env(safe-area-inset-bottom, 0px)) !important;
-  min-width: 0;
-  max-width: min(560px, calc(100% - 20px)) !important;
-  height: auto !important;
-  min-height: 64px;
-  border-radius: 22px !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
 
 
 
-.bottom-nav .nav-item{
-  display: flex !important;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  align-self: stretch;
-  min-width: 0;
-  min-height: 48px;
-  gap: 4px;
-  padding: 5px 3px !important;
-  line-height: 1.1;
-  white-space: normal;
-  overflow: visible;
-}
 
 
 
-.bottom-nav .nav-item svg{
-  display: block;
-  flex: 0 0 20px;
-  width: 20px;
-  height: 20px;
-}
 
 
 
-.bottom-nav .nav-item span{
-  display: block;
-  max-width: 100%;
-  font-size: clamp(9px, 1.8vw, 11px);
-  line-height: 1.15;
-  text-align: center;
-  overflow-wrap: anywhere;
-}
 
 
 
-.bottom-nav .nav-item#navHome{
-  align-self: center;
-}
+
+
+
+
+
 
 
 
@@ -783,9 +700,7 @@ button,
 
 
   
-#settingsModal .sk-ui-studio{
-    grid-template-columns: minmax(0, 1fr);
-  }
+
 
 
   
@@ -845,13 +760,7 @@ button,
 
 
   
-#settingsModal .sk-ui-theme-grid,
-#settingsModal .sk-ui-theme-profiles,
-#settingsModal .sk-ui-choice-grid,
-#settingsModal .sk-ui-card-grid,
-#settingsModal .sk-ui-option-grid{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+
 
 
   
@@ -863,11 +772,7 @@ button,
   
 
   
-.bottom-nav{
-    bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
-    width: calc(100% - 16px) !important;
-    max-width: 560px !important;
-  }
+
 
 }
 
@@ -887,9 +792,7 @@ button,
 
 
   
-#settingsModal .sk-ui-studio{
-    padding: 8px;
-  }
+
 
 
   
@@ -1008,100 +911,38 @@ button,
 /* Responsive 1-click profile cards: two columns except ultra-narrow devices. */
 
 
-#settingsModal .sk-ui-profile-grid{
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-}
 
 
-#settingsModal .sk-ui-profile-grid > .sk-ui-profile{
-  display: grid !important;
-  grid-template-columns: 24px minmax(0, 1fr) !important;
-  grid-template-rows: auto auto !important;
-  align-content: center !important;
-  align-items: center !important;
-  column-gap: 10px !important;
-  row-gap: 3px !important;
-  min-width: 0 !important;
-  min-height: 64px !important;
-  padding: 12px 14px !important;
-  text-align: left !important;
-  white-space: normal !important;
-}
 
 
-#settingsModal .sk-ui-profile-grid > .sk-ui-profile > span{
-  grid-column: 1;
-  grid-row: 1 / span 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  min-width: 24px;
-  line-height: 1.2;
-}
 
 
-#settingsModal .sk-ui-profile-grid > .sk-ui-profile > b,
-#settingsModal .sk-ui-profile-grid > .sk-ui-profile > small{
-  grid-column: 2;
-  min-width: 0;
-  margin: 0;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-}
 
 
-#settingsModal .sk-ui-profile-grid > .sk-ui-profile > b{
-  font-size: .82rem;
-}
 
 
-#settingsModal .sk-ui-profile-grid > .sk-ui-profile > small{
-  font-size: .72rem;
-  opacity: .78;
-}
+
+
+
+
+
+
 
 
 
 /* Custom brand colour: keep the label and the swatch/hex pair in separate flex groups. */
 
 
-#settingsModal .sk-ui-custom-color{
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 12px !important;
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  margin-top: 8px !important;
-  padding: 10px 14px !important;
-  border-radius: 12px !important;
-  background: var(--surface-bg, var(--model-bg, var(--card-bg, #fff))) !important;
-  border: 1px solid var(--border-color, var(--card-border, rgba(100,116,139,.25))) !important;
-}
 
 
-#settingsModal .sk-ui-custom-color > div{
-  display: flex !important;
-  flex: 1 1 auto !important;
-  flex-direction: column !important;
-  min-width: 0 !important;
-}
 
 
-#settingsModal .sk-ui-custom-color > div b{
-  font-size: .8rem !important;
-  line-height: 1.35;
-}
 
 
-#settingsModal .sk-ui-custom-color > div small{
-  font-size: .7rem !important;
-  line-height: 1.35;
-}
+
+
+
+
 
 
 #settingsModal #skAppearanceCustomHex{
@@ -1134,26 +975,13 @@ button,
 /* Avoid clipping and keep fixed navigation clear of the device safe area. */
 
 
-.bottom-nav{
-  box-sizing: border-box;
-  padding-bottom: calc(5px + env(safe-area-inset-bottom, 0px)) !important;
-}
 
 
-@media (max-width: 479px) {
-  
-  
-}
 
 
-@media (max-width: 359px) {
-  
-#settingsModal .sk-ui-profile-grid{
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
 
-  
-}
+
+
 
 
 
@@ -1286,24 +1114,10 @@ textarea{font-family:inherit;}
 
 
 
-@media (max-width: 640px) {
-  
-  
-  
-  
-  
-  
-  
-  
-}
 
 
-@media (max-width: 420px) {
-  
-  
-  
-  
-}
+
+
 
 
 
@@ -1356,44 +1170,19 @@ textarea{font-family:inherit;}
 }
 
 
-.sk-ui-model-card:has(#cfgShopName),
-.sk-ui-model-card:has(#cfgShopPhone){
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
-}
 
 
-.sk-ui-model-card:has(#cfgShopName) .form-group,
-.sk-ui-model-card:has(#cfgShopPhone) .form-group{
-  width: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-}
 
 
-.sk-ui-model-card:has(#cfgShopName) .form-label,
-.sk-ui-model-card:has(#cfgShopPhone) .form-label{
-  display: block !important;
-  margin-bottom: 5px !important;
-  line-height: 1.3 !important;
-}
 
 
-.sk-ui-model-card:has(#cfgShopName) .form-input,
-.sk-ui-model-card:has(#cfgShopPhone) .form-input{
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  min-height: 40px !important;
-  padding: 9px 11px !important;
-  line-height: 1.35 !important;
-}
 
 
-.sk-ui-model-card:has(#cfgShopPhone) #cfgShopPhone{
-  padding-right: 44px !important;
-}
+
+
+
+
+
 
 
 
@@ -1446,18 +1235,10 @@ textarea{font-family:inherit;}
 
 
 
-@media (min-width: 700px) {
-  
-  
-}
 
 
-@media (max-width: 380px) {
-  
-  
-  
-  
-}
+
+
 
 
 
@@ -1482,10 +1263,7 @@ textarea{font-family:inherit;}
 
 
 
-@media (max-width: 380px) {
-  
-  
-}
+
 
 
 
@@ -1924,15 +1702,7 @@ body:has(#skLoginModal.active) #leftDrawer{
    This removes the blank band between the four summary values and the catalog. */
 
 
-@media (max-width: 640px) {
-  
-  
-  
-  
-  
-  
-  
-}
+
 
 
 
@@ -1945,10 +1715,7 @@ body:has(#skLoginModal.active) #leftDrawer{
 
 
 
-@media (max-height: 620px) {
-  
-  
-}
+
 
 
 
@@ -1965,10 +1732,7 @@ body:has(#skLoginModal.active) #leftDrawer{
 
 
 .skcp-summary,
-.used-stock-metrics,
-.stats-grid,
-.summary-grid,
-.metrics-grid{
+.stats-grid {
   gap: 8px;
   margin-block: 10px 12px;
 }
@@ -1977,10 +1741,7 @@ body:has(#skLoginModal.active) #leftDrawer{
 
 
 .skcp-summary > .skcp-stat,
-.used-stock-metrics > div,
-.stats-grid > .stat-card,
-.summary-grid > .summary-card,
-.metrics-grid > .metric-card{
+.stats-grid > .stat-card {
   box-sizing: border-box;
   min-width: 0;
   min-height: 0;
@@ -1992,10 +1753,7 @@ body:has(#skLoginModal.active) #leftDrawer{
 
 
 .skcp-summary > .skcp-stat,
-.used-stock-metrics > div,
-.stats-grid > .stat-card,
-.summary-grid > .summary-card,
-.metrics-grid > .metric-card{
+.stats-grid > .stat-card {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -2006,10 +1764,7 @@ body:has(#skLoginModal.active) #leftDrawer{
 
 
 .skcp-summary .skcp-stat > span,
-.used-stock-metrics > div > span:first-child,
-.stats-grid > .stat-card > :first-child,
-.summary-grid > .summary-card > :first-child,
-.metrics-grid > .metric-card > :first-child{
+.stats-grid > .stat-card > :first-child {
   margin: 0;
   line-height: var(--sk-compact-label-line-height);
 }
@@ -2018,10 +1773,7 @@ body:has(#skLoginModal.active) #leftDrawer{
 
 
 .skcp-summary .skcp-stat > b,
-.used-stock-metrics > div > span:last-child,
-.stats-grid > .stat-card > :last-child,
-.summary-grid > .summary-card > :last-child,
-.metrics-grid > .metric-card > :last-child{
+.stats-grid > .stat-card > :last-child {
   margin: 0;
   line-height: var(--sk-compact-value-line-height);
 }
@@ -2195,12 +1947,7 @@ body:has(#skLoginModal.active) #leftDrawer{
 
 
 
-:is(.filter-pill, .filter-chip, .action-pill, .ledger-action, .btn-compact){
-  min-height: 38px;
-  padding-inline: 12px;
-  line-height: 1.2;
-  box-sizing: border-box;
-}
+
 
 
 
@@ -2223,9 +1970,7 @@ body:has(#skLoginModal.active) #leftDrawer{
 
 
 
-@media (max-width: 359px) {
-  
-}
+
 
 
 
@@ -2462,17 +2207,12 @@ body:has(#skLoginModal.active) #leftDrawer{
 
 .app-viewport,
 .app-viewport > *,
-.view-section,
-.tab-content,
 .content-area,
 .modal-overlay,
 .modal-sheet,
-.modal-content,
-.modal-body,
 .form-section,
 .card,
-.panel,
-.content-box{
+.panel {
   min-width: 0;
   box-sizing: border-box;
 }
@@ -2562,19 +2302,11 @@ body:has(#skLoginModal.active) #leftDrawer{
 
 
 
-:is(.modal-body, .modal-content-body, .sheet-body, .dialog-body){
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-}
 
 
 
-:is(.modal-actions, .modal-footer, .sheet-footer, .dialog-actions){
-  flex-shrink: 0;
-  padding-bottom: max(10px, env(safe-area-inset-bottom));
-}
+
+
 
 
 
@@ -2625,8 +2357,7 @@ textarea{
 
 
 
-:is(.form-grid, .fields-grid, .purchase-form-grid) > *,
-:is(.settings-grid, .theme-grid-selector) > *{
+:is(.form-grid, .fields-grid, .purchase-form-grid) > * {
   min-width: 0;
 }
 
@@ -2692,9 +2423,7 @@ body{
 
 
 
-:is(.bottom-nav, .bottom-navigation, .app-bottom-nav, .mobile-bottom-nav){
-  padding-bottom: env(safe-area-inset-bottom);
-}
+
 
 
 
@@ -2905,9 +2634,8 @@ body{
 .app-viewport :is(main, section, article, aside, header, footer, form, fieldset),
 .modal-overlay,
 .modal-overlay .modal-sheet,
-.drawer-sheet,
 #skCreditLedgerPage,
-#skRepairDetailModal #skRepairDetailContent{
+#skRepairDetailModal #skRepairDetailContent {
   box-sizing: border-box;
   min-width: 0;
 }
@@ -3060,12 +2788,7 @@ body{
 }
 
 
-.modal-overlay .modal-actions,
-.modal-overlay .modal-footer,
-.modal-overlay .sheet-footer{
-  flex: 0 0 auto;
-  padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
-}
+
 
 
 
@@ -3283,12 +3006,11 @@ body [role="button"]:not(#printableInvoiceCard [role="button"]){
 .skcp-bill-actions button,
 .skcp-bill-actions .skcp-sales-bill-paid,
 .sk-credit-actions button,
-.sk-v43-entry-type button,
 .sk-v43-keep-actions button,
 .skcp-toolbar button,
 .skcp-filters button,
 .skcp-page-head button,
-.sk-credit-search-row button{
+.sk-credit-search-row button {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
@@ -3352,12 +3074,11 @@ body button:not(#printableInvoiceCard button){
 .skcp-bill-actions button,
 .skcp-bill-actions .skcp-sales-bill-paid,
 .sk-credit-actions button,
-.sk-v43-entry-type button,
 .sk-v43-keep-actions button,
 .skcp-toolbar button,
 .skcp-filters button,
 .skcp-page-head button,
-.sk-credit-search-row button{
+.sk-credit-search-row button {
     padding-inline: 8px;
     font-size: 12px;
   }
@@ -3391,12 +3112,7 @@ body button:not(#printableInvoiceCard button){
 /* Reduce excess gaps without forcing every layout into one fixed height. */
 
 
-.app-container,
-.app-content,
-.page-content,
-.page-container,
-main,
-.main-content{
+main {
   gap: var(--sk-ui-card-gap);
 }
 
@@ -3404,23 +3120,9 @@ main,
 
 .card,
 .glass-card,
-.section-card,
-.form-card,
-.dashboard-card,
-.inventory-card,
-.customer-card,
-.ledger-card,
 .history-card,
-.repair-card,
-.accessory-card,
-.analytics-card,
-.summary-card,
 .stat-card,
-.metric-card,
-.sk-card,
-.sk-ui-model-card,
-.sk-home-metric-card,
-.skcp-bill-card{
+.skcp-bill-card {
   box-sizing: border-box;
   padding: var(--sk-ui-card-pad-y) var(--sk-ui-card-pad-x);
   border-radius: var(--sk-ui-radius);
@@ -3430,14 +3132,8 @@ main,
 
 .form-section,
 .bill-section,
-.view-section,
-.section-header,
 .card-header,
-.modal-header,
-.modal-footer,
-.action-toolbar,
-.action-row,
-.header-row{
+.header-row {
   gap: var(--sk-ui-card-gap);
 }
 
@@ -3448,8 +3144,7 @@ main,
 
 .card-title,
 .section-title,
-.sk-ui-section-title,
-.modal-title{
+.modal-title {
   line-height: var(--sk-ui-title-line);
   margin-block: 0 6px;
 }
@@ -3458,16 +3153,7 @@ main,
 
 .card p,
 .glass-card p,
-.section-card p,
-.form-card p,
-.dashboard-card p,
-.inventory-card p,
-.customer-card p,
-.ledger-card p,
-.history-card p,
-.repair-card p,
-.accessory-card p,
-.sk-ui-model-card p{
+.history-card p {
   line-height: var(--sk-ui-body-line);
   margin-block: 3px;
 }
@@ -3520,17 +3206,7 @@ body button:not(#printableInvoiceCard button){
 
 
 .stats-grid,
-.stat-grid,
-.summary-grid,
-.metrics-grid,
-.metric-grid,
-.form-grid,
-.fields-grid,
-.settings-grid,
-.sk-ui-card-grid,
-.sk-ui-option-grid,
-.sk-ui-choice-grid,
-.sk-ui-theme-grid{
+.form-grid {
   gap: var(--sk-ui-card-gap);
   align-items: stretch;
 }
@@ -3545,14 +3221,11 @@ body button:not(#printableInvoiceCard button){
 }
 
 
-.modal-body{
-  padding-block: 10px;
-}
 
 
-.modal-actions,
+
 .skcp-bill-actions,
-.sk-credit-actions{
+.sk-credit-actions {
   gap: 8px;
 }
 
@@ -3570,12 +3243,7 @@ body button:not(#printableInvoiceCard button){
   }
 
   
-.app-container,
-.app-content,
-.page-content,
-.page-container,
-main,
-.main-content{
+main {
     gap: var(--sk-ui-card-gap);
   }
 
@@ -3583,7 +3251,7 @@ main,
 .modal-sheet{ padding-inline: 10px; }
 
   
-.modal-body{ padding-block: 8px; }
+
 
 }
 
@@ -3737,14 +3405,7 @@ main,
 }
 
 
-#toolsOthersNoteModal .tools-others-info{
-  width:100% !important;
-  box-sizing:border-box !important;
-  margin:0 0 8px !important;
-  padding:8px 10px !important;
-  line-height:1.45 !important;
-  overflow-wrap:anywhere !important;
-}
+
 
 
 #toolsOthersNoteModal .tools-others-label{
@@ -3991,13 +3652,7 @@ main,
   }
 
   
-:is(.sk-style-profile, .style-profile, .theme-option, .font-option, .sk-theme-option, .sk-profile-option){
-    min-width: 0 !important;
-    max-width: 100% !important;
-    padding: 9px 10px !important;
-    gap: 8px !important;
-    box-sizing: border-box !important;
-  }
+
 
 
   
@@ -4060,19 +3715,10 @@ textarea,
   
   
   
-#settingsModal :is(.sk-style-profiles, .style-profiles, .theme-grid, .font-grid, .sk-theme-grid, .sk-profile-grid){
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
+
 
   
-#settingsModal :is(.sk-style-profile, .style-profile, .theme-option, .font-option, .sk-theme-option, .sk-profile-option) :is(h3, h4, p, span, small, div){
-    min-width: 0 !important;
-    max-width: 100% !important;
-    overflow-wrap: anywhere !important;
-  }
+
 
 }
 
@@ -4406,22 +4052,22 @@ body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-copy strong{font-s
 body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-recent-copy small{font-size:7px!important;line-height:1.1!important;color:#64799e!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
 
 
-body:has(#cardsContainer.sk-home-redesign) .bottom-nav{height:54px!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;border-radius:28px!important;background:rgba(255,255,255,.96)!important;box-shadow:0 10px 28px rgba(30,64,175,.12)!important;}
 
 
-body:has(#cardsContainer.sk-home-redesign) .bottom-nav>.nav-item{height:54px!important;min-height:54px!important;}
 
 
-body:has(#cardsContainer.sk-home-redesign) .bottom-nav>.nav-item svg{width:19px!important;height:19px!important;flex-basis:19px!important;}
 
 
-body:has(#cardsContainer.sk-home-redesign) .bottom-nav>.nav-item span{font-size:9px!important;}
 
 
-body:has(#cardsContainer.sk-home-redesign) .bottom-nav>#navHome::before{width:58px!important;height:58px!important;transform:translate(-50%,-50%) translateY(-12px)!important;}
 
 
-body:has(#cardsContainer.sk-home-redesign) .bottom-nav>#navHome svg{width:24px!important;height:24px!important;flex-basis:24px!important;transform:translateY(-12px)!important;}
+
+
+
+
+
+
 
 
 body:has(#cardsContainer.sk-home-redesign) #skUrgentRepairCard{grid-column:1/-1!important;width:100%!important;max-width:100%!important;margin-top:6px!important;}

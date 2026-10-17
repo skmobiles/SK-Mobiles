@@ -1,0 +1,58 @@
+/* ==========================================================================
+   SK MOBILES v5.6.144 — ONE INVOICE LOOK EVERYWHERE
+   Live Preview, Saved Bill view, Download PDF, WhatsApp PDF and Print all use
+   the same fixed 540px "paper". Screens only scale it (JS sets `zoom`), so the
+   bill looks identical on mobile, tablet, PC and in every output.
+   Presentation only. No ids, handlers or data touched.
+   ========================================================================== */
+html body .sk-invoice-paper{
+  width:540px !important;max-width:none !important;min-width:0 !important;
+  box-sizing:border-box !important;margin:0 auto !important;padding:16px !important;
+  background:#fff !important;color:#1e293b !important;
+  border:1px solid #e2e8f0 !important;border-radius:14px !important;
+  box-shadow:0 6px 18px rgba(15,23,42,.07) !important;overflow:visible !important;
+  font-family:"Plus Jakarta Sans",Arial,sans-serif !important;font-size:16px !important;
+  line-height:1.35 !important;text-align:left !important;
+  -webkit-text-size-adjust:100% !important;text-size-adjust:100% !important;
+  print-color-adjust:exact;-webkit-print-color-adjust:exact;
+}
+html body .sk-invoice-paper.sk-invoice-export-root{border:0 !important;border-radius:0 !important;box-shadow:none !important;padding:0 !important}
+html body .sk-invoice-paper *{
+  box-sizing:border-box !important;
+  font-family:"Plus Jakarta Sans",Arial,sans-serif !important;
+  -webkit-text-size-adjust:100% !important;text-size-adjust:100% !important;
+}
+html body .sk-invoice-paper #invoiceMainSheet,
+html body .sk-invoice-paper .sk-invoice-export-page{width:100% !important;max-width:100% !important;margin:0 !important;padding:0 !important;min-width:0 !important}
+html body .sk-invoice-paper table{width:100% !important;max-width:100% !important;table-layout:fixed !important;border-collapse:collapse !important}
+html body .sk-invoice-paper td,
+html body .sk-invoice-paper th{overflow-wrap:anywhere !important;word-break:break-word !important;min-width:0 !important}
+
+/* header */
+html body .sk-invoice-paper .invoice-brand-header{display:flex !important;align-items:center !important;gap:14px !important;justify-content:space-between !important}
+html body .sk-invoice-paper .invoice-logo-wrap{flex:0 0 auto !important}
+html body .sk-invoice-paper .invoice-shop-info{min-width:0 !important;flex:1 1 auto !important;text-align:right !important}
+html body .sk-invoice-paper .invoice-address{max-width:100% !important}
+html body .sk-invoice-paper .invoice-meta-row{min-width:0 !important}
+
+/* Mobile-type: always the highlighted badge, never the extra table row */
+html body .sk-invoice-paper tr:has(#pvMobileType) {display:none !important}
+html body .sk-invoice-paper #invoiceMainSheet > div:has(> div > #pvCustName)::before{
+  font-size:11px !important;min-height:28px !important;padding:5px 12px !important;
+}
+html body .sk-invoice-paper .sk-print-mobile-type-badge{font-size:11px !important}
+html body .sk-invoice-paper.sk-invoice-export-root #invoiceMainSheet > div:has(> div > #pvCustName)::before{content:none !important;display:none !important}
+
+/* Saved-bill popup: let the paper breathe, keep it centred */
+html body #viewBillContent{padding:0 !important}
+html body #viewBillContent .sk-invoice-paper{margin:12px auto !important}
+
+
+/* Compact vertical rhythm so a bill (incl. EMI summary) always fits one A4 page */
+html body .sk-invoice-paper .invoice-logo-wrap{width:76px!important;height:76px!important;flex:0 0 76px!important}
+html body .sk-invoice-paper .invoice-brand-header{padding-bottom:10px!important}
+html body .sk-invoice-paper #invoiceMainSheet table td,
+html body .sk-invoice-paper #invoiceMainSheet table th{padding-top:5px!important;padding-bottom:5px!important}
+html body .sk-invoice-paper #invoiceMainSheet > div,
+html body .sk-invoice-paper #invoiceMainSheet > table{margin-bottom:8px!important}
+html body .sk-invoice-paper .invoice-meta-row{margin-top:8px!important;margin-bottom:8px!important}

@@ -1,11 +1,11 @@
 /* SK MOBILES PWA shell cache. Firebase/auth/firestore requests are never intercepted. */
 const CACHE_PREFIX = 'sk-mobiles-shell-';
-const CACHE_NAME = 'sk-mobiles-shell-v5.6.140';
+const CACHE_NAME = 'sk-mobiles-shell-v5.6.149';
 const APP_SHELL = [
   '/', '/index.html', '/manifest.webmanifest',
-  '/css/style.css', '/css/premium-overrides.css', '/css/used-mobile-stock.css', '/css/billing-page.css', '/js/app.js', '/js/firebase-sync.js',
+  '/css/style.css', '/css/premium-overrides.css', '/css/used-mobile-stock.css', '/css/billing-page.css', '/css/colorful-ui.css', '/css/polish-v143.css', '/css/invoice-unified.css', '/css/settings-v145.css', '/css/screens-v145.css', '/css/bottom-nav.css', '/css/business-tools.css', '/js/features/settings-v145.js', '/js/features/date-fields-v145.js', '/js/features/business-tools-v148.js', '/js/features/form-icons-v145.js', '/js/features/colorful-ui.js', '/js/features/pin-security.js', '/js/app.js', '/js/firebase-sync.js',
   '/icons/sk-mobiles-192.png', '/icons/sk-mobiles-512.png',
-  '/assets/sk-home-logo.png', '/assets/sk-home-hero.jpg',
+  '/Logo.png', '/assets/sk-home-logo.png', '/assets/sk-home-hero.jpg',
   '/assets/sk-home-glass.png', '/assets/sk-home-used-inventory.png',
   '/assets/sk-home-stock-box.png', '/assets/sk-home-accessories.png',
   '/assets/sk-home-repair.png', '/assets/sk-home-other-stock.png'

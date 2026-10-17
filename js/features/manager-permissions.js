@@ -417,10 +417,7 @@
   window.skManagerPermissionAllowed = allowed;
   window.skManagerPermissionAllowsDataKey = dataKeyAllowed;
   window.skReloadManagerPermissions = loadCloud;
-  window.skClearManagerPermissionCache = function(){
-    if(permUnsub){ try{permUnsub();}catch(e){} permUnsub=null; }
-    cloudPerms=null; ready=false;
-  };
+  
   window.skRenderCloudManagerPermissions = renderAdminPanel;
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true});

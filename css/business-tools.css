@@ -1,0 +1,56 @@
+/* SK MOBILES v5.6.149 — daily report and credit reminders. */
+
+/* ---------- daily report ---------- */
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-nav{display:flex;align-items:center;gap:8px;margin:2px 0 10px}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-nb{flex:0 0 40px;width:40px;height:40px;min-height:0!important;padding:0!important;border-radius:12px!important;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text);font-size:1.4rem;font-weight:800;line-height:1}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-datebox{position:relative;flex:1 1 auto;min-width:0;height:40px;display:flex;align-items:center;justify-content:center;border:1px solid var(--card-border);border-radius:12px;background:var(--card-bg);font-weight:800;font-size:.9rem;color:var(--text);cursor:pointer}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-datebox input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-today{flex:0 0 auto;height:40px;min-height:0!important;padding:0 12px!important;border-radius:12px!important;border:1px solid var(--badge-border);background:var(--badge-bg);color:var(--primary);font-weight:800;font-size:.8rem}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-hero{border-radius:16px;padding:14px;text-align:center;color:#fff;background:var(--primary-gradient,linear-gradient(135deg,#3b82f6,#1d4ed8));margin-bottom:10px}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-hero small{display:block;font-size:.66rem;font-weight:800;letter-spacing:.12em;opacity:.9}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-hero b{display:block;font-size:1.9rem;font-weight:900;line-height:1.2}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-card{border:1px solid var(--card-border);background:var(--card-bg);border-radius:14px;padding:10px 12px;margin-bottom:10px}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-card h4{margin:0 0 6px;font-size:.82rem;font-weight:900;color:var(--text)}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-line{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 8px;padding:5px 0;border-top:1px dashed var(--card-border);font-size:.84rem;color:var(--text-muted)}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-line:first-of-type{border-top:0}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-line b{color:var(--text);font-weight:800}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-line em{flex:1 0 100%;font-style:normal;font-size:.7rem}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px dashed var(--card-border);font-size:.86rem;color:var(--text);font-weight:700}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-item:first-of-type{border-top:0}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-item small{display:block;font-weight:600;color:var(--text-muted);font-size:.7rem}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-item b{white-space:nowrap}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-empty{padding:14px;text-align:center;color:var(--text-muted);font-size:.85rem}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-actions{margin-top:6px}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-sheet{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skls-zero{color:var(--danger,#dc2626)}
+
+/* ---------- credit reminders ---------- */
+html body #skCrStrip#skCrStrip{display:flex;align-items:center;gap:8px;width:100%;min-height:42px!important;margin:0 0 8px;padding:0 12px!important;border-radius:12px!important;border:1px solid var(--badge-border);background:var(--badge-bg);color:var(--primary);font-weight:800;font-size:.85rem;text-align:left}
+html body #skCrStrip#skCrStrip span{flex:1 1 auto}
+html body #skCrStrip#skCrStrip em{font-style:normal;font-size:.74rem;color:var(--text-muted);font-weight:700}
+html body #skCrStrip#skCrStrip.has-overdue{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.08)}
+html body #skCrStrip#skCrStrip.has-overdue em{color:#dc2626}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skcr-note{padding:0 4px;font-size:.74rem;color:var(--text-muted);margin:0 0 8px}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skcr-row{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--card-border);background:var(--card-bg);border-radius:14px}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skcr-main{flex:1 1 0;min-width:0}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skcr-main b{display:block;font-size:.92rem;color:var(--text);overflow-wrap:anywhere}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skcr-main small{display:block;font-size:.72rem;color:var(--text-muted)}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skcr-tag{display:inline-block;margin:3px 4px 0 0;padding:2px 8px;border-radius:999px;font-style:normal;font-size:.66rem;font-weight:800;background:var(--badge-bg);color:var(--primary)}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skcr-tag.bad{background:rgba(239,68,68,.12);color:#dc2626}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skcr-tag.ok{background:rgba(22,163,74,.12);color:#15803d}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skcr-amt{flex:0 0 auto;font-weight:900;font-size:.95rem;color:var(--text);white-space:nowrap}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skcr-wa{flex:0 0 40px;width:40px;height:40px;min-height:0!important;padding:0!important;border-radius:12px!important;font-size:1.1rem}
+html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skcr-wa:disabled{opacity:.4}
+
+/* ---------- repair jobs: filter chips, age badge, ready button ---------- */
+html body #skRepairJobsModal#skRepairJobsModal .sk-rj-filter-bar{display:flex;gap:6px;overflow-x:auto;margin:10px 0 0;padding:2px 0 4px;scrollbar-width:none}
+html body #skRepairJobsModal#skRepairJobsModal .sk-rj-filter-bar::-webkit-scrollbar{display:none}
+html body #skRepairJobsModal#skRepairJobsModal .sk-rj-chip{flex:0 0 auto;min-height:34px!important;padding:0 12px!important;border-radius:999px!important;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text);font-size:.76rem;font-weight:800;white-space:nowrap}
+html body #skRepairJobsModal#skRepairJobsModal .sk-rj-chip b{margin-left:4px;color:var(--primary)}
+html body #skRepairJobsModal#skRepairJobsModal .sk-rj-chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+html body #skRepairJobsModal#skRepairJobsModal .sk-rj-chip.active b{color:#fff}
+html body #skRepairJobsModal#skRepairJobsModal .sk-rj-age{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--badge-bg);color:var(--primary);font-size:.66rem;font-weight:800;white-space:nowrap}
+html body #skRepairJobsModal#skRepairJobsModal .sk-rj-age.old{background:rgba(239,68,68,.12);color:#dc2626}
+html body #skRepairJobsModal#skRepairJobsModal .sk-rj-wa{color:#15803d;border-color:rgba(22,163,74,.35)}
+html body #homeMetricGrid#homeMetricGrid .sk-urgent-badge{position:absolute;top:-8px;right:10px;margin:0;padding:2px 8px;border-radius:999px;background:#dc2626;color:#fff;font-style:normal;font-size:.62rem;font-weight:800;line-height:1.4;box-shadow:0 2px 6px rgba(220,38,38,.35)}
+html body #homeMetricGrid#homeMetricGrid [data-card-id="metric-repair"]{position:relative}

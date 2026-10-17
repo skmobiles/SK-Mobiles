@@ -1,0 +1,51 @@
+/* ==========================================================================
+   SK MOBILES — ONE bottom navigation, identical on every page.
+   This file is the only place that styles .bottom-nav (all older copies were
+   removed). Two looks, chosen in Settings → Bottom Navigation Style:
+   Floating Island (default) and Fixed Dock. Same size/position on all pages.
+   ========================================================================== */
+html body nav.bottom-nav{
+  --nav-h:66px;--nav-gap:10px;
+  position:fixed;left:50%;right:auto;bottom:calc(var(--nav-gap) + env(safe-area-inset-bottom,0px));
+  transform:translateX(-50%);width:calc(100% - 24px);max-width:440px;height:var(--nav-h);min-height:var(--nav-h);
+  box-sizing:border-box;margin:0;padding:0 6px;
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;gap:0;
+  background:var(--bottom-nav-bg,rgba(255,255,255,.96));border:1px solid rgba(226,232,240,.9);border-radius:28px;
+  box-shadow:0 10px 28px rgba(30,64,175,.12);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  z-index:2147483600;overflow:visible;visibility:visible;opacity:1;pointer-events:auto}
+html[data-ui-nav="fixed"] body nav.bottom-nav{
+  left:0;bottom:0;transform:none;width:100%;max-width:none;border-radius:22px 22px 0 0;border-width:1px 0 0;
+  padding-bottom:env(safe-area-inset-bottom,0px);height:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));
+  box-shadow:0 -6px 20px rgba(15,23,42,.08)}
+
+html body nav.bottom-nav > .nav-item{
+  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  height:54px;min-height:54px;min-width:0;margin:0;padding:4px 0;border:0;border-radius:16px;background:none;box-shadow:none;
+  color:var(--text,#0f172a);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform .15s ease,color .15s ease}
+html body nav.bottom-nav > .nav-item svg{width:22px;height:22px;flex:0 0 22px;display:block}
+html body nav.bottom-nav > .nav-item span{display:block;margin:0;font-size:10px;line-height:1.1;font-weight:700;letter-spacing:0;white-space:nowrap}
+html body nav.bottom-nav > .nav-item:active{transform:scale(.94)}
+html body nav.bottom-nav > .nav-item.active:not(#navHome){color:var(--primary,#2563eb)}
+html body nav.bottom-nav > .nav-item.active:not(#navHome) span{font-weight:800}
+
+/* raised round Home button */
+html body nav.bottom-nav > #navHome{z-index:10;color:#fff}
+html body nav.bottom-nav > #navHome::before{
+  content:"";position:absolute;left:50%;top:50%;width:58px;height:58px;border-radius:50%;box-sizing:border-box;
+  border:3px solid #fff;background:linear-gradient(135deg,var(--primary,#2563eb),color-mix(in srgb,var(--primary,#2563eb) 70%,#1e3a8a));
+  box-shadow:0 10px 22px color-mix(in srgb,var(--primary,#2563eb) 42%,transparent);
+  transform:translate(-50%,-50%) translateY(-12px);z-index:-1}
+html body nav.bottom-nav > #navHome svg{position:relative;z-index:2;width:26px;height:26px;flex-basis:26px;transform:translateY(-12px)}
+html body nav.bottom-nav > #navHome span{display:none}
+html body nav.bottom-nav > #navHome:active::before{transform:translate(-50%,-50%) translateY(-12px) scale(.94)}
+
+/* above every page; below the side drawer; hidden behind small pop-up forms */
+html body:has(#leftDrawer.active) nav.bottom-nav{z-index:900;pointer-events:none}
+html body:has(#skCreditActionModal.active) nav.bottom-nav,html body:has(#skCreditEntryModal.active) nav.bottom-nav{z-index:900}
+
+/* every full page keeps its last content clear of the bar */
+html body :is(#settingsModal,#billingModal,#skRepairJobsModal,#skCreditLedgerPage,#skAccessoriesPage,#orderModal,#repairSparesModal,#toolsOthersNoteModal,#itemEditorModal,#skAdminPanelModal,#skRecycleBinModal,#viewBillModal,#skRepairDetailModal) > .modal-sheet{
+  padding-bottom:calc(var(--nav-h,66px) + 36px + env(safe-area-inset-bottom,0px))!important}
+html body #skUsedStockModal  main.sk-used-stock-scroll{padding-bottom:calc(66px + 36px + env(safe-area-inset-bottom,0px))}
+@media (prefers-reduced-motion:reduce){html body nav.bottom-nav,html body nav.bottom-nav > .nav-item{transition:none}}

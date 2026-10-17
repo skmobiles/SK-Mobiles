@@ -37,7 +37,8 @@ html.sk-cui .ski[data-i="layers"]{--ic:var(--ico-layers)} html.sk-cui .ski[data-
 html.sk-cui .ski[data-i="home"]{--ic:var(--ico-home)} html.sk-cui .ski[data-i="search"]{--ic:var(--ico-search)}
 html.sk-cui .ski[data-i="calendar"]{--ic:var(--ico-calendar)} html.sk-cui .ski[data-i="chart"]{--ic:var(--ico-chart)}
 html.sk-cui .ski[data-i="image"]{--ic:var(--ico-image)} html.sk-cui .ski[data-i="store"]{--ic:var(--ico-store)}
-html.sk-cui .ski[data-i="call"]{--ic:var(--ico-call)} html.sk-cui .ski[data-i="pencil"]{--ic:var(--ico-pencil)} html.sk-cui .ski[data-i="tag"]{--ic:var(--ico-tag)} html.sk-cui .ski[data-i="chip"]{--ic:var(--ico-chip)}
+html.sk-cui .ski[data-i="call"]{--ic:var(--ico-call)} html.sk-cui .ski[data-i="pencil"]{--ic:var(--ico-pencil)} html.sk-cui .ski[data-i="filter"]{--ic:var(--ico-filter)} html.sk-cui .ski[data-i="refresh"]{--ic:var(--ico-refresh)} html.sk-cui .ski[data-i="menu"]{--ic:var(--ico-menu)} html.sk-cui .ski[data-i="barcode"]{--ic:var(--ico-barcode)} html.sk-cui .ski[data-i="cloud"]{--ic:var(--ico-cloud)} html.sk-cui .ski[data-i="chevron"]{--ic:var(--ico-chevron)}
+html.sk-cui .ski[data-i="tag"]{--ic:var(--ico-tag)} html.sk-cui .ski[data-i="chip"]{--ic:var(--ico-chip)}
 
 /* inline icon (buttons, labels) */
 html.sk-cui .ski-in{width:1.15em;height:1.15em;margin-right:.45em;transform:translateY(-1px)}
@@ -64,9 +65,9 @@ html.sk-cui .repair-spares-head,html.sk-cui .tools-others-head{display:flex;alig
 html.sk-cui .repair-spares-title,html.sk-cui .tools-others-title{display:flex;align-items:center;font-size:1.2rem;font-weight:800}
 html.sk-cui .repair-spares-title .ski-tile,html.sk-cui .tools-others-title .ski-tile{width:52px;height:52px;border-radius:16px}
 html.sk-cui .repair-spares-title .ski-tile::before,html.sk-cui .tools-others-title .ski-tile::before{width:28px;height:28px}
-html.sk-cui .repair-spares-info,html.sk-cui .tools-others-info{position:relative;display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;
+html.sk-cui .repair-spares-info {position:relative;display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;
   background:color-mix(in srgb,var(--cui-blue) 9%,var(--card-bg));border:1px solid color-mix(in srgb,var(--cui-blue) 16%,transparent);color:var(--text-muted)}
-html.sk-cui .repair-spares-info::before,html.sk-cui .tools-others-info::before{content:"";flex:none;width:26px;height:26px;border-radius:50%;background:var(--cui-blue);
+html.sk-cui .repair-spares-info::before {content:"";flex:none;width:26px;height:26px;border-radius:50%;background:var(--cui-blue);
   -webkit-mask:var(--ico-info) center/contain no-repeat;mask:var(--ico-info) center/contain no-repeat}
 html.sk-cui .repair-spares-label,html.sk-cui .tools-others-label{display:flex;align-items:center;justify-content:space-between;font-weight:800}
 html.sk-cui .repair-spares-label::after,html.sk-cui .tools-others-label::after{content:"✱ Required";font-size:.72rem;font-weight:800;color:#dc2626;background:rgba(239,68,68,.10);padding:6px 12px;border-radius:999px}
@@ -222,3 +223,9 @@ html.sk-cui #skUsedStockModal tr:has(> .sk-used-empty-cell){display:block!import
 html.sk-cui #skUsedStockModal .sk-used-empty-cell{display:block!important;width:100%!important;grid-column:1/-1!important;white-space:normal!important;word-break:normal!important}
 html.sk-cui .bill-history-search-wrap > svg,html.sk-cui .bill-history-date-wrap > svg{top:24px!important;margin-top:-10px!important}
 html.sk-cui #repairSparesModal .repair-spares-action.repair-spares-share,html.sk-cui #toolsOthersNoteModal .tools-others-action.tools-others-share{background:color-mix(in srgb,var(--cui-green) 6%,var(--card-bg))!important;background-image:none!important;color:#15803d!important;border:1.5px solid color-mix(in srgb,var(--cui-green) 55%,transparent)!important;box-shadow:none!important}
+
+/* ---------- fix: Factory Reset keeps its text inside the border ---------- */
+
+/* any button: text never touches the border */
+html.sk-cui button{box-sizing:border-box}
+

@@ -1,15 +1,26 @@
 {
-  "lock_name": "SK MOBILES V5.6.1 Stable Core Baseline",
-  "version": "V5.6.1",
-  "source": "SK-Mobiles-V5.6.1-Design-Studio-Reliability-Fix.zip",
+  "lock_name": "SK MOBILES V5.6.149 Stable Core Baseline",
+  "version": "V5.6.149",
+  "source": "User-approved V5.6.149: repair order fix, tap-to-open boxes, filters, reminders",
   "policy": "Approved V5.6.1 Design Studio UI changes are included in this new baseline. Future changes to locked core files must be reviewed and the lock must not be silently regenerated. Preserve business logic, Firebase configuration/rules and existing data keys.",
   "core_files": {
-    "index.html": "70460c74c2730895dc86eec0d383799f1a2e106f7be971100684b849710b9dfb",
-    "js/app.js": "6b6daff490e3030456723f75275d625986bb6dfbba7edef289324c4d7bedb9bf",
-    "js/firebase-sync.js": "36a8eab4bb8dece1b092f18a8c7e53bbaacb0523ed5272272b5557a2d184a255",
-    "css/style.css": "7520bd1b1a2659cd44b3ff31af7f8438dd318b7fdb7097ec6cf8dc8017b1159b",
+    "index.html": "aa3f22c76ba033822ac2fa841a5dcfdc5c9639b3c43a26fce6cc23a9525834f6",
+    "js/app.js": "0e921e2073fd363d7a398e0d06dfff7774e12142c046b3b0c04d57242246ffeb",
+    "js/firebase-sync.js": "9808d3cd7aaba0b4ab78b2847460964091933ccd4f8ffffd79b925d78d8a215e",
+    "js/features/pin-security.js": "adde7413b65e7676169be8670d31494abd364f14a263681faa577fa07d08a0db",
+    "js/features/colorful-ui.js": "0e989266c7f70facc25f990f09e225603b7af331f95030d6f2277a57f4095075",
+    "css/style.css": "9fc2f356f45ad47d3518853deb158af3aea4ca89cba0a1141357b31ec31b1995",
+    "css/colorful-ui.css": "62ec238663db64122cfdd73734fdc6ddf705a1d86eb9c7e6f105dfb7ab8120ce",
     "firestore.rules": "3d2976de0b3e3c9789bab1ab39b75a6a7c36328c4e51f08862cea72bd56ed5f4",
-    "FIREBASE_SETUP.txt": "d56888379e27efec0d40ec7d6b2132bbca912f102cd3aea006ee93e28947c791",
-    "README.mdSK-V4.13 ( Stabled Version) V3": "fe0d2f1020279437a87d0d620312262bd71b1b8c515c1d991b76d5da3e1faa2c"
+    "css/polish-v143.css": "6a064c182179ce8c6234feea8a7cbbceaadbbb359f7231471dc1ca5c9976de67",
+    "css/invoice-unified.css": "1203d79c89cd14ffda5f39d84f1803324b77947b39c15b6bf0f48b4e1f6d68af",
+    "css/settings-v145.css": "a9e4919e6a2219af05ca4b77dd14ba8f38b64d9844d1c0f7d6f810861c2c692a",
+    "css/screens-v145.css": "f7d1302d2215fc98615691b9caa953376345f4d86a39d6175b4b4a7bdb1f15e5",
+    "js/features/settings-v145.js": "af8923fafc9cee55c359cf23a6ebf16ddf9db63dfa5fe4e384943f44043fcf7e",
+    "js/features/date-fields-v145.js": "7978afb461ae59e6ebe97f6631ec7d14ec29cbfb854dc022487284c4e35df3ff",
+    "js/features/form-icons-v145.js": "a020519e569d758ff03db39f6ad35f295311e0c7ccbd0c0fec0d4d8b5ef11727",
+    "css/bottom-nav.css": "11b95e3a2a6bbf927b5b03ef56be6b248b055315bb767634818fee51c08a9d5a",
+    "js/features/business-tools-v148.js": "869f2cdd55818d0cfecabd830de96245192a037f3b64e4c3ed61cb2f70b373b0",
+    "css/business-tools.css": "5efe16915a123bc21943fcdb4fed66344d850e1fcfec633d151b00c2e7c53eb0"
   }
 }

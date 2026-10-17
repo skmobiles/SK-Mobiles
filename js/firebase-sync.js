@@ -311,13 +311,7 @@
     return current;
   }
 
-  function managerPermission(key){
-    try{
-      const p=JSON.parse(localStorage.getItem("sk_manager_permissions_v1")||"{}");
-      return p[key] !== false;
-    }catch(e){ return !!MANAGER_PERMISSION_DEFAULTS[key]; }
-  }
-
+  
   function managerCanSyncKey(key){
     /*
      * IMPORTANT:
@@ -375,30 +369,8 @@
     }
   }
 
-  function replaceLocalBillsFromRemote(remoteDocs){
-    const remote = [];
-    remoteDocs.forEach(d => {
-      const r = d.data() || {};
-      if(r.isDeleted === true || r._deleted === true) return;
-      const id = String(r.id || d.id);
-      const clean = Object.assign({}, r, {id});
-      delete clean._deleted; delete clean._syncUpdatedBy; delete clean._syncUpdatedAt;
-      remote.push(clean);
-    });
-    setLocalBills(remote);
-    lastKnownBillIds = new Set(remote.map(b => String(b.id)));
-  }
-
-  function removeBillFromLocalStorage(billId){
-    const target = String(billId || '');
-    if(!target) return;
-    const current = localBills();
-    const filtered = current.filter(b => String(b?.id || '') !== target && String(b?.billId || '') !== target && String(b?.billNo || '') !== target);
-    if(filtered.length !== current.length){
-      setLocalBills(filtered);
-    }
-  }
-
+  
+  
   async function startBillSync(){
     if(unsubscribeBills) unsubscribeBills();
     remoteReady = false;

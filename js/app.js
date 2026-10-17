@@ -1161,6 +1161,8 @@ const MASTER_INVENTORY = [
       if (ramStorageGrid) ramStorageGrid.classList.toggle('sk-keypad-hidden', currentMobileType === 'Keypad Mobile');
       saveDraft();
       updateBillPreview();
+      const _hv = document.getElementById('billHistoryView');
+      if (_hv && _hv.style.display !== 'none' && typeof renderBillHistory === 'function') renderBillHistory();
     }
 
     /* ================================================================
@@ -1207,10 +1209,7 @@ const MASTER_INVENTORY = [
       return n ? Number(n[1]) : 0;
     }
 
-    function skIsCurrentBillNo(bill) {
-      return /^SK(?:-B)?-\d{4}-\d{3}$/i.test(String(bill?.billNo || '').trim());
-    }
-
+    
     function skNextBillSequence(dateValue, list) {
       const dateKey = skBillDateKey(dateValue);
       const bills = Array.isArray(list) ? list : (typeof savedBills !== 'undefined' ? savedBills : []);
@@ -1370,14 +1369,7 @@ const MASTER_INVENTORY = [
       if (studio && document.getElementById('skRjSparesView')?.style.display !== 'none') return studio;
       return legacy || studio;
     }
-    function loadRepairSparesNoteIntoStudio() {
-      const value = (() => { try { return localStorage.getItem('sk_repair_tools_note') || ''; } catch(e) { return ''; } })();
-      const studio = document.getElementById('skRjSparesNoteInput');
-      const legacy = document.getElementById('repairSparesNoteInput');
-      if (studio) studio.value=value;
-      if (legacy) legacy.value=value;
-    }
-
+    
     function saveRepairSparesNote() {
       const input = getRepairSparesInput();
       if (!input) return;
@@ -1485,6 +1477,9 @@ const MASTER_INVENTORY = [
       localStorage.setItem('sk_shop_name', name);
       localStorage.setItem('sk_shop_addr', addr);
       localStorage.setItem('sk_shop_phone', phone);
+      const _em = document.getElementById('cfgShopEmail'), _gs = document.getElementById('cfgShopGst');
+      if (_em) localStorage.setItem('sk_shop_email', _em.value.trim());
+      if (_gs) localStorage.setItem('sk_shop_gst', _gs.value.trim().toUpperCase());
 
       applyShopConfig();
       showToast("Shop Profile updated!");
@@ -1517,6 +1512,11 @@ const MASTER_INVENTORY = [
       document.getElementById('cfgShopName').value = name;
       document.getElementById('cfgShopAddress').value = addr;
       document.getElementById('cfgShopPhone').value = phone;
+      const _email = localStorage.getItem('sk_shop_email') || '', _gst = localStorage.getItem('sk_shop_gst') || '';
+      const _cEm = document.getElementById('cfgShopEmail'); if (_cEm) _cEm.value = _email;
+      const _cGs = document.getElementById('cfgShopGst'); if (_cGs) _cGs.value = _gst;
+      const _extra = document.getElementById('pvShopExtraDisplay');
+      if (_extra) { const parts = []; if (_gst) parts.push('GSTIN: ' + _gst); if (_email) parts.push(_email); _extra.textContent = parts.join('  •  '); _extra.style.display = parts.length ? 'block' : 'none'; }
 
       document.getElementById('appHeaderTitle').innerText = name;
       document.getElementById('pvShopNameDisplay').innerText = name;
@@ -1524,11 +1524,11 @@ const MASTER_INVENTORY = [
       document.getElementById('pvShopPhoneDisplay').innerText = phone;
 
       const threshold = localStorage.getItem('sk_low_threshold') || '3';
-      document.getElementById('cfgLowStockThreshold').value = threshold;
-      document.getElementById('pillLowStockVal').innerText = threshold;
+      const _cfgLow = document.getElementById('cfgLowStockThreshold'); if (_cfgLow) _cfgLow.value = threshold;
+      const _pillLow = document.getElementById('pillLowStockVal'); if (_pillLow) _pillLow.innerText = threshold;
 
       const terms = localStorage.getItem('sk_terms');
-      if (terms) document.getElementById('cfgTermsConditions').value = terms;
+      const _cfgTerms = document.getElementById('cfgTermsConditions'); if (terms && _cfgTerms) _cfgTerms.value = terms;
     }
 
     function saveLowStockThreshold(val) {
@@ -1902,7 +1902,7 @@ const MASTER_INVENTORY = [
     const SK_APPEARANCE_DEFAULTS = {
       preset:'classic', themeMode:'light', accent:'blue', customHex:'#2563EB',
       surface:'offwhite', cardRadius:'modern', buttonRadius:'modern', cardSurface:'blur',
-      header:'glass', nav:'floating', scale:'normal', aura:true, haptic:true, sound:false, motion:false
+      header:'glass', nav:'floating', scale:'normal', buttonStyle:'solid', aura:true, haptic:true, sound:false, motion:false
     };
     const SK_APPEARANCE_ACCENTS = {
       blue:'#2563EB', violet:'#7C3AED', green:'#059669', rose:'#E11D48',
@@ -1925,7 +1925,9 @@ const MASTER_INVENTORY = [
         const raw=localStorage.getItem(SK_APPEARANCE_KEY);
         if(!raw) return {...SK_APPEARANCE_DEFAULTS};
         const parsed=JSON.parse(raw);
-        return {...SK_APPEARANCE_DEFAULTS,...(parsed&&typeof parsed==='object'?parsed:{})};
+        const merged={...SK_APPEARANCE_DEFAULTS,...(parsed&&typeof parsed==='object'?parsed:{})};
+        if(merged.scale==='comfortable')merged.scale='large';
+        return merged;
       }catch(e){ return {...SK_APPEARANCE_DEFAULTS}; }
     }
     function skAppearanceSave(settings){
@@ -2005,7 +2007,7 @@ const MASTER_INVENTORY = [
       root.style.setProperty('--card-elevation',shadow);
       const cardRadiusMap={sharp:'0px',standard:'8px',modern:'12px',smooth:'16px',pill:'24px'};
       const buttonRadiusMap={sharp:'0px',modern:'8px',smooth:'14px',pill:'999px'};
-      const scaleMap={compact:'.92',normal:'1',comfortable:'1.08'};
+      const scaleMap={compact:'.92',normal:'1',comfortable:'1.1',large:'1.1'};
       root.style.setProperty('--ui-card-radius',cardRadiusMap[settings.cardRadius]||'12px');
       root.style.setProperty('--ui-button-radius',buttonRadiusMap[settings.buttonRadius]||'8px');
       root.style.setProperty('--ui-scale',scaleMap[settings.scale]||'1');
@@ -2024,6 +2026,7 @@ const MASTER_INVENTORY = [
       root.setAttribute('data-ui-card-radius',settings.cardRadius);
       root.setAttribute('data-ui-button-radius',settings.buttonRadius);
       root.setAttribute('data-ui-card-surface',settings.cardSurface);
+      root.setAttribute('data-ui-button-style',settings.buttonStyle||'solid');
       root.style.colorScheme=resolved;
       const hexEl=document.getElementById('skAppearanceHexValue');if(hexEl)hexEl.textContent=accent.toUpperCase();
       const colorEl=document.getElementById('skAppearanceCustomHex');if(colorEl && /^#[0-9A-F]{6}$/i.test(skHex(settings.customHex)))colorEl.value=skHex(settings.customHex);
@@ -2243,25 +2246,8 @@ const MASTER_INVENTORY = [
       if(!silent) showToast("Theme applied: " + theme.toUpperCase());
     }
 
-    function adjustThemeDepth(val) {
-      const depthFactor = val / 100;
-      document.documentElement.style.setProperty('--glass-shadow', `0 4px ${14 * depthFactor}px rgba(37, 99, 235, ${0.12 * depthFactor})`);
-      const label = document.getElementById('depthValueLabel');
-      if (label) label.innerText = val + '%';
-      localStorage.setItem('sk_theme_depth', val);
-    }
-
-    function resetThemeToDefault() {
-      if (window.skResetAppearanceStudio) { skResetAppearanceStudio(); return; }
-      setTheme('light');
-      localStorage.removeItem('sk_theme');
-      localStorage.removeItem('sk_theme_depth');
-      const slider = document.getElementById('themeDepthSlider');
-      if (slider) slider.value = 100;
-      adjustThemeDepth(100);
-      showToast("Theme reset to Classic Light Default!");
-    }
-
+    
+    
     function openItemEditor() {
       const category = currentFilter === 'combo' ? 'combo' : 'glass';
       const categoryField = document.getElementById('editItemCategory');
@@ -2843,7 +2829,7 @@ const MASTER_INVENTORY = [
     function skInitDmyDateInputs(root){
       (root||document).querySelectorAll('input[data-dmy-date]').forEach(function(input){
         if(input.dataset.dmyBound==='1')return;
-        input.dataset.dmyBound='1'; input.type='text'; input.inputMode='numeric'; input.autocomplete='off'; input.placeholder='DD/MM/YYYY';
+        input.dataset.dmyBound='1'; input.type='text'; input.inputMode='text'; input.autocomplete='off'; input.placeholder='DD/MM/YYYY';
         skNormalizeDmyInput(input);
         input.addEventListener('input',function(){
           const digits=this.value.replace(/\D/g,'').slice(0,8);
@@ -2930,7 +2916,6 @@ const MASTER_INVENTORY = [
       setTimeout(function(){
         try{
           document.querySelectorAll('#homeMetricGrid [data-card-id="metric-orders"]').forEach(function(el){el.remove();});
-          if(typeof window.skHideBadTemperedCards==='function')window.skHideBadTemperedCards();
           if(typeof window.skRjRenderHomeMetric==='function' && (window.currentFilter==='home'||document.getElementById('homeMetricGrid')))window.skRjRenderHomeMetric();
           if(typeof window.skUrgentRepairInstall==='function' && document.getElementById('homeMetricGrid'))window.skUrgentRepairInstall();
         }catch(e){}
@@ -2984,18 +2969,17 @@ const MASTER_INVENTORY = [
           {id:'metric-bills',icon:'file-text',label:'Saved Bills',value:String(savedBills.length),tone:'blue',action:"toggleModal('billingModal',true);switchBillTab('history');"},
           {id:'metric-credit',icon:'credit-card',label:'Outstanding',value:moneyHome(outstandingHome),tone:'amber',action:'window.skOpenCreditLedger?.();'},
           {id:'metric-repair',icon:'wrench',label:'Pending Jobs',value:String(pendingRepairsHome.length),tone:'green',action:'window.skOpenPendingRepairJobs?.();'},
-          {id:'metric-low',icon:'package',label:'Low Stock',value:String(lowCountHome),tone:'rose',action:"currentFilter='low';renderCards();window.scrollTo({top:0,behavior:'smooth'});"}
+          {id:'metric-low',icon:'toolbox',label:'Repair Spares Orders',value:'Daily service spares note',small:true,tone:'rose',action:"toggleModal('repairSparesModal',true);"}
         ];
         let metricOrderHome = [];
         try { const oldOrder=JSON.parse(localStorage.getItem('sk_order_homeMetricGrid')||'[]'); if(Array.isArray(oldOrder)) metricOrderHome=oldOrder.map(id=>({'metric-spares':'metric-low','metric-stock':'metric-low','metric-orders':'metric-repair'}[id]||id)); } catch(e) {}
         const orderedMetricDataHome = [...metricDataHome].sort((a,b)=>{const ai=metricOrderHome.indexOf(a.id),bi=metricOrderHome.indexOf(b.id);return (ai<0?999:ai)-(bi<0?999:bi)});
-        const metricHTML = orderedMetricDataHome.map(m => `<button type="button" class="sk-home-v2-metric draggable-card" data-card-id="${m.id}" draggable="true" onclick="${m.action}"><span class="sk-home-v2-metric-icon ${m.tone}">${homeIcon(m.icon)}</span><span class="sk-home-v2-metric-copy"><b>${m.label}</b><strong>${escHome(m.value)}</strong></span><span class="sk-home-v2-metric-arrow">›</span></button>`).join('');
+        const metricHTML = orderedMetricDataHome.map(m => `<button type="button" class="sk-home-v2-metric draggable-card" data-card-id="${m.id}" draggable="true" onclick="${m.action}"><span class="sk-home-v2-metric-icon ${m.tone}">${homeIcon(m.icon)}</span><span class="sk-home-v2-metric-copy"><b>${m.label}</b><strong${m.small?' class="sk-home-v2-metric-sub"':''}>${escHome(m.value)}</strong></span><span class="sk-home-v2-metric-arrow">›</span></button>`).join('');
         const featureDataHome = [
           {id:'card-glass',title:'Tempered Glass',sub:'View All Glass Stock',img:'sk-home-glass.png',icon:'shield',tone:'glass',action:"currentFilter='glass';renderCards();window.scrollTo({top:0,behavior:'smooth'});"},
           {id:'card-display',title:'Used Mobile Inventory',sub:'Add / Update Purchase',img:'sk-home-used-inventory.png',icon:'phone',tone:'used',action:'window.skUsedOpenInventoryPage?.();'},
           {id:'card-used-stock',title:'Used Mobile Stock',sub:'Purchase · Pricing · Sales',img:'sk-home-stock-box.png',icon:'package',tone:'stock',action:'window.skUsedOpen?.();window.skUsedShowManagement?.();'},
           {id:'card-accessories',title:'Accessories',sub:'View OCA & Spares',img:'sk-home-accessories.png',icon:'bolt',tone:'accessories',action:'window.skOpenAccessoriesPage?.();'},
-          {id:'card-repair-spares',title:'Repair Spares Orders',sub:'Daily service spares note',img:'sk-home-repair.png',icon:'toolbox',tone:'repair',action:"toggleModal('repairSparesModal',true);"},
           {id:'card-other-inventory',title:'Other Inventory',sub:'Tools, Items & Others',img:'sk-home-other-stock.png',icon:'package',tone:'other',action:"currentFilter='all';renderCards();window.scrollTo({top:0,behavior:'smooth'});"}
         ];
         let featureOrderHome = [];
@@ -3007,7 +2991,7 @@ const MASTER_INVENTORY = [
           {icon:'wrench',label:'New Repair',tone:'rose',action:'window.skOpenRepairJobs?.();'},
           {icon:'users',label:'Add Customer',tone:'green',action:'window.skOpenCreditLedger?.();'},
           {icon:'package-plus',label:'Add Product',tone:'purple',action:'openItemEditor();'},
-          {icon:'chart',label:'Today Report',tone:'orange',action:"toggleModal('billingModal',true);switchBillTab('history');"}
+          {icon:'chart',label:'Today Report',tone:'orange',action:'window.skOpenDailyReport?.();'}
         ].map(q => `<button type="button" class="sk-home-v2-quick ${q.tone}" onclick="${q.action}"><span>${homeIcon(q.icon)}</span><b>${q.label}</b></button>`).join('');
         const latestBillHome = Array.isArray(savedBills) ? savedBills[0] : null;
         const latestRepairHome = pendingRepairsHome[0] || repairJobsHome[0] || null;
@@ -3155,16 +3139,7 @@ const MASTER_INVENTORY = [
       renderCards();
     }
 
-    function filterCategory(cat) {
-      currentFilter = cat;
-      document.querySelectorAll('.bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
-      if (cat === 'all' || cat === 'home') document.getElementById('navHome')?.classList.add('active');
-      if (cat === 'glass') document.getElementById('navGlass')?.classList.add('active');
-      if (cat === 'combo') document.getElementById('navCombo')?.classList.add('active');
-      renderCards();
-      if (typeof window.skAppHistoryFilter === 'function') window.skAppHistoryFilter(cat);
-    }
-
+    
     function updateStock(id, delta) {
       const item = inventory.find(i => i.id === id);
       if (!item) return;
@@ -3506,13 +3481,20 @@ const MASTER_INVENTORY = [
         if(!b)return false; const values=[b.custName,b.phone,b.model,b.id,b.billNo].map(v=>String(v||''));
         const matchesQuery=!q||values.join(' ').toLowerCase().includes(q); const matchesPay=payFilter?String(b.payMode||'')===payFilter:true; let matchesDate=true;
         if(dateFilter){const p=dateFilter.split('-');if(p.length===3){const wanted=p[0]+p[1].padStart(2,'0')+p[2].padStart(2,'0');matchesDate=skBillDateKey(b.date)===wanted;}}
-        return matchesQuery&&matchesPay&&matchesDate;
+        const billType=['New Mobile','Used Mobile','Keypad Mobile'].includes(b.mobileType)?b.mobileType:'New Mobile';
+        const matchesType=billType===(typeof currentMobileType==='string'?currentMobileType:'New Mobile');
+        return matchesQuery&&matchesPay&&matchesDate&&matchesType;
       });
-      if(!filtered.length){container.innerHTML=`<div class="empty-state">${source.length?'No saved billing history matches this filter.':'No saved billing history found.'}</div>`;return;}
+      if(!filtered.length){container.innerHTML=`<div class="empty-state">${source.length?'No saved '+(typeof currentMobileType==='string'?currentMobileType:'New Mobile')+' bills match this filter.':'No saved billing history found.'}</div>`;return;}
       filtered.forEach(b=>{
         const item=document.createElement('article'); item.className='bill-history-card';
         const billId=String(b.id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); const displayBillNo=b.billNo||skBillNumberFromDateSeq(b.date,skExistingBillSeq(b)||1,false); const safePrice=Number(b.price)||0;
-        item.innerHTML=`<div class="bill-history-main"><div class="bill-history-name">${String(b.custName||'Customer')} (${String(b.model||'---')})</div><div class="bill-history-meta"><span class="bill-history-meta-item">🧾 ${displayBillNo}</span><span class="bill-history-meta-item">•</span><span class="bill-history-meta-item">📞 ${String(b.phone||'---')}</span><span class="bill-history-meta-item">📅 ${skBillUiDate(b.date||'---')}</span><span class="bill-history-pay-mode">${String(b.payMode||'Cash')}</span></div><div class="bill-history-amount">₹${safePrice.toLocaleString('en-IN')}</div></div><div class="bill-history-actions"><button type="button" class="bill-history-view" onclick="viewSavedBill(savedBills.findIndex(x=>x&&x.id==='${billId}'))" title="View Bill" aria-label="View bill">👁️</button><button type="button" class="bill-history-edit" onclick="editSavedBill(savedBills.findIndex(x=>x&&x.id==='${billId}'))" title="Edit Bill" aria-label="Edit bill">✏️</button><button type="button" class="bill-history-delete" onclick="deleteBillSafely('${billId}')" title="Delete Bill" aria-label="Delete bill">🗑️</button></div>`;
+        item.innerHTML=`<div class="bill-history-main"><div class="bill-history-name">${String(b.custName||'Customer')} (${String(b.model||'---')})</div><div class="bill-history-meta"><span class="bill-history-meta-item">🧾 ${displayBillNo}</span><span class="bill-history-meta-item">•</span><span class="bill-history-meta-item">📞 ${String(b.phone||'---')}</span><span class="bill-history-meta-item">📅 ${skBillUiDate(b.date||'---')}</span><span class="bill-history-pay-mode">${String(b.payMode||'Cash')}</span></div><div class="bill-history-amount">₹${safePrice.toLocaleString('en-IN')}</div></div><div class="bill-history-actions"><button type="button" class="bill-history-edit" onclick="editSavedBill(savedBills.findIndex(x=>x&&x.id==='${billId}'))" title="Edit Bill" aria-label="Edit bill">✏️</button><button type="button" class="bill-history-delete" onclick="deleteBillSafely('${billId}')" title="Delete Bill" aria-label="Delete bill">🗑️</button></div>`;
+        item.style.cursor='pointer';
+        item.addEventListener('click',function(e){
+          if(e.target.closest('.bill-history-actions'))return;
+          viewSavedBill(savedBills.findIndex(x=>x&&x.id===b.id));
+        });
         container.appendChild(item);
       });
     }
@@ -3707,7 +3689,7 @@ function viewSavedBill(idx) {
       container.innerHTML = '';
 
       const wrapper = document.createElement('div');
-      wrapper.style.cssText = "background:#fff;color:#1e293b;padding:20px;border-radius:18px;font-family:'Plus Jakarta Sans',sans-serif;";
+      wrapper.style.cssText = "background:transparent;color:#1e293b;padding:4px 0;font-family:'Plus Jakarta Sans',sans-serif;";
 
       const header = document.createElement('div');
       header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid #edf0f6;padding-bottom:12px;margin-bottom:12px;gap:14px;';
@@ -3726,16 +3708,18 @@ function viewSavedBill(idx) {
       meta.style.cssText = 'text-align:right;font-size:.75rem;';
       meta.innerHTML = `<strong>Bill No:</strong> ${String(b.billNo || skBillNumberFromDateSeq(b.date, skExistingBillSeq(b) || 1, false))}<br><strong>Date:</strong> ${String(skBillUiDate(b.date || ''))}`;
 
-      header.append(backBtn, title, meta);
+      header.append(backBtn);
 
-      const previewClone = source.cloneNode(true);
+      // Same markup as PDF / WhatsApp / Print, so the saved bill looks identical.
+      const previewClone = skCloneLiveInvoiceForOutput() || source.cloneNode(true);
       previewClone.removeAttribute('id');
       previewClone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-      previewClone.style.width = '100%';
-      previewClone.style.maxWidth = '100%';
-      previewClone.style.margin = '0';
-      previewClone.style.boxShadow = 'none';
-      previewClone.style.borderRadius = '0';
+      previewClone.classList.add('sk-invoice-paper');
+      previewClone.classList.remove('sk-invoice-export-root');
+      previewClone.style.width = '';
+      previewClone.style.maxWidth = '';
+      previewClone.style.margin = '';
+      previewClone.style.padding = '';
 
       const actions = document.createElement('div');
       actions.style.cssText = 'display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;';
@@ -3769,6 +3753,7 @@ function viewSavedBill(idx) {
       container.appendChild(wrapper);
 
       toggleModal('viewBillModal', true);
+      if (typeof skFitInvoicePaper === 'function') { skFitInvoicePaper(previewClone); setTimeout(() => skFitInvoicePaper(previewClone), 120); }
     }
 
     function closeViewedBillAndReturn(){
@@ -3893,6 +3878,28 @@ function viewSavedBill(idx) {
       document.addEventListener('click',()=>{if(initialized)setTimeout(()=>{const key=String(document.getElementById('pvBillNo')?.textContent||document.getElementById('pvBillNo')?.innerText||'current').trim()||'current';const store=readStore();applySignatures(store[key]);refreshLauncher();},80);},true);
     })();
 
+    // One fixed 540px "paper" layout is used by Live Preview, Saved Bill view,
+    // PDF, WhatsApp and Print. Screens only scale it, so every output matches.
+    function skFitInvoicePaper(card) {
+      try {
+        if (!card || !card.parentElement) return;
+        const w = card.parentElement.clientWidth;
+        if (!w) return;
+        const z = Math.max(0.3, Math.min(1.25, w / 540));
+        card.style.zoom = String(Math.round(z * 1000) / 1000);
+      } catch (_) {}
+    }
+    function skFitAllInvoicePapers() {
+      document.querySelectorAll('.sk-invoice-paper').forEach((c) => { if (!c.closest('.sk-invoice-export-holder')) skFitInvoicePaper(c); });
+    }
+    window.addEventListener('resize', skFitAllInvoicePapers);
+    document.addEventListener('DOMContentLoaded', () => {
+      const live = document.getElementById('printableInvoiceCard');
+      if (live && live.parentElement && window.ResizeObserver) new ResizeObserver(() => skFitInvoicePaper(live)).observe(live.parentElement);
+      skFitAllInvoicePapers();
+    });
+    setTimeout(skFitAllInvoicePapers, 600);
+
     function skCloneLiveInvoiceForOutput() {
       const source = document.getElementById('printableInvoiceCard');
       if (!source) return null;
@@ -3923,8 +3930,9 @@ function viewSavedBill(idx) {
       root.id = 'printableInvoiceCard';
       const mobileTypeText = String(previewClone.querySelector('#pvMobileType')?.textContent || 'New Mobile').trim().toLowerCase();
       root.dataset.mobileType = mobileTypeText.includes('used') ? 'used' : mobileTypeText.includes('keypad') ? 'keypad' : 'new';
-      root.style.width = '774px';
-      root.style.maxWidth = '774px';
+      root.classList.add('sk-invoice-paper');
+      root.style.width = '540px';
+      root.style.maxWidth = '540px';
       root.style.minWidth = '0';
       root.style.margin = '0 auto';
       root.style.padding = '0';
@@ -4045,14 +4053,14 @@ function viewSavedBill(idx) {
 
     function skGetUnifiedInvoicePdfOptions(filename) {
       return {
-        margin: [10, 10, 10, 10],
+        margin: [8, 8, 8, 8],
         filename,
         image: { type: 'jpeg', quality: 0.96 },
         html2canvas: {
           scale: 1.5,
           useCORS: true,
           backgroundColor: '#ffffff',
-          windowWidth: 794,
+          windowWidth: 540,
           scrollX: 0,
           scrollY: 0,
           logging: false,
@@ -4068,7 +4076,7 @@ function viewSavedBill(idx) {
       holder.className = 'sk-invoice-export-holder';
       holder.setAttribute('aria-hidden', 'true');
       holder.style.cssText = [
-        'position:fixed','left:0','top:0','width:794px','max-width:794px',
+        'position:fixed','left:0','top:0','width:540px','max-width:540px',
         'height:auto','padding:0','margin:0','background:#ffffff','z-index:-1',
         'pointer-events:none','opacity:1','visibility:visible','overflow:visible',
         'contain:layout style'
@@ -4129,20 +4137,25 @@ function viewSavedBill(idx) {
       if (!clone) { showToast?.('Live Invoice Preview not found'); return; }
       const w = window.open('', '_blank');
       if (!w) { showToast?.('Please allow popups to print!'); return; }
-      const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"],style'))
-        .map(el => el.tagName.toLowerCase() === 'link'
-          ? `<link rel="stylesheet" href="${el.href}">`
-          : `<style>${el.textContent || ''}</style>`).join('');
+      // Inline every stylesheet so the print window never waits for CSS files.
+      const styles = Array.from(document.styleSheets).map((sheet) => {
+        try {
+          const css = Array.from(sheet.cssRules).map(r => r.cssText).join('\n');
+          return `<style>${css}</style>`;
+        } catch (_) {
+          return sheet.href ? `<link rel="stylesheet" href="${sheet.href}">` : '';
+        }
+      }).join('');
       const emi = clone.querySelector('#pvEmiScheduleSection');
       if (emi && emi.style.display !== 'none') { emi.style.breakBefore = 'page'; emi.style.pageBreakBefore = 'always'; }
-      clone.style.cssText = 'width:100%;max-width:100%;margin:0;padding:0;background:#fff;color:#1e293b;box-sizing:border-box;font-family:"Plus Jakarta Sans",Arial,sans-serif;';
+      clone.style.cssText = 'width:540px;max-width:540px;margin:0 auto;padding:0;background:#fff;color:#1e293b;box-sizing:border-box;font-family:"Plus Jakarta Sans",Arial,sans-serif;';
       w.document.open();
       w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>SK MOBILES - Invoice</title>${styles}<style>
 @page{size:A4 portrait;margin:10mm}
 html,body{margin:0!important;padding:0!important;background:#fff!important;color:#1e293b!important;overflow:visible!important;width:100%!important;}
 body{font-family:"Plus Jakarta Sans",Arial,sans-serif!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
 .print-preview-host{width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;background:#fff!important;}
-#printableInvoiceCard{width:100%!important;max-width:100%!important;margin:0 auto!important;padding:0!important;box-sizing:border-box!important;background:#fff!important;color:#1e293b!important;box-shadow:none!important;}
+#printableInvoiceCard{width:540px!important;max-width:540px!important;margin:0 auto!important;box-sizing:border-box!important;background:#fff!important;color:#1e293b!important;box-shadow:none!important;zoom:1.3!important;}
 .sk-invoice-export-root #invoiceMainSheet > div:has(> div > #pvCustName)::before{content:none!important;display:none!important;}
 .sk-print-mobile-type-badge{display:inline-flex!important;align-items:center!important;min-height:28px!important;width:max-content!important;box-sizing:border-box!important;margin:0 0 9px!important;padding:5px 12px!important;border:1px solid #93c5fd!important;border-radius:9px!important;background:#eff6ff!important;color:#1d4ed8!important;font-size:11px!important;line-height:1!important;font-weight:900!important;letter-spacing:.035em!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important;}
 .sk-print-mobile-type-badge[data-type="used"]{border-color:#f59e0b!important;background:#fef3c7!important;color:#92400e!important;}
@@ -4230,14 +4243,35 @@ img{max-width:100%!important;}
     const diff=ts(b)-ts(a);
     return diff || String(b?.id||'').localeCompare(String(a?.id||''));
   }
+  function rjReceivedTs(j){
+    const iso=rjToISODate(String(j?.date||''));
+    const d=iso?Date.parse(iso):NaN;
+    return Number.isNaN(d)?0:d;
+  }
+  function rjIsUrgent(j){ return String(j?.workType||'Normal').trim().toLowerCase().includes('urgent'); }
+  /* Order depends only on urgency and the received date, never on updatedAt,
+     so changing a job's status leaves its box where it is. */
   function getPending(){
     return load().filter(isPending).sort((a,b)=>{
-      const au=String(a?.workType||'Normal').trim().toLowerCase().includes('urgent');
-      const bu=String(b?.workType||'Normal').trim().toLowerCase().includes('urgent');
+      const au=rjIsUrgent(a), bu=rjIsUrgent(b);
       if(au!==bu) return au?-1:1;
-      return rjSortNewest(a,b);
+      return (rjReceivedTs(b)-rjReceivedTs(a))
+        || String(b?.createdAt||'').localeCompare(String(a?.createdAt||''))
+        || String(b?.id||'').localeCompare(String(a?.id||''));
     });
   }
+  function rjDaysPending(j){
+    const t=rjReceivedTs(j); if(!t)return null;
+    const now=new Date(); now.setHours(0,0,0,0);
+    return Math.max(0,Math.round((now.getTime()-t)/86400000));
+  }
+  function rjAgeLabel(j){
+    const n=rjDaysPending(j); if(n===null)return '';
+    const txt=n===0?'Today':n===1?'1 day':n+' days';
+    return `<span class="sk-rj-age${n>=7?' old':''}">⏱ ${txt}</span>`;
+  }
+  window.__skRjFilter=window.__skRjFilter||'all';
+  window.skRjSetFilter=function(f){window.__skRjFilter=f;skRjRenderJobs();};
 
   function clearForm(){
     document.getElementById('skRjForm')?.reset();
@@ -4608,42 +4642,55 @@ img{max-width:100%!important;}
   };
 
   window.skRjCallPhone=function(phone){
-    const digits=String(phone||'').replace(/\\D/g,'');
+    const digits=String(phone||'').replace(/\D/g,'');
     if(!digits){ if(typeof showToast==='function')showToast('Repair phone number not available'); return; }
     window.location.href='tel:'+(digits.length===10?'91'+digits:digits);
   };
   window.skRjWhatsAppReady=function(id){
     const j=load().find(x=>x.id===id); if(!j)return;
-    const digits=String(j.phone||'').replace(/\\D/g,'');
+    const digits=String(j.phone||'').replace(/\D/g,'');
     if(!digits){ if(typeof showToast==='function')showToast('Repair phone number not available'); return; }
     const name=String(j.customer||'Customer').trim();
-    const msg=`Dear Mr./Mrs. ${name}, your mobile is ready. Your mobile is ready. Please visit the shop and collect it. Thank you - SK MOBILES.`;
+    const bal=Math.max(0,Number(j.outstandingAmount ?? (Number(j.estimate||0)-Number(j.discountAmount||0)-Number(j.paidAmount||0)))||0);
+    const shop=localStorage.getItem('sk_shop_name')||'SK MOBILES';
+    const msg=`Dear ${name}, your ${String(j.model||'mobile').trim()} repair is completed and ready.${bal>0?' Balance to pay: ₹'+bal.toLocaleString('en-IN')+'.':''} Please visit the shop to collect it. Thank you - ${shop}.`;
     window.open('https://wa.me/'+(digits.length===10?'91'+digits:digits)+'?text='+encodeURIComponent(msg),'_blank');
   };
 
   window.skRjShowDetail=function(id){
     const j=load().find(x=>x.id===id); if(!j)return;
+    const _fp=Math.max(0,Number(j.estimate||0)-Number(j.discountAmount||0));
+    const _bal=Math.max(0,Number(j.outstandingAmount ?? (Number(j.estimate||0)-Number(j.discountAmount||0)-Number(j.paidAmount||0)))||0);
+    const _hasPh=String(j.phone||'').replace(/\D/g,'').length>0;
+    const _st=String(j.status||'').toLowerCase().replace(/[^a-z]+/g,'-');
+    const _ic={call:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>',wa:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.6-4.8A8.5 8.5 0 1 1 8 19.4z"/><path d="M9 9c0 3 3 6 6 6l1.2-1.6-2-1-.9.7a4 4 0 0 1-1.8-1.8l.7-.9-1-2z"/></svg>',cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',tool:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3.5 17.3a1.8 1.8 0 0 0 2.5 2.5l5.8-5.8a4 4 0 0 0 5.2-5.4l-2.5 2.5-2.3-.5-.5-2.3z"/></svg>',ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/></svg>'};
     document.getElementById('skRepairDetailContent').innerHTML=`
-      <div style="background:var(--model-bg);border:1px solid var(--card-border);border-radius:15px;padding:12px">
-        <div style="font-weight:900;font-size:.95rem">${esc(j.customer)} · ${esc(j.model)}</div>
-        <div style="font:inherit;font-size:12px;color:var(--text-muted);margin-top:5px">📱 Repair Phone: ${esc(j.phone||'—')}</div>
-        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
-          <button type="button" class="submit-btn" style="flex:1;min-width:135px;background:#2563eb" onclick="skRjCallPhone('${esc(j.phone||'')}')">📞 Call Repair Phone</button>
-          <button type="button" class="submit-btn whatsapp-green" style="flex:1;min-width:135px" onclick="skRjWhatsAppReady('${esc(j.id||'')}')">💬 WhatsApp</button>
+      <div class="rjd">
+        <div class="rjd-hero">
+          <div class="rjd-device" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="19" y="5" width="26" height="54" rx="6" fill="#1e293b"/><rect x="22" y="11" width="20" height="38" rx="2.5" fill="#93c5fd"/><path d="M22 36l8-9 6 6 6-8v18.5a2.5 2.5 0 0 1-2.5 2.5h-15a2.5 2.5 0 0 1-2.5-2.5z" fill="#3b82f6"/><circle cx="32" cy="54" r="1.8" fill="#64748b"/></svg></div>
+          <div class="rjd-who"><b>${esc(j.customer)}</b><span>${esc(j.model)}</span><small>${_ic.call}${esc(j.phone||'No phone')}</small></div>
         </div>
-        <div style="margin-top:9px;font-size:.76rem"><b>Problem / Repair:</b><br>${esc(j.problem)}</div>
-        <div style="margin-top:8px;font:inherit;font-size:12px;color:var(--text-muted)">📅 ${rjFmtDate(j.date)} · Status: <b>${esc(j.status)}</b> · Work: <b>${esc(j.workType)}</b></div>
-        ${j.schedule?`<div style="margin-top:6px;font-size:.72rem">🗓️ Scheduled: <b>${esc(j.schedule)}</b></div>`:''}
-        <div class="sk-rj-detail-finance">
-          <div><span>Original estimate</span><b>₹${Number(j.estimate||0).toLocaleString('en-IN')}</b></div>
-          ${Number(j.discountAmount||0)>0?`<div><span>Total discount</span><b style="color:#16a34a">− ₹${Number(j.discountAmount||0).toLocaleString('en-IN')}</b></div>`:''}
-          <div><span>Final payable</span><b>₹${Math.max(0,Number(j.estimate||0)-Number(j.discountAmount||0)).toLocaleString('en-IN')}</b></div>
-          <div><span>Total paid</span><b>₹${Number(j.paidAmount||0).toLocaleString('en-IN')}</b></div>
-          <div class="sk-rj-finance-due"><span>Balance to pay</span><b>₹${Math.max(0,Number(j.outstandingAmount ?? (Number(j.estimate||0)-Number(j.discountAmount||0)-Number(j.paidAmount||0)))||0).toLocaleString('en-IN')}</b></div>
+        <div class="rjd-actions">
+          <button type="button" class="rjd-btn call" ${_hasPh?'':'disabled'} onclick="skRjCallPhone('${esc(j.phone||'')}')">${_ic.call}<span>Call Repair Phone</span></button>
+          <button type="button" class="rjd-btn wa" ${_hasPh?'':'disabled'} onclick="skRjWhatsAppReady('${esc(j.id||'')}')">${_ic.wa}<span>WhatsApp</span></button>
+        </div>
+        <div class="rjd-problem"><small>PROBLEM / REPAIR</small><p>${esc(j.problem||'—')}</p></div>
+        <div class="rjd-chips">
+          <div class="rjd-chip"><small>DATE</small><b>${_ic.cal}${rjFmtDate(j.date)}</b></div>
+          <div class="rjd-chip st-${_st}"><small>STATUS</small><b>${_ic.ok}${esc(j.status||'—')}</b></div>
+          <div class="rjd-chip"><small>WORK</small><b>${_ic.tool}${esc(j.workType||'—')}</b></div>
+        </div>
+        ${j.schedule?`<div class="rjd-sched">${_ic.cal}<span>Scheduled: <b>${esc(j.schedule)}</b></span></div>`:''}
+        <div class="rjd-money sk-rj-detail-finance">
+          <div class="rjd-card"><span>Original estimate</span><b>₹${Number(j.estimate||0).toLocaleString('en-IN')}</b></div>
+          ${Number(j.discountAmount||0)>0?`<div class="rjd-card"><span>Total discount</span><b style="color:#16a34a">− ₹${Number(j.discountAmount||0).toLocaleString('en-IN')}</b></div>`:''}
+          <div class="rjd-card"><span>Final payable</span><b>₹${_fp.toLocaleString('en-IN')}</b></div>
+          <div class="rjd-card paid"><span>Total paid</span><b>₹${Number(j.paidAmount||0).toLocaleString('en-IN')}</b></div>
+          <div class="rjd-card due sk-rj-finance-due"><span>Balance to pay</span><b>₹${_bal.toLocaleString('en-IN')}</b></div>
         </div>
         ${Array.isArray(j.discountHistory)&&j.discountHistory.length?`<div class="sk-rj-payment-summary"><b>Discount history</b>${j.discountHistory.map(d=>`<div><span>${esc(d.date?rjFmtDate(d.date):'Date not recorded')} · ${esc(d.reason||'Discount')}</span><span>− ₹${Number(d.amount||0).toLocaleString('en-IN')}</span></div>`).join('')}</div>`:''}
         ${Array.isArray(j.paymentHistory)&&j.paymentHistory.length?`<div class="sk-rj-payment-summary"><b>Payments received</b>${j.paymentHistory.map(p=>`<div><span>${esc(p.date?rjFmtDate(p.date):'Date not recorded')}</span><span>₹${Number(p.amount||0).toLocaleString('en-IN')}</span></div>`).join('')}</div>`:''}
-        ${j.note?`<div style="margin-top:8px;font-size:.72rem"><b>Note:</b> ${esc(j.note)}</div>`:''}
+        ${j.note?`<div class="rjd-note"><small>NOTE</small><p>${esc(j.note)}</p></div>`:''}
       </div>`;
     document.getElementById('skRepairDetailModal').classList.add('active');
     if(typeof window.skAppHistoryRepairOpen==='function')window.skAppHistoryRepairOpen('skRepairDetailModal',{detailId:id});
@@ -4780,10 +4827,19 @@ img{max-width:100%!important;}
 
   window.skRjRenderJobs=function(){
     const list=document.getElementById('skRjJobsList'); if(!list)return;
-    let a=getPending();
+    const allPending=getPending();
+    let a=allPending;
+    let bar=document.getElementById('skRjFilterBar');
+    if(!bar){bar=document.createElement('div');bar.id='skRjFilterBar';bar.className='sk-rj-filter-bar';list.insertAdjacentElement('beforebegin',bar);}
+    const cnt=f=>f==='urgent'?allPending.filter(rjIsUrgent).length:f==='all'?allPending.length:allPending.filter(j=>j.status===f).length;
+    if(window.__skRjFilter!=='all' && !cnt(window.__skRjFilter)) window.__skRjFilter='all';
+    bar.innerHTML=[['all','All'],['urgent','🚨 Urgent'],['Received','Received'],['Checking','Checking'],['Repairing','Repairing']]
+      .map(([k,l])=>`<button type="button" class="sk-rj-chip${window.__skRjFilter===k?' active':''}" onclick="skRjSetFilter('${k}')">${l} <b>${cnt(k)}</b></button>`).join('');
+    if(window.__skRjFilter==='urgent') a=allPending.filter(rjIsUrgent);
+    else if(window.__skRjFilter!=='all') a=allPending.filter(j=>j.status===window.__skRjFilter);
     const focusId=String(window.__skUrgentFocusId||'');
-    if(focusId) a.sort((x,y)=>(String(x.id)===focusId?-1:0)-(String(y.id)===focusId?-1:0));
-    document.getElementById('skRjPendingCount').textContent=a.length;
+    if(focusId) a=[...a].sort((x,y)=>(String(x.id)===focusId?-1:0)-(String(y.id)===focusId?-1:0));
+    document.getElementById('skRjPendingCount').textContent=allPending.length;
     const hc=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const hEl=document.getElementById('skRjHistoryCount'); if(hEl) hEl.textContent=hc;
     list.innerHTML=a.length? a.map(j=>`
@@ -4791,7 +4847,7 @@ img{max-width:100%!important;}
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')}<br><span class="sk-rj-problem-highlight">${esc(j.problem)}</span></div>
-          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div></div>
+          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''} ${rjAgeLabel(j)}</div></div>
           <div class="sk-rj-status-dealer-row"><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span>${skRjDealerControl(j)}</div>
         </div>
         <div class="sk-rj-actions">
@@ -4828,7 +4884,7 @@ img{max-width:100%!important;}
           <span class="sk-rj-status">${esc(j.status)}</span>
           <button type="button" class="sk-rj-edit" onclick="skRjEdit('${j.id}')">✏️ Edit</button>
           <button type="button" class="sk-rj-delete" onclick="skRjDelete('${j.id}')">🗑️ Delete</button>
-          ${j.status==='Ready'?`<button type="button" class="sk-rj-deliver" onclick="skRjDeliver('${j.id}')">🚚 Mark Delivered</button>`:`<button type="button" class="sk-rj-rework" onclick="skRjRework('${j.id}')">↩️ Rework</button>`}
+          ${j.status==='Ready'?`<button type="button" class="sk-rj-wa" onclick="skRjWhatsAppReady('${j.id}')">💬 Ready message</button><button type="button" class="sk-rj-deliver" onclick="skRjDeliver('${j.id}')">🚚 Mark Delivered</button>`:`<button type="button" class="sk-rj-rework" onclick="skRjRework('${j.id}')">↩️ Rework</button>`}
         </div>
         <div style="margin-top:7px;font-size:.65rem;color:var(--primary);font-weight:800">Tap to open full repair details →</div>
       </div>`;
@@ -4855,7 +4911,16 @@ img{max-width:100%!important;}
     const grid=document.getElementById('homeMetricGrid'); if(!grid)return;
     const jobs=load().filter(j=>['Received','Checking','Repairing'].includes(String(j.status||'')));
     const card=grid.querySelector('[data-card-id="metric-repair"]');
-    if(card){const value=card.querySelector('strong');if(value)value.textContent=String(jobs.length);return;}
+    if(card){
+      const value=card.querySelector('strong');if(value)value.textContent=String(jobs.length);
+      const urgent=jobs.filter(rjIsUrgent).length;
+      let badge=card.querySelector('.sk-urgent-badge');
+      if(urgent){
+        if(!badge){badge=document.createElement('i');badge.className='sk-urgent-badge';card.appendChild(badge);}
+        badge.textContent='🚨 '+urgent+' urgent';
+      }else if(badge){badge.remove();}
+      return;
+    }
     const old=document.getElementById('skHomeRepairMetric'); old?.remove();
   };
 
@@ -6413,180 +6478,6 @@ img{max-width:100%!important;}
 (function(){
   'use strict';
 
-  function skFixShopBrand(){
-    try{
-      var saved = localStorage.getItem('sk_shop_name') || '';
-      if (/hindusthan|hindustan|surgical/i.test(saved)) {
-        localStorage.setItem('sk_shop_name','SK MOBILES');
-      }
-      var cfg = document.getElementById('cfgShopName');
-      if(cfg && /hindusthan|hindustan|surgical/i.test(cfg.value || '')){
-        cfg.value='SK MOBILES';
-      }
-      if(typeof applyShopConfig === 'function'){
-        applyShopConfig();
-      } else {
-        var h=document.getElementById('appHeaderTitle');
-        if(h) h.innerText='SK MOBILES';
-        var p=document.getElementById('pvShopNameDisplay');
-        if(p) p.innerText='SK MOBILES';
-      }
-    }catch(e){}
-  }
-
-  function skBootFix(){
-    skFixShopBrand();
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded',skBootFix,{once:true});
-  }else{
-    skBootFix();
-  }
-
-  window.addEventListener('load',function(){
-    skFixShopBrand();
-  },{once:true});
-})();
-
-(function(){
-  'use strict';
-
-  /* 1) Restore the user's SK MOBILES shop phone number if old browser data contains another number. */
-  function skFixBillingPhone(){
-    try{
-      var correctPhone='766 766 6362';
-      var saved=localStorage.getItem('sk_shop_phone') || '';
-      if(saved !== correctPhone) localStorage.setItem('sk_shop_phone',correctPhone);
-      var el=document.getElementById('cfgShopPhone');
-      if(el) el.value=correctPhone;
-      var pv=document.getElementById('pvShopPhoneDisplay');
-      if(pv) pv.textContent=correctPhone;
-    }catch(e){}
-  }
-
-  /* 2) Mark clearly non-mobile/surgical records so only those records disappear from Tempered Glass.
-        Other inventory categories and normal mobile tempered records are untouched. */
-  var badWords=[
-    'hospital','surgical','surgery','furniture','equipment','patient','stretcher',
-    'privacy screen','step stool','scalpel','wheelchair','trolley','bedside','instrument',
-    'catheter','dressing','oxygen cylinder','oxygen','gloves','mask','apron','medical',
-    'orthopedic','ortho','holloware','ent','operating table','ot table','iv stand','walker'
-  ];
-
-  function skIsBadTemperedItem(item){
-    if(!item || item.category!=='glass') return false;
-    var text=[item.title,item.name,item.spec,item.note].concat(Array.isArray(item.models)?item.models:[]).join(' ').toLowerCase();
-    for(var i=0;i<badWords.length;i++) if(text.indexOf(badWords[i])!==-1) return true;
-    return false;
-  }
-
-  function skCleanTemperedInventory(){
-    try{
-      if(typeof inventory==='undefined' || !Array.isArray(inventory)) return;
-      var changed=false;
-      var clean=[];
-      var glassCount=0;
-      inventory.forEach(function(item){
-        if(item && item.category==='glass'){
-          glassCount++;
-          if(skIsBadTemperedItem(item)){ changed=true; return; }
-        }
-        clean.push(item);
-      });
-      if(changed){
-        var remainingGlass=clean.filter(function(x){return x && x.category==='glass';});
-        if(remainingGlass.length===0 && typeof MASTER_INVENTORY!=='undefined' && Array.isArray(MASTER_INVENTORY)){
-          MASTER_INVENTORY.filter(function(x){return x && x.category==='glass';}).forEach(function(x){
-            clean.push(JSON.parse(JSON.stringify(x)));
-          });
-        }
-        inventory=clean;
-        if(typeof saveInventory==='function') saveInventory();
-      }
-    }catch(e){}
-  }
-
-  function skHideBadTemperedCards(){
-    var container=document.getElementById('cardsContainer');
-    if(!container) return;
-    container.classList.toggle('sk-tempered-clean-view', String(window.currentFilter||'').toLowerCase()==='glass');
-    if(String(window.currentFilter||'').toLowerCase()!=='glass') return;
-    var cards=container.querySelectorAll('.glass-card');
-    cards.forEach(function(card){
-      var txt=(card.textContent||'').toLowerCase();
-      var bad=false;
-      for(var i=0;i<badWords.length;i++){ if(txt.indexOf(badWords[i])!==-1){bad=true;break;} }
-      card.classList.toggle('sk-surgical-tempered-card',bad);
-    });
-  }
-
-  function skRunFix(){
-    skFixBillingPhone();
-    skCleanTemperedInventory();
-    skHideBadTemperedCards();
-  }
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',skRunFix,{once:true});
-  else skRunFix();
-  window.addEventListener('load',skRunFix,{once:true});
-
-  window.skHideBadTemperedCards=skHideBadTemperedCards;
-})();
-
-(function(){
-  'use strict';
-
-  var RESET_KEY='sk_tempered_inventory_clean_reset_v1';
-  var BAD_WORDS=[
-    'hospital','surgical','surgery','furniture','equipment','patient','stretcher',
-    'privacy screen','step stool','scalpel','wheelchair','trolley','bedside','instrument',
-    'catheter','dressing','oxygen cylinder','oxygen','gloves','mask','apron','medical',
-    'orthopedic','ortho','holloware','ent','operating table','ot table','iv stand','walker'
-  ];
-
-  function isSurgical(item){
-    if(!item) return false;
-    var text=[item.title,item.name,item.spec,item.note].concat(Array.isArray(item.models)?item.models:[]).join(' ').toLowerCase();
-    for(var i=0;i<BAD_WORDS.length;i++) if(text.indexOf(BAD_WORDS[i])!==-1) return true;
-    return false;
-  }
-
-  function cleanOnce(){
-    try{
-      if(localStorage.getItem(RESET_KEY)==='1') return;
-      if(typeof inventory==='undefined' || !Array.isArray(inventory)) return;
-      if(typeof MASTER_INVENTORY==='undefined' || !Array.isArray(MASTER_INVENTORY)) return;
-
-      /* Keep every non-glass mobile inventory record, remove surgical records,
-         and replace the entire existing glass set with the original tempered-glass inventory. */
-      var clean=[];
-      inventory.forEach(function(item){
-        if(isSurgical(item)) return;
-        if(item && item.category==='glass') return;
-        clean.push(item);
-      });
-
-      MASTER_INVENTORY.forEach(function(item){
-        if(item && item.category==='glass' && !isSurgical(item)){
-          clean.push(JSON.parse(JSON.stringify(item)));
-        }
-      });
-
-      inventory=clean;
-      if(typeof saveInventory==='function') saveInventory();
-      localStorage.setItem(RESET_KEY,'1');
-      if(typeof renderCards==='function') renderCards();
-    }catch(e){}
-  }
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',cleanOnce,{once:true});
-  else cleanOnce();
-})();
-
-(function(){
-  'use strict';
-
   /* 2) Restore the Order List renderer/actions that are referenced by the
         existing Order modal. Existing data/storage structure is preserved. */
   function v39OrderMatches(order, query){
@@ -7238,8 +7129,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 (function(){
 'use strict';
 
-function skV43Set(id,v){var e=document.getElementById(id);if(e)e.value=v==null?'':v}
-function skV43Get(id){var e=document.getElementById(id);return e?e.value:''}
+
 function skV43Money(n){return '₹'+(Number(n)||0).toLocaleString('en-IN')}
 function skV43Date(s){
   if(!s)return '';
@@ -7247,14 +7137,7 @@ function skV43Date(s){
   if(m){var y=Number(m[3]);if(y<100)y+=2000;return y+'-'+String(Number(m[2])).padStart(2,'0')+'-'+String(Number(m[1])).padStart(2,'0')}
   var d=new Date(s);return isNaN(d)?'':d.toISOString().slice(0,10)
 }
-function skV43DateText(s){
-  var x=skV43Date(s);if(!x)return '';
-  var a=x.split('-');return a[2]+'/'+a[1]+'/'+a[0].slice(-2)
-}
-function skV43ParseAmount(s){
-  var m=String(s||'').match(/(?:₹\s*)?(\d[\d,]*(?:\.\d+)?)/);
-  return m?Number(m[1].replace(/,/g,'')):0
-}
+
 function skV43CustomerFromHeader(lines,fileName){
   var clean=lines.map(function(x){return x.trim()}).filter(Boolean);
   var first=clean[0]||'';
@@ -7422,7 +7305,7 @@ function skV43EnhanceCreditEntry(){
   var save=sheet.querySelector('.submit-btn');if(save)save.textContent='💾 Save Credit / Payment';
   // Add due date only for EMI/credit notes.
   var dg=document.createElement('div');dg.className='form-group';dg.id='skV43DueGroup';
-  dg.innerHTML='<label class="form-label">EMI / Due Date (optional)</label><input id="skCreditDueDateV43" class="form-input" type="text" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY" data-dmy-date="1">';
+  dg.innerHTML='<label class="form-label">EMI / Due Date (optional)</label><input id="skCreditDueDateV43" class="form-input" type="text" autocomplete="off" placeholder="DD/MM/YYYY" data-dmy-date="1">';
   var btn=sheet.querySelector('.submit-btn');if(btn)sheet.insertBefore(dg,btn);
 }
 function skV43AddKeepButton(){
@@ -7538,6 +7421,7 @@ function cpGetCustomers(){
 }
 
 /* 🔒 SK V4.8 LOCKED: Home Outstanding uses the same bill-linked Customer Credit calculation. */
+window.skCPGetCustomers=cpGetCustomers;
 window.skOutstandingTotalForHome=function(){
  try{return cpGetCustomers().filter(function(c){return Number(c.balance||0)>0}).reduce(function(a,c){return a+Number(c.balance||0)},0)}
  catch(e){return 0}
@@ -7564,6 +7448,7 @@ function cpRow(c){
  '<div class="sk-credit-avatar">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div>'+
  '<div class="skcp-row-main"><div class="skcp-name">'+cpEsc(c.name)+'</div><div class="skcp-sub">📞 '+cpEsc(c.phone||'No phone')+' • '+displayMode+' • Bill #'+cpEsc(last3)+'</div></div>'+
  '<div><div class="skcp-amt">'+cpMoney(displayBalance)+'</div><div class="skcp-bill">'+(displayBalance>0?'OUTSTANDING':'COMPLETED')+'</div></div>'+
+ (displayBalance>0&&cpDigits(c.phone)?'<button type="button" class="skcp-btn" style="color:#15803d;border-color:rgba(22,163,74,.3);flex:0 0 auto" title="WhatsApp reminder" onclick="event.stopPropagation();skCreditRemind(encodeURIComponent(decodeURIComponent(this.dataset.k)))" data-k="'+encodeURIComponent(c.key)+'">💬</button>':'')+
  '<button type="button" class="skcp-btn" style="color:#dc2626;border-color:rgba(239,68,68,.25);flex:0 0 auto" title="Delete customer" onclick="event.stopPropagation();skCPDeleteCustomer(decodeURIComponent(this.dataset.k))" data-k="'+encodeURIComponent(c.key)+'">🗑️</button>'+
  '</div>';
 }
@@ -7655,7 +7540,7 @@ function cpOpenDetail(c){
      payment receipts and manual ledger entries visible. */
   return String(e.source||'')!=='bill';
 }).sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))});
- var html='<div class="skcp-page-head"><button class="skcp-back" onclick="skCPBackToList()">← Back</button><div><b>'+cpEsc(c.name)+'</b><div style="font-size:.72rem;color:var(--text-muted);line-height:1.35;margin-top:3px">📞 '+cpEsc(c.phone||'No phone')+'</div></div></div>'+
+ var html='<div class="skcp-page-head"><button class="skcp-back" onclick="skCPBackToList()">← Back</button><div class="sk-credit-avatar skcp-det-av">'+cpEsc((c.name||'?').charAt(0).toUpperCase())+'</div><div class="skcp-det-who"><b>'+cpEsc(c.name)+'</b><div style="font-size:.72rem;color:var(--text-muted);line-height:1.35;margin-top:3px">📞 '+cpEsc(c.phone||'No phone')+'</div></div></div>'+
  '<div class="skcp-detail-box"><div class="skcp-detail-grid"><div class="skcp-mini"><b>'+cpMoney(c.balance)+'</b><span>CURRENT OUTSTANDING</span></div><div class="skcp-mini"><b>'+cpMoney(c.credits)+'</b><span>CREDIT / EMI</span></div><div class="skcp-mini"><b>'+cpMoney(c.payments)+'</b><span>PAYMENT</span></div></div>'+
  '<div class="skcp-bill-actions"><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(Number(c.balance||0)>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span style="font-size:.62rem;font-weight:900;color:#16a34a;padding:8px 10px;">✓ FULLY PAID</span>')+'</div></div>';
  if(bills.length){html+='<div style="font-size:.68rem;font-weight:900;margin:8px 0 5px">SALES BILL HISTORY</div>';html+=bills.map(function(x){var b=x.b;var billTotal=Math.max(0,Number(b.price)||0);var billBalance=Math.max(0,Number(b.balance)||0);var isCreditBill=b.payMode==='Credit'||b.payMode==='EMI';var billPaid=isCreditBill?Math.max(0,Number(b.advance)||0):Math.max(0,billTotal-billBalance);return '<div class="skcp-bill-card"><div class="skcp-bill-top"><div><b>'+cpEsc(b.id)+'</b> • '+cpEsc(b.model||'')+'<div style="font-size:.6rem;color:var(--text-muted)">'+cpDateText(b.date)+' • '+cpEsc(b.payMode||'')+'</div></div><b>'+cpMoney(billTotal)+'</b></div><div class="skcp-sales-bill-finance">Amount: '+cpMoney(billTotal)+' • Paid: '+cpMoney(billPaid)+' • Outstanding: '+cpMoney(billBalance)+'</div><div class="skcp-bill-actions"><button class="skcp-btn" onclick="skCPViewBill('+x.idx+')">📄 Bill Details</button><button class="skcp-btn credit" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'credit\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">➕ Credit</button>'+(billBalance>0?'<button class="skcp-btn pay" onclick="skCPOpenActionFor(decodeURIComponent(this.dataset.k),\'payment\','+x.idx+')" data-k="'+encodeURIComponent(c.key)+'">💰 Payment</button>':'<span class="skcp-sales-bill-paid">✓ PAID</span>')+'</div>'+
@@ -7741,7 +7626,7 @@ window.skCPEditRepairJob=function(id){var jobId=String(id||'');if(!jobId)return;
 window.skCPBackToList=cpShowMain;
 window.skCPBackToHome=function(){document.getElementById('skCreditLedgerPage').classList.remove('active')}
 window.skCPViewBill=function(idx){try{window.__skBillViewReturn='creditLedger';if(typeof viewSavedBill==='function'){viewSavedBill(idx)}else{}}catch(e){window.__skBillViewReturn=''}}
-function cpFillBillsForCustomer(c,idx){document.getElementById('skCPBill').innerHTML=cpBillOptions(c,idx);if(c){document.getElementById('skCPName').value=c.name||'';document.getElementById('skCPPhone').value=c.phone||''}}
+
 function cpEnsureActionModalAtBodyRoot(){
  var modal=document.getElementById('skCreditActionModal');
  if(modal && modal.parentElement!==document.body){
@@ -8035,11 +7920,10 @@ function render(){
  const box=document.getElementById('skAccessoriesList');if(!box)return;
  const q=(document.getElementById('skAccessoriesSearch')?.value||'').trim().toLowerCase();
  const a=get().filter(x=>[x.name,x.category,x.brand,x.note].join(' ').toLowerCase().includes(q));
- box.innerHTML=a.length?a.map(x=>`<div class="sk-accessory-row" data-sk-accessory-row="${escA(x.id)}" style="display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--card-border);border-radius:14px;margin-bottom:8px;background:var(--card-bg);">
+ box.innerHTML=a.length?a.map(x=>`<div class="sk-accessory-row" data-sk-accessory-row="${escA(x.id)}" style="cursor:pointer;display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--card-border);border-radius:14px;margin-bottom:8px;background:var(--card-bg);">
  <input type="checkbox" class="skAccSelect" data-id="${escA(x.id)}" aria-label="Select ${escA(x.name)}">
  ${x.image?`<img src="${x.image}" style="width:48px;height:48px;border-radius:10px;object-fit:cover;">`:`<div style="width:48px;height:48px;border-radius:10px;display:grid;place-items:center;background:var(--model-bg);font-size:22px;">⚡</div>`}
  <div style="min-width:0;flex:1"><b>${escA(x.name)}</b><div style="font-size:.68rem;color:var(--text-muted);">${escA(x.category||'')} ${x.brand?'• '+escA(x.brand):''} • Stock: ${Number(x.stock)||0}</div><div style="font-size:.68rem;color:var(--text-muted);">${x.price?'₹'+Number(x.price).toLocaleString('en-IN'):''} ${x.note?'• '+escA(x.note):''}</div></div>
- <button type="button" class="submit-btn" onclick="skEditAccessory('${escA(x.id)}')">Edit</button>
  </div>`).join(''):'<div style="padding:25px;text-align:center;color:var(--text-muted)">No accessories found.</div>';
  bindLongPressSelection();
  const allBtn=document.getElementById('skAccessoriesSelectAllBtn');if(allBtn){const checks=[...box.querySelectorAll('.skAccSelect')];allBtn.textContent=checks.length&&checks.every(cb=>cb.checked)?'☐ Clear Selection':'☑ Select All';}
@@ -8047,11 +7931,19 @@ function render(){
 function bindLongPressSelection(){
  const box=document.getElementById('skAccessoriesList'); if(!box||box.dataset.skLongPressBound==='1')return; box.dataset.skLongPressBound='1';
  let timer=null, target=null, moved=false, startX=0, startY=0;
- box.addEventListener('pointerdown',function(e){const row=e.target.closest('.sk-accessory-row');if(!row||e.target.closest('button,input'))return;target=row;moved=false;startX=e.clientX;startY=e.clientY;timer=setTimeout(function(){if(!target||moved)return;box.classList.add('sk-selection-mode');const cb=target.querySelector('.skAccSelect');if(cb){cb.checked=!cb.checked;}target.classList.toggle('sk-selected',!!cb&&cb.checked);if(typeof showToast==='function')showToast('Selection mode: hold another item to select');},550);});
+ box.addEventListener('pointerdown',function(e){const row=e.target.closest('.sk-accessory-row');if(!row||e.target.closest('button,input'))return;target=row;moved=false;startX=e.clientX;startY=e.clientY;timer=setTimeout(function(){if(!target||moved)return;box.__skLongAt=Date.now();box.classList.add('sk-selection-mode');const cb=target.querySelector('.skAccSelect');if(cb){cb.checked=!cb.checked;}target.classList.toggle('sk-selected',!!cb&&cb.checked);if(typeof showToast==='function')showToast('Selection mode: hold another item to select');},550);});
  box.addEventListener('pointermove',function(e){if(Math.abs(e.clientX-startX)>10||Math.abs(e.clientY-startY)>10){moved=true;if(timer){clearTimeout(timer);timer=null;}}});
  ['pointerup','pointercancel','pointerleave'].forEach(function(ev){box.addEventListener(ev,function(){if(timer){clearTimeout(timer);timer=null;}target=null;});});
  box.addEventListener('change',function(e){if(e.target.matches('.skAccSelect')){const row=e.target.closest('.sk-accessory-row');if(row)row.classList.toggle('sk-selected',e.target.checked);if(!box.querySelector('.skAccSelect:checked'))box.classList.remove('sk-selection-mode');}});
  box.addEventListener('contextmenu',function(e){if(e.target.closest('.sk-accessory-row'))e.preventDefault();});
+ /* Tap the box to open it for editing; while selecting, tap toggles the tick instead. */
+ box.addEventListener('click',function(e){
+  const row=e.target.closest('.sk-accessory-row');if(!row||e.target.closest('button,input,a'))return;
+  if(Date.now()-(box.__skLongAt||0)<700)return;
+  const cb=row.querySelector('.skAccSelect');
+  if(box.classList.contains('sk-selection-mode')){if(cb){cb.checked=!cb.checked;cb.dispatchEvent(new Event('change',{bubbles:true}));}return;}
+  skEditAccessory(row.dataset.skAccessoryRow);
+ });
 }
 function open(){document.getElementById('skAccessoriesPage')?.classList.add('active');document.body.classList.add('modal-open');render();}
 function close(){document.getElementById('skAccessoriesPage')?.classList.remove('active');document.body.classList.remove('modal-open');}
@@ -8140,7 +8032,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const money=n=>'₹'+(Number(n)||0).toLocaleString('en-IN',{maximumFractionDigits:2});
  const costInput=$('skUsedCost'),dealerPriceInput=$('skUsedDealerPrice'),customerPriceInput=$('skUsedCustomerPrice');if(costInput&&!costInput.dataset.autoPriceBound){costInput.dataset.autoPriceBound='1';costInput.addEventListener('input',()=>{const n=Number(costInput.value);if(costInput.value.trim()===''||!Number.isFinite(n)||n<0){dealerPriceInput.value='';customerPriceInput.value='';return;}dealerPriceInput.value=String(Math.round((n+1000)*100)/100);customerPriceInput.value=String(Math.round((n+2000)*100)/100);});}
- window.skUsedOpen=function(){const m=$('skUsedStockModal');if(m){if(typeof toggleModal==='function')toggleModal('skUsedStockModal',true);else m.classList.add('active');if(!$('skUsedDate').value)$('skUsedDate').value=new Date().toISOString().slice(0,10);skUsedRender();}};
+ window.skUsedOpen=function(){const m=$('skUsedStockModal');if(m){m.classList.remove('sk-used-form-page');if(typeof toggleModal==='function')toggleModal('skUsedStockModal',true);else m.classList.add('active');if(!$('skUsedDate').value)$('skUsedDate').value=new Date().toISOString().slice(0,10);skUsedRender();}};
  window.skUsedResetForm=function(){$('skUsedPurchaseForm')?.reset();$('skUsedDate').value=new Date().toISOString().slice(0,10);$('skUsedImei').readOnly=false;delete window.__skUsedEditingImei;};
  window.skUsedSavePurchase=function(){
   const imei=$('skUsedImei').value.trim();const model=$('skUsedModel').value.trim();const dealer=$('skUsedDealer').value.trim();const cost=Number($('skUsedCost').value);
@@ -8149,12 +8041,12 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   if(duplicate){alert('இந்த IMEI ஏற்கனவே பதிவு செய்யப்பட்டுள்ளது. Duplicate IMEI அனுமதிக்கப்படாது.');return;}
   const old=editing?rows.find(r=>String(r.imei)===editing):null;if(old&&old.status==='Sold'&&editing!==imei){alert('Sold device IMEI cannot be changed.');return;}
   const item={id:old?.id||('USED-'+Date.now()),date:$('skUsedDate').value,dealer,model,ram:$('skUsedRam')?.value.trim()||'',colour:$('skUsedColour').value.trim(),storage:$('skUsedStorage').value.trim(),kit:$('skUsedKit').value,cost,dealerPrice:Math.round((cost+1000)*100)/100,customerPrice:Math.round((cost+2000)*100)/100,imei,issue:$('skUsedIssue').value.trim(),status:old?.status||'In Stock',sale:old?.sale?{...old.sale,profit:(Number(old.sale.price)||0)-cost}:null,updatedAt:new Date().toISOString()};
-  if(old){rows[rows.indexOf(old)]=item;}else rows.unshift(item);write(rows);skUsedResetForm();const purchaseForm=$('skUsedPurchaseForm');if(purchaseForm)purchaseForm.style.display=window.__skUsedInventoryPageMode?'block':'none';skUsedRender();if(typeof showToast==='function')showToast('Used mobile purchase saved');
+  if(old){rows[rows.indexOf(old)]=item;}else rows.unshift(item);write(rows);skUsedResetForm();if(window.__skUsedFormFromMgmt){window.__skUsedFormFromMgmt=false;window.skUsedShowManagement();}else{const purchaseForm=$('skUsedPurchaseForm');if(purchaseForm)purchaseForm.style.display=window.__skUsedInventoryPageMode?'block':'none';}skUsedRender();if(typeof showToast==='function')showToast('Used mobile purchase saved');
  };
- window.skUsedEdit=function(imei){const r=read().find(x=>String(x.imei)===String(imei));if(!r)return;const purchaseForm=$('skUsedPurchaseForm');if(purchaseForm){purchaseForm.style.display='block';purchaseForm.scrollIntoView({behavior:'smooth',block:'start'});}const actions=$('skUsedPurchaseActions');if(actions)actions.style.display='block';window.__skUsedEditingImei=r.imei;[['Date','date'],['Dealer','dealer'],['Model','model'],['Ram','ram'],['Colour','colour'],['Storage','storage'],['Kit','kit'],['Cost','cost'],['DealerPrice','dealerPrice'],['CustomerPrice','customerPrice'],['Imei','imei'],['Issue','issue']].forEach(([a,b])=>{const e=$('skUsed'+a);if(e)e.value=r[b]??'';});$('skUsedImei').readOnly=true;};
+ window.skUsedEdit=function(imei){const r=read().find(x=>String(x.imei)===String(imei));if(!r)return;window.__skUsedFormFromMgmt=true;window.skUsedShowInventory();const _sc=$('skUsedStockModal')?.querySelector('.sk-used-stock-scroll');if(_sc)_sc.scrollTop=0;window.__skUsedEditingImei=r.imei;[['Date','date'],['Dealer','dealer'],['Model','model'],['Ram','ram'],['Colour','colour'],['Storage','storage'],['Kit','kit'],['Cost','cost'],['DealerPrice','dealerPrice'],['CustomerPrice','customerPrice'],['Imei','imei'],['Issue','issue']].forEach(([a,b])=>{const e=$('skUsed'+a);if(e)e.value=r[b]??'';});$('skUsedImei').readOnly=true;};
  window.skUsedDelete=function(imei){const rows=read(),r=rows.find(x=>String(x.imei)===String(imei));if(!r)return;const warning=r.status==='Sold'?'This device is SOLD. Deleting it will also remove its sale/profit record. Continue?':'Delete this used mobile purchase record?';if(!confirm(warning))return;write(rows.filter(x=>String(x.imei)!==String(imei)));skUsedRender();};
  window.skUsedClearAll=function(){const rows=read();if(!rows.length){if(typeof showToast==='function')showToast('Inventory is already empty');return;}const sold=rows.filter(r=>r.status==='Sold').length;const message='Delete ALL '+rows.length+' used mobile inventory records?'+(sold?'\nThis also removes '+sold+' sold-device sale/profit records.':'')+'\nThis action cannot be undone.';if(!confirm(message))return;write([]);window.skUsedResetForm();if($('skUsedSearch'))$('skUsedSearch').value='';skUsedRender();if(typeof showToast==='function')showToast('All used mobile inventory records deleted');};
- window.skUsedAddInventory=function(){window.__skUsedInventoryPageMode=false;window.skUsedResetForm();window.skUsedShowManagement();const form=$('skUsedPurchaseForm');if(form)form.style.display='block';form?.scrollIntoView({behavior:'smooth',block:'start'});$('skUsedModel')?.focus({preventScroll:true});};
+ window.skUsedAddInventory=function(){window.__skUsedFormFromMgmt=true;window.skUsedResetForm();window.skUsedShowInventory();const sc=$('skUsedStockModal')?.querySelector('.sk-used-stock-scroll');if(sc)sc.scrollTop=0;};
  window.skUsedRender=function(){
   const rows=read();
   const q=String($('skUsedSearch')?.value||'').trim().toLowerCase();
@@ -8184,15 +8076,19 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
    const statusClass=sold?'is-sold':String(r.status||'').toLowerCase()==='pending'?'is-pending':'is-stock';
    const imei=esc(r.imei);
    const brandColor=['#2478ff','#7c3aed','#0f9f6e','#ea8a18','#e34b6f'][i%5];
-   return `<tr>
+   return `<tr data-imei="${imei}" style="cursor:pointer">
     <td class="sk-used-number-cell">${i+1}</td>
     <td class="sk-used-device-cell"><span class="sk-used-phone-thumb" style="--phone-accent:${brandColor}" aria-hidden="true"><svg viewBox="0 0 24 36"><rect x="3" y="1" width="18" height="34" rx="3.2"/><rect x="5.2" y="4" width="13.6" height="26" rx="1.4"/><path d="M9 2.8h6M10.5 32.4h3"/></svg></span><span class="sk-used-device-copy"><strong>${esc(r.model)}</strong><small>IMEI: ${imei}</small></span></td>
     <td class="sk-used-dealer-cell">${esc(r.dealer)}</td>
     <td class="sk-used-price-cell">${money(r.cost)}</td>
     <td class="sk-used-status-cell"><span class="sk-used-status ${statusClass}">${esc(r.status||'In Stock')}</span></td>
-    <td class="sk-used-row-actions"><button type="button" class="sk-used-row-view" onclick="window.skUsedShowDetails('${imei}')" aria-label="View ${esc(r.model)} details" title="View details"><span class="sk-used-chevron" aria-hidden="true">›</span></button><details class="sk-used-row-menu"><summary aria-label="More actions" title="More actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></summary><div class="sk-used-row-menu-pop"><button type="button" ${sold?'disabled':''} onclick="window.skUsedSelectForBill('${imei}')">Select for Bill</button><button type="button" onclick="window.skUsedEdit('${imei}')">Edit</button><button type="button" class="is-danger" onclick="window.skUsedDelete('${imei}')">Delete</button></div></details></td>
+    <td class="sk-used-row-actions"><details class="sk-used-row-menu"><summary aria-label="More actions" title="More actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></summary><div class="sk-used-row-menu-pop"><button type="button" ${sold?'disabled':''} onclick="window.skUsedSelectForBill('${imei}')">Select for Bill</button><button type="button" onclick="window.skUsedEdit('${imei}')">Edit</button><button type="button" class="is-danger" onclick="window.skUsedDelete('${imei}')">Delete</button></div></details></td>
    </tr>`;
   }).join('');
+  if(!body.__skTap){body.__skTap=1;body.addEventListener('click',function(e){
+   const tr=e.target.closest('tr[data-imei]');if(!tr||e.target.closest('.sk-used-row-actions,button,summary,details,a'))return;
+   window.skUsedShowDetails(tr.dataset.imei);
+  });}
   const active=Object.values(filters).some(v=>v!==''&&v!=null);
   const filterButton=$('skUsedFilterButton');
   if(filterButton)filterButton.classList.toggle('has-active-filters',!!active);
@@ -8255,9 +8151,11 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   else window.skUsedSavePurchase();
  };
  window.skUsedClearAction=function(){
-  const form=$('skUsedPurchaseForm');
-  if(form&&getComputedStyle(form).display==='none')window.skUsedAddInventory();
   window.skUsedResetForm();
+  if($('skUsedSearch'))$('skUsedSearch').value='';
+  window.__skUsedFilters={model:'',brand:'',ram:'',storage:'',minPrice:'',maxPrice:''};
+  skUsedRender();
+  if(typeof showToast==='function')showToast('Cleared');
  };
  window.skUsedOpenFilters=function(){
   const rows=read();
@@ -8289,7 +8187,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  window.skUsedShowDetails=function(imei){
   const r=read().find(x=>String(x.imei)===String(imei));if(!r)return;
   let dlg=$('skUsedDetailDialog');if(!dlg){dlg=document.createElement('div');dlg.id='skUsedDetailDialog';dlg.className='sk-used-detail-overlay';dlg.setAttribute('role','dialog');dlg.setAttribute('aria-modal','true');document.body.appendChild(dlg);}
-  dlg.innerHTML='<section class="sk-used-detail-sheet"><header class="sk-used-detail-head"><div><strong>'+esc(r.model)+'</strong><small>Used mobile details</small></div><button type="button" class="sk-used-detail-close" aria-label="Close" onclick="document.getElementById(\'skUsedDetailDialog\').remove()">×</button></header><div class="sk-used-detail-grid">'+[['RAM',r.ram],['Storage',r.storage],['Colour',r.colour],['Full Kit',r.kit],['IMEI / Serial',r.imei],['Status',r.status],['Customer Price',money(r.customerPrice)],['Notes / Issue',r.issue||'—']].map(([k,v])=>'<div class="sk-used-detail-field"><small>'+esc(k)+'</small><strong>'+esc(v||'Not set')+'</strong></div>').join('')+'</div><footer class="sk-used-detail-actions"><button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedShowManagement();window.skUsedEdit(\''+esc(r.imei)+'\');document.getElementById(\'skUsedPurchaseForm\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">Edit</button><button type="button" class="submit-btn sk-used-detail-danger" onclick="window.skUsedDelete(\''+esc(r.imei)+'\');document.getElementById(\'skUsedDetailDialog\')?.remove();window.skUsedShowInventory()">Delete</button><button type="button" class="submit-btn sk-used-bill-button" '+(r.status==='Sold'?'disabled':'')+' onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Select for Bill</button></footer></section>';
+  dlg.innerHTML='<section class="sk-used-detail-sheet"><header class="sk-used-detail-head"><button type="button" class="sk-used-detail-close sk-used-detail-back" aria-label="Back" onclick="document.getElementById(\'skUsedDetailDialog\').remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4-8 8 8 8"/></svg></button><div class="sk-used-detail-title"><strong>'+esc(r.model)+'</strong><small>Used mobile details</small></div><span class="sk-used-detail-status '+(r.status==='Sold'?'is-sold':'is-stock')+'">'+esc(r.status||'In Stock')+'</span></header><div class="sk-used-detail-grid">'+[['RAM',r.ram,'ram'],['Storage',r.storage,'storage'],['Colour',r.colour,'colour'],['Full Kit',r.kit,'kit'],['IMEI / Serial',r.imei,'imei'],['Status',r.status,'status'],['Customer Price',money(r.customerPrice),'price'],['Notes / Issue',r.issue||'—','notes']].map(([k,v,c])=>'<div class="sk-used-detail-field f-'+c+(c==='imei'||c==='notes'?' is-wide':'')+'"><small>'+esc(k)+'</small><strong>'+esc(v||'Not set')+'</strong></div>').join('')+'</div><footer class="sk-used-detail-actions"><button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedShowManagement();window.skUsedEdit(\''+esc(r.imei)+'\');document.getElementById(\'skUsedPurchaseForm\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">Edit</button><button type="button" class="submit-btn sk-used-detail-danger" onclick="window.skUsedDelete(\''+esc(r.imei)+'\');document.getElementById(\'skUsedDetailDialog\')?.remove();window.skUsedShowManagement()">Delete</button><button type="button" class="submit-btn sk-used-bill-button" '+(r.status==='Sold'?'disabled':'')+' onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Select for Bill</button></footer></section>';
   dlg.addEventListener('click',function(e){if(e.target===dlg)dlg.remove();},{once:true});
  };
  window.skUsedShowInventory=function(){
@@ -8297,7 +8195,8 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   const form=$('skUsedPurchaseForm');if(form)form.style.display='block';
   const actions=$('skUsedPurchaseActions');if(actions)actions.style.display='none';
   const register=$('skUsedRegisterPanel');if(register)register.style.display='none';
-  const stats=$('skUsedStatsGrid');if(stats)stats.style.display='grid';
+  const stats=$('skUsedStatsGrid');if(stats)stats.style.display='none';
+  $('skUsedStockModal')?.classList.add('sk-used-form-page');
   const date=$('skUsedDate');if(date&&!date.value)date.value=new Date().toISOString().slice(0,10);
   skUsedRender();
  };
@@ -8305,6 +8204,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   window.skUsedOpen();
   window.skUsedResetForm();
   window.skUsedShowInventory();
+  window.__skUsedFormFromMgmt=false;
  };
  window.skUsedShowManagement=function(){
   window.__skUsedInventoryPageMode=false;
@@ -8312,6 +8212,13 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   const actions=$('skUsedPurchaseActions');if(actions)actions.style.display='block';
   const register=$('skUsedRegisterPanel');if(register)register.style.display='block';
   const stats=$('skUsedStatsGrid');if(stats)stats.style.display='grid';
+  window.__skUsedFormFromMgmt=false;
+  $('skUsedStockModal')?.classList.remove('sk-used-form-page');
+ };
+ window.skUsedBack=function(){
+  const m=$('skUsedStockModal');
+  if(m?.classList.contains('sk-used-form-page')&&window.__skUsedFormFromMgmt){window.skUsedResetForm();window.skUsedShowManagement();return;}
+  toggleModal('skUsedStockModal',false);
  };
  window.skUsedSelectForBill=function(imei){
   const item=read().find(r=>String(r.imei)===String(imei)&&r.status!=='Sold');

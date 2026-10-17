@@ -1,0 +1,303 @@
+/* ==========================================================================
+   SK MOBILES v5.6.149 — Settings page + Tools & Others notes redesign
+   Presentation only. All handlers / ids are the existing ones.
+   ========================================================================== */
+html body{--st-r:22px}
+/* ---------- tiles ---------- */
+html body .st-tile,html body .st-ptile,html body .st-bigicon{
+  --tf:#2563eb;--tb:#e0ecff;
+  display:inline-grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border-radius:14px;
+  color:var(--tf);background:color-mix(in srgb,var(--tf) 14%,var(--card-bg,#fff));
+  border:1px solid color-mix(in srgb,var(--tf) 18%,transparent);box-sizing:border-box}
+html body .st-tile.sm{flex-basis:36px;width:36px;height:36px;border-radius:12px;margin-top:20px}
+html body .st-tile svg,html body .st-ptile svg,html body .st-bigicon svg{width:22px;height:22px;display:block}
+html body .st-tile.sm svg{width:18px;height:18px}
+html body .c-blue{--tf:#2563eb}html body .c-orange{--tf:#ea580c}html body .c-violet,html body .c-purple{--tf:#7c3aed}
+html body .c-green{--tf:#16a34a}html body .c-pink {--tf:#db2777}html body .c-red{--tf:#dc2626}
+html body .c-teal{--tf:#0d9488}html body .c-amber{--tf:#d97706}html body .c-slate{--tf:#475569}
+
+/* ---------- page title ---------- */
+html body .st-title-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+html body .st-title-text b{font-size:1.1rem;font-weight:800;line-height:1.2;color:var(--text)}
+html body .st-title-text small{font-size:.8rem;font-weight:600;color:var(--text-muted);line-height:1.25}
+html body .modal-title > span:has(> .st-title-text),html body #settingsModal .modal-title > span{display:flex!important;align-items:center;gap:12px}
+
+/* ---------- section card ---------- */
+html body #settingsModal .st-section,html body #settingsModal .modal-sheet > .st-section,html body #settingsModal .st-studio > .st-section{
+  margin:0 0 12px!important;padding:14px!important;border-radius:var(--st-r)!important;
+  background:var(--card-bg,#fff)!important;border:1px solid var(--card-border,#dbe4f5)!important;
+  box-shadow:0 6px 18px color-mix(in srgb,var(--primary,#2563eb) 7%,transparent)!important;box-sizing:border-box!important;min-width:0}
+html body #settingsModal .st-studio{display:block!important;background:none!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important}
+html body .st-head{display:flex;align-items:center;gap:12px;margin:0 0 12px;min-width:0}
+html body .st-head-copy{min-width:0}
+html body .st-head h3{margin:0;font-size:.95rem;font-weight:800;line-height:1.25;letter-spacing:.015em;color:var(--text);text-transform:none}
+html body #settingsModal .st-head h3{text-transform:uppercase}
+html body .st-head p{margin:2px 0 0;font-size:.8rem;line-height:1.3;color:var(--text-muted);font-weight:600}
+html body .st-label{margin:12px 0 8px;font-size:.88rem;font-weight:800;color:var(--text)}
+
+/* ---------- grids ---------- */
+html body .st-grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+html body .st-grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+html body .st-row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+html body .st-row4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+html body .st-row5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+
+/* ---------- style profiles / theme modes ---------- */
+html body #settingsModal .st-profile,html body #settingsModal .st-mode{
+  position:relative;display:flex;align-items:center;gap:10px;min-width:0;width:100%;min-height:72px;
+  padding:9px 30px 9px 8px!important;gap:8px!important;text-align:left;border-radius:18px!important;
+  background:var(--pc,color-mix(in srgb,var(--primary,#2563eb) 7%,var(--card-bg,#fff)))!important;
+  border:1.5px solid color-mix(in srgb,var(--card-border,#dbe4f5) 80%,transparent)!important;box-shadow:none!important;color:var(--text)!important}
+html body #settingsModal .p-classic{--pc:#e8f0ff}html body #settingsModal .p-liquid{--pc:#eceef8}
+html body #settingsModal .p-white{--pc:#fff7e6}html body #settingsModal .p-midnight{--pc:#ece9fb}
+html body #settingsModal .p-emerald{--pc:#e4f6ec}html body #settingsModal .p-amber{--pc:#fff1e0}
+html body #settingsModal .p-ruby{--pc:#fde8ee}html body #settingsModal .p-ocean{--pc:#e1f6f8}
+html body #settingsModal .st-mode{--pc:color-mix(in srgb,var(--primary,#2563eb) 6%,var(--card-bg,#fff))}
+html body #settingsModal .st-profile .st-ptile,html body #settingsModal .st-mode .st-ptile{flex:0 0 38px;width:38px;height:38px;border-radius:12px!important}
+html body #settingsModal .st-profile .st-ptile svg,html body #settingsModal .st-mode .st-ptile svg{width:20px;height:20px}
+html body .st-ptext{display:flex;flex-direction:column;gap:2px;min-width:0}
+html body .st-ptext b{font-size:.82rem;font-weight:800;line-height:1.2}
+html body .st-ptext small{font-size:.7rem;font-weight:600;line-height:1.2;color:var(--text-muted)}
+html body .st-chev{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--text-muted);display:grid;place-items:center}
+html body .st-chev svg{width:16px;height:16px}
+html body .st-check{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:var(--primary,#2563eb);color:#fff;place-items:center}
+html body .st-check svg{width:14px;height:14px;stroke-width:3}
+html body #settingsModal button.active > .st-check,html body #settingsModal .st-profile.active > .st-check{display:grid}
+html body #settingsModal .st-profile.active > .st-chev{display:none}
+html body #settingsModal button.active.st-profile,html body #settingsModal button.active.st-mode{border-color:var(--primary,#2563eb)!important;box-shadow:0 0 0 1px var(--primary,#2563eb) inset!important}
+
+/* ---------- accent dots ---------- */
+html body .st-dots{padding:4px 2px;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+html body #settingsModal .st-dot{position:relative;width:100%;max-width:38px;aspect-ratio:1;height:auto;min-width:0;justify-self:center;padding:0;border-radius:50%!important;background:var(--sw)!important;border:2px solid transparent!important;color:#fff;display:grid;place-items:center;box-shadow:0 3px 8px color-mix(in srgb,var(--sw) 35%,transparent)!important}
+html body #settingsModal .st-dot svg{display:none;width:18px;height:18px;stroke-width:3}
+html body #settingsModal .st-dot.active{outline:3px solid color-mix(in srgb,var(--sw) 40%,transparent);outline-offset:2px}
+html body #settingsModal .st-dot.active svg{display:block}
+html body .st-custom{display:flex;align-items:center;gap:10px;margin-top:18px;padding:10px 12px;border-radius:14px;background:var(--pill-bg,#f1f5f9)}
+html body .st-custom div{flex:1;min-width:0}
+html body .st-custom b{display:block;font-size:.86rem;font-weight:800}
+html body .st-custom small{font-size:.74rem;color:var(--text-muted);font-weight:600}
+html body .st-custom input[type=color]{width:42px;height:34px;padding:0;border:0;border-radius:10px;background:none}
+html body .st-custom code{font-size:.78rem;font-weight:800}
+
+/* ---------- row buttons (font, reset) ---------- */
+html body #settingsModal .st-row-btn,html body #settingsModal .st-reset-row{
+  display:flex;align-items:center;gap:12px;width:100%;margin:0 0 12px;padding:14px;text-align:left;border-radius:var(--st-r)!important;
+  background:var(--card-bg,#fff)!important;border:1px solid var(--card-border,#dbe4f5)!important;color:var(--text)!important;
+  box-shadow:0 6px 18px color-mix(in srgb,var(--primary,#2563eb) 7%,transparent)!important;position:relative;box-sizing:border-box}
+html body #settingsModal .st-row-btn{padding-right:34px}
+html body .st-row-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+html body .st-row-copy b{font-size:.92rem;font-weight:800;line-height:1.2;text-transform:uppercase;letter-spacing:.015em}
+html body .st-row-copy small{font-size:.8rem;font-weight:600;color:var(--text-muted);line-height:1.25}
+html body #settingsModal .st-reset-row .st-row-copy b{text-transform:none;font-size:.95rem}
+
+/* ---------- selectable preview cards ---------- */
+html body #settingsModal .st-choice,html body #settingsModal .st-rad{
+  position:relative;display:flex;min-width:0;width:100%;border-radius:16px!important;text-align:left;
+  background:var(--card-bg,#fff)!important;border:1.5px solid color-mix(in srgb,var(--card-border,#dbe4f5) 85%,transparent)!important;
+  box-shadow:none!important;color:var(--text)!important;box-sizing:border-box}
+html body #settingsModal .st-choice{flex-direction:column;align-items:stretch;gap:8px;padding:10px!important;min-height:0}
+html body #settingsModal .st-rad{flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;padding:8px 2px 30px!important;text-align:center}
+html body #settingsModal .st-rad b{font-size:.72rem;font-weight:800;line-height:1.15}
+html body #settingsModal .st-rad small{font-size:.7rem;font-weight:600;color:var(--text-muted);line-height:1.1}
+html body .st-ctext{display:flex;flex-direction:column;gap:2px;min-width:0}
+html body .st-ctext b{font-size:.84rem;font-weight:800;line-height:1.2}
+html body .st-ctext small{font-size:.72rem;font-weight:600;line-height:1.2;color:var(--text-muted)}
+html body .st-radio{position:absolute;width:18px;height:18px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--text-muted) 55%,transparent);box-sizing:border-box}
+html body #settingsModal .st-choice .st-radio{right:10px;top:10px;background:#fff}
+html body #settingsModal .st-rad .st-radio{left:50%;bottom:5px;transform:translateX(-50%)}
+html body #settingsModal button.active > .st-radio{border-color:var(--primary,#2563eb);background:radial-gradient(circle,var(--primary,#2563eb) 0 4px,transparent 5px)}
+html body #settingsModal .st-choice.active,html body #settingsModal .st-rad.active{border-color:var(--primary,#2563eb)!important;box-shadow:0 0 0 1px var(--primary,#2563eb) inset!important;background:color-mix(in srgb,var(--primary,#2563eb) 5%,var(--card-bg,#fff))!important}
+html body #settingsModal .st-bs.active > .st-check{display:grid;top:6px;right:6px;transform:none;width:20px;height:20px}
+
+/* preview swatches */
+html body .st-prev{display:block;flex:0 0 auto;box-sizing:border-box;border-radius:12px;border:1px solid color-mix(in srgb,var(--card-border,#dbe4f5) 90%,transparent);background:#fff}
+html body .st-choice .st-prev{width:100%;height:40px}
+html body .st-rad .st-prev{width:100%;max-width:58px;height:34px;margin:0 auto}
+html body .st-prev.sv-flat{background:#fff}
+html body .st-prev.sv-accent{background:linear-gradient(135deg,color-mix(in srgb,var(--primary,#2563eb) 35%,#fff),#fbcfe8)}
+html body .st-prev.sv-classic{background:linear-gradient(160deg,#bfdbfe,#f8fafc)}
+html body .st-prev.sv-slate{background:linear-gradient(160deg,#94a3b8,#e2e8f0)}
+html body .st-prev.sv-offwhite{background:#faf8f3}
+html body .st-prev.sv-glow{background:radial-gradient(circle at 30% 30%,#f472b6,transparent 55%),radial-gradient(circle at 70% 70%,#60a5fa,transparent 55%),#a78bfa}
+html body .st-prev.cr-sharp{border-radius:0}html body .st-prev.cr-standard{border-radius:8px}html body .st-prev.cr-modern{border-radius:12px}
+html body .st-prev.cr-smooth{border-radius:16px}html body .st-prev.cr-pill{border-radius:24px}
+html body .st-prev[class*="cr-"]{background:linear-gradient(160deg,#dbe8ff,#f5f8ff);height:38px;max-width:46px}
+html body .st-prev[class*="br-"]{height:26px;max-width:54px;background:var(--primary,#2563eb);border:0}
+html body .st-prev.br-sharp{border-radius:0}html body .st-prev.br-modern{border-radius:8px}html body .st-prev.br-smooth{border-radius:14px}html body .st-prev.br-pill{border-radius:999px}
+html body .st-prev[class*="bs-"]{height:28px;max-width:64px;border-radius:999px;border:0;margin-top:4px}
+html body .st-prev.bs-solid{background:var(--primary,#2563eb)}
+html body .st-prev.bs-gradient{background:linear-gradient(90deg,var(--primary,#2563eb),#d946ef)}
+html body .st-prev.bs-glass{background:linear-gradient(180deg,#fff,color-mix(in srgb,var(--primary,#2563eb) 18%,#fff));border:1px solid color-mix(in srgb,var(--primary,#2563eb) 25%,#fff);box-shadow:0 4px 10px color-mix(in srgb,var(--primary,#2563eb) 18%,transparent)}
+html body .st-prev.bs-outline{background:#fff;border:2px solid var(--primary,#2563eb)}
+html body .st-prev.cs-ios{background:linear-gradient(135deg,#fff 0,#eaf1ff 60%,#dbe8ff);box-shadow:inset 0 1px 0 #fff,0 6px 14px rgba(37,99,235,.15)}
+html body .st-prev.cs-blur{background:linear-gradient(135deg,#cfe0ff,#e9f0ff);box-shadow:0 4px 12px rgba(37,99,235,.12)}
+html body .st-prev.cs-border{background:#fff;border:1.5px solid #cbd5e1}
+html body .st-prev.cs-shadow{background:#fff;box-shadow:0 8px 16px rgba(15,23,42,.18)}
+html body .st-prev[class*="hd-"]{height:34px;max-width:96px;width:100%;border-radius:10px;background:#f1f5f9;position:relative;overflow:hidden}
+html body .st-prev[class*="hd-"]::before{content:"";position:absolute;left:8px;right:8px;top:8px;height:16px;border-radius:8px;background:linear-gradient(90deg,#94a3b8 0 14px,transparent 14px) no-repeat,#fff}
+html body .st-prev.hd-glass::before{background:linear-gradient(90deg,#a5b4fc 0 14px,transparent 14px) no-repeat,rgba(255,255,255,.75);backdrop-filter:blur(4px)}
+html body .st-prev.hd-solid::before{background:linear-gradient(90deg,#64748b 0 14px,transparent 14px) no-repeat,#e2e8f0}
+html body .st-prev.hd-minimal::before{background:linear-gradient(90deg,#94a3b8 0 14px,transparent 14px) no-repeat;border-radius:0;top:10px;height:12px}
+html body .st-prev[class*="nv-"]{width:100%;height:42px;position:relative;background:#f1f5f9;overflow:hidden}
+html body .st-prev[class*="nv-"]::before{content:"";position:absolute;left:6px;right:6px;height:16px;border-radius:999px;background:radial-gradient(circle,var(--primary,#2563eb) 0 3px,transparent 4px) 50% 50%/16px 16px no-repeat,#fff;bottom:5px}
+html body .st-prev.nv-fixed::before{left:0;right:0;bottom:0;border-radius:0;height:14px}
+html body .st-prev[class*="sc-"]{display:grid;place-items:center;max-width:58px;height:38px;font-weight:800;color:var(--primary,#2563eb);background:color-mix(in srgb,var(--primary,#2563eb) 10%,#fff);border:0}
+html body .st-prev.sc-compact{font-size:14px}html body .st-prev.sc-normal{font-size:17px}html body .st-prev.sc-large{font-size:21px}
+
+/* ---------- toggles ---------- */
+html body .st-toggles{border:1px solid var(--card-border,#dbe4f5);border-radius:18px;overflow:hidden;background:var(--card-bg,#fff)}
+html body #settingsModal .st-toggle{display:flex;align-items:center;gap:12px;padding:10px 12px!important;margin:0;border:0;border-bottom:1px solid color-mix(in srgb,var(--card-border,#dbe4f5) 70%,transparent);background:none;cursor:pointer;position:relative}
+html body #settingsModal .st-toggle:last-child{border-bottom:0}
+html body .st-toggle .st-row-copy b{text-transform:none;font-size:.92rem}
+html body #settingsModal .st-toggle input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+html body #settingsModal .st-toggle i{position:relative;flex:0 0 52px;width:52px;height:30px;border-radius:999px;background:color-mix(in srgb,var(--text-muted) 35%,#fff);transition:background .15s;display:block}
+html body #settingsModal .st-toggle i::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(15,23,42,.25);transition:transform .15s}
+html body #settingsModal .st-toggle input:checked + i{background:var(--primary,#2563eb)}
+html body #settingsModal .st-toggle input:checked + i::after{transform:translateX(22px)}
+
+/* ---------- details (live preview) ---------- */
+html body #settingsModal .st-details{margin:0 0 12px;border-radius:var(--st-r);background:var(--card-bg,#fff);border:1px solid var(--card-border,#dbe4f5);overflow:hidden;box-shadow:0 6px 18px color-mix(in srgb,var(--primary,#2563eb) 7%,transparent)}
+html body #settingsModal .st-details > summary{display:flex;align-items:center;gap:12px;padding:14px;list-style:none;cursor:pointer;position:relative}
+html body #settingsModal .st-details > summary::-webkit-details-marker{display:none}
+html body #settingsModal .st-details[open] > summary .st-chev{transform:translateY(-50%) rotate(90deg)}
+html body #settingsModal .st-details > .sk-ui-preview{margin:0 12px 12px}
+
+/* ---------- shop profile fields ---------- */
+html body .st-fields{display:flex;flex-direction:column;gap:10px}
+html body .st-field{display:flex;gap:10px;align-items:flex-start}
+html body .st-field-body{flex:1;min-width:0}
+html body .st-flabel{display:block;margin:0 0 5px;font-size:.8rem;font-weight:800;color:var(--text-muted)}
+html body .st-input-wrap{position:relative}
+html body #settingsModal .st-field .form-input{width:100%;box-sizing:border-box;min-height:44px;padding:10px 40px 10px 12px;border-radius:14px;font-size:.92rem}
+html body #settingsModal .st-field textarea.form-input{min-height:76px;padding-right:12px;resize:vertical}
+html body #settingsModal .st-clear{position:absolute;right:8px;top:8px;transform:none;width:28px!important;height:28px!important;min-width:0!important;min-height:0!important;padding:0!important;border-radius:50%!important;display:grid;place-items:center;background:var(--pill-bg,#f1f5f9)!important;border:0!important;color:var(--text-muted)!important;box-shadow:none!important}
+html body .st-clear svg{width:14px;height:14px}
+html body .st-phone-row{display:flex;gap:8px;align-items:center}
+html body .st-phone-row .st-input-wrap{flex:1;min-width:0}
+html body #settingsModal .st-wa{flex:0 0 46px;width:46px!important;height:44px!important;min-width:0!important;padding:0!important;border-radius:14px!important;display:grid;place-items:center;background:#dcfce7!important;border:1px solid #86efac!important;color:#16a34a!important;box-shadow:none!important}
+html body .st-wa svg{width:22px;height:22px}
+
+/* ---------- terms / buttons ---------- */
+html body #settingsModal .st-terms{width:100%;box-sizing:border-box;min-height:130px;max-height:180px;overflow-y:auto;padding:12px;border-radius:14px;font-size:.88rem!important;line-height:1.55!important}
+html body .st-btn-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+html body .st-btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 8px;border-radius:14px!important;font-size:.88rem;font-weight:800;line-height:1.1;text-align:center;
+  background:linear-gradient(135deg,var(--primary,#2563eb),color-mix(in srgb,var(--primary,#2563eb) 70%,#6d28d9))!important;color:#fff!important;border:0!important;box-shadow:0 6px 14px color-mix(in srgb,var(--primary,#2563eb) 28%,transparent)!important;box-sizing:border-box}
+html body .st-btn svg{width:18px;height:18px;flex:0 0 18px}
+html body .st-btn.light{background:var(--card-bg,#fff)!important;color:var(--text)!important;border:1px solid var(--card-border,#dbe4f5)!important;box-shadow:none!important}
+html body .st-btn.green{background:linear-gradient(135deg,#16a34a,#059669)!important;box-shadow:0 6px 14px rgba(22,163,74,.28)!important}
+html body .st-btn.wide{width:100%;margin-top:10px}
+
+/* ---------- logo ---------- */
+html body .st-logo-card{display:flex;align-items:center;gap:14px;padding:12px;border-radius:16px;background:var(--pill-bg,#f1f5f9)}
+html body .st-logo-card img{width:76px;height:76px;flex:0 0 76px;border-radius:50%;object-fit:cover;border:2px solid var(--card-border,#dbe4f5);background:#fff}
+html body .st-logo-copy{display:flex;flex-direction:column;gap:5px;min-width:0}
+html body .st-logo-copy b{font-size:.92rem;font-weight:800;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+html body .st-logo-copy small{font-size:.78rem;color:var(--text-muted);font-weight:600;line-height:1.3}
+html body .st-active{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:.74rem;font-weight:800}
+html body .st-active svg{width:12px;height:12px;stroke-width:3}
+
+/* ---------- backup tiles / status / notes ---------- */
+html body .st-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+html body .st-tilecard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:14px 10px;border-radius:18px!important;background:color-mix(in srgb,var(--tf) 7%,var(--card-bg,#fff));border:1px solid color-mix(in srgb,var(--tf) 18%,transparent);min-width:0}
+html body .st-tilecard .st-bigicon{width:46px;height:46px;flex-basis:46px;border-radius:50%;background:none;border:0}
+html body .st-tilecard .st-bigicon svg{width:34px;height:34px}
+html body .st-tilecard b{font-size:.92rem;font-weight:800}
+html body .st-tilecard small{font-size:.76rem;line-height:1.3;color:var(--text-muted);font-weight:600;min-height:30px}
+html body .st-tilecard .st-btn{width:100%;margin-top:4px}
+html body .st-note{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:14px;background:color-mix(in srgb,var(--primary,#2563eb) 8%,var(--card-bg,#fff));border:1px solid color-mix(in srgb,var(--primary,#2563eb) 16%,transparent);font-size:.82rem;line-height:1.45;font-weight:600;color:var(--text)}
+html body .st-note svg{flex:0 0 20px;width:20px;height:20px;color:var(--primary,#2563eb);margin-top:1px}
+html body .st-note.small{margin-top:12px;font-size:.76rem;color:var(--text-muted)}
+html body .st-note b{font-weight:800}
+html body .st-status{display:flex;align-items:center;padding:12px;margin:10px 0 0;border-radius:14px;font-size:.84rem;font-weight:800;line-height:1.3;word-break:break-word;min-width:0}
+html body .st-two .st-status{margin-top:10px}
+html body .st-status.green{background:#dcfce7;color:#166534;border:1px solid #86efac}
+html body .st-status.violet{background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd}
+html body .st-status.red{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+html body #skAutoSyncBoxV40{margin-top:12px;padding:12px;border-radius:16px;background:color-mix(in srgb,var(--primary,#2563eb) 6%,var(--card-bg,#fff));border:1px solid var(--card-border,#dbe4f5)}
+html body #skAutoSyncBoxV40 .sk-v40-row{display:flex;flex-direction:column;gap:8px}
+html body #skAutoSyncBoxV40 .sk-v40-label{font-size:.9rem;font-weight:800}
+html body #skAutoSyncBoxV40 select{width:100%;min-height:44px;border-radius:14px;padding:8px 12px;font-size:.9rem;font-weight:700}
+html body #skAutoSyncStatusV40{margin-top:8px;font-size:.76rem;color:var(--text-muted);font-weight:600}
+
+/* ---------- Tools & Others notes ---------- */
+html body .st-count{text-align:right;margin:4px 2px 10px;font-size:.76rem;font-weight:700;color:var(--text-muted)}
+html body .st-qt{margin-top:12px;padding-top:12px;border-top:1px solid var(--card-border,#dbe4f5)}
+html body .st-qt.st-flash{animation:stflash .9s ease}
+@keyframes stflash{0%,100%{background:transparent}30%{background:color-mix(in srgb,var(--primary,#2563eb) 12%,transparent)}}
+html body .st-tpl{display:flex;align-items:center;gap:8px;min-width:0;padding:8px;border-radius:14px!important;text-align:left;background:color-mix(in srgb,var(--tf) 7%,var(--card-bg,#fff))!important;border:1px solid color-mix(in srgb,var(--tf) 18%,transparent)!important;box-shadow:none!important;color:var(--text)!important}
+html body .st-tpl .st-ptile{flex:0 0 30px;width:30px;height:30px;border-radius:10px}
+html body .st-tpl .st-ptile svg{width:16px;height:16px}
+html body .st-tpl .st-ptext b{font-size:.72rem;line-height:1.15;word-break:break-word}
+html body .st-tpl .st-ptext small{font-size:.7rem}
+@media (max-width:359px){html body .st-grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}html body #settingsModal .st-row5{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* ---------- button style option (real effect on app buttons) ---------- */
+html[data-ui-button-style="gradient"] :is(.submit-btn,.bill-action-save,.sk-used-save-primary,.sk-used-form-save,.box-photo-scan-btn,.st-btn:not(.light)){
+  background:linear-gradient(135deg,var(--primary,#2563eb),#9333ea)!important;color:#fff!important;border-color:transparent!important}
+html[data-ui-button-style="glass"] :is(.submit-btn,.bill-action-save,.sk-used-save-primary,.sk-used-form-save,.box-photo-scan-btn,.st-btn:not(.light)){
+  background:linear-gradient(180deg,rgba(255,255,255,.92),color-mix(in srgb,var(--primary,#2563eb) 16%,#fff))!important;
+  color:var(--primary,#2563eb)!important;border:1px solid color-mix(in srgb,var(--primary,#2563eb) 28%,#fff)!important;
+  box-shadow:0 6px 16px color-mix(in srgb,var(--primary,#2563eb) 16%,transparent)!important;backdrop-filter:blur(8px)}
+html[data-ui-button-style="outline"] :is(.submit-btn,.bill-action-save,.sk-used-save-primary,.sk-used-form-save,.box-photo-scan-btn,.st-btn:not(.light)){
+  background:transparent!important;color:var(--primary,#2563eb)!important;border:2px solid var(--primary,#2563eb)!important;box-shadow:none!important}
+html[data-ui-button-style="glass"] :is(.submit-btn,.sk-used-save-primary,.sk-used-form-save,.box-photo-scan-btn,.st-btn) svg,
+html[data-ui-button-style="outline"] :is(.submit-btn,.sk-used-save-primary,.sk-used-form-save,.box-photo-scan-btn,.st-btn) svg{color:inherit}
+
+html[data-ui-scale="large"]{--ui-scale:1.1}
+html[data-ui-scale="large"] .app-viewport{font-size:110%}
+
+/* ---------- General permissions card (JS-injected) ---------- */
+html body #settingsModal #skGeneralPermissionsBox{margin:0 0 12px!important;padding:14px!important;border-radius:var(--st-r)!important;background:var(--card-bg,#fff)!important;border:1px solid var(--card-border,#dbe4f5)!important;box-shadow:0 6px 18px color-mix(in srgb,var(--primary,#2563eb) 7%,transparent)!important;box-sizing:border-box}
+html body #settingsModal #skGeneralPermissionsBox > div:first-child{font-size:.9rem!important;font-weight:800!important;letter-spacing:.015em;color:var(--text)!important;margin-bottom:10px!important}
+html body #settingsModal #skGeneralPermissionsBox .sk-perm-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border-radius:14px;background:var(--pill-bg,#f1f5f9);border:0}
+html body #settingsModal #skGeneralPermissionsBox .sk-perm-row:last-child{margin-bottom:0}
+html body #settingsModal #skGeneralPermissionsBox .sk-perm-title{font-size:.9rem;font-weight:800}
+html body #settingsModal #skGeneralPermissionsBox .sk-perm-status{font-size:.76rem;font-weight:600;color:var(--text-muted)}
+html body #settingsModal #skGeneralPermissionsBox .sk-perm-btn{min-width:78px;min-height:40px;padding:8px 14px;border-radius:12px;font-size:.86rem;font-weight:800;background:var(--card-bg,#fff)!important;color:var(--primary,#2563eb)!important;border:1.5px solid color-mix(in srgb,var(--primary,#2563eb) 35%,transparent)!important;box-shadow:none!important}
+
+
+/* ---------- Tools & Others notes: layout ---------- */
+html body #toolsOthersNoteModal .tools-others-title{display:flex;align-items:center;gap:12px}
+html body #toolsOthersNoteModal .st-note{margin:10px 0}
+html body #toolsOthersNoteModal .st-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0 6px}
+html body #toolsOthersNoteModal .tools-others-label{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:6px;margin:0;font-size:.88rem;font-weight:800}
+html body #toolsOthersNoteModal .tools-others-label svg{width:20px;height:20px;color:var(--primary,#2563eb)}
+html body #toolsOthersNoteModal .st-chip{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:8px 12px}
+html body #toolsOthersNoteModal .tools-others-note{width:100%;box-sizing:border-box;min-height:190px;padding:12px;border-radius:16px;font-size:.92rem;line-height:1.55}
+html body #toolsOthersNoteModal .tools-others-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+html body #toolsOthersNoteModal .tools-others-action{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;width:100%;margin:0;padding:6px 8px;font-size:.8rem;line-height:1.15;white-space:normal}
+html body #toolsOthersNoteModal .tools-others-action svg{width:18px;height:18px;flex:0 0 18px}
+html body #toolsOthersNoteModal .st-grid-3{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+html body #toolsOthersNoteModal .st-tpl .st-ptile{flex:0 0 34px;width:34px;height:34px}
+html body #toolsOthersNoteModal .st-tpl .st-ptext{flex:1 1 auto}
+html body #toolsOthersNoteModal .st-tpl .st-ptext b{font-size:.78rem;line-height:1.2;word-break:normal;overflow-wrap:normal}
+
+/* ---------- Settings: spacing & sync/backup boxes ---------- */
+html body #settingsModal .st-studio > *,html body #settingsModal .st-section + .st-section{margin-bottom:14px!important}
+html body #settingsModal .st-dots{margin-bottom:10px}
+html body #settingsModal .st-dots + *{margin-top:10px}
+html body #settingsModal .st-status{min-height:40px;font-size:.82rem;overflow:visible}
+html body #settingsModal .st-btn-row .st-btn{min-height:46px;line-height:1.15}
+html body #skCloudBackupBox .st-two{grid-template-columns:1fr}
+html body #settingsModal .st-section > .st-head + .st-fields,html body #settingsModal .st-section > .st-head + .st-two{margin-top:2px}
+html body #settingsModal #skCloudBackupSection,html body #settingsModal #skAppDataFolderSection{display:none}
+
+/* ---------- Settings: sticky solid header, bottom space for the nav ---------- */
+html body #settingsModal .modal-title,html body #toolsOthersNoteModal .tools-others-head{position:sticky;top:0;z-index:30;background:var(--card-bg,#fff)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html body #settingsModal .modal-sheet{padding-bottom:110px!important}
+html body #settingsModal .st-input-wrap:has(.sk-contact-access-btn) .st-clear{display:none}
+html body #settingsModal .modal-sheet{padding-top:0!important}
+html body #settingsModal .modal-title{margin-top:0!important;padding-top:10px!important}
+html body #settingsModal .modal-sheet::before{content:"";display:block;position:sticky;top:0;height:8px;margin-bottom:-8px;background:var(--card-bg,#fff);z-index:29}
+html body #settingsModal .st-toggle .st-tile{flex:0 0 40px;width:40px;height:40px}
+html body #settingsModal .sk-cloud-backup-card,html body #settingsModal .sk-app-folder-card{display:flex!important;flex-direction:column!important;gap:10px!important;padding:0!important;margin:0!important;background:none!important;border:0!important;box-shadow:none!important}
+html body #settingsModal .sk-cloud-backup-card > *,html body #settingsModal .sk-app-folder-card > *{margin:0!important}
+html body #settingsModal .st-note{font-weight:600!important;font-size:.82rem!important;line-height:1.45!important;color:var(--text)!important}
+html body #settingsModal .st-note.small{color:var(--text-muted)!important;font-size:.76rem!important}
+html body #settingsModal .st-status{padding:12px!important;font-size:.84rem!important;font-weight:800!important;border-radius:14px!important}
+html body #settingsModal .st-status.green{background:#dcfce7!important;color:#166534!important;border:1px solid #86efac!important}
+html body #settingsModal .st-status.violet{background:#ede9fe!important;color:#5b21b6!important;border:1px solid #c4b5fd!important}
+html body #settingsModal .st-status.red{background:#fee2e2!important;color:#991b1b!important;border:1px solid #fecaca!important}
+html body #settingsModal #skAutoSyncBoxV40{margin:0!important;padding:12px!important;display:flex;flex-direction:column;gap:8px}
+html body #settingsModal #skAutoSyncBoxV40 .sk-v40-row{border:0!important;padding:0!important;background:none!important;box-shadow:none!important;margin:0!important}
+html body #settingsModal #skAutoSyncStatusV40{margin:0!important;padding:0!important;background:none!important;border:0!important}
