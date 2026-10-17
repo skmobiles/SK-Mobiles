@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.3 — small shared helpers for the newer tools (bulk WhatsApp, stock aging, backup, customer QR). */
+/* SK MOBILES v5.7.4 — small shared helpers for the newer tools (bulk WhatsApp, stock aging, backup, customer QR). */
 (function(){
 'use strict';
 var T=window.skTools={};

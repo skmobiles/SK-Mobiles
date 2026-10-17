@@ -1,5 +1,5 @@
-/* SK MOBILES v5.7.3 — Cloud guard for the Firebase free plan.
-   1. Automatic backup: first open of the day + after closing time (only when data changed).
+/* SK MOBILES v5.7.4 — Cloud guard for the Firebase free plan.
+   1. Automatic backup: only when data changed (5 minutes after the last change, max 1 per 30 min, 8 per day).
    2. Keeps only the newest backup of each of the last 14 days (older ones are deleted, incl. sub-collections).
    3. Storage Health page: size of every data key vs the 1 MB Firestore document limit, backup status, read estimate.
    Never touches the realtime sync code; uses the existing window.skCloudBackupNow(). */
@@ -82,7 +82,9 @@ async function runBackup(reason){
   try{
     var m=meta(),h=dataHash(),today=dayKey(Date.now()),slot=(new Date().getHours()>=CLOSE_HOUR)?'close':'open';
     if(m.lastHash===h&&m.lastBackupMs){ /* nothing changed since the last backup: only mark the slot as done */
-      m[slot+'Day']=today;saveMeta(m);return;
+      m[slot+'Day']=today;saveMeta(m);
+      try{window.dispatchEvent(new CustomEvent('sk-cloud-backup',{detail:{ok:true,at:Date.now()}}))}catch(e){}  /* identical to the last backup: just turn the status green */
+      return;
     }
     var okFlag=await new Promise(function(res){
       var done=false,t=setTimeout(function(){if(!done){done=true;window.removeEventListener('sk-cloud-backup',on);res(false)}},120000);
@@ -96,11 +98,20 @@ async function runBackup(reason){
     }
   }finally{busy=false}
 }
+/* Automatic backup only when something changed: 5 minutes after the last change (so a busy billing session is saved once,
+   not after every bill), at most one backup per 30 minutes and 8 per day on this device. No change = no backup. */
+var QUIET_MS=5*60000,GAP_MS=30*60000,MAX_PER_DAY=8;
 function tick(){
   if(!canBackup())return;
-  var m=meta(),now=new Date(),today=dayKey(now.getTime());
-  if(m.openDay!==today)return runBackup('open');
-  if(now.getHours()>=CLOSE_HOUR&&m.closeDay!==today)return runBackup('close');
+  var st={};try{st=JSON.parse(localStorage.getItem('bk_status_v1')||'{}')||{}}catch(e){}
+  var changeMs=+st.changeMs||0,backupMs=+st.backupMs||0,now=Date.now();
+  if(!changeMs||changeMs<=backupMs)return;          /* nothing new to save */
+  if(now-changeMs<QUIET_MS)return;                  /* still busy: wait until things settle */
+  var m=meta(),today=dayKey(now);
+  if(m.lastBackupMs&&now-m.lastBackupMs<GAP_MS)return;
+  var n=(m.autoDay===today?(m.autoN||0):0);if(n>=MAX_PER_DAY)return;
+  m.autoDay=today;m.autoN=n+1;saveMeta(m);
+  return runBackup('change');
 }
 
 /* ---------- Storage Health page ---------- */
