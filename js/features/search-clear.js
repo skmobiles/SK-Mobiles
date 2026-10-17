@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.165 — Adds a small (x) clear button to every search box. It appears only while text is typed;
+/* SK MOBILES v5.6.166 — Adds a small (x) clear button to every search box. It appears only while text is typed;
    tapping it empties the box in one go, refreshes the list and keeps the keyboard open. Display-only helper. */
 (function(){
 'use strict';

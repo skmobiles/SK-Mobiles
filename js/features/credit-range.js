@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.165 — Credit List (date to date): customer-wise pending credit for a chosen period,
+/* SK MOBILES v5.6.166 — Credit List (date to date): customer-wise pending credit for a chosen period,
    with days pending, WhatsApp (whole list or one customer statement) and PDF. Read-only over existing data. */
 (function(){
 'use strict';

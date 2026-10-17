@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.165 — Warranty tracker, Customers, bill popup, undo bar. */
+/* SK MOBILES v5.6.166 — Warranty tracker, Customers, bill popup, undo bar. */
 html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-tabs{display:flex;gap:6px;margin-bottom:10px}
 html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-tab{flex:1;padding:9px 4px;border:1px solid var(--card-border);border-radius:12px;background:var(--card-bg);color:var(--text-muted);font-size:.78rem;font-weight:600;cursor:pointer}
 html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-tab.on{background:var(--primary);color:#fff;border-color:var(--primary)}

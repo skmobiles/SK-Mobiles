@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.165 — Customers page: "Edit" a customer (name / phone) and "Merge" two accounts of the same person.
+/* SK MOBILES v5.6.166 — Customers page: "Edit" a customer (name / phone) and "Merge" two accounts of the same person.
    Every bill, repair job and credit-ledger entry of the old account(s) is re-pointed to the final name + phone, so
    the history stays complete and the date-wise order of the ledger is unchanged. A 15 second Undo is offered.
    Nothing is deleted: only the customer name / phone fields of existing records change. */
@@ -11,6 +11,8 @@ function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){retur
 function toast(t){if(typeof window.showToast==='function')window.showToast(t)}
 function tail10(p){var d=String(p||'').replace(/\D/g,'');return d.length>10?d.slice(-10):d}
 function cleanName(n){return String(n||'').replace(/\s+/g,' ').trim()}
+/* walk-in customers have no real name, so different numbers are different people: never suggest merging them */
+function isWalk(n){return /^walk[\s-]*in(\b|$)/i.test(String(n||'').trim())}
 /* same grouping rule as the Customers list: by phone when it has 10 digits, otherwise by name */
 function custKey(name,phone){var p=tail10(phone);return p.length===10?'p'+p:'n'+cleanName(name).toLowerCase()}
 function ledgerKey(name,phone){return cleanName(name).toLowerCase()+'|'+String(phone||'').replace(/\D/g,'')}
@@ -144,9 +146,9 @@ function pickerHtml(src,q){
   q=String(q||'').toLowerCase();
   var list=groups().filter(function(g){return g.key!==src.key&&(!q||g.name.toLowerCase().indexOf(q)>=0||g.phone.indexOf(q.replace(/\D/g,'')||'§')>=0)}).slice(0,40);
   var sn=cleanName(src.name).toLowerCase();
-  list.sort(function(a,b){var sa=cleanName(a.name).toLowerCase()===sn?0:1,sb=cleanName(b.name).toLowerCase()===sn?0:1;return sa-sb});
+  list.sort(function(a,b){if(isWalk(sn))return 0;var sa=cleanName(a.name).toLowerCase()===sn?0:1,sb=cleanName(b.name).toLowerCase()===sn?0:1;return sa-sb});
   return list.length?list.map(function(g){
-    var same=cleanName(g.name).toLowerCase()===sn;
+    var same=!isWalk(sn)&&cleanName(g.name).toLowerCase()===sn;
     return '<button type="button" class="skcm-opt sk-keepr'+(cur.tgt&&cur.tgt.key===g.key?' sel':'')+'" onclick="skCmPick(\''+encodeURIComponent(g.key)+'\')">'+avatar(g.name)+'<span class="skcm-tx"><b>'+esc(g.name)+(same?'<i class="same">same name</i>':'')+'</b><small>'+(g.phone?esc(g.phone):'No phone')+' • '+esc(countsLine(g))+'</small></span></button>';
   }).join(''):'<div class="skcm-empty">No other customers</div>';
 }
@@ -198,7 +200,7 @@ function dupBanner(){
   if(!list||!modal||!modal.classList.contains('active'))return;
   var old=document.getElementById('skCmDup');
   if(list.style.display==='none'){if(old)old.remove();return}
-  var by={};groups().forEach(function(g){var n=cleanName(g.name).toLowerCase();if(n&&n!=='customer'){(by[n]=by[n]||[]).push(g)}});
+  var by={};groups().forEach(function(g){var n=cleanName(g.name).toLowerCase();if(n&&n!=='customer'&&!isWalk(n)){(by[n]=by[n]||[]).push(g)}});
   var dups=Object.keys(by).filter(function(n){return by[n].length>1}).map(function(n){return by[n]});
   if(!dups.length){if(old)old.remove();return}
   var html='<button type="button" class="skcm-dup sk-keepr" onclick="skCmDupReview()">⚠️ '+dups.length+' customer'+(dups.length>1?'s have':' has')+' more than one account — tap to review &amp; merge</button>';
@@ -206,7 +208,7 @@ function dupBanner(){
   old=document.createElement('div');old.id='skCmDup';old.innerHTML=html;list.parentNode.insertBefore(old,list);
 }
 window.skCmDupReview=function(){
-  var by={};groups().forEach(function(g){var n=cleanName(g.name).toLowerCase();if(n&&n!=='customer'){(by[n]=by[n]||[]).push(g)}});
+  var by={};groups().forEach(function(g){var n=cleanName(g.name).toLowerCase();if(n&&n!=='customer'&&!isWalk(n)){(by[n]=by[n]||[]).push(g)}});
   var dups=Object.keys(by).filter(function(n){return by[n].length>1});
   var h=dups.map(function(n){
     var gs=by[n];return '<div class="skcm-dgroup"><b>'+esc(gs[0].name)+'</b>'+gs.map(function(g,i){

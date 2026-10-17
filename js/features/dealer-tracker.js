@@ -1,11 +1,11 @@
-/* SK MOBILES v5.6.165 — Dealer payment tracker.
+/* SK MOBILES v5.6.166 — Dealer payment tracker.
    Bought = used-mobile purchases (dealer + purchase price) + repair spare-part purchases (dealer + amount).
    Paid   = payments entered here (key skx_dealer_payments_v1, synced like every other skx_ key).
-   Balance = Bought - Paid. Only purchases on/after the "count from" date are included, so old, already-settled
+   Purchases are treated as already paid; only ones marked "Pay later" count as owed. Balance = credit purchases - Paid. Only purchases on/after the "count from" date are included, so old, already-settled
    purchases do not show up as pending. */
 (function(){
 'use strict';
-var PAY_KEY='skx_dealer_payments_v1',START_KEY='skx_dealer_start_v1',USED_KEY='sk_used_mobile_stock_v1',REP_KEY='skx_repair_jobs_v2';
+var CRED_KEY='skx_dealer_credit_v1',PAY_KEY='skx_dealer_payments_v1',START_KEY='skx_dealer_start_v1',USED_KEY='sk_used_mobile_stock_v1',REP_KEY='skx_repair_jobs_v2';
 function read(k,f){try{var v=JSON.parse(localStorage.getItem(k)||'');return v==null?f:v}catch(e){return f}}
 function arr(k){var v=read(k,[]);return Array.isArray(v)?v:[]}
 function num(v){v=Number(v);return isFinite(v)?v:0}
@@ -24,27 +24,28 @@ function toast(t){if(typeof window.showToast==='function')window.showToast(t)}
 function startKey(){var s=localStorage.getItem(START_KEY);return s||(today().slice(0,8)+'01')}
 function shopName(){return localStorage.getItem('sk_shop_name')||'SK MOBILES'}
 
+function credSet(){var v=read(CRED_KEY,{});return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
 function compute(){
-  var start=startKey(),map={};
+  var start=startKey(),map={},cs=credSet();
   function get(name){
     var n=String(name||'').trim();if(!n)return null;
-    var k=n.toLowerCase();if(!map[k])map[k]={name:n,bought:0,paid:0,buys:[],pays:[]};return map[k];
+    var k=n.toLowerCase();if(!map[k])map[k]={name:n,bought:0,credit:0,paid:0,buys:[],pays:[]};return map[k];
   }
   arr(USED_KEY).forEach(function(r){
     if(r.exchange)return;var d=get(r.dealer);if(!d)return;var dt=toKey(r.date);
     if(dt&&dt<start)return;
-    d.bought+=num(r.cost);d.buys.push({date:dt,label:(r.model||'Used mobile')+(r.imei?' • '+String(r.imei).slice(-6):''),amount:num(r.cost)});
+    var id='u:'+(r.imei||r.id||dt+num(r.cost)),cr=!!cs[id];d.bought+=num(r.cost);if(cr)d.credit+=num(r.cost);d.buys.push({id:id,credit:cr,date:dt,label:(r.model||'Used mobile')+(r.imei?' • '+String(r.imei).slice(-6):''),amount:num(r.cost)});
   });
   arr(REP_KEY).forEach(function(j){
     var amt=num(j.dealerPurchaseAmount);if(!amt)return;var d=get(j.dealerName);if(!d)return;var dt=toKey(j.date||j.createdAt);
     if(dt&&dt<start)return;
-    d.bought+=amt;d.buys.push({date:dt,label:'Spare parts • '+(j.model||'Repair'),amount:amt});
+    var id='r:'+(j.id||dt+amt),cr=!!cs[id];d.bought+=amt;if(cr)d.credit+=amt;d.buys.push({id:id,credit:cr,date:dt,label:'Spare parts • '+(j.model||'Repair'),amount:amt});
   });
   arr(PAY_KEY).forEach(function(p){
     var d=get(p.dealer);if(!d)return;var dt=toKey(p.date);
     d.paid+=num(p.amount);d.pays.push({id:p.id,date:dt,note:p.note||'',amount:num(p.amount)});
   });
-  var list=Object.keys(map).filter(function(k){return map[k].buys.length||map[k].pays.length}).map(function(k){var d=map[k];d.balance=d.bought-d.paid;
+  var list=Object.keys(map).filter(function(k){return map[k].buys.length||map[k].pays.length}).map(function(k){var d=map[k];d.balance=d.credit-d.paid;
     d.buys.sort(function(a,b){return a.date<b.date?1:-1});d.pays.sort(function(a,b){return a.date<b.date?1:-1});return d})
     .sort(function(a,b){return b.balance-a.balance||a.name.localeCompare(b.name)});
   var total=0;list.forEach(function(d){if(d.balance>0)total+=d.balance});
@@ -64,7 +65,7 @@ function render(){
   if(!D.list.length)h+='<div class="skdr-empty">No dealer purchases yet. Add a dealer name in Used Mobile purchase or Repair spare parts.</div>';
   else h+='<div class="skdr-card">'+D.list.map(function(d){
     var cls=d.balance>0?'skdl-due':(d.balance<0?'skdl-adv':'skdl-ok');
-    return '<div class="skdr-item skdl-row" onclick="skDlOpen(\''+esc(d.name.toLowerCase().replace(/\\/g,'\\\\').replace(/'/g,"\\'"))+'\')"><span>'+esc(d.name)+'<small>Bought '+money(d.bought)+' • Paid '+money(d.paid)+'</small></span><b class="'+cls+'">'+(d.balance<0?'Adv ':'')+money(Math.abs(d.balance))+'</b></div>';
+    return '<div class="skdr-item skdl-row" onclick="skDlOpen(\''+esc(d.name.toLowerCase().replace(/\\/g,'\\\\').replace(/'/g,"\\'"))+'\')"><span>'+esc(d.name)+'<small>Bought '+money(d.bought)+' • On credit '+money(d.credit)+' • Paid '+money(d.paid)+'</small></span><b class="'+cls+'">'+(d.balance<0?'Adv ':'')+money(Math.abs(d.balance))+'</b></div>';
   }).join('')+'</div>';
   body.innerHTML=h;
 }
@@ -79,8 +80,8 @@ function detailHtml(d){
    '<div class="skdr-card"><h4>Payments given</h4>'+(d.pays.length?d.pays.map(function(p){
      return '<div class="skdr-item"><span>'+fmt(p.date)+'<small>'+esc(p.note||'Payment')+'</small></span><b>'+money(p.amount)+' <button type="button" class="skdl-x" aria-label="Delete payment" onclick="skDlDelPay(\''+esc(p.id)+'\')">✕</button></b></div>';
    }).join(''):'<div class="skdr-empty">No payments yet</div>')+'</div>'+
-   '<div class="skdr-card"><h4>Purchases</h4>'+(d.buys.length?d.buys.map(function(b){
-     return '<div class="skdr-item"><span>'+esc(b.label)+'<small>'+fmt(b.date)+'</small></span><b>'+money(b.amount)+'</b></div>';
+   '<div class="skdr-card"><h4>Purchases <small style="font-weight:500;opacity:.7">(paid by default — tap Pay later only if you owe the dealer)</small></h4>'+(d.buys.length?d.buys.map(function(b){
+     return '<div class="skdr-item"><span>'+esc(b.label)+'<small>'+fmt(b.date)+' • '+(b.credit?'Pay later (credit)':'Paid')+'</small></span><b>'+money(b.amount)+' <button type="button" class="skdl-x" onclick="skDlCred(\''+esc(b.id).replace(/'/g,"\\'")+'\')">'+(b.credit?'Mark paid':'Pay later')+'</button></b></div>';
    }).join(''):'<div class="skdr-empty">No purchases in this period</div>')+'</div>'+
    '<div class="skdr-actions"><button type="button" class="submit-btn whatsapp-green" onclick="skDlShare()">📤 Share on WhatsApp</button></div>';
   return h;
@@ -93,6 +94,7 @@ function ensureModal(){
 }
 window.skOpenDealerTracker=function(){ensureModal();view=null;render();if(typeof window.toggleModal==='function')window.toggleModal('skDealerModal',true)};
 window.skDlOpen=function(k){view=k;render();var s=document.querySelector('#skDealerModal .skdr-sheet');if(s)s.scrollTop=0};
+window.skDlCred=function(id){var c=credSet();if(c[id])delete c[id];else c[id]=1;try{localStorage.setItem(CRED_KEY,JSON.stringify(c))}catch(e){}render()};
 window.skDlSetStart=function(v){if(!v)return;try{localStorage.setItem(START_KEY,v)}catch(e){}render()};
 function curDealer(){var D=compute();return D.list.filter(function(x){return x.name.toLowerCase()===view})[0]}
 function addPay(name,amount,date,note){
@@ -119,7 +121,7 @@ window.skDlDelPay=function(id){
 };
 window.skDlShare=function(){
   var d=curDealer();if(!d)return;
-  var t=shopName()+' — Dealer account\n'+d.name+'\nBought: '+money(d.bought)+'\nPaid: '+money(d.paid)+'\n'+(d.balance<0?'Advance: ':'Balance: ')+money(Math.abs(d.balance));
+  var t=shopName()+' — Dealer account\n'+d.name+'\nBought: '+money(d.bought)+'\nOn credit: '+money(d.credit)+'\nPaid: '+money(d.paid)+'\n'+(d.balance<0?'Advance: ':'Balance: ')+money(Math.abs(d.balance));
   window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank','noopener');
 };
 function addDrawer(){

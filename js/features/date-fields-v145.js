@@ -1,4 +1,4 @@
-/* SK Mobiles v5.6.165 — date fields: normal keyboard + calendar icon in right corner.
+/* SK Mobiles v5.6.166 — date fields: normal keyboard + calendar icon in right corner.
    Presentation/input helper only. Typed values still use the existing DD/MM/YYYY logic. */
 (function(){
   'use strict';

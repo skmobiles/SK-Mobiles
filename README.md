@@ -200,3 +200,11 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Tempered Glass long-press bar (Cancel / Select All / Delete) is one clean row.
 - Home Recent Activity cards show the newest bill / repair and open the same item.
 - New "Reviews & Offers": separate saved contacts (mobile buyers, finished repairs), WhatsApp review-link request and offers.
+- Used Mobile Stock page: 4 small stat boxes in one row, compact purchase buttons, search + All/In stock/Sold above them.
+
+## V5.6.166
+- Walk-in Customer accounts are never suggested for merging; merge list rows no longer cut off.
+- Signature opens as its own centred popup; pen is bolder and smoothed, signature is straightened, cropped and centred; the authorised (sales) signature is saved once and used on every bill until cleared.
+- Home Recent Activity shows the 3 newest activities of any kind (newest first, same-day order fixed) and each opens its item.
+- Home: Tempered Glass, Accessories and Other Inventory cards removed; new Shop Tools tiles (Price List, Reviews & Offers, Monthly Report, Dealer Payments).
+- Dealer Payments: purchases count as paid by default; only ones marked "Pay later" are owed.

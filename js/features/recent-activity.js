@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.165 — Home "Recent Activity": the three cards open the item they show, and "View All" opens one
+/* SK MOBILES v5.6.166 — Home "Recent Activity": the three cards open the item they show, and "View All" opens one
    newest-first list of the latest bills, repair jobs, used-stock purchases and credit entries (tap a row to open it).
    Read-only: no data is changed. */
 (function(){
@@ -12,13 +12,18 @@ function key(v){
   var d=new Date(s);return isNaN(d)?'':d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2);
 }
 function dmy(k){return k?k.slice(6,8)+'/'+k.slice(4,6)+'/'+k.slice(0,4):''}
+/* time hint from ids made with Date.now() (bills keep its last 8 digits) so same-day items sort newest first */
+function tsOf(id,created){
+  var m=String(id==null?'':id).match(/(\d{8,13})$/);if(m)return Number(m[1])%100000000;
+  var d=new Date(created||'');return isNaN(d)?0:d.getTime()%100000000;
+}
 function collect(){
   var out=[],n=0;
-  read('sk_bills').forEach(function(b){if(!b)return;out.push({t:'bill',id:b.id,k:key(b.date),i:n++,title:'Bill #'+(b.billNo||b.id),sub:(b.custName||'Customer')+(b.model?' • '+b.model:''),amt:money(b.price),icon:'🧾'})});
-  read('skx_repair_jobs_v2').forEach(function(j){if(!j)return;out.push({t:'job',id:j.id,k:key(j.createdAt||j.date),i:n++,title:'Repair #'+j.id,sub:(j.customer||'Customer')+(j.model?' • '+j.model:'')+(j.status?' • '+j.status:''),amt:j.estimate?money(j.estimate):'',icon:'🔧'})});
-  read('sk_used_mobile_stock_v1').forEach(function(r){if(!r||r.exchange)return;out.push({t:'used',id:r.imei,k:key(r.date),i:n++,title:'Used stock • '+(r.model||'Mobile'),sub:(r.dealer||'')+(r.status?' • '+r.status:''),amt:money(r.cost),icon:'📱'})});
-  read('sk_credit_ledger_v1').forEach(function(e){if(!e||String(e.source||'')==='bill'||e.billId)return;out.push({t:'credit',id:e.id,k:key(e.date),name:e.name,phone:e.phone,i:n++,title:(e.type==='payment'?'Payment • ':'Credit • ')+(e.name||'Customer'),sub:(e.mode||'')+(e.details?' '+e.details:''),amt:money(e.amount),icon:e.type==='payment'?'💰':'📒'})});
-  out.sort(function(a,b){return a.k<b.k?1:a.k>b.k?-1:b.i-a.i});
+  read('sk_bills').forEach(function(b,bi){if(!b)return;out.push({t:'bill',id:b.id,k:key(b.date),ts:tsOf(b.id,b.createdAt),o:-bi,i:n++,title:'Bill #'+(b.billNo||b.id),sub:(b.custName||'Customer')+(b.model?' • '+b.model:''),amt:money(b.price),icon:'🧾'})});
+  read('skx_repair_jobs_v2').forEach(function(j){if(!j)return;out.push({t:'job',id:j.id,k:key(j.createdAt||j.date),ts:tsOf(j.id,j.createdAt),o:n,i:n++,title:'Repair #'+j.id,sub:(j.customer||'Customer')+(j.model?' • '+j.model:'')+(j.status?' • '+j.status:''),amt:j.estimate?money(j.estimate):'',icon:'🔧'})});
+  read('sk_used_mobile_stock_v1').forEach(function(r){if(!r||r.exchange)return;out.push({t:'used',id:r.imei,k:key(r.date),ts:tsOf(r.id,r.createdAt),o:n,i:n++,title:'Used stock • '+(r.model||'Mobile'),sub:(r.dealer||'')+(r.status?' • '+r.status:''),amt:money(r.cost),icon:'📱'})});
+  read('sk_credit_ledger_v1').forEach(function(e){if(!e||String(e.source||'')==='bill'||e.billId)return;out.push({t:'credit',id:e.id,k:key(e.date),ts:tsOf(e.id,e.createdAt),o:n,name:e.name,phone:e.phone,i:n++,title:(e.type==='payment'?'Payment • ':'Credit • ')+(e.name||'Customer'),sub:(e.mode||'')+(e.details?' '+e.details:''),amt:money(e.amount),icon:e.type==='payment'?'💰':'📒'})});
+  out.sort(function(a,b){return a.k<b.k?1:a.k>b.k?-1:(b.ts-a.ts)||(b.o-a.o)});
   return out;
 }
 var rows=[],filter='all';
@@ -65,6 +70,9 @@ window.skOpenRecentActivity=function(){
   ensureModal();rows=collect();filter='all';render();
   if(typeof window.toggleModal==='function')window.toggleModal('skRecentModal',true);
 };
+/* home page: the three newest activities of any kind */
+window.skRaHome=function(){return collect().slice(0,3).map(function(r){return {t:r.t,title:r.title,sub:r.sub,amt:r.amt,date:dmy(r.k),icon:r.t==='bill'?'file-text':r.t==='job'?'wrench':r.t==='credit'?'credit-card':'package',tone:r.t==='bill'?'blue':r.t==='job'?'rose':r.t==='credit'?'amber':'green'}})};
+window.skRaTop=function(n){rows=collect();window.skRaOpen(n)};
 /* newest bill / repair job (same ordering as the list), used by the home cards and their taps */
 window.skRaLatest=function(type){
   var all=collect().filter(function(r){return r.t===type});

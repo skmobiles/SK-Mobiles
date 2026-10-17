@@ -253,3 +253,9 @@ html.sk-cui .ski[data-i="megaphone"]{--ic:var(--ico-megaphone)}
 html.sk-cui .ski[data-i="qr"]{--ic:var(--ico-qr)}
 html.sk-cui .ski[data-i="clock"]{--ic:var(--ico-clock)}
 html.sk-cui .ski[data-i="trend"]{--ic:var(--ico-trend)}
+
+/* v5.6.166 home shop tools tiles */
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-icon.t-price{--c:var(--cui-green)}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-icon.t-review{--c:var(--cui-amber)}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-icon.t-month{--c:var(--cui-teal)}
+html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-icon.t-dealer{--c:var(--cui-red)}

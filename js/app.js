@@ -2832,6 +2832,9 @@ const MASTER_INVENTORY = [
             'shield': '<path d="M12 3 4 6v6c0 4.5 3.2 8 8 9 4.8-1 8-4.5 8-9V6z"/>',
             'phone': '<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
             'bolt': '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+            'tag': '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/>',
+            'star': '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+            'handshake': '<path d="M3 11l4-4 4 2 3-2 4 4v5l-4 3-3-1-3 1-5-3z"/><path d="M9 15l2 2"/>',
             'toolbox': '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v8M3 13h18M11 13v2h2v-2"/>'
           };
           return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths[name] || paths['package']}</svg>`;
@@ -2853,11 +2856,12 @@ const MASTER_INVENTORY = [
         const orderedMetricDataHome = [...metricDataHome].sort((a,b)=>{const ai=metricOrderHome.indexOf(a.id),bi=metricOrderHome.indexOf(b.id);return (ai<0?999:ai)-(bi<0?999:bi)});
         const metricHTML = orderedMetricDataHome.map(m => `<button type="button" class="sk-home-v2-metric draggable-card" data-card-id="${m.id}" draggable="true" onclick="${m.action}"><span class="sk-home-v2-metric-icon ${m.tone}">${homeIcon(m.icon)}</span><span class="sk-home-v2-metric-copy"><b>${m.label}</b><strong${m.small?' class="sk-home-v2-metric-sub"':''}>${escHome(m.value)}</strong></span><span class="sk-home-v2-metric-arrow">›</span></button>`).join('');
         const featureDataHome = [
-          {id:'card-glass',title:'Tempered Glass',sub:'View All Glass Stock',img:'sk-home-glass.png',icon:'shield',tone:'glass',action:"currentFilter='glass';renderCards();window.scrollTo({top:0,behavior:'smooth'});"},
           {id:'card-display',title:'Used Mobile Inventory',sub:'Add / Update Purchase',img:'sk-home-used-inventory.png',icon:'phone',tone:'used',action:'window.skUsedOpenInventoryPage?.();'},
           {id:'card-used-stock',title:'Used Mobile Stock',sub:'Purchase · Pricing · Sales',img:'sk-home-stock-box.png',icon:'package',tone:'stock',action:'window.skUsedOpen?.();window.skUsedShowManagement?.();'},
-          {id:'card-accessories',title:'Accessories',sub:'View OCA & Spares',img:'sk-home-accessories.png',icon:'bolt',tone:'accessories',action:'window.skOpenAccessoriesPage?.();'},
-          {id:'card-other-inventory',title:'Other Inventory',sub:'Tools, Items & Others',img:'sk-home-other-stock.png',icon:'package',tone:'other',action:"currentFilter='all';renderCards();window.scrollTo({top:0,behavior:'smooth'});"}
+          {id:'card-price',title:'Price List',sub:'Share with customers',icon:'tag',tone:'price',action:'window.skOpenPriceList?.();'},
+          {id:'card-review',title:'Reviews & Offers',sub:'Ask rating · send offers',icon:'star',tone:'review',action:'window.skOpenReviews?.();'},
+          {id:'card-month',title:'Monthly Report',sub:'Sales · profit · repairs',icon:'chart',tone:'month',action:'window.skOpenMonthReport?.();'},
+          {id:'card-dealer',title:'Dealer Payments',sub:'Credit purchases to pay',icon:'handshake',tone:'dealer',action:'window.skOpenDealerTracker?.();'}
         ];
         let featureOrderHome = [];
         try { const oldOrder=JSON.parse(localStorage.getItem('sk_order_homeActionCardsContainer')||'[]'); if(Array.isArray(oldOrder)) featureOrderHome=oldOrder; } catch(e) {}
@@ -2877,14 +2881,17 @@ const MASTER_INVENTORY = [
           latestBillHome ? {icon:'file-text',tone:'blue',title:'Bill #' + (latestBillHome.billNo || latestBillHome.id || 'Recent'),value:moneyHome(latestBillHome.price || latestBillHome.total || latestBillHome.amount || 0),sub:escHome(latestBillHome.custName || latestBillHome.model || 'Saved bill')} : {icon:'file-text',tone:'blue',title:'Billing',value:'No bills yet',sub:'New bills will appear here'},
           latestRepairHome ? {icon:'wrench',tone:'rose',title:'Repair #' + (latestRepairHome.id || 'Recent'),value:escHome(latestRepairHome.model || latestRepairHome.customer || 'Repair job'),sub:escHome(latestRepairHome.status || 'Repair activity')} : {icon:'wrench',tone:'rose',title:'Repair Jobs',value:'No recent jobs',sub:'Repair activity will appear here'},
           latestStockHome ? {icon:'package',tone:'blue',title:'Stock Available',value:escHome(latestStockHome.title || 'Inventory item'),sub:`${Number(latestStockHome.stock || 0)} pcs · Inventory`} : {icon:'package',tone:'blue',title:'Stock Added',value:'No stock items',sub:'Inventory activity will appear here'}
-        ].map((r,ri) => `<div class="sk-home-v2-recent-card" role="button" tabindex="0" onclick="window.skRecentCard&&window.skRecentCard(${ri})"><span class="sk-home-v2-recent-icon ${r.tone}">${homeIcon(r.icon)}</span><span class="sk-home-v2-recent-copy"><b>${r.title}</b><strong>${r.value}</strong><small>${r.sub}</small></span></div>`).join('');
+        ];
+        const recentRowsHome = (window.skRaHome && window.skRaHome()) || [];
+        const recentShownHome = recentRowsHome.length ? recentRowsHome.map(r => ({icon:r.icon,tone:r.tone,title:escHome(r.title),value:escHome(r.amt || r.sub),sub:escHome((r.amt ? r.sub + ' · ' : '') + r.date)})) : recentHTML;
+        const recentHTMLDone = recentShownHome.map((r,ri) => `<div class="sk-home-v2-recent-card" role="button" tabindex="0" onclick="window.skRaTop?window.skRaTop(${ri}):(window.skRecentCard&&window.skRecentCard(${ri}))"><span class="sk-home-v2-recent-icon ${r.tone}">${homeIcon(r.icon)}</span><span class="sk-home-v2-recent-copy"><b>${r.title}</b><strong>${r.value}</strong><small>${r.sub}</small></span></div>`).join('');
 
         container.innerHTML = `
           <section class="sk-home-v2-hero" aria-label="SK Mobiles business banner"><img src="./assets/sk-home-hero.jpg" alt="SK Mobiles — Mobile sales, service, accessories and repair"/></section>
           <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Business Summary</h2></div><div id="homeMetricGrid" class="sk-home-v2-metrics" aria-label="Business summary">${metricHTML}</div></section>
-          <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Inventory &amp; Stock</h2><button type="button" onclick="currentFilter='all';renderCards();window.scrollTo({top:0,behavior:'smooth'});">View All <span>›</span></button></div><div id="homeActionCardsContainer" class="sk-home-v2-features" aria-label="Inventory shortcuts">${featureCards}</div></section>
+          <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Shop Tools</h2><button type="button" onclick="toggleLeftDrawer(true)">More <span>›</span></button></div><div id="homeActionCardsContainer" class="sk-home-v2-features" aria-label="Shop tools">${featureCards}</div></section>
           <section class="sk-home-v2-section"><div class="sk-home-v2-section-heading"><h2>Quick Actions</h2><button type="button" onclick="toggleLeftDrawer(true)">See All <span>→</span></button></div><div class="sk-home-v2-quick-grid">${quickActions}</div></section>
-          <section class="sk-home-v2-section sk-home-v2-recent-section"><div class="sk-home-v2-section-heading"><h2>Recent Activity</h2><button type="button" onclick="window.skOpenRecentActivity?window.skOpenRecentActivity():(toggleModal('billingModal',true),switchBillTab('history'))">View All <span>→</span></button></div><div class="sk-home-v2-recent-grid">${recentHTML}</div></section>
+          <section class="sk-home-v2-section sk-home-v2-recent-section"><div class="sk-home-v2-section-heading"><h2>Recent Activity</h2><button type="button" onclick="window.skOpenRecentActivity?window.skOpenRecentActivity():(toggleModal('billingModal',true),switchBillTab('history'))">View All <span>→</span></button></div><div class="sk-home-v2-recent-grid">${recentHTMLDone}</div></section>
         `;
         setTimeout(() => {
           container.querySelectorAll('.draggable-card').forEach(card => {
@@ -3699,7 +3706,10 @@ function viewSavedBill(idx) {
       let initialized = false, drawing = false, hasInk = false, savedData = '', activeRole = 'customer';
       const getBillKey = () => String(document.getElementById('pvBillNo')?.textContent || document.getElementById('pvBillNo')?.innerText || 'current').trim() || 'current';
       const readStore = () => { try { const v = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); return v && typeof v === 'object' ? v : {}; } catch (_) { return {}; } };
-      const normalized = value => typeof value === 'string' ? {customer:value, sales:''} : (value && typeof value === 'object' ? {customer:value.customer || '', sales:value.sales || ''} : {customer:'',sales:''});
+      const DEFAULT_SALES_KEY = 'sk_default_sales_signature_v1';
+      const defaultSales = () => { try { return localStorage.getItem(DEFAULT_SALES_KEY) || ''; } catch (_) { return ''; } };
+      /* the authorised (sales) signature is saved once and used on every bill until it is cleared */
+      const normalized = value => typeof value === 'string' ? {customer:value, sales:defaultSales()} : (value && typeof value === 'object' ? {customer:value.customer || '', sales:value.sales || defaultSales()} : {customer:'',sales:defaultSales()});
       const currentSignatures = () => normalized(readStore()[getBillKey()]);
       const applySignatures = value => {
         const sigs = normalized(value);
@@ -3728,10 +3738,10 @@ function viewSavedBill(idx) {
         const roleCopy=()=>{
           activeRole=roleSelect.value==='sales'?'sales':'customer';
           if(title) title.textContent=activeRole==='customer'?'✍️ Customer Signature':'✍️ Sales Person Signature';
-          if(hint) hint.textContent=activeRole==='customer'?'This signature will appear in the Customer Signature area on the bill.':'This signature will appear in the Authorized Signature / Seal area on the bill.';
+          if(hint) hint.textContent=activeRole==='customer'?'This signature will appear in the Customer Signature area on the bill.':'Sign once — this authorised signature is used on every bill. Tap Clear to remove it. (Appears in the Authorized Signature / Seal area on the bill.)';
           loadCanvasForRole();
         };
-        const openSignature=()=>{if(!modal)return;modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');document.body.classList.add('sk-signature-open');setTimeout(()=>{resize();roleCopy();},60);};
+        const openSignature=()=>{if(!modal)return;if(modal.parentNode!==document.body)document.body.appendChild(modal);modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');document.body.classList.add('sk-signature-open');setTimeout(()=>{resize();roleCopy();},60);};
         const closeSignature=()=>{if(!modal)return;modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('sk-signature-open');};
         openBtn?.addEventListener('click',openSignature); closeBtn?.addEventListener('click',closeSignature);
         modal?.addEventListener('click',e=>{if(e.target===modal)closeSignature();});
@@ -3743,24 +3753,52 @@ function viewSavedBill(idx) {
           const ratio=Math.max(1,window.devicePixelRatio||1);
           let old=''; try{if(hasInk)old=canvas.toDataURL('image/png');}catch(_){}
           canvas.width=Math.round(rect.width*ratio);canvas.height=Math.round(rect.height*ratio);
-          ctx.setTransform(ratio,0,0,ratio,0,0);ctx.lineWidth=2.4;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#172554';
+          ctx.setTransform(ratio,0,0,ratio,0,0);ctx.lineWidth=3.6;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#0b1b4d';
           if(old){const image=new Image();image.onload=()=>ctx.drawImage(image,0,0,rect.width,rect.height);image.src=old;}
         };
         const point=event=>{const r=canvas.getBoundingClientRect();return{x:event.clientX-r.left,y:event.clientY-r.top};};
-        canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture?.(e.pointerId);const p=point(e);drawing=true;hasInk=true;ctx.beginPath();ctx.moveTo(p.x,p.y);});
-        canvas.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+        let strokes=[],cur=null,last=null;
+        canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture?.(e.pointerId);const p=point(e);drawing=true;hasInk=true;cur=[p];strokes.push(cur);last=p;ctx.beginPath();ctx.arc(p.x,p.y,ctx.lineWidth/2,0,6.2832);ctx.fillStyle=ctx.strokeStyle;ctx.fill();});
+        canvas.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();const p=point(e);cur.push(p);const m={x:(last.x+p.x)/2,y:(last.y+p.y)/2};ctx.beginPath();ctx.moveTo(last.mx!==undefined?last.mx:last.x,last.mx!==undefined?last.my:last.y);ctx.quadraticCurveTo(last.x,last.y,m.x,m.y);ctx.stroke();p.mx=m.x;p.my=m.y;last=p;});
         const finish=e=>{if(!drawing)return;drawing=false;try{if(e&&canvas.hasPointerCapture?.(e.pointerId))canvas.releasePointerCapture(e.pointerId);}catch(_){}};
         canvas.addEventListener('pointerup',finish);canvas.addEventListener('pointercancel',finish);canvas.addEventListener('pointerleave',finish);
+        /* Redraw the signature level and neat: straighten the slant, crop to the ink, centre it and use a bold, even pen,
+           so every signature looks clean and the same size on the bill whatever way it was drawn. */
+        const neat=(st)=>{
+          try{
+            const pts=[];st.forEach(s=>s.forEach(p=>pts.push(p)));if(pts.length<2)return '';
+            let mx=0,my=0;pts.forEach(p=>{mx+=p.x;my+=p.y});mx/=pts.length;my/=pts.length;
+            let sxx=0,sxy=0;pts.forEach(p=>{sxx+=(p.x-mx)*(p.x-mx);sxy+=(p.x-mx)*(p.y-my)});
+            let ang=sxx>1?Math.atan2(sxy,sxx):0;if(Math.abs(ang)>0.6)ang=0;
+            const c=Math.cos(-ang),sn=Math.sin(-ang);
+            const rot=st.map(s=>s.map(p=>({x:(p.x-mx)*c-(p.y-my)*sn,y:(p.x-mx)*sn+(p.y-my)*c})));
+            let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;rot.forEach(s=>s.forEach(p=>{x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x);y1=Math.max(y1,p.y)}));
+            const w=Math.max(x1-x0,8),h=Math.max(y1-y0,8),W=480,H=140,pad=10,lw=6;
+            const k=Math.min((W-2*pad)/w,(H-2*pad)/h);
+            const o=document.createElement('canvas');o.width=W;o.height=H;const g=o.getContext('2d');
+            g.lineWidth=lw;g.lineCap='round';g.lineJoin='round';g.strokeStyle='#0b1b4d';g.fillStyle='#0b1b4d';
+            const ox=(W-w*k)/2-x0*k,oy=(H-h*k)/2-y0*k;
+            rot.forEach(s=>{
+              const q=s.map(p=>({x:p.x*k+ox,y:p.y*k+oy}));
+              if(q.length===1){g.beginPath();g.arc(q[0].x,q[0].y,lw/2,0,6.2832);g.fill();return}
+              g.beginPath();g.moveTo(q[0].x,q[0].y);
+              for(let i=1;i<q.length-1;i++){g.quadraticCurveTo(q[i].x,q[i].y,(q[i].x+q[i+1].x)/2,(q[i].y+q[i+1].y)/2);}
+              g.lineTo(q[q.length-1].x,q[q.length-1].y);g.stroke();
+            });
+            return o.toDataURL('image/png');
+          }catch(_){return '';}
+        };
         clearBtn.addEventListener('click',()=>{
           // Clear the selected role immediately in the canvas, persisted store, and live invoice.
           ctx.clearRect(0,0,canvas.width,canvas.height);
-          hasInk=false;
+          hasInk=false;strokes=[];
           savedData='';
           try {
             const store=readStore();
             const billKey=getBillKey();
             const sigs=normalized(store[billKey]);
             sigs[activeRole]='';
+            if(activeRole==='sales'){try{localStorage.removeItem(DEFAULT_SALES_KEY);}catch(_){} sigs.sales='';}
             if(!sigs.customer && !sigs.sales) delete store[billKey];
             else store[billKey]=sigs;
             localStorage.setItem(STORE_KEY,JSON.stringify(store));
@@ -3775,13 +3813,13 @@ function viewSavedBill(idx) {
         saveBtn.addEventListener('click',()=>{
           if(!hasInk){status('Please sign in the box before saving.');return;}
           try{
-            savedData=canvas.toDataURL('image/png');const store=readStore();const sigs=normalized(store[getBillKey()]);sigs[activeRole]=savedData;store[getBillKey()]=sigs;localStorage.setItem(STORE_KEY,JSON.stringify(store));applySignatures(sigs);refreshLauncher();status((activeRole==='customer'?'Customer':'Sales person')+' signature saved and added to the invoice.');
+            savedData=strokes.length?(neat(strokes)||canvas.toDataURL('image/png')):canvas.toDataURL('image/png');strokes=[];if(activeRole==='sales'){try{localStorage.setItem(DEFAULT_SALES_KEY,savedData);}catch(_){}}const store=readStore();const sigs=normalized(store[getBillKey()]);sigs[activeRole]=savedData;store[getBillKey()]=sigs;localStorage.setItem(STORE_KEY,JSON.stringify(store));applySignatures(sigs);refreshLauncher();status((activeRole==='customer'?'Customer':'Sales person')+' signature saved and added to the invoice.');
             setTimeout(()=>{if(modal){modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('sk-signature-open');}},350);
           }catch(err){console.error('Signature save failed:',err);status('Could not save signature on this device.');}
         });
         function loadCanvasForRole(){
           const sigs=currentSignatures();savedData=sigs[activeRole]||'';const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;
-          ctx.clearRect(0,0,canvas.width,canvas.height);hasInk=false;
+          ctx.clearRect(0,0,canvas.width,canvas.height);hasInk=false;strokes=[];
           if(savedData){const img=new Image();img.onload=()=>{ctx.drawImage(img,0,0,rect.width,rect.height);hasInk=true;};img.src=savedData;}
           status(savedData?'Existing signature loaded. You can redraw and save to replace it.':'Sign in the box, then tap Save Signature.');
         }
