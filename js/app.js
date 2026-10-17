@@ -2883,7 +2883,7 @@ const MASTER_INVENTORY = [
           latestStockHome ? {icon:'package',tone:'blue',title:'Stock Available',value:escHome(latestStockHome.title || 'Inventory item'),sub:`${Number(latestStockHome.stock || 0)} pcs · Inventory`} : {icon:'package',tone:'blue',title:'Stock Added',value:'No stock items',sub:'Inventory activity will appear here'}
         ];
         const recentRowsHome = (window.skRaHome && window.skRaHome()) || [];
-        const recentShownHome = recentRowsHome.length ? recentRowsHome.map(r => ({icon:r.icon,tone:r.tone,title:escHome(r.title),value:escHome(r.amt || r.sub),sub:escHome((r.amt ? r.sub + ' · ' : '') + r.date)})) : recentHTML;
+        const recentShownHome = window.skRaHome ? (recentRowsHome.length ? recentRowsHome.map(r => ({icon:r.icon,tone:r.tone,title:escHome(r.title),value:escHome(r.amt || r.sub),sub:escHome((r.amt ? r.sub + ' · ' : '') + r.date)})) : [{icon:'file-text',tone:'blue',title:'Today',value:'No activity yet',sub:'New bills and repairs will appear here'}]) : recentHTML;
         const recentHTMLDone = recentShownHome.map((r,ri) => `<div class="sk-home-v2-recent-card" role="button" tabindex="0" onclick="window.skRaTop?window.skRaTop(${ri}):(window.skRecentCard&&window.skRecentCard(${ri}))"><span class="sk-home-v2-recent-icon ${r.tone}">${homeIcon(r.icon)}</span><span class="sk-home-v2-recent-copy"><b>${r.title}</b><strong>${r.value}</strong><small>${r.sub}</small></span></div>`).join('');
 
         container.innerHTML = `

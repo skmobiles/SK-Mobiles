@@ -208,3 +208,8 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Home Recent Activity shows the 3 newest activities of any kind (newest first, same-day order fixed) and each opens its item.
 - Home: Tempered Glass, Accessories and Other Inventory cards removed; new Shop Tools tiles (Price List, Reviews & Offers, Monthly Report, Dealer Payments).
 - Dealer Payments: purchases count as paid by default; only ones marked "Pay later" are owed.
+
+## V5.7
+- Used Mobile Stock: search box is back under "Used Mobile Register".
+- Home Recent Activity shows only today's 3 newest activities.
+- Layout/alignment audit across all pages.

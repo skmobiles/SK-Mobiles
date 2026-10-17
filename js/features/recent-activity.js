@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.166 — Home "Recent Activity": the three cards open the item they show, and "View All" opens one
+/* SK MOBILES v5.7.0 — Home "Recent Activity": the three cards open the item they show, and "View All" opens one
    newest-first list of the latest bills, repair jobs, used-stock purchases and credit entries (tap a row to open it).
    Read-only: no data is changed. */
 (function(){
@@ -71,8 +71,8 @@ window.skOpenRecentActivity=function(){
   if(typeof window.toggleModal==='function')window.toggleModal('skRecentModal',true);
 };
 /* home page: the three newest activities of any kind */
-window.skRaHome=function(){return collect().slice(0,3).map(function(r){return {t:r.t,title:r.title,sub:r.sub,amt:r.amt,date:dmy(r.k),icon:r.t==='bill'?'file-text':r.t==='job'?'wrench':r.t==='credit'?'credit-card':'package',tone:r.t==='bill'?'blue':r.t==='job'?'rose':r.t==='credit'?'amber':'green'}})};
-window.skRaTop=function(n){rows=collect();window.skRaOpen(n)};
+window.skRaHome=function(){var t=new Date(),tk=t.getFullYear()+('0'+(t.getMonth()+1)).slice(-2)+('0'+t.getDate()).slice(-2);return collect().filter(function(r){return r.k===tk}).slice(0,3).map(function(r){return {t:r.t,id:r.id,name:r.name,phone:r.phone,title:r.title,sub:r.sub,amt:r.amt,date:dmy(r.k),icon:r.t==='bill'?'file-text':r.t==='job'?'wrench':r.t==='credit'?'credit-card':'package',tone:r.t==='bill'?'blue':r.t==='job'?'rose':r.t==='credit'?'amber':'green'}})};
+window.skRaTop=function(n){rows=window.skRaHome();window.skRaOpen(n)};
 /* newest bill / repair job (same ordering as the list), used by the home cards and their taps */
 window.skRaLatest=function(type){
   var all=collect().filter(function(r){return r.t===type});
