@@ -90,6 +90,23 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - **Daily Report** (drawer + home "Today Report"): sales, repairs, credit collected, total collection for any date; share on WhatsApp or copy. Read-only over existing data.
 - **Credit reminders:** 💬 WhatsApp button on every customer row with a pending balance, a Reminders list (overdue first, "reminded today" marker) and a link to the EMI reminder settings. Only `sk_credit_reminder_log_v1` is newly written.
 
+## V5.6.154
+- Payment page: Due Date field removed (still available on Credit entries); Date now full width.
+- All Tamil-script text in the app (messages, alerts, notes, code comments) replaced with English; new feature messages are plain English too.
+
+## V5.6.153
+- Tools & Others note page: oversized Templates icon fixed (icons without a size rule can no longer balloon, app-wide); spacing between Save/Share and Quick Templates; "Required" chip no longer wraps.
+- Calendar buttons stay inside their date boxes (Repair History etc.); Accessories rows no longer have empty left space.
+- Phone fields: tap an empty phone field to open the phone contact list (name + number fill in); new contact icon.
+- IMEI fields (Bill, Used stock): camera scan button (BarcodeDetector, ZXing fallback). Second IMEI on a label fills IMEI 2.
+- Audit: all handlers defined, no duplicate ids, every button clicked on every screen without JS errors; copy-models no longer throws when clipboard is blocked.
+
+## V5.6.152
+- **Bill saved popup:** after Save Bill, one-tap WhatsApp message to the customer (bill no, item, total, balance, warranty).
+- **Customers** (drawer, or tap the name on a Bill History card): bills, repairs, credit balance, Call/WhatsApp.
+- **Warranty:** new Warranty dropdown on the bill (7 days – 1 year), shown on the invoice terms; **Warranty Tracker** (drawer) with Ending soon / Active / Expired and WhatsApp reminder.
+- **Undo delete:** 10-second Undo bar after deleting a bill, repair job, credit customer, used mobile, accessories or inventory item.
+
 ## V5.6.151
 - Font weights lightened (WhatsApp/YouTube style): 400 regular, 500–600 medium, 700–900 now semibold. No heavy bold anywhere.
 - Used Mobile details page: multi-colour fields with icons; Edit/Delete/Select-for-Bill no longer hidden behind the bottom nav; Delete is red.
@@ -109,3 +126,13 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Home: red "🚨 N urgent" badge on the Pending Jobs box.
 - "Ready" WhatsApp message: one-tap button on Ready jobs in History; message now includes the model and balance. Fixed a phone-number cleanup typo (`/\\D/`) in repair call/WhatsApp.
 - Tap the box to open: Bill History (opens bill), Used Mobile Stock rows (opens details), Accessories (opens edit; long-press still selects). The separate View / arrow / Edit buttons were removed. Edit/Delete/menu buttons that remain are unchanged.
+
+## V5.6.155
+- **Monthly Report** (drawer): sales, profit (used mobiles + repairs), best-selling models, credit collected; share on WhatsApp, Excel and PDF.
+- **UPI QR on bills**: set the UPI ID in Settings; the QR prints on the invoice when a balance is due (or always / never).
+- **Repair photos**: up to 3 compressed photos per repair job; removed automatically 90 days after delivery.
+- **Dealer Payments** (drawer): bought vs paid per dealer, payments, settle-all, WhatsApp statement.
+- **Search everywhere**: the search button on Home finds bills, customers, phone, IMEI, repair jobs and used stock.
+- **Cloud backup guard / Storage Health**: auto backup on first open of the day and after 21:00, only the last 14 backups are kept.
+- **Dark mode**: dark page surface, readable labels and softer borders on every screen.
+- No change to core sync, Firebase config or data keys.

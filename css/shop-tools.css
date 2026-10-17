@@ -1,0 +1,60 @@
+/* SK MOBILES v5.6.155 — Warranty tracker, Customers, bill popup, undo bar. */
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-tabs{display:flex;gap:6px;margin-bottom:10px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-tab{flex:1;padding:9px 4px;border:1px solid var(--card-border);border-radius:12px;background:var(--card-bg);color:var(--text-muted);font-size:.78rem;font-weight:600;cursor:pointer}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-tab.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-tab b{font-weight:700}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-empty{text-align:center;padding:26px 10px;color:var(--text-muted);font-size:.85rem}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-row{display:flex;align-items:center;gap:10px;padding:11px 12px;margin-bottom:8px;border:1px solid var(--card-border);background:var(--card-bg);border-radius:14px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-main{flex:1;min-width:0}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-name{font-weight:600;font-size:.92rem;color:var(--text)}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-sub{font-size:.72rem;color:var(--text-muted);margin-top:2px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-chip{font-size:.68rem;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-chip.ok{background:#dcfce7;color:#15803d}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-chip.warn{background:#fef3c7;color:#b45309}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-chip.bad{background:#fee2e2;color:#dc2626}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skw-wa{width:34px;height:34px;border-radius:10px;border:1px solid rgba(22,163,74,.35);background:#f0fdf4;font-size:1rem;cursor:pointer}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-search{width:100%;margin-bottom:10px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-row{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--card-border);background:var(--card-bg);border-radius:14px;cursor:pointer}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-av{flex:0 0 38px;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#e0e7ff;color:#4338ca;font-weight:700}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-av.big{width:52px;height:52px;flex-basis:52px;font-size:1.3rem;border-radius:16px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-main{flex:1;min-width:0}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-name{font-weight:600;font-size:.92rem;color:var(--text)}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-name.big{font-size:1.1rem}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-sub{font-size:.72rem;color:var(--text-muted);margin-top:2px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-bal{font-size:.74rem;font-weight:600;color:#dc2626;background:#fee2e2;padding:3px 9px;border-radius:999px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-arr{color:var(--text-muted);font-size:1.2rem}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-back{border:0;background:none;color:var(--primary);font-weight:600;font-size:.9rem;padding:4px 0 10px;cursor:pointer}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-actions{display:flex;gap:8px;margin-bottom:12px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-act{flex:1;text-align:center;padding:10px;border-radius:12px;font-weight:600;font-size:.85rem;text-decoration:none;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text);cursor:pointer}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-act.wa{background:#16a34a;color:#fff;border-color:#16a34a}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:6px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats>div{padding:10px 12px;border-radius:14px;border:1px solid var(--card-border)}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats b{display:block;font-size:1.05rem;font-weight:700}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats small{font-size:.7rem;color:var(--text-muted)}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats .s1{background:#eff6ff}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats .s1 b{color:#2563eb}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats .s2{background:#f0fdf4}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats .s2 b{color:#16a34a}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats .s3{background:#fef2f2}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats .s3 b{color:#dc2626}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats .s4{background:#faf5ff}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-stats .s4 b{color:#7c3aed}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-h{margin:14px 0 8px;font-size:.85rem;font-weight:600;color:var(--text)}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--card-border);background:var(--card-bg);border-radius:12px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-item b{display:block;font-weight:600;font-size:.88rem}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-item small{display:block;font-size:.7rem;color:var(--text-muted);margin-top:2px}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-item span{text-align:right;font-weight:600;font-size:.88rem;white-space:nowrap}
+html body :is(#skWarrantyModal,#skCustModal):is(#skWarrantyModal,#skCustModal) .skcu-item em{display:block;font-style:normal;font-size:.68rem;color:#dc2626;font-weight:500}
+.skwp-overlay{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.5)}
+.skwp-card{width:100%;max-width:340px;background:var(--card-bg,#fff);color:var(--text,#0f172a);border-radius:22px;padding:22px 20px 16px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.skwp-ok{font-size:2.2rem}
+.skwp-card h3{margin:4px 0 6px;font-size:1.1rem;font-weight:600}
+.skwp-card p{margin:0 0 14px;font-size:.88rem;line-height:1.5}
+.skwp-card p span{color:var(--text-muted,#64748b);font-size:.8rem}
+.skwp-card .submit-btn{width:100%;margin-bottom:8px}
+.skwp-skip{width:100%;padding:10px;border:0;background:none;color:var(--text-muted,#64748b);font-weight:500;font-size:.88rem;cursor:pointer}
+.skun-bar{position:fixed;left:12px;right:12px;bottom:92px;z-index:2147483640;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-radius:14px;background:#0f172a;color:#fff;font-size:.86rem;box-shadow:0 10px 28px rgba(0,0,0,.3);animation:skUnIn .2s ease}
+.skun-bar button{border:0;border-radius:10px;padding:7px 14px;background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:.84rem;cursor:pointer}
+@keyframes skUnIn{from{transform:translateY(12px);opacity:0}}

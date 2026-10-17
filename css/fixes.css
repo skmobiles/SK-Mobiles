@@ -1,0 +1,65 @@
+/* SK MOBILES v5.6.155 — final layout fixes (loaded last). */
+/* Any inline icon without its own size rule can never balloon to fill its box. */
+:where(svg.st-svg){width:20px;height:20px;flex:none}
+/* Tools & Others note page spacing */
+html body #toolsOthersNoteModal#toolsOthersNoteModal .tools-others-actions{margin:12px 0 22px!important}
+html body #toolsOthersNoteModal#toolsOthersNoteModal .st-qt{margin-top:10px;padding-top:18px;border-top:1px solid var(--card-border,#e2e8f0)}
+html body #toolsOthersNoteModal#toolsOthersNoteModal .st-chip svg{width:16px;height:16px}
+/* Calendar button always stays inside its input, whatever the input height */
+html body .sk-date-btn{min-height:0!important;min-width:0!important;top:4px;bottom:4px;right:4px;transform:none;height:auto;width:auto;aspect-ratio:1/1;max-width:34px;max-height:34px;margin:auto 0!important}
+html body .sk-date-btn:active{transform:scale(.94)}
+html body .sk-date-btn svg{width:min(19px,60%);height:auto;aspect-ratio:1/1}
+html body .sk-date-wrap>input:not(.sk-date-native){padding-right:calc(min(34px,100%) + 10px)!important}
+/* Contact + scan buttons: same size, centred inside the field */
+html body .sk-contact-field-wrap>.sk-contact-access-btn,html body .sk-scan-btn{font-size:0!important;line-height:0!important}
+html body .sk-contact-field-wrap>.sk-contact-access-btn svg,html body .sk-scan-btn svg{width:17px;height:17px;display:block}
+/* "Required" chip never wraps; label text shrinks instead */
+html.sk-cui .repair-spares-label::after,html.sk-cui .tools-others-label::after{white-space:nowrap;flex:none;margin-left:6px}
+html body #toolsOthersNoteModal#toolsOthersNoteModal .tools-others-label{flex-wrap:wrap}
+/* Accessories: hidden select checkbox takes no space until selection mode */
+html body #skAccessoriesList#skAccessoriesList:not(.sk-selection-mode) .sk-accessory-row .skAccSelect{width:0!important;min-width:0!important;height:0!important;margin:0 -10px 0 0!important;padding:0!important;border:0!important;flex:0 0 0!important}
+html body #skAccessoriesList#skAccessoriesList:not(.sk-selection-mode)>div{grid-template-columns:0 42px minmax(0,1fr)!important;column-gap:0!important}
+html body #skAccessoriesList#skAccessoriesList:not(.sk-selection-mode)>div>:nth-child(2){margin-right:10px}
+/* IMEI scan button + scanner overlay */
+html body .sk-scan-wrap{position:relative;display:block;width:100%;min-width:0}
+html body .sk-scan-wrap>input{width:100%!important;box-sizing:border-box;padding-right:44px!important}
+html body .sk-scan-btn{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:32px;height:32px;min-width:0!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:10px!important;display:flex!important;align-items:center;justify-content:center;background:linear-gradient(135deg,#dbeafe,#e0e7ff)!important;color:#2563eb!important;box-shadow:none!important;cursor:pointer;z-index:3}
+html body .sk-scan-btn:active{transform:translateY(-50%) scale(.94)}
+.sk-scan-overlay{position:fixed;inset:0;z-index:2147483647;background:#000;display:flex;align-items:center;justify-content:center}
+.sk-scan-overlay video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sk-scan-frame{position:relative;width:78vw;max-width:420px;height:34vw;max-height:190px;min-height:120px;border:2px solid rgba(255,255,255,.9);border-radius:16px;box-shadow:0 0 0 100vmax rgba(0,0,0,.55)}
+.sk-scan-frame i{position:absolute;left:8px;right:8px;top:50%;height:2px;background:#ef4444;box-shadow:0 0 10px #ef4444;animation:skScanLine 1.6s ease-in-out infinite alternate}
+@keyframes skScanLine{from{top:18%}to{top:82%}}
+.sk-scan-top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 14px;color:#fff;font-size:1rem}
+.sk-scan-x{width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:1.1rem;cursor:pointer}
+.sk-scan-hint{position:absolute;left:0;right:0;bottom:calc(90px + env(safe-area-inset-bottom,0px));text-align:center;color:#fff;font-size:.9rem;padding:0 20px;text-shadow:0 1px 6px #000}
+.sk-scan-torch{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:999px;border:0;background:rgba(255,255,255,.22);color:#fff;font-size:.9rem;cursor:pointer}
+
+/* Repair photos */
+html body .skph-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+html body .skph-thumbs{display:contents}
+html body .skph-th{position:relative;width:64px;height:64px;border-radius:12px;overflow:hidden;border:1px solid var(--card-border,#dbe4f5)}
+html body .skph-th img{width:100%;height:100%;object-fit:cover;display:block}
+html body .skph-th button{position:absolute;top:3px;right:3px;width:20px!important;height:20px!important;min-width:0!important;min-height:0!important;max-height:20px!important;display:block;padding:0!important;border:0;border-radius:50%;background:rgba(15,23,42,.75);color:#fff;font-size:.6rem;line-height:20px;cursor:pointer}
+html body .skph-add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:64px;height:64px;border:1.5px dashed var(--primary,#2563eb);border-radius:12px;color:var(--primary,#2563eb);font-size:.62rem;font-weight:600;cursor:pointer}
+html body .skph-add svg{width:22px;height:22px}
+html body .skph-hint{margin-top:6px;font-size:.68rem;color:var(--text-muted,#64748b)}
+html body .skph-gallery{margin:10px 0}
+html body .skph-gallery small{display:block;font-size:.66rem;font-weight:600;letter-spacing:.08em;color:var(--text-muted,#64748b);margin-bottom:6px}
+html body .skph-gallery div{display:flex;gap:8px;flex-wrap:wrap}
+html body .skph-gallery img{width:84px;height:84px;object-fit:cover;border-radius:12px;border:1px solid var(--card-border,#dbe4f5);cursor:pointer}
+.skph-view{position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center}
+.skph-view img{max-width:96vw;max-height:90vh;object-fit:contain;border-radius:8px}
+.skph-view button{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:1.1rem}
+
+/* Dark mode: built-in page surface must be dark too; labels that were hard-coded dark */
+html:not(#a):not(#b)[data-ui-mode="dark"][data-ui-surface="offwhite"] body{background:var(--page-bg)!important}
+html:not(#a):not(#b)[data-ui-mode="dark"] .sk-home-v2-hero{background:var(--card-bg)!important}
+html:not(#a):not(#b)[data-ui-mode="dark"] body .sk-home-v2-metric b,
+html:not(#a):not(#b)[data-ui-mode="dark"] body .sk-home-v2-metric strong{color:var(--text)!important}
+html:not(#a):not(#b)[data-ui-mode="dark"] body :is(.sksh-card,.sksh-row,.skgs-row,.skdl-start,.skph-hint){color:var(--text)}
+html:not(#a):not(#b)[data-ui-mode="dark"] body :is(.sksh-card h4,.sksh-row span,.sksh-row b){color:var(--text)!important}
+html:not(#a):not(#b)[data-ui-mode="dark"] body .skgs-h span{background:var(--chip-bg,#243a65);color:var(--text)}
+html:not(#a):not(#b)[data-ui-mode="dark"] body #skDealerModal .skdl-start input{background:var(--input-bg);color:var(--text);border:1px solid var(--card-border)}
+html:not(#a):not(#b)[data-ui-mode="dark"] body :is(.app-name,.sk-home-v2-section h2,.sk-home-v2-card h2,.sk-home-v2-recent-section h2){color:var(--text)!important}
+html:not(#a):not(#b)[data-ui-mode="dark"] body :is(.app-subtitle,.app-tagline,.search-icon-left){color:var(--text-muted)!important}

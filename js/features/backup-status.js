@@ -1,4 +1,4 @@
-/* SK Mobiles v5.6.151 — Home backup status button.
+/* SK Mobiles v5.6.155 — Home backup status button.
    Green = every change is backed up to the cloud, Red = changes not backed up yet.
    Tap = cloud backup now; if cloud backup is not possible, the app restarts. */
 (function(){
@@ -36,7 +36,7 @@
   window.skBackupTap=async function(){
     if(running)return;
     if(!(typeof window.skCloudCanBackup==='function'&&window.skCloudCanBackup())){
-      toast('☁️ Cloud backup ippo mudiyala — app restart aagudhu…');
+      toast('☁️ Cloud backup is not possible right now — restarting the app…');
       setTimeout(function(){location.reload();},900);return;
     }
     running=true;paint();
@@ -44,9 +44,9 @@
     try{await window.skCloudBackupNow(false);}catch(e){}
     running=false;paint();
     if(state.backupMs===before||state.backupMs<state.changeMs){
-      toast('❌ Backup fail — app restart aagudhu…');
+      toast('❌ Backup failed — restarting the app…');
       setTimeout(function(){location.reload();},1100);
-    }else toast('✅ Cloud backup முடிந்தது');
+    }else toast('✅ Cloud backup completed');
   };
   function boot(){load();hook();paint();setInterval(paint,5000);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();

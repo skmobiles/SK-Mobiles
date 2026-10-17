@@ -1,9 +1,9 @@
 /* SK MOBILES PWA shell cache. Firebase/auth/firestore requests are never intercepted. */
 const CACHE_PREFIX = 'sk-mobiles-shell-';
-const CACHE_NAME = 'sk-mobiles-shell-v5.6.151';
+const CACHE_NAME = 'sk-mobiles-shell-v5.6.155';
 const APP_SHELL = [
   '/', '/index.html', '/manifest.webmanifest',
-  '/css/fonts.css', '/css/style.css', '/css/premium-overrides.css', '/css/used-mobile-stock.css', '/css/billing-page.css', '/css/colorful-ui.css', '/css/polish-v143.css', '/css/invoice-unified.css', '/css/settings-v145.css', '/css/screens-v145.css', '/css/bottom-nav.css', '/css/appearance.css', '/css/business-tools.css', '/fonts/inter-regular.woff', '/fonts/inter-medium.woff', '/fonts/inter-semibold.woff', '/js/features/settings-v145.js', '/js/features/date-fields-v145.js', '/js/features/backup-status.js', '/js/features/business-tools-v148.js', '/js/features/form-icons-v145.js', '/js/features/colorful-ui.js', '/js/features/pin-security.js', '/js/app.js', '/js/firebase-sync.js',
+  '/css/fonts.css', '/css/style.css', '/css/premium-overrides.css', '/css/used-mobile-stock.css', '/css/billing-page.css', '/css/colorful-ui.css', '/css/polish-v143.css', '/css/invoice-unified.css', '/css/settings-v145.css', '/css/screens-v145.css', '/css/bottom-nav.css', '/css/appearance.css', '/css/fixes.css', '/css/business-tools.css', '/css/shop-tools.css', '/js/features/shop-tools-v151.js', '/fonts/inter-regular.woff', '/fonts/inter-medium.woff', '/fonts/inter-semibold.woff', '/js/features/settings-v145.js', '/js/features/date-fields-v145.js', '/js/features/backup-status.js', '/js/features/scanner-v152.js', '/js/features/qr-mini.js', '/js/features/invoice-upi.js', '/js/features/month-report.js', '/js/features/cloud-guard.js', '/js/features/repair-photos.js', '/js/features/dealer-tracker.js', '/js/features/global-search.js', '/js/features/business-tools-v148.js', '/js/features/form-icons-v145.js', '/js/features/colorful-ui.js', '/js/features/pin-security.js', '/js/app.js', '/js/firebase-sync.js',
   '/icons/sk-mobiles-192.png', '/icons/sk-mobiles-512.png',
   '/Logo.png', '/assets/sk-home-logo.png', '/assets/sk-home-hero.jpg',
   '/assets/sk-home-glass.png', '/assets/sk-home-used-inventory.png',

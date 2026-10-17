@@ -2,7 +2,7 @@
 
 <html lang="en-GB" data-theme="light">
 <head>
-<meta name="sk-app-version" content="5.6.151">
+<meta name="sk-app-version" content="5.6.155">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
@@ -30,11 +30,13 @@
 <script>
 (function(){try{var r=document.documentElement,t=localStorage.getItem('sk_theme');if(t)r.setAttribute('data-theme',t);var meta=document.getElementById('skThemeColorMeta');var c={light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',sunset:'#ffedd5',emerald:'#d1fae5',rose:'#ffe4e6',midnight:'#111827',graphite:'#111827',lime:'#0f1a05',dark:'#050811',cyber:'#03040a',obsidian:'#000000',aurora:'#cffafe',crimson:'#ffe4e6',mint:'#ccfbf1',solar:'#000000',nebula:'#17102f',forest:'#062e1c',glacier:'#e0f2fe',magenta:'#2b092f','apple-light':'#f5f5f7','apple-dark':'#000000'}[t||'light'];if(meta&&c)meta.setAttribute('content',c);}catch(e){}})();
 </script>
-<link href="./css/fonts.css?v=5.6.151" rel="stylesheet" type="text/css"/>
-<link href="./css/style.css?v=5.6.151" rel="stylesheet" type="text/css"/>
-<link href="./css/premium-overrides.css?v=5.6.151" rel="stylesheet" type="text/css"/>
-<link href="./css/used-mobile-stock.css?v=5.6.151" rel="stylesheet" type="text/css"/>
-<link href="./css/billing-page.css?v=5.6.151" rel="stylesheet" type="text/css"/><link href="./css/colorful-ui.css?v=5.6.151" rel="stylesheet" type="text/css"/><link href="./css/polish-v143.css?v=5.6.151" rel="stylesheet" type="text/css"/><link href="./css/invoice-unified.css?v=5.6.151" rel="stylesheet" type="text/css"/><link href="./css/settings-v145.css?v=5.6.151" rel="stylesheet" type="text/css"/><link href="./css/screens-v145.css?v=5.6.151" rel="stylesheet" type="text/css"/><link href="./css/bottom-nav.css?v=5.6.151" rel="stylesheet" type="text/css"/><link href="./css/appearance.css?v=5.6.151" rel="stylesheet" type="text/css"/><link href="./css/business-tools.css?v=5.6.151" rel="stylesheet" type="text/css"/><script>
+<link href="./css/fonts.css?v=5.6.155" rel="stylesheet" type="text/css"/>
+<link href="./css/style.css?v=5.6.155" rel="stylesheet" type="text/css"/>
+<link href="./css/premium-overrides.css?v=5.6.155" rel="stylesheet" type="text/css"/>
+<link href="./css/used-mobile-stock.css?v=5.6.155" rel="stylesheet" type="text/css"/>
+<link href="./css/billing-page.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/colorful-ui.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/polish-v143.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/invoice-unified.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/settings-v145.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/screens-v145.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/bottom-nav.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/appearance.css?v=5.6.155" rel="stylesheet" type="text/css"/>
+<link href="./css/fixes.css?v=5.6.155" rel="stylesheet" type="text/css"/><link href="./css/shop-tools.css?v=5.6.155" rel="stylesheet" type="text/css"/>
+<link href="./css/business-tools.css?v=5.6.155" rel="stylesheet" type="text/css"/><script>
 (function(){try{
   var s=JSON.parse(localStorage.getItem('sk_appearance_settings')||'null');
   if(!s)return;
@@ -312,7 +314,7 @@
 </button>
 
 <div class="drawer-footer-badge">
-<span>SK Mobiles Master • V5.6.151</span>
+<span>SK Mobiles Master • V5.6.155</span>
 <span>Dharmapuri, Tamil Nadu</span>
 </div>
 </div>
@@ -463,7 +465,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea></div></div><div class="st-field"><spa
 <div class="repair-spares-title"><span aria-hidden="true">🧰</span><span>Repair Spares Orders</span></div>
 <button class="modal-close-btn" type="button" onclick="toggleModal('repairSparesModal', false)" aria-label="Close Repair Tools & IC Spares">✕</button>
 </div>
-<div class="repair-spares-info">Daily repair-க்கு தேவையான spare parts / components-ஐ இங்கே manual-ஆக note செய்து save செய்யலாம்.</div>
+<div class="repair-spares-info">Note the spare parts / components needed for daily repairs here and save them.</div>
 <label class="repair-spares-label" for="repairSparesNoteInput">Required Repair Spares Note</label>
 <textarea class="repair-spares-note" id="repairSparesNoteInput" rows="12" placeholder="e.g.
 1. iPhone 11 Display - 1 pc
@@ -482,7 +484,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea></div></div><div class="st-field"><spa
 <div class="tools-others-title"><span class="st-tile c-blue"><svg class="st-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.4 2.4-2.6-.6-.6-2.6z"/></svg></span><span class="st-title-text"><b>Tools &amp; Others Notes</b><small>Monthly / rare order tools &amp; equipment</small></span></div>
 <button class="modal-close-btn" type="button" onclick="toggleModal('toolsOthersNoteModal', false)" aria-label="Close Tools & Others Notes">✕</button>
 </div>
-<div class="st-note st-note-blue"><svg class="st-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>இந்த note உங்களுடைய reference க்காக மட்டுமே. இது orders அல்லது inventory-க்கு affect ஆகாது.</span></div>
+<div class="st-note st-note-blue"><svg class="st-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>This note is for your reference only. It does not affect orders or inventory.</span></div>
 <div class="st-label-row"><label class="tools-others-label" for="toolsOthersNoteInput"><svg class="st-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg><span>Tools &amp; Others Order Note</span></label><button type="button" class="st-chip" onclick="skToolsTemplates()"><svg class="st-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg><span>Templates</span></button></div>
 <textarea class="tools-others-note" id="toolsOthersNoteInput" rows="9" maxlength="2000" oninput="skToolsCount()" placeholder="e.g.
 1. Soldering Iron - 1 pc
@@ -829,7 +831,7 @@ Dharmapuri, Tamil Nadu 636705 .</textarea></div></div><div class="st-field"><spa
 <img alt="SK MOBILES" class="sk-logo-img" id="appHeaderLogo" onclick="document.getElementById('logoFileInput').click()" src="./assets/sk-home-logo.png" title="Click to change logo"/>
 <div>
 <div class="app-name" id="appHeaderTitle">SK MOBILES</div>
-<div class="app-sub"><span class="app-sub-default">Tempered Glass &amp; Inventory Master</span><span class="app-sub-home">Smart Billing &amp; Business Management</span> <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V5.6.151</span></div>
+<div class="app-sub"><span class="app-sub-default">Tempered Glass &amp; Inventory Master</span><span class="app-sub-home">Smart Billing &amp; Business Management</span> <span id="skAppVersionBadge" style="display:inline-block;margin-left:5px;padding:2px 6px;border-radius:7px;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--primary);font-size:.58rem;font-weight:900;vertical-align:middle;">V5.6.155</span></div>
 </div>
 </div>
 <div class="sk-home-header-actions" aria-label="Home shortcuts">
@@ -1266,18 +1268,27 @@ Dharmapuri, Tamil Nadu 636705 .</textarea></div></div><div class="st-field"><spa
 
 <script>try { localStorage.removeItem('sk_design_studio_v1'); } catch(e) {}</script>
 
-<script src="js/features/pin-security.js?v=5.6.151" defer></script>
-<script src="js/features/colorful-ui.js?v=5.6.151" defer></script>
-<script src="js/features/settings-v145.js?v=5.6.151" defer></script>
-<script src="js/features/date-fields-v145.js?v=5.6.151" defer></script>
-<script src="js/features/backup-status.js?v=5.6.151"></script>
-<script src="js/features/business-tools-v148.js?v=5.6.151" defer></script>
-<script src="js/features/form-icons-v145.js?v=5.6.151" defer></script>
-<script src="js/app.js?v=5.6.151" defer></script>
-<script src="js/firebase-sync.js?v=5.6.151"></script>
+<script src="js/features/pin-security.js?v=5.6.155" defer></script>
+<script src="js/features/colorful-ui.js?v=5.6.155" defer></script>
+<script src="js/features/settings-v145.js?v=5.6.155" defer></script>
+<script src="js/features/date-fields-v145.js?v=5.6.155" defer></script>
+<script src="js/features/backup-status.js?v=5.6.155"></script>
+<script src="js/features/shop-tools-v151.js?v=5.6.155"></script>
+<script src="js/features/scanner-v152.js?v=5.6.155"></script>
+<script src="js/features/qr-mini.js?v=5.6.155"></script>
+<script src="js/features/invoice-upi.js?v=5.6.155"></script>
+<script src="js/features/month-report.js?v=5.6.155"></script>
+<script src="js/features/cloud-guard.js?v=5.6.155"></script>
+<script src="js/features/repair-photos.js?v=5.6.155"></script>
+<script src="js/features/dealer-tracker.js?v=5.6.155"></script>
+<script src="js/features/global-search.js?v=5.6.155"></script>
+<script src="js/features/business-tools-v148.js?v=5.6.155" defer></script>
+<script src="js/features/form-icons-v145.js?v=5.6.155" defer></script>
+<script src="js/app.js?v=5.6.155" defer></script>
+<script src="js/firebase-sync.js?v=5.6.155"></script>
 
 <script>
-/* V5.6.151: mount fixed navigation under body so transformed page wrappers
+/* V5.6.155: mount fixed navigation under body so transformed page wrappers
    cannot clip its lower edge or trap position:fixed inside a stacking context. */
 (function(){
   function mountSkBottomNav(){

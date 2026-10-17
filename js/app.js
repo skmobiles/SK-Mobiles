@@ -1156,7 +1156,7 @@ const MASTER_INVENTORY = [
       const typeEl = document.getElementById('pvMobileType');
       if (typeEl) typeEl.innerText = currentMobileType;
       const termsEl = document.getElementById('pvTerms');
-      if (termsEl) termsEl.innerText = getMobileTerms(currentMobileType);
+      if (termsEl) termsEl.innerText = getMobileTerms(currentMobileType) + (window.skWarrantyLine ? window.skWarrantyLine({warrantyDays:(document.getElementById('billWarranty')||{}).value,date:''}) : '');
       const ramStorageGrid = document.getElementById('billRamStorageGrid');
       if (ramStorageGrid) ramStorageGrid.classList.toggle('sk-keypad-hidden', currentMobileType === 'Keypad Mobile');
       saveDraft();
@@ -1844,7 +1844,7 @@ const MASTER_INVENTORY = [
       const accent=accentName==='custom'?skHex(settings.customHex):skHex(SK_APPEARANCE_ACCENTS[accentName]||SK_APPEARANCE_ACCENTS.blue);
       const light=resolved==='light';
       const primary2=skMix(accent,light?'#0F172A':'#FFFFFF',light?.12:.18);
-      const border=light?skMix(accent,'#E2E8F0',.78):skMix(accent,'#FFFFFF',.82);
+      const border=light?skMix(accent,'#E2E8F0',.78):skMix(accent,'#243044',.80);
       const page=light?skMix(accent,'#F8FAFC',.93):'#070A10';
       const bg=light?skMix(accent,'#FFFFFF',.97):'#05070C';
       const card=light?'#FFFFFF':'#0D121C';
@@ -3031,9 +3031,18 @@ const MASTER_INVENTORY = [
       const item = inventory.find(i => i.id === id);
       if (!item) return;
       const text = `${item.title}:\n` + item.models.join(', ');
-      navigator.clipboard.writeText(text).then(() => {
-        showToast("Copied to clipboard!");
-      });
+      const fallback = () => {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;left:-999px';
+          document.body.appendChild(ta); ta.select();
+          const ok = document.execCommand('copy'); ta.remove();
+          showToast(ok ? "Copied to clipboard!" : "❌ Copy not allowed on this browser");
+        } catch (e) { showToast("❌ Copy not allowed on this browser"); }
+      };
+      try {
+        navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard!"), fallback);
+      } catch (e) { fallback(); }
     }
 
     function toggleQuickOrder(id) {
@@ -3271,7 +3280,7 @@ const MASTER_INVENTORY = [
       const mobileTypeEl = document.getElementById('pvMobileType');
       if (mobileTypeEl) mobileTypeEl.innerText = currentMobileType;
       const termsEl = document.getElementById('pvTerms');
-      if (termsEl) termsEl.innerText = getMobileTerms(currentMobileType);
+      if (termsEl) termsEl.innerText = getMobileTerms(currentMobileType) + (window.skWarrantyLine ? window.skWarrantyLine({warrantyDays:(document.getElementById('billWarranty')||{}).value,date:''}) : '');
     }
 
     function saveUsedBill() {
@@ -3533,7 +3542,7 @@ function renderSavedBillToLiveInvoicePreview(b) {
       }
 
       const terms = getMobileTerms(b.mobileType || 'New Mobile');
-      setText('pvTerms', terms, '');
+      setText('pvTerms', terms + (window.skWarrantyLine ? window.skWarrantyLine(b) : ''), '');
 
       return true;
     }
@@ -4257,6 +4266,7 @@ img{max-width:100%!important;}
       reworkReason: existing?.reworkReason||'',
       reworkCount: Number(existing?.reworkCount)||0,
       deliveredAt:existing?.deliveredAt||'',
+      photos:Array.isArray(window.__skRjPhotosNow)?window.__skRjPhotosNow.slice(0,3):(Array.isArray(existing?.photos)?existing.photos:[]),
       createdAt:existing?.createdAt||new Date().toISOString(),
       updatedAt:new Date().toISOString()
     };
@@ -4655,13 +4665,12 @@ img{max-width:100%!important;}
       const btn=document.createElement('button');
       btn.type='button';btn.className='sk-contact-access-btn';
       btn.title='Choose contact';btn.setAttribute('aria-label','Choose contact name and phone number');
-      btn.textContent='▣';
-      btn.addEventListener('click',async function(ev){
-        ev.preventDefault();ev.stopPropagation();
+      btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><circle cx="12" cy="10" r="2.6"/><path d="M7.8 17c.7-2 2.4-3 4.2-3s3.5 1 4.2 3M3 8h2M3 12h2M3 16h2"/></svg>';
+      const pickContact=async function(auto){
         try{
           const picker=(navigator.contacts&&typeof navigator.contacts.select==='function')?navigator.contacts:null;
           if(!picker){
-            if(typeof showToast==='function')showToast('Contact selection is not supported in this browser. Try Chrome on Android over HTTPS.');
+            if(!auto&&typeof showToast==='function')showToast('Contact selection is not supported in this browser. Try Chrome on Android over HTTPS.');
             return;
           }
           const selected=await picker.select(['name','tel'],{multiple:false});
@@ -4686,7 +4695,14 @@ img{max-width:100%!important;}
           if(typeof saveDraft==='function')saveDraft();
           if(typeof updateBillPreview==='function')updateBillPreview();
           if(typeof showToast==='function')showToast(chosenName?'Contact selected':'Phone number selected');
-        }catch(err){if(err&&err.name!=='AbortError'&&typeof showToast==='function')showToast('Could not open contacts. Check browser permission and HTTPS.');}
+        }catch(err){if(!auto&&err&&err.name!=='AbortError'&&typeof showToast==='function')showToast('Could not open contacts. Check browser permission and HTTPS.');}
+      };
+      btn.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();pickContact(false);});
+      /* Tapping an empty phone field opens the phone's contact list; cancel it and type normally. */
+      input.addEventListener('click',function(){
+        if(input.value||input.readOnly||input.disabled)return;
+        if(!(navigator.contacts&&typeof navigator.contacts.select==='function'))return;
+        pickContact(true);
       });
       wrap.appendChild(btn);
     });
@@ -7369,7 +7385,7 @@ window.skCPEditLedgerEntry=function(encodedId){
   var entry=ledger.find(function(e){return String(e.id||'')===id;});
   if(!entry){if(typeof showToast==='function')showToast('Credit/payment entry not found');return;}
   if(String(entry.source||'')==='bill'||String(entry.source||'')==='repair-job'||skCPRepairJobIdFromCredit(entry)){
-    if(typeof showToast==='function')showToast('இந்த பதிவு Bill / Repair Job-உடன் இணைக்கப்பட்டுள்ளது. அசல் பதிவிலிருந்து திருத்தவும்.');return;
+    if(typeof showToast==='function')showToast('This entry is linked to a Bill / Repair Job. Please edit it from the original record.');return;
   }
   var old=document.getElementById('skcpLedgerEditModal');if(old)old.remove();
   var esc=typeof cpEsc==='function'?cpEsc:function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
@@ -7518,7 +7534,7 @@ function cpEnsureActionModalAtBodyRoot(){
 }
 function cpResetForm(type,c,idx){
  cpEnsureActionModalAtBodyRoot();
- document.getElementById('skCPActionType').value=type;document.getElementById('skCPActionTitle').textContent=type==='payment'?'💰 Payment':'➕ Credit';
+ document.getElementById('skCPActionType').value=type;document.getElementById('skCPActionTitle').textContent=type==='payment'?'💰 Payment':'➕ Credit';var skDueGrp=document.getElementById('skCPDueDateGroup');if(skDueGrp)skDueGrp.style.display=type==='payment'?'none':'';var skDateGrp=document.getElementById('skCPDate')&&document.getElementById('skCPDate').closest('.form-group');if(skDateGrp)skDateGrp.style.gridColumn=type==='payment'?'1 / -1':'';
  document.getElementById('skCPName').value=c?.name||'';document.getElementById('skCPPhone').value=c?.phone||'';
  document.getElementById('skCPBill').innerHTML=cpBillOptions(c,idx);document.getElementById('skCPAmount').value='';
  document.getElementById('skCPAdvance').value='0';document.getElementById('skCPDate').value=cpDate();document.getElementById('skCPDueDate').value='';document.getElementById('skCPCategory').value='Mobile Sale';document.getElementById('skCPNote').value='';
@@ -7919,7 +7935,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   const imei=$('skUsedImei').value.trim();const model=$('skUsedModel').value.trim();const dealer=$('skUsedDealer').value.trim();const cost=Number($('skUsedCost').value);
   if(!imei||!model||!dealer||!Number.isFinite(cost)||cost<0){alert('Dealer, model, IMEI and valid purchase price are required.');return;}
   const rows=read();const editing=String(window.__skUsedEditingImei||'');const duplicate=rows.find(r=>String(r.imei)===imei&&String(r.imei)!==editing);
-  if(duplicate){alert('இந்த IMEI ஏற்கனவே பதிவு செய்யப்பட்டுள்ளது. Duplicate IMEI அனுமதிக்கப்படாது.');return;}
+  if(duplicate){alert('This IMEI is already registered. Duplicate IMEI is not allowed.');return;}
   const old=editing?rows.find(r=>String(r.imei)===editing):null;if(old&&old.status==='Sold'&&editing!==imei){alert('Sold device IMEI cannot be changed.');return;}
   const item={id:old?.id||('USED-'+Date.now()),date:$('skUsedDate').value,dealer,model,ram:$('skUsedRam')?.value.trim()||'',colour:$('skUsedColour').value.trim(),storage:$('skUsedStorage').value.trim(),kit:$('skUsedKit').value,cost,dealerPrice:Math.round((cost+1000)*100)/100,customerPrice:Math.round((cost+2000)*100)/100,imei,issue:$('skUsedIssue').value.trim(),status:old?.status||'In Stock',sale:old?.sale?{...old.sale,profit:(Number(old.sale.price)||0)-cost}:null,updatedAt:new Date().toISOString()};
   if(old){rows[rows.indexOf(old)]=item;}else rows.unshift(item);write(rows);skUsedResetForm();if(window.__skUsedFormFromMgmt){window.__skUsedFormFromMgmt=false;window.skUsedShowManagement();}else{const purchaseForm=$('skUsedPurchaseForm');if(purchaseForm)purchaseForm.style.display=window.__skUsedInventoryPageMode?'block':'none';}skUsedRender();if(typeof showToast==='function')showToast('Used mobile purchase saved');
@@ -8104,7 +8120,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  };
  window.skUsedSelectForBill=function(imei){
   const item=read().find(r=>String(r.imei)===String(imei)&&r.status!=='Sold');
-  if(!item){alert('இந்த Used Mobile stock-ல் கிடைக்கவில்லை அல்லது ஏற்கெனவே விற்பனையாகியுள்ளது.');return;}
+  if(!item){alert('This item was not found in Used Mobile stock or is already sold.');return;}
   const set=(id,v)=>{const e=$(id);if(e){e.value=String(v??'');e.dispatchEvent(new Event('input',{bubbles:true}));}};
   // Open the actual Billing page and start a fresh bill before applying selected stock data.
   if(typeof toggleModal==='function')toggleModal('skUsedStockModal',false);else $('skUsedStockModal')?.classList.remove('active');
@@ -8122,7 +8138,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   const imei=String($('billImei1')?.value||'').trim();if(!imei)return;
   const item=read().find(r=>String(r.imei)===imei);
   if(!item)return;
-  if(item.status==='Sold'){alert('இந்த IMEI ஏற்கெனவே விற்பனையாகியுள்ளது.');return;}
+  if(item.status==='Sold'){alert('This IMEI is already sold.');return;}
   const set=(id,v)=>{const e=$(id);if(e){e.value=String(v??'');}};
   set('billBrand',item.model.split(/\s+/)[0]||item.model);set('billModel',item.model);set('billRam',item.ram||'');set('billStorage',item.storage||'');set('billColour',item.colour||'');
   const t=$('mobileTypeUsed');if(t)t.click();
@@ -8133,14 +8149,14 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  window.skUsedImportCSV=function(input){
   const file=input?.files?.[0];if(!file)return;
   const isExcel=/\.(xlsx|xls)$/i.test(file.name),isCSV=/\.csv$/i.test(file.name);
-  if(!isExcel&&!isCSV){alert('Excel (.xlsx, .xls) அல்லது CSV file தேர்ந்தெடுக்கவும்.');input.value='';return;}
+  if(!isExcel&&!isCSV){alert('Please choose an Excel (.xlsx, .xls) or CSV file.');input.value='';return;}
   const norm=v=>String(v??'').trim().toLowerCase().replace(/[ _\-/]+/g,'').replace(/[^a-z0-9]/g,'');
   const dateValue=v=>{if(v instanceof Date&&!isNaN(v))return v.toISOString().slice(0,10);const t=String(v??'').trim();if(!t)return new Date().toISOString().slice(0,10);const d=new Date(t);return !isNaN(d)?d.toISOString().slice(0,10):t;};
   const importRows=function(table,priceMaps={dealer:new Map(),customer:new Map()},salesMap=new Map()){
-   const clean=table.filter(r=>r&&Object.values(r).some(v=>String(v??'').trim()!==''));if(clean.length<1)throw new Error('தேர்ந்தெடுத்த sheet-ல் header/data இல்லை.');
+   const clean=table.filter(r=>r&&Object.values(r).some(v=>String(v??'').trim()!==''));if(clean.length<1)throw new Error('The selected sheet has no header/data.');
    const headers=Object.keys(clean[0]);const idx=(...names)=>{for(const n of names){const i=headers.findIndex(h=>norm(h)===norm(n));if(i>=0)return headers[i];}return null;};
    const get=(row,...names)=>{const k=idx(...names);return k===null?'':String(row[k]??'').trim();};
-   if(!idx('IMEI','IMEI/Serial','IMEI1')||!idx('Mobile Model','Model','Mobile','Device','Brand Model'))throw new Error('IMEI மற்றும் Mobile Model column உள்ள Purchases sheet அல்லது file தேவை.');
+   if(!idx('IMEI','IMEI/Serial','IMEI1')||!idx('Mobile Model','Model','Mobile','Device','Brand Model'))throw new Error('A Purchases sheet or file with IMEI and Mobile Model columns is required.');
    const existing=read(),seen=new Set(existing.map(r=>String(r.imei||'').trim()).filter(Boolean));let added=0,skipped=0,invalid=0,soldImported=0;
    for(const row of clean){
     const imei=get(row,'IMEI','IMEI/Serial','IMEI1'),model=get(row,'Mobile Model','Model','Mobile','Device','Brand Model');
@@ -8152,31 +8168,31 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
     const sale=salesMap.get(imei)||null;const status=sale?'Sold':(/sold/i.test(get(row,'Status','Stock Status'))?'Sold':'In Stock');
     existing.push({id:'USED-IMPORT-'+Date.now()+'-'+added,date:dateValue(get(row,'Date','Purchase Date')),dealer,model,ram:get(row,'RAM','Memory'),colour:get(row,'Colour','Color'),storage:get(row,'Storage'),kit:get(row,'Full Kit','Kit','Package')||'Mobile Only',cost,dealerPrice:dealerText!==''&&Number.isFinite(Number(dealerText))?Number(dealerText):Math.round((cost+1000)*100)/100,customerPrice:customerText!==''&&Number.isFinite(Number(customerText))?Number(customerText):Math.round((cost+2000)*100)/100,imei,issue:get(row,'Issue','Issu','Notes','Notes Issue'),status,sale,updatedAt:new Date().toISOString()});seen.add(imei);added++;if(sale)soldImported++;
    }
-   if(!added){alert('புதிய valid stock record எதுவும் சேர்க்கப்படவில்லை. Duplicate IMEI: '+skipped+'; Invalid rows: '+invalid+'.');return;}
-   write(existing);skUsedRender();if(window.__skUsedInventoryPageMode&&typeof window.skUsedShowInventory==='function')window.skUsedShowInventory();alert('Import முடிந்தது. Added: '+added+'; Sold records: '+soldImported+'; Duplicate IMEI skipped: '+skipped+'; Invalid rows skipped: '+invalid+'.');
+   if(!added){alert('No new valid stock record was added. Duplicate IMEI: '+skipped+'; Invalid rows: '+invalid+'.');return;}
+   write(existing);skUsedRender();if(window.__skUsedInventoryPageMode&&typeof window.skUsedShowInventory==='function')window.skUsedShowInventory();alert('Import completed. Added: '+added+'; Sold records: '+soldImported+'; Duplicate IMEI skipped: '+skipped+'; Invalid rows skipped: '+invalid+'.');
   };
   const reader=new FileReader();reader.onload=function(){
    try{
     if(isExcel){
-     if(!window.XLSX)throw new Error('Excel reader library load ஆகவில்லை. இணைய இணைப்புடன் app-ஐ திறந்து மீண்டும் முயற்சிக்கவும்.');
+     if(!window.XLSX)throw new Error('Excel reader library did not load. Open the app with an internet connection and try again.');
      const wb=window.XLSX.read(reader.result,{type:'array',cellDates:true});
      const findSheet=(names)=>{const n=wb.SheetNames.find(x=>names.some(y=>norm(x)===norm(y)));return n?window.XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:'',raw:false}):[];};
-     const purchases=findSheet(['Purchases']);if(!purchases.length)throw new Error('Excel-ல் Purchases sheet கிடைக்கவில்லை.');
+     const purchases=findSheet(['Purchases']);if(!purchases.length)throw new Error('Purchases sheet not found in the Excel file.');
      const makeMap=(rows,field)=>{const m=new Map();for(const r of rows){const h=Object.keys(r);const getv=(...names)=>{const k=h.find(x=>names.some(n=>norm(x)===norm(n)));return k===undefined?'':String(r[k]??'').trim();};const imei=getv('IMEI','IMEI/Serial','IMEI1');const val=getv(field);if(imei&&val!=='')m.set(imei,val);}return m;};
      const dealerRows=findSheet(['Dealer Price']),customerRows=findSheet(['Customer Price']),salesRows=findSheet(['Sales']);
      const salesMap=new Map();for(const r of salesRows){const h=Object.keys(r);const gv=(...names)=>{const k=h.find(x=>names.some(n=>norm(x)===norm(n)));return k===undefined?'':String(r[k]??'').trim();};const imei=gv('IMEI','IMEI/Serial','IMEI1');if(!imei)continue;const price=Number(gv('Sale Price','Sales Price','Price'))||0;const profitText=gv('Profit');salesMap.set(imei,{date:dateValue(gv('Sale Date','Date')),customer:gv('Customer Name','Customer'),price,profit:profitText!==''&&Number.isFinite(Number(profitText))?Number(profitText):price-(Number(gv('Purchase Price','Cost'))||0)});}
      importRows(purchases,{dealer:makeMap(dealerRows,'Dealer Price'),customer:makeMap(customerRows,'Customer Price')},salesMap);
     }else{
      const text=String(reader.result||'').replace(/^\uFEFF/,'');const parseCSV=function(src){const out=[];let row=[],cell='',quoted=false;for(let i=0;i<src.length;i++){const c=src[i];if(quoted){if(c==='"'&&src[i+1]==='"'){cell+='"';i++;}else if(c==='"')quoted=false;else cell+=c;}else if(c==='"')quoted=true;else if(c===','){row.push(cell);cell='';}else if(c==='\n'){row.push(cell.replace(/\r$/,''));out.push(row);row=[];cell='';}else cell+=c;}if(cell.length||row.length){row.push(cell.replace(/\r$/,''));out.push(row);}return out;};
-     const grid=parseCSV(text).filter(r=>r.some(v=>String(v||'').trim()!==''));if(grid.length<2)throw new Error('CSV-ல் header மற்றும் data row இருக்க வேண்டும்.');const heads=grid[0];const objects=grid.slice(1).map(r=>Object.fromEntries(heads.map((h,i)=>[h,r[i]??''])));importRows(objects);
+     const grid=parseCSV(text).filter(r=>r.some(v=>String(v||'').trim()!==''));if(grid.length<2)throw new Error('The CSV must contain a header and data rows.');const heads=grid[0];const objects=grid.slice(1).map(r=>Object.fromEntries(heads.map((h,i)=>[h,r[i]??''])));importRows(objects);
     }
-   }catch(err){alert('Import செய்ய முடியவில்லை: '+(err?.message||'Invalid file'));}finally{input.value='';}
+   }catch(err){alert('Import failed: '+(err?.message||'Invalid file'));}finally{input.value='';}
   };
-  reader.onerror=function(){alert('File படிக்க முடியவில்லை.');input.value='';};if(isExcel)reader.readAsArrayBuffer(file);else reader.readAsText(file,'UTF-8');
+  reader.onerror=function(){alert('Could not read the file.');input.value='';};if(isExcel)reader.readAsArrayBuffer(file);else reader.readAsText(file,'UTF-8');
  };
  window.skUsedExportCSV=function(){const rows=read();const cols=['Date','Dealer Name','Mobile Model','RAM','Colour','Storage','Full Kit','Purchase Price','Dealer Price','Customer Price','IMEI','Issue','Status','Sales'];const values=rows.map(r=>[r.date,r.dealer,r.model,r.ram||'',r.colour,r.storage,r.kit,r.cost,r.dealerPrice,r.customerPrice,r.imei,r.issue,r.status,r.sale?JSON.stringify(r.sale):'']);const cell=v=>{const s=String(v??'');return '"'+s.replace(/"/g,'""')+'"';};const csv=[cols.map(cell).join(','),...values.map(row=>row.map(cell).join(','))].join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='SK-Used-Mobile-Register.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
  // When a used-mobile bill is saved, match by IMEI and mark the matching stock item sold exactly once.
- window.skUsedCanSell=function(bill){if(!bill||bill.mobileType!=='Used Mobile')return true;const imei=String(bill.imei1||'').trim();if(!imei)return true;const item=read().find(r=>String(r.imei)===imei);if(!item)return true;if(item.status==='Sold'&&String(item.sale?.billId||'')!==String(bill.id||'')){alert('இந்த IMEI Used Mobile Stock-ல் ஏற்கனவே விற்பனையாகியுள்ளது. வேறு IMEI தேர்வு செய்யவும்.');return false;}return true;};
+ window.skUsedCanSell=function(bill){if(!bill||bill.mobileType!=='Used Mobile')return true;const imei=String(bill.imei1||'').trim();if(!imei)return true;const item=read().find(r=>String(r.imei)===imei);if(!item)return true;if(item.status==='Sold'&&String(item.sale?.billId||'')!==String(bill.id||'')){alert('This IMEI is already sold in Used Mobile Stock. Please choose a different IMEI.');return false;}return true;};
  window.skUsedRecordBillSale=function(bill){if(!bill||bill.mobileType!=='Used Mobile')return;const imei=String(bill.imei1||'').trim();if(!imei)return;const rows=read();const item=rows.find(r=>String(r.imei)===imei);if(!item)return;if(item.status==='Sold'&&String(item.sale?.billId||'')!==String(bill.id||''))return;item.status='Sold';item.sale={billId:String(bill.id||''),date:String(bill.date||''),customer:String(bill.custName||''),price:Number(bill.price)||0,profit:(Number(bill.price)||0)-(Number(item.cost)||0)};write(rows);};
  document.addEventListener('DOMContentLoaded',()=>{if(!$('skUsedDate'))return;$('skUsedDate').value=new Date().toISOString().slice(0,10);});
 })();

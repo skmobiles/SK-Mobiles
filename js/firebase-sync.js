@@ -40,7 +40,7 @@
   let cloudAutoBackupTimer = null;
   let cloudAutoBackupRunning = false;
   let cloudAutoBackupLastMs = 0;
-  const CLOUD_AUTO_BACKUP_MIN_INTERVAL = 6 * 60 * 60 * 1000;
+  const CLOUD_AUTO_BACKUP_MIN_INTERVAL = 24 * 60 * 60 * 1000;
   let cloudRestoreApplying = false;
   let refreshUiFrame = 0;
   const REPAIR_KEY = "skx_repair_jobs_v2";
@@ -76,10 +76,10 @@
     persistSyncMetaSoon();
   }
 
-  // தானாகவே அனைத்து sk_ மற்றும் skx_ விசைகளையும் கண்டறியும் அமைப்பு
+  // Automatically detects all sk_ and skx_ keys
   function isSyncableKey(key) {
     if (!key) return false;
-    // உள்நுழைவு/தீம் போன்ற சாதன தனிப்பட்ட அமைப்புகளை மட்டும் தவிர்த்தல்
+    // Skip only device-specific settings such as login/theme
     if (key === SYNC_META_KEY || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_bill_draft" || key === REPAIR_KEY) {
       return false;
     }
@@ -111,7 +111,7 @@
     refreshAllUI();
   }
 
-  // தரவு மாறியவுடன் அனைத்து UI பகுதிகளையும் உடனுக்குடன் புதுப்பித்தல்
+  // Refresh all UI sections as soon as data changes
   function refreshAllUI(){
     /* During the three-part login bootstrap, wait until bills/repairs/data have
        all reached their baseline. Rendering each intermediate state causes a
@@ -588,7 +588,7 @@
     });
   }
 
-  // கிளவுடில் உள்ள அனைத்து sk_ டேட்டாக்களையும் நிகழ்நேரத்தில் கண்காணிக்கும் அமைப்பு
+  // Watches all sk_ cloud data in real time
   const universalLastSyncedHash = new Map();
   const universalDirtyKeys = new Set();
   let universalSyncStarted = false;
@@ -755,7 +755,7 @@
     }, 60000);
   }
 
-  // லோக்கல் ஸ்டோரேஜில் நடக்கும் அனைத்து மாற்றங்களையும் பிடிக்கும் கொக்கி
+  // Hook that captures every localStorage change
   function hookLocalBillWrites(){
     if(window.__skFirebaseStorageHook) return;
     window.__skFirebaseStorageHook = true;
@@ -1007,7 +1007,7 @@
     },err=>console.warn("Manager permission listener failed:",err));
   }
 
-  // பட்டன்களுக்கு நேரடி கிளிக் நிகழ்வு வழங்குதல்
+  // Attach direct click handlers to buttons
   function bindBackupButtons() {
     document.querySelectorAll("button").forEach(btn => {
       const text = btn.textContent || "";
