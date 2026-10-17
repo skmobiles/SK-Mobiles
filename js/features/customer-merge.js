@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.164 — Customers page: "Edit" a customer (name / phone) and "Merge" two accounts of the same person.
+/* SK MOBILES v5.6.165 — Customers page: "Edit" a customer (name / phone) and "Merge" two accounts of the same person.
    Every bill, repair job and credit-ledger entry of the old account(s) is re-pointed to the final name + phone, so
    the history stays complete and the date-wise order of the ledger is unchanged. A 15 second Undo is offered.
    Nothing is deleted: only the customer name / phone fields of existing records change. */
@@ -91,7 +91,7 @@ function offerUndo(label,snap,openKey){
   bar.innerHTML='<span>'+esc(label)+'</span><button type="button">↩ Undo</button>';
   document.body.appendChild(bar);
   bar.querySelector('button').onclick=function(){restore(undoSnap);hideUndo();refresh('');toast('Undone')};
-  undoTimer=setTimeout(hideUndo,15000);
+  undoTimer=setTimeout(hideUndo,5000);
 }
 function hideUndo(){var b=document.getElementById('skMergeUndo');if(b)b.remove();clearTimeout(undoTimer)}
 

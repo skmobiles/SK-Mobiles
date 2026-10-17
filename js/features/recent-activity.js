@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.164 — Home "Recent Activity": the three cards open the item they show, and "View All" opens one
+/* SK MOBILES v5.6.165 — Home "Recent Activity": the three cards open the item they show, and "View All" opens one
    newest-first list of the latest bills, repair jobs, used-stock purchases and credit entries (tap a row to open it).
    Read-only: no data is changed. */
 (function(){
@@ -65,15 +65,25 @@ window.skOpenRecentActivity=function(){
   ensureModal();rows=collect();filter='all';render();
   if(typeof window.toggleModal==='function')window.toggleModal('skRecentModal',true);
 };
+/* newest bill / repair job (same ordering as the list), used by the home cards and their taps */
+window.skRaLatest=function(type){
+  var all=collect().filter(function(r){return r.t===type});
+  if(type==='job'){
+    var ids={};read('skx_repair_jobs_v2').forEach(function(j){if(j)ids[j.id]=j});
+    var pend=all.filter(function(r){var j=ids[r.id];return j&&['Received','Checking','Repairing'].indexOf(String(j.status||''))>=0});
+    var r0=pend[0]||all[0];return r0?ids[r0.id]:null;
+  }
+  var bills={};read('sk_bills').forEach(function(b){if(b)bills[b.id]=b});
+  return all[0]?bills[all[0].id]:null;
+};
 /* the three cards on the home page */
 window.skRecentCard=function(n){
   try{
     if(n===0){
-      var b=Array.isArray(savedBills)?savedBills[0]:null;if(!b){window.toggleModal('billingModal',true);return}
+      var b=window.skRaLatest('bill');if(!b){window.toggleModal('billingModal',true);return}
       window.skGsOpenRaw('bill',b.id);
     }else if(n===1){
-      var jobs=read('skx_repair_jobs_v2').filter(Boolean);
-      var pend=jobs.filter(function(j){return j.status!=='Delivered'});var j=(pend[0]||jobs[0]);
+      var j=window.skRaLatest('job');
       if(!j){window.skOpenRepairJobs&&window.skOpenRepairJobs();return}
       window.skGsOpenRaw('job',j.id);
     }else if(n===2){

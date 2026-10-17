@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.164 — Bill WhatsApp popup, Customer history, Warranty tracker, Undo delete.
+/* SK MOBILES v5.6.165 — Bill WhatsApp popup, Customer history, Warranty tracker, Undo delete.
    Additive only: reads existing data; writes only warrantyDays/warrantyEnd on a bill and restores
    data the user explicitly undoes. Existing business logic is wrapped, never replaced. */
 (function(){
@@ -325,7 +325,7 @@ function offerUndo(before,label){
   bar.innerHTML='<span>🗑️ '+esc(label)+' deleted</span><button type="button">↩ Undo</button>';
   document.body.appendChild(bar);
   bar.querySelector('button').onclick=function(){doUndo(before,keys,label)};
-  undoTimer=setTimeout(hideUndo,10000);
+  undoTimer=setTimeout(hideUndo,5000);
 }
 function rerender(){
   ['renderBillHistory','updateBillHistoryCount','skRjRenderJobs','skRjRenderHistory','skRjRenderHomeMetric','skCPRender','skUsedRender','skRenderAccessories','renderCards','updateBillPreview'].forEach(function(n){

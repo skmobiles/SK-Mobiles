@@ -2870,8 +2870,8 @@ const MASTER_INVENTORY = [
           {icon:'package-plus',label:'Add Product',tone:'purple',action:'openItemEditor();'},
           {icon:'chart',label:'Today Report',tone:'orange',action:'window.skOpenDailyReport?.();'}
         ].map(q => `<button type="button" class="sk-home-v2-quick ${q.tone}" onclick="${q.action}"><span>${homeIcon(q.icon)}</span><b>${q.label}</b></button>`).join('');
-        const latestBillHome = Array.isArray(savedBills) ? savedBills[0] : null;
-        const latestRepairHome = pendingRepairsHome[0] || repairJobsHome[0] || null;
+        const latestBillHome = (window.skRaLatest && window.skRaLatest('bill')) || (Array.isArray(savedBills) ? savedBills[0] : null);
+        const latestRepairHome = (window.skRaLatest && window.skRaLatest('job')) || pendingRepairsHome[0] || repairJobsHome[0] || null;
         const latestStockHome = Array.isArray(inventory) ? inventory[0] : null;
         const recentHTML = [
           latestBillHome ? {icon:'file-text',tone:'blue',title:'Bill #' + (latestBillHome.billNo || latestBillHome.id || 'Recent'),value:moneyHome(latestBillHome.price || latestBillHome.total || latestBillHome.amount || 0),sub:escHome(latestBillHome.custName || latestBillHome.model || 'Saved bill')} : {icon:'file-text',tone:'blue',title:'Billing',value:'No bills yet',sub:'New bills will appear here'},

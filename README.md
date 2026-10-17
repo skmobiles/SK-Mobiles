@@ -193,3 +193,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock aging (drawer): unsold used mobiles 30/60/90+ days, money locked, reduce customer price.
 - Backup & Restore (drawer): JSON / Excel download, one-tap restore, weekly reminder bar.
 - Customer QR: QR holds a link to `/view.html` with a compressed summary of the latest bills inside the link. No data uploaded. `sw.js` now caches `/index.html` only for the real app page.
+
+## V5.6.165
+- Credit List and Customer Credit Ledger now show the same balance (ledger payments are netted off the oldest dues first).
+- Undo bars hide automatically after 5 seconds.
+- Tempered Glass long-press bar (Cancel / Select All / Delete) is one clean row.
+- Home Recent Activity cards show the newest bill / repair and open the same item.
+- New "Reviews & Offers": separate saved contacts (mobile buyers, finished repairs), WhatsApp review-link request and offers.
