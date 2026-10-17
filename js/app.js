@@ -2876,14 +2876,14 @@ const MASTER_INVENTORY = [
           latestBillHome ? {icon:'file-text',tone:'blue',title:'Bill #' + (latestBillHome.billNo || latestBillHome.id || 'Recent'),value:moneyHome(latestBillHome.price || latestBillHome.total || latestBillHome.amount || 0),sub:escHome(latestBillHome.custName || latestBillHome.model || 'Saved bill')} : {icon:'file-text',tone:'blue',title:'Billing',value:'No bills yet',sub:'New bills will appear here'},
           latestRepairHome ? {icon:'wrench',tone:'rose',title:'Repair #' + (latestRepairHome.id || 'Recent'),value:escHome(latestRepairHome.model || latestRepairHome.customer || 'Repair job'),sub:escHome(latestRepairHome.status || 'Repair activity')} : {icon:'wrench',tone:'rose',title:'Repair Jobs',value:'No recent jobs',sub:'Repair activity will appear here'},
           latestStockHome ? {icon:'package',tone:'blue',title:'Stock Available',value:escHome(latestStockHome.title || 'Inventory item'),sub:`${Number(latestStockHome.stock || 0)} pcs · Inventory`} : {icon:'package',tone:'blue',title:'Stock Added',value:'No stock items',sub:'Inventory activity will appear here'}
-        ].map(r => `<div class="sk-home-v2-recent-card"><span class="sk-home-v2-recent-icon ${r.tone}">${homeIcon(r.icon)}</span><span class="sk-home-v2-recent-copy"><b>${r.title}</b><strong>${r.value}</strong><small>${r.sub}</small></span></div>`).join('');
+        ].map((r,ri) => `<div class="sk-home-v2-recent-card" role="button" tabindex="0" onclick="window.skRecentCard&&window.skRecentCard(${ri})"><span class="sk-home-v2-recent-icon ${r.tone}">${homeIcon(r.icon)}</span><span class="sk-home-v2-recent-copy"><b>${r.title}</b><strong>${r.value}</strong><small>${r.sub}</small></span></div>`).join('');
 
         container.innerHTML = `
           <section class="sk-home-v2-hero" aria-label="SK Mobiles business banner"><img src="./assets/sk-home-hero.jpg" alt="SK Mobiles — Mobile sales, service, accessories and repair"/></section>
           <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Business Summary</h2></div><div id="homeMetricGrid" class="sk-home-v2-metrics" aria-label="Business summary">${metricHTML}</div></section>
           <section class="sk-home-v2-card"><div class="sk-home-v2-card-head"><h2>Inventory &amp; Stock</h2><button type="button" onclick="currentFilter='all';renderCards();window.scrollTo({top:0,behavior:'smooth'});">View All <span>›</span></button></div><div id="homeActionCardsContainer" class="sk-home-v2-features" aria-label="Inventory shortcuts">${featureCards}</div></section>
           <section class="sk-home-v2-section"><div class="sk-home-v2-section-heading"><h2>Quick Actions</h2><button type="button" onclick="toggleLeftDrawer(true)">See All <span>→</span></button></div><div class="sk-home-v2-quick-grid">${quickActions}</div></section>
-          <section class="sk-home-v2-section sk-home-v2-recent-section"><div class="sk-home-v2-section-heading"><h2>Recent Activity</h2><button type="button" onclick="toggleModal('billingModal',true);switchBillTab('history');">View All <span>→</span></button></div><div class="sk-home-v2-recent-grid">${recentHTML}</div></section>
+          <section class="sk-home-v2-section sk-home-v2-recent-section"><div class="sk-home-v2-section-heading"><h2>Recent Activity</h2><button type="button" onclick="window.skOpenRecentActivity?window.skOpenRecentActivity():(toggleModal('billingModal',true),switchBillTab('history'))">View All <span>→</span></button></div><div class="sk-home-v2-recent-grid">${recentHTML}</div></section>
         `;
         setTimeout(() => {
           container.querySelectorAll('.draggable-card').forEach(card => {
@@ -7333,7 +7333,16 @@ function cpGetCustomers(){
      return String(e.source||'')==='repair-job' && e.type==='credit';
    }).reduce(function(a,e){return a+Math.max(0,Number(e.amount)||0)},0);
    /* Sales bill balances remain authoritative for bills; repair balances are added separately. */
-   c.credits=c.bills.length?billBalance+repairBalance:manualCredits;
+   /* Ledger-only credit (no sales bill, not a repair job) of a customer who also has sales bills was ignored before.
+      It is now added, minus the ledger-only payments, so merged / mixed accounts never lose outstanding. */
+   var extraLedger=0;
+   if(c.bills.length){
+     var plainCredits=manualEntries.filter(function(e){return (e.type==='credit'||e.type==='emi')&&String(e.source||'')!=='repair-job'}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+     var plainPays=manualEntries.filter(function(e){return e.type==='payment'&&String(e.source||'')!=='repair-job'}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+     extraLedger=Math.max(0,plainCredits-plainPays);
+   }
+   c.extraLedger=extraLedger;
+   c.credits=c.bills.length?billBalance+repairBalance+extraLedger:manualCredits;
    c.payments=payments;
 
    c.creditBalance=c.bills.filter(function(x){return x.b.payMode==='Credit'}).reduce(function(a,x){
@@ -7348,7 +7357,7 @@ function cpGetCustomers(){
      return (e.type==='emi'||e.mode==='EMI');
    }).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
 
-   c.balance=c.bills.length ? billBalance+repairBalance : Math.max(0,manualCredits-payments);
+   c.balance=c.bills.length ? billBalance+repairBalance+extraLedger : Math.max(0,manualCredits-payments);
    /* Customers without bills: the Credit / EMI filter totals must also subtract the payments, like c.balance does. */
    if(!c.bills.length){
      var payLeft=payments;

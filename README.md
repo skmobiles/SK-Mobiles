@@ -172,3 +172,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - **Home header**: the floating role badge no longer overlaps the profile icon; the profile icon itself shows the role (crown / briefcase / wrench).
 - **Billing**: after Save or Update the New Bill form is empty, also when you return later; abandoning an edit does not leave its data in the New Bill form.
 - **Fields keep their data** when tapped (billing fields no longer clear on focus).
+
+## V5.6.162
+- **Flicker fixed**: the popup-centering script re-toggled the class of every popup in an endless loop (~500 DOM changes per second). It now does nothing when nothing changes (3 changes in 3 s).
+- **Customers page**: new Edit (name / phone) and Merge buttons on each customer, and a banner when one name has more than one account. Merge re-points every bill, repair job and credit entry to the final name + phone (history stays date-wise), keeps the due-date override, and offers a 15 s Undo. File `js/features/customer-merge.js`.
+- **Outstanding**: ledger-only credit of a customer who also has bills (for example after merging) is now included in the outstanding total (minus ledger-only payments).
+- **Home**: Recent Activity cards open the bill / repair / stock item they show; View All opens one newest-first list of bills, repairs, used-stock purchases and credit entries (`js/features/recent-activity.js`). View All / See All are plain links (no tall box).

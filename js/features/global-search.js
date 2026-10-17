@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.161 — Search everywhere: one box finds bills (customer, phone, bill no., IMEI, model),
+/* SK MOBILES v5.6.162 — Search everywhere: one box finds bills (customer, phone, bill no., IMEI, model),
    repair jobs (customer, phone, model, IMEI, job id) and used-mobile stock (IMEI, model, dealer, buyer).
    Read-only; opens the existing detail screens. Opened from the scan-style button next to the home search box. */
 (function(){
