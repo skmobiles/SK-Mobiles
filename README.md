@@ -90,6 +90,18 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - **Daily Report** (drawer + home "Today Report"): sales, repairs, credit collected, total collection for any date; share on WhatsApp or copy. Read-only over existing data.
 - **Credit reminders:** 💬 WhatsApp button on every customer row with a pending balance, a Reminders list (overdue first, "reminded today" marker) and a link to the EMI reminder settings. Only `sk_credit_reminder_log_v1` is newly written.
 
+## V5.6.151
+- Font weights lightened (WhatsApp/YouTube style): 400 regular, 500–600 medium, 700–900 now semibold. No heavy bold anywhere.
+- Used Mobile details page: multi-colour fields with icons; Edit/Delete/Select-for-Bill no longer hidden behind the bottom nav; Delete is red.
+- Bottom-nav Home / inventory buttons now also close the Used-mobile details page (was stuck open).
+
+## V5.6.150
+- **Settings → Themes & Appearance:** every option now works (header, nav, scale, aura, surface, card/button radius, card surface, button style, presets). Root cause: the old rules targeted legacy class names that no longer exist; replaced by one `css/appearance.css` layer and the dead rules deleted.
+- **One font everywhere:** self-hosted Inter (`fonts/`, no Google Fonts requests, works offline). Font picker, 30 old fonts, their CSS/JS and the Settings "Font style" row removed. Invoice/PDF also Inter.
+- **Bell:** red dot only when there is an urgent repair/message.
+- **Home:** backup status button (green = backed up, red = changes not backed up, amber = running). Tap = cloud backup; if cloud backup is not possible the app restarts. Inventory & Stock now compact 2-column tiles; shop name no longer truncated (role badge floats).
+- **Bill History / other cards:** empty space left by removed buttons closed (2-button grid).
+
 ## V5.6.149
 - Removed the low-stock home banner/list added in 5.6.148 (code and CSS deleted).
 - Pending Jobs: **Next/Previous Status no longer moves the job**. Order is urgent first, then newest received date (never "last updated").

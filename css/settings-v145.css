@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SK MOBILES v5.6.149 — Settings page + Tools & Others notes redesign
+   SK MOBILES v5.6.151 — Settings page + Tools & Others notes redesign
    Presentation only. All handlers / ids are the existing ones.
    ========================================================================== */
 html body{--st-r:22px}
@@ -232,19 +232,13 @@ html body .st-tpl .st-ptext small{font-size:.7rem}
 @media (max-width:359px){html body .st-grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}html body #settingsModal .st-row5{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 /* ---------- button style option (real effect on app buttons) ---------- */
-html[data-ui-button-style="gradient"] :is(.submit-btn,.bill-action-save,.sk-used-save-primary,.sk-used-form-save,.box-photo-scan-btn,.st-btn:not(.light)){
-  background:linear-gradient(135deg,var(--primary,#2563eb),#9333ea)!important;color:#fff!important;border-color:transparent!important}
-html[data-ui-button-style="glass"] :is(.submit-btn,.bill-action-save,.sk-used-save-primary,.sk-used-form-save,.box-photo-scan-btn,.st-btn:not(.light)){
-  background:linear-gradient(180deg,rgba(255,255,255,.92),color-mix(in srgb,var(--primary,#2563eb) 16%,#fff))!important;
-  color:var(--primary,#2563eb)!important;border:1px solid color-mix(in srgb,var(--primary,#2563eb) 28%,#fff)!important;
-  box-shadow:0 6px 16px color-mix(in srgb,var(--primary,#2563eb) 16%,transparent)!important;backdrop-filter:blur(8px)}
-html[data-ui-button-style="outline"] :is(.submit-btn,.bill-action-save,.sk-used-save-primary,.sk-used-form-save,.box-photo-scan-btn,.st-btn:not(.light)){
-  background:transparent!important;color:var(--primary,#2563eb)!important;border:2px solid var(--primary,#2563eb)!important;box-shadow:none!important}
-html[data-ui-button-style="glass"] :is(.submit-btn,.sk-used-save-primary,.sk-used-form-save,.box-photo-scan-btn,.st-btn) svg,
-html[data-ui-button-style="outline"] :is(.submit-btn,.sk-used-save-primary,.sk-used-form-save,.box-photo-scan-btn,.st-btn) svg{color:inherit}
 
-html[data-ui-scale="large"]{--ui-scale:1.1}
-html[data-ui-scale="large"] .app-viewport{font-size:110%}
+
+
+
+
+
+
 
 /* ---------- General permissions card (JS-injected) ---------- */
 html body #settingsModal #skGeneralPermissionsBox{margin:0 0 12px!important;padding:14px!important;border-radius:var(--st-r)!important;background:var(--card-bg,#fff)!important;border:1px solid var(--card-border,#dbe4f5)!important;box-shadow:0 6px 18px color-mix(in srgb,var(--primary,#2563eb) 7%,transparent)!important;box-sizing:border-box}

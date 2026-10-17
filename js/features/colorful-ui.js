@@ -92,7 +92,7 @@
     skCreditLedgerPage:['card','amber'], skCreditLedgerModal:['card','amber'], skCreditCustomerModal:['user','blue'],
     skCreditEntryModal:['card','amber'], skEmiReminderModal:['bell','amber'], skWorkerProfileModal:['user','blue'],
     skWorkerEditModal:['user','blue'], skAdminProfileModal:['crown','amber'], skRepairDetailModal:['wrench','green'],
-    skUrgentRepairModal:['alert','red'], skKeepImportModal:['upload','blue'], skFontPickerModal:['sparkle','purple'],
+    skUrgentRepairModal:['alert','red'], skKeepImportModal:['upload','blue'],
     skUsedFilterModal:['search','blue'], skCreditActionModal:['money','amber'], skSignatureModal:['note','blue']
   };
 
@@ -102,7 +102,7 @@
     ['.drawer-title', 'store', 'blue']
   ];
   var TILE_SEL = '.modal-title span, .modal-title b, .repair-spares-title, .tools-others-title, .bill-section-title, .sk-admin-title, .sk-credit-title, h2, h3';
-  var ALLOW = '.bill-history-meta-item, .bill-history-view, .bill-history-edit, .bill-history-delete, .sk-rj-history-actions, button, .modal-title, .repair-spares-title, .tools-others-title, .bill-section-title, .sk-admin-title, .sk-admin-box, h1, h2, h3, h4, label, summary, .sk-rj-tab, .active-category-notice, .menu-item, .drawer-item, .sk-menu-item, .menu-label, .sk-credit-btn, .skcp-btn, .skcp-filter, .sk-section-title, .section-title, .form-section-title, #skAdminCurrentRole';
+  var ALLOW = '.bill-history-meta-item, .bill-history-edit, .bill-history-delete, .sk-rj-history-actions, button, .modal-title, .repair-spares-title, .tools-others-title, .bill-section-title, .sk-admin-title, .sk-admin-box, h1, h2, h3, h4, label, summary, .sk-rj-tab, .active-category-notice, .menu-item, .drawer-item, .sk-menu-item, .menu-label, .sk-credit-btn, .skcp-btn, .skcp-filter, .sk-section-title, .section-title, .form-section-title, #skAdminCurrentRole';
   var DENY = 'option, textarea, input, script, style, .ski, #orderItemsContainer, .sk-credit-list, .skcp-list, #recycleBinItemsContainer, .no-ski, [contenteditable]';
 
   /* ---------- publish icon CSS variables once ---------- */

@@ -1,0 +1,73 @@
+/* ==========================================================================
+   SK MOBILES v5.6.150 — appearance engine (the ONLY place data-ui-* is styled)
+   JS (skAppearanceApply in app.js) sets on <html>:
+     tokens   --primary, --card-bg, --card-border, --bg, --page-bg, --header-bg,
+              --ui-card-radius, --ui-button-radius
+     attrs    data-ui-card-radius | button-radius | button-style | card-surface |
+              surface | header | scale | aura | motion  (nav lives in bottom-nav.css)
+   Every rule uses the `html:not(#a):not(#b)` prefix: two ID-weights beat the
+   legacy ID-based page layers without relying on source order.
+   ========================================================================== */
+
+/* ---------- card radius ---------- */
+html:not(#a):not(#b)[data-ui-card-radius] :is(.sk-home-v2-hero,.sk-home-v2-card,.sk-home-v2-recent-card,.sk-home-v2-feature,.sk-home-v2-metric,.bill-section,.bill-action-grid,.bill-history-card,.skcp-stat,.skcp-row,.sk-rj-card,.sk-used-stat-card,.sk-used-panel,.sk-used-stock-header,.sk-accessory-row,.st-section,.st-tilecard,.st-details,.st-note,.st-logo-card,.st-toggles,.skdr-card,.skdr-hero,.skcr-row,.sk-signature-panel,.modal-title,.billing-tabs,.sk-rj-tabs,.sk-perm-row){border-radius:var(--ui-card-radius)!important}
+html:not(#a):not(#b)[data-ui-card-radius] :is(.sk-home-v2-hero img){border-radius:var(--ui-card-radius)!important}
+
+/* ---------- button radius (cards that are <button>s follow the card radius) ---------- */
+html:not(#a):not(#b)[data-ui-button-radius] button:not(.modal-close-btn):not(.drawer-close-btn):not(#navHome):not(.draggable-card):not(.sk-home-v2-feature):not(.sk-home-v2-metric):not(.st-profile):not(.st-row-btn):not(.st-reset-row){border-radius:var(--ui-button-radius)!important}
+
+/* ---------- card surface ---------- */
+html:not(#a):not(#b)[data-ui-card-surface="blur"] :is(.sk-home-v2-hero,.sk-home-v2-card,.sk-home-v2-recent-card,.sk-home-v2-feature,.sk-home-v2-metric,.bill-section,.bill-action-grid,.bill-history-card,.skcp-stat,.skcp-row,.sk-rj-card,.sk-used-stat-card,.sk-used-panel,.sk-used-stock-header,.sk-accessory-row,.st-section,.st-tilecard,.st-details,.st-note,.st-logo-card,.st-toggles,.skdr-card,.skdr-hero,.skcr-row,.sk-signature-panel,.modal-title,.billing-tabs,.sk-rj-tabs,.sk-perm-row){backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+html:not(#a):not(#b)[data-ui-card-surface="ios"] :is(.sk-home-v2-hero,.sk-home-v2-card,.sk-home-v2-recent-card,.sk-home-v2-feature,.sk-home-v2-metric,.bill-section,.bill-action-grid,.bill-history-card,.skcp-stat,.skcp-row,.sk-rj-card,.sk-used-stat-card,.sk-used-panel,.sk-used-stock-header,.sk-accessory-row,.st-section,.st-tilecard,.st-details,.st-note,.st-logo-card,.st-toggles,.skdr-card,.skdr-hero,.skcr-row,.sk-signature-panel,.modal-title,.billing-tabs,.sk-rj-tabs,.sk-perm-row){border-color:color-mix(in srgb,var(--card-border) 35%,transparent)!important;box-shadow:0 1px 2px rgba(15,23,42,.06),0 16px 36px rgba(15,23,42,.13)!important;backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%)}
+html:not(#a):not(#b)[data-ui-card-surface="border"] :is(.sk-home-v2-hero,.sk-home-v2-card,.sk-home-v2-recent-card,.sk-home-v2-feature,.sk-home-v2-metric,.bill-section,.bill-action-grid,.bill-history-card,.skcp-stat,.skcp-row,.sk-rj-card,.sk-used-stat-card,.sk-used-panel,.sk-used-stock-header,.sk-accessory-row,.st-section,.st-tilecard,.st-details,.st-note,.st-logo-card,.st-toggles,.skdr-card,.skdr-hero,.skcr-row,.sk-signature-panel,.modal-title,.billing-tabs,.sk-rj-tabs,.sk-perm-row){border-width:1.5px!important;border-color:color-mix(in srgb,var(--primary) 38%,var(--card-border))!important;box-shadow:none!important}
+html:not(#a):not(#b)[data-ui-card-surface="shadow"] :is(.sk-home-v2-hero,.sk-home-v2-card,.sk-home-v2-recent-card,.sk-home-v2-feature,.sk-home-v2-metric,.bill-section,.bill-action-grid,.bill-history-card,.skcp-stat,.skcp-row,.sk-rj-card,.sk-used-stat-card,.sk-used-panel,.sk-used-stock-header,.sk-accessory-row,.st-section,.st-tilecard,.st-details,.st-note,.st-logo-card,.st-toggles,.skdr-card,.skdr-hero,.skcr-row,.sk-signature-panel,.modal-title,.billing-tabs,.sk-rj-tabs,.sk-perm-row){border-color:transparent!important;box-shadow:0 14px 30px color-mix(in srgb,var(--primary) 16%,rgba(15,23,42,.16))!important}
+/* repair cards keep their work-type border colour */
+html:not(#a):not(#b)[data-ui-card-surface] .sk-rj-card[data-work-type="urgent"]{border-color:#dc2626!important}
+html:not(#a):not(#b)[data-ui-card-surface] .sk-rj-card[data-work-type="normal"]{border-color:#16a34a!important}
+html:not(#a):not(#b)[data-ui-card-surface] .sk-rj-card[data-work-type="scheduled"]{border-color:#2563eb!important}
+
+/* ---------- page surface (offwhite = the app's built-in background) ---------- */
+html:not(#a):not(#b)[data-ui-surface="flat"] body{background:var(--card-bg)!important}
+html:not(#a):not(#b)[data-ui-surface="accent"] body{background:linear-gradient(170deg,color-mix(in srgb,var(--primary) 26%,var(--bg)) 0%,color-mix(in srgb,var(--primary) 9%,var(--bg)) 55%,var(--bg) 100%) fixed!important}
+html:not(#a):not(#b)[data-ui-surface="classic"] body{background:linear-gradient(180deg,#eef2f7,#d9e2ee) fixed!important}
+html:not(#a):not(#b)[data-ui-mode="dark"][data-ui-surface="classic"] body{background:linear-gradient(180deg,#0b1220,#05070c) fixed!important}
+html:not(#a):not(#b)[data-ui-surface="slate"] body{background:color-mix(in srgb,#64748b 22%,var(--page-bg))!important}
+html:not(#a):not(#b)[data-ui-surface="glow"] body{background:radial-gradient(130% 60% at 50% -10%,color-mix(in srgb,var(--primary) 45%,transparent),transparent 72%) fixed,var(--page-bg)!important}
+
+/* ---------- header ---------- */
+html:not(#a):not(#b)[data-ui-header="glass"] .app-header{background:color-mix(in srgb,var(--header-bg) 62%,transparent)!important;backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);border-bottom:1px solid color-mix(in srgb,var(--card-border) 70%,transparent)!important}
+html:not(#a):not(#b)[data-ui-header="solid"] .app-header{background:var(--header-bg)!important;backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:1px solid var(--card-border)!important;box-shadow:0 4px 14px rgba(15,23,42,.08)!important}
+html:not(#a):not(#b)[data-ui-header="minimal"] .app-header{background:transparent!important;backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:0!important;box-shadow:none!important}
+
+/* ---------- primary button style ---------- */
+html:not(#a):not(#b)[data-ui-button-style="solid"] :is(.submit-btn:not(.whatsapp-green),.bill-action-save,.bill-action-pdf,.bill-action-print,.sk-used-save-primary,.sk-used-form-save,.st-btn:not(.light):not(.green),.skcp-btn.credit,.sk-rj-next,.sk-ui-sandbox-primary,.box-photo-scan-btn){background:var(--primary)!important;color:#fff!important;border:1px solid var(--primary)!important;box-shadow:none!important}
+html:not(#a):not(#b)[data-ui-button-style="gradient"] :is(.submit-btn:not(.whatsapp-green),.bill-action-save,.bill-action-pdf,.bill-action-print,.sk-used-save-primary,.sk-used-form-save,.st-btn:not(.light):not(.green),.skcp-btn.credit,.sk-rj-next,.sk-ui-sandbox-primary,.box-photo-scan-btn){background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 68%,#fff),var(--primary) 50%,color-mix(in srgb,var(--primary) 76%,#000))!important;color:#fff!important;border:1px solid transparent!important;box-shadow:0 8px 18px color-mix(in srgb,var(--primary) 34%,transparent)!important}
+html:not(#a):not(#b)[data-ui-button-style="glass"] :is(.submit-btn:not(.whatsapp-green),.bill-action-save,.bill-action-pdf,.bill-action-print,.sk-used-save-primary,.sk-used-form-save,.st-btn:not(.light):not(.green),.skcp-btn.credit,.sk-rj-next,.sk-ui-sandbox-primary,.box-photo-scan-btn){background:color-mix(in srgb,var(--primary) 14%,transparent)!important;color:var(--primary)!important;border:1px solid color-mix(in srgb,var(--primary) 42%,transparent)!important;box-shadow:none!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+html:not(#a):not(#b)[data-ui-button-style="outline"] :is(.submit-btn:not(.whatsapp-green),.bill-action-save,.bill-action-pdf,.bill-action-print,.sk-used-save-primary,.sk-used-form-save,.st-btn:not(.light):not(.green),.skcp-btn.credit,.sk-rj-next,.sk-ui-sandbox-primary,.box-photo-scan-btn){background:transparent!important;color:var(--primary)!important;border:2px solid var(--primary)!important;box-shadow:none!important}
+html:not(#a):not(#b)[data-ui-button-style] :is(.submit-btn,.bill-action-save,.bill-action-pdf,.bill-action-print,.sk-used-save-primary,.sk-used-form-save,.st-btn,.skcp-btn.credit,.sk-rj-next,.box-photo-scan-btn) :is(svg,span,i){color:inherit}
+
+/* ---------- text size ---------- */
+html:not(#a):not(#b)[data-ui-scale="compact"]{zoom:.94}
+html:not(#a):not(#b)[data-ui-scale="large"]{zoom:1.08}
+
+/* ---------- aura glow ---------- */
+html[data-ui-aura="on"] body:before,html[data-ui-aura="on"] body:after{content:"";display:block;position:fixed;pointer-events:none;z-index:-1;border-radius:50%;filter:blur(38px);opacity:var(--ui-aura-opacity)}
+html[data-ui-aura="on"] body:before{width:42vw;height:42vw;max-width:300px;max-height:300px;left:-10vw;top:10vh;background:color-mix(in srgb,var(--primary) 25%,transparent)}
+html[data-ui-aura="on"] body:after{width:38vw;height:38vw;max-width:280px;max-height:280px;right:-8vw;bottom:12vh;background:color-mix(in srgb,#a855f7 18%,transparent)}
+html[data-ui-aura="off"] body:before,html[data-ui-aura="off"] body:after{display:none!important}
+
+/* ---------- reduce motion (toggle "on") ---------- */
+html[data-ui-motion="on"] *,html[data-ui-motion="on"] *::before,html[data-ui-motion="on"] *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+
+/* Role badge floats above the header so the shop name gets the full width */
+html:not(#a):not(#b) .app-header .header-row{position:relative}
+html:not(#a):not(#b) .app-header .sk-top-role-badge{position:absolute;top:-11px;right:0;margin:0;padding:2px 7px;font-size:.55rem;line-height:1.2;box-shadow:none;z-index:2}
+
+/* Home polish: inventory & stock as compact 2-column tiles */
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card .sk-home-v2-features{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card .sk-home-v2-feature{flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:8px!important;min-height:104px!important;padding:12px!important;border-radius:16px!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature .sk-home-v2-feature-icon{width:40px!important;height:40px!important;border-radius:12px!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature .sk-home-v2-feature-icon svg{width:22px!important;height:22px!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-copy b{font-size:.9rem!important;line-height:1.2!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-copy small{font-size:.72rem!important;line-height:1.25!important}
+html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card .sk-home-v2-feature:last-child:nth-child(odd){grid-column:1/-1!important;min-height:76px!important;flex-direction:row!important;align-items:center!important}

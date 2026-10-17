@@ -1,4 +1,4 @@
-/* SK MOBILES v5.6.149 — daily report and credit reminders. */
+/* SK MOBILES v5.6.151 — daily report and credit reminders. */
 
 /* ---------- daily report ---------- */
 html body :is(#skDailyReportModal,#skCreditRemindModal):is(#skDailyReportModal,#skCreditRemindModal) .skdr-nav{display:flex;align-items:center;gap:8px;margin:2px 0 10px}
@@ -54,3 +54,13 @@ html body #skRepairJobsModal#skRepairJobsModal .sk-rj-age.old{background:rgba(23
 html body #skRepairJobsModal#skRepairJobsModal .sk-rj-wa{color:#15803d;border-color:rgba(22,163,74,.35)}
 html body #homeMetricGrid#homeMetricGrid .sk-urgent-badge{position:absolute;top:-8px;right:10px;margin:0;padding:2px 8px;border-radius:999px;background:#dc2626;color:#fff;font-style:normal;font-size:.62rem;font-weight:800;line-height:1.4;box-shadow:0 2px 6px rgba(220,38,38,.35)}
 html body #homeMetricGrid#homeMetricGrid [data-card-id="metric-repair"]{position:relative}
+
+/* Home backup status button — green = backed up, red = pending */
+body:has(#cardsContainer.sk-home-redesign) .sk-home-header-icon.sk-bk-btn i{display:block!important;width:9px!important;height:9px!important}
+body:has(#cardsContainer.sk-home-redesign) .sk-bk-btn[data-state="ok"]{color:#15803d!important}
+body:has(#cardsContainer.sk-home-redesign) .sk-bk-btn[data-state="ok"] i{background:#22c55e!important}
+body:has(#cardsContainer.sk-home-redesign) .sk-bk-btn[data-state="due"]{color:#dc2626!important}
+body:has(#cardsContainer.sk-home-redesign) .sk-bk-btn[data-state="due"] i{background:#ef4444!important}
+body:has(#cardsContainer.sk-home-redesign) .sk-bk-btn[data-state="busy"]{color:#d97706!important}
+body:has(#cardsContainer.sk-home-redesign) .sk-bk-btn[data-state="busy"] i{background:#f59e0b!important;animation:skBkPulse 1s ease-in-out infinite}
+@keyframes skBkPulse{50%{transform:scale(1.5);opacity:.5}}

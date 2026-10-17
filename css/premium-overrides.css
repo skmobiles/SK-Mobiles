@@ -3749,7 +3749,7 @@ textarea,
     height: 16px !important;
     margin: 0 !important;
     padding: 0 !important;
-    font-family: Arial, sans-serif !important;
+    font-family: var(--app-font) !important;
     font-size: 12px !important;
     line-height: 16px !important;
     pointer-events: none !important;
@@ -3836,7 +3836,8 @@ body:has(#cardsContainer.sk-home-redesign) .sk-home-header-icon{position:relativ
 body:has(#cardsContainer.sk-home-redesign) .sk-home-header-icon svg{width:20px!important;height:20px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 
 
-body:has(#cardsContainer.sk-home-redesign) .sk-home-header-icon i{position:absolute!important;right:2px!important;top:2px!important;width:8px!important;height:8px!important;border-radius:50%!important;background:#fb3652!important;border:1px solid #fff!important;}
+body:has(#cardsContainer.sk-home-redesign) .sk-home-header-icon i{display:none!important;position:absolute!important;right:2px!important;top:2px!important;width:8px!important;height:8px!important;border-radius:50%!important;background:#fb3652!important;border:1px solid #fff!important;}
+body:has(#cardsContainer.sk-home-redesign) .sk-home-header-icon.has-alert i{display:block!important;}
 
 
 body:has(#cardsContainer.sk-home-redesign) .sk-home-profile-btn{background:linear-gradient(145deg,#fff,#eef6ff)!important;color:#1475f8!important;}

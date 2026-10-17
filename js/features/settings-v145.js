@@ -1,14 +1,8 @@
-/* SK Mobiles v5.6.149 — small helpers for the redesigned Settings + Tools notes.
+/* SK Mobiles v5.6.151 — small helpers for the redesigned Settings + Tools notes.
    Presentation / convenience only. */
 (function(){
   'use strict';
-  var FONTS={jakarta:'Plus Jakarta Sans',inter:'Inter (Default)',poppins:'Poppins',manrope:'Manrope',dm:'DM Sans',space:'Space Grotesk',lato:'Lato',outfit:'Outfit',roboto:'Roboto',montserrat:'Montserrat',opensans:'Open Sans',raleway:'Raleway',quicksand:'Quicksand',fira:'Fira Sans',work:'Work Sans',lexend:'Lexend',sora:'Sora',urbanist:'Urbanist',barlow:'Barlow',archivo:'Archivo',mulish:'Mulish',karla:'Karla',cabin:'Cabin',source:'Source Sans 3',ibmplex:'IBM Plex Sans',josefin:'Josefin Sans',playfair:'Playfair Display',serif:'Classic Serif',mono:'Clean Mono'};
   function $(id){return document.getElementById(id);}
-  function fontLabel(){
-    var el=$('stFontLabel');if(!el)return;
-    var k='jakarta';try{k=localStorage.getItem('sk_font_family')||'jakarta';}catch(e){}
-    el.textContent=(FONTS[k]||k)+' • tap to change';
-  }
   window.skStClear=function(btn){
     var w=btn&&btn.closest('.st-input-wrap');var i=w&&w.querySelector('input,textarea');
     if(!i)return;i.value='';i.focus();
@@ -44,14 +38,7 @@
     if(m&&window.MutationObserver){
       new MutationObserver(function(){if(m.classList.contains('active'))setTimeout(window.skToolsCount,30);}).observe(m,{attributes:true,attributeFilter:['class']});
     }
-    var s=$('settingsModal');
-    if(s&&window.MutationObserver){
-      new MutationObserver(function(){if(s.classList.contains('active'))fontLabel();}).observe(s,{attributes:true,attributeFilter:['class']});
-    }
-    document.addEventListener('click',function(e){
-      if(e.target&&e.target.closest&&e.target.closest('#skFontPickerModal'))setTimeout(fontLabel,250);
-    },true);
-    fontLabel();window.skToolsCount();
+    window.skToolsCount();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watch);else watch();
 })();

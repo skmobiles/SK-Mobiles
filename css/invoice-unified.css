@@ -11,7 +11,7 @@ html body .sk-invoice-paper{
   background:#fff !important;color:#1e293b !important;
   border:1px solid #e2e8f0 !important;border-radius:14px !important;
   box-shadow:0 6px 18px rgba(15,23,42,.07) !important;overflow:visible !important;
-  font-family:"Plus Jakarta Sans",Arial,sans-serif !important;font-size:16px !important;
+  font-family:"Inter",Arial,sans-serif !important;font-size:16px !important;
   line-height:1.35 !important;text-align:left !important;
   -webkit-text-size-adjust:100% !important;text-size-adjust:100% !important;
   print-color-adjust:exact;-webkit-print-color-adjust:exact;
@@ -19,7 +19,7 @@ html body .sk-invoice-paper{
 html body .sk-invoice-paper.sk-invoice-export-root{border:0 !important;border-radius:0 !important;box-shadow:none !important;padding:0 !important}
 html body .sk-invoice-paper *{
   box-sizing:border-box !important;
-  font-family:"Plus Jakarta Sans",Arial,sans-serif !important;
+  font-family:"Inter",Arial,sans-serif !important;
   -webkit-text-size-adjust:100% !important;text-size-adjust:100% !important;
 }
 html body .sk-invoice-paper #invoiceMainSheet,

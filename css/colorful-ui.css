@@ -215,10 +215,9 @@ html.sk-cui .bill-history-meta-item .ski-in[data-i="call"]{--c:var(--cui-green)}
 html.sk-cui .bill-history-actions{display:flex;gap:8px;align-items:center}
 html.sk-cui .bill-history-actions button{display:inline-grid;place-items:center;width:44px;height:44px;padding:0;border-radius:14px;border:0}
 html.sk-cui .bill-history-actions .ski-in{width:22px;height:22px;margin:0;transform:none}
-html.sk-cui .bill-history-view{background:color-mix(in srgb,var(--cui-blue) 13%,transparent)!important}
 html.sk-cui .bill-history-edit{background:color-mix(in srgb,var(--cui-amber) 18%,transparent)!important}
 html.sk-cui .bill-history-delete{background:color-mix(in srgb,var(--cui-red) 14%,transparent)!important}
-html.sk-cui .bill-history-view .ski{--c:var(--cui-blue)} html.sk-cui .bill-history-edit .ski{--c:#ea8a00} html.sk-cui .bill-history-delete .ski{--c:var(--cui-red)}
+html.sk-cui .bill-history-edit .ski{--c:#ea8a00} html.sk-cui .bill-history-delete .ski{--c:var(--cui-red)}
 html.sk-cui #skUsedStockModal tr:has(> .sk-used-empty-cell){display:block!important;width:100%!important}
 html.sk-cui #skUsedStockModal .sk-used-empty-cell{display:block!important;width:100%!important;grid-column:1/-1!important;white-space:normal!important;word-break:normal!important}
 html.sk-cui .bill-history-search-wrap > svg,html.sk-cui .bill-history-date-wrap > svg{top:24px!important;margin-top:-10px!important}
@@ -229,3 +228,21 @@ html.sk-cui #repairSparesModal .repair-spares-action.repair-spares-share,html.sk
 /* any button: text never touches the border */
 html.sk-cui button{box-sizing:border-box}
 
+
+/* Used mobile details: multi-colour fields with icons */
+html body #skUsedDetailDialog .sk-used-detail-field{display:flex!important;align-items:center;gap:10px;background:color-mix(in srgb,var(--fc) 7%,#fff)!important;border-color:color-mix(in srgb,var(--fc) 22%,#e2eafb)!important}
+html body #skUsedDetailDialog .sk-used-detail-field .sk-ud-ic{flex:0 0 34px;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:color-mix(in srgb,var(--fc) 15%,#fff);color:var(--fc)}
+html body #skUsedDetailDialog .sk-used-detail-field .sk-ud-ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+html body #skUsedDetailDialog .sk-used-detail-field .sk-ud-tx{min-width:0;flex:1}
+html body #skUsedDetailDialog .sk-used-detail-field small{color:var(--fc)!important;opacity:.85}
+html body #skUsedDetailDialog .f-ram{--fc:#2563eb}
+html body #skUsedDetailDialog .f-storage{--fc:#0891b2}
+html body #skUsedDetailDialog .f-colour{--fc:#db2777}
+html body #skUsedDetailDialog .f-kit{--fc:#ea580c}
+html body #skUsedDetailDialog .f-imei{--fc:#7c3aed}
+html body #skUsedDetailDialog .f-status{--fc:#16a34a}
+html body #skUsedDetailDialog .f-price{--fc:#0d9488}
+html body #skUsedDetailDialog .f-notes{--fc:#64748b}
+html body #skUsedDetailDialog .sk-used-detail-actions{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))!important;grid-template-columns:1fr 1fr!important}
+html body #skUsedDetailDialog .sk-used-detail-actions>.sk-used-bill-button{grid-column:1/-1}
+html body #skUsedDetailDialog .sk-used-detail-actions>.sk-used-detail-danger{background:#fef2f2!important;color:#dc2626!important;border:1px solid #fecaca!important}

@@ -1607,6 +1607,7 @@ const MASTER_INVENTORY = [
     // directly to the requested inventory category without changing any business logic.
     window.skGoToInventoryFilter = function(filter){
       try{
+        document.querySelectorAll('.sk-used-detail-overlay').forEach(function(d){d.remove();});
         document.querySelectorAll('.modal-overlay.active').forEach(function(m){
           m.classList.remove('active');
           m.style.display='';
@@ -1626,6 +1627,7 @@ const MASTER_INVENTORY = [
     // This is navigation-only; it does not alter page data or business logic.
     window.skGoHomeFromAppShell = function(){
       try{
+        document.querySelectorAll('.sk-used-detail-overlay').forEach(function(d){d.remove();});
         document.querySelectorAll('.modal-overlay.active').forEach(function(m){
           m.classList.remove('active');
           m.style.display='';
@@ -1740,19 +1742,6 @@ const MASTER_INVENTORY = [
     const THEME_ICON_PACK = { light:'classic', dark:'classic', ocean:'wave', emerald:'wave', royal:'luxury', obsidian:'luxury', sunset:'soft', rose:'soft', midnight:'orbit', cyber:'neon', graphite:'angular', lime:'angular', aurora:'prism', crimson:'pulse', mint:'leaf', solar:'retro', nebula:'orbit', forest:'leaf', glacier:'wave', magenta:'neon', 'apple-light':'classic', 'apple-dark':'classic' };
 
     const SK_THEME_STATUS_COLORS = {light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',sunset:'#ffedd5',emerald:'#d1fae5',rose:'#ffe4e6',midnight:'#111827',graphite:'#111827',lime:'#0f1a05',dark:'#050811',cyber:'#03040a',obsidian:'#000000',aurora:'#cffafe',crimson:'#ffe4e6',mint:'#ccfbf1',solar:'#000000',nebula:'#17102f',forest:'#062e1c',glacier:'#e0f2fe',magenta:'#2b092f','apple-light':'#f5f5f7','apple-dark':'#000000'};
-    const SK_APP_FONTS = {
-      jakarta:"'Plus Jakarta Sans', sans-serif", inter:"'Inter', sans-serif", poppins:"'Poppins', sans-serif",
-      nunito:"'Nunito', sans-serif", rubik:"'Rubik', sans-serif", manrope:"'Manrope', sans-serif",
-      dm:"'DM Sans', sans-serif", space:"'Space Grotesk', sans-serif", lato:"'Lato', sans-serif",
-      outfit:"'Outfit', sans-serif", roboto:"'Roboto', sans-serif", montserrat:"'Montserrat', sans-serif",
-      opensans:"'Open Sans', sans-serif", raleway:"'Raleway', sans-serif", quicksand:"'Quicksand', sans-serif",
-      fira:"'Fira Sans', sans-serif", work:"'Work Sans', sans-serif", lexend:"'Lexend', sans-serif",
-      sora:"'Sora', sans-serif", urbanist:"'Urbanist', sans-serif", barlow:"'Barlow', sans-serif",
-      archivo:"'Archivo', sans-serif", mulish:"'Mulish', sans-serif", karla:"'Karla', sans-serif",
-      cabin:"'Cabin', sans-serif", source:"'Source Sans 3', sans-serif", ibmplex:"'IBM Plex Sans', sans-serif",
-      josefin:"'Josefin Sans', sans-serif", playfair:"'Playfair Display', serif",
-      serif:"Georgia, 'Times New Roman', serif", mono:"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-    };
     function skUpdateThemeChrome(theme){
       try{
         const meta=document.getElementById('skThemeColorMeta');
@@ -1760,123 +1749,6 @@ const MASTER_INVENTORY = [
         document.documentElement.style.setProperty('--app-status-color',SK_THEME_STATUS_COLORS[theme]||SK_THEME_STATUS_COLORS.light);
       }catch(e){}
     }
-    function skEnsureGoogleFont(fontKey){
-      const families={
-        inter:'Inter:wght@400;500;600;700;800',poppins:'Poppins:wght@400;500;600;700;800',
-        nunito:'Nunito:wght@400;500;600;700;800',rubik:'Rubik:wght@400;500;600;700;800',
-        manrope:'Manrope:wght@400;500;600;700;800',dm:'DM+Sans:wght@400;500;600;700;800',
-        space:'Space+Grotesk:wght@400;500;600;700',lato:'Lato:wght@400;700;900',
-        outfit:'Outfit:wght@400;500;600;700;800',roboto:'Roboto:wght@400;500;700;900',
-        montserrat:'Montserrat:wght@400;500;600;700;800',opensans:'Open+Sans:wght@400;500;600;700;800',
-        raleway:'Raleway:wght@400;500;600;700;800',quicksand:'Quicksand:wght@400;500;600;700',
-        fira:'Fira+Sans:wght@400;500;600;700;800',work:'Work+Sans:wght@400;500;600;700;800',
-        lexend:'Lexend:wght@400;500;600;700;800',sora:'Sora:wght@400;500;600;700;800',
-        urbanist:'Urbanist:wght@400;500;600;700;800',barlow:'Barlow:wght@400;500;600;700;800',
-        archivo:'Archivo:wght@400;500;600;700;800',mulish:'Mulish:wght@400;500;600;700;800',
-        karla:'Karla:wght@400;500;600;700;800',cabin:'Cabin:wght@400;500;600;700',
-        source:'Source+Sans+3:wght@400;500;600;700;800',ibmplex:'IBM+Plex+Sans:wght@400;500;600;700',
-        josefin:'Josefin+Sans:wght@400;500;600;700',playfair:'Playfair+Display:wght@400;500;600;700;800'
-      };
-      const spec=families[fontKey]; if(!spec)return;
-      const id='sk-font-google-'+fontKey;
-      if(document.getElementById(id))return;
-      const link=document.createElement('link');link.id=id;link.rel='stylesheet';
-      link.href='https://fonts.googleapis.com/css2?family='+spec+'&display=swap';
-      document.head.appendChild(link);
-    }
-
-    function setAppFont(fontKey, silent){
-      if(!SK_APP_FONTS[fontKey]) fontKey='jakarta';
-      const family=SK_APP_FONTS[fontKey];
-      skEnsureGoogleFont(fontKey);
-      const labelMap={
-        jakarta:'Plus Jakarta Sans',inter:'Inter',poppins:'Poppins',nunito:'Nunito',rubik:'Rubik',
-        manrope:'Manrope',dm:'DM Sans',space:'Space Grotesk',lato:'Lato',outfit:'Outfit',
-        roboto:'Roboto',montserrat:'Montserrat',opensans:'Open Sans',raleway:'Raleway',quicksand:'Quicksand',
-        fira:'Fira Sans',work:'Work Sans',lexend:'Lexend',sora:'Sora',urbanist:'Urbanist',
-        barlow:'Barlow',archivo:'Archivo',mulish:'Mulish',karla:'Karla',cabin:'Cabin',
-        source:'Source Sans 3',ibmplex:'IBM Plex Sans',josefin:'Josefin Sans',playfair:'Playfair Display',
-        serif:'Classic Serif',mono:'Clean Mono'
-      };
-      document.documentElement.setAttribute('data-font-family',fontKey);
-      document.documentElement.style.setProperty('--app-font',family);
-      localStorage.setItem('sk_font_family',fontKey);
-
-      /* Force the selected family onto the rendered app, including elements
-         that previously had their own fixed font-family declaration. */
-      try{
-        document.body.style.setProperty('font-family',family,'important');
-        const viewport=document.querySelector('.app-viewport');
-        if(viewport) viewport.style.setProperty('font-family',family,'important');
-      }catch(e){}
-
-      const sel=document.getElementById('skFontFamilySelect');
-      if(sel) sel.value=fontKey;
-
-      const preview=document.getElementById('skFontPreview');
-      if(preview){
-        preview.style.setProperty('font-family',family,'important');
-        preview.innerHTML='<strong>'+labelMap[fontKey]+'</strong><span>SK MOBILES — Sample Text 12345</span><small>Regular • Medium • Bold</small>';
-      }
-
-      /* Update the selectable font cards immediately so the chosen typeface
-         is visible before the user closes the picker. */
-      document.querySelectorAll('.sk-font-choice').forEach(function(card){
-        const key=card.getAttribute('data-font-key');
-        card.classList.toggle('active',key===fontKey);
-        if(SK_APP_FONTS[key]) card.style.setProperty('font-family',SK_APP_FONTS[key],'important');
-      });
-
-      /* Ask the browser to load the requested web font, then re-apply the
-         family so a cached/fallback face cannot remain visually stuck. */
-      try{
-        if(document.fonts && document.fonts.load){
-          const familyName = family.split(',')[0].trim().replace(/^['\"]|['\"]$/g,'');
-          document.fonts.load('400 16px "'+familyName+'"').then(function(){
-            document.documentElement.style.setProperty('--app-font',family);
-            document.documentElement.setAttribute('data-font-family',fontKey);
-            document.body.style.setProperty('font-family',family);
-            if(viewport) viewport.style.setProperty('font-family',family);
-            if(preview) preview.style.setProperty('font-family',family);
-          }).catch(function(){});
-        }
-      }catch(e){}
-
-      if(!silent && typeof showToast==='function') showToast('Font applied: '+(labelMap[fontKey]||fontKey));
-    }
-    window.setAppFont=setAppFont;
-    function openAppFontPicker(){
-      const modal=document.getElementById('skFontPickerModal');
-      if(!modal) return;
-      renderAppFontPicker();
-      toggleModal('skFontPickerModal', true);
-    }
-    window.openAppFontPicker=openAppFontPicker;
-    function renderAppFontPicker(){
-      const grid=document.getElementById('skFontPickerGrid');
-      if(!grid) return;
-      const labels={
-        jakarta:'Plus Jakarta Sans',inter:'Inter',poppins:'Poppins',nunito:'Nunito',rubik:'Rubik',
-        manrope:'Manrope',dm:'DM Sans',space:'Space Grotesk',lato:'Lato',outfit:'Outfit',
-        roboto:'Roboto',montserrat:'Montserrat',opensans:'Open Sans',raleway:'Raleway',quicksand:'Quicksand',
-        fira:'Fira Sans',work:'Work Sans',lexend:'Lexend',sora:'Sora',urbanist:'Urbanist',
-        barlow:'Barlow',archivo:'Archivo',mulish:'Mulish',karla:'Karla',cabin:'Cabin',
-        source:'Source Sans 3',ibmplex:'IBM Plex Sans',josefin:'Josefin Sans',playfair:'Playfair Display',
-        serif:'Classic Serif',mono:'Clean Mono'
-      };
-      const current=localStorage.getItem('sk_font_family')||'jakarta';
-      grid.innerHTML=Object.keys(labels).map(k=>`<button type="button" class="sk-font-choice${k===current?' active':''}" data-font-key="${k}" onclick="selectAppFontCard('${k}',this)"><span>${labels[k]}</span><small>SK MOBILES • 12345</small></button>`).join('');
-      grid.querySelectorAll('.sk-font-choice').forEach(function(card){
-        const key=card.getAttribute('data-font-key');
-        if(SK_APP_FONTS[key]) card.style.setProperty('font-family',SK_APP_FONTS[key],'important');
-      });
-    }
-    function selectAppFontCard(fontKey, el){
-      setAppFont(fontKey, false);
-      document.querySelectorAll('.sk-font-choice').forEach(x=>x.classList.remove('active'));
-      if(el) el.classList.add('active');
-    }
-    window.selectAppFontCard=selectAppFontCard;
     function toggleThemeIconPanel(){
       const body=document.getElementById('skThemeIconPanelBody'),btn=document.getElementById('skThemePanelToggle');
       if(!body)return;
@@ -1888,8 +1760,7 @@ const MASTER_INVENTORY = [
     window.toggleThemeIconPanel=toggleThemeIconPanel;
     function skInitThemeSettingsUI(){
       try{
-        const savedFont=localStorage.getItem('sk_font_family')||'jakarta'; setAppFont(savedFont,true);
-        const body=document.getElementById('skThemeIconPanelBody'),btn=document.getElementById('skThemePanelToggle');
+                const body=document.getElementById('skThemeIconPanelBody'),btn=document.getElementById('skThemePanelToggle');
         if(body){const collapsed=localStorage.getItem('sk_theme_panel_collapsed')==='1';body.setAttribute('data-collapsed',collapsed?'1':'0');if(btn){btn.setAttribute('aria-expanded',collapsed?'false':'true');btn.textContent=collapsed?'⌄ Expand':'⌃ Minimise';}}
       }catch(e){}
     }
@@ -1902,14 +1773,14 @@ const MASTER_INVENTORY = [
     const SK_APPEARANCE_DEFAULTS = {
       preset:'classic', themeMode:'light', accent:'blue', customHex:'#2563EB',
       surface:'offwhite', cardRadius:'modern', buttonRadius:'modern', cardSurface:'blur',
-      header:'glass', nav:'floating', scale:'normal', buttonStyle:'solid', aura:true, haptic:true, sound:false, motion:false
+      header:'minimal', nav:'floating', scale:'normal', buttonStyle:'solid', aura:true, haptic:true, sound:false, motion:false
     };
     const SK_APPEARANCE_ACCENTS = {
       blue:'#2563EB', violet:'#7C3AED', green:'#059669', rose:'#E11D48',
       amber:'#D97706', teal:'#0D9488', coral:'#F05A5A', indigo:'#4F46E5'
     };
     const SK_APPEARANCE_PRESETS = {
-      classic:{theme:'light',accent:'blue',surface:'offwhite',cardSurface:'blur',header:'glass',nav:'fixed',cardRadius:'modern',buttonRadius:'modern',aura:true},
+      classic:{theme:'light',accent:'blue',surface:'offwhite',cardSurface:'blur',header:'minimal',nav:'fixed',cardRadius:'modern',buttonRadius:'modern',aura:true},
       liquid:{theme:'light',accent:'blue',surface:'accent',cardSurface:'ios',header:'glass',nav:'floating',cardRadius:'smooth',buttonRadius:'pill',aura:true},
       white:{theme:'light',accent:'blue',surface:'flat',cardSurface:'border',header:'minimal',nav:'fixed',cardRadius:'standard',buttonRadius:'modern',aura:false},
       midnight:{theme:'dark',accent:'violet',surface:'flat',cardSurface:'shadow',header:'minimal',nav:'floating',cardRadius:'modern',buttonRadius:'modern',aura:false},
@@ -2007,7 +1878,7 @@ const MASTER_INVENTORY = [
       root.style.setProperty('--card-elevation',shadow);
       const cardRadiusMap={sharp:'0px',standard:'8px',modern:'12px',smooth:'16px',pill:'24px'};
       const buttonRadiusMap={sharp:'0px',modern:'8px',smooth:'14px',pill:'999px'};
-      const scaleMap={compact:'.92',normal:'1',comfortable:'1.1',large:'1.1'};
+      const scaleMap={compact:'.94',normal:'1',comfortable:'1.08',large:'1.08'};
       root.style.setProperty('--ui-card-radius',cardRadiusMap[settings.cardRadius]||'12px');
       root.style.setProperty('--ui-button-radius',buttonRadiusMap[settings.buttonRadius]||'8px');
       root.style.setProperty('--ui-scale',scaleMap[settings.scale]||'1');
@@ -3689,7 +3560,7 @@ function viewSavedBill(idx) {
       container.innerHTML = '';
 
       const wrapper = document.createElement('div');
-      wrapper.style.cssText = "background:transparent;color:#1e293b;padding:4px 0;font-family:'Plus Jakarta Sans',sans-serif;";
+      wrapper.style.cssText = "background:transparent;color:#1e293b;padding:4px 0;font-family:'Inter',sans-serif;";
 
       const header = document.createElement('div');
       header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid #edf0f6;padding-bottom:12px;margin-bottom:12px;gap:14px;';
@@ -3939,7 +3810,7 @@ function viewSavedBill(idx) {
       root.style.background = '#ffffff';
       root.style.color = '#1e293b';
       root.style.boxSizing = 'border-box';
-      root.style.fontFamily = '"Plus Jakarta Sans", Arial, sans-serif';
+      root.style.fontFamily = '"Inter", Arial, sans-serif';
       root.style.color = '#1e293b';
       root.style.background = '#ffffff';
 
@@ -4148,12 +4019,12 @@ function viewSavedBill(idx) {
       }).join('');
       const emi = clone.querySelector('#pvEmiScheduleSection');
       if (emi && emi.style.display !== 'none') { emi.style.breakBefore = 'page'; emi.style.pageBreakBefore = 'always'; }
-      clone.style.cssText = 'width:540px;max-width:540px;margin:0 auto;padding:0;background:#fff;color:#1e293b;box-sizing:border-box;font-family:"Plus Jakarta Sans",Arial,sans-serif;';
+      clone.style.cssText = 'width:540px;max-width:540px;margin:0 auto;padding:0;background:#fff;color:#1e293b;box-sizing:border-box;font-family:"Inter",Arial,sans-serif;';
       w.document.open();
       w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>SK MOBILES - Invoice</title>${styles}<style>
 @page{size:A4 portrait;margin:10mm}
 html,body{margin:0!important;padding:0!important;background:#fff!important;color:#1e293b!important;overflow:visible!important;width:100%!important;}
-body{font-family:"Plus Jakarta Sans",Arial,sans-serif!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+body{font-family:"Inter",Arial,sans-serif!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
 .print-preview-host{width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;background:#fff!important;}
 #printableInvoiceCard{width:540px!important;max-width:540px!important;margin:0 auto!important;box-sizing:border-box!important;background:#fff!important;color:#1e293b!important;box-shadow:none!important;zoom:1.3!important;}
 .sk-invoice-export-root #invoiceMainSheet > div:has(> div > #pvCustName)::before{content:none!important;display:none!important;}
@@ -4908,6 +4779,7 @@ img{max-width:100%!important;}
   };
 
   window.skRjRenderHomeMetric=function(){
+    if(typeof window.skUpdateBellDot==='function')window.skUpdateBellDot();
     const grid=document.getElementById('homeMetricGrid'); if(!grid)return;
     const jobs=load().filter(j=>['Received','Checking','Repairing'].includes(String(j.status||'')));
     const card=grid.querySelector('[data-card-id="metric-repair"]');
@@ -5000,7 +4872,15 @@ img{max-width:100%!important;}
     card.style.display=jobs.length?'flex':'none';
     const count=document.getElementById('skUrgentRepairCount');if(count)count.textContent=jobs.length;
     const preview=document.getElementById('skUrgentRepairPreview');if(preview){preview.textContent=jobs.slice(0,2).map(j=>(j.customer||'Customer')+' · '+(j.model||'Model')).join('  •  ')||'No urgent jobs'}
+    updateBellDot();
   }
+
+  /* The bell shows its red dot only while there is an urgent repair to look at. */
+  function updateBellDot(){
+    const on=urgentJobs().length>0;
+    document.querySelectorAll('.sk-home-header-icon[aria-label="Notifications"]').forEach(b=>b.classList.toggle('has-alert',on));
+  }
+  window.skUpdateBellDot=updateBellDot;
 
   function showInAppNotification(jobs){
     const bar=document.getElementById('skUrgentNotifyBar');
@@ -5050,6 +4930,7 @@ img{max-width:100%!important;}
   }
 
   window.skUrgentRepairInstall=install;
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',updateBellDot);else updateBellDot();
   const target=document.getElementById('cardsContainer');
   let urgentRenderQueued=false;
   if(target)new MutationObserver(()=>{
@@ -8184,10 +8065,11 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   skUsedRender();
  };
 
+ const UD_ICONS={ram:'<rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/>',storage:'<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/>',colour:'<path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z"/>',kit:'<path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v8"/>',imei:'<path d="M4 5v14M8 5v14M12 5v14M16 5v14M20 5v14"/>',status:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',price:'<path d="M3 12V4h8l10 10-8 8L3 12Z"/><circle cx="7.5" cy="8.5" r="1.2"/>',notes:'<path d="M4 20h4L19 9l-4-4L4 16v4Z"/>'};
  window.skUsedShowDetails=function(imei){
   const r=read().find(x=>String(x.imei)===String(imei));if(!r)return;
   let dlg=$('skUsedDetailDialog');if(!dlg){dlg=document.createElement('div');dlg.id='skUsedDetailDialog';dlg.className='sk-used-detail-overlay';dlg.setAttribute('role','dialog');dlg.setAttribute('aria-modal','true');document.body.appendChild(dlg);}
-  dlg.innerHTML='<section class="sk-used-detail-sheet"><header class="sk-used-detail-head"><button type="button" class="sk-used-detail-close sk-used-detail-back" aria-label="Back" onclick="document.getElementById(\'skUsedDetailDialog\').remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4-8 8 8 8"/></svg></button><div class="sk-used-detail-title"><strong>'+esc(r.model)+'</strong><small>Used mobile details</small></div><span class="sk-used-detail-status '+(r.status==='Sold'?'is-sold':'is-stock')+'">'+esc(r.status||'In Stock')+'</span></header><div class="sk-used-detail-grid">'+[['RAM',r.ram,'ram'],['Storage',r.storage,'storage'],['Colour',r.colour,'colour'],['Full Kit',r.kit,'kit'],['IMEI / Serial',r.imei,'imei'],['Status',r.status,'status'],['Customer Price',money(r.customerPrice),'price'],['Notes / Issue',r.issue||'—','notes']].map(([k,v,c])=>'<div class="sk-used-detail-field f-'+c+(c==='imei'||c==='notes'?' is-wide':'')+'"><small>'+esc(k)+'</small><strong>'+esc(v||'Not set')+'</strong></div>').join('')+'</div><footer class="sk-used-detail-actions"><button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedShowManagement();window.skUsedEdit(\''+esc(r.imei)+'\');document.getElementById(\'skUsedPurchaseForm\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">Edit</button><button type="button" class="submit-btn sk-used-detail-danger" onclick="window.skUsedDelete(\''+esc(r.imei)+'\');document.getElementById(\'skUsedDetailDialog\')?.remove();window.skUsedShowManagement()">Delete</button><button type="button" class="submit-btn sk-used-bill-button" '+(r.status==='Sold'?'disabled':'')+' onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Select for Bill</button></footer></section>';
+  dlg.innerHTML='<section class="sk-used-detail-sheet"><header class="sk-used-detail-head"><button type="button" class="sk-used-detail-close sk-used-detail-back" aria-label="Back" onclick="document.getElementById(\'skUsedDetailDialog\').remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4-8 8 8 8"/></svg></button><div class="sk-used-detail-title"><strong>'+esc(r.model)+'</strong><small>Used mobile details</small></div><span class="sk-used-detail-status '+(r.status==='Sold'?'is-sold':'is-stock')+'">'+esc(r.status||'In Stock')+'</span></header><div class="sk-used-detail-grid">'+[['RAM',r.ram,'ram'],['Storage',r.storage,'storage'],['Colour',r.colour,'colour'],['Full Kit',r.kit,'kit'],['IMEI / Serial',r.imei,'imei'],['Status',r.status,'status'],['Customer Price',money(r.customerPrice),'price'],['Notes / Issue',r.issue||'—','notes']].map(([k,v,c])=>'<div class="sk-used-detail-field f-'+c+(c==='imei'||c==='notes'?' is-wide':'')+'"><span class="sk-ud-ic"><svg viewBox="0 0 24 24" aria-hidden="true">'+(UD_ICONS[c]||'')+'</svg></span><div class="sk-ud-tx"><small>'+esc(k)+'</small><strong>'+esc(v||'Not set')+'</strong></div></div>').join('')+'</div><footer class="sk-used-detail-actions"><button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedShowManagement();window.skUsedEdit(\''+esc(r.imei)+'\');document.getElementById(\'skUsedPurchaseForm\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">Edit</button><button type="button" class="submit-btn sk-used-detail-danger" onclick="window.skUsedDelete(\''+esc(r.imei)+'\');document.getElementById(\'skUsedDetailDialog\')?.remove();window.skUsedShowManagement()">Delete</button><button type="button" class="submit-btn sk-used-bill-button" '+(r.status==='Sold'?'disabled':'')+' onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Select for Bill</button></footer></section>';
   dlg.addEventListener('click',function(e){if(e.target===dlg)dlg.remove();},{once:true});
  };
  window.skUsedShowInventory=function(){

@@ -897,6 +897,9 @@
     }
   }
 
+  window.skCloudCanBackup = function(){ return !!(auth?.currentUser && db && cloudBackupAllowed() && navigator.onLine !== false); };
+  function cloudBackupEvent(ok, at){ try{ window.dispatchEvent(new CustomEvent("sk-cloud-backup",{detail:{ok:ok,at:at||Date.now()}})); }catch(e){} }
+
   window.skCloudBackupNow = async function(silent){
     if(!auth?.currentUser || !db){ toast("❌ Firebase Login required"); return; }
     if(!cloudBackupAllowed()){ toast("🔒 Cloud Backup for Admin/Manager only"); return; }
@@ -933,10 +936,12 @@
         chunkCount
       }, {merge:true});
       cloudBackupStatus("✅ Cloud backup saved • " + itemCount + " data items");
+      cloudBackupEvent(true);
       if(!silent) toast("☁️ Cloud Backup completed");
     }catch(e){
       console.error("Cloud backup error", e);
       cloudBackupStatus("❌ Cloud backup failed");
+      cloudBackupEvent(false);
     }
   };
 

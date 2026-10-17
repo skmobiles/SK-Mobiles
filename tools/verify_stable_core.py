@@ -19,6 +19,6 @@ for rel, expected in data["core_files"].items():
     else:
         print(f"OK: {rel}")
 if failed:
-    print("\nV5.6.149 STABLE CORE VERIFICATION FAILED.")
+    print("\nV5.6.151 STABLE CORE VERIFICATION FAILED.")
     sys.exit(1)
-print("\nV5.6.149 STABLE CORE VERIFIED — files match the V5.6.149 baseline.")
+print("\nV5.6.151 STABLE CORE VERIFIED — files match the V5.6.151 baseline.")
