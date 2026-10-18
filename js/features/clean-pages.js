@@ -114,6 +114,33 @@ function cleanLedger(){
   });
 }
 
+
+/* ---------- ledger: customer list (main view) ---------- */
+var WA_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19.3z"/></svg>';
+function soften(av){
+  var bg=av.getAttribute('style')||'';var m=bg.match(/#[0-9a-f]{6}/i);if(!m)return;
+  var c=m[0];av.style.setProperty('background',c+'22','important');av.style.setProperty('color',c,'important');av.setAttribute('data-skcl','1');
+}
+function cleanLedgerList(){
+  var page=$('skCreditLedgerPage'),mv=$('skCPMainView');if(!page||!mv||!page.classList.contains('active'))return;
+  /* one total card instead of four boxes */
+  var g=function(id){var e=$(id);return e?e.textContent.trim():''};
+  var tot=mv.querySelector('.skcl-total');
+  if(!tot){tot=document.createElement('div');tot.className='skcl-sum skcl-total';mv.insertBefore(tot,mv.firstChild)}
+  var all=g('skCPAllCount'),emi=g('skCPEmiCount'),out=g('skCPOutstandingTotal'),sig=[all,emi,out].join('|');
+  if(tot.getAttribute('data-v')!==sig){tot.setAttribute('data-v',sig);tot.innerHTML='<small>Total outstanding</small><b>'+esc(out||'₹0')+'</b><span>'+esc(all||'0')+' customer'+(all==='1'?'':'s')+' · '+esc(emi||'0')+' on EMI</span>'}
+  /* customer rows */
+  Array.prototype.forEach.call(mv.querySelectorAll('#skCPList .skcp-row:not([data-skcl])'),function(r){
+    r.setAttribute('data-skcl','1');
+    var av=r.querySelector('.sk-credit-avatar');if(av)soften(av);
+    var sub=r.querySelector('.skcp-sub');if(sub)sub.textContent=(sub.textContent||'').replace(/📞/g,'').replace(/\s*•\s*/g,' · ').trim();
+    var st=r.querySelector('.skcp-bill');if(st){var t=(st.textContent||'').trim().toUpperCase();st.textContent=t==='OUTSTANDING'?'due':t.toLowerCase();if(t==='OUTSTANDING')st.classList.add('is-due')}
+    Array.prototype.forEach.call(r.querySelectorAll('button'),function(b){
+      if(/WhatsApp/i.test(b.title||'')){b.classList.add('skcl-wa');b.removeAttribute('style');b.innerHTML=WA_IC;b.setAttribute('aria-label','WhatsApp reminder')}
+      else if(/Delete/i.test(b.title||''))b.classList.add('skcl-del');
+    });
+  });
+}
 /* ============================ Settings ============================ */
 var ST_ROWS=[
   ['Shop',[
@@ -229,13 +256,13 @@ document.addEventListener('click',function(e){
 
 /* ============================ wiring ============================ */
 var raf=0;
-function run(){raf=0;try{cleanLedger()}catch(e){console.warn('clean ledger',e)}try{cleanSettings()}catch(e){console.warn('clean settings',e)}}
+function run(){raf=0;try{cleanLedger()}catch(e){console.warn('clean ledger',e)}try{cleanLedgerList()}catch(e){console.warn('clean ledger list',e)}try{cleanSettings()}catch(e){console.warn('clean settings',e)}}
 function schedule(){if(!raf)raf=requestAnimationFrame(run)}
 function boot(){
   new MutationObserver(function(ms){
     for(var i=0;i<ms.length;i++){var t=ms[i].target;
-      if(t.nodeType===1&&(t.id==='skCreditLedgerPage'||t.id==='settingsModal'||t.id==='skCPDetailView'||(t.closest&&t.closest('#skCPDetailView,#settingsModal')))){schedule();return}}
-  }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
+      if(t.nodeType===1&&(t.id==='skCreditLedgerPage'||t.id==='settingsModal'||t.id==='skCPDetailView'||(t.closest&&t.closest('#skCPDetailView,#skCPMainView,#settingsModal')))){schedule();return}}
+  }).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','style']});
   schedule();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
