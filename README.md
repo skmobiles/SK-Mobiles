@@ -235,3 +235,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Used Mobile Stock → Add / Update Purchase: the date text no longer overlaps its calendar icon.
 - Bill Details and other popups: removed the large blank block under the content (every popup used to reserve 112px at the bottom). Short popups now fit their content; Bill Details sits just above the bottom menu with the Edit / Download / WhatsApp buttons reachable by scrolling.
 - App Settings & Themes: a LIVE PREVIEW strip (header, card, buttons, mini menu) stays pinned under the title, so accent, radius, button style, theme and other options are visible instantly inside the settings window.
+
+## V5.8.4 — Version label, tile/card alignment
+- The version shown in the Menu, the Tempered/Display header chip and the profile box now all come from one place (the app version), so they always match (was V5.7 / V5.5 / V5.8).
+- Home "Shop Tools": icon, title and subtitle line up at the same height in every tile; subtitle text centred and not touching the border; "More" no longer touches the tiles.
+- Tempered / Display cards: even inner spacing, "In Stock" pill and "Models Fit" box no longer touch their borders, model chips are never cut in half.
+- Billing, Order, Admin and Item editor windows keep a small margin so boxes no longer touch the window border; Repair tabs have inner spacing.
