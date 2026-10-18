@@ -256,3 +256,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 
 ## V5.8.7 — Contact picker fills the name everywhere
 - Choosing a contact with the contact icon now fills the customer name as well as the phone number in every form: Credit entry (this was missing), Bill, Repair job, Credit, Worker add/edit and Worker profile. Name fields are matched by their ID, with a safe automatic fallback for fields named like "...Phone" / "...Name".
+
+## V5.8.8 — Popup margins, softer Aura glow
+- Every popup (Compatible Models, Credit entry, EMI reminder, Monthly/Daily report, Warranty, Dealer, Customers, Price List, Urgent repairs, Used Mobile Stock and others) now keeps a 12px margin, so inner boxes no longer touch the window border.
+- Ambient Aura Glow (the coloured patches at the top-left and bottom-right of Home) now sits behind the cards instead of tinting them, is softer, and both patches follow the accent colour. Turn it off any time in Settings → Visual Effects → Ambient Aura Glow.
