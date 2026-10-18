@@ -10,11 +10,17 @@ function visible(o){
   if(o.classList.contains('modal-overlay')&&!o.classList.contains('active'))return false;
   var cs=getComputedStyle(o);return cs.display!=='none'&&cs.visibility!=='hidden';
 }
+/* V5.9.14: real pages always stay full-screen pages, even when they have little content */
+var PAGES=/^(skCreditLedgerPage|billingModal|settingsModal|skRepairJobsModal|skAccessoriesPage|skMonthReportModal|skDailyReportModal|skStorageHealthModal|skAdminPanelModal|itemEditorModal|toolsOthersNoteModal|viewBillModal|skUsedStockModal|skBulkModal|skReviewModal)$/;
 function evaluate(o){
   if(!o||!o.isConnected)return;
+  if(PAGES.test(o.id||'')){if(o.classList.contains(CLS))o.classList.remove(CLS);return}
   var s=o.firstElementChild;
   if(!visible(o)||!s){if(o.classList.contains(CLS))o.classList.remove(CLS);return}
-  var h=Math.max(s.scrollHeight,s.getBoundingClientRect().height),r=h/window.innerHeight,on=o.classList.contains(CLS);
+  /* V5.9.14: measure the content itself - full pages are now stretched to the screen, so the box height no longer tells */
+  var sr=s.getBoundingClientRect(),cs=getComputedStyle(s),bottom=0;
+  Array.prototype.forEach.call(s.children,function(c){var r=c.getBoundingClientRect();if(r.height>0)bottom=Math.max(bottom,r.bottom-sr.top+s.scrollTop+(parseFloat(getComputedStyle(c).marginBottom)||0))});
+  var h=bottom+(parseFloat(cs.paddingBottom)||0),r=h/window.innerHeight,on=o.classList.contains(CLS);
   if(!on&&r<IN)o.classList.add(CLS);
   else if(on&&r>OUT)o.classList.remove(CLS);
   if(ro&&seen&&!seen.has(s)){seen.add(s);ro.observe(s)}
@@ -36,5 +42,10 @@ function boot(){
   window.addEventListener('resize',scanAll);
   scanAll();
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+/* V5.9.14: mark sheets whose content scrolls, so their bottom edge can fade (same scroll look everywhere) */
+var sct=0;
+function markScroll(){document.querySelectorAll('.modal-overlay.active > .modal-sheet').forEach(function(s){var on=s.scrollHeight>s.clientHeight+4;if(on!==s.classList.contains('sk-scrolls'))s.classList.toggle('sk-scrolls',on)})}
+function markSoon(){clearTimeout(sct);sct=setTimeout(markScroll,120)}
+function bootMark(){new MutationObserver(markSoon).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});window.addEventListener('resize',markSoon);markSoon()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){boot();bootMark()});else{boot();bootMark()}
 })();
