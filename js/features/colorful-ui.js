@@ -210,8 +210,18 @@
   }
   function schedule(){ if (!queued){ queued = true; (window.requestAnimationFrame || setTimeout)(run); } }
 
+  /* V5.9.13: colour for the fade under the nav bar = the page background of the current theme */
+  function syncStrip(){
+    try { var c = getComputedStyle(document.body).backgroundColor;
+      if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') document.documentElement.style.setProperty('--sk-nav-strip', c); } catch (e) {}
+  }
   function init(){
     document.documentElement.classList.add('sk-cui');
+    syncStrip();
+    if (!document.getElementById('skNavFade')) { var fd = document.createElement('div'); fd.id = 'skNavFade'; fd.setAttribute('aria-hidden', 'true'); document.body.appendChild(fd); }
+    var st = 0, mo = new MutationObserver(function(){ clearTimeout(st); st = setTimeout(syncStrip, 60); });
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme', 'data-ui-theme', 'data-ui-palette', 'data-ui-accent'] });
+    mo.observe(document.body, { attributes: true, attributeFilter: ['class', 'data-theme'] });
     run();
     new MutationObserver(function(muts){
       for (var i = 0; i < muts.length; i++){

@@ -333,3 +333,4 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Tempered / Display / any long list: the emoji→icon pass (colorful-ui.js) re-measured the whole page after every icon; it now reads first and writes after. Tempered page with ~170 cards: 23 s freeze → ~15 ms.
 - Customer Credit Ledger: full page from the top down to just above the nav bar; only the inside scrolls, so history cards never slide behind the nav bar or out of the white box.
 - Credit form: Months / Interest % / Date stay hidden while "No EMI" is selected (a CSS rule matched the word "grid" inside the hidden field's style).
+- Home / Tempered / Display: cards fade out just above the floating nav bar instead of showing around and under it (page-coloured fade under the bar, follows the theme; hidden while a page, popup or the menu is open).
