@@ -358,3 +358,9 @@ html:not(#a) body #billingModal #mobileTypeTabs{margin-left:0!important;margin-r
 
 /* V5.8.6 popups: one blur layer only (the dim background). A second blur on the sheet itself made some Android phones paint popups half-empty. */
 html:not(#a) body .modal-overlay .modal-sheet{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:color-mix(in srgb,var(--modal-bg,#fff) 97%,transparent)!important}
+
+/* V5.8.8 every popup keeps its boxes away from the window border (many popups had 0 side padding) */
+html.sk-cui:not(#a) body .modal-overlay:not(#skAccessoriesPage):not(#skUsedStockModal):not(#skSignatureModal) > .modal-sheet{padding-left:12px!important;padding-right:12px!important;box-sizing:border-box!important}
+html:not(#a) body #skUsedStockModal main.sk-used-stock-scroll{padding-left:10px!important;padding-right:10px!important;box-sizing:border-box}
+html:not(#a) body #skAccessoriesPage > .modal-sheet > .modal-title{margin-left:10px!important;margin-right:10px!important}
+html:not(#a) body #skUsedStockModal .sk-used-stock-header{margin-left:10px!important;margin-right:10px!important;width:auto!important;box-sizing:border-box}
