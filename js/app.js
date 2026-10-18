@@ -4775,9 +4775,10 @@ img{max-width:100%!important;}
           if(chosenName){
             let nameInput=null;
             const id=String(input.id||'');
-            const knownPairs={billCustPhone:'billCustName',skCreditPhone:'skCreditName',skRjPhone:'skRjCustomer',skSandboxPhone:'skSandboxCustomer'};
+            const knownPairs={billCustPhone:'billCustName',skCreditPhone:'skCreditName',skCPPhone:'skCPName',skRjPhone:'skRjCustomer',skSandboxPhone:'skSandboxCustomer',skWorkerEditPhone:'skWorkerEditName',skWorkerProfilePhone:'skWorkerProfileName'};
             const pairedId=knownPairs[id];
             if(pairedId)nameInput=document.getElementById(pairedId);
+            if(!nameInput&&id){const base=id.replace(/(Phone|Mobile|Contact|Whatsapp)$/i,'');['Name','Customer','CustName','Party'].some(function(sfx){const c=document.getElementById(base+sfx);if(c&&c!==input&&c.tagName==='INPUT'){nameInput=c;return true}return false});}
             if(!nameInput){
               const scope=input.closest('.form-group, .form-row, .form-grid, form, .modal, .bill-section, label')||input.parentElement.parentElement;
               if(scope)nameInput=scope.querySelector('input[id*="name" i], input[id*="customer" i], input[id*="party" i]');
