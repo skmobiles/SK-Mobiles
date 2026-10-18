@@ -160,3 +160,14 @@ html body #skCreditRemindModal#skCreditRemindModal .skcr-dateclr{border:1px soli
 html body #skCPHistModal#skCPHistModal .skcph-actions{margin-top:6px}
 html body #skCPHistModal#skCPHistModal .skcph-actions .submit-btn{width:100%}
 html body #skCPHistModal#skCPHistModal > .modal-sheet{height:auto !important;min-height:0 !important;max-height:88dvh !important;overflow:auto;align-self:flex-start;padding-bottom:16px !important}
+
+/* V5.9.4 credit reminders: round, centred reset + WhatsApp buttons; due-date popup */
+html body #skCreditRemindModal#skCreditRemindModal .skcr-dateclr{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;max-height:34px!important;padding:0!important;border-radius:50%!important;display:inline-grid!important;place-items:center!important;line-height:1!important;font-size:.95rem!important;flex:0 0 34px!important}
+html body #skCreditRemindModal#skCreditRemindModal .skcr-wa{display:inline-grid!important;place-items:center!important;padding:0!important;line-height:1!important}
+html body #skCreditRemindModal#skCreditRemindModal .skcr-wa>*{margin:0!important}
+html body #skCreditRemindModal#skCreditRemindModal .skcr-datebtn{cursor:pointer;font-family:inherit}
+html body #skCrDueModal .skcr-duepop{display:grid;gap:12px}
+html body #skCrDueModal .skcr-duebtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+html body #skCrDueModal .skcr-duebtns .submit-btn:only-child{grid-column:1/-1}
+html body #skCrDueModal .skcr-duepop .form-label{display:grid!important;gap:6px!important;grid-template-columns:1fr!important}
+html:not(#a):not(#b):not(#c) body #skCreditRemindModal#skCreditRemindModal .skcr-dateclr{border-radius:50%!important}

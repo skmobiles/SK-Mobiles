@@ -285,3 +285,8 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 ## V5.9.3 — Spacing sweep
 - Sale Price and the "Old mobile exchange" box no longer touch; Accent colour swatches are round and stay inside the card, with a gap before the Custom Brand Hex row whose text now stays inside its box.
 - An automatic check of every page and popup (normal and Large text) for boxes that touch: gaps added for repair-job buttons, repair details, admin profile, worker edit, tools note, settings terms / logo / UPI and all section headers.
+
+## V5.9.4 — WhatsApp PDF, short statement, reminder due date
+- WhatsApp PDF: building the PDF takes a few seconds, after which Android no longer treats it as a tap and blocks sharing ("WhatsApp invoice PDF failed"). Now a small "Invoice PDF ready — Share on WhatsApp" prompt appears; one more tap opens the share sheet. Cancelling the share sheet no longer shows an error, and any real error now shows its reason.
+- Send history (credit ledger) message is now short: outstanding amount, last payment (amount + date) and only the last 3 credit items.
+- Credit Reminders: "Change date / Set due date" opens a small popup with a date box and Save / Remove (the old hidden date box did not open on some phones). The reset and WhatsApp buttons are round with the icon centred.

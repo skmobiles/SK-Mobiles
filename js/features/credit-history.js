@@ -47,28 +47,21 @@ function pick(c){
   return {bills:bills,ents:ents};
 }
 function statement(c){
+  /* V5.9.4: short customer message — outstanding, last payment, and only the last 3 credit items */
   var r=pick(c);
-  var L=['*'+shopName()+' — Account statement*','Customer: '+c.name+(c.phone?' ('+c.phone+')':''),'Period: '+period(),''];
-  var paid=r.ents.filter(function(e){return e.type==='payment'}).reduce(function(a,e){return a+num(e.amount)},0);
-  L.push('Outstanding now: '+money(c.balance),'Payments in this period: '+money(paid),'');
-  if(r.bills.length){
-    L.push('*Credit bills*');
-    r.bills.forEach(function(x){
-      var b=x.b,total=num(b.price),bal=num(b.balance),pd=Math.max(0,total-bal);
-      L.push('• '+dmy(b.date)+' '+(b.model||'Bill')+' — Total '+money(total)+', Paid '+money(pd)+', Balance '+money(bal));
-    });
-    L.push('');
+  var clean=function(t){return String(t||'').replace(/\s*•\s*Ledger only/ig,'').trim()};
+  var L=['*'+shopName()+' — Account statement*','Customer: '+c.name,'','*Outstanding: '+money(c.balance)+'*'];
+  var pays=r.ents.filter(function(e){return e.type==='payment'});
+  if(pays.length){var lp=pays[pays.length-1];L.push('Last payment: '+money(lp.amount)+' on '+dmy(lp.date));}
+  var items=[];
+  r.bills.forEach(function(x){var b=x.b;items.push({k:sortKey(b.date),d:b.date,t:(b.model||'Bill'),a:num(b.balance)||num(b.price)})});
+  r.ents.forEach(function(e){if(e.type!=='payment'&&e.type!=='discount')items.push({k:sortKey(e.date),d:e.date,t:clean(e.note||e.details)||'Credit',a:num(e.amount)})});
+  items.sort(function(a,b){return a.k<b.k?1:a.k>b.k?-1:0});
+  if(items.length){
+    L.push('','*Recent items*');
+    items.slice(0,3).forEach(function(it){L.push('• '+dmy(it.d)+' — '+it.t+' — '+money(it.a))});
   }
-  if(r.ents.length){
-    L.push('*Credit / payment history*');
-    r.ents.forEach(function(e){
-      var tag=e.type==='payment'?'Payment':(e.type==='discount'?'Discount':'Credit');
-      L.push('• '+dmy(e.date)+' '+tag+' '+money(e.amount)+(e.note||e.details?' ('+(e.note||e.details)+')':''));
-    });
-    L.push('');
-  }
-  if(!r.bills.length&&!r.ents.length)L.push('No entries in this period.','');
-  L.push('Thank you 🙏');
+  L.push('','Thank you 🙏');
   return L.join('\n');
 }
 function renderSummary(){
