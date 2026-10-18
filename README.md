@@ -328,3 +328,8 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Price List (image / PDF): each item now has the same "#1" chip before its name.
 - Bottom navigation: colourful icons (Tempered sky blue, Display purple, Billing green, Orders orange); the open page gets a light tile. Home button unchanged.
 - Menu: scrolling inside the menu no longer toggles the page-wide scroll-performance class, and the background glow stays while the menu is open — removes the one-time home page blink.
+
+## V5.9.13 — Tempered freeze, Credit Ledger full page, EMI fields
+- Tempered / Display / any long list: the emoji→icon pass (colorful-ui.js) re-measured the whole page after every icon; it now reads first and writes after. Tempered page with ~170 cards: 23 s freeze → ~15 ms.
+- Customer Credit Ledger: full page from the top down to just above the nav bar; only the inside scrolls, so history cards never slide behind the nav bar or out of the white box.
+- Credit form: Months / Interest % / Date stay hidden while "No EMI" is selected (a CSS rule matched the word "grid" inside the hidden field's style).

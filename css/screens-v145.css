@@ -63,7 +63,7 @@ html body #skCreditActionModal .form-group:has(#skCPCategory),
 html body #skCreditActionModal #skCPPaymentModeGroup{grid-column:span 1}
 html body #skCreditActionModal .form-group:has(#skCPName),html body #skCreditActionModal .form-group:has(#skCPPhone){grid-column:span 1}
 html body #skCreditActionModal #skCPEmiFields{display:none}
-html body #skCreditActionModal #skCPEmiFields[style*="grid"],html body #skCreditActionModal #skCPEmiFields[style*="block"]{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+html body #skCreditActionModal #skCPEmiFields[style*="display: grid"],html body #skCreditActionModal #skCPEmiFields[style*="display:grid"],html body #skCreditActionModal #skCPEmiFields[style*="display: block"]{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
 html body #skCreditActionModal textarea{min-height:56px!important}
 html body #skCreditActionModal .submit-btn{margin-top:4px!important}
 
