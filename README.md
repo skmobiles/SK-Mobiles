@@ -322,3 +322,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 ## V5.9.11 — Stat cards centred, smooth Menu scroll
 - Used Mobile Stock stat cards (Total Devices / In Stock / Sold / Sold Profit): icon, label and value are centred; in dark mode the cards are dark with readable labels (were light grey and faded).
 - Menu: scrolling the menu no longer makes the Home page behind it blink. The menu no longer live-blurs the page behind it on every scroll step, and the long-press re-order only blocks scrolling while a box is actually being moved.
+
+## V5.9.12 — Serial "#1" chips, colourful nav icons, menu blink
+- Used Mobile Register: serial number shown as a soft "#1" chip before the phone name (was a dark dot on the phone icon).
+- Price List (image / PDF): each item now has the same "#1" chip before its name.
+- Bottom navigation: colourful icons (Tempered sky blue, Display purple, Billing green, Orders orange); the open page gets a light tile. Home button unchanged.
+- Menu: scrolling inside the menu no longer toggles the page-wide scroll-performance class, and the background glow stays while the menu is open — removes the one-time home page blink.

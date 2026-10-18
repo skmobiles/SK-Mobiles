@@ -8210,8 +8210,8 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
    /* V5.9.10: one even card per phone - same layout in All / In stock / Sold */
    return `<tr class="sk-uc-row" data-imei="${imei}" style="cursor:pointer"><td class="sk-uc" colspan="6">
     <div class="sk-uc-top">
-     <span class="sk-uc-thumb sk-used-phone-thumb" style="--phone-accent:${brandColor}" aria-hidden="true"><b class="sk-uc-no">${i+1}</b><svg viewBox="0 0 24 36"><rect x="3" y="1" width="18" height="34" rx="3.2"/><rect x="5.2" y="4" width="13.6" height="26" rx="1.4"/><path d="M9 2.8h6M10.5 32.4h3"/></svg></span>
-     <span class="sk-uc-main"><strong class="sk-uc-name">${esc(r.model)}</strong><small class="sk-uc-dealer">${esc(r.dealer||'—')}</small></span>
+     <span class="sk-uc-thumb sk-used-phone-thumb" style="--phone-accent:${brandColor}" aria-hidden="true"><svg viewBox="0 0 24 36"><rect x="3" y="1" width="18" height="34" rx="3.2"/><rect x="5.2" y="4" width="13.6" height="26" rx="1.4"/><path d="M9 2.8h6M10.5 32.4h3"/></svg></span>
+     <span class="sk-uc-main"><strong class="sk-uc-name"><b class="sk-uc-no">#${i+1}</b>${esc(r.model)}</strong><small class="sk-uc-dealer">${esc(r.dealer||'—')}</small></span>
      <span class="sk-uc-side"><b class="sk-uc-price">${money(r.cost)}</b><span class="sk-used-status sk-uc-status ${statusClass}">${esc(r.status||'In Stock')}</span></span>
     </div>
     <div class="sk-uc-bottom">

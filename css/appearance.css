@@ -63,7 +63,7 @@ html[data-ui-aura="on"] body:before{width:80vw;height:80vw;max-width:460px;max-h
 html[data-ui-aura="on"] body:after{width:76vw;height:76vw;max-width:440px;max-height:440px;right:-28vw;bottom:8vh;background:radial-gradient(circle,color-mix(in srgb,var(--primary) 26%,transparent) 0%,transparent 68%)}
 html[data-ui-aura="off"] body:before,html[data-ui-aura="off"] body:after{display:none!important}
 /* no glow layer while a popup / drawer is open (keeps popups crisp and avoids paint glitches on phones) */
-html[data-ui-aura="on"] body:has(.modal-overlay.active,#leftDrawer.active,#leftDrawer.open):before,html[data-ui-aura="on"] body:has(.modal-overlay.active,#leftDrawer.active,#leftDrawer.open):after{display:none!important}
+html[data-ui-aura="on"] body:has(.modal-overlay.active):before,html[data-ui-aura="on"] body:has(.modal-overlay.active):after{display:none!important}
 
 /* ---------- reduce motion (toggle "on") ---------- */
 html[data-ui-motion="on"] *,html[data-ui-motion="on"] *::before,html[data-ui-motion="on"] *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
