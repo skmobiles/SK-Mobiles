@@ -277,3 +277,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Tested with the shop's Used Mobiles 2026 workbook: fresh import and re-import over the old data both give 415 phones, 389 sold, 26 in stock — matching the Inventory sheet.
 - Re-import also repairs IMEIs that were saved as "354596000000000" (the rounded form of "3.54596E+14").
 - **Clear All** (Used Mobile Stock) now really clears the whole Used Mobile register so a fresh Excel can be imported. Accessories got a matching **🗑 Clear List** next to Upload / Export. Both ask for confirmation, then ask you to type CLEAR, and download a backup file (CSV / list export) before clearing. The cleared list also syncs to your other devices.
+
+## V5.9.2 — WhatsApp buttons open WhatsApp Business
+- On Android, every WhatsApp button (bill, credit reminder / statement, repair ready, price list, monthly report, dealer, reviews, bulk message, shop phone) now opens **WhatsApp Business** directly (new js/features/wa-business.js). If WhatsApp Business is not installed, it falls back to the normal wa.me link. Desktop / iPhone unchanged.
+- PDF sharing still uses the phone's Share sheet — choose WhatsApp Business there (a web page cannot force one app for file sharing).
