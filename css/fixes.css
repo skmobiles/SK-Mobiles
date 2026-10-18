@@ -370,3 +370,4 @@ html:not(#a) body #skUsedStockModal .sk-used-stock-header{margin-bottom:10px!imp
 html:not(#a) body #skUsedStockModal #skUsedViewChips{margin-bottom:10px!important}
 html:not(#a) body #skUsedStockModal .sk-used-table-wrap+.sk-used-storage-note{margin-top:8px!important}
 html:not(#a) body #skUsedStockModal #skUsedRows{margin-top:6px!important}
+html body #skUsedDetailDialog .f-battery{--fc:#16a34a}
