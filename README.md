@@ -374,3 +374,4 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 ## V5.9.20 — Used mobile details in the clean style
 - Simple top bar (← name, status); details as one white list (label left, value right, colour icons).
 - The buttons were partly hidden behind the nav bar; they now sit above it: Bill this mobile (blue), Edit | Delete (red outline), Select for Bill. Same functions as before. CSS only.
+- Dark mode: no more white boxes (search box, header buttons, Used Stock form fields, status chips, row menu, repair details, filter fields) and no unreadable text (home recent activity, pay-mode chips, used details title, repair amounts). Popup backdrops stay dark. Checked every screen with a contrast scan.
