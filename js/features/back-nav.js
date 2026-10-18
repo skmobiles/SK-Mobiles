@@ -43,6 +43,8 @@ function layersNow(){
   /* inner views: Back goes to the list the user came from */
   var led=$('skCPDetailView');
   if(isOn($('skCreditLedgerPage'))&&led&&led.style.display==='block')out.push({key:'sub:ledger',close:function(){if(window.skCPBackToList)window.skCPBackToList()},still:function(){return led.style.display==='block'}});
+  var stm=$('settingsModal'),sts=stm&&stm.querySelector(':scope > .modal-sheet');
+  if(isOn(stm)&&sts&&sts.classList.contains('skst-open'))out.push({key:'sub:settings',close:function(){if(window.skStBack)window.skStBack()},still:function(){return sts.classList.contains('skst-open')}});
   var used=$('skUsedStockModal');
   if(isOn(used)&&used.classList.contains('sk-used-form-page'))out.push({key:'sub:usedform',close:function(){if(window.skUsedBack)window.skUsedBack();if(isOn(used)&&used.classList.contains('sk-used-form-page')&&window.skUsedShowManagement)window.skUsedShowManagement()},still:function(){return used.classList.contains('sk-used-form-page')}});
   var cu=$('skCuDetail');
