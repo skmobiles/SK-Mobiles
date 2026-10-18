@@ -39,6 +39,9 @@ html.sk-cui .ski[data-i="calendar"]{--ic:var(--ico-calendar)} html.sk-cui .ski[d
 html.sk-cui .ski[data-i="image"]{--ic:var(--ico-image)} html.sk-cui .ski[data-i="store"]{--ic:var(--ico-store)}
 html.sk-cui .ski[data-i="call"]{--ic:var(--ico-call)} html.sk-cui .ski[data-i="pencil"]{--ic:var(--ico-pencil)} html.sk-cui .ski[data-i="filter"]{--ic:var(--ico-filter)} html.sk-cui .ski[data-i="refresh"]{--ic:var(--ico-refresh)} html.sk-cui .ski[data-i="menu"]{--ic:var(--ico-menu)} html.sk-cui .ski[data-i="barcode"]{--ic:var(--ico-barcode)} html.sk-cui .ski[data-i="cloud"]{--ic:var(--ico-cloud)} html.sk-cui .ski[data-i="chevron"]{--ic:var(--ico-chevron)}
 html.sk-cui .ski[data-i="tag"]{--ic:var(--ico-tag)} html.sk-cui .ski[data-i="chip"]{--ic:var(--ico-chip)}
+html.sk-cui .ski[data-i="handshake"]{--ic:var(--ico-handshake)} html.sk-cui .ski[data-i="book"]{--ic:var(--ico-book)}
+html.sk-cui .ski[data-i="pulse"]{--ic:var(--ico-pulse)} html.sk-cui .ski[data-i="broom"]{--ic:var(--ico-broom)}
+html.sk-cui .ski[data-i="printer"]{--ic:var(--ico-printer)} html.sk-cui .ski[data-i="truck"]{--ic:var(--ico-truck)} html.sk-cui .ski[data-i="trophy"]{--ic:var(--ico-trophy)}
 
 /* inline icon (buttons, labels) */
 html.sk-cui .ski-in{width:1.15em;height:1.15em;margin-right:.45em;transform:translateY(-1px)}
@@ -254,7 +257,7 @@ html.sk-cui .ski[data-i="qr"]{--ic:var(--ico-qr)}
 html.sk-cui .ski[data-i="clock"]{--ic:var(--ico-clock)}
 html.sk-cui .ski[data-i="trend"]{--ic:var(--ico-trend)}
 
-/* v5.8.0 home shop tools tiles */
+/* v5.8.1 home shop tools tiles */
 html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-icon.t-price{--c:var(--cui-green)}
 html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-icon.t-review{--c:var(--cui-amber)}
 html.sk-cui body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-feature-icon.t-month{--c:var(--cui-teal)}

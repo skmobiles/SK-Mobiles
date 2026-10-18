@@ -51,6 +51,10 @@ html:not(#a):not(#b)[data-ui-button-style] :is(.submit-btn,.bill-action-save,.bi
 /* ---------- text size ---------- */
 html:not(#a):not(#b)[data-ui-scale="compact"]{zoom:.94}
 html:not(#a):not(#b)[data-ui-scale="large"]{zoom:1.08}
+/* Text size zoom must not stretch full-screen popups past the phone screen (they are position:fixed, so they
+   are sized by the unzoomed viewport; divide by the zoom so they fill the screen exactly). */
+html:not(#a):not(#b)[data-ui-scale="large"] :is(.modal-overlay,.left-drawer){width:calc(100vw / 1.08)!important;max-width:none!important;height:calc(100vh / 1.08)!important;height:calc(100dvh / 1.08)!important}
+html:not(#a):not(#b)[data-ui-scale="compact"] :is(.modal-overlay,.left-drawer){width:calc(100vw / .94)!important;max-width:none!important;height:calc(100vh / .94)!important;height:calc(100dvh / .94)!important}
 
 /* ---------- aura glow ---------- */
 html[data-ui-aura="on"] body:before,html[data-ui-aura="on"] body:after{content:"";display:block;position:fixed;pointer-events:none;z-index:-1;border-radius:50%;filter:blur(38px);opacity:var(--ui-aura-opacity)}

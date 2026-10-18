@@ -1,4 +1,4 @@
-/* SK Mobiles v5.8.0 — small helpers for the redesigned Settings + Tools notes.
+/* SK Mobiles v5.8.1 — small helpers for the redesigned Settings + Tools notes.
    Presentation / convenience only. */
 (function(){
   'use strict';

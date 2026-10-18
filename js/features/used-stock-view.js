@@ -1,4 +1,4 @@
-/* SK MOBILES v5.8.0 — Used Mobile register view switch: All / In stock / Sold.
+/* SK MOBILES v5.8.1 — Used Mobile register view switch: All / In stock / Sold.
    The filtering itself is in skUsedRender (window.__skUsedView); this adds the chips. The choice is remembered for the session only. */
 (function(){
 'use strict';

@@ -73,6 +73,13 @@
     qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/>',
     clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     trend:'<path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+    handshake:'<path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2L15 11l3-3-3-3-3.5 3.5a2 2 0 0 1-2.8 0L7 6.5"/><path d="M2 12l5-5 5 1M22 12l-3 3M5 19l-3-3 3-4"/>',
+    book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5M9 7h7M9 11h5"/>',
+    pulse:'<path d="M3 12h4l2-6 4 12 2-6h6"/>',
+    broom:'<path d="m13 3 8 8-3 3-8-8z"/><path d="m10.5 8.5-7 12 12-7M7 14l3 3"/>',
+    printer:'<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
+    truck:'<path d="M1 4h13v12H1zM14 8h4l4 4v4h-8"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>',
+    trophy:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
     cloud:'<path d="M17.5 19a4.5 4.5 0 1 0-1-8.9A6 6 0 0 0 4.4 12 3.5 3.5 0 0 0 6 19z"/><path d="m9 13 2 2 4-4"/>'
   };
 
@@ -87,7 +94,10 @@
     '📜':['history','purple'],'🟢':['dot','green'],'☑':['check','blue'],'💰':['money','amber'],'📝':['note','blue'],
     '🔄':['recycle','sky'],'🔒':['lock','slate'],'⬇':['download','blue'],'⬆':['upload','blue'],'🧑':['user','blue'],
     '🖼':['image','purple'],'🏪':['store','orange'],'🏷':['tag','orange'],'📊':['chart','orange'],'📅':['calendar','blue'],
-    '🔍':['search','blue'],'📂':['folder','amber'],'✏':['pencil','orange'],'📞':['call','green'],'🛒':['cart','orange'],'ℹ':['info','blue'],'🔗':['link','blue'],'📍':['pin','red'],'✉':['mail','blue'],'📣':['megaphone','orange'],'📤':['upload','green'],'📥':['download','blue'],'⏰':['clock','amber'],'📲':['whatsapp','green'],'📉':['trend','red'],'🔲':['qr','slate']
+    '🔍':['search','blue'],'📂':['folder','amber'],'✏':['pencil','orange'],'📞':['call','green'],'🛒':['cart','orange'],'ℹ':['info','blue'],'🔗':['link','blue'],'📍':['pin','red'],'✉':['mail','blue'],'📣':['megaphone','orange'],'📤':['upload','green'],'📥':['download','blue'],'⏰':['clock','amber'],'📲':['whatsapp','green'],'📉':['trend','red'],'🔲':['qr','slate'],
+    '🤝':['handshake','orange'],'🔎':['search','blue'],'📒':['book','amber'],'📆':['calendar','purple'],'👥':['users','blue'],'🩺':['pulse','red'],'🕘':['clock','purple'],'🚨':['alert','red'],'👷':['user','amber'],'☁':['cloud','blue'],'🧹':['broom','orange'],'🗂':['folder','amber'],'✅':['check','green'],
+    '💵':['money','green'],'🔁':['refresh','sky'],'📄':['file','blue'],'🖨':['printer','slate'],'✍':['pencil','purple'],'🚚':['truck','orange'],'📈':['trend','green'],'🏆':['trophy','amber'],'📌':['pin','red'],
+    '🙏':['sparkle','amber']
   };
   var EMO_RE = new RegExp('^\\s*(' + Object.keys(E).join('|') + ')[\\uFE0F\\u200D]*\\s*');
 
@@ -103,13 +113,15 @@
     skCmEditModal:['pencil','orange'], skCmMergeModal:['link','blue'], skCmDupModal:['alert','orange'], skRecentModal:['history','purple'], skBulkModal:['whatsapp','green'], skAgingModal:['hourglass','amber'], skBackupModal:['cloud','blue'], skQrModal:['qr','purple'], skCPHistModal:['upload','green'], skUsedFilterModal:['search','blue'], skCreditActionModal:['money','amber'], skSignatureModal:['note','blue']
   };
 
+  Object.assign(MODAL_ICON,{skDealerModal:['handshake','orange'],skGlobalSearchModal:['search','blue'],skCreditRangeModal:['book','amber'],skMonthReportModal:['calendar','purple'],skCustModal:['users','blue'],skStorageHealthModal:['pulse','red'],skReviewModal:['megaphone','orange'],skUrgentRepairModal:['alert','red'],skWorkerEditModal:['user','amber']});
+
   /* headers that are not .modal-title: selector -> [icon, colour] */
   var TILE_EXTRA = [
     ['#skUsedFilterTitle', 'filter', 'blue'],
     ['.drawer-title', 'store', 'blue']
   ];
   var TILE_SEL = '.modal-title span, .modal-title b, .repair-spares-title, .tools-others-title, .bill-section-title, .sk-admin-title, .sk-credit-title, h2, h3';
-  var ALLOW = '.bill-history-meta-item, .bill-history-edit, .bill-history-delete, .sk-rj-history-actions, button, .modal-title, .repair-spares-title, .tools-others-title, .bill-section-title, .sk-admin-title, .sk-admin-box, h1, h2, h3, h4, label, summary, .sk-rj-tab, .active-category-notice, .menu-item, .drawer-item, .sk-menu-item, .menu-label, .sk-credit-btn, .skcp-btn, .skcp-filter, .sk-section-title, .section-title, .form-section-title, #skAdminCurrentRole';
+  var ALLOW = '.bill-history-meta-item, .bill-history-edit, .bill-history-delete, .sk-rj-history-actions, button, .modal-title, .repair-spares-title, .tools-others-title, .bill-section-title, .sk-admin-title, .sk-admin-box, h1, h2, h3, h4, label, summary, .sk-rj-tab, .active-category-notice, .menu-item, .drawer-item, .sk-menu-item, .menu-label, .sk-credit-btn, .skcp-btn, .skcp-filter, .sk-section-title, .section-title, .form-section-title, #skAdminCurrentRole, .modal-sheet strong, .sk-perm-title, .st-status, .sk-order-empty-v39, .sk-rj-delivery-meta, #settingsModal div';
   var DENY = 'option, textarea, input, script, style, .ski, #orderItemsContainer, .sk-credit-list, .skcp-list, #recycleBinItemsContainer, .no-ski, [contenteditable]';
 
   /* ---------- publish icon CSS variables once ---------- */
