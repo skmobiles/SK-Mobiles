@@ -250,3 +250,6 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Live Preview strip also reflects Header style, Bottom menu style and Background.
 - Settings section headers no longer overlap the options below them (Corner radius, Navigation, Visual effects, App data folder, Shell background).
 - Used Mobile Inventory: closing the page with the phone's Back button no longer leaves a stale "form page" state behind (fixes the last failing back-button test).
+
+## V5.8.6 — Popup paint glitch fix
+- EMI Reminder Settings (and other popups) could appear half-painted on some phones (header cut at the right, empty body). The Aura glow layer used a heavy blur that stayed on while popups were open, and popups used a second blur layer. Aura now uses a light gradient and is switched off while a popup or the menu is open; popups use a single blur layer.
