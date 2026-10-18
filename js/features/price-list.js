@@ -49,16 +49,22 @@ function makeItems(g,d){
   }
   function row(r,i){
     var priceTxt=money(r.price);g.font=f(800,32);
-    var pillW=Math.ceil(g.measureText(priceTxt).width)+PILL_PAD*2,textW=W-PAD*2-ROW_PAD*2-pillW-20;
+    var pillW=Math.ceil(g.measureText(priceTxt).width)+PILL_PAD*2;
+    /* V5.9.12: serial "#1" chip before the name */
+    var noTxt='#'+(i+1);g.font=f(800,22);var noW=Math.ceil(g.measureText(noTxt).width)+20,IND=noW+12;
+    var textW=W-PAD*2-ROW_PAD*2-pillW-20-IND;
     var nm=wrap(g,r.name,textW,f(700,30)),sp=r.spec?wrap(g,r.spec,textW,f(500,23)):[],ex=r.extra?wrap(g,r.extra,textW,f(500,21)):[];
     var h=ROW_PAD*2+nm.length*38+sp.length*30+ex.length*28;if(h<84)h=84;
     items.push({h:h+14,draw:function(c,y){
       c.fillStyle=i%2?'#f8fafc':'#ffffff';rr(c,PAD,y,W-PAD*2,h,18);c.fill();
       c.strokeStyle='#e2e8f0';c.lineWidth=2;rr(c,PAD+1,y+1,W-PAD*2-2,h-2,18);c.stroke();
-      var ty=y+ROW_PAD;c.textAlign='left';c.textBaseline='top';
-      c.fillStyle='#0f172a';c.font=f(700,30);nm.forEach(function(t){c.fillText(t,PAD+ROW_PAD,ty+4);ty+=38});
-      c.fillStyle='#64748b';c.font=f(500,23);sp.forEach(function(t){c.fillText(t,PAD+ROW_PAD,ty+2);ty+=30});
-      c.fillStyle='#94a3b8';c.font=f(500,21);ex.forEach(function(t){c.fillText(t,PAD+ROW_PAD,ty+2);ty+=28});
+      var ty=y+ROW_PAD,tx=PAD+ROW_PAD+IND;
+      c.fillStyle='#e0ebff';rr(c,PAD+ROW_PAD,ty+3,noW,34,9);c.fill();
+      c.fillStyle='#2563eb';c.font=f(800,22);c.textAlign='center';c.textBaseline='middle';c.fillText(noTxt,PAD+ROW_PAD+noW/2,ty+21);
+      c.textAlign='left';c.textBaseline='top';
+      c.fillStyle='#0f172a';c.font=f(700,30);nm.forEach(function(t){c.fillText(t,tx,ty+4);ty+=38});
+      c.fillStyle='#64748b';c.font=f(500,23);sp.forEach(function(t){c.fillText(t,tx,ty+2);ty+=30});
+      c.fillStyle='#94a3b8';c.font=f(500,21);ex.forEach(function(t){c.fillText(t,tx,ty+2);ty+=28});
       var px=W-PAD-ROW_PAD-pillW,ph=58,py=y+(h-ph)/2;
       c.fillStyle='#e8f0ff';rr(c,px,py,pillW,ph,32);c.fill();
       c.fillStyle='#1d4ed8';c.font=f(800,32);c.textAlign='center';c.textBaseline='middle';c.fillText(priceTxt,px+pillW/2,py+ph/2+2);

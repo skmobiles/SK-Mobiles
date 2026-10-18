@@ -472,3 +472,17 @@ html:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card{display:flex!impo
 html:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card>*{margin-left:auto!important;margin-right:auto!important;text-align:center!important}
 html[data-ui-mode="dark"]:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card{background:var(--card-bg,#0d121c)!important;border-color:var(--card-border,#243044)!important}
 html[data-ui-mode="dark"]:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card small{color:var(--text-muted,#94a3b8)!important}
+
+/* ===== V5.9.12: used register serial "#1" chip before the name (design B) ===== */
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-no{position:static!important;display:inline-flex!important;align-items:center;justify-content:center;min-width:24px;height:18px;padding:0 5px;margin:0 6px 0 0;border-radius:6px;background:rgba(37,99,235,.13)!important;color:var(--primary,#2563eb)!important;font-size:10.5px;font-weight:800;line-height:1;vertical-align:2px;box-shadow:none!important;border:0!important;top:auto;left:auto}
+
+/* ===== V5.9.12: colourful bottom nav icons (design N3, home button unchanged) ===== */
+html body nav.bottom-nav > .nav-item:not(#navHome) svg{stroke-width:2;box-sizing:content-box;padding:4px 7px;margin:-4px 0 -1px;border-radius:10px;transition:background-color .2s}
+html body nav.bottom-nav > #navGlass svg{color:#0ea5e9}
+html body nav.bottom-nav > #navCombo svg{color:#a855f7}
+html body nav.bottom-nav > #navBilling svg{color:#10b981}
+html body nav.bottom-nav > #navOrders svg{color:#f97316}
+html body nav.bottom-nav > #navGlass.active svg{background:rgba(14,165,233,.15)}
+html body nav.bottom-nav > #navCombo.active svg{background:rgba(168,85,247,.15)}
+html body nav.bottom-nav > #navBilling.active svg{background:rgba(16,185,129,.15)}
+html body nav.bottom-nav > #navOrders.active svg{background:rgba(249,115,22,.15)}
