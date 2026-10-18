@@ -8240,6 +8240,8 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   const m=$('skUsedStockModal');
   if(m?.classList.contains('sk-used-form-page')&&window.__skUsedFormFromMgmt){window.skUsedResetForm();window.skUsedShowManagement();return;}
   toggleModal('skUsedStockModal',false);
+  if(m)m.classList.remove('sk-used-form-page');
+  window.__skUsedInventoryPageMode=false;
  };
  window.skUsedSelectForBill=function(imei){
   const item=read().find(r=>String(r.imei)===String(imei)&&r.status!=='Sold');

@@ -249,3 +249,4 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Home Shop Tools tiles now follow the Card corner radius option.
 - Live Preview strip also reflects Header style, Bottom menu style and Background.
 - Settings section headers no longer overlap the options below them (Corner radius, Navigation, Visual effects, App data folder, Shell background).
+- Used Mobile Inventory: closing the page with the phone's Back button no longer leaves a stale "form page" state behind (fixes the last failing back-button test).
