@@ -346,3 +346,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Ledger customer view: ← name/phone ⋮ bar; one Outstanding card (Credit · Paid); Credit / Payment buttons; Customer QR and Send history links; history as a plain list with a small ✎ edit on every entry. ⋮ menu: Edit customer, Customer QR, Send history, Close ledger, Delete customer. All buttons call the same functions as before.
 - Settings: grouped list (Shop / Look / Permissions / Data); a row opens only its part; ← or the phone Back returns to the list. Menu "App Data Folder" opens that part directly.
 - Ledger customer list: one "Total outstanding" card (customers · on EMI), search + Credit, Reminders row, simple tabs, plain customer rows (soft letter circle, amount + "due", small WhatsApp icon). Delete customer lives in the customer ⋮ menu (removed from each list row).
+
+## V5.9.16 — Clean style: Billing + Repair Jobs
+- Same frame as Ledger / Settings: no floating box, simple top bar that stays, old pull-handle gap removed.
+- Tabs (New Bill / History, Jobs / Pending / History) are plain text with a line under the open one; New / Used / Keypad is one quiet switch.
+- Sections are plain white cards with small grey headings; inputs 46px with one thin border; pay-mode chips; Save (blue), WhatsApp (green), Download / Print (outline).
+- Bill history and repair lists: quiet cards. CSS only — no change to billing or repair logic.
