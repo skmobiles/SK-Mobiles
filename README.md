@@ -253,3 +253,6 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 
 ## V5.8.6 — Popup paint glitch fix
 - EMI Reminder Settings (and other popups) could appear half-painted on some phones (header cut at the right, empty body). The Aura glow layer used a heavy blur that stayed on while popups were open, and popups used a second blur layer. Aura now uses a light gradient and is switched off while a popup or the menu is open; popups use a single blur layer.
+
+## V5.8.7 — Contact picker fills the name everywhere
+- Choosing a contact with the contact icon now fills the customer name as well as the phone number in every form: Credit entry (this was missing), Bill, Repair job, Credit, Worker add/edit and Worker profile. Name fields are matched by their ID, with a safe automatic fallback for fields named like "...Phone" / "...Name".
