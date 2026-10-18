@@ -370,3 +370,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Ledger customer view: summary card padding and spacing restored (a global margin/padding reset was wiping them); "Send history" can no longer appear twice.
 - Text that spilled out: Used Stock numbers shrink to fit, date field, Import button, "Mobile Only" select, "Keypad Mobile", home recent activity — checked on every screen at 360px and 390px.
 - Home page and Menu in the clean style (quiet cards, colour icons without boxes, grouped menu list).
+
+## V5.9.20 — Used mobile details in the clean style
+- Simple top bar (← name, status); details as one white list (label left, value right, colour icons).
+- The buttons were partly hidden behind the nav bar; they now sit above it: Bill this mobile (blue), Edit | Delete (red outline), Select for Bill. Same functions as before. CSS only.
