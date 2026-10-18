@@ -49,3 +49,7 @@
   function init(){place();var pv=document.getElementById('skLivePreview');if(!pv)return;var t=pv.parentElement.querySelector('.modal-title');try{if(window.ResizeObserver&&t)new ResizeObserver(place).observe(t);}catch(e){}window.addEventListener('resize',place);var m=document.getElementById('settingsModal');if(m&&window.MutationObserver)new MutationObserver(place).observe(m,{attributes:true,attributeFilter:['class']});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
+
+/* V5.8.4: one source of truth for the version shown in the app (meta sk-app-version) */
+(function(){function go(){try{var m=document.querySelector('meta[name="sk-app-version"]');if(!m)return;var v='V'+m.content;document.querySelectorAll('[data-sk-ver]').forEach(function(e){e.textContent=v;});}catch(e){}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();})();
