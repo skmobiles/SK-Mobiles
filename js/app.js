@@ -4077,6 +4077,19 @@ function viewSavedBill(idx) {
       return holder;
     }
 
+
+    /* V5.9.4: one-tap "Share PDF" prompt used when the phone blocks sharing after a slow PDF build */
+    function skAskTapToShare(shareData){
+      document.getElementById('skTapShare')?.remove();
+      const box=document.createElement('div');box.id='skTapShare';
+      box.style.cssText='position:fixed;left:50%;bottom:calc(var(--nav-h,66px) + 28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483647;display:flex;gap:8px;align-items:center;padding:10px 12px;border-radius:18px;background:var(--card-bg,#fff);box-shadow:0 12px 30px rgba(15,23,42,.28);border:1px solid var(--card-border,#dbe4f5);max-width:calc(100vw - 24px)';
+      box.innerHTML='<span style="font-size:.85rem;font-weight:600;color:var(--text,#0f172a)">Invoice PDF ready</span><button type="button" style="border:0;border-radius:12px;padding:10px 14px;font-weight:700;background:#16a34a;color:#fff">Share on WhatsApp</button><button type="button" aria-label="Close" style="border:0;background:transparent;font-size:1.1rem;padding:6px 8px;color:var(--text-muted,#64748b)">✕</button>';
+      const [go,close]=box.querySelectorAll('button');
+      close.onclick=()=>box.remove();
+      go.onclick=()=>{navigator.share(shareData).then(()=>showToast?.('✅ Invoice PDF shared')).catch(e=>{if(!e||e.name!=='AbortError')showToast?.('❌ Could not open Share. Use Download PDF.');}).finally(()=>box.remove());};
+      document.body.appendChild(box);
+      setTimeout(()=>box.remove(),60000);
+    }
     function sendBillToWhatsAppAsPDF() {
       const clone = skCloneLiveInvoiceForOutput();
       if (!clone) { showToast?.('❌ Live Invoice Preview not found'); return; }
@@ -4102,8 +4115,15 @@ function viewSavedBill(idx) {
           if (!(pdfBlob instanceof Blob) || pdfBlob.size < 100 || pdfBlob.type !== 'application/pdf') throw new Error('PDF output is empty or invalid');
           const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
           if (navigator.canShare && navigator.canShare({ files: [pdfFile] }) && navigator.share) {
-            return navigator.share({ files: [pdfFile], title: 'SK Mobiles Invoice', text: 'Here is your purchase invoice PDF from SK Mobiles, Dharmapuri.' })
-              .then(() => showToast?.('✅ Invoice PDF shared'));
+            const shareData = { files: [pdfFile], title: 'SK Mobiles Invoice', text: 'Here is your purchase invoice PDF from SK Mobiles, Dharmapuri.' };
+            return navigator.share(shareData)
+              .then(() => showToast?.('✅ Invoice PDF shared'))
+              .catch((err) => {
+                if (err && err.name === 'AbortError') return; /* user closed the share sheet */
+                /* V5.9.4: making the PDF takes a few seconds, so Android no longer counts it as a tap and blocks the share.
+                   Ask for one more tap with the PDF already ready. */
+                skAskTapToShare(shareData);
+              });
           }
           // Fallback: download the same generated PDF, then open WhatsApp with a message.
           const url = URL.createObjectURL(pdfBlob);
@@ -4114,7 +4134,7 @@ function viewSavedBill(idx) {
           window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
           showToast?.('✅ Invoice PDF downloaded • WhatsApp opened');
         })
-        .catch((err) => { console.error('WhatsApp invoice PDF failed:', err); showToast?.('❌ WhatsApp invoice PDF failed. Check browser Console.'); })
+        .catch((err) => { console.error('WhatsApp invoice PDF failed:', err); showToast?.('❌ WhatsApp PDF failed: '+String(err&&(err.message||err.name)||err||'unknown').slice(0,80)); })
         .finally(() => { try { holder.remove(); } catch (_) {} });
     }
 

@@ -202,6 +202,17 @@ window.skCrSetDue=function(encKey,v){
   toast(v?'Due date set to '+dmy(v):'Due date reset');
   renderRemind();updateRemindStrip();
 };
+/* V5.9.4: due date is chosen in a small popup (the old invisible date box did not open on some phones) */
+window.skCrPickDue=function(encKey,cur,encName){
+  var T=window.skTools,id='skCrDueModal';
+  T.modal(id,'Due date — '+decodeURIComponent(encName||''),'<div class="skcr-duepop"><label class="form-label">Due date<input class="form-input" type="date" id="skCrDueInput" value="'+esc(cur||'')+'"></label>'+
+   '<div class="skcr-duebtns"><button type="button" class="submit-btn" id="skCrDueSave">Save date</button>'+(cur?'<button type="button" class="submit-btn btn-secondary" id="skCrDueClear">Remove date</button>':'')+'</div></div>');
+  var inp=document.getElementById('skCrDueInput');
+  document.getElementById('skCrDueSave').onclick=function(){var v=inp.value;if(!v){T.toast('Choose a date');return}T.close(id);skCrSetDue(encKey,v)};
+  var c=document.getElementById('skCrDueClear');if(c)c.onclick=function(){T.close(id);skCrSetDue(encKey,'')};
+  T.open(id);
+  setTimeout(function(){try{inp.showPicker&&inp.showPicker()}catch(e){}},150);
+};
 function renderRemind(){
   var box=document.getElementById('skCrBody');if(!box)return;
   var rows=reminderRows(),log=remindLog(),t=today();
@@ -211,7 +222,7 @@ function renderRemind(){
     var ago=r.days>=0?'<i class="skcr-tag'+(r.days>=30?' bad':'')+'">'+r.days+' days pending</i>':'';
     var sent=log[r.key]===t?'<i class="skcr-tag ok">Reminded today</i>':'';
     var can=!!digits(r.phone);
-    var dt='<label class="skcr-datebtn">📅 <span>'+(r.due?'Change date':'Set due date')+'</span><input type="date" value="'+esc(r.due||'')+'" onchange="skCrSetDue(\''+encodeURIComponent(r.key)+'\',this.value)" aria-label="Due date"></label>'+(r.manual?'<button type="button" class="skcr-dateclr" onclick="skCrSetDue(\''+encodeURIComponent(r.key)+'\',\'\')" aria-label="Reset due date">↺</button>':'');
+    var dt='<button type="button" class="skcr-datebtn" onclick="skCrPickDue(\''+encodeURIComponent(r.key)+'\',\''+esc(r.due||'')+'\',\''+encodeURIComponent(r.name||'')+'\')">📅 <span>'+(r.due?'Change date':'Set due date')+'</span></button>'+(r.manual?'<button type="button" class="skcr-dateclr" onclick="skCrSetDue(\''+encodeURIComponent(r.key)+'\',\'\')" aria-label="Reset due date">↺</button>':'');
     return '<div class="skcr-row"><div class="skcr-main"><b>'+esc(r.name)+'</b><small>'+(can?esc(r.phone):'No phone')+'</small><div>'+ago+tag+sent+'</div><div class="skcr-datewrap">'+dt+'</div></div>'+
       '<div class="skcr-amt">'+money(r.balance)+'</div>'+
       '<button type="button" class="skcp-btn skcr-wa" '+(can?'':'disabled ')+'onclick="skCreditRemind(\''+encodeURIComponent(r.key)+'\')" aria-label="WhatsApp reminder">💬</button></div>';
