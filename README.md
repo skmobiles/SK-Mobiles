@@ -281,3 +281,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 ## V5.9.2 — WhatsApp buttons open WhatsApp Business
 - On Android, every WhatsApp button (bill, credit reminder / statement, repair ready, price list, monthly report, dealer, reviews, bulk message, shop phone) now opens **WhatsApp Business** directly (new js/features/wa-business.js). If WhatsApp Business is not installed, it falls back to the normal wa.me link. Desktop / iPhone unchanged.
 - PDF sharing still uses the phone's Share sheet — choose WhatsApp Business there (a web page cannot force one app for file sharing).
+
+## V5.9.3 — Spacing sweep
+- Sale Price and the "Old mobile exchange" box no longer touch; Accent colour swatches are round and stay inside the card, with a gap before the Custom Brand Hex row whose text now stays inside its box.
+- An automatic check of every page and popup (normal and Large text) for boxes that touch: gaps added for repair-job buttons, repair details, admin profile, worker edit, tools note, settings terms / logo / UPI and all section headers.
