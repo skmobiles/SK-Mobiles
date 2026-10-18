@@ -4083,9 +4083,8 @@ function viewSavedBill(idx) {
     /* V5.9.4: one-tap "Share PDF" prompt used when the phone blocks sharing after a slow PDF build */
     function skAskTapToShare(shareData){
       document.getElementById('skTapShare')?.remove();
-      const box=document.createElement('div');box.id='skTapShare';
-      box.style.cssText='position:fixed;left:50%;bottom:calc(var(--nav-h,66px) + 28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483647;display:flex;gap:8px;align-items:center;padding:10px 12px;border-radius:18px;background:var(--card-bg,#fff);box-shadow:0 12px 30px rgba(15,23,42,.28);border:1px solid var(--card-border,#dbe4f5);max-width:calc(100vw - 24px)';
-      box.innerHTML='<span style="font-size:.85rem;font-weight:600;color:var(--text,#0f172a)">Invoice PDF ready</span><button type="button" style="border:0;border-radius:12px;padding:10px 14px;font-weight:700;background:#16a34a;color:#fff">Share on WhatsApp</button><button type="button" aria-label="Close" style="border:0;background:transparent;font-size:1.1rem;padding:6px 8px;color:var(--text-muted,#64748b)">✕</button>';
+      const box=document.createElement('div');box.id='skTapShare';box.className='sk-pdf-prompt';
+      box.innerHTML='<span class="sk-pdf-prompt-txt">✅ PDF ready</span><button type="button" class="sk-pdf-prompt-open is-wa">Send on WhatsApp</button><button type="button" class="sk-pdf-prompt-x" aria-label="Close">✕</button>';
       const [go,close]=box.querySelectorAll('button');
       close.onclick=()=>box.remove();
       go.onclick=()=>{navigator.share(shareData).then(()=>showToast?.('✅ Invoice PDF shared')).catch(e=>{if(!e||e.name!=='AbortError')showToast?.('❌ Could not open Share. Use Download PDF.');}).finally(()=>box.remove());};
@@ -4188,14 +4187,12 @@ img{max-width:100%!important;}
     /* V5.9.8: "PDF downloaded — Open" prompt (opens the PDF in the phone's PDF viewer; Share as a second option) */
     function skPdfOpenPrompt(url, blob, filename){
       document.getElementById('skTapShare')?.remove();
-      const box=document.createElement('div');box.id='skTapShare';
-      box.style.cssText='position:fixed;left:50%;bottom:calc(var(--nav-h,66px) + 28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483647;display:flex;gap:8px;align-items:center;padding:10px 12px;border-radius:18px;background:var(--card-bg,#fff);box-shadow:0 12px 30px rgba(15,23,42,.28);border:1px solid var(--card-border,#dbe4f5);max-width:calc(100vw - 24px)';
-      box.innerHTML='<span style="font-size:.85rem;font-weight:600;color:var(--text,#0f172a)">PDF downloaded</span><button type="button" data-a="open" style="border:0;border-radius:12px;padding:10px 14px;font-weight:700;background:#2563eb;color:#fff">Open</button>'+(navigator.canShare?'<button type="button" data-a="share" style="border:1px solid #cbd5e1;border-radius:12px;padding:9px 12px;font-weight:700;background:transparent;color:var(--text,#0f172a)">Share</button>':'')+'<button type="button" data-a="x" aria-label="Close" style="border:0;background:transparent;font-size:1.1rem;padding:6px 8px;color:var(--text-muted,#64748b)">✕</button>';
+      const box=document.createElement('div');box.id='skTapShare';box.className='sk-pdf-prompt';
+      box.innerHTML='<span class="sk-pdf-prompt-txt">✅ PDF downloaded</span><button type="button" class="sk-pdf-prompt-open" data-a="open">Open PDF</button><button type="button" class="sk-pdf-prompt-x" data-a="x" aria-label="Close">✕</button>';
       box.addEventListener('click',(e)=>{
         const act=e.target.closest('button')?.dataset.a;if(!act)return;
-        if(act==='open'){ const w=window.open(url,'_blank'); if(!w){ location.href=url; } box.remove(); }
-        else if(act==='share'){ try{ const f=new File([blob],filename,{type:'application/pdf'}); if(navigator.canShare({files:[f]})) navigator.share({files:[f],title:filename}).catch(()=>{}); }catch(_){} box.remove(); }
-        else box.remove();
+        if(act==='open'){ const w=window.open(url,'_blank'); if(!w){ location.href=url; } }
+        box.remove();
       });
       document.body.appendChild(box);
       setTimeout(()=>box.remove(),60000);
