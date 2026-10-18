@@ -331,3 +331,9 @@ html[data-ui-header="minimal"] #settingsModal .sk-livepv-hdr{background:transpar
 html[data-ui-nav="fixed"] #settingsModal .sk-livepv-nav{border-radius:0 0 4px 4px;margin-left:-8px;margin-right:-8px;border-left:0;border-right:0}
 html[data-ui-nav="floating"] #settingsModal .sk-livepv-nav{border-radius:999px}
 html[data-ui-motion="off"] #settingsModal .sk-livepv-btn{transition:transform .2s}
+
+/* V5.9.3 Accent colour: round swatches that fit the card, gap before the custom-colour row, text kept inside its box */
+html:not(#a):not(#b) body #settingsModal .st-dots{margin:0 0 12px!important;padding:4px 2px!important;gap:6px!important}
+html:not(#a):not(#b):not(#c) body #settingsModal #skUiAppearanceStudio .st-dots>.st-dot{width:100%!important;max-width:44px!important;height:auto!important;aspect-ratio:1/1!important;border-radius:50%!important;justify-self:center;align-self:center;min-width:0!important;min-height:0!important;max-height:44px!important;padding:0!important}
+html:not(#a):not(#b) body #settingsModal .st-custom{margin-top:0!important;padding:10px 14px!important;box-sizing:border-box!important;gap:10px!important;border-radius:var(--ui-card-radius,16px)!important}
+html:not(#a):not(#b) body #settingsModal .st-custom>*{min-width:0}
