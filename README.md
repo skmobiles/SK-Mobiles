@@ -363,3 +363,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - The four numbers sit in one quiet card; Save Purchase is the one blue button, Clear / Export / Import are outline buttons.
 - Register and Add / Update Purchase are plain white cards; All / In stock / Sold are plain tabs; single-border search box.
 - Filter popup: simple title and ✕ like the other popups. CSS only.
+
+## V5.9.19 — Fixes from the phone check + clean Home and Menu
+- Bill History scrolls with the page (it had its own inner scroll under the tabs).
+- Every page / popup title bar now reaches both edges (it had width:100% plus negative margins, so it stopped short on the right).
+- Ledger customer view: summary card padding and spacing restored (a global margin/padding reset was wiping them); "Send history" can no longer appear twice.
+- Text that spilled out: Used Stock numbers shrink to fit, date field, Import button, "Mobile Only" select, "Keypad Mobile", home recent activity — checked on every screen at 360px and 390px.
+- Home page and Menu in the clean style (quiet cards, colour icons without boxes, grouped menu list).

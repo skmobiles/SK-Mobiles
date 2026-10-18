@@ -78,12 +78,17 @@ function cleanLedger(){
     if(!sum){sum=document.createElement('div');sum.className='skcl-sum';box.insertBefore(sum,box.firstChild)}
     if(sum.getAttribute('data-v')!==txt){sum.setAttribute('data-v',txt);sum.innerHTML='<small>Outstanding</small><b>'+esc(v[0]||'₹0')+'</b><span>Credit '+esc(v[1]||'₹0')+' · Paid '+esc(v[2]||'₹0')+'</span>'}
   }
-  /* Customer QR + Send history as one row of links under the buttons */
+  /* Customer QR + Send history as one row of links under the buttons.
+     Our own two links call the same functions; the original buttons stay where their modules put them (hidden),
+     so those modules never add a second copy. */
   var links=view.querySelector('.skcl-links');
-  if(!links&&box){links=document.createElement('div');links.className='skcl-links';box.parentNode.insertBefore(links,box.nextSibling)}
-  if(links){
-    var qr=view.querySelector('.skqr-row button');if(qr&&qr.parentNode!==links)links.insertBefore(qr,links.firstChild);
-    var hb=view.querySelector('.skcp-hist-btn');if(hb&&hb.parentNode!==links)links.appendChild(hb);
+  if(!links&&box){
+    links=document.createElement('div');links.className='skcl-links';
+    links.innerHTML='<button type="button" class="skcl-link" data-a="qr">'+IC.qr+'Customer QR</button><button type="button" class="skcl-link" data-a="hist">'+IC.share+'Send history</button>';
+    links.addEventListener('click',function(e){var b=e.target.closest('.skcl-link');if(!b)return;
+      if(b.getAttribute('data-a')==='qr'){if(window.skQrOpen)window.skQrOpen('ledger')}
+      else{var hb=view.querySelector('.skcp-hist-btn');if(hb)hb.click();else if(window.skCPSendHistory)window.skCPSendHistory()}});
+    box.parentNode.insertBefore(links,box.nextSibling);
   }
   /* section headings */
   Array.prototype.forEach.call(view.children,function(c){
@@ -254,14 +259,41 @@ document.addEventListener('click',function(e){
   setTimeout(function(){if($('settingsModal')&&$('settingsModal').classList.contains('active'))window.skStOpenPart('App data folder')},250);
 },true);
 
+
+/* ---------- numbers that must stay on one line: shrink the font until they fit their box ---------- */
+var FIT_SEL='#skUsedStatsGrid strong,#skCPDetailView .skcl-sum b,#skCPMainView .skcl-total b';
+function fitText(){
+  Array.prototype.forEach.call(document.querySelectorAll(FIT_SEL),function(el){
+    if(!el.offsetParent)return;
+    var key=el.textContent+'|'+el.clientWidth;if(el.__fitKey===key)return;
+    el.style.removeProperty('font-size');
+    var size=parseFloat(getComputedStyle(el).fontSize)||16,min=11,guard=20;
+    while(el.scrollWidth>el.clientWidth+1&&size>min&&guard--){size-=1;el.style.setProperty('font-size',size+'px','important')}
+    el.__fitKey=el.textContent+'|'+el.clientWidth;
+  });
+}
+window.addEventListener('resize',function(){setTimeout(fitText,100)});
+
+/* ---------- menu: round the first and last visible row of every group ---------- */
+function cleanMenu(){
+  var d=$('leftDrawer');if(!d||!d.classList.contains('active'))return;
+  Array.prototype.forEach.call(d.querySelectorAll('.drawer-group'),function(g){
+    var vis=Array.prototype.filter.call(g.querySelectorAll(':scope > .menu-drawer-btn'),function(b){return getComputedStyle(b).display!=='none'});
+    Array.prototype.forEach.call(g.querySelectorAll(':scope > .menu-drawer-btn'),function(b,i){
+      var f=b===vis[0],l=b===vis[vis.length-1];
+      if(b.classList.contains('skm-first')!==f)b.classList.toggle('skm-first',f);
+      if(b.classList.contains('skm-last')!==l)b.classList.toggle('skm-last',l);
+    });
+  });
+}
 /* ============================ wiring ============================ */
 var raf=0;
-function run(){raf=0;try{cleanLedger()}catch(e){console.warn('clean ledger',e)}try{cleanLedgerList()}catch(e){console.warn('clean ledger list',e)}try{cleanSettings()}catch(e){console.warn('clean settings',e)}}
+function run(){raf=0;try{cleanLedger()}catch(e){console.warn('clean ledger',e)}try{cleanLedgerList()}catch(e){console.warn('clean ledger list',e)}try{cleanSettings()}catch(e){console.warn('clean settings',e)}try{fitText()}catch(e){}try{cleanMenu()}catch(e){}}
 function schedule(){if(!raf)raf=requestAnimationFrame(run)}
 function boot(){
   new MutationObserver(function(ms){
     for(var i=0;i<ms.length;i++){var t=ms[i].target;
-      if(t.nodeType===1&&(t.id==='skCreditLedgerPage'||t.id==='settingsModal'||t.id==='skCPDetailView'||(t.closest&&t.closest('#skCPDetailView,#skCPMainView,#settingsModal')))){schedule();return}}
+      if(t.nodeType===1&&(t.id==='skCreditLedgerPage'||t.id==='settingsModal'||t.id==='skCPDetailView'||(t.closest&&t.closest('#skCPDetailView,#skCPMainView,#settingsModal,#skUsedStatsGrid'))||t.id==='skUsedStockModal'||t.id==='leftDrawer')){schedule();return}}
   }).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','style']});
   schedule();
 }
