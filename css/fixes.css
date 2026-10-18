@@ -355,3 +355,6 @@ html:not(#a) body .sk-rj-tabs{padding:4px!important;gap:4px!important;box-sizing
 /* V5.8.4 full-page popups: content never touches the window border */
 html:not(#a) body :is(#orderModal,#skAdminPanelModal,#itemEditorModal,#billingModal)>.modal-sheet{padding-left:10px!important;padding-right:10px!important}
 html:not(#a) body #billingModal #mobileTypeTabs{margin-left:0!important;margin-right:0!important;width:auto!important}
+
+/* V5.8.6 popups: one blur layer only (the dim background). A second blur on the sheet itself made some Android phones paint popups half-empty. */
+html:not(#a) body .modal-overlay .modal-sheet{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:color-mix(in srgb,var(--modal-bg,#fff) 97%,transparent)!important}
