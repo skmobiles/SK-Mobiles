@@ -357,3 +357,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Pages (Accessories, Daily / Monthly Report, Storage, Bulk WhatsApp, Reviews, Admin, Item editor, Tools notes, Worker, Bill details, Recent activity): same simple top bar and frame as Billing / Ledger.
 - Popups: lighter box, simple title with a thin line under it, plain ✕.
 - Everywhere: same labels, 46px fields with one thin border, same main buttons (blue / green), plain white cards. CSS only.
+
+## V5.9.18 — Clean style: Used Mobile Stock
+- Same simple top bar (← title chart) and frame as every other page.
+- The four numbers sit in one quiet card; Save Purchase is the one blue button, Clear / Export / Import are outline buttons.
+- Register and Add / Update Purchase are plain white cards; All / In stock / Sold are plain tabs; single-border search box.
+- Filter popup: simple title and ✕ like the other popups. CSS only.
