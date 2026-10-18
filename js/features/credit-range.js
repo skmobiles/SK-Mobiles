@@ -95,15 +95,16 @@ window.skCrgPdf=function(){
   if(typeof html2pdf!=='function'){toast('PDF library not loaded (internet needed once). Try again.');return}
   var total=rows.reduce(function(a,r){return a+r.balance},0);
   var box=document.createElement('div');
-  box.style.cssText='position:fixed;left:-9999px;top:0;width:700px;padding:24px;background:#fff;color:#0f172a;font-family:Inter,Arial,sans-serif;font-size:12px';
+  box.style.cssText='width:700px;padding:24px;background:#fff;color:#0f172a;font-family:Inter,Arial,sans-serif;font-size:12px';
   var td='padding:6px 8px;border-bottom:1px solid #e2e8f0';
   box.innerHTML='<h2 style="margin:0 0 2px">'+esc(shopName())+'</h2><div style="color:#64748b;margin-bottom:12px">Credit List — '+esc(periodLabel())+'</div>'+
    '<table style="width:100%;border-collapse:collapse"><tr style="background:#f1f5f9;font-weight:700"><td style="'+td+'">Customer</td><td style="'+td+'">Phone</td><td style="'+td+'">Since</td><td style="'+td+';text-align:right">Days</td><td style="'+td+';text-align:right">Balance</td></tr>'+
    rows.map(function(r){return '<tr><td style="'+td+'">'+esc(r.name)+'</td><td style="'+td+'">'+esc(r.phone)+'</td><td style="'+td+'">'+dmy(r.first)+'</td><td style="'+td+';text-align:right">'+r.days+'</td><td style="'+td+';text-align:right;font-weight:600">'+money(r.balance)+'</td></tr>'}).join('')+
    '<tr><td colspan="4" style="padding:8px;font-weight:700">Total pending</td><td style="padding:8px;text-align:right;font-weight:700">'+money(total)+'</td></tr></table>';
-  document.body.appendChild(box);
+  /* V5.9.8: the box itself must not be off-screen (the PDF copy kept that position and came out blank); an off-screen holder hides it instead */
+  var hold=document.createElement('div');hold.style.cssText='position:fixed;left:-10000px;top:0;width:700px;pointer-events:none';hold.appendChild(box);document.body.appendChild(hold);
   html2pdf().set({margin:8,filename:'SK_Mobiles_Credit_List.pdf',image:{type:'jpeg',quality:.95},html2canvas:{scale:2},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}})
-    .from(box).save().then(function(){box.remove();toast('✅ PDF downloaded')}).catch(function(){box.remove();toast('❌ PDF failed')});
+    .from(box).save().then(function(){hold.remove();toast('✅ PDF downloaded')}).catch(function(e){hold.remove();toast('❌ PDF failed: '+String(e&&(e.message||e.name)||e||'').slice(0,80))});
 };
 function ensureModal(){
   if(document.getElementById('skCreditRangeModal'))return;

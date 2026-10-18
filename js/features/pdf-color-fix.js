@@ -35,6 +35,17 @@ function prepare(root,doc){
   if(css.length){var st=doc.createElement('style');st.setAttribute('data-sk-pdf-fix','1');st.textContent=css.join('\n');(doc.head||doc.documentElement).appendChild(st);if(doc===document)setTimeout(function(){st.remove()},120000);}
 }
 window.skPdfPrepare=prepare;
+var KEEP_TAGS={HTML:1,HEAD:1,BODY:1,STYLE:1,LINK:1,META:1,TITLE:1,BASE:1};
+function skPdfIgnore(el){
+  try{
+    if(!el||el.nodeType!==1||KEEP_TAGS[el.tagName])return false;
+    var ov=el.ownerDocument&&el.ownerDocument.querySelector('.html2pdf__overlay');
+    if(!ov)return false;
+    if(el===ov||ov.contains(el)||el.contains(ov))return false;
+    return true;
+  }catch(e){return false}
+}
+window.skPdfIgnore=skPdfIgnore;
 /* html2canvas also reads the background colour of the LIVE page (<html> and <body>), e.g. the "Subtle Slate" background.
    Give those two a plain rgba() for the time the PDF is being made, then put them back. */
 var pageFixTimer=0,pageSaved=null;
@@ -57,7 +68,10 @@ function patch(){
   var wrapped=function(){
     var w=H.apply(this,arguments);
     if(w&&typeof w.from==='function'){var f=w.from;w.from=function(src){try{fixPage();if(src&&src.nodeType===1)prepare(src)}catch(e){}return f.apply(this,arguments)};}
-    if(w&&typeof w.set==='function'){var s=w.set;w.set=function(o){try{fixPage();if(o&&typeof o==='object'){o.html2canvas=o.html2canvas||{};if(o.html2canvas.backgroundColor===undefined)o.html2canvas.backgroundColor='#ffffff';var oc=o.html2canvas.onclone;o.html2canvas.onclone=function(cd){try{cleanDoc(cd)}catch(e){}if(typeof oc==='function')return oc.apply(this,arguments)};}}catch(e){}return s.apply(this,arguments)};}
+    if(w&&typeof w.set==='function'){var s=w.set;w.set=function(o){try{fixPage();if(o&&typeof o==='object'){o.html2canvas=o.html2canvas||{};if(o.html2canvas.backgroundColor===undefined)o.html2canvas.backgroundColor='#ffffff';/* V5.9.8 speed: html2canvas copies the WHOLE app (all pages and popups) before drawing; on a phone that froze the app
+   for many seconds. Only the PDF area (and the page head with its styles) is copied now. */
+if(!o.html2canvas.ignoreElements)o.html2canvas.ignoreElements=skPdfIgnore;
+var oc=o.html2canvas.onclone;o.html2canvas.onclone=function(cd){try{cleanDoc(cd)}catch(e){}if(typeof oc==='function')return oc.apply(this,arguments)};}}catch(e){}return s.apply(this,arguments)};}
     return w;
   };
   for(var k in H){try{wrapped[k]=H[k]}catch(e){}}

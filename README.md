@@ -307,3 +307,6 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Download PDF: after the file is saved a "PDF downloaded — Open / Share" prompt appears, because an app installed on the home screen shows no "Open" after a download.
 - The app version is now shown next to "SK MOBILES" on the Home screen.
 - Speed: search boxes no longer force a re-layout per box at start-up, and the Settings live preview does its measuring only while Settings is open (start-up about 18% faster in a 4x-slowed phone test). A full sweep of all pages and popups shows no script errors.
+- Long-press re-order on phones: hold a Home box (Business Summary or Shop Tools) about half a second until it lifts, slide it to the new place and lift the finger. The order is saved like before; a normal tap still opens the box.
+- PDF freeze fixed: the PDF library used to copy the whole app (all pages and popups) before drawing, which froze the app for many seconds on a phone (about 45 s in a 6x-slowed test). Now only the bill area is copied: about 3 s, with no long freeze. WhatsApp PDF, Download PDF, Monthly report and Credit list PDF all tested.
+- Monthly report PDF and Credit list PDF were coming out blank (the hidden source box was off-screen); fixed.
