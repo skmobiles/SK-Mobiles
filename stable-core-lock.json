@@ -4,7 +4,7 @@
   "source": "User-approved V5.8.2: flicker fix, customer edit/merge, recent activity",
   "policy": "Approved V5.6.1 Design Studio UI changes are included in this new baseline. Future changes to locked core files must be reviewed and the lock must not be silently regenerated. Preserve business logic, Firebase configuration/rules and existing data keys.",
   "core_files": {
-    "index.html": "d8f3a2fa8cf64fb1efd4be594c96bb674606739de9bedfeb184a24e9bffc6f17",
+    "index.html": "c6d897bdef1cef1432f3d6159cc876419323e93eff94d5856575b507222e7c72",
     "js/app.js": "33b54eb5ea4a8469ccc0ce913803116e5b3f345cc90601e7c71ec5bc83632a4f",
     "js/firebase-sync.js": "8330415961f01cbac8d1bdc04fba2a7035cc0e8ef59b35c293cf62eda6e04311",
     "js/features/pin-security.js": "adde7413b65e7676169be8670d31494abd364f14a263681faa577fa07d08a0db",
@@ -25,7 +25,7 @@
     "css/appearance.css": "57d541ffb20d945240bf1938256bfaa1abee971a41b79afeb16ae85ad38f0c83",
     "css/fonts.css": "56d92b67f350ad559b08d3bf1bf3c2321ee6a6dd79a7cb091e9a2c1889888d27",
     "js/features/backup-status.js": "794aa17b6c07b509e92246a939e97ffa4f0297d09d87c3c3096ea0704ef9d0f2",
-    "sw.js": "e2889bf447887134999279629904735fdc8dfbf23008813ca44c3a13956474b2",
+    "sw.js": "810f0ba8de9657cb94b2bc46cba352c00b088340935c17f92686714d0559d1a5",
     "css/shop-tools.css": "5d89635d27f47a40fe335e60939be63fef7dd29c47f2be222f4f9dac197dc8c3",
     "js/features/shop-tools-v151.js": "3d52bb37bcb73b00f5b1123ca9bcc951eb9c5b0cd26afe099e21f3e48f1611da",
     "css/fixes.css": "afb4ad9e920fb46740001292fc81bfb36dd8c83a184efd3bebac77c9fa6bd227",
