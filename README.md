@@ -340,3 +340,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Every full page starts 8px from the top and ends on the same line just above the nav bar; scrolling content fades out at that edge. Used Mobile Stock uses the same frame.
 - Every page and popup: white box 8px from the screen edges, content 12px inside it.
 - Short popups stay centred; real pages (Ledger, Billing, Settings, Repair Jobs, reports…) always open full size. Centring now measures the content itself.
+
+## V5.9.15 — Clean style: Customer Credit Ledger + Settings
+- Both pages: no floating box; one simple top bar that stays; plain lists; fewer font sizes; colour icons.
+- Ledger customer view: ← name/phone ⋮ bar; one Outstanding card (Credit · Paid); Credit / Payment buttons; Customer QR and Send history links; history as a plain list with a small ✎ edit on every entry. ⋮ menu: Edit customer, Customer QR, Send history, Close ledger, Delete customer. All buttons call the same functions as before.
+- Settings: grouped list (Shop / Look / Permissions / Data); a row opens only its part; ← or the phone Back returns to the list. Menu "App Data Folder" opens that part directly.
+- Ledger customer list: one "Total outstanding" card (customers · on EMI), search + Credit, Reminders row, simple tabs, plain customer rows (soft letter circle, amount + "due", small WhatsApp icon). Delete customer lives in the customer ⋮ menu (removed from each list row).
