@@ -1,3 +1,18 @@
+/* V5.9.1 shared "Clear all data" for lists that have Import / Export: asks twice, downloads a backup first, then empties the list
+   (the empty list also syncs to the other devices like any other change). */
+window.skClearDataset=function(o){
+  const toast=m=>{if(typeof showToast==='function')showToast(m);};
+  const n=Number(o&&o.count)||0;
+  if(!n){toast('Nothing to clear');return false;}
+  if(!confirm('Clear ALL '+n+' '+o.label+'?\n\nA backup file will be downloaded first.\nThis also clears them on your other devices.'))return false;
+  const t=prompt('Type CLEAR to confirm');
+  if(String(t||'').trim().toUpperCase()!=='CLEAR'){toast('Not cleared');return false;}
+  try{if(typeof o.backup==='function')o.backup();}catch(e){}
+  localStorage.setItem(o.key,'[]');
+  try{if(typeof o.after==='function')o.after();}catch(e){}
+  toast(o.label.charAt(0).toUpperCase()+o.label.slice(1)+' cleared ('+n+'). Backup downloaded.');
+  return true;
+};
 window.skStamp=function(ms){var d=ms?new Date(ms):new Date();if(isNaN(d.getTime()))return '';var p=function(n){return String(n).padStart(2,'0')},h=d.getHours(),ap=h>=12?'PM':'AM';h=h%12||12;return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+', '+p(h)+':'+p(d.getMinutes())+' '+ap};
 /* SK MOBILES 5.6.97 — visual design-system release; application logic retained. */
 
@@ -8038,7 +8053,7 @@ function importFile(input){
 function exportFile(){
  const blob=new Blob([JSON.stringify(get(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='SK-MOBILES-Accessories.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
-window.skOpenAccessoriesPage=open;window.skCloseAccessoriesPage=close;window.skNewAccessory=newItem;window.skEditAccessory=edit;window.skCancelAccessoryEdit=cancel;window.skSaveAccessory=saveItem;window.skDeleteSelectedAccessories=delSelected;window.skToggleSelectAllAccessories=toggleSelectAll;window.skImportAccessoriesFile=importFile;window.skExportAccessories=exportFile;window.skRenderAccessories=render;
+window.skClearAccessories=function(){window.skClearDataset({key:KEY,label:'accessories',count:get().length,backup:exportFile,after:render});};window.skOpenAccessoriesPage=open;window.skCloseAccessoriesPage=close;window.skNewAccessory=newItem;window.skEditAccessory=edit;window.skCancelAccessoryEdit=cancel;window.skSaveAccessory=saveItem;window.skDeleteSelectedAccessories=delSelected;window.skToggleSelectAllAccessories=toggleSelectAll;window.skImportAccessoriesFile=importFile;window.skExportAccessories=exportFile;window.skRenderAccessories=render;
 window.addEventListener('storage',e=>{if(e.key===KEY)render();});
 window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStorage.setItem(KEY,JSON.stringify(DEFAULTS));});
 })();
@@ -8213,11 +8228,10 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   else window.skUsedSavePurchase();
  };
  window.skUsedClearAction=function(){
-  window.skUsedResetForm();
-  if($('skUsedSearch'))$('skUsedSearch').value='';
-  window.__skUsedFilters={model:'',brand:'',ram:'',storage:'',minPrice:'',maxPrice:''};
-  skUsedRender();
-  if(typeof showToast==='function')showToast('Cleared');
+  /* V5.9.1: "Clear" now clears the whole Used Mobile register (after a backup CSV is downloaded) so a fresh Excel can be imported. */
+  window.skClearDataset({key:KEY,label:'used mobile records',count:read().length,backup:window.skUsedExportCSV,after:function(){
+   window.skUsedResetForm();if($('skUsedSearch'))$('skUsedSearch').value='';
+   window.__skUsedFilters={model:'',brand:'',ram:'',storage:'',minPrice:'',maxPrice:''};skUsedRender();}});
  };
  window.skUsedOpenFilters=function(){
   const rows=read();
@@ -8320,31 +8334,38 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   if(!isExcel&&!isCSV){alert('Please choose an Excel (.xlsx, .xls) or CSV file.');input.value='';return;}
   const norm=v=>String(v??'').trim().toLowerCase().replace(/[ _\-/]+/g,'').replace(/[^a-z0-9]/g,'');
   const dateValue=v=>{if(v instanceof Date&&!isNaN(v))return v.toISOString().slice(0,10);const t=String(v??'').trim();if(!t)return new Date().toISOString().slice(0,10);const d=new Date(t);return !isNaN(d)?d.toISOString().slice(0,10):t;};
+  /* V5.9.1: read real cell values. Formatted text turned long IMEIs into "3.53881E+14" and padded some numbers, so sold phones were not matched. */
+  const skCellText=v=>{if(v instanceof Date&&!isNaN(v)){const d=new Date(v.getTime()+3600000);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}if(typeof v==='number')return Number.isInteger(v)?v.toFixed(0):String(v);return v;};
   const importRows=function(table,priceMaps={dealer:new Map(),customer:new Map()},salesMap=new Map()){
    const clean=table.filter(r=>r&&Object.values(r).some(v=>String(v??'').trim()!==''));if(clean.length<1)throw new Error('The selected sheet has no header/data.');
    const headers=Object.keys(clean[0]);const idx=(...names)=>{for(const n of names){const i=headers.findIndex(h=>norm(h)===norm(n));if(i>=0)return headers[i];}return null;};
    const get=(row,...names)=>{const k=idx(...names);return k===null?'':String(row[k]??'').trim();};
    if(!idx('IMEI','IMEI/Serial','IMEI1')||!idx('Mobile Model','Model','Mobile','Device','Brand Model'))throw new Error('A Purchases sheet or file with IMEI and Mobile Model columns is required.');
-   const existing=read(),seen=new Set(existing.map(r=>String(r.imei||'').trim()).filter(Boolean));let added=0,skipped=0,invalid=0,soldImported=0;
+   const existing=read(),seen=new Set(existing.map(r=>String(r.imei||'').trim()).filter(Boolean));let added=0,skipped=0,invalid=0,soldImported=0,fixedImei=0,markedSold=0;
+   const sci=existing.filter(r=>{const v=String(r.imei||'').trim();return /^\d(\.\d+)?e\+\d+$/i.test(v)||/^\d{7,}0{5,}$/.test(v);});
+   const mnorm=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+   const applySale=(rec,imei)=>{const sale=salesMap.get(imei);if(sale&&rec.status!=='Sold'){rec.status='Sold';rec.sale={...sale,profit:Number.isFinite(sale.profit)?sale.profit:(Number(sale.price)||0)-(Number(rec.cost)||0)};rec.updatedAt=new Date().toISOString();markedSold++;}};
    for(const row of clean){
     const imei=get(row,'IMEI','IMEI/Serial','IMEI1'),model=get(row,'Mobile Model','Model','Mobile','Device','Brand Model');
     const dealer=get(row,'Dealer Name','Dealer','Supplier');
     const costText=get(row,'Purchase Price','Purchase Cost','Cost','Cost Price');
     if(norm(Object.keys(row)[0])==='sno'||!imei||!model||costText===''||!Number.isFinite(Number(costText))||Number(costText)<0){invalid++;continue;}
-    if(seen.has(imei)){skipped++;continue;}
+    if(!seen.has(imei)&&/^\d{6,}$/.test(imei)&&sci.length){const n=Number(imei),mm=mnorm(model);const hit=sci.find(r=>!r.__fixed&&mnorm(r.model)===mm&&Math.abs(Number(r.imei)-n)/n<1e-5);if(hit){seen.delete(String(hit.imei).trim());hit.imei=imei;hit.__fixed=1;seen.add(imei);fixedImei++;}}
+    if(seen.has(imei)){const rec=existing.find(r=>String(r.imei||'').trim()===imei);if(rec)applySale(rec,imei);skipped++;continue;}
     const cost=Number(costText),dealerText=get(row,'Dealer Price','Dealer Selling Price')||priceMaps.dealer.get(imei)||'',customerText=get(row,'Customer Price','Sale Price','Selling Price')||priceMaps.customer.get(imei)||'';
     const sale=salesMap.get(imei)||null;const status=sale?'Sold':(/sold/i.test(get(row,'Status','Stock Status'))?'Sold':'In Stock');
     existing.push({id:'USED-IMPORT-'+Date.now()+'-'+added,date:dateValue(get(row,'Date','Purchase Date')),dealer,model,...(()=>{const _ip=window.skUsedIsIphone(model);const _sp=window.skUsedSplitSpec(_ip?'':get(row,'RAM','Memory'),get(row,'Storage'));const _b=_ip?String(get(row,'Battery Health','Battery','Battery %')).replace(/[^0-9]/g,'').slice(0,3):'';return {ram:_ip?'':_sp.ram,storage:_sp.storage,battery:_b};})(),colour:get(row,'Colour','Color'),kit:get(row,'Full Kit','Kit','Package')||'Mobile Only',cost,dealerPrice:dealerText!==''&&Number.isFinite(Number(dealerText))?Number(dealerText):Math.round((cost+1000)*100)/100,customerPrice:customerText!==''&&Number.isFinite(Number(customerText))?Number(customerText):Math.round((cost+2000)*100)/100,imei,issue:get(row,'Issue','Issu','Notes','Notes Issue'),status,sale,updatedAt:new Date().toISOString()});seen.add(imei);added++;if(sale)soldImported++;
    }
-   if(!added){alert('No new valid stock record was added. Duplicate IMEI: '+skipped+'; Invalid rows: '+invalid+'.');return;}
-   write(existing);skUsedRender();if(window.__skUsedInventoryPageMode&&typeof window.skUsedShowInventory==='function')window.skUsedShowInventory();alert('Import completed. Added: '+added+'; Sold records: '+soldImported+'; Duplicate IMEI skipped: '+skipped+'; Invalid rows skipped: '+invalid+'.');
+   existing.forEach(r=>{delete r.__fixed;});
+   if(!added&&!fixedImei&&!markedSold){alert('No new valid stock record was added. Duplicate IMEI: '+skipped+'; Invalid rows: '+invalid+'.');return;}
+   write(existing);skUsedRender();if(window.__skUsedInventoryPageMode&&typeof window.skUsedShowInventory==='function')window.skUsedShowInventory();alert('Import completed. Added: '+added+'; Sold records: '+soldImported+'; Existing phones marked Sold: '+markedSold+'; IMEI corrected: '+fixedImei+'; Duplicate IMEI skipped: '+skipped+'; Invalid rows skipped: '+invalid+'.');
   };
   const reader=new FileReader();reader.onload=function(){
    try{
     if(isExcel){
      if(!window.XLSX)throw new Error('Excel reader library did not load. Open the app with an internet connection and try again.');
      const wb=window.XLSX.read(reader.result,{type:'array',cellDates:true});
-     const findSheet=(names)=>{const n=wb.SheetNames.find(x=>names.some(y=>norm(x)===norm(y)));return n?window.XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:'',raw:false}):[];};
+     const findSheet=(names)=>{const n=wb.SheetNames.find(x=>names.some(y=>norm(x)===norm(y)));return n?window.XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:'',raw:true}).map(r=>{const o={};for(const k in r)o[k]=skCellText(r[k]);return o;}):[];};
      const purchases=findSheet(['Purchases']);if(!purchases.length)throw new Error('Purchases sheet not found in the Excel file.');
      const makeMap=(rows,field)=>{const m=new Map();for(const r of rows){const h=Object.keys(r);const getv=(...names)=>{const k=h.find(x=>names.some(n=>norm(x)===norm(n)));return k===undefined?'':String(r[k]??'').trim();};const imei=getv('IMEI','IMEI/Serial','IMEI1');const val=getv(field);if(imei&&val!=='')m.set(imei,val);}return m;};
      const dealerRows=findSheet(['Dealer Price']),customerRows=findSheet(['Customer Price']),salesRows=findSheet(['Sales']);
