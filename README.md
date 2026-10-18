@@ -298,3 +298,6 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 ## V5.9.6 — PDF export: page background fix
 - V5.9.5 still failed when the app background was "Subtle Slate" (and similar): html2canvas also reads the background colour of the live page (<html>/<body>), which Chrome reports as color(srgb …). While a PDF is being made those two colours are now given as plain rgba(), then put back. The fix now also runs for every html2pdf call (set()/from() return new worker objects, so the earlier hook could be skipped).
 - Tested with the real html2pdf 0.10.1 library: WhatsApp PDF, Download PDF, Monthly report PDF and Credit list PDF all work with Subtle Slate (light and dark) and all other backgrounds / presets. Nothing else changed.
+
+## V5.9.7 — Download PDF: same file path as WhatsApp PDF, real error shown
+- Download PDF now builds the PDF file first (like WhatsApp PDF) and hands it to the phone's download manager; if the phone blocks the download, a "Share" prompt is offered instead. If it still fails, the message now shows the real reason (instead of "check browser download permissions").

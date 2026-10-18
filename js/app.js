@@ -4195,9 +4195,24 @@ img{max-width:100%!important;}
       // Use html2pdf's built-in save flow so the generated PDF is handed
       // directly to the browser download manager after the user gesture.
       // The content source remains the cloned Live Invoice Preview above.
-      html2pdf().set(opt).from(clone).save()
-        .then(() => { showToast?.('✅ Invoice PDF download started'); })
-        .catch((error) => { console.error('Invoice PDF download failed:', error); showToast?.('❌ PDF download failed. Please retry or check browser download permissions.'); })
+      /* V5.9.7: build the PDF as a file first (same path as WhatsApp PDF), then hand it to the phone's download manager.
+         If the phone blocks the download, offer Share instead. Any error now shows its real reason. */
+      html2pdf().set(opt).from(clone).outputPdf('blob')
+        .then((pdfBlob) => {
+          if (!(pdfBlob instanceof Blob) || pdfBlob.size < 100) throw new Error('PDF output is empty');
+          const blob = pdfBlob.type === 'application/pdf' ? pdfBlob : new Blob([pdfBlob], { type: 'application/pdf' });
+          try {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = filename; a.rel = 'noopener'; a.style.display = 'none';
+            document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
+            showToast?.('✅ Invoice PDF download started');
+          } catch (dlErr) {
+            const file = new File([blob], filename, { type: 'application/pdf' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) skAskTapToShare({ files: [file], title: 'SK Mobiles Invoice' });
+            else throw dlErr;
+          }
+        })
+        .catch((error) => { console.error('Invoice PDF download failed:', error); showToast?.('❌ PDF download failed: ' + String(error && (error.message || error.name) || error || 'unknown').slice(0, 80)); })
         .finally(() => { try { holder.remove(); } catch (_) {} });
     }
 
