@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.3 — Bill WhatsApp popup, Customer history, Warranty tracker, Undo delete.
+/* SK MOBILES v5.8.0 — Bill WhatsApp popup, Customer history, Warranty tracker, Undo delete.
    Additive only: reads existing data; writes only warrantyDays/warrantyEnd on a bill and restores
    data the user explicitly undoes. Existing business logic is wrapped, never replaced. */
 (function(){

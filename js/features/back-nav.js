@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.3 — Android / browser Back button, one step at a time.
+/* SK MOBILES v5.8.0 — Android / browser Back button, one step at a time.
    Every open page, popup or inner view (customer detail, used-stock form, bill popup…) gets one history entry.
    Back closes only the top-most one; closing with the on-screen buttons removes its entry again.
    When nothing is open, the app's own Home/root handling in app.js still applies. */

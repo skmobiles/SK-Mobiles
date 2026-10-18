@@ -221,5 +221,12 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Home Quick Actions: "Edit" lets you choose your own 5 buttons (20 to pick from); saved on this device.
 - Dark-mode button in the home header (works with the Appearance settings); dark header title colour fixed.
 
-## V5.7.3
+## V5.8.0
 - Firebase free-quota saver: old cloud-backup clean-up runs once a day per device and deletes at most 1,000 documents a day (was 3,000 per run), so it no longer exhausts the 20K deletes / 50K reads daily limits.
+
+## V5.8.0 — App Lock (PIN + fingerprint) and staff PINs
+- New `js/features/app-lock.js`. Menu → **App Lock & Staff** (admin only): set an owner PIN (4-8 digits), turn on fingerprint (uses the phone's own fingerprint / screen lock), choose how long the app may stay in the background before it locks again.
+- The shop phone stays signed in to Firebase; the lock only asks for a PIN / fingerprint when the app is opened. "Forgot PIN" signs out and switches the lock off so the owner can sign in again with email + password.
+- **Staff PINs**: add staff with a name, PIN and allowed screens (Bills & Orders, Repair jobs, Stock, Customer credit, Reports, Settings & Admin). A staff member who unlocks with their PIN does not see, and cannot open, the screens that are not allowed. This is a limit inside the app on that phone; real data security is still Firebase Auth + Firestore rules.
+- Lock and staff are saved on that phone only (`skl_*` keys), so PIN hashes are never uploaded to Firestore. Business logic, Firebase config and data keys are unchanged.
+- Credit reminder was already available (💬 on the credit list, and the date-to-date Credit List with WhatsApp), so nothing was added there.
