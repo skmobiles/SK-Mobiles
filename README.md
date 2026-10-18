@@ -224,8 +224,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 ## V5.8.1
 - Firebase free-quota saver: old cloud-backup clean-up runs once a day per device and deletes at most 1,000 documents a day (was 3,000 per run), so it no longer exhausts the 20K deletes / 50K reads daily limits.
 
-## V5.8.1 — Popup icons, Text size fix
+## V5.8.1 — Popup icons, Text size fix (V5.8.2 adds the signature page fix)
 - Every popup title now has a coloured icon (Dealer Payments, Search everywhere, Credit List, Monthly Report, Customers, Storage Health, Reviews & Offers and others), and the leftover plain emoji in popup buttons and headings are replaced by matching coloured icons (colorful-ui.js / colorful-ui.css, presentation only).
 - Fixed: App Settings → Text size **Large / Compact** made popups wider / narrower than the phone screen (✕ button cut off). Full-screen popups now fill the screen exactly at every text size (css/appearance.css).
 - Header shows V5.8. All Appearance options (style profiles, Light/Dark/System/Auto Night, accent colours, custom colour, surface, radius, button style, header, nav, text size, toggles, reset) were checked and work.
 - The PIN / fingerprint lock added in the first V5.8.0 preview was removed completely. Firebase's saved login is used as before.
+- Signature page (Bill → Add Customer / Sales Signature) is much bigger (fills the screen), the bottom menu no longer covers Clear / Save, and the drawn signature is no longer wiped when the screen size changes slightly (e.g. browser toolbar hiding).
