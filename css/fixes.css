@@ -325,3 +325,12 @@ html:is([data-theme="dark"],[data-theme="obsidian"],[data-theme="midnight"],[dat
 html:not(#a) body:has(#cardsContainer.sk-home-redesign) .app-header .app-name{font-size:1.05rem!important;white-space:nowrap}
 html:not(#a):not(#b):is([data-theme="dark"],[data-theme="obsidian"],[data-theme="midnight"],[data-theme="apple-dark"],[data-theme="forest"],[data-theme="crimson"],[data-theme="cyber"]) body #appHeaderTitle.app-name,
 html:not(#a):not(#b):is([data-theme="dark"],[data-theme="obsidian"],[data-theme="midnight"],[data-theme="apple-dark"],[data-theme="forest"],[data-theme="crimson"],[data-theme="cyber"]) body .app-header .app-name{color:#f1f5f9!important;-webkit-text-fill-color:#f1f5f9!important;background:none!important}
+
+/* V5.8.3 Bill Details: fit content, sit above the bottom nav, no blank gap */
+html:not(#a) body #viewBillModal.modal-overlay{padding:12px 12px calc(var(--nav-h,66px) + 22px + env(safe-area-inset-bottom,0px))!important;align-items:center!important}
+html:not(#a) body #viewBillModal .modal-sheet{padding-bottom:18px!important;height:auto!important;max-height:calc(100dvh - var(--nav-h,66px) - 44px - env(safe-area-inset-bottom,0px))!important;overflow-y:auto!important;display:block!important}
+html:not(#a) body #viewBillModal #viewBillContent{height:auto!important;max-height:none!important}
+
+/* V5.8.3 small pop-ups fit their content (no empty block under a short list); full pages keep full height */
+html.sk-cui:not(#a) body .modal-overlay:not(#settingsModal):not(#billingModal):not(#skRepairJobsModal):not(#skCreditLedgerPage):not(#skAccessoriesPage):not(#orderModal):not(#repairSparesModal):not(#toolsOthersNoteModal):not(#itemEditorModal):not(#skAdminPanelModal):not(#skRecycleBinModal):not(#skRepairDetailModal):not(#skUsedStockModal):not(#skUsedFilterModal):not(#skLoginModal):not(#longPressMenuModal):not(#skSignatureModal):not(#viewBillModal){align-items:flex-start!important}
+html.sk-cui:not(#a) body .modal-overlay:not(#settingsModal):not(#billingModal):not(#skRepairJobsModal):not(#skCreditLedgerPage):not(#skAccessoriesPage):not(#orderModal):not(#repairSparesModal):not(#toolsOthersNoteModal):not(#itemEditorModal):not(#skAdminPanelModal):not(#skRecycleBinModal):not(#skRepairDetailModal):not(#skUsedStockModal):not(#skUsedFilterModal):not(#skLoginModal):not(#longPressMenuModal):not(#skSignatureModal):not(#viewBillModal)>.modal-sheet{height:auto!important;align-self:flex-start!important;margin:0 auto!important}

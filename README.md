@@ -230,3 +230,8 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Header shows V5.8. All Appearance options (style profiles, Light/Dark/System/Auto Night, accent colours, custom colour, surface, radius, button style, header, nav, text size, toggles, reset) were checked and work.
 - The PIN / fingerprint lock added in the first V5.8.0 preview was removed completely. Firebase's saved login is used as before.
 - Signature page (Bill → Add Customer / Sales Signature) is much bigger (fills the screen), the bottom menu no longer covers Clear / Save, and the drawn signature is no longer wiped when the screen size changes slightly (e.g. browser toolbar hiding).
+
+## V5.8.3 — Used Mobile Stock date icon, popup gaps, live preview
+- Used Mobile Stock → Add / Update Purchase: the date text no longer overlaps its calendar icon.
+- Bill Details and other popups: removed the large blank block under the content (every popup used to reserve 112px at the bottom). Short popups now fit their content; Bill Details sits just above the bottom menu with the Edit / Download / WhatsApp buttons reachable by scrolling.
+- App Settings & Themes: a LIVE PREVIEW strip (header, card, buttons, mini menu) stays pinned under the title, so accent, radius, button style, theme and other options are visible instantly inside the settings window.

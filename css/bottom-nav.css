@@ -45,7 +45,7 @@ html body:has(#leftDrawer.active) nav.bottom-nav{z-index:900;pointer-events:none
 html body:has(#skCreditActionModal.active) nav.bottom-nav,html body:has(#skCreditEntryModal.active) nav.bottom-nav{z-index:900}
 
 /* every full page keeps its last content clear of the bar */
-html body :is(#settingsModal,#billingModal,#skRepairJobsModal,#skCreditLedgerPage,#skAccessoriesPage,#orderModal,#repairSparesModal,#toolsOthersNoteModal,#itemEditorModal,#skAdminPanelModal,#skRecycleBinModal,#viewBillModal,#skRepairDetailModal) > .modal-sheet{
+html body :is(#settingsModal,#billingModal,#skRepairJobsModal,#skCreditLedgerPage,#skAccessoriesPage,#orderModal,#repairSparesModal,#toolsOthersNoteModal,#itemEditorModal,#skAdminPanelModal,#skRecycleBinModal,#skRepairDetailModal) > .modal-sheet{
   padding-bottom:calc(var(--nav-h,66px) + 36px + env(safe-area-inset-bottom,0px))!important}
 html body #skUsedStockModal  main.sk-used-stock-scroll{padding-bottom:calc(66px + 36px + env(safe-area-inset-bottom,0px))}
 @media (prefers-reduced-motion:reduce){html body nav.bottom-nav,html body nav.bottom-nav > .nav-item{transition:none}}
