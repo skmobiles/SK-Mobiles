@@ -3752,7 +3752,7 @@ function viewSavedBill(idx) {
           const rect=canvas.getBoundingClientRect(); if(!rect.width||!rect.height)return;
           const ratio=Math.max(1,window.devicePixelRatio||1);
           let old=''; try{if(hasInk)old=canvas.toDataURL('image/png');}catch(_){}
-          canvas.width=Math.round(rect.width*ratio);canvas.height=Math.round(rect.height*ratio);
+          canvas.__sw=rect.width;canvas.__sh=rect.height;canvas.width=Math.round(rect.width*ratio);canvas.height=Math.round(rect.height*ratio);
           ctx.setTransform(ratio,0,0,ratio,0,0);ctx.lineWidth=3.6;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#0b1b4d';
           if(old){const image=new Image();image.onload=()=>ctx.drawImage(image,0,0,rect.width,rect.height);image.src=old;}
         };
@@ -3824,7 +3824,7 @@ function viewSavedBill(idx) {
           status(savedData?'Existing signature loaded. You can redraw and save to replace it.':'Sign in the box, then tap Save Signature.');
         }
         function loadForCurrentBill(){applySignatures(currentSignatures());refreshLauncher();if(modal?.classList.contains('is-open'))loadCanvasForRole();}
-        window.addEventListener('resize',()=>{if(!drawing){resize();loadCanvasForRole();}});
+        window.addEventListener('resize',()=>{if(drawing)return;const r=canvas.getBoundingClientRect();if(canvas.__sw&&Math.abs(r.width-canvas.__sw)<2&&Math.abs(r.height-canvas.__sh)<2)return;resize();if(!hasInk)loadCanvasForRole();});
         resize();loadForCurrentBill();
       };
       if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();

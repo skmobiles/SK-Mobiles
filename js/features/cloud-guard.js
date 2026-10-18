@@ -1,4 +1,4 @@
-/* SK MOBILES v5.8.1 — Cloud guard for the Firebase free plan.
+/* SK MOBILES v5.8.2 — Cloud guard for the Firebase free plan.
    1. Automatic backup: first open of the day + after closing time (only when data changed).
    2. Keeps only the newest backup of each of the last 14 days (older ones are deleted, incl. sub-collections).
    3. Storage Health page: size of every data key vs the 1 MB Firestore document limit, backup status, read estimate.

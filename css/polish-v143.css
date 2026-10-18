@@ -71,7 +71,8 @@ html.sk-cui .drawer-title{gap:0}
    C. BOTTOM NAV NEVER HIDES CONTENT
    ====================================================================== */
 html.sk-cui .modal-overlay:not(#skUsedStockModal):not(#skUsedFilterModal):not(#skLoginModal):not(#skAccessoriesPage):not(#longPressMenuModal):not(#billingModal) > .modal-sheet{
-  padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
+  padding-bottom:20px!important;max-height:calc(100dvh - var(--nav-h,66px) - 40px - env(safe-area-inset-bottom,0px))!important}
+html.sk-cui .modal-overlay:not(#skUsedStockModal):not(#skUsedFilterModal):not(#skLoginModal):not(#skAccessoriesPage):not(#longPressMenuModal):not(#billingModal){padding-bottom:calc(var(--nav-h,66px) + 20px + env(safe-area-inset-bottom,0px))!important}
 html.sk-cui #skAccessoriesPage > .modal-sheet{padding-bottom:0!important}
 html.sk-cui #skAccessoriesPage > .modal-sheet > div:last-child{padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
 
@@ -181,6 +182,9 @@ html.sk-cui #skUsedStockModal .sk-used-panel,html.sk-cui #skUsedStockModal .sk-u
   html.sk-cui #skUsedStockModal .sk-used-form-grid > .form-label::after{content:"";position:absolute;left:12px;bottom:13px;width:20px;height:20px;pointer-events:none;
     background:var(--c,var(--cui-blue));-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
   html.sk-cui #skUsedStockModal .sk-used-form-grid > .sk-used-field-issue::after{bottom:auto;top:auto;bottom:62px}
+  /* the dd/mm/yyyy text of the date field must start after the icon, like the other fields */
+  html.sk-cui:not(#a) body #skUsedStockModal .sk-used-form-grid .sk-dmy>input[type="date"]{padding-left:40px!important}
+  html.sk-cui:not(#a) body #skUsedStockModal .sk-used-form-grid .sk-dmy-txt{left:40px!important}
   html.sk-cui #skUsedStockModal .sk-used-field-date{--c:var(--cui-blue);--ic:var(--ico-calendar)}
   html.sk-cui #skUsedStockModal .sk-used-field-dealer{--c:var(--cui-orange);--ic:var(--ico-store)}
   html.sk-cui #skUsedStockModal .sk-used-field-model{--c:var(--cui-purple);--ic:var(--ico-phone)}

@@ -1,4 +1,4 @@
-/* SK MOBILES v5.8.1 — Home "Recent Activity": the three cards open the item they show, and "View All" opens one
+/* SK MOBILES v5.8.2 — Home "Recent Activity": the three cards open the item they show, and "View All" opens one
    newest-first list of the latest bills, repair jobs, used-stock purchases and credit entries (tap a row to open it).
    Read-only: no data is changed. */
 (function(){

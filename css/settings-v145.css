@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SK MOBILES v5.8.1 — Settings page + Tools & Others notes redesign
+   SK MOBILES v5.8.2 — Settings page + Tools & Others notes redesign
    Presentation only. All handlers / ids are the existing ones.
    ========================================================================== */
 html body{--st-r:22px}
@@ -295,3 +295,28 @@ html body #settingsModal .st-status.red{background:#fee2e2!important;color:#991b
 html body #settingsModal #skAutoSyncBoxV40{margin:0!important;padding:12px!important;display:flex;flex-direction:column;gap:8px}
 html body #settingsModal #skAutoSyncBoxV40 .sk-v40-row{border:0!important;padding:0!important;background:none!important;box-shadow:none!important;margin:0!important}
 html body #settingsModal #skAutoSyncStatusV40{margin:0!important;padding:0!important;background:none!important;border:0!important}
+
+/* V5.8.3 live preview: follows the same design tokens as the app, so every option shows here instantly */
+#settingsModal .sk-livepv{position:sticky;top:90px;z-index:4;margin:0 0 12px;padding:8px 10px 10px;border-radius:var(--ui-card-radius,16px);background:var(--bg,#f1f5f9);border:1px solid var(--card-border,#e2e8f0);box-shadow:0 6px 16px rgba(2,6,23,.12)}
+#settingsModal .sk-livepv-tag{font-size:.6rem;font-weight:800;letter-spacing:.12em;color:var(--text-muted,#64748b);margin-bottom:5px}
+#settingsModal .sk-livepv-hdr{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:calc(var(--ui-card-radius,16px) * .7);background:var(--primary,#2563eb);color:#fff;font-size:.78rem}
+#settingsModal .sk-livepv-hdr span{opacity:.85;font-size:.7rem}
+#settingsModal .sk-livepv-card{display:flex;justify-content:space-between;align-items:center;margin-top:7px;padding:8px 10px;border-radius:var(--ui-card-radius,16px);background:var(--card-bg,#fff);border:1px solid var(--card-border,#e2e8f0);color:var(--text,#0f172a)}
+#settingsModal .sk-livepv-card small{display:block;font-size:.62rem;color:var(--text-muted,#64748b)}
+#settingsModal .sk-livepv-card strong{font-size:.95rem}
+#settingsModal .sk-livepv-chip{font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:999px;background:color-mix(in srgb,var(--primary,#2563eb) 14%,transparent);color:var(--primary,#2563eb)}
+#settingsModal .sk-livepv-row{display:flex;gap:8px;margin-top:7px}
+#settingsModal .sk-livepv-btn{flex:1;width:auto!important;margin:0!important;min-height:34px!important;padding:6px 10px!important;font-size:.78rem!important;pointer-events:none}
+#settingsModal .sk-livepv-btn2{flex:1;min-height:34px;font-size:.78rem;font-weight:700;border:1px solid var(--primary,#2563eb);background:transparent;color:var(--primary,#2563eb);border-radius:var(--ui-button-radius,12px);pointer-events:none}
+#settingsModal .sk-livepv-nav{display:flex;justify-content:space-around;align-items:center;margin-top:7px;padding:7px 10px;border-radius:var(--ui-card-radius,16px);background:var(--card-bg,#fff);border:1px solid var(--card-border,#e2e8f0)}
+#settingsModal .sk-livepv-nav i{width:18px;height:18px;border-radius:6px;background:var(--text-muted,#94a3b8);opacity:.45}
+#settingsModal .sk-livepv-nav i.on{background:var(--primary,#2563eb);opacity:1}
+html body #settingsModal .sk-livepv{padding:6px 8px 8px!important;background:var(--card-bg,#fff)!important}
+html body #settingsModal .sk-livepv-tag{display:none}
+html body #settingsModal .sk-livepv-hdr{padding:5px 10px!important}
+html body #settingsModal .sk-livepv-card{padding:6px 10px!important;margin-top:5px!important}
+html body #settingsModal .sk-livepv-card strong{font-size:.85rem}
+html body #settingsModal .sk-livepv-row{margin-top:5px!important}
+html body #settingsModal .sk-livepv-btn,html body #settingsModal .sk-livepv-btn2{min-height:30px!important;padding:4px 10px!important}
+html body #settingsModal .sk-livepv-nav{padding:5px 10px!important;margin-top:5px!important}
+html body #settingsModal .sk-livepv-nav i{width:14px;height:14px}

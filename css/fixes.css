@@ -1,4 +1,4 @@
-/* SK MOBILES v5.8.1 — final layout fixes (loaded last). */
+/* SK MOBILES v5.8.2 — final layout fixes (loaded last). */
 /* Any inline icon without its own size rule can never balloon to fill its box. */
 :where(svg.st-svg){width:20px;height:20px;flex:none}
 /* Tools & Others note page spacing */
@@ -82,20 +82,20 @@ html body .sk-used-view-chips{display:flex;gap:6px;margin:8px 0}
 html body .sk-used-view-chips button{flex:1;height:38px;min-height:0!important;border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);border-radius:12px;font-size:.78rem;font-weight:700;cursor:pointer}
 html body .sk-used-view-chips button.on{background:var(--primary,#2563eb);border-color:var(--primary,#2563eb);color:#fff}
 
-/* v5.8.1 - keep every full-screen sheet centred and hide the in-sheet scrollbar so nothing looks pushed off screen */
+/* v5.8.2 - keep every full-screen sheet centred and hide the in-sheet scrollbar so nothing looks pushed off screen */
 html body .modal-overlay .modal-sheet{margin-left:auto !important;margin-right:auto !important;scrollbar-width:none}
 html body .modal-overlay .modal-sheet::-webkit-scrollbar,html body #skCreditLedgerPage *::-webkit-scrollbar,html body #skCreditLedgerPage::-webkit-scrollbar{width:0 !important;height:0 !important;display:none}
 html body #skCreditLedgerPage,html body #skCreditLedgerPage *{scrollbar-width:none}
 
-/* v5.8.1 - Bill button on used stock rows / detail dialog */
+/* v5.8.2 - Bill button on used stock rows / detail dialog */
 html body #skUsedStockModal .sk-used-bill-btn{display:inline-flex;align-items:center;gap:4px;height:34px;padding:0 10px;border:0;border-radius:17px;background:var(--accent,#2563eb);color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex:0 0 auto}
 html body #skUsedStockModal .sk-used-bill-btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 html body #skUsedStockModal .sk-used-bill-btn:active{transform:scale(.96)}
 
-/* v5.8.1 - last buttons of the Used Mobile Stock page must clear the bottom navigation bar */
+/* v5.8.2 - last buttons of the Used Mobile Stock page must clear the bottom navigation bar */
 html body #skUsedStockModal main.sk-used-stock-scroll{padding-bottom:calc(var(--nav-h,66px) + 64px + env(safe-area-inset-bottom,0px)) !important}
 
-/* v5.8.1 - used stock row: Bill button + menu fit inside the card */
+/* v5.8.2 - used stock row: Bill button + menu fit inside the card */
 html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-register-table tbody tr{grid-template-columns:22px minmax(0,1fr) auto 92px !important}
 html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-row-actions{gap:4px !important;justify-content:flex-end !important;min-width:0;width:92px}
 html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-bill-btn{height:30px !important;padding:0 8px !important;font-size:11px !important;border-radius:15px !important;flex:0 0 auto}
@@ -105,19 +105,19 @@ html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-row-menu summary{w
 html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-row-menu summary svg{width:16px !important;height:16px !important;flex:0 0 16px !important}
 html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-price-cell,html:not(#a) body #skUsedStockModal#skUsedStockModal .sk-used-status-cell{padding-right:4px !important}
 
-/* v5.8.1 - Credit list: filter chips fill the row (no empty gap on the right) */
+/* v5.8.2 - Credit list: filter chips fill the row (no empty gap on the right) */
 html:not(#a) body #skCreditLedgerPage#skCreditLedgerPage .skcp-filters{display:flex !important;gap:6px !important;overflow:visible !important;padding:2px 0 6px !important;width:100%}
 html:not(#a) body #skCreditLedgerPage#skCreditLedgerPage .skcp-filters .skcp-filter{flex:1 1 auto !important;min-width:0 !important;padding:0 4px !important;font-size:.74rem !important;text-align:center;justify-content:center}
 
-/* v5.8.1 - header: role is shown on the profile icon, the floating badge is hidden so nothing overlaps */
+/* v5.8.2 - header: role is shown on the profile icon, the floating badge is hidden so nothing overlaps */
 html body #skTopRoleBadge{display:none !important}
 
-/* v5.8.1 - home section links (View All / See All) are plain links, not tall boxes */
+/* v5.8.2 - home section links (View All / See All) are plain links, not tall boxes */
 html:not(#a) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-section-heading>button{height:auto !important;min-height:0 !important;width:auto !important;padding:4px 2px !important;box-shadow:none !important;background:transparent !important;border:0 !important}
 html:not(#a) body .sk-home-v2-recent-card{cursor:pointer;-webkit-tap-highlight-color:transparent}
 html:not(#a) body .sk-home-v2-recent-card:active{transform:scale(.98)}
 
-/* v5.8.1 - Recent Activity list */
+/* v5.8.2 - Recent Activity list */
 html:not(#a) body #skRecentModal#skRecentModal .skra-chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
 html:not(#a) body #skRecentModal#skRecentModal .skra-chips button{border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);border-radius:99px;padding:6px 12px;font-size:.74rem;font-weight:800}
 html:not(#a) body #skRecentModal#skRecentModal .skra-chips button.active{background:var(--primary,#2563eb);color:#fff;border-color:transparent}
@@ -130,9 +130,9 @@ html:not(#a) body #skRecentModal#skRecentModal .skra-side{text-align:right;flex:
 html:not(#a) body #skRecentModal#skRecentModal .skra-side em{font-style:normal;font-weight:800;font-size:.82rem;display:block}
 html:not(#a) body #skRecentModal#skRecentModal .skra-empty{text-align:center;color:var(--text-muted,#64748b);padding:24px}
 
-/* v5.8.1 - customer edit / merge */
+/* v5.8.2 - customer edit / merge */
 
-/* ===== v5.8.1 search box clear (x) ===== */
+/* ===== v5.8.2 search box clear (x) ===== */
 html body .sk-sc-wrap{position:relative;display:block;width:100%}
 html body .sk-sc-wrap>input{width:100%!important;box-sizing:border-box!important;padding-right:44px!important}
 html body .sk-sc-btn{display:none!important;position:absolute;right:10px;top:50%;transform:translateY(-50%);width:26px!important;height:26px!important;min-width:0!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:50%!important;background:rgba(100,116,139,.22)!important;box-shadow:none!important;align-items:center;justify-content:center;cursor:pointer;z-index:2}
@@ -146,7 +146,7 @@ html body #skPriceListModal#skPriceListModal #skPlBody{margin-top:6px;margin-bot
 html body #skUsedStockModal#skUsedStockModal .sk-used-search-box #skUsedSearch:focus{box-shadow:none!important;border:0!important;background:transparent!important;outline:0!important}
 html body #skUsedStockModal#skUsedStockModal .sk-used-search-box:focus-within{border-color:var(--primary,#2563eb)}
 
-/* ===== v5.8.1 shared popup design (.skpop): even side gutters, tinted notes, icon labels, pill-safe buttons ===== */
+/* ===== v5.8.2 shared popup design (.skpop): even side gutters, tinted notes, icon labels, pill-safe buttons ===== */
 html:not(#a) body .modal-sheet.skpop{height:auto!important;min-height:0!important;max-height:90dvh!important;overflow:auto;align-self:flex-start;padding-bottom:18px!important}
 html:not(#a) body .skpop>:not(.modal-title){margin-left:16px!important;margin-right:16px!important}
 html:not(#a) body .skpop-note{display:flex;gap:9px;align-items:flex-start;margin-top:12px!important;margin-bottom:4px!important;padding:11px 13px!important;border-radius:14px;border:1px solid color-mix(in srgb,var(--primary,#2563eb) 22%,transparent);background:color-mix(in srgb,var(--primary,#2563eb) 8%,transparent);font-size:.78rem;line-height:1.45;color:var(--text)}
@@ -183,14 +183,14 @@ html:not(#a) body .skcm-addr{margin-top:4px!important;font-size:.72rem;line-heig
 html:not(#a) body .skcp-det-who{cursor:pointer}
 html:not(#a) body .skcp-det-who>b::after{content:"";display:inline-block;width:15px;height:15px;margin-left:7px!important;vertical-align:-2px;background:var(--primary,#2563eb);-webkit-mask:var(--ico-pencil) center/contain no-repeat;mask:var(--ico-pencil) center/contain no-repeat;opacity:.85}
 
-/* ===== v5.8.1 dd/mm/yyyy date fields ===== */
+/* ===== v5.8.2 dd/mm/yyyy date fields ===== */
 html:not(#a) body .sk-dmy{position:relative;display:block;width:100%}
 html:not(#a) body .sk-dmy>input[type="date"]{width:100%;box-sizing:border-box;-webkit-text-fill-color:transparent;color:transparent!important}
 html:not(#a) body .sk-dmy>input[type="date"]::-webkit-datetime-edit{opacity:0}
 html:not(#a) body .sk-dmy-txt{position:absolute;left:0;right:34px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text);white-space:nowrap;overflow:hidden;line-height:1.2}
 html:not(#a) body .sk-dmy-txt.empty{color:var(--text-muted,#94a3b8)}
 
-/* ===== v5.8.1 bulk WhatsApp / stock aging / backup / QR ===== */
+/* ===== v5.8.2 bulk WhatsApp / stock aging / backup / QR ===== */
 html:not(#a) body .skbk-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px!important}
 html:not(#a) body .skbk-chip{border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);padding:7px 12px!important;font-size:.72rem;font-weight:700;min-height:0;cursor:pointer;border-radius:99px!important}
 html:not(#a) body .skbk-chip.on{background:var(--primary,#2563eb);border-color:var(--primary,#2563eb);color:#fff}
@@ -243,7 +243,7 @@ html:not(#a) body .sk-dmy>input[type="date"]{padding-left:12px!important;padding
 html:not(#a) body .sk-dmy-txt{left:12px!important}
 html:not(#a) body :is(.skbk-row b,.skag-top b,.skcm-opt b,.skbkp-stat b,.skbk-tile b,.skcu-item b,.skcu-item>span){color:var(--text)!important}
 
-/* v5.8.1 selection bar (Cancel / Select All / Delete): one full-width row */
+/* v5.8.2 selection bar (Cancel / Select All / Delete): one full-width row */
 html:not(#a) body #cardsContainer > #skTemperedSelectBar.sk-active,
 html:not(#a) body #cardsContainer.sk-tempered-selection-mode > #skTemperedSelectBar{
   grid-column:1/-1!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
@@ -255,12 +255,12 @@ html:not(#a) body #skTemperedSelectBar .sk-select-action{
   white-space:nowrap!important;writing-mode:horizontal-tb!important;font-size:.8rem!important;border-radius:12px!important;
   display:flex!important;align-items:center;justify-content:center;text-align:center}
 
-/* v5.8.1 review-link row */
+/* v5.8.2 review-link row */
 html:not(#a) body .skrv-link{display:flex!important;gap:8px;align-items:stretch}
 html:not(#a) body .skrv-link input{flex:1 1 auto!important;min-width:0!important;width:auto!important}
 html:not(#a) body .skrv-link .submit-btn{flex:0 0 auto!important;width:auto!important;min-width:84px;margin:0!important;padding:0 18px!important}
 
-/* v5.8.1 used mobile stock: 4 small stat boxes in one row, compact actions, search above the actions */
+/* v5.8.2 used mobile stock: 4 small stat boxes in one row, compact actions, search above the actions */
 html:not(#a) body #skUsedStockModal #skUsedStatsGrid:not([style*="none"]){display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;margin:0 0 8px!important}
 html:not(#a) body #skUsedStockModal #skUsedStatsGrid .sk-used-stat-card{flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;padding:7px 8px!important;gap:3px!important;border-radius:14px!important;min-width:0}
 html:not(#a) body #skUsedStockModal #skUsedStatsGrid .sk-used-stat-icon{width:22px!important;height:22px!important;flex:0 0 22px!important;border-radius:8px!important}
@@ -281,12 +281,12 @@ html:not(#a) body #skUsedStockModal .sk-used-findbar .sk-used-view-chips{margin:
 html:not(#a) body #skUsedStockModal #skUsedPurchaseActions:not([style*="none"]){display:flex!important}
 html:not(#a) body #skUsedStockModal.sk-used-form-page .sk-used-findbar{display:none!important}
 
-/* v5.8.1 merge list rows: let long details wrap instead of being cut off */
+/* v5.8.2 merge list rows: let long details wrap instead of being cut off */
 html:not(#a) body .skcm-opt{height:auto!important;min-height:64px!important;overflow:visible!important;align-items:center!important}
 html:not(#a) body .skcm-opt .skcm-tx{min-width:0;line-height:1.3}
 html:not(#a) body .skcm-opt .skcm-tx small{display:block;white-space:normal;line-height:1.3}
 
-/* v5.8.1 home "Shop Tools": compact modern 3-column tiles */
+/* v5.8.2 home "Shop Tools": compact modern 3-column tiles */
 html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer.sk-home-v2-features{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
 html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature{flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;gap:6px!important;min-height:112px!important;padding:12px 6px!important;border-radius:18px!important;grid-column:auto!important;width:auto!important;justify-content:flex-start!important}
 html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature-icon{width:44px!important;height:44px!important;margin:0!important}
@@ -300,14 +300,16 @@ html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-
 html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature-copy small{white-space:normal!important;overflow-wrap:anywhere}
 html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-v2-card #homeActionCardsContainer .sk-home-v2-feature-copy b{white-space:normal!important;overflow-wrap:anywhere}
 
-/* v5.8.1 signature popup: its own centred popup with proper spacing */
-html:not(#a) body .sk-signature-modal{padding:16px!important}
-html:not(#a) body .sk-signature-modal .sk-signature-modal-card{padding:16px!important;width:min(520px,100%)!important;max-height:calc(100dvh - 32px)!important;border-radius:22px!important;box-shadow:0 24px 60px rgba(15,23,42,.35)!important;background:var(--card,#fff)!important;border:0!important}
-html:not(#a) body .sk-signature-modal #skCustomerSignatureCanvas{display:block;width:100%!important;height:230px!important;margin:8px 0 10px!important;background:#fff;border:2px dashed #94a3b8;border-radius:16px}
+/* v5.8.2 signature popup: its own centred popup with proper spacing */
+html:not(#a) body .sk-signature-modal{padding:10px!important}
+html:not(#a) body .sk-signature-modal .sk-signature-modal-card{padding:14px!important;width:min(680px,100%)!important;max-height:calc(100dvh - 20px)!important;border-radius:22px!important;box-shadow:0 24px 60px rgba(15,23,42,.35)!important;background:var(--card,#fff)!important;border:0!important}
+html:not(#a) body .sk-signature-modal #skCustomerSignatureCanvas{display:block;width:100%!important;height:clamp(240px,calc(100vh - 300px),520px)!important;height:clamp(240px,calc(100svh - 300px),520px)!important;margin:8px 0 10px!important;background:#fff;border:2px dashed #94a3b8;border-radius:16px;touch-action:none!important;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 html:not(#a) body .sk-signature-modal .sk-signature-role{width:100%;margin:6px 0!important;padding:10px 12px!important;border-radius:14px!important}
 html:not(#a) body .sk-signature-modal .sk-signature-actions{display:flex!important;gap:10px!important}
 html:not(#a) body .sk-signature-modal .sk-signature-actions button{flex:1 1 0;margin:0!important}
 html:not(#a) body .sk-signature-modal .sk-signature-modal-head{margin-bottom:6px}
+/* the bottom menu must not cover the Clear / Save buttons while signing */
+html:not(#a) body.sk-signature-open .bottom-nav{display:none!important}
 html:not(#a) body .sk-signature-modal .sk-signature-close{width:38px;height:38px;border-radius:50%!important;padding:0!important}
 html:not(#a) body .sk-signature-modal .sk-signature-modal-hint,html:not(#a) body .sk-signature-modal .sk-signature-status{padding:0 2px}
 
@@ -315,7 +317,7 @@ html:not(#a) body .sk-signature-modal .sk-signature-modal-hint,html:not(#a) body
 html:not(#a) body .pay-mode-btn{padding:8px 2px!important;font-size:.74rem!important;overflow:visible!important;text-overflow:clip!important;white-space:nowrap!important;gap:3px!important;min-width:0!important;letter-spacing:0!important}
 html:not(#a) body .pay-mode-btn svg,html:not(#a) body .pay-mode-btn .ski{width:14px!important;height:14px!important;flex:0 0 14px!important}
 
-/* v5.8.1 home header: room for the dark-mode button */
+/* v5.8.2 home header: room for the dark-mode button */
 html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-header-actions{gap:4px!important}
 html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-header-actions .sk-home-header-icon{width:34px!important;height:34px!important;flex:0 0 34px!important}
 html.sk-cui:not(#a):not(#b) body:has(#cardsContainer.sk-home-redesign) .sk-home-header-actions .sk-home-header-icon svg{width:18px!important;height:18px!important}
@@ -323,3 +325,12 @@ html:is([data-theme="dark"],[data-theme="obsidian"],[data-theme="midnight"],[dat
 html:not(#a) body:has(#cardsContainer.sk-home-redesign) .app-header .app-name{font-size:1.05rem!important;white-space:nowrap}
 html:not(#a):not(#b):is([data-theme="dark"],[data-theme="obsidian"],[data-theme="midnight"],[data-theme="apple-dark"],[data-theme="forest"],[data-theme="crimson"],[data-theme="cyber"]) body #appHeaderTitle.app-name,
 html:not(#a):not(#b):is([data-theme="dark"],[data-theme="obsidian"],[data-theme="midnight"],[data-theme="apple-dark"],[data-theme="forest"],[data-theme="crimson"],[data-theme="cyber"]) body .app-header .app-name{color:#f1f5f9!important;-webkit-text-fill-color:#f1f5f9!important;background:none!important}
+
+/* V5.8.3 Bill Details: fit content, sit above the bottom nav, no blank gap */
+html:not(#a) body #viewBillModal.modal-overlay{padding:12px 12px calc(var(--nav-h,66px) + 22px + env(safe-area-inset-bottom,0px))!important;align-items:center!important}
+html:not(#a) body #viewBillModal .modal-sheet{padding-bottom:18px!important;height:auto!important;max-height:calc(100dvh - var(--nav-h,66px) - 44px - env(safe-area-inset-bottom,0px))!important;overflow-y:auto!important;display:block!important}
+html:not(#a) body #viewBillModal #viewBillContent{height:auto!important;max-height:none!important}
+
+/* V5.8.3 small pop-ups fit their content (no empty block under a short list); full pages keep full height */
+html.sk-cui:not(#a) body .modal-overlay:not(#settingsModal):not(#billingModal):not(#skRepairJobsModal):not(#skCreditLedgerPage):not(#skAccessoriesPage):not(#orderModal):not(#repairSparesModal):not(#toolsOthersNoteModal):not(#itemEditorModal):not(#skAdminPanelModal):not(#skRecycleBinModal):not(#skRepairDetailModal):not(#skUsedStockModal):not(#skUsedFilterModal):not(#skLoginModal):not(#longPressMenuModal):not(#skSignatureModal):not(#viewBillModal){align-items:flex-start!important}
+html.sk-cui:not(#a) body .modal-overlay:not(#settingsModal):not(#billingModal):not(#skRepairJobsModal):not(#skCreditLedgerPage):not(#skAccessoriesPage):not(#orderModal):not(#repairSparesModal):not(#toolsOthersNoteModal):not(#itemEditorModal):not(#skAdminPanelModal):not(#skRecycleBinModal):not(#skRepairDetailModal):not(#skUsedStockModal):not(#skUsedFilterModal):not(#skLoginModal):not(#longPressMenuModal):not(#skSignatureModal):not(#viewBillModal)>.modal-sheet{height:auto!important;align-self:flex-start!important;margin:0 auto!important}
