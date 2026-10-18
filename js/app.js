@@ -8205,14 +8205,20 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
    const statusClass=sold?'is-sold':String(r.status||'').toLowerCase()==='pending'?'is-pending':'is-stock';
    const imei=esc(r.imei);
    const brandColor=['#2478ff','#7c3aed','#0f9f6e','#ea8a18','#e34b6f'][i%5];
-   return `<tr data-imei="${imei}" style="cursor:pointer">
-    <td class="sk-used-number-cell">${i+1}</td>
-    <td class="sk-used-device-cell"><span class="sk-used-phone-thumb" style="--phone-accent:${brandColor}" aria-hidden="true"><svg viewBox="0 0 24 36"><rect x="3" y="1" width="18" height="34" rx="3.2"/><rect x="5.2" y="4" width="13.6" height="26" rx="1.4"/><path d="M9 2.8h6M10.5 32.4h3"/></svg></span><span class="sk-used-device-copy"><strong>${esc(r.model)}</strong><small>IMEI: ${imei}</small></span></td>
-    <td class="sk-used-dealer-cell">${esc(r.dealer)}</td>
-    <td class="sk-used-price-cell">${money(r.cost)}</td>
-    <td class="sk-used-status-cell"><span class="sk-used-status ${statusClass}">${esc(r.status||'In Stock')}</span></td>
-    <td class="sk-used-row-actions">${sold?'':`<button type="button" class="sk-used-bill-btn" aria-label="Bill this mobile" title="Bill this mobile" onclick="event.stopPropagation();window.skUsedSelectForBill('${imei}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span>Bill</span></button>`}<details class="sk-used-row-menu"><summary aria-label="More actions" title="More actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></summary><div class="sk-used-row-menu-pop"><button type="button" ${sold?'disabled':''} onclick="window.skUsedSelectForBill('${imei}')">Select for Bill</button><button type="button" onclick="window.skUsedEdit('${imei}')">Edit</button><button type="button" class="is-danger" onclick="window.skUsedDelete('${imei}')">Delete</button></div></details></td>
-   </tr>`;
+   const menu=`<details class="sk-used-row-menu"><summary aria-label="More actions" title="More actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></summary><div class="sk-used-row-menu-pop"><button type="button" ${sold?'disabled':''} onclick="window.skUsedSelectForBill('${imei}')">Select for Bill</button><button type="button" onclick="window.skUsedEdit('${imei}')">Edit</button><button type="button" class="is-danger" onclick="window.skUsedDelete('${imei}')">Delete</button></div></details>`;
+   const profit=Number(r.sale?.profit);
+   /* V5.9.10: one even card per phone - same layout in All / In stock / Sold */
+   return `<tr class="sk-uc-row" data-imei="${imei}" style="cursor:pointer"><td class="sk-uc" colspan="6">
+    <div class="sk-uc-top">
+     <span class="sk-uc-thumb sk-used-phone-thumb" style="--phone-accent:${brandColor}" aria-hidden="true"><b class="sk-uc-no">${i+1}</b><svg viewBox="0 0 24 36"><rect x="3" y="1" width="18" height="34" rx="3.2"/><rect x="5.2" y="4" width="13.6" height="26" rx="1.4"/><path d="M9 2.8h6M10.5 32.4h3"/></svg></span>
+     <span class="sk-uc-main"><strong class="sk-uc-name">${esc(r.model)}</strong><small class="sk-uc-dealer">${esc(r.dealer||'—')}</small></span>
+     <span class="sk-uc-side"><b class="sk-uc-price">${money(r.cost)}</b><span class="sk-used-status sk-uc-status ${statusClass}">${esc(r.status||'In Stock')}</span></span>
+    </div>
+    <div class="sk-uc-bottom">
+     <span class="sk-uc-imei"><i>IMEI</i>${imei||'—'}</span>
+     <span class="sk-uc-acts sk-used-row-actions">${sold?(Number.isFinite(profit)?`<span class="sk-uc-profit">Profit ${money(profit)}</span>`:''):`<button type="button" class="sk-used-bill-btn sk-uc-bill" aria-label="Bill this mobile" title="Bill this mobile" onclick="event.stopPropagation();window.skUsedSelectForBill('${imei}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span>Bill</span></button>`}${menu}</span>
+    </div>
+   </td></tr>`;
   }).join('');
   if(!body.__skTap){body.__skTap=1;body.addEventListener('click',function(e){
    const tr=e.target.closest('tr[data-imei]');if(!tr||e.target.closest('.sk-used-row-actions,button,summary,details,a'))return;

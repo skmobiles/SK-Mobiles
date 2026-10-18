@@ -432,3 +432,43 @@ html:not(#a):not(#b) body #skDealerModal input[type="date"]{border:1px solid var
 /* Repair details: date chip never splits the year onto a new line */
 html:not(#a):not(#b) body .rjd .rjd-chips{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,.8fr)!important}
 html:not(#a):not(#b) body .rjd .rjd-chip b{white-space:nowrap!important;font-size:.82rem!important}
+
+/* V5.9.10 Used Mobile Register — one even card per phone (same in All / In stock / Sold) */
+html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-used-register-table thead{display:none!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-used-register-table tbody{display:grid!important;gap:10px!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-used-register-table tbody tr.sk-uc-row{display:block!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;grid-template-columns:none!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal tr.sk-uc-row>td.sk-uc{display:block!important;width:100%!important;padding:12px 12px 10px!important;border:1px solid var(--card-border,#dbe5f5)!important;border-radius:var(--ui-card-radius,16px)!important;background:var(--card-bg,#fff)!important;box-shadow:0 2px 8px rgba(30,64,120,.06)!important;box-sizing:border-box!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-top{display:grid;grid-template-columns:44px minmax(0,1fr) auto;column-gap:12px;align-items:start}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-thumb{position:relative!important;width:44px!important;height:52px!important;flex:none!important;border-radius:12px!important;display:grid!important;place-items:center!important;margin:0!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-thumb svg{width:22px!important;height:36px!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-no{position:absolute;top:-6px;left:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--text,#0f172a);color:var(--card-bg,#fff);font-size:11px;font-weight:700;display:grid;place-items:center;line-height:1}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-main{display:flex;flex-direction:column;gap:4px;min-width:0;padding-top:2px}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-name{font-size:.95rem!important;font-weight:800!important;line-height:1.25!important;color:var(--text,#0f172a)!important;overflow-wrap:anywhere}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-dealer{font-size:.78rem!important;color:var(--text-muted,#64748b)!important;line-height:1.3!important;overflow-wrap:anywhere}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;text-align:right}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-price{font-size:1rem;font-weight:800;white-space:nowrap;color:var(--text,#0f172a)}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-status{font-size:.74rem!important;font-weight:700!important;padding:4px 10px!important;border-radius:999px!important;white-space:nowrap!important;min-width:0!important;line-height:1.2!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding-top:9px;border-top:1px dashed var(--card-border,#e2e8f0)}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-imei{font-size:.78rem;color:var(--text-muted,#475569);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-variant-numeric:tabular-nums}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-imei i{font-style:normal;color:#94a3b8;font-weight:600;margin-right:5px}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-acts{display:flex!important;flex-direction:row!important;align-items:center!important;gap:8px!important;flex:none!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-bill{height:34px!important;min-height:34px!important;padding:0 14px!important;border-radius:10px!important;display:inline-flex!important;align-items:center!important;gap:6px!important;font-size:.8rem!important;font-weight:700!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-bill svg{width:16px!important;height:16px!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-acts .sk-used-row-menu summary{width:34px!important;height:34px!important;flex:0 0 34px!important;border-radius:10px!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal .sk-uc-profit{font-size:.76rem;color:var(--text-muted,#64748b);white-space:nowrap}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-uc-top>.sk-uc-thumb{grid-column:1!important;grid-row:1!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-uc-top>.sk-uc-main{grid-column:2!important;grid-row:1!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-uc-top>.sk-uc-side{grid-column:3!important;grid-row:1!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-uc .sk-used-row-actions{grid-column:auto!important;grid-row:auto!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-uc .sk-uc-acts{width:auto!important;min-width:0!important;max-width:none!important;justify-content:flex-end!important;margin-left:auto!important}
+html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-uc .sk-uc-acts .sk-used-row-menu{width:auto!important;min-width:34px!important;flex:none!important}
+
+/* V5.9.11 Menu: no live blur behind the menu (re-blurring the home page on every scroll step made it blink on phones) */
+html:not(#a):not(#b) body #leftDrawer.left-drawer{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:rgba(8,12,28,.45)!important}
+html:not(#a):not(#b) body #leftDrawer .left-drawer-content{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:var(--modal-bg,#fff)!important;will-change:auto!important;contain:paint;overscroll-behavior:contain}
+
+/* V5.9.11 Used Mobile Stock stat cards: icon, label and value centred (was left with an empty right side) */
+html:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important}
+html:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card>*{margin-left:auto!important;margin-right:auto!important;text-align:center!important}
+html[data-ui-mode="dark"]:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card{background:var(--card-bg,#0d121c)!important;border-color:var(--card-border,#243044)!important}
+html[data-ui-mode="dark"]:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card small{color:var(--text-muted,#94a3b8)!important}
