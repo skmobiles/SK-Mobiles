@@ -315,3 +315,6 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - PDF prompt: one clear row "✅ PDF downloaded — [Open PDF] ✕" placed just above the bottom menu (Share removed); the WhatsApp "PDF ready" prompt uses the same style.
 - Used Mobile Register rows: name and price on the first line, dealer and status on the second, full IMEI on the third; the Actions column only takes the space it needs (no empty area on sold phones).
 - Review of every page and popup at phone size: Bill page sections now have an even 14px rhythm (were 26–42px apart); Order list and Repair details fit their content; Credit ledger starts at the top; EMI reminder fields keep a margin; Accessories buttons form a 2 x 2 grid; Dealer date box matches other inputs; Repair-details date no longer splits the year. Automatic spacing check: no touching boxes anywhere.
+
+## V5.9.10 — Used Mobile Register cards (as in the approved demo)
+- Every phone is one even card, the same in All / In stock / Sold: phone icon with its number, model name and dealer, price and In Stock / Sold on the right; a thin line; then the full IMEI with Bill + ⋮ (in stock) or Profit + ⋮ (sold). The old column header row is hidden. Works in light and dark.
