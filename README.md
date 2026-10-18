@@ -221,5 +221,11 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Home Quick Actions: "Edit" lets you choose your own 5 buttons (20 to pick from); saved on this device.
 - Dark-mode button in the home header (works with the Appearance settings); dark header title colour fixed.
 
-## V5.7.3
+## V5.8.1
 - Firebase free-quota saver: old cloud-backup clean-up runs once a day per device and deletes at most 1,000 documents a day (was 3,000 per run), so it no longer exhausts the 20K deletes / 50K reads daily limits.
+
+## V5.8.1 — Popup icons, Text size fix
+- Every popup title now has a coloured icon (Dealer Payments, Search everywhere, Credit List, Monthly Report, Customers, Storage Health, Reviews & Offers and others), and the leftover plain emoji in popup buttons and headings are replaced by matching coloured icons (colorful-ui.js / colorful-ui.css, presentation only).
+- Fixed: App Settings → Text size **Large / Compact** made popups wider / narrower than the phone screen (✕ button cut off). Full-screen popups now fill the screen exactly at every text size (css/appearance.css).
+- Header shows V5.8. All Appearance options (style profiles, Light/Dark/System/Auto Night, accent colours, custom colour, surface, radius, button style, header, nav, text size, toggles, reset) were checked and work.
+- The PIN / fingerprint lock added in the first V5.8.0 preview was removed completely. Firebase's saved login is used as before.

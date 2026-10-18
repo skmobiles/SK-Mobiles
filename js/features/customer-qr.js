@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.3 — Customer purchase-history QR. The QR holds a link to /view.html plus a small, compressed summary of the
+/* SK MOBILES v5.8.1 — Customer purchase-history QR. The QR holds a link to /view.html plus a small, compressed summary of the
    customer's latest bills (inside the link itself). The customer scans it with the phone camera and sees their bills in a clean page.
    Nothing is uploaded anywhere: the data lives only inside the QR / link you give that customer. */
 (function(){

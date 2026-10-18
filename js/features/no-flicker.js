@@ -1,4 +1,4 @@
-/* SK MOBILES v5.7.3 — stops list/page flicker. When the app re-draws a list with exactly the same HTML it drew last time
+/* SK MOBILES v5.8.1 — stops list/page flicker. When the app re-draws a list with exactly the same HTML it drew last time
    (this happens after every cloud-sync refresh and many button taps), the browser used to throw away and rebuild every row,
    which showed as a blink and reset scroll/touch state. Now an identical re-draw is skipped. Safe: the skip only happens when
    the element still holds exactly what was drawn before (nothing else changed it). No data is read or written. */
