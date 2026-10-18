@@ -4800,6 +4800,25 @@ img{max-width:100%!important;}
   const skContactObserver=new MutationObserver(function(){skInstallContactButtons()});
   if(document.body)skContactObserver.observe(document.body,{childList:true,subtree:true});
 
+
+  /* V5.8.9: update a list without rebuilding rows that did not change (stops the whole list blinking on Next / Previous Status) */
+  function skMorphChildren(el,html){
+    if(!el)return;
+    const t=document.createElement('template');t.innerHTML=String(html);
+    const news=Array.from(t.content.children);
+    if(!news.length){el.innerHTML=String(html);return;}
+    const olds=new Map();Array.from(el.children).forEach((c,i)=>olds.set(c.getAttribute('data-rj-id')||('#'+i+':'+c.className),c));
+    const keep=[];
+    news.forEach((n,i)=>{
+      const src=n.outerHTML,key=n.getAttribute('data-rj-id')||('#'+i+':'+n.className);
+      const o=olds.get(key);
+      if(o&&o.__skSrc===src){keep.push(o);olds.delete(key);}
+      else{n.__skSrc=src;keep.push(n);}
+    });
+    Array.from(el.childNodes).forEach(c=>{if(keep.indexOf(c)<0)c.remove();});
+    keep.forEach((n,i)=>{if(el.children[i]!==n)el.insertBefore(n,el.children[i]||null);});
+  }
+  window.skMorphChildren=skMorphChildren;
   window.skRjRenderJobs=function(){
     const list=document.getElementById('skRjJobsList'); if(!list)return;
     const allPending=getPending();
@@ -4808,8 +4827,8 @@ img{max-width:100%!important;}
     if(!bar){bar=document.createElement('div');bar.id='skRjFilterBar';bar.className='sk-rj-filter-bar';list.insertAdjacentElement('beforebegin',bar);}
     const cnt=f=>f==='urgent'?allPending.filter(rjIsUrgent).length:f==='all'?allPending.length:allPending.filter(j=>j.status===f).length;
     if(window.__skRjFilter!=='all' && !cnt(window.__skRjFilter)) window.__skRjFilter='all';
-    bar.innerHTML=[['all','All'],['urgent','🚨 Urgent'],['Received','Received'],['Checking','Checking'],['Repairing','Repairing']]
-      .map(([k,l])=>`<button type="button" class="sk-rj-chip${window.__skRjFilter===k?' active':''}" onclick="skRjSetFilter('${k}')">${l} <b>${cnt(k)}</b></button>`).join('');
+    skMorphChildren(bar,[['all','All'],['urgent','🚨 Urgent'],['Received','Received'],['Checking','Checking'],['Repairing','Repairing']]
+      .map(([k,l])=>`<button type="button" class="sk-rj-chip${window.__skRjFilter===k?' active':''}" onclick="skRjSetFilter('${k}')">${l} <b>${cnt(k)}</b></button>`).join(''));
     if(window.__skRjFilter==='urgent') a=allPending.filter(rjIsUrgent);
     else if(window.__skRjFilter!=='all') a=allPending.filter(j=>j.status===window.__skRjFilter);
     const focusId=String(window.__skUrgentFocusId||'');
@@ -4817,7 +4836,7 @@ img{max-width:100%!important;}
     document.getElementById('skRjPendingCount').textContent=allPending.length;
     const hc=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const hEl=document.getElementById('skRjHistoryCount'); if(hEl) hEl.textContent=hc;
-    list.innerHTML=a.length? a.map(j=>`
+    skMorphChildren(list,a.length? a.map(j=>`
       <div class="sk-rj-card" data-rj-id="${esc(j.id)}" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
@@ -4831,7 +4850,7 @@ img{max-width:100%!important;}
           <button type="button" class="sk-rj-prev" onclick="event.stopPropagation();skRjPrevious('${j.id}')">Previous Status</button>
           <button type="button" class="sk-rj-next" onclick="event.stopPropagation();skRjNext('${j.id}')">Next Status</button>
         </div>
-      </div>`).join(''):'<div class="sk-rj-empty">No pending repair jobs.</div>';
+      </div>`).join(''):'<div class="sk-rj-empty">No pending repair jobs.</div>');
   };
 
   window.skRjRenderHistory=function(){
