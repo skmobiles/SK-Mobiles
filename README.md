@@ -352,3 +352,8 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Tabs (New Bill / History, Jobs / Pending / History) are plain text with a line under the open one; New / Used / Keypad is one quiet switch.
 - Sections are plain white cards with small grey headings; inputs 46px with one thin border; pay-mode chips; Save (blue), WhatsApp (green), Download / Print (outline).
 - Bill history and repair lists: quiet cards. CSS only — no change to billing or repair logic.
+
+## V5.9.17 — Clean style for every other page and popup
+- Pages (Accessories, Daily / Monthly Report, Storage, Bulk WhatsApp, Reviews, Admin, Item editor, Tools notes, Worker, Bill details, Recent activity): same simple top bar and frame as Billing / Ledger.
+- Popups: lighter box, simple title with a thin line under it, plain ✕.
+- Everywhere: same labels, 46px fields with one thin border, same main buttons (blue / green), plain white cards. CSS only.
