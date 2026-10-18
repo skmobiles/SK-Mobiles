@@ -371,3 +371,13 @@ html:not(#a) body #skUsedStockModal #skUsedViewChips{margin-bottom:10px!importan
 html:not(#a) body #skUsedStockModal .sk-used-table-wrap+.sk-used-storage-note{margin-top:8px!important}
 html:not(#a) body #skUsedStockModal #skUsedRows{margin-top:6px!important}
 html body #skUsedDetailDialog .f-battery{--fc:#16a34a}
+
+/* V5.9.3 spacing sweep: every pair of stacked boxes keeps a visible gap (found by an automatic check of all pages and popups) */
+html:not(#a) body #billingModal #exchToggle,html:not(#a) body #billingModal #exchangeBox{margin-top:12px!important}
+html:not(#a) body .st-head{height:auto!important;margin-bottom:12px!important}
+html:not(#a):not(#b):not(#c) body #skRepairJobsModal .sk-rj-card .sk-rj-actions{gap:8px!important;column-gap:8px!important;row-gap:8px!important}
+html:not(#a):not(#b):not(#c) body .rjd .rjd-hero+.rjd-actions{margin-top:12px!important}
+html:not(#a) body .sk-v42-profile-box+.sk-v42-profile-box,html:not(#a) body .modal-sheet>.sk-v42-profile-box+.sk-v42-profile-grid{margin-top:10px!important}
+html:not(#a) body #skWorkerEditPhotoPreview{margin-bottom:10px!important}
+html:not(#a) body #settingsModal .st-terms,html:not(#a) body #settingsModal .st-logo-card{margin-bottom:12px!important}
+html:not(#a) body #settingsModal #cfgShopUpi{margin-bottom:10px!important}
