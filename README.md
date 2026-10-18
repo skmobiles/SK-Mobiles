@@ -241,3 +241,12 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Home "Shop Tools": icon, title and subtitle line up at the same height in every tile; subtitle text centred and not touching the border; "More" no longer touches the tiles.
 - Tempered / Display cards: even inner spacing, "In Stock" pill and "Models Fit" box no longer touch their borders, model chips are never cut in half.
 - Billing, Order, Admin and Item editor windows keep a small margin so boxes no longer touch the window border; Repair tabs have inner spacing.
+
+## V5.8.5 — Appearance options now clearly work
+- Ambient Aura Glow was hidden behind the page background (no visible change); now it shows as soft colour glows, and turning it ON/OFF is visible.
+- Every Appearance option now shows a confirmation message (e.g. "Card corners: Pill", "Vibration: ON"); Vibration ON vibrates once and Click sound ON plays a click so you can feel the change.
+- Appearance settings are now saved on each phone only (they are no longer synced through Firebase), so another device or an older copy cannot overwrite the option you just chose. Data keys are unchanged.
+- Home Shop Tools tiles now follow the Card corner radius option.
+- Live Preview strip also reflects Header style, Bottom menu style and Background.
+- Settings section headers no longer overlap the options below them (Corner radius, Navigation, Visual effects, App data folder, Shell background).
+- Used Mobile Inventory: closing the page with the phone's Back button no longer leaves a stale "form page" state behind (fixes the last failing back-button test).

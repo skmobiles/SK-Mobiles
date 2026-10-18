@@ -80,7 +80,7 @@
   function isSyncableKey(key) {
     if (!key) return false;
     // Skip only device-specific settings such as login/theme
-    if (key === SYNC_META_KEY || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_bill_draft" || key === REPAIR_KEY) {
+    if (key === SYNC_META_KEY || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_appearance_settings" || key === "sk_bill_draft" || key === REPAIR_KEY) {
       return false;
     }
     return key.startsWith("sk_") || key.startsWith("skx_");

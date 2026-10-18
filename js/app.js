@@ -1885,7 +1885,7 @@ const MASTER_INVENTORY = [
       root.style.setProperty('--ui-card-radius',cardRadiusMap[settings.cardRadius]||'12px');
       root.style.setProperty('--ui-button-radius',buttonRadiusMap[settings.buttonRadius]||'8px');
       root.style.setProperty('--ui-scale',scaleMap[settings.scale]||'1');
-      root.style.setProperty('--ui-aura-opacity',settings.aura?.45:0);
+      root.style.setProperty('--ui-aura-opacity',settings.aura?.8:0);
       root.setAttribute('data-ui-mode',resolved);
       root.setAttribute('data-ui-preset',settings.preset);
       root.setAttribute('data-ui-accent',accentName);
@@ -1919,12 +1919,19 @@ const MASTER_INVENTORY = [
     function skAppearanceApply(settings,opts){
       const next={...SK_APPEARANCE_DEFAULTS,...settings};
       skAppearanceSave(next);skAppearanceApplyTokens(next);skAppearanceSyncControls(next);
+      try{skLivePreviewSync();}catch(e){}
       if(opts?.theme){
         window.__skAppearanceApplying=true;
         try{setTheme(skAppearanceThemeFor(next),true);}catch(e){}
         window.__skAppearanceApplying=false;
       }
       return next;
+    }
+    function skLivePreviewSync(){
+      const pv=document.getElementById('skLivePreview');if(!pv)return;
+      const cs=getComputedStyle(document.body);
+      pv.style.setProperty('--pv-bg-img',cs.backgroundImage&&cs.backgroundImage!=='none'?cs.backgroundImage:'none');
+      pv.style.setProperty('--pv-bg-col',cs.backgroundColor);
     }
     function skAppearanceSet(key,value){
       let settings=skAppearanceRead();
@@ -1943,6 +1950,18 @@ const MASTER_INVENTORY = [
         if(key==='accent' && value!=='custom') settings.customHex=skHex(SK_APPEARANCE_ACCENTS[value]||SK_APPEARANCE_ACCENTS.blue);
         skAppearanceApply(settings,{theme:key==='themeMode'});
       }
+      try{skAppearanceFeedback(key,value);}catch(e){}
+    }
+    /* Visible / tactile confirmation so every option clearly "does something" */
+    const SK_APPEARANCE_LABELS={cardRadius:'Card corners',buttonRadius:'Button corners',header:'Header',nav:'Bottom menu',surface:'Background',cardSurface:'Card surface',buttonStyle:'Button style',scale:'Text size',accent:'Accent colour',themeMode:'Theme',preset:'Style',aura:'Aura glow',haptic:'Vibration',sound:'Click sound',motion:'Reduced motion'};
+    function skAppearanceFeedback(key,value){
+      if(window.__skAppearanceBoot)return;
+      const label=SK_APPEARANCE_LABELS[key];if(!label)return;
+      const isBool=['aura','haptic','sound','motion'].includes(key);
+      const text=isBool?(label+': '+(value?'ON':'OFF')):(label+': '+String(value).replace(/^./,c=>c.toUpperCase()));
+      if(typeof showToast==='function')showToast(text);
+      if(key==='haptic'&&value&&navigator.vibrate){try{navigator.vibrate([40]);}catch(e){}}
+      if(key==='sound'&&value)skAppearanceSoftClick();
     }
     function skAppearanceSetCustomAccent(value){
       const hex=skHex(value),settings=skAppearanceRead();settings.accent='custom';settings.customHex=hex;settings.preset='classic';skAppearanceApply(settings,{theme:false});
@@ -8221,6 +8240,8 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   const m=$('skUsedStockModal');
   if(m?.classList.contains('sk-used-form-page')&&window.__skUsedFormFromMgmt){window.skUsedResetForm();window.skUsedShowManagement();return;}
   toggleModal('skUsedStockModal',false);
+  if(m)m.classList.remove('sk-used-form-page');
+  window.__skUsedInventoryPageMode=false;
  };
  window.skUsedSelectForBill=function(imei){
   const item=read().find(r=>String(r.imei)===String(imei)&&r.status!=='Sold');

@@ -320,3 +320,14 @@ html body #settingsModal .sk-livepv-row{margin-top:5px!important}
 html body #settingsModal .sk-livepv-btn,html body #settingsModal .sk-livepv-btn2{min-height:30px!important;padding:4px 10px!important}
 html body #settingsModal .sk-livepv-nav{padding:5px 10px!important;margin-top:5px!important}
 html body #settingsModal .sk-livepv-nav i{width:14px;height:14px}
+
+/* V5.8.5 section headers grow with their text and keep a gap before the options (no overlap) */
+html body #settingsModal .st-section>.st-head{height:auto!important;min-height:44px;margin-bottom:12px!important;align-items:center}
+html body #settingsModal .st-section>.st-head+*{margin-top:0}
+html body #settingsModal .sk-livepv{background-color:var(--pv-bg-col,var(--card-bg,#fff))!important;background-image:var(--pv-bg-img,none)!important}
+html[data-ui-header="glass"] #settingsModal .sk-livepv-hdr{background:color-mix(in srgb,var(--primary,#2563eb) 55%,transparent);backdrop-filter:blur(8px);box-shadow:none}
+html[data-ui-header="solid"] #settingsModal .sk-livepv-hdr{background:var(--primary,#2563eb);box-shadow:0 4px 10px rgba(15,23,42,.25)}
+html[data-ui-header="minimal"] #settingsModal .sk-livepv-hdr{background:transparent;color:var(--text,#0f172a);border-bottom:2px solid var(--primary,#2563eb);border-radius:0;box-shadow:none}
+html[data-ui-nav="fixed"] #settingsModal .sk-livepv-nav{border-radius:0 0 4px 4px;margin-left:-8px;margin-right:-8px;border-left:0;border-right:0}
+html[data-ui-nav="floating"] #settingsModal .sk-livepv-nav{border-radius:999px}
+html[data-ui-motion="off"] #settingsModal .sk-livepv-btn{transition:transform .2s}
