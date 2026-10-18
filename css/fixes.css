@@ -486,3 +486,16 @@ html body nav.bottom-nav > #navGlass.active svg{background:rgba(14,165,233,.15)}
 html body nav.bottom-nav > #navCombo.active svg{background:rgba(168,85,247,.15)}
 html body nav.bottom-nav > #navBilling.active svg{background:rgba(16,185,129,.15)}
 html body nav.bottom-nav > #navOrders.active svg{background:rgba(249,115,22,.15)}
+
+/* ===== V5.9.13: Customer Credit Ledger = full page that ends above the nav bar; only the sheet scrolls ===== */
+html:not(#a):not(#b):not(#c) body #skCreditLedgerPage#skCreditLedgerPage.active{overflow:hidden!important;align-items:stretch!important;justify-content:center!important;padding:8px 8px calc(var(--nav-h,66px) + 18px + env(safe-area-inset-bottom,0px))!important}
+html:not(#a):not(#b):not(#c) body #skCreditLedgerPage#skCreditLedgerPage > .modal-sheet{height:auto!important;max-height:none!important;flex:1 1 auto!important;margin:0 auto!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;padding-bottom:14px!important;border-radius:22px!important}
+html:not(#a):not(#b):not(#c) body #skCreditLedgerPage#skCreditLedgerPage > .modal-sheet > .modal-title{flex:0 0 auto}
+
+/* ===== V5.9.13: main lists (Home / Tempered / Display) - cards fade out at the nav bar instead of sliding around/behind it.
+   A page-coloured fade sits under the nav bar; hidden whenever a page / popup / menu is open. ===== */
+html:not([data-ui-nav="fixed"]) body #skNavFade{display:block;position:fixed;left:0;right:0;bottom:0;z-index:2147483500;pointer-events:none;
+  height:calc(var(--nav-h,66px) + 10px + 34px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(to bottom,transparent 0,var(--sk-nav-strip,#eef5ff) 34px)}
+#skNavFade{display:none}
+html body:has(.modal-overlay.active,#leftDrawer.active,.sk-used-detail-overlay) #skNavFade{display:none}

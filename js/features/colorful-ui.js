@@ -163,15 +163,23 @@
       if (first !== n) continue;
       hits.push(n);
     }
+    /* V5.9.13: read every style first, then write. Reading getComputedStyle after each insert forced a
+       full page re-layout per icon (Tempered page with ~170 cards froze for 15+ s on phones). */
+    var jobs = [], lightCache = new Map();
     hits.forEach(function(node){
       var m = node.nodeValue.match(EMO_RE); if (!m) return;
       var key = m[1], def = E[key]; if (!def) return;
       var p = node.parentElement;
       var tile = !!p.closest(TILE_SEL) && !p.closest('button');
-      node.nodeValue = node.nodeValue.slice(m[0].length);
-      var ic = mk(def[0], def[1], tile);
-      if (!tile) { var b = p.closest('button, .submit-btn, a'); if (b && isLight(getComputedStyle(b).color)) ic.classList.add('on-dark'); }
-      p.insertBefore(ic, node);
+      var dark = false;
+      if (!tile) { var b = p.closest('button, .submit-btn, a'); if (b) { if (!lightCache.has(b)) lightCache.set(b, isLight(getComputedStyle(b).color)); dark = lightCache.get(b); } }
+      jobs.push([node, p, m[0].length, def, tile, dark]);
+    });
+    jobs.forEach(function(j){
+      var node = j[0], ic = mk(j[3][0], j[3][1], j[4]);
+      node.nodeValue = node.nodeValue.slice(j[2]);
+      if (j[5]) ic.classList.add('on-dark');
+      j[1].insertBefore(ic, node);
     });
   }
 
@@ -202,8 +210,18 @@
   }
   function schedule(){ if (!queued){ queued = true; (window.requestAnimationFrame || setTimeout)(run); } }
 
+  /* V5.9.13: colour for the fade under the nav bar = the page background of the current theme */
+  function syncStrip(){
+    try { var c = getComputedStyle(document.body).backgroundColor;
+      if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') document.documentElement.style.setProperty('--sk-nav-strip', c); } catch (e) {}
+  }
   function init(){
     document.documentElement.classList.add('sk-cui');
+    syncStrip();
+    if (!document.getElementById('skNavFade')) { var fd = document.createElement('div'); fd.id = 'skNavFade'; fd.setAttribute('aria-hidden', 'true'); document.body.appendChild(fd); }
+    var st = 0, mo = new MutationObserver(function(){ clearTimeout(st); st = setTimeout(syncStrip, 60); });
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme', 'data-ui-theme', 'data-ui-palette', 'data-ui-accent'] });
+    mo.observe(document.body, { attributes: true, attributeFilter: ['class', 'data-theme'] });
     run();
     new MutationObserver(function(muts){
       for (var i = 0; i < muts.length; i++){
