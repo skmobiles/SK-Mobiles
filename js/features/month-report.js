@@ -137,7 +137,7 @@ window.skMrPdf=function(){
   if(typeof html2pdf!=='function'){toast('PDF library not loaded (internet needed once). Try again.');return}
   var d=build(ym);
   var box=document.createElement('div');
-  box.style.cssText='position:fixed;left:-9999px;top:0;width:700px;padding:24px;background:#fff;color:#0f172a;font-family:Inter,Arial,sans-serif;font-size:13px';
+  box.style.cssText='width:700px;padding:24px;background:#fff;color:#0f172a;font-family:Inter,Arial,sans-serif;font-size:13px';
   function r2(a,b){return '<tr><td style="padding:6px 8px;border-bottom:1px solid #e2e8f0">'+a+'</td><td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600">'+b+'</td></tr>'}
   box.innerHTML='<h2 style="margin:0 0 2px">'+esc(shopName())+'</h2><div style="color:#64748b;margin-bottom:14px">Monthly Report — '+esc(ymLabel(d.ym))+'</div>'+
    '<table style="width:100%;border-collapse:collapse;margin-bottom:14px">'+r2('Total collection',money(d.collection))+r2('Profit (used mobiles + repairs)',money(d.profit))+
@@ -146,9 +146,10 @@ window.skMrPdf=function(){
    r2('Credit collected',money(d.C.total))+r2('Total outstanding now',money(d.outstanding))+'</table>'+
    '<h3 style="margin:0 0 6px">Best selling models</h3><table style="width:100%;border-collapse:collapse">'+
    (d.top.map(function(m,i){return r2((i+1)+'. '+esc(m.name)+' ('+m.qty+' pcs)',money(m.value))}).join('')||r2('No sales','—'))+'</table>';
-  document.body.appendChild(box);
+  /* V5.9.8: the box itself must not be off-screen (the PDF copy kept that position and came out blank); an off-screen holder hides it instead */
+  var hold=document.createElement('div');hold.style.cssText='position:fixed;left:-10000px;top:0;width:700px;pointer-events:none';hold.appendChild(box);document.body.appendChild(hold);
   html2pdf().set({margin:8,filename:'SK_Mobiles_Report_'+d.ym+'.pdf',image:{type:'jpeg',quality:.95},html2canvas:{scale:2},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}})
-    .from(box).save().then(function(){box.remove();toast('✅ PDF downloaded')}).catch(function(){box.remove();toast('❌ PDF failed')});
+    .from(box).save().then(function(){hold.remove();toast('✅ PDF downloaded')}).catch(function(e){hold.remove();toast('❌ PDF failed: '+String(e&&(e.message||e.name)||e||'').slice(0,80))});
 };
 function addDrawer(){
   var ref=document.querySelector('.menu-drawer-btn[onclick*="skOpenDailyReport"]');if(!ref||document.getElementById('skDrMonth'))return;

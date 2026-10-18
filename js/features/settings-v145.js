@@ -45,8 +45,8 @@
 
 /* V5.8.3: keep the live preview just under the sticky settings title */
 (function(){
-  function place(){try{var pv=document.getElementById('skLivePreview');if(!pv)return;var t=pv.parentElement.querySelector('.modal-title');if(!t)return;if(t.nextElementSibling!==pv)t.after(pv);var z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;pv.style.top=Math.max(0,Math.round(t.getBoundingClientRect().height/z)-2)+'px';}catch(e){}}
-  function init(){place();var pv=document.getElementById('skLivePreview');if(!pv)return;var t=pv.parentElement.querySelector('.modal-title');try{if(window.ResizeObserver&&t)new ResizeObserver(place).observe(t);}catch(e){}window.addEventListener('resize',place);var m=document.getElementById('settingsModal');if(m&&window.MutationObserver)new MutationObserver(place).observe(m,{attributes:true,attributeFilter:['class']});}
+  function place(){try{var pv=document.getElementById('skLivePreview');if(!pv)return;var sm=document.getElementById('settingsModal');if(sm&&!sm.classList.contains('active'))return;var t=pv.parentElement.querySelector('.modal-title');if(!t)return;if(t.nextElementSibling!==pv)t.after(pv);var z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;pv.style.top=Math.max(0,Math.round(t.getBoundingClientRect().height/z)-2)+'px';}catch(e){}}
+  function init(){place();var pv=document.getElementById('skLivePreview');if(!pv)return;var t=pv.parentElement.querySelector('.modal-title');try{if(window.ResizeObserver&&t)new ResizeObserver(place).observe(t);}catch(e){}window.addEventListener('resize',place);var m=document.getElementById('settingsModal');if(m&&window.MutationObserver)new MutationObserver(function(){place();if(m.classList.contains('active')&&window.skLivePreviewSync)try{window.skLivePreviewSync()}catch(e){}}).observe(m,{attributes:true,attributeFilter:['class']});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 
