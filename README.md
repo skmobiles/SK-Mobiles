@@ -301,3 +301,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 
 ## V5.9.7 — Download PDF: same file path as WhatsApp PDF, real error shown
 - Download PDF now builds the PDF file first (like WhatsApp PDF) and hands it to the phone's download manager; if the phone blocks the download, a "Share" prompt is offered instead. If it still fails, the message now shows the real reason (instead of "check browser download permissions").
+
+## V5.9.8 — Reliable Home taps, Download "Open", version on Home, speed
+- Home boxes sometimes did nothing until the app was refreshed. Two causes fixed (new js/features/tap-guard.js): cloud-sync redraws now wait until the finger is lifted (a box replaced mid-tap lost the tap), and on touch phones the boxes are no longer HTML-draggable (a long press started a browser drag that could swallow later taps).
+- Download PDF: after the file is saved a "PDF downloaded — Open / Share" prompt appears, because an app installed on the home screen shows no "Open" after a download.
+- The app version is now shown next to "SK MOBILES" on the Home screen.
+- Speed: search boxes no longer force a re-layout per box at start-up, and the Settings live preview does its measuring only while Settings is open (start-up about 18% faster in a 4x-slowed phone test). A full sweep of all pages and popups shows no script errors.

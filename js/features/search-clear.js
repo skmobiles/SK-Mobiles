@@ -9,11 +9,10 @@ function isSearch(i){
   if(i.matches(SKIP)||i.readOnly||i.disabled)return false;
   return /search/i.test(i.id||'')||/search/i.test(i.placeholder||'')||t==='search';
 }
-function attach(i){
+function attach(i,flex){
   i.dataset.skSc='1';
   var w=document.createElement('span');w.className='sk-sc-wrap';
-  var cs=getComputedStyle(i);
-  if(cs.flexGrow!=='0'||cs.flexBasis!=='auto')w.style.flex=cs.flex;
+  if(flex)w.style.flex=flex;
   w.style.minWidth='0';
   i.parentNode.insertBefore(w,i);w.appendChild(i);
   var b=document.createElement('button');b.type='button';b.className='sk-sc-btn';b.setAttribute('aria-label','Clear search');b.tabIndex=-1;
@@ -34,7 +33,8 @@ function attach(i){
   if(d&&d.configurable){try{Object.defineProperty(i,'value',{configurable:true,get:function(){return d.get.call(i)},set:function(v){d.set.call(i,v);sync()}})}catch(x){}}
   sync();
 }
-function scan(){document.querySelectorAll('input').forEach(function(i){if(isSearch(i)){try{attach(i)}catch(e){}}})}
+/* V5.9.8: read all styles first, then change the page (reading between writes forced a full re-layout per box) */
+function scan(){var list=[];document.querySelectorAll('input').forEach(function(i){if(isSearch(i))list.push(i)});if(!list.length)return;var flex=list.map(function(i){var cs=getComputedStyle(i);return (cs.flexGrow!=='0'||cs.flexBasis!=='auto')?cs.flex:''});list.forEach(function(i,k){try{attach(i,flex[k])}catch(e){}})}
 var t=0;function later(){clearTimeout(t);t=setTimeout(scan,120)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scan);else scan();
 if(document.body)new MutationObserver(function(m){for(var k=0;k<m.length;k++)if(m[k].addedNodes.length){later();break}}).observe(document.body,{childList:true,subtree:true});

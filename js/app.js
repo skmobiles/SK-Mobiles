@@ -1944,10 +1944,12 @@ const MASTER_INVENTORY = [
     }
     function skLivePreviewSync(){
       const pv=document.getElementById('skLivePreview');if(!pv)return;
+      if(!document.getElementById('settingsModal')?.classList.contains('active'))return;
       const cs=getComputedStyle(document.body);
       pv.style.setProperty('--pv-bg-img',cs.backgroundImage&&cs.backgroundImage!=='none'?cs.backgroundImage:'none');
       pv.style.setProperty('--pv-bg-col',cs.backgroundColor);
-    }
+    }    window.skLivePreviewSync=skLivePreviewSync;
+
     function skAppearanceSet(key,value){
       let settings=skAppearanceRead();
       if(key==='preset'){
@@ -4182,6 +4184,22 @@ img{max-width:100%!important;}
       setTimeout(waitForReady, 100);
     }
 
+
+    /* V5.9.8: "PDF downloaded — Open" prompt (opens the PDF in the phone's PDF viewer; Share as a second option) */
+    function skPdfOpenPrompt(url, blob, filename){
+      document.getElementById('skTapShare')?.remove();
+      const box=document.createElement('div');box.id='skTapShare';
+      box.style.cssText='position:fixed;left:50%;bottom:calc(var(--nav-h,66px) + 28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483647;display:flex;gap:8px;align-items:center;padding:10px 12px;border-radius:18px;background:var(--card-bg,#fff);box-shadow:0 12px 30px rgba(15,23,42,.28);border:1px solid var(--card-border,#dbe4f5);max-width:calc(100vw - 24px)';
+      box.innerHTML='<span style="font-size:.85rem;font-weight:600;color:var(--text,#0f172a)">PDF downloaded</span><button type="button" data-a="open" style="border:0;border-radius:12px;padding:10px 14px;font-weight:700;background:#2563eb;color:#fff">Open</button>'+(navigator.canShare?'<button type="button" data-a="share" style="border:1px solid #cbd5e1;border-radius:12px;padding:9px 12px;font-weight:700;background:transparent;color:var(--text,#0f172a)">Share</button>':'')+'<button type="button" data-a="x" aria-label="Close" style="border:0;background:transparent;font-size:1.1rem;padding:6px 8px;color:var(--text-muted,#64748b)">✕</button>';
+      box.addEventListener('click',(e)=>{
+        const act=e.target.closest('button')?.dataset.a;if(!act)return;
+        if(act==='open'){ const w=window.open(url,'_blank'); if(!w){ location.href=url; } box.remove(); }
+        else if(act==='share'){ try{ const f=new File([blob],filename,{type:'application/pdf'}); if(navigator.canShare({files:[f]})) navigator.share({files:[f],title:filename}).catch(()=>{}); }catch(_){} box.remove(); }
+        else box.remove();
+      });
+      document.body.appendChild(box);
+      setTimeout(()=>box.remove(),60000);
+    }
     function downloadInvoicePDF() {
       const clone = skCloneLiveInvoiceForOutput();
       if (!clone) { showToast?.('❌ Live Invoice Preview not found'); return; }
@@ -4204,8 +4222,10 @@ img{max-width:100%!important;}
           try {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = filename; a.rel = 'noopener'; a.style.display = 'none';
-            document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
-            showToast?.('✅ Invoice PDF download started');
+            document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 300000);
+            showToast?.('✅ Invoice PDF downloaded');
+            /* V5.9.8: an app installed on the home screen shows no "Open" after a download, so offer it here */
+            skPdfOpenPrompt(url, blob, filename);
           } catch (dlErr) {
             const file = new File([blob], filename, { type: 'application/pdf' });
             if (navigator.canShare && navigator.canShare({ files: [file] })) skAskTapToShare({ files: [file], title: 'SK Mobiles Invoice' });

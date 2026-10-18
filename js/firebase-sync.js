@@ -125,6 +125,9 @@
     if(refreshUiFrame) return;
     const run = function(){
       refreshUiFrame = 0;
+      /* V5.9.8: never redraw the screen in the middle of a tap - a button replaced between finger-down and finger-up
+         loses the tap (home boxes "did nothing" while cloud updates were arriving). Wait until the finger is lifted. */
+      if(window.__skTouchBusy && window.__skTouchBusy()){ refreshUiFrame=setTimeout(run,350); return; }
       try {
         if(typeof savedBills !== "undefined") savedBills = localBills();
         if(typeof updateBillHistoryCount === "function") updateBillHistoryCount();

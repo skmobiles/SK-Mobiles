@@ -381,3 +381,8 @@ html:not(#a) body .sk-v42-profile-box+.sk-v42-profile-box,html:not(#a) body .mod
 html:not(#a) body #skWorkerEditPhotoPreview{margin-bottom:10px!important}
 html:not(#a) body #settingsModal .st-terms,html:not(#a) body #settingsModal .st-logo-card{margin-bottom:12px!important}
 html:not(#a) body #settingsModal #cfgShopUpi{margin-bottom:10px!important}
+
+/* V5.9.8 version shown on Home too */
+html body .sk-home-ver{display:none}
+html:not(#a) body:has(#cardsContainer.sk-home-redesign) #appHeaderTitle{display:inline-block!important;vertical-align:middle}
+html:not(#a) body:has(#cardsContainer.sk-home-redesign) .sk-home-ver{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:8px;background:var(--badge-bg,#e0ebff);border:1px solid var(--badge-border,#bfd3ff);color:var(--primary,#2563eb);font-size:.6rem;font-weight:900;vertical-align:middle;line-height:1.3}
