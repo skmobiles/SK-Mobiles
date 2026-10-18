@@ -294,3 +294,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 ## V5.9.5 — PDF export fixed ("unsupported color function 'color'")
 - Cause: newer Chrome reports colours built with CSS color-mix() as `color(srgb …)`. The PDF library (html2canvas inside html2pdf 0.10.1) cannot read that format, so WhatsApp PDF, Download PDF, Monthly report PDF and Credit list PDF all failed on updated phones.
 - Fix (new js/features/pdf-color-fix.js): just before a PDF is drawn, every such colour in the copy being printed is converted to plain rgba(), and the page background is given as white. Tested with the real html2pdf 0.10.1 library with forced `color(srgb …)` colours: all four PDFs are created again.
+
+## V5.9.6 — PDF export: page background fix
+- V5.9.5 still failed when the app background was "Subtle Slate" (and similar): html2canvas also reads the background colour of the live page (<html>/<body>), which Chrome reports as color(srgb …). While a PDF is being made those two colours are now given as plain rgba(), then put back. The fix now also runs for every html2pdf call (set()/from() return new worker objects, so the earlier hook could be skipped).
+- Tested with the real html2pdf 0.10.1 library: WhatsApp PDF, Download PDF, Monthly report PDF and Credit list PDF all work with Subtle Slate (light and dark) and all other backgrounds / presets. Nothing else changed.

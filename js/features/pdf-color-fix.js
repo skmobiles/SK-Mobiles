@@ -35,6 +35,16 @@ function prepare(root,doc){
   if(css.length){var st=doc.createElement('style');st.setAttribute('data-sk-pdf-fix','1');st.textContent=css.join('\n');(doc.head||doc.documentElement).appendChild(st);if(doc===document)setTimeout(function(){st.remove()},120000);}
 }
 window.skPdfPrepare=prepare;
+/* html2canvas also reads the background colour of the LIVE page (<html> and <body>), e.g. the "Subtle Slate" background.
+   Give those two a plain rgba() for the time the PDF is being made, then put them back. */
+var pageFixTimer=0,pageSaved=null;
+function fixPage(){
+  if(!pageSaved){pageSaved=[];[document.documentElement,document.body].forEach(function(el){if(!el)return;var cs=getComputedStyle(el);
+    ['background-color','color'].forEach(function(p){var v=cs.getPropertyValue(p);if(v&&RX.test(v)){pageSaved.push([el,p,el.style.getPropertyValue(p),el.style.getPropertyPriority(p)]);el.style.setProperty(p,fix(v),'important');}});});}
+  clearTimeout(pageFixTimer);pageFixTimer=setTimeout(restorePage,30000);
+}
+function restorePage(){if(!pageSaved)return;pageSaved.forEach(function(x){if(x[2])x[0].style.setProperty(x[1],x[2],x[3]);else x[0].style.removeProperty(x[1]);});pageSaved=null;}
+window.skPdfFixPage=fixPage;
 /* inside the copy of the page that html2canvas draws from: fix the root, body and the PDF container */
 function cleanDoc(cd){
   var win=cd.defaultView;if(!win)return;
@@ -46,11 +56,12 @@ function patch(){
   var H=window.html2pdf;if(typeof H!=='function'||H.__skPatched)return !!(H&&H.__skPatched);
   var wrapped=function(){
     var w=H.apply(this,arguments);
-    if(w&&typeof w.from==='function'){var f=w.from;w.from=function(src){try{if(src&&src.nodeType===1)prepare(src)}catch(e){}return f.apply(this,arguments)};}
-    if(w&&typeof w.set==='function'){var s=w.set;w.set=function(o){try{if(o&&typeof o==='object'){o.html2canvas=o.html2canvas||{};if(o.html2canvas.backgroundColor===undefined)o.html2canvas.backgroundColor='#ffffff';var oc=o.html2canvas.onclone;o.html2canvas.onclone=function(cd){try{cleanDoc(cd)}catch(e){}if(typeof oc==='function')return oc.apply(this,arguments)};}}catch(e){}return s.apply(this,arguments)};}
+    if(w&&typeof w.from==='function'){var f=w.from;w.from=function(src){try{fixPage();if(src&&src.nodeType===1)prepare(src)}catch(e){}return f.apply(this,arguments)};}
+    if(w&&typeof w.set==='function'){var s=w.set;w.set=function(o){try{fixPage();if(o&&typeof o==='object'){o.html2canvas=o.html2canvas||{};if(o.html2canvas.backgroundColor===undefined)o.html2canvas.backgroundColor='#ffffff';var oc=o.html2canvas.onclone;o.html2canvas.onclone=function(cd){try{cleanDoc(cd)}catch(e){}if(typeof oc==='function')return oc.apply(this,arguments)};}}catch(e){}return s.apply(this,arguments)};}
     return w;
   };
   for(var k in H){try{wrapped[k]=H[k]}catch(e){}}
+  try{var Wk=H.Worker;if(Wk&&Wk.prototype&&!Wk.prototype.__skFrom){var pf=Wk.prototype.from;Wk.prototype.from=function(src){try{fixPage();if(src&&src.nodeType===1)prepare(src)}catch(e){}return pf.apply(this,arguments)};Wk.prototype.__skFrom=1;}}catch(e){}
   wrapped.__skPatched=true;window.html2pdf=wrapped;return true;
 }
 if(!patch()){
