@@ -260,3 +260,13 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 ## V5.8.8 — Popup margins, softer Aura glow
 - Every popup (Compatible Models, Credit entry, EMI reminder, Monthly/Daily report, Warranty, Dealer, Customers, Price List, Urgent repairs, Used Mobile Stock and others) now keeps a 12px margin, so inner boxes no longer touch the window border.
 - Ambient Aura Glow (the coloured patches at the top-left and bottom-right of Home) now sits behind the cards instead of tinting them, is softer, and both patches follow the accent colour. Turn it off any time in Settings → Visual Effects → Ambient Aura Glow.
+
+## V5.8.9 — Repair status without flicker, Used Stock spacing
+- Repair Jobs → Next Status / Previous Status: only the card you tapped is redrawn; the other cards, chips and buttons no longer blink.
+- Used Mobile Stock: gaps added between the header and the stat cards, and between the All / In stock / Sold chips and the table, so boxes no longer touch.
+
+## V5.9.0 — Used mobiles: RAM / Storage split, iPhone Battery Health
+- "6/128" (also 6+128, 6-128, "4 / 64") is read as 6 GB RAM + 128 GB Storage. A single 32 / 64 / 128 / 256 / 512 GB or 1 TB value is Storage only. A lone 8 or 16 is treated as a typing mistake and left empty.
+- When the model name contains "iPhone", the RAM box is hidden and a Battery Health % box is shown (form, details page, bill, price list, stock aging).
+- Typing "6/128" in the Storage box splits it into RAM and Storage automatically. Existing records (including the 415 imported ones) are shown split without rewriting the saved data; records saved from now on store RAM and Storage separately. New optional field: `battery` (iPhones only).
+- Excel/CSV import applies the same rules (and reads a "Battery Health" column if present); CSV export uses the split values and adds a Battery Health column.

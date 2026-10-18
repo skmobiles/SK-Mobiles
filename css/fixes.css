@@ -364,3 +364,10 @@ html.sk-cui:not(#a) body .modal-overlay:not(#skAccessoriesPage):not(#skUsedStock
 html:not(#a) body #skUsedStockModal main.sk-used-stock-scroll{padding-left:10px!important;padding-right:10px!important;box-sizing:border-box}
 html:not(#a) body #skAccessoriesPage > .modal-sheet > .modal-title{margin-left:10px!important;margin-right:10px!important}
 html:not(#a) body #skUsedStockModal .sk-used-stock-header{margin-left:10px!important;margin-right:10px!important;width:auto!important;box-sizing:border-box}
+
+/* V5.8.9 Used Mobile Stock: gaps between header / stat cards and between filter chips / table so boxes never touch */
+html:not(#a) body #skUsedStockModal .sk-used-stock-header{margin-bottom:10px!important}
+html:not(#a) body #skUsedStockModal #skUsedViewChips{margin-bottom:10px!important}
+html:not(#a) body #skUsedStockModal .sk-used-table-wrap+.sk-used-storage-note{margin-top:8px!important}
+html:not(#a) body #skUsedStockModal #skUsedRows{margin-top:6px!important}
+html body #skUsedDetailDialog .f-battery{--fc:#16a34a}

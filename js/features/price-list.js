@@ -14,7 +14,7 @@ function data(){
   var pk=mode==='dealer'?'dealerPrice':'customerPrice';
   var used=useUsed?arr('sk_used_mobile_stock_v1').filter(function(r){return r&&r.status!=='Sold'&&num(r[pk])>0}).map(function(r){
     var extra=showMore?[r.kit,r.issue].filter(Boolean).join(' • '):'';
-    return {name:r.model||'Used mobile',spec:[r.ram,r.storage,r.colour].filter(Boolean).join(' / '),extra:extra,price:num(r[pk])};
+    return {name:r.model||'Used mobile',spec:(window.skUsedSpec?(function(S){return [S.iphone?(S.battery?'Battery '+S.battery:''):S.ram,S.storage,r.colour]})(window.skUsedSpec(r)):[r.ram,r.storage,r.colour]).filter(Boolean).join(' / '),extra:extra,price:num(r[pk])};
   }):[];
   var acc=useAcc?arr('sk_accessories_v1').filter(function(r){return r&&num(r.price)>0&&num(r.stock)>0}).map(function(r){
     return {name:r.name||'Accessory',spec:[r.brand&&r.brand!=='Universal'?r.brand:'',r.category].filter(Boolean).join(' • '),extra:'',price:num(r.price)};

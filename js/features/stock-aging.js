@@ -22,7 +22,7 @@ function render(){
   var h=document.getElementById('skAgList');if(!h)return;
   h.innerHTML=list.length?list.map(function(x){
     var r=x.r,id=esc(r.imei||r.id||''),open=String(editing)===String(r.imei||r.id||''),sg=suggest(x);
-    return '<div class="skag-row"><div class="skag-top"><span><b>'+esc(r.model||'Used mobile')+'</b><small>'+esc([r.ram,r.storage,r.colour].filter(Boolean).join(' / '))+(r.imei?' • IMEI '+esc(r.imei):'')+'<br>Bought '+esc(T.dmy(r.date)||'—')+'</small></span><span class="skag-age '+cls(x.age)+'">'+x.age+' days</span></div>'+
+    return '<div class="skag-row"><div class="skag-top"><span><b>'+esc(r.model||'Used mobile')+'</b><small>'+esc((window.skUsedSpec?(function(S){return [S.iphone?(S.battery?'Battery '+S.battery:''):S.ram,S.storage,r.colour]})(window.skUsedSpec(r)):[r.ram,r.storage,r.colour]).filter(Boolean).join(' / '))+(r.imei?' • IMEI '+esc(r.imei):'')+'<br>Bought '+esc(T.dmy(r.date)||'—')+'</small></span><span class="skag-age '+cls(x.age)+'">'+x.age+' days</span></div>'+
       '<div class="skag-pr"><span>Cost <b>'+T.money(r.cost)+'</b></span><span>Price <b>'+T.money(r.customerPrice)+'</b></span></div>'+
       (open?'<div class="skag-edit"><input id="skAgPrice" type="number" inputmode="numeric" value="'+Math.round(T.num(r.customerPrice))+'">'+
         '<button type="button" onclick="skAgNudge(-200)">−200</button><button type="button" onclick="skAgNudge(-500)">−500</button><button type="button" onclick="skAgNudge(-1000)">−1000</button>'+
