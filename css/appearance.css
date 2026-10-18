@@ -57,9 +57,9 @@ html:not(#a):not(#b)[data-ui-scale="large"] :is(.modal-overlay,.left-drawer){wid
 html:not(#a):not(#b)[data-ui-scale="compact"] :is(.modal-overlay,.left-drawer){width:calc(100vw / .94)!important;max-width:none!important;height:calc(100vh / .94)!important;height:calc(100dvh / .94)!important}
 
 /* ---------- aura glow ---------- */
-html[data-ui-aura="on"] body:before,html[data-ui-aura="on"] body:after{content:"";display:block;position:fixed;pointer-events:none;z-index:-1;border-radius:50%;filter:blur(38px);opacity:var(--ui-aura-opacity)}
-html[data-ui-aura="on"] body:before{width:42vw;height:42vw;max-width:300px;max-height:300px;left:-10vw;top:10vh;background:color-mix(in srgb,var(--primary) 25%,transparent)}
-html[data-ui-aura="on"] body:after{width:38vw;height:38vw;max-width:280px;max-height:280px;right:-8vw;bottom:12vh;background:color-mix(in srgb,#a855f7 18%,transparent)}
+html[data-ui-aura="on"] body:before,html[data-ui-aura="on"] body:after{content:"";display:block;position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(38px);opacity:var(--ui-aura-opacity)}
+html[data-ui-aura="on"] body:before{width:42vw;height:42vw;max-width:300px;max-height:300px;left:-10vw;top:10vh;background:color-mix(in srgb,var(--primary) 40%,transparent)}
+html[data-ui-aura="on"] body:after{width:38vw;height:38vw;max-width:280px;max-height:280px;right:-8vw;bottom:12vh;background:color-mix(in srgb,#a855f7 32%,transparent)}
 html[data-ui-aura="off"] body:before,html[data-ui-aura="off"] body:after{display:none!important}
 
 /* ---------- reduce motion (toggle "on") ---------- */
