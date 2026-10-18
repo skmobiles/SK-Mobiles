@@ -334,3 +334,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Customer Credit Ledger: full page from the top down to just above the nav bar; only the inside scrolls, so history cards never slide behind the nav bar or out of the white box.
 - Credit form: Months / Interest % / Date stay hidden while "No EMI" is selected (a CSS rule matched the word "grid" inside the hidden field's style).
 - Home / Tempered / Display: cards fade out just above the floating nav bar instead of showing around and under it (page-coloured fade under the bar, follows the theme; hidden while a page, popup or the menu is open).
+
+## V5.9.14 — Same scroll and same width on every page & popup
+- Title bar (name + ✕) stays at the top on every page and popup; only the content below it scrolls.
+- Every full page starts 8px from the top and ends on the same line just above the nav bar; scrolling content fades out at that edge. Used Mobile Stock uses the same frame.
+- Every page and popup: white box 8px from the screen edges, content 12px inside it.
+- Short popups stay centred; real pages (Ledger, Billing, Settings, Repair Jobs, reports…) always open full size. Centring now measures the content itself.
