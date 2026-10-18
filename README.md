@@ -310,3 +310,8 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Long-press re-order on phones: hold a Home box (Business Summary or Shop Tools) about half a second until it lifts, slide it to the new place and lift the finger. The order is saved like before; a normal tap still opens the box.
 - PDF freeze fixed: the PDF library used to copy the whole app (all pages and popups) before drawing, which froze the app for many seconds on a phone (about 45 s in a 6x-slowed test). Now only the bill area is copied: about 3 s, with no long freeze. WhatsApp PDF, Download PDF, Monthly report and Credit list PDF all tested.
 - Monthly report PDF and Credit list PDF were coming out blank (the hidden source box was off-screen); fixed.
+
+## V5.9.9 — Full mobile review
+- PDF prompt: one clear row "✅ PDF downloaded — [Open PDF] ✕" placed just above the bottom menu (Share removed); the WhatsApp "PDF ready" prompt uses the same style.
+- Used Mobile Register rows: name and price on the first line, dealer and status on the second, full IMEI on the third; the Actions column only takes the space it needs (no empty area on sold phones).
+- Review of every page and popup at phone size: Bill page sections now have an even 14px rhythm (were 26–42px apart); Order list and Repair details fit their content; Credit ledger starts at the top; EMI reminder fields keep a margin; Accessories buttons form a 2 x 2 grid; Dealer date box matches other inputs; Repair-details date no longer splits the year. Automatic spacing check: no touching boxes anywhere.
