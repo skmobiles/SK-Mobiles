@@ -462,3 +462,13 @@ html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-uc-top>
 html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-uc .sk-used-row-actions{grid-column:auto!important;grid-row:auto!important}
 html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-uc .sk-uc-acts{width:auto!important;min-width:0!important;max-width:none!important;justify-content:flex-end!important;margin-left:auto!important}
 html:not(#a):not(#b):not(#c) body #skUsedStockModal#skUsedStockModal .sk-uc .sk-uc-acts .sk-used-row-menu{width:auto!important;min-width:34px!important;flex:none!important}
+
+/* V5.9.11 Menu: no live blur behind the menu (re-blurring the home page on every scroll step made it blink on phones) */
+html:not(#a):not(#b) body #leftDrawer.left-drawer{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:rgba(8,12,28,.45)!important}
+html:not(#a):not(#b) body #leftDrawer .left-drawer-content{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:var(--modal-bg,#fff)!important;will-change:auto!important;contain:paint;overscroll-behavior:contain}
+
+/* V5.9.11 Used Mobile Stock stat cards: icon, label and value centred (was left with an empty right side) */
+html:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important}
+html:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card>*{margin-left:auto!important;margin-right:auto!important;text-align:center!important}
+html[data-ui-mode="dark"]:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card{background:var(--card-bg,#0d121c)!important;border-color:var(--card-border,#243044)!important}
+html[data-ui-mode="dark"]:not(#a):not(#b) body #skUsedStockModal .sk-used-stat-card small{color:var(--text-muted,#94a3b8)!important}

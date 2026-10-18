@@ -318,3 +318,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 
 ## V5.9.10 — Used Mobile Register cards (as in the approved demo)
 - Every phone is one even card, the same in All / In stock / Sold: phone icon with its number, model name and dealer, price and In Stock / Sold on the right; a thin line; then the full IMEI with Bill + ⋮ (in stock) or Profit + ⋮ (sold). The old column header row is hidden. Works in light and dark.
+
+## V5.9.11 — Stat cards centred, smooth Menu scroll
+- Used Mobile Stock stat cards (Total Devices / In Stock / Sold / Sold Profit): icon, label and value are centred; in dark mode the cards are dark with readable labels (were light grey and faded).
+- Menu: scrolling the menu no longer makes the Home page behind it blink. The menu no longer live-blurs the page behind it on every scroll step, and the long-press re-order only blocks scrolling while a box is actually being moved.

@@ -31,7 +31,7 @@ document.addEventListener('pointerdown',function(e){
   if(e.pointerType==='mouse')return;
   var card=e.target.closest&&e.target.closest('#homeMetricGrid .draggable-card,#homeActionCardsContainer .draggable-card');if(!card)return;
   lp={card:card,box:card.parentElement,x:e.clientX,y:e.clientY,on:false,t:setTimeout(function(){
-    if(!lp)return;lp.on=true;card.classList.add('sk-lp-drag');document.body.classList.add('sk-lp-active');
+    if(!lp)return;lp.on=true;document.addEventListener('touchmove',blockMove,{capture:true,passive:false});card.classList.add('sk-lp-drag');document.body.classList.add('sk-lp-active');
     try{navigator.vibrate&&navigator.vibrate(25)}catch(x){}
   },LP_MS)};
 },true);
@@ -44,9 +44,10 @@ document.addEventListener('pointermove',function(e){
     lp.box.insertBefore(lp.card,a<b?over.nextSibling:over);
   }
 },true);
-document.addEventListener('touchmove',function(e){if(lp&&lp.on)e.preventDefault()},{capture:true,passive:false});
+/* non-passive touchmove only while a box is being moved, so normal scrolling stays smooth (a page-wide blocking listener made scrolling jerky) */
+function blockMove(e){if(lp&&lp.on)e.preventDefault()}
 function end(){
-  if(!lp)return;clearTimeout(lp.t);var was=lp.on,card=lp.card,box=lp.box;lp=null;
+  if(!lp)return;clearTimeout(lp.t);var was=lp.on,card=lp.card,box=lp.box;lp=null;document.removeEventListener('touchmove',blockMove,{capture:true});
   if(!was)return;
   card.classList.remove('sk-lp-drag');document.body.classList.remove('sk-lp-active');saveOrder(box);
   if(typeof window.showToast==='function')window.showToast('Position updated!');
@@ -54,6 +55,6 @@ function end(){
   var stop=function(ev){ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();};
   document.addEventListener('click',stop,{capture:true,once:true});setTimeout(function(){document.removeEventListener('click',stop,true)},350);
 }
-document.addEventListener('pointerup',end,true);document.addEventListener('pointercancel',function(){if(lp&&lp.on)end();else if(lp){clearTimeout(lp.t);lp=null}},true);
+document.addEventListener('pointerup',end,true);document.addEventListener('pointercancel',function(){if(lp&&lp.on)end();else if(lp){clearTimeout(lp.t);lp=null;document.removeEventListener('touchmove',blockMove,{capture:true})}},true);
 document.addEventListener('contextmenu',function(e){if(lp||(e.target.closest&&e.target.closest('#homeMetricGrid .draggable-card,#homeActionCardsContainer .draggable-card')))e.preventDefault()},true);
 })();
