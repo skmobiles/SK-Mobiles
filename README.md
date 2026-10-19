@@ -375,3 +375,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Simple top bar (← name, status); details as one white list (label left, value right, colour icons).
 - The buttons were partly hidden behind the nav bar; they now sit above it: Bill this mobile (blue), Edit | Delete (red outline), Select for Bill. Same functions as before. CSS only.
 - Dark mode: no more white boxes (search box, header buttons, Used Stock form fields, status chips, row menu, repair details, filter fields) and no unreadable text (home recent activity, pay-mode chips, used details title, repair amounts). Popup backdrops stay dark. Checked every screen with a contrast scan.
+
+## V5.9.21 — Speed: smooth scroll, quicker taps
+- Scroll: the page-wide "sk-perf-scrolling" class on <html> restyled every element at the start and end of each scroll (100–200 ms stall on a phone); on Used Mobile Stock it flipped on every frame (~2 s per frame). Removed — every page now scrolls at 60 fps in a 4× slowed-CPU test.
+- Taps: date fields no longer force a page layout on every value change (Used purchase form opened ~200 ms faster); bill preview reads the bill number with textContent (no forced layout); number auto-fit only runs when Used Stock / Ledger is open.
+- Long lists (Tempered / Display cards, used register, bill history, ledger list) only lay out the cards on screen: opening Tempered ~760 → ~310 ms in the slowed test.
+- Same left/right width on every page: Bill History cards, Admin boxes, Accessories, Bulk WhatsApp, Reviews now start 16px from the screen edge like every other page; Backup, Stock aging, Price List and Repair details popups use the popup width (20px). Measured on every screen.

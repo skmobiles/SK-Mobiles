@@ -11,9 +11,13 @@ function attach(i){
   if(cs.flexGrow!=='0')w.style.flex=cs.flex;
   i.parentNode.insertBefore(w,i);w.appendChild(i);
   var t=document.createElement('span');t.className='sk-dmy-txt';t.setAttribute('aria-hidden','true');w.appendChild(t);
+  /* V5.9.21: the font is copied once, in the next frame. Reading it right after every value change
+     forced a full page layout each time (Used purchase form: ~200 ms per open on a phone). */
+  var fontDone=false;
+  function font(){if(fontDone||!i.isConnected)return;var c=getComputedStyle(i);if(!c.fontSize)return;t.style.fontSize=c.fontSize;t.style.fontWeight=c.fontWeight;fontDone=true}
   function sync(){
     var v=fmt(i.value);t.textContent=v||'dd/mm/yyyy';t.classList.toggle('empty',!v);
-    var c=getComputedStyle(i);t.style.fontSize=c.fontSize;t.style.fontWeight=c.fontWeight;
+    if(!fontDone)requestAnimationFrame(font);
   }
   i.addEventListener('input',sync);i.addEventListener('change',sync);
   var d=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');

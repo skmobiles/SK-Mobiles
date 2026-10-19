@@ -45,7 +45,7 @@ function liveInfo(){
   var g=function(id){var e=document.getElementById(id);return e?e.value:''};
   var price=typeof window.skBillNetPrice==='function'?window.skBillNetPrice():num(g('billTotalPrice')),adv=num(g('billAdvance'));
   var pm=(typeof currentPayMode!=='undefined')?currentPayMode:'Cash';
-  var no=(document.getElementById('pvBillNo')||{}).innerText||'';
+  var no=(document.getElementById('pvBillNo')||{}).textContent||''; /* V5.9.21: textContent - innerText forced a page layout on every preview update */
   return {price:price,advance:adv,balance:Math.max(0,price-adv),payMode:pm,billNo:String(no).trim()};
 }
 function wrap(){
