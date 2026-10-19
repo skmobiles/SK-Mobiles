@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.15 — Used mobile details: wider box
+- The details box now uses the full page width (same side gaps as the buttons below it), is taller, and the inner scrollbar no longer eats width.
+
 ## V5.11.14 — Pull down to reload on Home
 - Home page only, when already at the top: pull down past ~80px and release to reload the app (a small ↻ indicator shows). Pulling up at the bottom, and every other page / popup / Menu, still just bounces.
 
