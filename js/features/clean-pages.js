@@ -251,6 +251,7 @@ window.skStOpenPart=function(label){
   return false;
 };
 var stWasOn=false;
+window.addEventListener('sk-role-ready',function(){var sh=stSheet();if(sh&&sh.classList.contains('skst-listmode'))buildList(sh)});
 function cleanSettings(){
   var m=$('settingsModal'),sh=stSheet();if(!m||!sh)return;
   var on=m.classList.contains('active');
