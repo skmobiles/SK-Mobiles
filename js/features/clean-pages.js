@@ -148,6 +148,9 @@ function cleanLedgerList(){
 }
 /* ============================ Settings ============================ */
 var ST_ROWS=[
+  ['Staff',[
+    ['People & access','#2563eb','<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.6"/><path d="M16 14.2a5 5 0 0 1 5.5 5"/>',['id:skPeopleSection'],null,null,'admin']
+  ]],
   ['Shop',[
     ['Shop profile & address','#f97316','<path d="M3 9l1.5-5h15L21 9M4 9v11h16V9M9 20v-6h6v6"/>',['sec:SHOP PROFILE']],
     ['Shop logo','#8b5cf6','<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>',['sec:BRAND LOGO']],
@@ -206,7 +209,10 @@ function buildList(sh){
   var html='';
   ST_ROWS.forEach(function(g,gi){
     html+='<div class="skst-h">'+esc(g[0])+'</div><div class="skst-group">';
+    var vis=g[1].filter(function(r){return !r[6]||(typeof window.skCurrentRole==='function'&&window.skCurrentRole()===r[6])});
+    if(!vis.length){html=html.replace(/<div class="skst-h">[^<]*<\/div><div class="skst-group">$/,'');html+='<!--skip-->';return}
     g[1].forEach(function(r,ri){
+      if(r[6]&&!(typeof window.skCurrentRole==='function'&&window.skCurrentRole()===r[6]))return;
       var val=r[5]?stValue(r[5]):'';
       html+='<button type="button" class="skst-row" data-g="'+gi+'" data-r="'+ri+'"><span class="skst-ic" style="color:'+r[1]+'">'+svg(r[2])+'</span><span class="skst-l">'+esc(r[0])+'</span><span class="skst-v">'+val+'</span>'+(r[4]==='action'?'':'<span class="skst-chev">'+IC.chev+'</span>')+'</button>';
     });
