@@ -77,7 +77,24 @@ document.addEventListener('click',async function(e){
 /* listen only while Settings is open */
 function check(){var m=$('settingsModal');if(m&&m.classList.contains('active'))start();else stop()}
 window.addEventListener('sk-role-ready',function(){stop();check()});
+/* Menu (left drawer): People & access at the very top, owner only */
+function menuBtn(){
+  var g=document.querySelector('#leftDrawer .left-drawer-content > .drawer-group');if(!g)return;
+  var b=$('skPeopleMenuBtn');
+  if(!b){
+    b=document.createElement('button');b.type='button';b.id='skPeopleMenuBtn';b.className='menu-drawer-btn';
+    b.innerHTML='<span class="menu-icon-pod" aria-hidden="true" style="color:#2563eb"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.6"/><path d="M16 14.2a5 5 0 0 1 5.5 5"/></svg></span><span class="menu-btn-label">People &amp; access</span><span class="menu-arrow">\u203a</span>';
+    b.onclick=function(){
+      try{toggleModal('settingsModal',true);toggleLeftDrawer(false)}catch(e){}
+      setTimeout(function(){if(typeof window.skStOpenPart==='function')window.skStOpenPart('People & access')},150);
+    };
+    var t=g.querySelector('.drawer-group-title');g.insertBefore(b,t?t.nextSibling:g.firstChild);
+  }
+  b.style.display=(typeof window.skCurrentRole==='function'&&window.skCurrentRole()==='admin')?'':'none';
+}
+window.addEventListener('sk-role-ready',menuBtn);
 function boot(){
+  menuBtn();var dr=$('leftDrawer');if(dr)new MutationObserver(menuBtn).observe(dr,{attributes:true,attributeFilter:['class']});
   var m=$('settingsModal');if(!m)return;
   new MutationObserver(check).observe(m,{attributes:true,attributeFilter:['class']});check();
 }
