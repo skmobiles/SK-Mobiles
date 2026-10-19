@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.16 — iPhone-style spring physics
+- `spring-scroll.js` rewritten: rubber-band drag (heavier the further you pull), real damped spring on release that carries your release speed, and fast scrolls that hit the end feed their speed into the same spring. Home pull-to-reload threshold now matches the new drag feel (~200px pull).
+
 ## V5.11.15 — Used mobile details: wider box
 - The details box now uses the full page width (same side gaps as the buttons below it), is taller, and the inner scrollbar no longer eats width.
 
