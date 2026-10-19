@@ -386,3 +386,5 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Scroll: no live blur behind the bottom bar, no fade mask on scrolling boxes (both are redrawn on every scroll frame by the phone's graphics chip), and the V5.9.21 "only draw cards on screen" rule removed (it drew cards while the finger was moving, giving a hitch at the start of a scroll).
 - Taps: pressed buttons no longer shrink (a shrinking button could slip out from under the finger); taps fire at once (touch-action: manipulation); with the menu open the bottom bar is on top and a tap on it closes the menu and opens the page.
 - Used Mobile Stock: the register is no longer a box inside a box — each phone card uses the full width.
+- Home "Pending Jobs" box: the "1 urgent" pill now sits inside the box (bottom-right); it was cut off at the top edge.
+- Repair Jobs list: urgent jobs have a red border (light and dark).
