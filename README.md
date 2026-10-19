@@ -434,6 +434,15 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.0 — Receipts for every payment, repair search, buy back once, search fixes
+- **Receipts:** every payment now gets its own shareable receipt (down payment, credit / EMI payment, repair advance, repair payment, account payment) showing amount, mode, total, paid so far and the balance. Share as WhatsApp text or PDF. Stored in `sk_receipts_v1`.
+- **Sale bill is never changed by later payments:** a credit payment no longer adds to the bill's Down Payment. The bill shows the balance at the time of sale; Bill Details has a "Payments after sale" block with the receipts and the current balance. Old bills are repaired once (original Down Payment restored from the payment records, missing receipts created).
+- **Repair Jobs (Pending):** search box (customer, phone, model, problem, amount, dealer) and a filter button (dealer, received date) with a "Filter ✕ Clear" bar.
+- **Used stock:** Return / Buy back only on the latest sale of an IMEI; older sales show "Already bought back".
+- **Search boxes:** the keyboard's search key hides the keyboard; the ✕ clears on the first tap.
+- **Customer Ledger:** sales bill list shows the newest bill first.
+- **People & access:** the row is also shown from the saved owner role and refreshes as soon as the cloud role is known.
+
 ## V5.10.6 — Used stock: buy back, sold edit, quick filter clear
 - **Return / Buy back** on sold phones (⋮ menu and details): opens a new purchase with model, IMEI, colour, storage, kit filled in and the customer as dealer; enter the price and save. The old sale stays as history.
 - **Edit on a sold phone** shows Sale details (Sold To, Phone, Sale Date, Sale Price); profit is recalculated.

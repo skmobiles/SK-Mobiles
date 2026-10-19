@@ -67,6 +67,7 @@ document.addEventListener('change',async function(e){
 });
 /* listen only while Settings is open */
 function check(){var m=$('settingsModal');if(m&&m.classList.contains('active'))start();else stop()}
+window.addEventListener('sk-role-ready',function(){stop();check()});
 function boot(){
   var m=$('settingsModal');if(!m)return;
   new MutationObserver(check).observe(m,{attributes:true,attributeFilter:['class']});check();
