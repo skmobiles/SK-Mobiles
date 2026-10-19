@@ -414,3 +414,8 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - firestore.rules: backup pieces (`items/{id}/chunks/{n}`) are now allowed (same access as items). Publish the rules in the Firebase console.
 - Backup writes go in batches of 20 (security rules allow only about 1000 checks per request; 400-write batches were refused as "permission-denied").
 - If a part is still refused, the message names it: backup record, backup items or backup pieces (chunks).
+
+## V5.10.4 — Cloud backup "no permission to save backup items"
+- Older user records have no `active` field. The rules read `active` directly, which fails for a missing field, so the owner was not seen as Owner. Rules now use `get('active', true)` / `get('role','')`.
+- On sign-in the app adds `active: true` to such records (role untouched), so it works even before the rules are published.
+- A permission error now also shows the signed-in email and the cloud role.

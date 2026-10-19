@@ -257,6 +257,10 @@
     } else {
       /* keep name / photo fresh; the role itself can only be changed by the owner */
       const d = snap.data() || {};
+      /* V5.10.4: older records have no "active" field; add it (role untouched) so the security rules can read it */
+      if(d.active === undefined){
+        try { await ref.update({ active: true }); snap = await ref.get(); } catch(e){ console.warn("active field not added", e); }
+      }
       if((user.displayName && d.name !== user.displayName) || (user.photoURL && d.photo !== user.photoURL)){
         try { await ref.update({ name: user.displayName || d.name || "", photo: user.photoURL || d.photo || "", lastSeenAt: firebase.firestore.FieldValue.serverTimestamp() }); } catch(e){}
       }
@@ -978,10 +982,19 @@
       if(!silent) toast("☁️ Cloud Backup completed");
     }catch(e){
       console.error("Cloud backup error", e);
-      const why = (e && e.code === "permission-denied") ? "no permission to save " + (e.skPart || "backup") + " — publish the latest Firestore rules"
+      let why = (e && e.code === "permission-denied") ? "no permission to save " + (e.skPart || "backup") + " — publish the latest Firestore rules"
         : (e && (e.code === "unavailable" || e.code === "deadline-exceeded")) ? "no internet connection"
         : (e && e.code === "resource-exhausted") ? "Firebase free daily limit reached — try again tomorrow"
         : ((e && (e.code || e.message)) || "unknown error");
+      let who = "";
+      if(e && e.code === "permission-denied"){
+        /* V5.10.4: say which account and which cloud role the rules saw */
+        try{
+          const u = auth.currentUser, us = await db.collection("users").doc(u.uid).get(), d = us.exists ? (us.data()||{}) : null;
+          who = " (signed in as " + (u.email||"?") + " • cloud role: " + (d ? String(d.role||"none") + (d.active === false ? ", turned off" : "") : "no record") + ")";
+        }catch(e4){ who = " (signed in as " + ((auth.currentUser&&auth.currentUser.email)||"?") + ")"; }
+      }
+      why = why + who;
       window.__skLastBackupError = why;
       cloudBackupStatus("❌ Cloud backup failed: " + why);
       cloudBackupEvent(false, null, why);

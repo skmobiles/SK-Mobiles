@@ -14,8 +14,8 @@ service cloud.firestore {
     function hasRole(role) {
       return signedIn()
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && myUser().role == role
-        && myUser().active != false;
+        && myUser().get('role', '') == role
+        && myUser().get('active', true) != false;   /* V5.10.4: older user records have no "active" field — reading a missing field made every check fail */
     }
 
     function isOwnerEmail() {
