@@ -255,6 +255,12 @@ function editForm(r){
   });
 }
 window.skReceiptEdit=function(id){var r=find(id);if(r)editForm(r)};
+/* receipt that belongs to a credit-ledger payment row (same bill, amount and date) */
+window.skReceiptForEntry=function(e){
+  var d=dmy(e.date);
+  return all().filter(function(r){return r.billId&&r.billId===String(e.billId||'')&&num(r.amount)===num(e.amount)&&r.date===d&&r.kind!=='Down payment'})[0]||null;
+};
+window.skReceiptEditForEntry=function(e){var r=window.skReceiptForEntry(e);if(!r)return false;editForm(r);return true};
 setTimeout(migrate,1500);
 window.addEventListener('sk-role-ready',function(){setTimeout(migrate,2500)});
 })();

@@ -434,6 +434,12 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.9 — Ledger row actions, return without repair, polite messages
+- Customer Ledger history: tap a row for full details (date, amount, mode, note, bill, receipt) with Edit / Delete; long press for an Edit / Delete menu. Delete goes to the Recycle Bin; deleting a payment made against a bill puts the amount back on the bill balance and removes its receipt, and Restore puts both back. Payments made against a bill are edited through their receipt.
+- The Edit Credit / Payment popup has a Delete button and closes with the phone Back button.
+- Repair: **Return without repair** (job details): reason, optional checking charge, refund shown when the advance is more than the charge. History has a separate "Returned – not repaired" section and tag.
+- All customer WhatsApp messages (credit reminder, repair ready, not-collected reminders) were rewritten in a more polite tone (English).
+
 ## V5.11.8 — Repair: ready but not collected
 - New chip **⏰ Not collected** in Pending Jobs: repaired (Ready) mobiles waiting 7+ days, oldest first. Each card has a WhatsApp button: **Reminder** (7+ days), **Warning** (30+, collect within 30 days, otherwise customer's risk) and **Final notice** (60+, shop not responsible; may dispose of / adjust against dues to the extent permitted by law). A UPI pay link is added when a balance is due. Sent reminders are remembered (`sk_repair_remind_log_v1`).
 - The day a job becomes Ready is now stored (`readyAt`); older jobs use their last update date.

@@ -16,9 +16,9 @@ function balanceOf(j){
 }
 function message(j){
   var bal=balanceOf(j);
-  var t='Hello '+(j.customer||'')+', your '+(j.model||'phone')+' is repaired and ready for pick-up at '+shopName()+'.';
-  if(bal>0)t+=' Balance to pay: '+money(bal)+'.';
-  return t+' Please collect it at your convenience. Thank you 🙏';
+  var t='Dear '+(j.customer||'Customer')+', greetings from '+shopName()+'. We are happy to inform you that your '+(j.model||'phone')+' has been repaired and is ready for collection.';
+  if(bal>0)t+=' The balance to pay is '+money(bal)+'.';
+  return t+' Kindly collect it at your convenience. Thank you for your support 🙏';
 }
 function popup(j){
   var old=document.getElementById('skRdyPop');if(old)old.remove();

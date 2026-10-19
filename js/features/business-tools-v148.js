@@ -181,9 +181,9 @@ function reminderRows(){
   });
 }
 function msgFor(r){
-  var m='Hello '+r.name+', this is a reminder from '+shopName()+'. Your pending balance is '+money(r.balance)+'.';
-  if(r.due)m+=(r.overdue?' It was due on ':' Your due date is ')+dmy(r.due)+'.';
-  m+=' Kindly pay at the earliest. Thank you 🙏';
+  var m='Dear '+r.name+', greetings from '+shopName()+'. This is a gentle reminder that '+money(r.balance)+' is pending in your account.';
+  if(r.due)m+=(r.overdue?' It was due on ':' It is due on ')+dmy(r.due)+'.';
+  m+=' Kindly clear it at your convenience. If you have already paid, please ignore this message. Thank you for your support 🙏';
   /* V5.11.5: UPI pay link (opens GPay / PhonePe / Paytm with the amount filled in) when a UPI ID is saved in Shop Profile */
   var upi=String(localStorage.getItem('sk_shop_upi')||'').trim();
   if(/^[\w.\-]{2,}@[A-Za-z][\w.\-]{1,}$/.test(upi)&&num(r.balance)>0){

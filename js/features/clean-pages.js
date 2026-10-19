@@ -104,6 +104,7 @@ function cleanLedger(){
     var btn=card.querySelector('button');
     var label=type==='payment'?'Payment':(type==='discount'?'Discount':'Credit');
     card.classList.add('skcl-row');
+    var em=btn&&(btn.getAttribute('onclick')||'').match(/skCPEditLedgerEntry\('([^']*)'\)/);if(em)card.setAttribute('data-eid',decodeURIComponent(em[1]));
     card.innerHTML='<div class="skcl-l"><span class="skcl-a">'+label+'</span><small>'+esc(sub)+'</small></div><b class="skcl-m'+(type==='credit'?'':' is-pay')+'">'+esc(type==='credit'?amt:'− '+amt.replace(/^−\s*/,''))+'</b>';
     if(btn){var t=(btn.textContent||'Edit').trim();btn.className='skcl-edit';btn.removeAttribute('style');btn.setAttribute('aria-label',t);btn.title=t;btn.innerHTML=IC.pencil;card.appendChild(btn)}
   });
