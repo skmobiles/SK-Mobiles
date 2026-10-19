@@ -3434,6 +3434,8 @@ const MASTER_INVENTORY = [
     // 🔒 SK V4.8 LOCKED: Bill History must render every synced bill safely and keep Delete visible.
     // Do not remove the Delete action or change the locked bill-number formats.
     // Core Bill History renderer: View / Edit / Delete are implemented directly here.
+    /* V5.11.1: same-day bills — higher bill number (made later) first, whatever order the list came back in */
+    function skBillSeqNo(b){const m=String(b&&b.billNo||'').match(/(\d+)\s*$/);return m?Number(m[1]):0;}
     function renderBillHistory() {
       const container=document.getElementById('billHistoryContainer'); if(!container)return;
       const q=(document.getElementById('billHistorySearch')?.value||'').trim().toLowerCase();
@@ -3448,7 +3450,7 @@ const MASTER_INVENTORY = [
         return matchesQuery&&matchesPay&&matchesDate&&matchesType;
       });
       if(!filtered.length){container.innerHTML=`<div class="empty-state">${source.length?'No saved '+(typeof currentMobileType==='string'?currentMobileType:'New Mobile')+' bills match this filter.':'No saved billing history found.'}</div>`;return;}
-      filtered.map((b,i)=>({b,i,k:skBillDateKey(b.date)||''})).sort((x,y)=>x.k<y.k?1:x.k>y.k?-1:x.i-y.i).map(x=>x.b).forEach(b=>{
+      filtered.map((b,i)=>({b,i,k:skBillDateKey(b.date)||''})).sort((x,y)=>x.k<y.k?1:x.k>y.k?-1:(skBillSeqNo(y.b)-skBillSeqNo(x.b)||x.i-y.i)).map(x=>x.b).forEach(b=>{
         const item=document.createElement('article'); item.className='bill-history-card';
         const billId=String(b.id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); const displayBillNo=b.billNo||skBillNumberFromDateSeq(b.date,skExistingBillSeq(b)||1,false); const safePrice=Number(b.price)||0;
         item.innerHTML=`<div class="bill-history-main"><div class="bill-history-name">${String(b.custName||'Customer')} (${String(b.model||'---')})</div><div class="bill-history-meta"><span class="bill-history-meta-item">🧾 ${displayBillNo}</span><span class="bill-history-meta-item">•</span><span class="bill-history-meta-item">📞 ${String(b.phone||'---')}</span><span class="bill-history-meta-item">📅 ${skBillUiDate(b.date||'---')}</span><span class="bill-history-pay-mode">${String(b.payMode||'Cash')}</span></div><div class="bill-history-amount">₹${safePrice.toLocaleString('en-IN')}</div></div><div class="bill-history-actions"><button type="button" class="bill-history-edit" onclick="editSavedBill(savedBills.findIndex(x=>x&&x.id==='${billId}'))" title="Edit Bill" aria-label="Edit bill">✏️</button><button type="button" class="bill-history-delete" onclick="deleteBillSafely('${billId}')" title="Delete Bill" aria-label="Delete bill">🗑️</button></div>`;
@@ -7677,7 +7679,7 @@ window.skCPEditLedgerEntry=function(encodedId){
 
 function cpOpenDetail(c){
  skCPSelectedKey=c.key;
- var bills=c.bills.slice().sort(function(a,b){var ka=skBillDateKey(a.b&&a.b.date),kb=skBillDateKey(b.b&&b.b.date);return ka<kb?1:ka>kb?-1:a.idx-b.idx});/* V5.11.0: newest bill first (saved bills are stored newest-first) */
+ var bills=c.bills.slice().sort(function(a,b){var ka=skBillDateKey(a.b&&a.b.date),kb=skBillDateKey(b.b&&b.b.date);return ka<kb?1:ka>kb?-1:(skBillSeqNo(b.b)-skBillSeqNo(a.b)||a.idx-b.idx)});/* V5.11.0: newest bill first (saved bills are stored newest-first) */
  var entries=c.entries.filter(function(e){
   /* Bill-sourced credit/EMI rows mirror the purchase and EMI schedule already
      shown above. Do not show them as extra credit history rows. Keep actual

@@ -101,7 +101,7 @@ function cleanLedger(){
     var head=card.querySelector('b');if(!head)return;
     var m=(head.textContent||'').match(/(PAYMENT|CREDIT|DISCOUNT)\s*•\s*(.*)$/i);if(!m)return;
     var type=m[1].toLowerCase(),amt=m[2].trim();
-    var lines=card.querySelectorAll(':scope > div');var sub=lines.length>1?lines[lines.length-1].textContent.trim():'';
+    var lines=card.querySelectorAll(':scope > div:not(.skcp-open-job-hint)');var sub=lines.length>1?lines[lines.length-1].textContent.trim():'';
     sub=sub.replace(/\s*•\s*/g,' · ').replace(/ · $/,'');
     var btn=card.querySelector('button');
     var label=type==='payment'?'Payment':(type==='discount'?'Discount':'Credit');
