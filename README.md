@@ -397,3 +397,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - `firebase.json` now deploys to the `skmobilesdpi` site (https://skmobilesdpi.web.app) in the same Firebase project (sk-mobiles-2d61d). The old address sk-mobiles-2d61d.web.app stays on V5.9.23 and gets no more updates.
 - `authDomain` in js/firebase-sync.js is unchanged on purpose (it is the Firebase sign-in handler, not the app address). skmobilesdpi.web.app and skmobilesdpi.firebaseapp.com were added to Authentication → Authorized domains.
 - Phone data is stored per address: take Backup & Restore → Download backup (JSON) in the old app, then Restore in the new one (Used Mobile Stock is local-only).
+
+## V5.10.0 — Sign in with Google + People & access
+- Login is "Sign in with Google" only (no email/password form). The owner is skmobilesdpi@gmail.com.
+- A new person who signs in gets a users/{uid} record with role "pending" and sees "Waiting for access". The app opens by itself when the owner gives a role.
+- Settings → Staff → People & access (owner only): Waiting for access + Staff lists; role per person: Manager / Worker / No access. "No access" stops all data at once; their earlier entries stay.
+- Existing staff keep their role: Google sign-in on the same Gmail uses the same Firebase account, so users/{uid} is unchanged.
+- firestore.rules: the fixed three-email list is gone. Create = own record as "pending" (or "admin" for the verified owner email); only the owner can set manager / worker / none, never on their own record. Data rules unchanged. **Publish firestore.rules in the Firebase console** — GitHub deploys only the app, not the rules.

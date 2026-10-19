@@ -12,11 +12,12 @@
     appId: "1:705961182597:web:fa8238739d140b250df0ec"
   };
 
-  const ROLE_BY_EMAIL = {
-    "skmobilesdpi@gmail.com": "admin",
-    "lavanyam.com94@gmail.com": "manager",
-    "sriyogi6@gmail.com": "worker"
-  };
+  /* V5.10.0: sign-in with Google. Only the owner is fixed; every other person gets a role from the owner
+     in Settings -> People (stored in users/{uid}.role and enforced by firestore.rules). */
+  const OWNER_EMAIL = "skmobilesdpi@gmail.com";
+  const STAFF_ROLES = ["admin","manager","worker"];
+  let currentRole = "";
+  let unsubscribeOwnUser = null;
 
   const MANAGER_PERMISSION_DEFAULTS = {
     managerAccess:true, billing:false, orders:false, inventory:false, credit:false, repair:false,
@@ -156,7 +157,7 @@
   }
 
   function emailRole(email){
-    return ROLE_BY_EMAIL[String(email||"").trim().toLowerCase()] || "";
+    return String(email||"").trim().toLowerCase() === OWNER_EMAIL ? "admin" : "";
   }
 
   async function ensureFirebase(){
@@ -175,86 +176,55 @@
     return true;
   }
 
-  function injectLoginUI(){
-    const modernModal = document.getElementById("skLoginModal");
-    const modernEmail = document.getElementById("loginEmailInput");
-    const modernPassword = document.getElementById("loginPasswordInput");
-    const modernBtn = document.getElementById("skFirebaseLoginBtn");
-
-    const doLogin = async ()=>{
-      const email = (modernEmail?.value || document.getElementById("skFirebaseEmail")?.value || "").trim().toLowerCase();
-      const password = modernPassword?.value || document.getElementById("skFirebasePassword")?.value || "";
-      if(!email || !password){ msg("❌ Enter Email and Password."); return; }
-      if(!emailRole(email)){ msg("❌ This Email is not registered."); return; }
-      msg("⏳ Logging in...");
-      if(modernBtn) modernBtn.disabled = true;
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-      } catch(e) {
-        console.error(e);
-        msg("❌ Login failed: " + (e.code === "auth/invalid-credential" ? "Email or Password is incorrect." : e.message));
-      } finally {
-        if(modernBtn) modernBtn.disabled = false;
-      }
-    };
-
-    if(modernModal && modernEmail && modernPassword && modernBtn){
-      if(!modernBtn.dataset.firebaseBound){
-        modernBtn.dataset.firebaseBound = "1";
-        modernBtn.addEventListener("click", doLogin);
-        modernPassword.addEventListener("keydown", e=>{ if(e.key === "Enter") doLogin(); });
-        const toggle = document.getElementById("skLoginPasswordToggle");
-        if(toggle && !toggle.dataset.bound){
-          toggle.dataset.bound = "1";
-          toggle.addEventListener("click", ()=>{
-            const visible = modernPassword.type === "text";
-            modernPassword.type = visible ? "password" : "text";
-            toggle.textContent = visible ? "Show" : "Hide";
-            toggle.setAttribute("aria-label", visible ? "Show password" : "Hide password");
-            toggle.setAttribute("aria-pressed", String(!visible));
-            modernPassword.focus();
-          });
-        }
-      }
-
-      // Keep the older role-gate login UI hidden when the supplied modern modal exists.
-      const card = document.querySelector("#skRoleGate .sk-login-card");
-      if(card){
-        const oldGrid = card.querySelector(".sk-role-grid");
-        const oldLabel = card.querySelector('label[for="skRolePin"]');
-        const oldPin = card.querySelector("#skRolePin");
-        const oldWorker = card.querySelector("#skWorkerLoginSelect");
-        const oldBtn = card.querySelector("#skRoleLoginBtn");
-        [oldGrid, oldLabel, oldPin, oldWorker, oldBtn].forEach(el=>{ if(el) el.style.display="none"; });
-      }
-      return;
+  function showLoginStep(step, user, role){
+    const signIn = document.getElementById("skLoginSignIn");
+    const wait = document.getElementById("skLoginWaiting");
+    if(signIn) signIn.hidden = step !== "signin";
+    if(wait) wait.hidden = step !== "waiting";
+    if(step === "waiting"){
+      const who = document.getElementById("skLoginWaitWho");
+      const title = document.getElementById("skLoginWaitTitle");
+      const text = document.getElementById("skLoginWaitText");
+      if(who) who.textContent = ((user && user.displayName) ? user.displayName + " " : "") + "(" + ((user && user.email) || "") + ")";
+      if(title) title.textContent = role === "none" ? "No access" : "Waiting for access";
+      if(text) text.textContent = role === "none"
+        ? "The owner has turned off access for this account. Ask the owner if you need access again."
+        : "The owner has to give you access. Keep this page open — the app opens by itself once you have access.";
     }
+  }
 
-    // Backward-compatible fallback for copies where the supplied modal is absent.
-    const card = document.querySelector("#skRoleGate .sk-login-card");
-    if(!card || document.getElementById("skFirebaseLoginBlock")) return;
-    const block = document.createElement("div");
-    block.id = "skFirebaseLoginBlock";
-    block.innerHTML = `
-      <div style="margin:12px 0 8px;border-top:1px solid var(--card-border,#ddd);padding-top:12px">
-        <div style="font-weight:800;font-size:.9rem;margin-bottom:8px">🔐 Email &amp; Password Login</div>
-        <input id="skFirebaseEmail" class="sk-login-input" type="email" autocomplete="username" placeholder="Email address">
-        <input id="skFirebasePassword" class="sk-login-input" type="password" autocomplete="current-password" placeholder="Password" style="margin-top:7px">
-        <button id="skFirebaseLoginBtn" class="sk-login-btn" type="button" style="margin-top:8px">☁️ Firebase Login</button>
-        <div style="font-size:.68rem;color:var(--text-muted,#64748b);margin-top:6px">Admin • Manager • Worker</div>
-      </div>`;
-    card.appendChild(block);
-    const oldGrid = card.querySelector(".sk-role-grid");
-    const oldLabel = card.querySelector('label[for="skRolePin"]');
-    const oldPin = card.querySelector("#skRolePin");
-    const oldWorker = card.querySelector("#skWorkerLoginSelect");
-    const oldBtn = card.querySelector("#skRoleLoginBtn");
-    [oldGrid, oldLabel, oldPin, oldWorker, oldBtn].forEach(el=>{ if(el) el.style.display="none"; });
-    const fallbackBtn=document.getElementById("skFirebaseLoginBtn");
-    const fallbackEmail=document.getElementById("skFirebaseEmail");
-    const fallbackPassword=document.getElementById("skFirebasePassword");
-    fallbackBtn.addEventListener("click", doLogin);
-    fallbackPassword.addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+  function injectLoginUI(){
+    const btn = document.getElementById("skGoogleLoginBtn");
+    if(btn && !btn.dataset.bound){
+      btn.dataset.bound = "1";
+      btn.addEventListener("click", async ()=>{
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
+        msg("⏳ Opening Google sign-in…");
+        btn.disabled = true;
+        try {
+          await auth.signInWithPopup(provider);
+          msg("");
+        } catch(e) {
+          const code = e && e.code || "";
+          if(code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment" || code === "auth/web-storage-unsupported"){
+            try { await auth.signInWithRedirect(provider); return; } catch(e2){ console.error(e2); }
+          }
+          if(code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") msg("");
+          else if(code === "auth/unauthorized-domain") msg("❌ This web address is not allowed for sign-in yet (Firebase → Authentication → Authorized domains).");
+          else if(code === "auth/operation-not-allowed") msg("❌ Google sign-in is not turned on yet (Firebase → Authentication → Sign-in method → Google).");
+          else { console.error(e); msg("❌ Sign-in failed: " + (e && e.message || code)); }
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    }
+    const other = document.getElementById("skLoginOtherAccount");
+    if(other && !other.dataset.bound){
+      other.dataset.bound = "1";
+      other.addEventListener("click", async ()=>{ try { await auth.signOut(); } catch(e){} showLoginStep("signin"); });
+    }
+    showLoginStep("signin");
   }
 
   function gate(show){
@@ -270,29 +240,70 @@
   }
 
   async function ensureUserProfile(user){
-    const expectedRole = emailRole(user.email);
-    if(!expectedRole) throw new Error("This Email is not authorized.");
+    const email = String(user.email||"").trim().toLowerCase();
     const ref = db.collection("users").doc(user.uid);
-    const snap = await ref.get();
+    let snap = await ref.get();
     if(!snap.exists){
+      const isOwner = email === OWNER_EMAIL && user.emailVerified !== false;
       await ref.set({
         email: user.email,
-        role: expectedRole,
-        name: expectedRole === "admin" ? "Admin" : expectedRole === "manager" ? "Manager" : "Worker",
+        name: user.displayName || "",
+        photo: user.photoURL || "",
+        role: isOwner ? "admin" : "pending",
         active: true,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+      snap = await ref.get();
+    } else {
+      /* keep name / photo fresh; the role itself can only be changed by the owner */
+      const d = snap.data() || {};
+      if((user.displayName && d.name !== user.displayName) || (user.photoURL && d.photo !== user.photoURL)){
+        try { await ref.update({ name: user.displayName || d.name || "", photo: user.photoURL || d.photo || "", lastSeenAt: firebase.firestore.FieldValue.serverTimestamp() }); } catch(e){}
+      }
     }
-    const data = (await ref.get()).data() || {};
-    if(data.role !== expectedRole) throw new Error("Role configuration does not match.");
-    if(data.active === false) throw new Error("This account is disabled.");
-    if(expectedRole === "manager"){
-      const perms=await getManagerPermissions();
-      localStorage.setItem("sk_manager_permissions_v1",JSON.stringify(perms));
-      if(perms.managerAccess===false) throw new Error("Manager access is disabled by Admin.");
+    const data = snap.data() || {};
+    let role = String(data.role || "pending");
+    if(data.active === false) role = "none";
+    if(STAFF_ROLES.indexOf(role) < 0) return role;            /* pending / none: no app access */
+    if(role === "manager"){
+      const perms = await getManagerPermissions();
+      localStorage.setItem("sk_manager_permissions_v1", JSON.stringify(perms));
+      if(perms.managerAccess === false) throw new Error("Manager access is disabled by Admin.");
     }
-    return data.role;
+    return role;
   }
+
+  /* own user record: when the owner changes this person's role, reopen the app with the new role */
+  function watchOwnUser(user, roleNow){
+    if(unsubscribeOwnUser){ unsubscribeOwnUser(); unsubscribeOwnUser = null; }
+    unsubscribeOwnUser = db.collection("users").doc(user.uid).onSnapshot(snap=>{
+      if(!snap.exists) return;
+      const d = snap.data() || {};
+      const r = d.active === false ? "none" : String(d.role || "pending");
+      if(r !== roleNow){
+        if(unsubscribeOwnUser){ unsubscribeOwnUser(); unsubscribeOwnUser = null; }
+        if(STAFF_ROLES.indexOf(roleNow) >= 0) { location.reload(); return; }   /* role taken away or changed while working */
+        handleUser(user);                                                      /* access just granted */
+      }
+    }, err=>console.warn("Own user listener failed:", err));
+  }
+
+  /* ---------- Settings -> People (owner only) ---------- */
+  window.skPeopleWatch = function(cb){
+    if(!db || currentRole !== "admin") return function(){};
+    return db.collection("users").onSnapshot(qs=>{
+      const list = [];
+      qs.forEach(doc=>{ const d = doc.data() || {}; list.push({ uid: doc.id, email: d.email || "", name: d.name || "", photo: d.photo || "", role: d.active === false ? "none" : String(d.role || "pending"), createdAt: d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : 0 }); });
+      cb(list, auth.currentUser && auth.currentUser.uid);
+    }, err=>{ console.warn("People list failed:", err); cb(null, null, err); });
+  };
+  window.skPeopleSetRole = async function(uid, role){
+    if(currentRole !== "admin") throw new Error("Owner only");
+    if(["manager","worker","none"].indexOf(role) < 0) throw new Error("Unknown role");
+    if(auth.currentUser && uid === auth.currentUser.uid) throw new Error("You cannot change your own role");
+    await db.collection("users").doc(uid).update({ role: role, active: role !== "none", updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: auth.currentUser.uid });
+  };
+  window.skCurrentRole = function(){ return currentRole; };
 
   async function getManagerPermissions(){
     if(!db) return {...MANAGER_PERMISSION_DEFAULTS};
@@ -305,7 +316,7 @@
   async function setManagerPermission(key,value){
     const allowed=Object.prototype.hasOwnProperty.call(MANAGER_PERMISSION_DEFAULTS,key);
     if(!allowed) throw new Error("Unknown Manager permission");
-    if(!auth?.currentUser || emailRole(auth.currentUser.email)!=="admin") throw new Error("Admin access only");
+    if(!auth?.currentUser || currentRole!=="admin") throw new Error("Admin access only");
     const ref=db.collection("shops").doc(SHOP_ID).collection("permissions").doc(MANAGER_PERMISSION_DOC);
     const current=await getManagerPermissions();
     current[key]=!!value;
@@ -1044,6 +1055,9 @@
 
   async function handleUser(user){
     if(!user){ 
+      currentRole = "";
+      if(unsubscribeOwnUser){ unsubscribeOwnUser(); unsubscribeOwnUser = null; }
+      showLoginStep("signin");
       if(unsubscribeBills){ unsubscribeBills(); unsubscribeBills = null; }
       if(unsubscribeAllData){ unsubscribeAllData(); unsubscribeAllData = null; }
       if(unsubscribeRepairJobs){ unsubscribeRepairJobs(); unsubscribeRepairJobs = null; }
@@ -1066,6 +1080,19 @@
     }
     try {
       const role = await ensureUserProfile(user);
+      if(STAFF_ROLES.indexOf(role) < 0){
+        currentRole = "";
+        localStorage.removeItem(ROLE_KEY);
+        localStorage.removeItem(WORKER_KEY);
+        gate(true);
+        showLoginStep("waiting", user, role);
+        msg("");
+        watchOwnUser(user, role);
+        return;
+      }
+      currentRole = role;
+      watchOwnUser(user, role);
+      showLoginStep("signin");
       localStorage.setItem(ROLE_KEY, role);
       if(role === "worker") localStorage.setItem(WORKER_KEY, user.uid);
       else localStorage.removeItem(WORKER_KEY);
@@ -1112,6 +1139,7 @@
       hookCloudAutoBackup();
       bindBackupButtons();
       gate(true);
+      auth.getRedirectResult().catch(e=>{ if(e && e.code && e.code !== "auth/no-auth-event") msg("❌ Sign-in failed: " + (e.message || e.code)); });
       auth.onAuthStateChanged(handleUser);
     } catch(e) {
       console.error(e);

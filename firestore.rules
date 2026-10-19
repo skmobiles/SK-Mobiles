@@ -12,7 +12,16 @@ service cloud.firestore {
     }
 
     function hasRole(role) {
-      return signedIn() && myUser().role == role && myUser().active != false;
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && myUser().role == role
+        && myUser().active != false;
+    }
+
+    function isOwnerEmail() {
+      return signedIn()
+        && request.auth.token.email == 'skmobilesdpi@gmail.com'
+        && request.auth.token.email_verified == true;
     }
 
     function isAdmin() {
@@ -29,13 +38,6 @@ service cloud.firestore {
 
     function isActiveStaff() {
       return isAdmin() || isManager() || isWorker();
-    }
-
-    function allowedStaffEmail(email, role) {
-      return
-        (email == 'skmobilesdpi@gmail.com' && role == 'admin') ||
-        (email == 'lavanyam.com94@gmail.com' && role == 'manager') ||
-        (email == 'sriyogi6@gmail.com' && role == 'worker');
     }
 
     function managerPermissions() {
@@ -61,22 +63,30 @@ service cloud.firestore {
         (key == 'sk_recycle_bin_v1' && managerHasPermission('recycleBin'));
     }
 
+    /* V5.10.0: Google sign-in. A new person creates their own record as "pending" (no access).
+       Only the owner can give a role (manager / worker / none). Nobody can change their own role. */
     match /users/{userId} {
       allow read: if signedIn() && request.auth.uid == userId;
       allow read: if isAdmin();
 
       allow create: if signedIn()
         && request.auth.uid == userId
-        && allowedStaffEmail(request.auth.token.email, request.resource.data.role)
-        && request.resource.data.email == request.auth.token.email;
+        && request.resource.data.email == request.auth.token.email
+        && (
+          request.resource.data.role == 'pending'
+          || (request.resource.data.role == 'admin' && isOwnerEmail())
+        );
 
-      allow update: if isAdmin()
+      allow update: if (isAdmin()
+            && request.auth.uid != userId
+            && request.resource.data.role in ['manager', 'worker', 'none', 'pending'])
         || (signedIn()
             && request.auth.uid == userId
             && request.resource.data.role == resource.data.role
-            && request.resource.data.email == resource.data.email);
+            && request.resource.data.email == resource.data.email
+            && request.resource.data.get('active', true) == resource.data.get('active', true));
 
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() && request.auth.uid != userId;
     }
 
     match /shops/{shopId}/permissions/{permissionDoc} {
