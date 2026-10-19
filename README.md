@@ -381,3 +381,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Taps: date fields no longer force a page layout on every value change (Used purchase form opened ~200 ms faster); bill preview reads the bill number with textContent (no forced layout); number auto-fit only runs when Used Stock / Ledger is open.
 - Long lists (Tempered / Display cards, used register, bill history, ledger list) only lay out the cards on screen: opening Tempered ~760 → ~310 ms in the slowed test.
 - Same left/right width on every page: Bill History cards, Admin boxes, Accessories, Bulk WhatsApp, Reviews now start 16px from the screen edge like every other page; Backup, Stock aging, Price List and Repair details popups use the popup width (20px). Measured on every screen.
+
+## V5.9.22 — Scroll starts smoothly, taps work first time, Used Stock wider
+- Scroll: no live blur behind the bottom bar, no fade mask on scrolling boxes (both are redrawn on every scroll frame by the phone's graphics chip), and the V5.9.21 "only draw cards on screen" rule removed (it drew cards while the finger was moving, giving a hitch at the start of a scroll).
+- Taps: pressed buttons no longer shrink (a shrinking button could slip out from under the finger); taps fire at once (touch-action: manipulation); with the menu open the bottom bar is on top and a tap on it closes the menu and opens the page.
+- Used Mobile Stock: the register is no longer a box inside a box — each phone card uses the full width.
+- Home "Pending Jobs" box: the "1 urgent" pill now sits inside the box (bottom-right); it was cut off at the top edge.
+- Repair Jobs list: urgent jobs have a red border (light and dark).
