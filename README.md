@@ -434,6 +434,11 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.17 — Repair filters in 2 rows, History spacing, People in Menu
+- Repair Jobs: All / Urgent / Received / Checking / Repairing / Not collected now sit in 2 rows of 3.
+- Repair History: section titles and cards have more inner space so text no longer touches the box border; Mark Delivered is always full width and fully readable.
+- Menu: "People & access" (owner only) is the first row; it opens Settings straight on that page (the Settings row stays too).
+
 ## V5.11.16 — iPhone-style spring physics
 - `spring-scroll.js` rewritten: rubber-band drag (heavier the further you pull), real damped spring on release that carries your release speed, and fast scrolls that hit the end feed their speed into the same spring. Home pull-to-reload threshold now matches the new drag feel (~200px pull).
 
