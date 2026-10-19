@@ -392,3 +392,8 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 ## V5.9.23 — No blink on list redraws, smooth page opening
 - Blink: an old performance layer delays every DOM watcher by 50 ms, so after a list redraw (Repair Next/Previous Status, Ledger tabs) the icons and the clean style were applied ~3 frames late — rows showed the old emoji/colours first and then blinked. The two look-only decorators (colorful-ui, clean-pages) now use the browser's direct watcher and style new rows before the screen is drawn. Button colour checks are cached so this stays fast.
 - Smooth opening: every page and popup fades in and rises 14 px (0.2 s, opacity/transform only); Home / Tempered / Display switch the same way. Turned off when "Reduce motion" is on.
+
+## Hosting address: skmobiles.web.app
+- `firebase.json` now deploys to the `skmobiles` site (https://skmobiles.web.app) in the same Firebase project (sk-mobiles-2d61d). The old address sk-mobiles-2d61d.web.app stays on V5.9.23 and gets no more updates.
+- `authDomain` in js/firebase-sync.js is unchanged on purpose (it is the Firebase sign-in handler, not the app address). skmobiles.web.app and skmobiles.firebaseapp.com were added to Authentication → Authorized domains.
+- Phone data is stored per address: take Backup & Restore → Download backup (JSON) in the old app, then Restore in the new one (Used Mobile Stock is local-only).
