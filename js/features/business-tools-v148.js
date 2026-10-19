@@ -183,7 +183,14 @@ function reminderRows(){
 function msgFor(r){
   var m='Hello '+r.name+', this is a reminder from '+shopName()+'. Your pending balance is '+money(r.balance)+'.';
   if(r.due)m+=(r.overdue?' It was due on ':' Your due date is ')+dmy(r.due)+'.';
-  return m+' Kindly pay at the earliest. Thank you 🙏';
+  m+=' Kindly pay at the earliest. Thank you 🙏';
+  /* V5.11.5: UPI pay link (opens GPay / PhonePe / Paytm with the amount filled in) when a UPI ID is saved in Shop Profile */
+  var upi=String(localStorage.getItem('sk_shop_upi')||'').trim();
+  if(/^[\w.\-]{2,}@[A-Za-z][\w.\-]{1,}$/.test(upi)&&num(r.balance)>0){
+    var link=location.origin+'/pay.html?pa='+encodeURIComponent(upi)+'&pn='+encodeURIComponent(shopName())+'&am='+Math.round(num(r.balance))+'&tn='+encodeURIComponent('Credit balance');
+    m+='\n\n*Pay '+money(r.balance)+' now* (GPay / PhonePe / Paytm):\n'+link+'\nUPI ID: '+upi;
+  }
+  return m;
 }
 window.skCreditRemind=function(encKey){
   var k=decodeURIComponent(encKey),r=reminderRows().find(function(x){return x.key===k});

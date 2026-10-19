@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.5 — UPI pay link in credit reminders
+- The WhatsApp credit reminder for one customer now ends with a "Pay ₹X now" link and the shop UPI ID (only when a UPI ID is saved in Shop Profile). The link opens new page `pay.html`, whose button opens GPay / PhonePe / Paytm with the pending amount filled in; it also has a Copy UPI ID button.
+
 ## V5.11.4
 - Customer Ledger ⋮ menu: removed "Send history" (the blue link under the buttons stays).
 

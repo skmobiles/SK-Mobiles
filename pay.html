@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Pay</title>
+<style>
+:root{--bg:#f1f5fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--blue:#2563eb;--green:#16a34a}
+@media(prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--line:#334155}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;-webkit-text-size-adjust:100%}
+.head{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:26px 18px 56px}
+.head h1{margin:0;font-size:1.3rem;text-transform:uppercase}.head p{margin:5px 0 0;font-size:.85rem;opacity:.85}
+.wrap{max-width:520px;margin:-38px auto 30px;padding:0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 6px 18px rgba(15,23,42,.07);text-align:center}
+.amt{font-size:2.2rem;font-weight:900;margin:6px 0 2px}.lbl{color:var(--muted);font-size:.85rem}
+.pay{display:block;margin:18px 0 10px;padding:15px;border-radius:14px;background:var(--green);color:#fff;font-weight:800;font-size:1.05rem;text-decoration:none}
+.upi{margin-top:14px;padding:12px;border:1px dashed var(--line);border-radius:12px;word-break:break-all;font-size:.95rem}
+button.cp{margin-top:8px;border:1px solid var(--line);background:transparent;color:var(--text);border-radius:10px;padding:9px 14px;font-weight:700}
+.note{color:var(--muted);font-size:.78rem;margin-top:12px;line-height:1.4}
+</style></head><body>
+<div class="head"><h1 id="shop">Pay</h1><p>Pending balance</p></div>
+<div class="wrap"><div class="card">
+<div class="lbl">Amount to pay</div><div class="amt" id="amt">—</div>
+<a class="pay" id="go" href="#">Pay with UPI app</a>
+<div class="lbl">GPay • PhonePe • Paytm • any UPI app</div>
+<div class="upi">UPI ID: <b id="upi">—</b><br><button class="cp" id="cp" type="button">Copy UPI ID</button></div>
+<div class="note">If the button does not open an app, copy the UPI ID and pay from your UPI app. Please tell the shop after paying.</div>
+</div></div>
+<script>
+(function(){
+var q=new URLSearchParams(location.search),pa=(q.get('pa')||'').trim(),pn=q.get('pn')||'',am=parseFloat(q.get('am'))||0,tn=q.get('tn')||'';
+var ok=/^[\w.\-]{2,}@[A-Za-z][\w.\-]{1,}$/.test(pa);
+document.getElementById('shop').textContent=pn||'Pay';
+document.getElementById('upi').textContent=ok?pa:'Not available';
+document.getElementById('amt').textContent=am>0?'₹'+Math.round(am).toLocaleString('en-IN'):'—';
+var go=document.getElementById('go');
+if(ok){go.href='upi://pay?pa='+encodeURIComponent(pa).replace(/%40/g,'@')+'&pn='+encodeURIComponent(pn)+(am>0?'&am='+am.toFixed(2):'')+'&cu=INR'+(tn?'&tn='+encodeURIComponent(tn):'')}else{go.style.display='none'}
+document.getElementById('cp').onclick=function(){try{navigator.clipboard.writeText(pa);this.textContent='Copied'}catch(e){}};
+})();
+</script></body></html>
