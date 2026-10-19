@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.11 — Remove staff
+- People & access: a 🗑 Remove button on every row except the owner and yourself. It deletes the user record (allowed by the existing Firestore rules, no rules change). Their old entries stay; if they sign in again they appear under "Waiting for access".
+
 ## V5.11.10 — Reminders in English or Tamil
 - Before a credit reminder or a repair "not collected" reminder opens WhatsApp, a popup asks English or Tamil (the last choice is marked). The Tamil text lives only in `js/features/remind-ta.js` (the one exception to the English-only rule, customer messages only). The app screens stay English.
 

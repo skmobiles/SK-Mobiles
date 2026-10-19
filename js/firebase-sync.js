@@ -307,6 +307,11 @@
     if(auth.currentUser && uid === auth.currentUser.uid) throw new Error("You cannot change your own role");
     await db.collection("users").doc(uid).update({ role: role, active: role !== "none", updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: auth.currentUser.uid });
   };
+  window.skPeopleRemove = async function(uid){
+    if(currentRole !== "admin") throw new Error("Owner only");
+    if(auth.currentUser && uid === auth.currentUser.uid) throw new Error("You cannot remove yourself");
+    await db.collection("users").doc(uid).delete();
+  };
   window.skCurrentRole = function(){ return currentRole || String(localStorage.getItem(ROLE_KEY)||"").toLowerCase(); };
 
   async function getManagerPermissions(){

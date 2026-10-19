@@ -26,7 +26,7 @@ function avatar(p,i){
   return '<span class="skpp-av" style="background:'+c+'22;color:'+c+'">'+esc(l)+'</span>';
 }
 function row(p,i,me){
-  var who='<span class="skpp-who"><b>'+esc(p.name||p.email.split('@')[0])+(p.role==='pending'?'<em class="skpp-new">New</em>':'')+'</b><small>'+esc(p.email)+'</small></span>';
+  var who='<span class="skpp-who"><b>'+esc(p.name||(p.email||'Unknown user').split('@')[0])+(p.role==='pending'?'<em class="skpp-new">New</em>':'')+'</b><small>'+esc(p.email)+'</small></span>';
   var ctl;
   if(p.role==='admin'||p.uid===me)ctl='<span class="skpp-owner">'+(p.role==='admin'?'Owner':ROLE_LABEL[p.role]||p.role)+'</span>';
   else ctl='<select class="skpp-role'+(p.role==='none'?' is-none':'')+(p.role==='pending'?' is-pending':'')+'" data-uid="'+esc(p.uid)+'" data-was="'+esc(p.role)+'" aria-label="Role for '+esc(p.email)+'">'+
@@ -34,7 +34,8 @@ function row(p,i,me){
     '<option value="manager"'+(p.role==='manager'?' selected':'')+'>Manager</option>'+
     '<option value="worker"'+(p.role==='worker'?' selected':'')+'>Worker</option>'+
     '<option value="none"'+(p.role==='none'?' selected':'')+'>No access</option></select>';
-  return '<div class="skpp-row'+(p.role==='pending'?' is-pending':'')+'">'+avatar(p,i)+who+ctl+'</div>';
+  var rm=(p.role==='admin'||p.uid===me)?'':'<button type="button" class="skpp-rm" data-uid="'+esc(p.uid)+'" aria-label="Remove '+esc(p.email||'user')+'" title="Remove">&#128465;</button>';
+  return '<div class="skpp-row'+(p.role==='pending'?' is-pending':'')+'">'+avatar(p,i)+who+ctl+rm+'</div>';
 }
 function render(list,me,err){
   var sec=ensureSection();if(!sec)return;var body=sec.querySelector('.skpp-body');
@@ -64,6 +65,14 @@ document.addEventListener('change',async function(e){
   try{await window.skPeopleSetRole(uid,role);toast('✅ '+email+' → '+(ROLE_LABEL[role]||role))}
   catch(err){console.error(err);s.value=was;toast('❌ Could not change the role: '+(err&&err.message||err))}
   finally{s.disabled=false}
+});
+document.addEventListener('click',async function(e){
+  var b=e.target&&e.target.closest&&e.target.closest('#skPeopleSection .skpp-rm');if(!b)return;
+  var row=b.closest('.skpp-row'),email=(row.querySelector('small')||{}).textContent||'this user';
+  if(!confirm('Remove '+email+' from the list? They lose access. Their old entries stay. If they sign in again they will appear under "Waiting for access".'))return;
+  b.disabled=true;
+  try{await window.skPeopleRemove(b.getAttribute('data-uid'));toast('✅ Removed '+email)}
+  catch(err){console.error(err);b.disabled=false;toast('❌ Could not remove: '+(err&&err.message||err))}
 });
 /* listen only while Settings is open */
 function check(){var m=$('settingsModal');if(m&&m.classList.contains('active'))start();else stop()}
