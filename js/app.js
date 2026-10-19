@@ -8139,6 +8139,11 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  const write=rows=>localStorage.setItem(KEY,JSON.stringify(rows));
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const money=n=>'₹'+(Number(n)||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+ /* V5.10.5: the same IMEI can come back (exchange / bought again) — every purchase is its own entry.
+    A key is an entry id; an IMEI picks the In Stock entry first, else the latest one. */
+ const findRec=(key,rows)=>{rows=rows||read();key=String(key??'');if(!key)return null;return rows.find(r=>String(r.id)===key)||rows.find(r=>String(r.imei)===key&&r.status!=='Sold')||rows.filter(r=>String(r.imei)===key).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))[0]||null;};
+ window.skUsedFind=key=>findRec(key);
+ const dmy=v=>{const t=String(v||'');const m=t.match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'/'+m[2]+'/'+m[1]:t;};
  const costInput=$('skUsedCost'),dealerPriceInput=$('skUsedDealerPrice'),customerPriceInput=$('skUsedCustomerPrice');if(costInput&&!costInput.dataset.autoPriceBound){costInput.dataset.autoPriceBound='1';costInput.addEventListener('input',()=>{const n=Number(costInput.value);if(costInput.value.trim()===''||!Number.isFinite(n)||n<0){dealerPriceInput.value='';customerPriceInput.value='';return;}dealerPriceInput.value=String(Math.round((n+1000)*100)/100);customerPriceInput.value=String(Math.round((n+2000)*100)/100);});}
  window.skUsedOpen=function(){const m=$('skUsedStockModal');if(m){m.classList.remove('sk-used-form-page');if(typeof toggleModal==='function')toggleModal('skUsedStockModal',true);else m.classList.add('active');if(!$('skUsedDate').value)$('skUsedDate').value=new Date().toISOString().slice(0,10);skUsedRender();}};
 
@@ -8162,22 +8167,25 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  window.skUsedSplitStorageField=function(){const se=$('skUsedStorage');if(!se)return;const ip=window.skUsedIsIphone($('skUsedModel')?.value);const sp=window.skUsedSplitSpec('',se.value);if(!String(se.value).trim())return;se.value=sp.storage;if(sp.ram&&!ip){const re=$('skUsedRam');if(re)re.value=sp.ram;}};
  document.addEventListener('input',e=>{if(e.target&&e.target.id==='skUsedModel')window.skUsedToggleIphone();},true);
  document.addEventListener('change',e=>{if(e.target&&e.target.id==='skUsedStorage')window.skUsedSplitStorageField();},true);
- window.skUsedResetForm=function(){$('skUsedPurchaseForm')?.reset();$('skUsedDate').value=new Date().toISOString().slice(0,10);$('skUsedImei').readOnly=false;delete window.__skUsedEditingImei;window.skUsedToggleIphone();};
+ window.skUsedResetForm=function(){$('skUsedPurchaseForm')?.reset();$('skUsedDate').value=new Date().toISOString().slice(0,10);$('skUsedImei').readOnly=false;delete window.__skUsedEditingImei;delete window.__skUsedEditingId;window.skUsedToggleIphone();};
  window.skUsedSavePurchase=function(){
   const imei=$('skUsedImei').value.trim();const model=$('skUsedModel').value.trim();const dealer=$('skUsedDealer').value.trim();const cost=Number($('skUsedCost').value);
   if(!imei||!model||!dealer||!Number.isFinite(cost)||cost<0){alert('Dealer, model, IMEI and valid purchase price are required.');return;}
-  const rows=read();const editing=String(window.__skUsedEditingImei||'');const duplicate=rows.find(r=>String(r.imei)===imei&&String(r.imei)!==editing);
-  if(duplicate){alert('This IMEI is already registered. Duplicate IMEI is not allowed.');return;}
-  const old=editing?rows.find(r=>String(r.imei)===editing):null;if(old&&old.status==='Sold'&&editing!==imei){alert('Sold device IMEI cannot be changed.');return;}
+  const rows=read();const editingId=String(window.__skUsedEditingId||'');const old=editingId?rows.find(r=>String(r.id)===editingId):null;
+  /* V5.10.5: an IMEI may be bought again after it was sold; only one In Stock entry per IMEI */
+  const duplicate=rows.find(r=>String(r.imei)===imei&&r!==old&&r.status!=='Sold');
+  if(duplicate){alert('This IMEI is already in stock. The same IMEI can be added again only after it is sold.');return;}
+  if(old&&old.status==='Sold'&&String(old.imei)!==imei){alert('Sold device IMEI cannot be changed.');return;}
   const _iph=window.skUsedIsIphone(model),_sp=window.skUsedSplitSpec(_iph?'':($('skUsedRam')?.value||''),$('skUsedStorage')?.value||''),_bat=_iph?String($('skUsedBattery')?.value||'').replace(/[^0-9]/g,'').slice(0,3):'';
-  const item={id:old?.id||('USED-'+Date.now()),date:$('skUsedDate').value,dealer,model,ram:_iph?'':_sp.ram,colour:$('skUsedColour').value.trim(),storage:_sp.storage,battery:_bat,kit:$('skUsedKit').value,cost,dealerPrice:Math.round((cost+1000)*100)/100,customerPrice:Math.round((cost+2000)*100)/100,imei,issue:$('skUsedIssue').value.trim(),status:old?.status||'In Stock',sale:old?.sale?{...old.sale,profit:(Number(old.sale.price)||0)-cost}:null,updatedAt:new Date().toISOString()};
+  const item={...(old||{}),id:old?.id||('USED-'+Date.now()),date:$('skUsedDate').value,dealer,model,ram:_iph?'':_sp.ram,colour:$('skUsedColour').value.trim(),storage:_sp.storage,battery:_bat,kit:$('skUsedKit').value,cost,dealerPrice:Math.round((cost+1000)*100)/100,customerPrice:Math.round((cost+2000)*100)/100,imei,issue:$('skUsedIssue').value.trim(),status:old?.status||'In Stock',sale:old?.sale?{...old.sale,profit:(Number(old.sale.price)||0)-cost}:null,updatedAt:new Date().toISOString()};
   if(old){rows[rows.indexOf(old)]=item;}else rows.unshift(item);write(rows);skUsedResetForm();if(window.__skUsedFormFromMgmt){window.__skUsedFormFromMgmt=false;window.skUsedShowManagement();}else{const purchaseForm=$('skUsedPurchaseForm');if(purchaseForm)purchaseForm.style.display=window.__skUsedInventoryPageMode?'block':'none';}skUsedRender();if(typeof showToast==='function')showToast('Used mobile purchase saved');
  };
- window.skUsedEdit=function(imei){const r=read().find(x=>String(x.imei)===String(imei));if(!r)return;window.__skUsedFormFromMgmt=true;window.skUsedShowInventory();const _sc=$('skUsedStockModal')?.querySelector('.sk-used-stock-scroll');if(_sc)_sc.scrollTop=0;window.__skUsedEditingImei=r.imei;[['Date','date'],['Dealer','dealer'],['Model','model'],['Ram','ram'],['Colour','colour'],['Storage','storage'],['Kit','kit'],['Cost','cost'],['DealerPrice','dealerPrice'],['CustomerPrice','customerPrice'],['Imei','imei'],['Issue','issue']].forEach(([a,b])=>{const e=$('skUsed'+a);if(e)e.value=r[b]??'';});const _S=window.skUsedSpec(r);if($('skUsedRam'))$('skUsedRam').value=_S.ram;if($('skUsedStorage'))$('skUsedStorage').value=_S.storage;if($('skUsedBattery'))$('skUsedBattery').value=String(r.battery||'').replace(/[^0-9]/g,'');window.skUsedToggleIphone();$('skUsedImei').readOnly=true;};
- window.skUsedDelete=function(imei){const rows=read(),r=rows.find(x=>String(x.imei)===String(imei));if(!r)return;const warning=r.status==='Sold'?'This device is SOLD. Deleting it will also remove its sale/profit record. Continue?':'Delete this used mobile purchase record?';if(!confirm(warning))return;write(rows.filter(x=>String(x.imei)!==String(imei)));skUsedRender();};
+ window.skUsedEdit=function(key){const r=findRec(key);if(!r)return;window.__skUsedEditingId=r.id;window.__skUsedFormFromMgmt=true;window.skUsedShowInventory();const _sc=$('skUsedStockModal')?.querySelector('.sk-used-stock-scroll');if(_sc)_sc.scrollTop=0;window.__skUsedEditingImei=r.imei;[['Date','date'],['Dealer','dealer'],['Model','model'],['Ram','ram'],['Colour','colour'],['Storage','storage'],['Kit','kit'],['Cost','cost'],['DealerPrice','dealerPrice'],['CustomerPrice','customerPrice'],['Imei','imei'],['Issue','issue']].forEach(([a,b])=>{const e=$('skUsed'+a);if(e)e.value=r[b]??'';});const _S=window.skUsedSpec(r);if($('skUsedRam'))$('skUsedRam').value=_S.ram;if($('skUsedStorage'))$('skUsedStorage').value=_S.storage;if($('skUsedBattery'))$('skUsedBattery').value=String(r.battery||'').replace(/[^0-9]/g,'');window.skUsedToggleIphone();$('skUsedImei').readOnly=true;};
+ window.skUsedDelete=function(key){const rows=read(),r=findRec(key,rows);if(!r)return;const warning=r.status==='Sold'?'This device is SOLD. Deleting it will also remove its sale/profit record. Continue?':'Delete this used mobile purchase record?';if(!confirm(warning))return;write(rows.filter(x=>x!==r));skUsedRender();};
  window.skUsedClearAll=function(){const rows=read();if(!rows.length){if(typeof showToast==='function')showToast('Inventory is already empty');return;}const sold=rows.filter(r=>r.status==='Sold').length;const message='Delete ALL '+rows.length+' used mobile inventory records?'+(sold?'\nThis also removes '+sold+' sold-device sale/profit records.':'')+'\nThis action cannot be undone.';if(!confirm(message))return;write([]);window.skUsedResetForm();if($('skUsedSearch'))$('skUsedSearch').value='';skUsedRender();if(typeof showToast==='function')showToast('All used mobile inventory records deleted');};
  window.skUsedAddInventory=function(){window.__skUsedFormFromMgmt=true;window.skUsedResetForm();window.skUsedShowInventory();const sc=$('skUsedStockModal')?.querySelector('.sk-used-stock-scroll');if(sc)sc.scrollTop=0;};
  window.skUsedRender=function(){
+  try{window.skUsedSyncBills();}catch(e){console.warn('Used stock bill sync skipped',e);}
   const rows=read();
   const q=String($('skUsedSearch')?.value||'').trim().toLowerCase();
   const filters=window.__skUsedFilters||{};
@@ -8200,22 +8208,22 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   $('skUsedStatTotal').textContent=String(rows.length);
   $('skUsedStatStock').textContent=String(rows.filter(r=>r.status!=='Sold').length);
   if($('skUsedStatSold'))$('skUsedStatSold').textContent=String(rows.filter(r=>r.status==='Sold').length);
-  $('skUsedStatProfit').textContent=money(rows.reduce((a,r)=>a+(Number(r.sale?.profit)||0),0));
+  $('skUsedStatProfit').textContent=money(rows.reduce((a,r)=>a+(r.status==='Sold'&&r.sale?(Number(r.sale.price)||0)-(Number(r.cost)||0):0),0));
   const body=$('skUsedRows');if(!body)return;
   if(!filtered.length){body.innerHTML='<tr><td colspan="6" class="sk-used-empty-cell">No matching used mobiles found.</td></tr>';return;}
-  filtered.map((r,i)=>({r,i,k:skBillDateKey(r.date||r.createdAt||'')||''})).sort((x,y)=>x.k<y.k?1:x.k>y.k?-1:y.i-x.i).forEach((x,j)=>{filtered[j]=x.r});
+  filtered.map((r,i)=>({r,i,k:(window.__skUsedView==='sold'&&r.sale?.date?(skBillDateKey(r.sale.date)||String(r.sale.date).slice(0,10)):skBillDateKey(r.date||r.createdAt||''))||''})) /* V5.10.5: Sold tab — newest sale first */.sort((x,y)=>x.k<y.k?1:x.k>y.k?-1:y.i-x.i).forEach((x,j)=>{filtered[j]=x.r});
   body.innerHTML=filtered.slice(0,1000).map((r,i)=>{
    const sold=r.status==='Sold';
    const statusClass=sold?'is-sold':String(r.status||'').toLowerCase()==='pending'?'is-pending':'is-stock';
-   const imei=esc(r.imei);
+   const imei=esc(r.imei),rid=esc(r.id||r.imei);
    const brandColor=['#2478ff','#7c3aed','#0f9f6e','#ea8a18','#e34b6f'][i%5];
-   const menu=`<details class="sk-used-row-menu"><summary aria-label="More actions" title="More actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></summary><div class="sk-used-row-menu-pop"><button type="button" ${sold?'disabled':''} onclick="window.skUsedSelectForBill('${imei}')">Select for Bill</button><button type="button" onclick="window.skUsedEdit('${imei}')">Edit</button><button type="button" class="is-danger" onclick="window.skUsedDelete('${imei}')">Delete</button></div></details>`;
-   const profit=Number(r.sale?.profit);
+   const menu=`<details class="sk-used-row-menu"><summary aria-label="More actions" title="More actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></summary><div class="sk-used-row-menu-pop"><button type="button" ${sold?'disabled':''} onclick="window.skUsedSelectForBill('${imei}')">Select for Bill</button><button type="button" onclick="window.skUsedEdit('${rid}')">Edit</button><button type="button" class="is-danger" onclick="window.skUsedDelete('${rid}')">Delete</button></div></details>`;
+   const profit=r.sale?(Number(r.sale.price)||0)-(Number(r.cost)||0):NaN;
    /* V5.9.10: one even card per phone - same layout in All / In stock / Sold */
-   return `<tr class="sk-uc-row" data-imei="${imei}" style="cursor:pointer"><td class="sk-uc" colspan="6">
+   return `<tr class="sk-uc-row" data-imei="${imei}" data-id="${rid}" style="cursor:pointer"><td class="sk-uc" colspan="6">
     <div class="sk-uc-top">
      <span class="sk-uc-thumb sk-used-phone-thumb" style="--phone-accent:${brandColor}" aria-hidden="true"><svg viewBox="0 0 24 36"><rect x="3" y="1" width="18" height="34" rx="3.2"/><rect x="5.2" y="4" width="13.6" height="26" rx="1.4"/><path d="M9 2.8h6M10.5 32.4h3"/></svg></span>
-     <span class="sk-uc-main"><strong class="sk-uc-name"><b class="sk-uc-no">#${i+1}</b>${esc(r.model)}</strong><small class="sk-uc-dealer">${esc(r.dealer||'—')}</small></span>
+     <span class="sk-uc-main"><strong class="sk-uc-name"><b class="sk-uc-no">#${i+1}</b>${esc(r.model)}</strong><small class="sk-uc-dealer">${sold&&r.sale?esc('Sold to '+(r.sale.customer||'Customer')+(r.sale.date?' · '+dmy(r.sale.date):'')):esc(r.dealer||'—')}</small></span>
      <span class="sk-uc-side"><b class="sk-uc-price">${money(sold&&Number(r.sale?.price)>0?r.sale.price:(Number(r.customerPrice)>0?r.customerPrice:(Number(r.cost)||0)+2000))}</b><span class="sk-used-status sk-uc-status ${statusClass}">${esc(r.status||'In Stock')}</span></span>
     </div>
     <div class="sk-uc-bottom">
@@ -8226,7 +8234,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   }).join('');
   if(!body.__skTap){body.__skTap=1;body.addEventListener('click',function(e){
    const tr=e.target.closest('tr[data-imei]');if(!tr||e.target.closest('.sk-used-row-actions,button,summary,details,a'))return;
-   window.skUsedShowDetails(tr.dataset.imei);
+   window.skUsedShowDetails(tr.dataset.id||tr.dataset.imei);
   });}
   const active=Object.values(filters).some(v=>v!==''&&v!=null);
   const filterButton=$('skUsedFilterButton');
@@ -8330,11 +8338,11 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  };
 
  const UD_ICONS={battery:'<rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 11v2"/><path d="M6 10v4M9 10v4M12 10v4"/>',ram:'<rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/>',storage:'<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/>',colour:'<path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z"/>',kit:'<path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v8"/>',imei:'<path d="M4 5v14M8 5v14M12 5v14M16 5v14M20 5v14"/>',status:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',price:'<path d="M3 12V4h8l10 10-8 8L3 12Z"/><circle cx="7.5" cy="8.5" r="1.2"/>',notes:'<path d="M4 20h4L19 9l-4-4L4 16v4Z"/>'};
- window.skUsedShowDetails=function(imei){
-  const r=read().find(x=>String(x.imei)===String(imei));if(!r)return;
+ window.skUsedShowDetails=function(key){
+  const r=findRec(key);if(!r)return;const rid=esc(r.id||r.imei);
   const _S=window.skUsedSpec(r);
   let dlg=$('skUsedDetailDialog');if(!dlg){dlg=document.createElement('div');dlg.id='skUsedDetailDialog';dlg.className='sk-used-detail-overlay';dlg.setAttribute('role','dialog');dlg.setAttribute('aria-modal','true');document.body.appendChild(dlg);}
-  dlg.innerHTML='<section class="sk-used-detail-sheet"><header class="sk-used-detail-head"><button type="button" class="sk-used-detail-close sk-used-detail-back" aria-label="Back" onclick="document.getElementById(\'skUsedDetailDialog\').remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4-8 8 8 8"/></svg></button><div class="sk-used-detail-title"><strong>'+esc(r.model)+'</strong><small>Used mobile details</small></div><span class="sk-used-detail-status '+(r.status==='Sold'?'is-sold':'is-stock')+'">'+esc(r.status||'In Stock')+'</span></header><div class="sk-used-detail-grid">'+[...(_S.iphone?[['Battery Health',_S.battery,'battery']]:[['RAM',_S.ram,'ram']]),['Storage',_S.storage,'storage'],['Colour',r.colour,'colour'],['Full Kit',r.kit,'kit'],['IMEI / Serial',r.imei,'imei'],['Status',r.status,'status'],['Customer Price',money(r.customerPrice),'price'],['Notes / Issue',r.issue||'—','notes']].map(([k,v,c])=>'<div class="sk-used-detail-field f-'+c+(c==='imei'||c==='notes'?' is-wide':'')+'"><span class="sk-ud-ic"><svg viewBox="0 0 24 24" aria-hidden="true">'+(UD_ICONS[c]||'')+'</svg></span><div class="sk-ud-tx"><small>'+esc(k)+'</small><strong>'+esc(v||'Not set')+'</strong></div></div>').join('')+'</div><footer class="sk-used-detail-actions">'+(r.status==='Sold'?'':'<button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Bill this mobile</button>')+'<button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedShowManagement();window.skUsedEdit(\''+esc(r.imei)+'\');document.getElementById(\'skUsedPurchaseForm\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">Edit</button><button type="button" class="submit-btn sk-used-detail-danger" onclick="window.skUsedDelete(\''+esc(r.imei)+'\');document.getElementById(\'skUsedDetailDialog\')?.remove();window.skUsedShowManagement()">Delete</button><button type="button" class="submit-btn sk-used-bill-button" '+(r.status==='Sold'?'disabled':'')+' onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Select for Bill</button></footer></section>';
+  dlg.innerHTML='<section class="sk-used-detail-sheet"><header class="sk-used-detail-head"><button type="button" class="sk-used-detail-close sk-used-detail-back" aria-label="Back" onclick="document.getElementById(\'skUsedDetailDialog\').remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4-8 8 8 8"/></svg></button><div class="sk-used-detail-title"><strong>'+esc(r.model)+'</strong><small>Used mobile details</small></div><span class="sk-used-detail-status '+(r.status==='Sold'?'is-sold':'is-stock')+'">'+esc(r.status||'In Stock')+'</span></header><div class="sk-used-detail-grid">'+[...(_S.iphone?[['Battery Health',_S.battery,'battery']]:[['RAM',_S.ram,'ram']]),['Storage',_S.storage,'storage'],['Colour',r.colour,'colour'],['Full Kit',r.kit,'kit'],['IMEI / Serial',r.imei,'imei'],['Status',r.status,'status'],...(r.status==='Sold'&&r.sale?[['Sold To',r.sale.customer||'—','status'],['Sale Date',r.sale.date?dmy(r.sale.date):'—','status'],['Sale Price',money(r.sale.price),'price'],['Profit',money((Number(r.sale.price)||0)-(Number(r.cost)||0)),'price']]:[['Customer Price',money(Number(r.customerPrice)>0?r.customerPrice:(Number(r.cost)||0)+2000),'price']]),['Notes / Issue',r.issue||'—','notes']].map(([k,v,c])=>'<div class="sk-used-detail-field f-'+c+(c==='imei'||c==='notes'?' is-wide':'')+'"><span class="sk-ud-ic"><svg viewBox="0 0 24 24" aria-hidden="true">'+(UD_ICONS[c]||'')+'</svg></span><div class="sk-ud-tx"><small>'+esc(k)+'</small><strong>'+esc(v||'Not set')+'</strong></div></div>').join('')+'</div><footer class="sk-used-detail-actions">'+(r.status==='Sold'?'':'<button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Bill this mobile</button>')+'<button type="button" class="submit-btn" onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedShowManagement();window.skUsedEdit(\''+rid+'\');document.getElementById(\'skUsedPurchaseForm\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">Edit</button><button type="button" class="submit-btn sk-used-detail-danger" onclick="window.skUsedDelete(\''+rid+'\');document.getElementById(\'skUsedDetailDialog\')?.remove();window.skUsedShowManagement()">Delete</button><button type="button" class="submit-btn sk-used-bill-button" '+(r.status==='Sold'?'disabled':'')+' onclick="document.getElementById(\'skUsedDetailDialog\').remove();window.skUsedSelectForBill(\''+esc(r.imei)+'\')">Select for Bill</button></footer></section>';
   dlg.addEventListener('click',function(e){if(e.target===dlg)dlg.remove();},{once:true});
  };
  window.skUsedShowInventory=function(){
@@ -8387,7 +8395,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  };
  window.skUsedAutoFillBillByImei=function(){
   const imei=String($('billImei1')?.value||'').trim();if(!imei)return;
-  const item=read().find(r=>String(r.imei)===imei);
+  const item=findRec(imei);
   if(!item)return;
   if(item.status==='Sold'){alert('This IMEI is already sold.');return;}
   const set=(id,v)=>{const e=$(id);if(e){e.value=String(v??'');}};
@@ -8397,6 +8405,62 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
   if(typeof saveDraft==='function')saveDraft();if(typeof updateBillPreview==='function')updateBillPreview();if(typeof calculateBillMath==='function')calculateBillMath();
  };
  document.addEventListener('DOMContentLoaded',()=>{const e=$('billImei1');if(e){e.addEventListener('change',window.skUsedAutoFillBillByImei);e.addEventListener('blur',window.skUsedAutoFillBillByImei);}});
+ /* V5.10.5: Excel import (Purchases / Sales / Inventory) — see the note inside skUsedImportCSV */
+ const skUsedImportCycles=function(purchases,salesRows,invRows){
+  const N=v=>String(v??'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');
+  const pick=(row,...names)=>{const ks=Object.keys(row);for(const n of names){const k=ks.find(x=>N(x)===N(n));if(k!==undefined){const v=String(row[k]??'').trim();if(v!=='')return v;}}return '';};
+  const MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  const day=v=>{const t=String(v||'').trim();if(!t)return '';let m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+   m=t.match(/^(\d{1,2})[\/\-. ]([A-Za-z]{3,})[\/\-. ](\d{2,4})$/);if(m&&MON[m[2].slice(0,3).toLowerCase()]){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+String(MON[m[2].slice(0,3).toLowerCase()]).padStart(2,'0')+'-'+m[1].padStart(2,'0');}
+   m=t.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');}return '';};
+  const okDate=d=>d&&d>='2015-01-01'&&d<='2100-01-01';
+  const num=v=>{const n=Number(String(v??'').replace(/[₹,\s]/g,''));return Number.isFinite(n)?n:NaN;};
+  const notes=[];
+  const P=[];purchases.forEach((row,i)=>{const imei=pick(row,'IMEI','IMEI/Serial','IMEI1'),model=pick(row,'Mobile Model','Model'),cost=num(pick(row,'Purchase Price','Purchase Cost','Cost'));
+   if(!imei||!model||!Number.isFinite(cost)||cost<0)return;
+   P.push({i,imei,model,date:day(pick(row,'Date','Purchase Date')),dealer:pick(row,'Dealer Name','Dealer','Supplier'),colour:pick(row,'Colour','Color'),storage:pick(row,'Storage'),kit:pick(row,'Full Kit','Kit'),cost,issue:pick(row,'Issue','Issu','Notes')});});
+  const S=[];salesRows.forEach((row,i)=>{const imei=pick(row,'IMEI','IMEI/Serial','IMEI1'),price=num(pick(row,'Sale Price','Sales Price','Price'));if(!imei||!Number.isFinite(price)||price<=0)return;
+   S.push({i,imei,model:pick(row,'Mobile Model','Model'),date:day(pick(row,'Sale Date','Date')),customer:pick(row,'Customer Name','Customer'),colour:pick(row,'Colour','Color'),storage:pick(row,'Storage'),kit:pick(row,'Full Kit','Kit'),price,xlProfit:num(pick(row,'Profit')),salesId:pick(row,'Sales ID','Sale ID','Bill No'),issue:pick(row,'Issue','Issu','Notes')});});
+  const INV=new Map();invRows.forEach(row=>{const imei=pick(row,'IMEI','IMEI/Serial','IMEI1');if(imei)INV.set(imei,{model:pick(row,'Mobile Model','Model'),colour:pick(row,'Colour','Color'),storage:pick(row,'Storage'),kit:pick(row,'Full Kit','Kit'),issue:pick(row,'Issue','Issu')});});
+  const byI=new Map();const add=(k,t,x)=>{if(!byI.has(k))byI.set(k,{p:[],s:[]});byI.get(k)[t].push(x);};P.forEach(x=>add(x.imei,'p',x));S.forEach(x=>add(x.imei,'s',x));
+  const out=[];let stamp=Date.now(),seq=0;
+  const mk=(p,sale,extra)=>{const inv=INV.get(p.imei)||{};const model=p.model||sale?.model||inv.model||'';const ip=window.skUsedIsIphone(model);
+   const sp=window.skUsedSplitSpec('',p.storage||sale?.storage||inv.storage||'');
+   const r={id:'USED-X-'+(stamp)+'-'+(seq++),date:p.date||sale?.date||'',dealer:p.dealer||'',model,ram:ip?'':sp.ram,colour:p.colour||sale?.colour||inv.colour||'',storage:sp.storage,battery:'',kit:p.kit||sale?.kit||inv.kit||'Mobile Only',
+    cost:p.cost,dealerPrice:Math.round((p.cost+1000)*100)/100,customerPrice:Math.round((p.cost+2000)*100)/100,imei:p.imei,issue:p.issue||sale?.issue||inv.issue||'',status:sale?'Sold':'In Stock',
+    sale:sale?{date:sale.date,customer:sale.customer,price:sale.price,profit:sale.price-p.cost,salesId:sale.salesId,source:'excel'}:null,source:'excel',updatedAt:new Date().toISOString(),...(extra||{})};
+   return r;};
+  byI.forEach((g,imei)=>{
+   g.p.sort((a,b)=>(a.date||'9').localeCompare(b.date||'9')||a.i-b.i);
+   /* the same sale typed twice (same customer, price) — keep one, the one with a real date */
+   const seen=new Map();g.s.forEach(x=>{const k=N(x.customer)+'|'+x.price;const o=seen.get(k);if(!o){seen.set(k,x);return;}const keep=okDate(x.date)&&(!okDate(o.date)||x.date>o.date)?x:o;seen.set(k,keep);notes.push('IMEI '+imei+': same sale entered twice — counted once');});
+   const sales=[...seen.values()].sort((a,b)=>(okDate(a.date)?a.date:'0').localeCompare(okDate(b.date)?b.date:'0')||a.i-b.i);
+   const used=new Set();
+   sales.forEach(x=>{
+    let p=g.p.find(q=>!used.has(q)&&(!q.date||!okDate(x.date)||q.date<=x.date))||g.p.find(q=>!used.has(q));
+    if(p){used.add(p);out.push(mk(p,x));return;}
+    /* sold again without a Purchases row (taken back and resold): purchase price = sale price - Excel profit */
+    const cost=x.price-(Number.isFinite(x.xlProfit)?x.xlProfit:NaN);
+    if(x.model&&Number.isFinite(cost)&&cost>0){const last=g.p[g.p.length-1]||{};out.push(mk({imei,model:x.model||last.model,date:x.date,dealer:'Taken back (not in Purchases sheet)',colour:x.colour||last.colour,storage:x.storage||last.storage,kit:x.kit||last.kit,cost,issue:''},x));notes.push('IMEI '+imei+': sold again without a purchase row — purchase price taken as '+cost+' (sale − Excel profit)');}
+    else notes.push('IMEI '+imei+': sale of '+x.price+' skipped — no model / purchase price');
+   });
+   const left=g.p.filter(q=>!used.has(q));
+   if(left.length>1){notes.push('IMEI '+imei+': bought '+left.length+' times without a sale in between — kept the latest purchase as In Stock');left.slice(0,-1).forEach(q=>used.add(q));}
+   left.slice(-1).forEach(q=>out.push(mk(q,null)));
+  });
+  INV.forEach((v,imei)=>{if(!out.some(r=>String(r.imei)===imei&&r.status!=='Sold'))notes.push('Inventory IMEI '+imei+' ('+(v.model||'')+') is not In Stock by Purchases/Sales');});
+  /* replace the app's old entries for these IMEIs; keep phones only in the app, and exchange entries newer than the Excel */
+  const xlImeis=new Set(out.map(r=>String(r.imei)));
+  const lastDate=new Map();out.forEach(r=>{const d=[r.date,r.sale?.date].filter(Boolean).sort().pop()||'';if(d>(lastDate.get(r.imei)||''))lastDate.set(r.imei,d);});
+  const existing=read();const kept=existing.filter(r=>{const k=String(r.imei||'');if(!xlImeis.has(k))return true;return !!r.exchange&&String(r.date||'')>(lastDate.get(k)||'');});
+  const removed=existing.length-kept.length;
+  write([...out,...kept]);
+  const linked=window.skUsedSyncBills?window.skUsedSyncBills():0;
+  skUsedRender();if(window.__skUsedInventoryPageMode&&typeof window.skUsedShowInventory==='function')window.skUsedShowInventory();
+  const sold=out.filter(r=>r.status==='Sold'),stock=out.length-sold.length,profit=sold.reduce((a,r)=>a+r.sale.profit,0);
+  return {out,notes,message:'Import completed.\n\nFrom Excel: '+out.length+' entries ('+stock+' in stock, '+sold.length+' sold)\nSold profit: ₹'+profit.toLocaleString('en-IN')+'\nOld app entries replaced: '+removed+'\nPhones only in the app kept: '+(kept.length)+'\nMarked sold from app bills: '+linked+(notes.length?'\n\nPlease check:\n• '+notes.slice(0,12).join('\n• ')+(notes.length>12?'\n• … and '+(notes.length-12)+' more':''):'')};
+ };
+ window.__skUsedImportCycles=skUsedImportCycles;
  window.skUsedImportCSV=function(input){
   const file=input?.files?.[0];if(!file)return;
   const isExcel=/\.(xlsx|xls)$/i.test(file.name),isCSV=/\.csv$/i.test(file.name);
@@ -8435,11 +8499,14 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
      if(!window.XLSX)throw new Error('Excel reader library did not load. Open the app with an internet connection and try again.');
      const wb=window.XLSX.read(reader.result,{type:'array',cellDates:true});
      const findSheet=(names)=>{const n=wb.SheetNames.find(x=>names.some(y=>norm(x)===norm(y)));return n?window.XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:'',raw:true}).map(r=>{const o={};for(const k in r)o[k]=skCellText(r[k]);return o;}):[];};
+     /* V5.10.5: only the Purchases, Sales and Inventory sheets are read.
+        Dealer price = purchase + 1000, customer price = purchase + 2000. Profit = sale price - purchase price (the Excel "Profit" column is not trusted).
+        The same IMEI can be bought, sold, taken back (exchange) and sold again: every purchase becomes its own entry and each sale is paired
+        with the purchase before it. Phones in the Excel replace their old entries in the app; phones added only in the app stay. */
      const purchases=findSheet(['Purchases']);if(!purchases.length)throw new Error('Purchases sheet not found in the Excel file.');
-     const makeMap=(rows,field)=>{const m=new Map();for(const r of rows){const h=Object.keys(r);const getv=(...names)=>{const k=h.find(x=>names.some(n=>norm(x)===norm(n)));return k===undefined?'':String(r[k]??'').trim();};const imei=getv('IMEI','IMEI/Serial','IMEI1');const val=getv(field);if(imei&&val!=='')m.set(imei,val);}return m;};
-     const dealerRows=findSheet(['Dealer Price']),customerRows=findSheet(['Customer Price']),salesRows=findSheet(['Sales']);
-     const salesMap=new Map();for(const r of salesRows){const h=Object.keys(r);const gv=(...names)=>{const k=h.find(x=>names.some(n=>norm(x)===norm(n)));return k===undefined?'':String(r[k]??'').trim();};const imei=gv('IMEI','IMEI/Serial','IMEI1');if(!imei)continue;const price=Number(gv('Sale Price','Sales Price','Price'))||0;const profitText=gv('Profit');salesMap.set(imei,{date:dateValue(gv('Sale Date','Date')),customer:gv('Customer Name','Customer'),price,profit:profitText!==''&&Number.isFinite(Number(profitText))?Number(profitText):price-(Number(gv('Purchase Price','Cost'))||0)});}
-     importRows(purchases,{dealer:makeMap(dealerRows,'Dealer Price'),customer:makeMap(customerRows,'Customer Price')},salesMap);
+     const salesRows=findSheet(['Sales']),invRows=findSheet(['Inventory']);
+     const res=skUsedImportCycles(purchases,salesRows,invRows);
+     alert(res.message);
     }else{
      const text=String(reader.result||'').replace(/^\uFEFF/,'');const parseCSV=function(src){const out=[];let row=[],cell='',quoted=false;for(let i=0;i<src.length;i++){const c=src[i];if(quoted){if(c==='"'&&src[i+1]==='"'){cell+='"';i++;}else if(c==='"')quoted=false;else cell+=c;}else if(c==='"')quoted=true;else if(c===','){row.push(cell);cell='';}else if(c==='\n'){row.push(cell.replace(/\r$/,''));out.push(row);row=[];cell='';}else cell+=c;}if(cell.length||row.length){row.push(cell.replace(/\r$/,''));out.push(row);}return out;};
      const grid=parseCSV(text).filter(r=>r.some(v=>String(v||'').trim()!==''));if(grid.length<2)throw new Error('The CSV must contain a header and data rows.');const heads=grid[0];const objects=grid.slice(1).map(r=>Object.fromEntries(heads.map((h,i)=>[h,r[i]??''])));importRows(objects);
@@ -8450,10 +8517,24 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  };
  window.skUsedExportCSV=function(){const rows=read();const cols=['Date','Dealer Name','Mobile Model','RAM','Colour','Storage','Full Kit','Purchase Price','Dealer Price','Customer Price','IMEI','Issue','Status','Sales','Battery Health'];const values=rows.map(r=>{const _S=window.skUsedSpec(r);return [r.date,r.dealer,r.model,_S.ram,r.colour,_S.storage,r.kit,r.cost,r.dealerPrice,r.customerPrice,r.imei,r.issue,r.status,r.sale?JSON.stringify(r.sale):'',_S.battery]});const cell=v=>{const s=String(v??'');return '"'+s.replace(/"/g,'""')+'"';};const csv=[cols.map(cell).join(','),...values.map(row=>row.map(cell).join(','))].join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='SK-Used-Mobile-Register.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
  // When a used-mobile bill is saved, match by IMEI and mark the matching stock item sold exactly once.
- window.skUsedCanSell=function(bill){if(!bill||bill.mobileType!=='Used Mobile')return true;const imei=String(bill.imei1||'').trim();if(!imei)return true;const item=read().find(r=>String(r.imei)===imei);if(!item)return true;if(item.status==='Sold'&&String(item.sale?.billId||'')!==String(bill.id||'')){alert('This IMEI is already sold in Used Mobile Stock. Please choose a different IMEI.');return false;}return true;};
+ window.skUsedCanSell=function(bill){if(!bill||bill.mobileType!=='Used Mobile')return true;const imei=String(bill.imei1||'').trim();if(!imei)return true;const rows=read().filter(r=>String(r.imei)===imei);if(!rows.length)return true;if(rows.some(r=>r.status!=='Sold'||String(r.sale?.billId||'')===String(bill.id||'')))return true;alert('This IMEI is already sold in Used Mobile Stock. Please choose a different IMEI.');return false;};
  /* V5.10.5: a used phone sold by a bill that is deleted (or edited to another IMEI) goes back to In Stock, so its profit is not counted. */
  window.skUsedReleaseBillSale=function(billId,keepImei){const id=String(billId||'');if(!id)return;const rows=read();let n=0;rows.forEach(r=>{if(r&&r.status==='Sold'&&r.sale&&String(r.sale.billId||'')===id&&String(r.imei)!==String(keepImei||'')){r.status='In Stock';r.sale=null;r.updatedAt=new Date().toISOString();n++;}});if(n){write(rows);try{skUsedRender();}catch(e){}}};
- window.skUsedRecordBillSale=function(bill){if(!bill||bill.mobileType!=='Used Mobile')return;const imei=String(bill.imei1||'').trim();if(!imei)return;const rows=read();const item=rows.find(r=>String(r.imei)===imei);if(!item)return;if(item.status==='Sold'&&String(item.sale?.billId||'')!==String(bill.id||''))return;item.status='Sold';item.sale={billId:String(bill.id||''),date:String(bill.date||''),customer:String(bill.custName||''),price:Number(bill.price)||0,profit:(Number(bill.price)||0)-(Number(item.cost)||0)};write(rows);};
+ window.skUsedRecordBillSale=function(bill){if(!bill||bill.mobileType!=='Used Mobile')return;const imei=String(bill.imei1||'').trim();if(!imei)return;const rows=read();const item=rows.find(r=>String(r.imei)===imei&&String(r.sale?.billId||'')===String(bill.id||'')&&r.status==='Sold')||rows.find(r=>String(r.imei)===imei&&r.status!=='Sold');if(!item)return;item.status='Sold';item.sale={billId:String(bill.id||''),billNo:String(bill.billNo||''),date:String(bill.date||''),customer:String(bill.custName||''),phone:String(bill.phone||''),price:Number(bill.price)||0,profit:(Number(bill.price)||0)-(Number(item.cost)||0)};item.updatedAt=new Date().toISOString();write(rows);};
+ /* V5.10.5: phones billed in the app — match the bill IMEI with an In Stock entry and mark it Sold with the bill's customer and price */
+ window.skUsedSyncBills=function(){
+  let bills=[];try{bills=JSON.parse(localStorage.getItem('sk_bills')||'[]');if(!Array.isArray(bills))bills=[];}catch(e){bills=[];}
+  const rows=read();if(!rows.length||!bills.length)return 0;
+  const linked=new Set(rows.map(r=>String(r.sale?.billId||'')).filter(Boolean));
+  const dk=v=>{try{return (typeof skBillDateKey==='function'?skBillDateKey(v):'')||String(v||'').slice(0,10);}catch(e){return '';}};
+  let n=0;
+  bills.forEach(b=>{if(!b||b.isDeleted||b._deleted)return;const imei=String(b.imei1||'').trim();if(!imei||linked.has(String(b.id||'')))return;
+   if(b.mobileType!=='Used Mobile'&&imei.length<8)return;
+   const bd=dk(b.date);const item=rows.find(r=>String(r.imei)===imei&&r.status!=='Sold'&&(!bd||!r.date||dk(r.date)<=bd));if(!item)return;
+   const price=Number(b.grossPrice)||Number(b.price)||0;
+   item.status='Sold';item.sale={billId:String(b.id||''),billNo:String(b.billNo||''),date:String(b.date||''),customer:String(b.custName||''),phone:String(b.phone||''),price,profit:price-(Number(item.cost)||0)};item.updatedAt=new Date().toISOString();linked.add(String(b.id||''));n++;});
+  if(n)write(rows);return n;
+ };
  document.addEventListener('DOMContentLoaded',()=>{if(!$('skUsedDate'))return;$('skUsedDate').value=new Date().toISOString().slice(0,10);});
 })();
 
