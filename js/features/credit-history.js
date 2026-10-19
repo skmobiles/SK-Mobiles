@@ -102,10 +102,8 @@ window.skCPSendHistory=function(){
 };
 function inject(){
   var view=document.getElementById('skCPDetailView');if(!view||view.style.display==='none')return;
-  var row=view.querySelector('.skcp-detail-box .skcp-bill-actions');
-  if(!row||row.querySelector('.skcp-hist-btn'))return;
-  var b=document.createElement('button');b.type='button';b.className='skcp-btn skcp-hist-btn';b.textContent='📤 Send history';b.onclick=window.skCPSendHistory;
-  row.appendChild(b);
+  /* V5.11.3: the big "Send history" box was removed — the blue "Send history" link under the buttons does the same */
+  var old=view.querySelector('.skcp-hist-btn');if(old)old.remove();
 }
 function boot(){
   var view=document.getElementById('skCPDetailView');
