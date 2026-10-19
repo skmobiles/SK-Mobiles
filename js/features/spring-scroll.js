@@ -42,7 +42,8 @@ document.addEventListener('touchstart',function(e){
   var sc=findScroller(t);if(!sc){st=null;return}
   var ts=targets(sc);if(!ts.length){st=null;return}
   stopAnims(ts);setT(ts,0);
-  st={sc:sc,ts:ts,y0:e.touches[0].clientY,x0:e.touches[0].clientX,on:false,dead:false,cur:0};
+  var home=sc===docScroller()&&!!(t.closest&&t.closest('.app-viewport'));
+  st={home:home,sc:sc,ts:ts,y0:e.touches[0].clientY,x0:e.touches[0].clientX,on:false,dead:false,cur:0};
 },{passive:true,capture:true});
 
 document.addEventListener('touchmove',function(e){
@@ -59,12 +60,24 @@ document.addEventListener('touchmove',function(e){
   /* finger moved back past the start point: no pull */
   if((st.dir>0&&d<0)||(st.dir<0&&d>0))cur=0;
   st.cur=cur;setT(st.ts,Math.round(cur*10)/10);
+  if(st.home&&st.dir>0)ind(cur);
 },{passive:false,capture:true});
 
+var IND=null;
+function ind(cur){
+  if(!IND){IND=document.createElement('div');IND.id='skPtr';IND.setAttribute('aria-hidden','true');
+    IND.style.cssText='position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);width:38px;height:38px;margin-left:-19px;border-radius:50%;background:#fff;box-shadow:0 4px 14px rgba(15,23,42,.25);display:grid;place-items:center;z-index:2147483000;font-size:20px;color:#2563eb;pointer-events:none;opacity:0;transition:opacity .15s';
+    IND.textContent='\u21bb';document.body.appendChild(IND)}
+  var p=Math.min(cur/REFRESH_AT,1);IND.style.opacity=String(Math.min(p*1.4,1));IND.style.transform='translateY('+Math.min(cur*.5,50)+'px) rotate('+(p*270)+'deg)';
+}
+function indHide(spin){if(!IND)return;if(spin){IND.style.opacity='1';IND.style.transition='none';IND.animate([{transform:IND.style.transform},{transform:'translateY(40px) rotate(720deg)'}],{duration:600,iterations:Infinity,easing:'linear'})}else{IND.style.opacity='0'}}
+var REFRESH_AT=80;
 function end(){
   if(!st){return}var s=st;st=null;
   if(!s.on)return;
   var from=s.cur;
+  if(s.home&&s.dir>0&&from>=REFRESH_AT){indHide(true);play(s.ts,[{translate:'0 '+from+'px'},{translate:'0 36px'}],{duration:200,fill:'forwards'});setTimeout(function(){location.reload()},350);return}
+  if(s.home)indHide(false);
   play(s.ts,[{translate:'0 '+from+'px'},{translate:'0 0px'}],{duration:900,easing:'cubic-bezier(.3,1.9,.45,1)'});
 }
 document.addEventListener('touchend',end,{passive:true,capture:true});
