@@ -55,7 +55,7 @@ function addToStock(bill){
   var ex=bill&&bill.exchange;if(!ex||num(ex.value)<=0||ex.stockAdded)return;
   var rows=[];try{rows=JSON.parse(localStorage.getItem(STOCK_KEY)||'[]');if(!Array.isArray(rows))rows=[]}catch(e){rows=[]}
   var imei=String(ex.imei||'').trim()||('EX-'+Date.now().toString().slice(-8));
-  if(rows.some(function(r){return String(r.imei)===imei})){toast('Old mobile IMEI already in stock — not added again');ex.stockAdded=true;return}
+  if(rows.some(function(r){return String(r.imei)===imei&&r.status!=='Sold'})){toast('Old mobile IMEI already in stock — not added again');ex.stockAdded=true;return} /* V5.10.5: a phone we sold earlier can come back in exchange — it becomes a new stock entry */
   var cost=num(ex.value),d=new Date();
   rows.unshift({id:'USED-EX-'+Date.now(),date:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),
     dealer:'Exchange - '+(bill.custName||'Customer'),model:ex.model||'Exchange mobile',ram:'',colour:'',storage:'',kit:'Mobile Only',
