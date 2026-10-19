@@ -28,7 +28,6 @@ function openMenu(btn,view){
   var k=ledgerKey(view);
   var items=[
     ['Edit customer',IC.user,'#2563eb',function(){var w=view.querySelector('.skcp-det-who');if(w)w.click()}],
-    ['Customer QR',IC.qr,'#0ea5e9',function(){if(window.skQrOpen)window.skQrOpen('ledger')}],
     ['Close ledger',IC.close,'#64748b',function(){if(window.skCPBackToHome)window.skCPBackToHome()}],
     ['Delete customer',IC.trash,'#dc2626',function(){if(k&&window.skCPDeleteCustomer)window.skCPDeleteCustomer(k)}]
   ];
@@ -83,7 +82,7 @@ function cleanLedger(){
   var links=view.querySelector('.skcl-links');
   if(!links&&box){
     links=document.createElement('div');links.className='skcl-links';
-    links.innerHTML='<button type="button" class="skcl-link" data-a="qr">'+IC.qr+'Customer QR</button><button type="button" class="skcl-link" data-a="hist">'+IC.share+'Send history</button>';
+    links.innerHTML='<button type="button" class="skcl-link" data-a="hist">'+IC.share+'Send history</button>';
     links.addEventListener('click',function(e){var b=e.target.closest('.skcl-link');if(!b)return;
       if(b.getAttribute('data-a')==='qr'){if(window.skQrOpen)window.skQrOpen('ledger')}
       else{var hb=view.querySelector('.skcp-hist-btn');if(hb)hb.click();else if(window.skCPSendHistory)window.skCPSendHistory()}});
