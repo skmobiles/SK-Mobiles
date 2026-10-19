@@ -407,5 +407,5 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 
 ## V5.10.1 — Cloud backup fixed, no forced restart
 - Backup writes are now split by size as well as count (each Firestore batch ≤ 7 MB / 400 writes; it used 450 writes of up to 650 KB each, which can exceed the 10 MB request limit once the data grows).
-- Each stored piece is 280 000 characters, so it stays under Firestore's 1 MiB-per-document limit even for Tamil text (650 000 Tamil characters ≈ 1.9 MB).
+- Each stored piece is 280 000 characters, so it stays under Firestore's 1 MiB-per-document limit even for non-English text (650 000 such characters ≈ 1.9 MB).
 - When a backup fails the app no longer restarts itself; it shows the reason (no permission / no internet / daily limit / error code).

@@ -824,7 +824,7 @@
   // CLOUD BACKUP & RESTORE
   // ----------------------------------------------------
   const CLOUD_BACKUP_ROOT = "cloudBackups";
-  /* V5.10.1: 280 000 characters per piece stays under Firestore's 1 MiB-per-document limit even for Tamil / emoji text (up to 3-4 bytes each); 650 000 could go over. */
+  /* V5.10.1: 280 000 characters per piece stays under Firestore's 1 MiB-per-document limit even for non-English or emoji text (up to 3-4 bytes per character); 650 000 could go over. */
   const CLOUD_BACKUP_CHUNK = 280000;
 
   function cloudBackupStatus(text){

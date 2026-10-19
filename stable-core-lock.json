@@ -6,7 +6,7 @@
   "core_files": {
     "index.html": "efb60de5f361af656a7cf9a8eb12f0758d5369fc1d786ed80b770fb1c56a799e",
     "js/app.js": "cd178cd58af152cd844627ecbc7cf268a547a9fed7b24282d7145b33e11f7dab",
-    "js/firebase-sync.js": "be387807032daa6db8c18ab43028f09ce8a8742d92c3c43752806523c9579c60",
+    "js/firebase-sync.js": "ec475bc6f04722cc73769a608c010fae9188f096d5819604f8d396196f2de208",
     "js/features/pin-security.js": "adde7413b65e7676169be8670d31494abd364f14a263681faa577fa07d08a0db",
     "js/features/colorful-ui.js": "8bd075f669975521a2f78e86b4dd33f05a5699483f5ff4e17b6e1f02a129f4db",
     "css/style.css": "51126e9ebbccaf0ee7b14aab82d6d813cd2cb00554f48df31ceb7bc0412052c1",
