@@ -409,3 +409,8 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Backup writes are now split by size as well as count (each Firestore batch ≤ 7 MB / 400 writes; it used 450 writes of up to 650 KB each, which can exceed the 10 MB request limit once the data grows).
 - Each stored piece is 280 000 characters, so it stays under Firestore's 1 MiB-per-document limit even for non-English text (650 000 such characters ≈ 1.9 MB).
 - When a backup fails the app no longer restarts itself; it shows the reason (no permission / no internet / daily limit / error code).
+
+## V5.10.2 — Cloud backup "no permission" fix
+- firestore.rules: backup pieces (`items/{id}/chunks/{n}`) are now allowed (same access as items). Publish the rules in the Firebase console.
+- Backup writes go in batches of 20 (security rules allow only about 1000 checks per request; 400-write batches were refused as "permission-denied").
+- If a part is still refused, the message names it: backup record, backup items or backup pieces (chunks).

@@ -904,17 +904,35 @@
     catch(e){ return String(value).replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 140); }
   }
 
-  /* V5.10.1: a batch may hold at most 500 writes AND about 10 MiB; split by both (450 writes of 650 KB each failed with "request too large"). */
+  /* V5.10.1: a batch may hold at most 500 writes AND about 10 MiB; split by both (450 writes of 650 KB each failed with "request too large").
+     V5.10.2: security rules allow only ~1000 checks per request, so a 400-write batch was refused as "permission-denied".
+     Now 20 writes per batch; if a batch is still refused, the writes are retried one by one to find which part is blocked. */
+  function cloudPartName(ref){
+    const p = String(ref && ref.path || "");
+    return p.indexOf("/chunks/") >= 0 ? "backup pieces (chunks)" : p.indexOf("/items/") >= 0 ? "backup items" : "backup record";
+  }
   async function cloudWriteBatches(writes){
-    const MAX_OPS = 400, MAX_BYTES = 7 * 1024 * 1024;
-    let batch = db.batch(), ops = 0, bytes = 0;
+    const MAX_OPS = 20, MAX_BYTES = 7 * 1024 * 1024;
     const size = d => { try { return new Blob([JSON.stringify(d)]).size; } catch(e){ return JSON.stringify(d).length * 3; } };
+    const groups = []; let cur = [], bytes = 0;
     for(const w of writes){
       const b = size(w.data) + 200;
-      if(ops && (ops >= MAX_OPS || bytes + b > MAX_BYTES)){ await batch.commit(); batch = db.batch(); ops = 0; bytes = 0; }
-      batch.set(w.ref, w.data, w.options||{}); ops++; bytes += b;
+      if(cur.length && (cur.length >= MAX_OPS || bytes + b > MAX_BYTES)){ groups.push(cur); cur = []; bytes = 0; }
+      cur.push(w); bytes += b;
     }
-    if(ops) await batch.commit();
+    if(cur.length) groups.push(cur);
+    for(const g of groups){
+      const batch = db.batch();
+      g.forEach(w => batch.set(w.ref, w.data, w.options||{}));
+      try{ await batch.commit(); }
+      catch(e){
+        if(!e || e.code !== "permission-denied") throw e;
+        for(const w of g){
+          try{ await w.ref.set(w.data, w.options||{}); }
+          catch(e2){ if(e2 && e2.code === "permission-denied") e2.skPart = cloudPartName(w.ref); throw e2; }
+        }
+      }
+    }
   }
 
   window.skCloudCanBackup = function(){ return !!(auth?.currentUser && db && cloudBackupAllowed() && navigator.onLine !== false); };
@@ -944,7 +962,7 @@
         itemCount++;
       });
       await cloudWriteBatches(writes);
-      await backupRef.set({
+      try{ await backupRef.set({
         app: "SK Mobiles",
         version: 1,
         status: "complete",
@@ -954,13 +972,13 @@
         createdByEmail: auth.currentUser.email || "",
         itemCount,
         chunkCount
-      }, {merge:true});
+      }, {merge:true}); }catch(e3){ if(e3 && e3.code === "permission-denied") e3.skPart = "backup record"; throw e3; }
       cloudBackupStatus("✅ Cloud backup saved • " + itemCount + " data items");
       cloudBackupEvent(true);
       if(!silent) toast("☁️ Cloud Backup completed");
     }catch(e){
       console.error("Cloud backup error", e);
-      const why = (e && e.code === "permission-denied") ? "no permission (check your role / Firestore rules)"
+      const why = (e && e.code === "permission-denied") ? "no permission to save " + (e.skPart || "backup") + " — publish the latest Firestore rules"
         : (e && (e.code === "unavailable" || e.code === "deadline-exceeded")) ? "no internet connection"
         : (e && e.code === "resource-exhausted") ? "Firebase free daily limit reached — try again tomorrow"
         : ((e && (e.code || e.message)) || "unknown error");
