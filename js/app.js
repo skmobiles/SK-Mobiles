@@ -4945,8 +4945,9 @@ img{max-width:100%!important;}
   function rjUncollected(){return load().filter(j=>j&&j.status==='Ready'&&rjReadyDays(j)>=7).sort((a,b)=>rjReadyDays(b)-rjReadyDays(a));}
   function rjRemindLevel(d){return d>=60?60:d>=30?30:7;}
   function rjDue(j){return Math.max(0,(Number(j.estimate)||0)-Math.max(0,Number(j.discountAmount)||0)-(Number(j.paidAmount)||0));}
-  function rjRemindText(j){
+  function rjRemindText(j,lang){
     const shop=localStorage.getItem('sk_shop_name')||'SK MOBILES',d=rjReadyDays(j),lv=rjRemindLevel(d),due=rjDue(j),m=String(j.model||'mobile');
+    if(lang==='ta'&&typeof window.skTaRepair==='function')return window.skTaRepair(j,d,lv,due,shop,localStorage.getItem('sk_shop_upi'));
     const bal=due>0?' The balance to pay is ₹'+Math.round(due).toLocaleString('en-IN')+'.':'';
     let t;
     if(lv===7)t='Dear '+(j.customer||'Customer')+', greetings from '+shop+'. We are happy to inform you that your '+m+' has been repaired and is ready for collection.'+bal+' Kindly collect it at your convenience. Thank you for your support 🙏';
@@ -4959,10 +4960,13 @@ img{max-width:100%!important;}
   window.skRjRemindSend=function(id){
     const j=load().find(x=>x.id===id);if(!j)return;
     const d=String(j.phone||'').replace(/\D/g,'');if(!d){showToast('No phone number for '+j.customer);return;}
-    window.open('https://wa.me/'+(d.length===10?'91'+d:d)+'?text='+encodeURIComponent(rjRemindText(j)),'_blank','noopener');
-    const log=rjRemindLog();log[id]=log[id]||{};log[id][rjRemindLevel(rjReadyDays(j))]=new Date().toISOString();
-    try{localStorage.setItem(SK_RJ_REMIND_KEY,JSON.stringify(log));}catch(e){}
-    skRjRenderJobs();
+    const go=lang=>{
+      window.open('https://wa.me/'+(d.length===10?'91'+d:d)+'?text='+encodeURIComponent(rjRemindText(j,lang)),'_blank','noopener');
+      const log=rjRemindLog();log[id]=log[id]||{};log[id][rjRemindLevel(rjReadyDays(j))]=new Date().toISOString();
+      try{localStorage.setItem(SK_RJ_REMIND_KEY,JSON.stringify(log));}catch(e){}
+      skRjRenderJobs();
+    };
+    if(typeof window.skRemindLang==='function')window.skRemindLang(go);else go('en');
   };
   function rjUncollectedHtml(){
     const list=rjUncollected(),log=rjRemindLog();

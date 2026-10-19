@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.10 — Reminders in English or Tamil
+- Before a credit reminder or a repair "not collected" reminder opens WhatsApp, a popup asks English or Tamil (the last choice is marked). The Tamil text lives only in `js/features/remind-ta.js` (the one exception to the English-only rule, customer messages only). The app screens stay English.
+
 ## V5.11.9 — Ledger row actions, return without repair, polite messages
 - Customer Ledger history: tap a row for full details (date, amount, mode, note, bill, receipt) with Edit / Delete; long press for an Edit / Delete menu. Delete goes to the Recycle Bin; deleting a payment made against a bill puts the amount back on the bill balance and removes its receipt, and Restore puts both back. Payments made against a bill are edited through their receipt.
 - The Edit Credit / Payment popup has a Delete button and closes with the phone Back button.
