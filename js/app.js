@@ -4254,7 +4254,12 @@ img{max-width:100%!important;}
       return Array.isArray(a)?a:[];
     }catch(e){return []}
   }
-  function save(a){ localStorage.setItem(KEY,JSON.stringify(a)); }
+  function save(a){
+    /* V5.11.8: remember the day a job became Ready (used by the "not collected" reminders) */
+    try{const prev={};load().forEach(j=>{if(j)prev[j.id]=j.status;});const now=new Date().toISOString();
+      a.forEach(j=>{if(!j)return;if(j.status==='Ready'&&!j.readyAt&&prev[j.id]!=='Ready')j.readyAt=now;else if(j.status!=='Ready'&&j.status!=='Delivered'&&j.readyAt)delete j.readyAt;});}catch(e){}
+    localStorage.setItem(KEY,JSON.stringify(a));
+  }
   function today(){ return new Date().toISOString().slice(0,10); }
   function rjToISODate(value){
     const s=String(value||'').trim();
@@ -4894,6 +4899,43 @@ img{max-width:100%!important;}
     keep.forEach((n,i)=>{if(el.children[i]!==n)el.insertBefore(n,el.children[i]||null);});
   }
   window.skMorphChildren=skMorphChildren;
+  /* ---------- V5.11.8: Ready but not collected -> reminders at 7 / 30 / 60 days ---------- */
+  const SK_RJ_REMIND_KEY='sk_repair_remind_log_v1';
+  function rjRemindLog(){try{const v=JSON.parse(localStorage.getItem(SK_RJ_REMIND_KEY)||'{}');return v&&typeof v==='object'?v:{};}catch(e){return{};}}
+  function rjReadyDays(j){const t=new Date(j.readyAt||j.updatedAt||j.date||'').getTime();return isNaN(t)?0:Math.max(0,Math.floor((Date.now()-t)/86400000));}
+  function rjUncollected(){return load().filter(j=>j&&j.status==='Ready'&&rjReadyDays(j)>=7).sort((a,b)=>rjReadyDays(b)-rjReadyDays(a));}
+  function rjRemindLevel(d){return d>=60?60:d>=30?30:7;}
+  function rjDue(j){return Math.max(0,(Number(j.estimate)||0)-Math.max(0,Number(j.discountAmount)||0)-(Number(j.paidAmount)||0));}
+  function rjRemindText(j){
+    const shop=localStorage.getItem('sk_shop_name')||'SK MOBILES',d=rjReadyDays(j),lv=rjRemindLevel(d),due=rjDue(j),m=String(j.model||'mobile');
+    let t='Hello '+(j.customer||'')+', ';
+    if(lv===7)t+='your '+m+' repair at '+shop+' is completed and ready for delivery'+(due>0?'. Balance to pay: ₹'+Math.round(due).toLocaleString('en-IN'):'')+'. Please collect it at your earliest convenience. Thank you 🙏';
+    else if(lv===30)t+='this is a reminder from '+shop+'. Your '+m+' has been ready for '+d+' days'+(due>0?' (balance to pay: ₹'+Math.round(due).toLocaleString('en-IN')+')':'')+'. As per our terms, repaired devices must be collected within 30 days of the ready date. After 30 days the device is kept at the customer\'s own risk and '+shop+' will not be responsible for any loss or damage. Please collect it immediately.';
+    else t+='FINAL NOTICE from '+shop+'. Your '+m+' has been ready for '+d+' days'+(due>0?' (balance to pay: ₹'+Math.round(due).toLocaleString('en-IN')+')':'')+'. As per our terms, devices not collected within 60 days are not the shop\'s responsibility, and the shop may dispose of the device or adjust it against the pending repair charges, to the extent permitted by law. Please collect it within 7 days of this message.';
+    const upi=String(localStorage.getItem('sk_shop_upi')||'').trim();
+    if(due>0&&/^[\w.\-]{2,}@[A-Za-z][\w.\-]{1,}$/.test(upi))t+='\n\n*Pay ₹'+Math.round(due).toLocaleString('en-IN')+' now* (GPay / PhonePe / Paytm):\n'+location.origin+'/pay.html?pa='+encodeURIComponent(upi)+'&pn='+encodeURIComponent(shop)+'&am='+Math.round(due)+'&tn='+encodeURIComponent('Repair '+(j.id||''))+'&ts='+Date.now()+'\nUPI ID: '+upi+'\n(Link valid for 3 days.)';
+    return t;
+  }
+  window.skRjRemindSend=function(id){
+    const j=load().find(x=>x.id===id);if(!j)return;
+    const d=String(j.phone||'').replace(/\D/g,'');if(!d){showToast('No phone number for '+j.customer);return;}
+    window.open('https://wa.me/'+(d.length===10?'91'+d:d)+'?text='+encodeURIComponent(rjRemindText(j)),'_blank','noopener');
+    const log=rjRemindLog();log[id]=log[id]||{};log[id][rjRemindLevel(rjReadyDays(j))]=new Date().toISOString();
+    try{localStorage.setItem(SK_RJ_REMIND_KEY,JSON.stringify(log));}catch(e){}
+    skRjRenderJobs();
+  };
+  function rjUncollectedHtml(){
+    const list=rjUncollected(),log=rjRemindLog();
+    if(!list.length)return '<div class="sk-rj-empty">No repaired mobiles waiting more than 7 days.</div>';
+    return list.map(j=>{const d=rjReadyDays(j),lv=rjRemindLevel(d),last=log[j.id]&&log[j.id][lv],due=rjDue(j);
+      const tag=lv===60?'Final notice':lv===30?'Warning':'Reminder';
+      return `<div class="sk-rj-card sk-rj-unc" data-rj-id="${esc(j.id)}" onclick="skRjShowDetail('${j.id}')">
+        <div class="sk-rj-card-top"><div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
+        <div class="sk-rj-meta">📱 ${esc(j.phone||'—')} · Ready ${d} days${due>0?' · Balance ₹'+Math.round(due).toLocaleString('en-IN'):''}</div>
+        <div class="sk-rj-delivery-meta">${last?'Last '+tag.toLowerCase()+' sent '+rjFmtDate(last):'No reminder sent yet'}</div></div>
+        <div class="sk-rj-status-dealer-row"><span class="sk-rj-status">${d} days</span></div></div>
+        <div class="sk-rj-actions"><button type="button" class="sk-rj-next" onclick="event.stopPropagation();skRjRemindSend('${j.id}')">📲 Send ${tag}</button></div></div>`;}).join('');
+  }
   window.__skRjQuery=window.__skRjQuery||'';window.__skRjFx=window.__skRjFx||{dealer:'',from:'',to:''};
   function skRjEnsureSearch(list){
     if(document.getElementById('skRjSearchRow'))return;
@@ -4929,9 +4971,9 @@ img{max-width:100%!important;}
     let a=allPending;
     let bar=document.getElementById('skRjFilterBar');
     if(!bar){bar=document.createElement('div');bar.id='skRjFilterBar';bar.className='sk-rj-filter-bar';list.insertAdjacentElement('beforebegin',bar);}
-    const cnt=f=>f==='urgent'?allPending.filter(rjIsUrgent).length:f==='all'?allPending.length:allPending.filter(j=>j.status===f).length;
+    const cnt=f=>f==='uncollected'?rjUncollected().length:f==='urgent'?allPending.filter(rjIsUrgent).length:f==='all'?allPending.length:allPending.filter(j=>j.status===f).length;
     if(window.__skRjFilter!=='all' && !cnt(window.__skRjFilter)) window.__skRjFilter='all';
-    skMorphChildren(bar,[['all','All'],['urgent','🚨 Urgent'],['Received','Received'],['Checking','Checking'],['Repairing','Repairing']]
+    skMorphChildren(bar,[['all','All'],['urgent','🚨 Urgent'],['Received','Received'],['Checking','Checking'],['Repairing','Repairing'],['uncollected','⏰ Not collected']]
       .map(([k,l])=>`<button type="button" class="sk-rj-chip${window.__skRjFilter===k?' active':''}" onclick="skRjSetFilter('${k}')">${l} <b>${cnt(k)}</b></button>`).join(''));
     if(window.__skRjFilter==='urgent') a=allPending.filter(rjIsUrgent);
     else if(window.__skRjFilter!=='all') a=allPending.filter(j=>j.status===window.__skRjFilter);
@@ -4948,6 +4990,7 @@ img{max-width:100%!important;}
     document.getElementById('skRjPendingCount').textContent=allPending.length;
     const hc=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const hEl=document.getElementById('skRjHistoryCount'); if(hEl) hEl.textContent=hc;
+    if(window.__skRjFilter==='uncollected'){skMorphChildren(list,rjUncollectedHtml());return;}
     skMorphChildren(list,a.length? a.map(j=>`
       <div class="sk-rj-card" data-rj-id="${esc(j.id)}" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">

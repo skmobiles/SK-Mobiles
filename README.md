@@ -434,6 +434,11 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.8 — Repair: ready but not collected
+- New chip **⏰ Not collected** in Pending Jobs: repaired (Ready) mobiles waiting 7+ days, oldest first. Each card has a WhatsApp button: **Reminder** (7+ days), **Warning** (30+, collect within 30 days, otherwise customer's risk) and **Final notice** (60+, shop not responsible; may dispose of / adjust against dues to the extent permitted by law). A UPI pay link is added when a balance is due. Sent reminders are remembered (`sk_repair_remind_log_v1`).
+- The day a job becomes Ready is now stored (`readyAt`); older jobs use their last update date.
+- The wording is not legal advice; add the 30 / 60 day rule to Bill terms / job slip too.
+
 ## V5.11.7 — pay link safety
 - `pay.html`: shows "Balance as on <date>", the customer can change the amount (part payment), and the link expires after 3 days (then it asks the customer to contact the shop). The reminder message says the balance date and that the link is valid for 3 days.
 
