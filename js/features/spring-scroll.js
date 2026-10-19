@@ -83,9 +83,9 @@ function onScroll(e){
   var hitTop=top<=0&&v<-0.5,hitBot=top>=max-1&&v>0.5;
   if(!hitTop&&!hitBot)return;
   var ts=targets(sc);if(!ts.length)return;
-  var amp=Math.min(Math.max(Math.abs(v)*14,22),44)*(hitBot?-1:1);
+  var amp=Math.min(Math.max(Math.abs(v)*16,28),52)*(hitBot?-1:1);
   f.busy=true;stopAnims(ts);
-  play(ts,[{translate:'0 0px',easing:'cubic-bezier(.22,.8,.3,1)'},{translate:'0 '+amp+'px',offset:.38,easing:'cubic-bezier(.45,0,.2,1)'},{translate:'0 0px'}],{duration:1100},function(){f.busy=false});
+  play(ts,[{translate:'0 0px',easing:'cubic-bezier(.2,.8,.4,1)'},{translate:'0 '+amp+'px',offset:.09,easing:'cubic-bezier(.3,1.9,.45,1)'},{translate:'0 0px'}],{duration:950},function(){f.busy=false});
 }
 document.addEventListener('scroll',onScroll,{passive:true,capture:true});
 })();

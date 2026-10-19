@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.13 — Fling bounce uses the same spring as drag-release
+- The bounce when a normal scroll reaches the end now starts instantly and springs back with the same feel as letting go after a pull (no pause before moving).
+
 ## V5.11.12 — Spring bounce scrolling
 - New `js/features/spring-scroll.js`: every scrolling page, popup and the Menu springs at the top/bottom. Dragging past the end follows the finger and springs back on release; a normal fast scroll that reaches the end gives one calm bounce (same feel at any speed). Uses the CSS `translate` property on the scroller's children (page = `.app-viewport`), skips inputs/horizontal swipes. `overscroll-behavior-y:none` removes the native glow. No data keys.
 
