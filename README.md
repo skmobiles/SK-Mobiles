@@ -415,6 +415,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Backup writes go in batches of 20 (security rules allow only about 1000 checks per request; 400-write batches were refused as "permission-denied").
 - If a part is still refused, the message names it: backup record, backup items or backup pieces (chunks).
 
+## V5.10.3 — Install app button
+- Chrome asks "Install app" only once per site. Now the sign-in card has **Install app on this phone**, and a small bar above the bottom navigation shows **Install SK Mobiles**.
+- Shown only when the phone can install the app and it is not installed yet. ✕ hides the bar for 7 days on that phone (device-only, not synced).
 ## V5.10.4 — Cloud backup "no permission to save backup items"
 - Older user records have no `active` field. The rules read `active` directly, which fails for a missing field, so the owner was not seen as Owner. Rules now use `get('active', true)` / `get('role','')`.
 - On sign-in the app adds `active: true` to such records (role untouched), so it works even before the rules are published.
@@ -424,3 +427,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - ⋮ menu on each card opens next to the button again (the register panel's blur effect moved the menu off-screen) and stays above the bottom navigation.
 - Card price shows the **customer price** (sold phones: the sale price). Purchase / dealer price are not shown on the list. Price filter uses the same customer price.
 - Profit correctness: deleting a used-mobile bill puts the phone back In Stock (its profit is no longer counted); restoring the bill marks it sold again; editing a bill updates the sale price / profit and frees the old phone if the IMEI changed.
+- Same IMEI can come back (exchange / bought again): every purchase is its own entry; only one In Stock entry per IMEI. Edit / Delete / Details work on the exact entry.
+- Excel import reads only **Purchases, Sales, Inventory**. Dealer = purchase + 1000, Customer = purchase + 2000. Profit = sale price − purchase price (Excel "Profit" column not used). Each sale is paired with the purchase before it; a resale without a purchase row uses sale − Excel profit as the purchase price. Phones in the Excel replace their old app entries (Excel prices win); phones only in the app stay. A summary lists anything to check.
+- Phones billed in the app (Used Mobile bill, matching IMEI) are marked Sold with the bill's customer and price.
+- Sold cards show "Sold to customer · date", sale price and profit; Sold tab lists newest sale first. Details show Sold To / Sale Date / Sale Price / Profit.
+- Stock summary button (top right) opens Stock aging.
+- Includes V5.10.3 Install app button.
