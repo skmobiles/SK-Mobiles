@@ -388,3 +388,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Used Mobile Stock: the register is no longer a box inside a box — each phone card uses the full width.
 - Home "Pending Jobs" box: the "1 urgent" pill now sits inside the box (bottom-right); it was cut off at the top edge.
 - Repair Jobs list: urgent jobs have a red border (light and dark).
+
+## V5.9.23 — No blink on list redraws, smooth page opening
+- Blink: an old performance layer delays every DOM watcher by 50 ms, so after a list redraw (Repair Next/Previous Status, Ledger tabs) the icons and the clean style were applied ~3 frames late — rows showed the old emoji/colours first and then blinked. The two look-only decorators (colorful-ui, clean-pages) now use the browser's direct watcher and style new rows before the screen is drawn. Button colour checks are cached so this stays fast.
+- Smooth opening: every page and popup fades in and rises 14 px (0.2 s, opacity/transform only); Home / Tempered / Display switch the same way. Turned off when "Reduce motion" is on.

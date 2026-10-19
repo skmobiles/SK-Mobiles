@@ -295,14 +295,25 @@ document.addEventListener('click',function(e){
   var d=$('leftDrawer');if(d&&d.classList.contains('active')&&typeof window.toggleLeftDrawer==='function')window.toggleLeftDrawer(false);
 },true);
 
+
+/* ---------- V5.9.23: Home / Tempered / Display switch with the same smooth entry as pages ---------- */
+(function(){
+  var reduce=function(){return document.documentElement.getAttribute('data-ui-motion')==='on'};
+  function play(){var c=$('cardsContainer');if(!c||!c.animate||reduce())return;
+    try{c.animate([{opacity:0,transform:'translate3d(0,14px,0)'},{opacity:1,transform:'none'}],{duration:200,easing:'cubic-bezier(.2,.8,.2,1)'})}catch(e){}}
+  function wrap(name){var o=window[name];if(typeof o!=='function'||o.__skIn)return false;
+    var w=function(){var r=o.apply(this,arguments);play();return r};w.__skIn=1;window[name]=w;return true}
+  function hook(){var a=wrap('skGoToInventoryFilter'),b=wrap('skGoHomeFromAppShell');return (a||window.skGoToInventoryFilter&&window.skGoToInventoryFilter.__skIn)&&(b||window.skGoHomeFromAppShell&&window.skGoHomeFromAppShell.__skIn)}
+  if(!hook()){var n=0,t=setInterval(function(){if(hook()||++n>40)clearInterval(t)},250)}
+})();
 /* ============================ wiring ============================ */
-var raf=0;
-function run(){raf=0;try{cleanLedger()}catch(e){console.warn('clean ledger',e)}try{cleanLedgerList()}catch(e){console.warn('clean ledger list',e)}try{cleanSettings()}catch(e){console.warn('clean settings',e)}try{fitText()}catch(e){}try{cleanMenu()}catch(e){}}
+var raf=0,syncDepth=0,fitPending=0;
+function run(){raf=0;try{cleanLedger()}catch(e){console.warn('clean ledger',e)}try{cleanLedgerList()}catch(e){console.warn('clean ledger list',e)}try{cleanSettings()}catch(e){console.warn('clean settings',e)}if(!fitPending){fitPending=1;requestAnimationFrame(function(){fitPending=0;try{fitText()}catch(e){}})}try{cleanMenu()}catch(e){}}
 function schedule(){if(!raf)raf=requestAnimationFrame(run)}
 function boot(){
-  new MutationObserver(function(ms){
+  new (window.__skNativeMO||MutationObserver)(function(ms){
     for(var i=0;i<ms.length;i++){var t=ms[i].target;
-      if(t.nodeType===1&&(t.id==='skCreditLedgerPage'||t.id==='settingsModal'||t.id==='skCPDetailView'||(t.closest&&t.closest('#skCPDetailView,#skCPMainView,#settingsModal,#skUsedStatsGrid'))||t.id==='skUsedStockModal'||t.id==='leftDrawer')){schedule();return}}
+      if(t.nodeType===1&&(t.id==='skCreditLedgerPage'||t.id==='settingsModal'||t.id==='skCPDetailView'||(t.closest&&t.closest('#skCPDetailView,#skCPMainView,#settingsModal,#skUsedStatsGrid'))||t.id==='skUsedStockModal'||t.id==='leftDrawer')){if(raf){cancelAnimationFrame(raf);raf=0}if(syncDepth<3){syncDepth++;try{run()}finally{Promise.resolve().then(function(){syncDepth=0})}}else schedule();return}}
   }).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','style']});
   schedule();
 }
