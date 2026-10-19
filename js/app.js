@@ -4254,7 +4254,12 @@ img{max-width:100%!important;}
       return Array.isArray(a)?a:[];
     }catch(e){return []}
   }
-  function save(a){ localStorage.setItem(KEY,JSON.stringify(a)); }
+  function save(a){
+    /* V5.11.8: remember the day a job became Ready (used by the "not collected" reminders) */
+    try{const prev={};load().forEach(j=>{if(j)prev[j.id]=j.status;});const now=new Date().toISOString();
+      a.forEach(j=>{if(!j)return;if(j.status==='Ready'&&!j.readyAt&&prev[j.id]!=='Ready')j.readyAt=now;else if(j.status!=='Ready'&&j.status!=='Delivered'&&j.readyAt)delete j.readyAt;});}catch(e){}
+    localStorage.setItem(KEY,JSON.stringify(a));
+  }
   function today(){ return new Date().toISOString().slice(0,10); }
   function rjToISODate(value){
     const s=String(value||'').trim();
@@ -4484,6 +4489,44 @@ img{max-width:100%!important;}
     document.getElementById('skRjCustomer').focus();
   };
 
+  /* ---------- V5.11.9: Return without repair ---------- */
+  window.skRjReturnOpen=function(id){
+    const j=load().find(x=>x.id===id);if(!j)return;
+    document.getElementById('skRjReturnDlg')?.remove();
+    const d=document.createElement('div');d.id='skRjReturnDlg';d.className='skrc-dlg skrc-edit';
+    const reasons=['Board dead','Customer declined the estimate','Not repairable','Spare part not available','Other'];
+    d.innerHTML=`<div class="skrc-sheet"><div class="skrc-bar"><button type="button" class="skrc-x" aria-label="Close">←</button><b>Return without repair</b></div><div class="skrc-body skrc-form">
+      <div class="skrc-hint">${esc(j.customer)} · ${esc(j.model)} — the mobile goes back to the customer without being repaired.</div>
+      <label>Reason<select id="skRrReason">${reasons.map(r=>`<option>${esc(r)}</option>`).join('')}</select></label>
+      <label>Note (optional)<input id="skRrNote" placeholder="Any detail"></label>
+      <label>Checking charge collected now (₹, optional)<input id="skRrCharge" type="number" inputmode="decimal" min="0" value="0"></label>
+      <label>Payment mode<select id="skRrMode"><option>Cash</option><option>GPay</option><option>PhonePe</option><option>Paytm</option><option>Other</option></select></label>
+      <div class="skrc-hint">Advance already paid: ₹${(Number(j.paidAmount)||0).toLocaleString('en-IN')}. If it is more than the checking charge, the difference is shown as a refund to give back.</div>
+      <div class="skrc-msg" id="skRrMsg"></div></div>
+      <div class="skrc-act"><button type="button" data-a="cancel" class="ed">Cancel</button><button type="button" data-a="save" class="wa">Save return</button></div></div>`;
+    document.body.appendChild(d);
+    d.addEventListener('click',e=>{
+      if(e.target===d||e.target.closest('.skrc-x')||e.target.dataset?.a==='cancel'){d.remove();return;}
+      if(e.target.dataset?.a!=='save')return;
+      const charge=Math.max(0,Number(d.querySelector('#skRrCharge').value)||0),reason=d.querySelector('#skRrReason').value,note=d.querySelector('#skRrNote').value.trim(),mode=d.querySelector('#skRrMode').value;
+      if(!confirm('Return this mobile without repair?\n\n'+j.customer+' · '+j.model+'\nReason: '+reason+(charge>0?'\nChecking charge: ₹'+charge:'')))return;
+      const a=load(),i=a.findIndex(x=>x.id===id);if(i<0)return;const job=a[i],now=new Date().toISOString(),paid=Math.max(0,Number(job.paidAmount)||0);
+      job.paymentHistory=Array.isArray(job.paymentHistory)?job.paymentHistory:[];
+      const extra=Math.max(0,charge-paid);
+      if(extra>0){job.paymentHistory.push({amount:extra,date:now,type:'Checking charge'});}
+      job.originalEstimate=job.originalEstimate!=null?job.originalEstimate:(Number(job.estimate)||0);
+      job.estimate=charge;job.discountAmount=0;job.paidAmount=Math.max(charge,Math.min(paid,charge));job.outstandingAmount=0;
+      job.refundAmount=Math.max(0,paid-charge);job.returnCharge=charge;
+      job.outcome='returned';job.returnReason=reason;job.returnNote=note;job.returnedAt=now;
+      job.status='Delivered';job.deliveryStatus='Returned – not repaired';job.deliveredAt=now;job.updatedAt=now;
+      try{if(extra>0&&window.skReceiptForRepair)window.skReceiptForRepair(job,extra,'Checking charge',mode);}catch(err){}
+      save(a);
+      try{const L=JSON.parse(localStorage.getItem('sk_credit_ledger_v1')||'[]');if(Array.isArray(L)){const keep=L.filter(e=>!(String(e&&e.id||'')==='RJ-CREDIT-'+id||String(e&&e.repairJobId||'')===String(id)&&e.type==='credit'));if(keep.length!==L.length)localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(keep));}}catch(err){}
+      d.remove();document.getElementById('skRepairDetailModal')?.classList.remove('active');
+      skRjRenderJobs();skRjRenderHistory();skRjRenderHomeMetric();try{window.skCPRender&&window.skCPRender();}catch(err){}
+      showToast(job.refundAmount>0?'↩ Returned • refund ₹'+job.refundAmount.toLocaleString('en-IN')+' to the customer':'↩ Returned without repair');
+    });
+  };
   window.skRjNext=function(id){
     const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
     const old=a[i].status;
@@ -4701,7 +4744,7 @@ img{max-width:100%!important;}
     const name=String(j.customer||'Customer').trim();
     const bal=Math.max(0,Number(j.outstandingAmount ?? (Number(j.estimate||0)-Number(j.discountAmount||0)-Number(j.paidAmount||0)))||0);
     const shop=localStorage.getItem('sk_shop_name')||'SK MOBILES';
-    const msg=`Dear ${name}, your ${String(j.model||'mobile').trim()} repair is completed and ready.${bal>0?' Balance to pay: ₹'+bal.toLocaleString('en-IN')+'.':''} Please visit the shop to collect it. Thank you - ${shop}.`;
+    const msg=`Dear ${name}, greetings from ${shop}. We are happy to inform you that your ${String(j.model||'mobile').trim()} has been repaired and is ready for collection.${bal>0?' The balance to pay is ₹'+bal.toLocaleString('en-IN')+'.':''} Kindly collect it at your convenience. Thank you for your support 🙏`;
     window.open('https://wa.me/'+(digits.length===10?'91'+digits:digits)+'?text='+encodeURIComponent(msg),'_blank');
   };
 
@@ -4723,6 +4766,7 @@ img{max-width:100%!important;}
           <button type="button" class="rjd-btn wa" ${_hasPh?'':'disabled'} onclick="skRjWhatsAppReady('${esc(j.id||'')}')">${_ic.wa}<span>WhatsApp</span></button>
         </div>
         <div class="rjd-problem"><small>PROBLEM / REPAIR</small><p>${esc(j.problem||'—')}</p></div>
+        ${j.outcome==='returned'?`<div class="sk-rj-returned-tag" style="margin:8px 0">↩ Returned – not repaired${j.returnReason?' · '+esc(j.returnReason):''}${j.returnNote?'<br>'+esc(j.returnNote):''}</div>`:(j.status!=='Delivered'?`<button type="button" class="sk-rj-return-btn" onclick="skRjReturnOpen('${esc(j.id||'')}')">↩ Return without repair</button>`:'')}
         <div class="rjd-chips">
           <div class="rjd-chip"><small>DATE</small><b>${_ic.cal}${rjFmtDate(j.date)}</b></div>
           <div class="rjd-chip st-${_st}"><small>STATUS</small><b>${_ic.ok}${esc(j.status||'—')}</b></div>
@@ -4894,6 +4938,48 @@ img{max-width:100%!important;}
     keep.forEach((n,i)=>{if(el.children[i]!==n)el.insertBefore(n,el.children[i]||null);});
   }
   window.skMorphChildren=skMorphChildren;
+  /* ---------- V5.11.8: Ready but not collected -> reminders at 7 / 30 / 60 days ---------- */
+  const SK_RJ_REMIND_KEY='sk_repair_remind_log_v1';
+  function rjRemindLog(){try{const v=JSON.parse(localStorage.getItem(SK_RJ_REMIND_KEY)||'{}');return v&&typeof v==='object'?v:{};}catch(e){return{};}}
+  function rjReadyDays(j){const t=new Date(j.readyAt||j.updatedAt||j.date||'').getTime();return isNaN(t)?0:Math.max(0,Math.floor((Date.now()-t)/86400000));}
+  function rjUncollected(){return load().filter(j=>j&&j.status==='Ready'&&rjReadyDays(j)>=7).sort((a,b)=>rjReadyDays(b)-rjReadyDays(a));}
+  function rjRemindLevel(d){return d>=60?60:d>=30?30:7;}
+  function rjDue(j){return Math.max(0,(Number(j.estimate)||0)-Math.max(0,Number(j.discountAmount)||0)-(Number(j.paidAmount)||0));}
+  function rjRemindText(j,lang){
+    const shop=localStorage.getItem('sk_shop_name')||'SK MOBILES',d=rjReadyDays(j),lv=rjRemindLevel(d),due=rjDue(j),m=String(j.model||'mobile');
+    if(lang==='ta'&&typeof window.skTaRepair==='function')return window.skTaRepair(j,d,lv,due,shop,localStorage.getItem('sk_shop_upi'));
+    const bal=due>0?' The balance to pay is ₹'+Math.round(due).toLocaleString('en-IN')+'.':'';
+    let t;
+    if(lv===7)t='Dear '+(j.customer||'Customer')+', greetings from '+shop+'. We are happy to inform you that your '+m+' has been repaired and is ready for collection.'+bal+' Kindly collect it at your convenience. Thank you for your support 🙏';
+    else if(lv===30)t='Dear '+(j.customer||'Customer')+', greetings from '+shop+'. This is a gentle reminder that your repaired '+m+' has been ready for '+d+' days.'+bal+' As per our terms, repaired devices should be collected within 30 days of the ready date. After that period the device is kept at the customer\'s own risk, and the shop cannot be held responsible for any loss or damage. Kindly collect it at the earliest. Thank you 🙏';
+    else t='Dear '+(j.customer||'Customer')+', this is an important notice from '+shop+'. Your repaired '+m+' has been ready for '+d+' days and we have not been able to hand it over.'+bal+' As per our terms, devices not collected within 60 days are no longer the shop\'s responsibility, and the shop may dispose of the device or adjust it against the pending repair charges, to the extent permitted by law. We request you to kindly collect it within 7 days of this message. We would be grateful for your co-operation 🙏';
+    const upi=String(localStorage.getItem('sk_shop_upi')||'').trim();
+    if(due>0&&/^[\w.\-]{2,}@[A-Za-z][\w.\-]{1,}$/.test(upi))t+='\n\n*Pay ₹'+Math.round(due).toLocaleString('en-IN')+' now* (GPay / PhonePe / Paytm):\n'+location.origin+'/pay.html?pa='+encodeURIComponent(upi)+'&pn='+encodeURIComponent(shop)+'&am='+Math.round(due)+'&tn='+encodeURIComponent('Repair '+(j.id||''))+'&ts='+Date.now()+'\nUPI ID: '+upi+'\n(Link valid for 3 days.)';
+    return t;
+  }
+  window.skRjRemindSend=function(id){
+    const j=load().find(x=>x.id===id);if(!j)return;
+    const d=String(j.phone||'').replace(/\D/g,'');if(!d){showToast('No phone number for '+j.customer);return;}
+    const go=lang=>{
+      window.open('https://wa.me/'+(d.length===10?'91'+d:d)+'?text='+encodeURIComponent(rjRemindText(j,lang)),'_blank','noopener');
+      const log=rjRemindLog();log[id]=log[id]||{};log[id][rjRemindLevel(rjReadyDays(j))]=new Date().toISOString();
+      try{localStorage.setItem(SK_RJ_REMIND_KEY,JSON.stringify(log));}catch(e){}
+      skRjRenderJobs();
+    };
+    if(typeof window.skRemindLang==='function')window.skRemindLang(go);else go('en');
+  };
+  function rjUncollectedHtml(){
+    const list=rjUncollected(),log=rjRemindLog();
+    if(!list.length)return '<div class="sk-rj-empty">No repaired mobiles waiting more than 7 days.</div>';
+    return list.map(j=>{const d=rjReadyDays(j),lv=rjRemindLevel(d),last=log[j.id]&&log[j.id][lv],due=rjDue(j);
+      const tag=lv===60?'Final notice':lv===30?'Warning':'Reminder';
+      return `<div class="sk-rj-card sk-rj-unc" data-rj-id="${esc(j.id)}" onclick="skRjShowDetail('${j.id}')">
+        <div class="sk-rj-card-top"><div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
+        <div class="sk-rj-meta">📱 ${esc(j.phone||'—')} · Ready ${d} days${due>0?' · Balance ₹'+Math.round(due).toLocaleString('en-IN'):''}</div>
+        <div class="sk-rj-delivery-meta">${last?'Last '+tag.toLowerCase()+' sent '+rjFmtDate(last):'No reminder sent yet'}</div></div>
+        <div class="sk-rj-status-dealer-row"><span class="sk-rj-status">${d} days</span></div></div>
+        <div class="sk-rj-actions"><button type="button" class="sk-rj-next" onclick="event.stopPropagation();skRjRemindSend('${j.id}')">📲 Send ${tag}</button></div></div>`;}).join('');
+  }
   window.__skRjQuery=window.__skRjQuery||'';window.__skRjFx=window.__skRjFx||{dealer:'',from:'',to:''};
   function skRjEnsureSearch(list){
     if(document.getElementById('skRjSearchRow'))return;
@@ -4929,9 +5015,9 @@ img{max-width:100%!important;}
     let a=allPending;
     let bar=document.getElementById('skRjFilterBar');
     if(!bar){bar=document.createElement('div');bar.id='skRjFilterBar';bar.className='sk-rj-filter-bar';list.insertAdjacentElement('beforebegin',bar);}
-    const cnt=f=>f==='urgent'?allPending.filter(rjIsUrgent).length:f==='all'?allPending.length:allPending.filter(j=>j.status===f).length;
+    const cnt=f=>f==='uncollected'?rjUncollected().length:f==='urgent'?allPending.filter(rjIsUrgent).length:f==='all'?allPending.length:allPending.filter(j=>j.status===f).length;
     if(window.__skRjFilter!=='all' && !cnt(window.__skRjFilter)) window.__skRjFilter='all';
-    skMorphChildren(bar,[['all','All'],['urgent','🚨 Urgent'],['Received','Received'],['Checking','Checking'],['Repairing','Repairing']]
+    skMorphChildren(bar,[['all','All'],['urgent','🚨 Urgent'],['Received','Received'],['Checking','Checking'],['Repairing','Repairing'],['uncollected','⏰ Not collected']]
       .map(([k,l])=>`<button type="button" class="sk-rj-chip${window.__skRjFilter===k?' active':''}" onclick="skRjSetFilter('${k}')">${l} <b>${cnt(k)}</b></button>`).join(''));
     if(window.__skRjFilter==='urgent') a=allPending.filter(rjIsUrgent);
     else if(window.__skRjFilter!=='all') a=allPending.filter(j=>j.status===window.__skRjFilter);
@@ -4948,6 +5034,7 @@ img{max-width:100%!important;}
     document.getElementById('skRjPendingCount').textContent=allPending.length;
     const hc=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const hEl=document.getElementById('skRjHistoryCount'); if(hEl) hEl.textContent=hc;
+    if(window.__skRjFilter==='uncollected'){skMorphChildren(list,rjUncollectedHtml());return;}
     skMorphChildren(list,a.length? a.map(j=>`
       <div class="sk-rj-card" data-rj-id="${esc(j.id)}" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
@@ -4976,7 +5063,8 @@ img{max-width:100%!important;}
       return (!from||d>=from)&&(!to||d<=to)&&(!q||[j.customer,j.phone,j.model,j.imei,j.problem,j.status,j.workType].join(' ').toLowerCase().includes(q));
     });
     const ready=a.filter(j=>j.status==='Ready').sort(rjSortNewest);
-    const delivered=a.filter(j=>j.status==='Delivered').sort(rjSortNewest);
+    const delivered=a.filter(j=>j.status==='Delivered'&&j.outcome!=='returned').sort(rjSortNewest);
+    const returned=a.filter(j=>j.status==='Delivered'&&j.outcome==='returned').sort(rjSortNewest);
     document.getElementById('skRjHistoryCount').textContent=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const pEl=document.getElementById('skRjPendingCount'); if(pEl) pEl.textContent=load().filter(isPending).length;
     const card=j=>`
@@ -4984,7 +5072,7 @@ img{max-width:100%!important;}
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')}<br><span class="sk-rj-problem-highlight">${esc(j.problem)}</span></div>
-          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||(j.status==='Delivered'?'Delivered':'Ready for Delivery'))}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div></div>
+          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||(j.status==='Delivered'?'Delivered':'Ready for Delivery'))}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div>${j.outcome==='returned'?`<div class="sk-rj-returned-tag">↩ Returned – not repaired${j.returnReason?' · '+esc(j.returnReason):''}${Number(j.returnCharge)>0?' · Charge ₹'+Number(j.returnCharge).toLocaleString('en-IN'):''}${Number(j.refundAmount)>0?' · Refund ₹'+Number(j.refundAmount).toLocaleString('en-IN'):''}</div>`:''}</div>
         </div>
         <div class="sk-rj-history-actions" onclick="event.stopPropagation()">
           <span class="sk-rj-status">${esc(j.status)}</span>
@@ -4996,6 +5084,7 @@ img{max-width:100%!important;}
       </div>`;
     list.innerHTML=(ready.length?`<div class="sk-rj-history-section-title ready">✅ Ready for Delivery <span>${ready.length}</span></div>${ready.map(card).join('')}`:'')
       +(delivered.length?`<div class="sk-rj-history-section-title delivered">🚚 Delivered <span>${delivered.length}</span></div>${delivered.map(card).join('')}`:'')
+      +(returned.length?`<div class="sk-rj-history-section-title returned">↩ Returned – not repaired <span>${returned.length}</span></div>${returned.map(card).join('')}`:'')
       ||'<div class="sk-rj-empty">No repair history found for selected filters.</div>';
   };
 
@@ -7636,6 +7725,8 @@ window.skCPEditLedgerEntry=function(encodedId){
   if(String(entry.source||'')==='bill'||String(entry.source||'')==='repair-job'||skCPRepairJobIdFromCredit(entry)){
     if(typeof showToast==='function')showToast('This entry is linked to a Bill / Repair Job. Please edit it from the original record.');return;
   }
+  /* V5.11.9: a payment made against a bill is edited through its receipt (keeps bill balance, receipt and ledger in step) */
+  if(entry.type==='payment'&&entry.billId&&typeof window.skReceiptEditForEntry==='function'&&window.skReceiptEditForEntry(entry))return;
   var old=document.getElementById('skcpLedgerEditModal');if(old)old.remove();
   var esc=typeof cpEsc==='function'?cpEsc:function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
   var dateVal=typeof skISOToDmy==='function'?skISOToDmy(entry.date||''):String(entry.date||'');
@@ -7653,11 +7744,12 @@ window.skCPEditLedgerEntry=function(encodedId){
     '<label style="display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700">Payment mode<input name="mode" value="'+esc(entry.mode||'Cash')+'" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"></label>'+
     '<label style="display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700;grid-column:1/-1">Full details / note<textarea name="details" rows="3" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit;resize:vertical">'+esc(entry.details||'')+'</textarea></label>'+
     '<label style="display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700;grid-column:1/-1">Due date (optional)<input name="dueDate" value="'+esc(dueVal)+'" placeholder="DD/MM/YYYY" style="box-sizing:border-box;width:100%;min-width:0;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit"></label>'+
-    '<div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:4px"><button type="button" id="skcpEditCancel" style="padding:10px 16px;border:1px solid var(--card-border,#cbd5e1);border-radius:999px;background:transparent;color:inherit">Cancel</button><button type="submit" style="padding:10px 18px;border:0;border-radius:999px;background:var(--primary,#2563eb);color:#fff;font-weight:800">Save Changes</button></div></form></div>';
+    '<div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:4px"><button type="button" id="skcpEditDelete" style="padding:10px 16px;border:1px solid #fca5a5;border-radius:999px;background:#fee2e2;color:#b91c1c;font-weight:800;margin-right:auto">Delete</button><button type="button" id="skcpEditCancel" style="padding:10px 16px;border:1px solid var(--card-border,#cbd5e1);border-radius:999px;background:transparent;color:inherit">Cancel</button><button type="submit" style="padding:10px 18px;border:0;border-radius:999px;background:var(--primary,#2563eb);color:#fff;font-weight:800">Save Changes</button></div></form></div>';
   document.body.appendChild(modal);
   modal.style.setProperty('z-index','2147483647','important');
   function close(){modal.remove();}
   modal.querySelector('#skcpEditClose').onclick=close;modal.querySelector('#skcpEditCancel').onclick=close;
+  modal.querySelector('#skcpEditDelete').onclick=function(){close();if(window.skLedgerDelete)window.skLedgerDelete(entry.id);};
   modal.addEventListener('click',function(ev){if(ev.target===modal)close();});
   modal.querySelector('#skcpLedgerEditForm').addEventListener('submit',function(ev){
     ev.preventDefault();var f=ev.currentTarget;

@@ -33,7 +33,7 @@ function layersNow(){
   var dr=$('leftDrawer');
   if(isOn(dr))out.push({key:'leftDrawer',el:dr,close:function(){if(window.toggleLeftDrawer)window.toggleLeftDrawer(false);else dr.classList.remove('active')},still:function(){return isOn(dr)}});
   /* short-lived popups created on the fly */
-  document.querySelectorAll('.skwp-overlay,.skph-view,.sk-used-detail-overlay,.sk-scan-overlay,.skrc-dlg,.sk-rj-fx-dlg').forEach(function(el){
+  document.querySelectorAll('#skcpLedgerEditModal,.skwp-overlay,.skph-view,.sk-used-detail-overlay,.sk-scan-overlay,.skrc-dlg,.sk-rj-fx-dlg').forEach(function(el){
     if(!el.__bkKey)el.__bkKey='eph'+(++eph);
     out.push({key:el.__bkKey,el:el,close:function(){
       var x=el.classList.contains('sk-scan-overlay')?el.querySelector('.sk-scan-x'):null;

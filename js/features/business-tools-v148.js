@@ -180,20 +180,31 @@ function reminderRows(){
     return b.balance-a.balance;
   });
 }
-function msgFor(r){
-  var m='Hello '+r.name+', this is a reminder from '+shopName()+'. Your pending balance is '+money(r.balance)+'.';
-  if(r.due)m+=(r.overdue?' It was due on ':' Your due date is ')+dmy(r.due)+'.';
-  return m+' Kindly pay at the earliest. Thank you 🙏';
+function msgFor(r,lang){
+  if(lang==='ta'&&typeof window.skTaCredit==='function')return window.skTaCredit(r,shopName(),r.due?dmy(r.due):'',localStorage.getItem('sk_shop_upi'),dmy(today()));
+  var m='Dear '+r.name+', greetings from '+shopName()+'. This is a gentle reminder that '+money(r.balance)+' is pending in your account.';
+  if(r.due)m+=(r.overdue?' It was due on ':' It is due on ')+dmy(r.due)+'.';
+  m+=' Kindly clear it at your convenience. If you have already paid, please ignore this message. Thank you for your support 🙏';
+  /* V5.11.5: UPI pay link (opens GPay / PhonePe / Paytm with the amount filled in) when a UPI ID is saved in Shop Profile */
+  var upi=String(localStorage.getItem('sk_shop_upi')||'').trim();
+  if(/^[\w.\-]{2,}@[A-Za-z][\w.\-]{1,}$/.test(upi)&&num(r.balance)>0){
+    var link=location.origin+'/pay.html?pa='+encodeURIComponent(upi)+'&pn='+encodeURIComponent(shopName())+'&am='+Math.round(num(r.balance))+'&tn='+encodeURIComponent('Credit balance')+'&ts='+Date.now();
+    m+='\n\n*Pay '+money(r.balance)+' now* (GPay / PhonePe / Paytm):\n'+link+'\nUPI ID: '+upi+'\n(Balance as on '+dmy(today())+'. Link valid for 3 days.)';
+  }
+  return m;
 }
 window.skCreditRemind=function(encKey){
   var k=decodeURIComponent(encKey),r=reminderRows().find(function(x){return x.key===k});
   if(!r){toast('No pending balance');return}
   if(!digits(r.phone)){toast('No phone number for '+r.name);return}
-  openWa(r.phone,msgFor(r));
-  var log=remindLog();log[k]=today();
-  try{localStorage.setItem(LOG_KEY,JSON.stringify(log))}catch(e){}
-  if(document.getElementById('skCreditRemindModal')?.classList.contains('active'))renderRemind();
-  updateRemindStrip();
+  var go=function(lang){
+    openWa(r.phone,msgFor(r,lang));
+    var log=remindLog();log[k]=today();
+    try{localStorage.setItem(LOG_KEY,JSON.stringify(log))}catch(e){}
+    if(document.getElementById('skCreditRemindModal')?.classList.contains('active'))renderRemind();
+    updateRemindStrip();
+  };
+  if(typeof window.skRemindLang==='function')window.skRemindLang(go);else go('en');
 };
 window.skCrSetDue=function(encKey,v){
   var k=decodeURIComponent(encKey),m=dueMap();
