@@ -433,3 +433,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Sold cards show "Sold to customer · date", sale price and profit; Sold tab lists newest sale first. Details show Sold To / Sale Date / Sale Price / Profit.
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
+
+## V5.10.6 — Used stock: buy back, sold edit, quick filter clear
+- **Return / Buy back** on sold phones (⋮ menu and details): opens a new purchase with model, IMEI, colour, storage, kit filled in and the customer as dealer; enter the price and save. The old sale stays as history.
+- **Edit on a sold phone** shows Sale details (Sold To, Phone, Sale Date, Sale Price); profit is recalculated.
+- After an Excel import the list is stored newest first; future dates (e.g. 02/07/2027) are listed under "Please check".
+- Active filters show under the search box with **✕ Clear**; the filter button shows a red dot while a filter is on.
