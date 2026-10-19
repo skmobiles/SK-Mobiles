@@ -35,17 +35,17 @@
   });
   window.skBackupTap=async function(){
     if(running)return;
+    /* V5.10.1: no more automatic restart — say what is wrong instead */
     if(!(typeof window.skCloudCanBackup==='function'&&window.skCloudCanBackup())){
-      toast('☁️ Cloud backup is not possible right now — restarting the app…');
-      setTimeout(function(){location.reload();},900);return;
+      toast(navigator.onLine===false?'☁️ No internet — cloud backup will work when you are online':'☁️ Cloud backup is only for Owner / Manager with backup permission');
+      return;
     }
     running=true;paint();
     var before=state.backupMs;
     try{await window.skCloudBackupNow(false);}catch(e){}
     running=false;paint();
     if(state.backupMs===before||state.backupMs<state.changeMs){
-      toast('❌ Backup failed — restarting the app…');
-      setTimeout(function(){location.reload();},1100);
+      toast('❌ Cloud backup failed: '+(window.__skLastBackupError||'please try again'));
     }else toast('✅ Cloud backup completed');
   };
   function boot(){load();hook();paint();setInterval(paint,5000);}

@@ -824,7 +824,8 @@
   // CLOUD BACKUP & RESTORE
   // ----------------------------------------------------
   const CLOUD_BACKUP_ROOT = "cloudBackups";
-  const CLOUD_BACKUP_CHUNK = 650000;
+  /* V5.10.1: 280 000 characters per piece stays under Firestore's 1 MiB-per-document limit even for non-English or emoji text (up to 3-4 bytes per character); 650 000 could go over. */
+  const CLOUD_BACKUP_CHUNK = 280000;
 
   function cloudBackupStatus(text){
     const el = document.getElementById("skCloudBackupStatus");
@@ -903,16 +904,21 @@
     catch(e){ return String(value).replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 140); }
   }
 
+  /* V5.10.1: a batch may hold at most 500 writes AND about 10 MiB; split by both (450 writes of 650 KB each failed with "request too large"). */
   async function cloudWriteBatches(writes){
-    for(let i=0; i<writes.length; i+=450){
-      const batch = db.batch();
-      writes.slice(i, i+450).forEach(w => batch.set(w.ref, w.data, w.options||{}));
-      await batch.commit();
+    const MAX_OPS = 400, MAX_BYTES = 7 * 1024 * 1024;
+    let batch = db.batch(), ops = 0, bytes = 0;
+    const size = d => { try { return new Blob([JSON.stringify(d)]).size; } catch(e){ return JSON.stringify(d).length * 3; } };
+    for(const w of writes){
+      const b = size(w.data) + 200;
+      if(ops && (ops >= MAX_OPS || bytes + b > MAX_BYTES)){ await batch.commit(); batch = db.batch(); ops = 0; bytes = 0; }
+      batch.set(w.ref, w.data, w.options||{}); ops++; bytes += b;
     }
+    if(ops) await batch.commit();
   }
 
   window.skCloudCanBackup = function(){ return !!(auth?.currentUser && db && cloudBackupAllowed() && navigator.onLine !== false); };
-  function cloudBackupEvent(ok, at){ try{ window.dispatchEvent(new CustomEvent("sk-cloud-backup",{detail:{ok:ok,at:at||Date.now()}})); }catch(e){} }
+  function cloudBackupEvent(ok, at, why){ try{ window.dispatchEvent(new CustomEvent("sk-cloud-backup",{detail:{ok:ok,at:at||Date.now(),why:why||""}})); }catch(e){} }
 
   window.skCloudBackupNow = async function(silent){
     if(!auth?.currentUser || !db){ toast("❌ Firebase Login required"); return; }
@@ -954,8 +960,13 @@
       if(!silent) toast("☁️ Cloud Backup completed");
     }catch(e){
       console.error("Cloud backup error", e);
-      cloudBackupStatus("❌ Cloud backup failed");
-      cloudBackupEvent(false);
+      const why = (e && e.code === "permission-denied") ? "no permission (check your role / Firestore rules)"
+        : (e && (e.code === "unavailable" || e.code === "deadline-exceeded")) ? "no internet connection"
+        : (e && e.code === "resource-exhausted") ? "Firebase free daily limit reached — try again tomorrow"
+        : ((e && (e.code || e.message)) || "unknown error");
+      window.__skLastBackupError = why;
+      cloudBackupStatus("❌ Cloud backup failed: " + why);
+      cloudBackupEvent(false, null, why);
     }
   };
 
