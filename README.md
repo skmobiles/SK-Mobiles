@@ -414,3 +414,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - firestore.rules: backup pieces (`items/{id}/chunks/{n}`) are now allowed (same access as items). Publish the rules in the Firebase console.
 - Backup writes go in batches of 20 (security rules allow only about 1000 checks per request; 400-write batches were refused as "permission-denied").
 - If a part is still refused, the message names it: backup record, backup items or backup pieces (chunks).
+
+## V5.10.3 — Install app button
+- Chrome asks "Install app" only once per site. Now the sign-in card has **Install app on this phone**, and a small bar above the bottom navigation shows **Install SK Mobiles**.
+- Shown only when the phone can install the app and it is not installed yet. ✕ hides the bar for 7 days on that phone (device-only, not synced).
