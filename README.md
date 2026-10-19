@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.2 — History row fix
+- Customer Ledger: the word "Credit" no longer breaks into two lines on repair-balance rows (the detail line is shown, not the "Tap to open" hint).
+
 ## V5.11.1 — Ledger layout, back button, bill order
 - Customer Ledger: Receipts / Credit / Payment sit on one line; the bill card buttons are a 2 x 2 grid with the text inside the boxes.
 - Phone Back button now closes the receipt / filter popups first (before, it closed the page under the popup).
