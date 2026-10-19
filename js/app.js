@@ -3371,7 +3371,10 @@ const MASTER_INVENTORY = [
         bill.emiStartDate=document.getElementById('billEmiStartDate').value||''; bill.creditDueDate=document.getElementById('billCreditDate').value||'';
         bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-advance):0;
         bill.emiHtml=currentPayMode==='EMI'?document.getElementById('pvEmiScheduleTbody').innerHTML:'';
+        if (typeof window.skUsedCanSell === 'function' && !window.skUsedCanSell(bill)) return;
         localStorage.setItem('sk_bills',JSON.stringify(savedBills)); window.__skEditingBillId='';
+        /* V5.10.5: an edited bill updates the used-phone sale price / profit, and frees the old phone if the IMEI changed */
+        try { if (typeof window.skUsedReleaseBillSale === 'function') window.skUsedReleaseBillSale(bill.id, bill.mobileType==='Used Mobile' ? String(bill.imei1||'').trim() : ''); if (typeof window.skUsedRecordBillSale === 'function') window.skUsedRecordBillSale(bill.grossPrice ? Object.assign({}, bill, { price: bill.grossPrice }) : bill); } catch (e) { console.warn('Used stock sale linkage skipped:', e); }
         const btn=document.querySelector('.bill-action-save'); if(btn){const sp=btn.querySelector('span:last-child');if(sp)sp.textContent='Save Bill';}
         updateBillHistoryCount(); renderBillHistory(); skBillResetForm(); showToast('✅ Bill updated successfully'); switchBillTab('history'); return;
       }
@@ -3479,6 +3482,7 @@ window.deleteBillSafely=async function(billId){
     const next=list.filter(function(_,i){return i!==idx});
     savedBills=next;
     localStorage.setItem('sk_bills',JSON.stringify(next));
+    try{if(typeof window.skUsedReleaseBillSale==='function')window.skUsedReleaseBillSale(bill.id);}catch(e){console.warn('Used stock release skipped',e)}
     if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
     if(typeof renderBillHistory==='function')renderBillHistory();
     if(typeof loadSavedBills==='function')loadSavedBills();
@@ -7973,7 +7977,7 @@ window.skOpenCreditLedger=cpOpenPage;
     purgeExpiredTrash();const list=readRecycle(),index=list.findIndex(x=>String(x.trashId)===String(trashId));if(index<0){showToast?.('❌ Recycle item not found');return;}const item=list[index];
     try{
       if(item.type==='bill'){
-        const bill=item.data,bills=Array.isArray(savedBills)?savedBills.slice():[];if(!bills.some(b=>String(b?.id||'')===String(bill?.id||'')))bills.push(bill);savedBills=bills;localStorage.setItem('sk_bills',JSON.stringify(bills));await restoreCloudBill(bill?.id);updateBillHistoryCount?.();renderBillHistory?.();loadSavedBills?.();updateBillPreview?.();
+        const bill=item.data,bills=Array.isArray(savedBills)?savedBills.slice():[];if(!bills.some(b=>String(b?.id||'')===String(bill?.id||'')))bills.push(bill);savedBills=bills;localStorage.setItem('sk_bills',JSON.stringify(bills));try{if(bill&&typeof window.skUsedRecordBillSale==='function')window.skUsedRecordBillSale(bill.grossPrice?Object.assign({},bill,{price:bill.grossPrice}):bill)}catch(e){}await restoreCloudBill(bill?.id);updateBillHistoryCount?.();renderBillHistory?.();loadSavedBills?.();updateBillPreview?.();
       }else if(item.type==='credit'){
         const entry=item.data,a=(()=>{try{const x=JSON.parse(localStorage.getItem('sk_credit_ledger_v1')||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}})();if(!a.some(x=>String(x?.id||'')===String(entry?.id||'')))a.push(entry);localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(a));window.skCPRender?.();
       }else if(item.type==='inventory'||item.type==='inventory-batch'){
@@ -8188,7 +8192,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
    if(filters.brand&&brand!==filters.brand.toLowerCase())return false;
    if(filters.ram&&String(window.skUsedSpec(r).ram||'').toLowerCase()!==filters.ram.toLowerCase())return false;
    if(filters.storage&&String(window.skUsedSpec(r).storage||'').toLowerCase()!==filters.storage.toLowerCase())return false;
-   const price=Number(r.cost)||0;
+   const price=Number(r.customerPrice)>0?Number(r.customerPrice):(Number(r.cost)||0)+2000; /* V5.10.5: filter by the price shown on the card (customer price) */
    if(filters.minPrice!==''&&filters.minPrice!=null&&price<Number(filters.minPrice))return false;
    if(filters.maxPrice!==''&&filters.maxPrice!=null&&price>Number(filters.maxPrice))return false;
    return true;
@@ -8212,7 +8216,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
     <div class="sk-uc-top">
      <span class="sk-uc-thumb sk-used-phone-thumb" style="--phone-accent:${brandColor}" aria-hidden="true"><svg viewBox="0 0 24 36"><rect x="3" y="1" width="18" height="34" rx="3.2"/><rect x="5.2" y="4" width="13.6" height="26" rx="1.4"/><path d="M9 2.8h6M10.5 32.4h3"/></svg></span>
      <span class="sk-uc-main"><strong class="sk-uc-name"><b class="sk-uc-no">#${i+1}</b>${esc(r.model)}</strong><small class="sk-uc-dealer">${esc(r.dealer||'—')}</small></span>
-     <span class="sk-uc-side"><b class="sk-uc-price">${money(r.cost)}</b><span class="sk-used-status sk-uc-status ${statusClass}">${esc(r.status||'In Stock')}</span></span>
+     <span class="sk-uc-side"><b class="sk-uc-price">${money(sold&&Number(r.sale?.price)>0?r.sale.price:(Number(r.customerPrice)>0?r.customerPrice:(Number(r.cost)||0)+2000))}</b><span class="sk-used-status sk-uc-status ${statusClass}">${esc(r.status||'In Stock')}</span></span>
     </div>
     <div class="sk-uc-bottom">
      <span class="sk-uc-imei"><i>IMEI</i>${imei||'—'}</span>
@@ -8259,11 +8263,18 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
     const popupHeight=popup.offsetHeight;
     let left=anchor.right-popupWidth;
     left=Math.max(margin,Math.min(left,window.innerWidth-popupWidth-margin));
+    /* V5.10.5: keep the menu above the bottom navigation */
+    const nav=document.querySelector('nav.bottom-nav');const navR=nav?nav.getBoundingClientRect():null,navTop=navR&&navR.height>0&&getComputedStyle(nav).visibility!=='hidden'?navR.top:window.innerHeight;
+    const bottomLimit=Math.min(window.innerHeight,navTop)-margin;
     let top=anchor.bottom+5;
-    if(top+popupHeight>window.innerHeight-margin)top=anchor.top-popupHeight-5;
-    top=Math.max(margin,Math.min(top,window.innerHeight-popupHeight-margin));
+    if(top+popupHeight>bottomLimit)top=anchor.top-popupHeight-5;
+    top=Math.max(margin,Math.min(top,bottomLimit-popupHeight));
     popup.style.left=left+'px';popup.style.top=top+'px';popup.style.right='auto';popup.style.bottom='auto';
     popup.style.zIndex='2147483002';
+    /* V5.10.5: the register panel has a blur effect, which moves "fixed" boxes along with the panel.
+       Measure where the menu really landed and shift it back so it opens next to the ⋮ button. */
+    const landed=popup.getBoundingClientRect();
+    popup.style.left=(left-(landed.left-left))+'px';popup.style.top=(top-(landed.top-top))+'px';
    });
    return;
   }
@@ -8440,6 +8451,8 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  window.skUsedExportCSV=function(){const rows=read();const cols=['Date','Dealer Name','Mobile Model','RAM','Colour','Storage','Full Kit','Purchase Price','Dealer Price','Customer Price','IMEI','Issue','Status','Sales','Battery Health'];const values=rows.map(r=>{const _S=window.skUsedSpec(r);return [r.date,r.dealer,r.model,_S.ram,r.colour,_S.storage,r.kit,r.cost,r.dealerPrice,r.customerPrice,r.imei,r.issue,r.status,r.sale?JSON.stringify(r.sale):'',_S.battery]});const cell=v=>{const s=String(v??'');return '"'+s.replace(/"/g,'""')+'"';};const csv=[cols.map(cell).join(','),...values.map(row=>row.map(cell).join(','))].join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='SK-Used-Mobile-Register.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
  // When a used-mobile bill is saved, match by IMEI and mark the matching stock item sold exactly once.
  window.skUsedCanSell=function(bill){if(!bill||bill.mobileType!=='Used Mobile')return true;const imei=String(bill.imei1||'').trim();if(!imei)return true;const item=read().find(r=>String(r.imei)===imei);if(!item)return true;if(item.status==='Sold'&&String(item.sale?.billId||'')!==String(bill.id||'')){alert('This IMEI is already sold in Used Mobile Stock. Please choose a different IMEI.');return false;}return true;};
+ /* V5.10.5: a used phone sold by a bill that is deleted (or edited to another IMEI) goes back to In Stock, so its profit is not counted. */
+ window.skUsedReleaseBillSale=function(billId,keepImei){const id=String(billId||'');if(!id)return;const rows=read();let n=0;rows.forEach(r=>{if(r&&r.status==='Sold'&&r.sale&&String(r.sale.billId||'')===id&&String(r.imei)!==String(keepImei||'')){r.status='In Stock';r.sale=null;r.updatedAt=new Date().toISOString();n++;}});if(n){write(rows);try{skUsedRender();}catch(e){}}};
  window.skUsedRecordBillSale=function(bill){if(!bill||bill.mobileType!=='Used Mobile')return;const imei=String(bill.imei1||'').trim();if(!imei)return;const rows=read();const item=rows.find(r=>String(r.imei)===imei);if(!item)return;if(item.status==='Sold'&&String(item.sale?.billId||'')!==String(bill.id||''))return;item.status='Sold';item.sale={billId:String(bill.id||''),date:String(bill.date||''),customer:String(bill.custName||''),price:Number(bill.price)||0,profit:(Number(bill.price)||0)-(Number(item.cost)||0)};write(rows);};
  document.addEventListener('DOMContentLoaded',()=>{if(!$('skUsedDate'))return;$('skUsedDate').value=new Date().toISOString().slice(0,10);});
 })();

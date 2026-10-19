@@ -419,3 +419,8 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Older user records have no `active` field. The rules read `active` directly, which fails for a missing field, so the owner was not seen as Owner. Rules now use `get('active', true)` / `get('role','')`.
 - On sign-in the app adds `active: true` to such records (role untouched), so it works even before the rules are published.
 - A permission error now also shows the signed-in email and the cloud role.
+
+## V5.10.5 — Used Mobile Stock fixes
+- ⋮ menu on each card opens next to the button again (the register panel's blur effect moved the menu off-screen) and stays above the bottom navigation.
+- Card price shows the **customer price** (sold phones: the sale price). Purchase / dealer price are not shown on the list. Price filter uses the same customer price.
+- Profit correctness: deleting a used-mobile bill puts the phone back In Stock (its profit is no longer counted); restoring the bill marks it sold again; editing a bill updates the sale price / profit and frees the old phone if the IMEI changed.
