@@ -289,6 +289,12 @@ function cleanMenu(){
     });
   });
 }
+/* ---------- bottom bar tapped while the menu is open: close the menu, then the tap does its normal job ---------- */
+document.addEventListener('click',function(e){
+  var n=e.target&&e.target.closest&&e.target.closest('nav.bottom-nav .nav-item');if(!n)return;
+  var d=$('leftDrawer');if(d&&d.classList.contains('active')&&typeof window.toggleLeftDrawer==='function')window.toggleLeftDrawer(false);
+},true);
+
 /* ============================ wiring ============================ */
 var raf=0;
 function run(){raf=0;try{cleanLedger()}catch(e){console.warn('clean ledger',e)}try{cleanLedgerList()}catch(e){console.warn('clean ledger list',e)}try{cleanSettings()}catch(e){console.warn('clean settings',e)}try{fitText()}catch(e){}try{cleanMenu()}catch(e){}}
