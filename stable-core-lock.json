@@ -5,7 +5,7 @@
   "policy": "Approved V5.6.1 Design Studio UI changes are included in this new baseline. Future changes to locked core files must be reviewed and the lock must not be silently regenerated. Preserve business logic, Firebase configuration/rules and existing data keys.",
   "core_files": {
     "index.html": "ba1f22627841a0f362e5ba51c156a053c4298bfbc648920e4a21d1babfc2c3e0",
-    "js/app.js": "ea5ac65426d288666190a41d882b25f67a90f9324b2991f53e7e09c222fdbd1e",
+    "js/app.js": "a39eea32afd30706f57eff63ccde45a5d47fa5824c7a4338194626b1be3f190e",
     "js/firebase-sync.js": "929cdc6b489300ad70fac20d75ab4da9e2997517d4a94772ccbe1c4fa046c288",
     "js/features/pin-security.js": "adde7413b65e7676169be8670d31494abd364f14a263681faa577fa07d08a0db",
     "js/features/colorful-ui.js": "8bd075f669975521a2f78e86b4dd33f05a5699483f5ff4e17b6e1f02a129f4db",
@@ -28,7 +28,7 @@
     "sw.js": "8076367a7dec2a2457a85cf1cbbdfd6516d1fd4963da0f5e71278a640c2deb5e",
     "css/shop-tools.css": "5d89635d27f47a40fe335e60939be63fef7dd29c47f2be222f4f9dac197dc8c3",
     "js/features/shop-tools-v151.js": "3d52bb37bcb73b00f5b1123ca9bcc951eb9c5b0cd26afe099e21f3e48f1611da",
-    "css/fixes.css": "0ce225c36b3098dc9da330677e65a3f41a3b61f9451d895426906106442a50c6",
+    "css/fixes.css": "001bde7aa3f50a79a273a5bc01983804743918754d21405c8afec2b22005f41f",
     "js/features/scanner-v152.js": "2f5a44cb6d5e07c2fbc316d79d637a077456f4d5e2c10226d2de60a00dce8dd1",
     "js/features/qr-mini.js": "35cc4db27a1040f2c0c4bbfef6714da5176589fe5790533eee50e9586c13bc02",
     "js/features/invoice-upi.js": "48d6858714d880d98afcef7d121772b249b7f69a74d68557418d2a705d80c434",

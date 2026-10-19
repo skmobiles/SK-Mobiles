@@ -135,12 +135,12 @@ window.skReceiptOpen=function(id){
   var d=$('skrcDlg');if(d)d.remove();
   d=document.createElement('div');d.id='skrcDlg';d.className='skrc-dlg';
   d.innerHTML='<div class="skrc-sheet"><div class="skrc-bar"><button type="button" class="skrc-x" aria-label="Close">←</button><b>Receipt</b></div><div class="skrc-body">'+receiptHtml(r)+'</div>'+
-    '<div class="skrc-act"><button type="button" data-a="wa" class="wa">WhatsApp</button><button type="button" data-a="pdf" class="pdf">Share PDF</button></div></div>';
+    '<div class="skrc-act"><button type="button" data-a="edit" class="ed">✏️ Edit</button><button type="button" data-a="wa" class="wa">WhatsApp</button><button type="button" data-a="pdf" class="pdf">Share PDF</button></div></div>';
   document.body.appendChild(d);
   d.addEventListener('click',function(e){
     if(e.target===d||e.target.closest('.skrc-x')){d.remove();return}
     var b=e.target.closest('[data-a]');if(!b)return;
-    if(b.dataset.a==='wa')shareWa(r);else shareFile(r);
+    if(b.dataset.a==='edit'){d.remove();editForm(r)}else if(b.dataset.a==='wa')shareWa(r);else shareFile(r);
   });
 };
 function forBill(billId){return all().filter(function(r){return r.billId===billId}).sort(function(a,b){return String(a.createdAt)<String(b.createdAt)?-1:1})}
@@ -183,6 +183,78 @@ window.skReceiptsListForBill=function(billId){
     var b=e.target.closest('[data-id]');if(b){d.remove();window.skReceiptOpen(b.dataset.id)}
   });
 };
+
+/* all receipts of one customer (any bill, repair or account payment) */
+function key(n,ph){var d=String(ph||'').replace(/\D/g,'');return d?d.slice(-10):String(n||'').trim().toLowerCase()}
+window.skReceiptsForCustomer=function(name,phone){
+  var k=key(name,phone),list=all().filter(function(r){return key(r.customer,r.phone)===k});
+  if(!list.length){toast('No receipts for this customer yet');return}
+  showList('Receipts • '+(name||''),list.slice().sort(function(a,b){return String(b.createdAt)<String(a.createdAt)?-1:1}));
+};
+function showList(title,list){
+  var d=$('skrcList');if(d)d.remove();
+  d=document.createElement('div');d.id='skrcList';d.className='skrc-dlg';
+  d.innerHTML='<div class="skrc-sheet"><div class="skrc-bar"><button type="button" class="skrc-x" aria-label="Close">←</button><b>'+esc(title)+'</b></div><div class="skrc-body"><div class="skrc-after">'+
+    list.map(function(r){return '<button type="button" class="skrc-item" data-id="'+r.id+'"><span><b>'+money(r.amount)+'</b><small>'+esc(r.kind)+(r.ref?' • '+esc(r.ref):'')+' • '+esc(r.date)+' • balance '+(r.balance>0?money(r.balance):'NIL')+'</small></span><em>'+esc(r.no)+' ›</em></button>'}).join('')+'</div></div></div>';
+  document.body.appendChild(d);
+  d.addEventListener('click',function(e){
+    if(e.target===d||e.target.closest('.skrc-x')){d.remove();return}
+    var b=e.target.closest('[data-id]');if(b){d.remove();window.skReceiptOpen(b.dataset.id)}
+  });
+}
+function ledgerArr(){return arr('sk_credit_ledger_v1')}
+/* save an edited receipt and keep the bill / ledger / later receipts in step */
+function applyEdit(r,v){
+  var a=all(),i=a.findIndex(function(x){return x.id===r.id});if(i<0)return 'Receipt not found';
+  var cur=a[i],old=num(cur.amount),amt=cur.kind==='Down payment'||/^Repair/.test(cur.kind)?old:num(v.amount);
+  if(!(amt>0))return 'Enter an amount above 0';
+  var delta=amt-old,bills=arr(BILLS),bi=cur.billId?bills.findIndex(function(b){return b&&b.id===cur.billId}):-1,b=bi>=0?bills[bi]:null;
+  if(delta>0&&b&&delta>num(b.balance))return 'Amount is more than the balance of this bill (max '+money(old+num(b.balance))+')';
+  if(delta>0&&!b&&cur.balance<delta)return 'Amount is more than the balance (max '+money(old+cur.balance)+')';
+  var d=dmy(v.date);if(!/^\d{2}\/\d{2}\/\d{4}$/.test(d))return 'Date must be DD/MM/YYYY';
+  var oldMode=cur.mode,oldDate=cur.date;
+  cur.amount=amt;cur.date=d;cur.mode=v.mode||cur.mode;cur.note=v.note||'';cur.customer=v.customer||cur.customer;cur.phone=v.phone;cur.edited=new Date().toISOString();
+  if(delta){
+    cur.balance=Math.max(0,num(cur.balance)-delta);cur.paidTotal=num(cur.paidTotal)+delta;
+    a.forEach(function(x){if(x!==cur&&String(x.createdAt)>String(cur.createdAt)&&((cur.billId&&x.billId===cur.billId)||(!cur.billId&&!x.billId&&x.ref===cur.ref&&key(x.customer,x.phone)===key(cur.customer,cur.phone)))){x.balance=Math.max(0,num(x.balance)-delta);x.paidTotal=num(x.paidTotal)+delta}});
+  }
+  if(b&&cur.kind!=='Down payment'){
+    if(delta)b.balance=Math.max(0,num(b.balance)-delta);
+    (b.paymentReceipts||[]).forEach(function(pr){if(pr.rcId===cur.id){pr.amount=amt;pr.date=d;pr.mode=cur.mode;pr.balanceAfter=cur.balance}});
+    localStorage.setItem(BILLS,JSON.stringify(bills));try{if(typeof savedBills!=='undefined')savedBills=bills}catch(e){}
+  }
+  /* the matching credit-ledger payment row */
+  var L=ledgerArr(),li=L.findIndex(function(e){return e&&e.type==='payment'&&num(e.amount)===old&&String(e.billId||'')===String(cur.billId||'')&&(cur.billId||key(e.name,e.phone)===key(cur.customer,cur.phone))&&String(e.mode||'')===String(oldMode||'')&&dmy(e.date)===oldDate});
+  if(li>=0){L[li].amount=amt;L[li].mode=cur.mode;L[li].date=d;if(v.customer){L[li].name=v.customer;L[li].phone=v.phone}localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(L))}
+  save(a);
+  try{if(typeof window.skImportFromBills==='function')window.skImportFromBills(true)}catch(e){}
+  try{if(typeof renderBillHistory==='function')renderBillHistory()}catch(e){}
+  try{if(typeof window.skCPRender==='function')window.skCPRender()}catch(e){}
+  return '';
+}
+function editForm(r){
+  var d=$('skrcEdit');if(d)d.remove();
+  var lock=r.kind==='Down payment'||/^Repair/.test(r.kind);
+  d=document.createElement('div');d.id='skrcEdit';d.className='skrc-dlg skrc-edit';
+  var modes=['Cash','GPay','PhonePe','Paytm','Card','Bank transfer','Other'];if(modes.indexOf(r.mode)<0)modes.unshift(r.mode);
+  d.innerHTML='<div class="skrc-sheet"><div class="skrc-bar"><button type="button" class="skrc-x" aria-label="Close">←</button><b>Edit receipt '+esc(r.no)+'</b></div><div class="skrc-body skrc-form">'+
+    '<label>Customer name<input id="skrcEn" value="'+esc(r.customer)+'"></label><label>Phone<input id="skrcEp" inputmode="tel" value="'+esc(r.phone)+'"></label>'+
+    '<label>Amount received (₹)<input id="skrcEa" type="number" inputmode="decimal" min="1" value="'+r.amount+'"'+(lock?' disabled':'')+'></label>'+(lock?'<small class="skrc-hint">The amount of a down payment / repair payment is changed from the bill or repair job.</small>':'')+
+    '<label>Date (DD/MM/YYYY)<input id="skrcEd" value="'+esc(r.date)+'" placeholder="DD/MM/YYYY"></label>'+
+    '<label>Payment mode<select id="skrcEm">'+modes.map(function(m){return '<option'+(m===r.mode?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'+
+    '<label>Note<input id="skrcEt" value="'+esc(r.note||'')+'"></label><div class="skrc-msg" id="skrcEmsg"></div></div>'+
+    '<div class="skrc-act"><button type="button" data-a="cancel" class="pdf" style="background:#64748b">Cancel</button><button type="button" data-a="save" class="wa">Save changes</button></div></div>';
+  document.body.appendChild(d);
+  d.addEventListener('click',function(e){
+    if(e.target===d||e.target.closest('.skrc-x')||(e.target.dataset&&e.target.dataset.a==='cancel')){d.remove();return}
+    if(e.target.dataset&&e.target.dataset.a==='save'){
+      var err=applyEdit(r,{customer:$('skrcEn').value.trim(),phone:$('skrcEp').value.trim(),amount:$('skrcEa').value,date:$('skrcEd').value.trim(),mode:$('skrcEm').value,note:$('skrcEt').value.trim()});
+      if(err){$('skrcEmsg').textContent=err;return}
+      d.remove();toast('✅ Receipt updated');window.skReceiptOpen(r.id);
+    }
+  });
+}
+window.skReceiptEdit=function(id){var r=find(id);if(r)editForm(r)};
 setTimeout(migrate,1500);
 window.addEventListener('sk-role-ready',function(){setTimeout(migrate,2500)});
 })();
