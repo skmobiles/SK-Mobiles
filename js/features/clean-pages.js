@@ -263,6 +263,9 @@ document.addEventListener('click',function(e){
 /* ---------- numbers that must stay on one line: shrink the font until they fit their box ---------- */
 var FIT_SEL='#skUsedStatsGrid strong,#skCPDetailView .skcl-sum b,#skCPMainView .skcl-total b';
 function fitText(){
+  /* V5.9.21: only when a page that has such numbers is open (checking hidden ones forced a page layout on every tap) */
+  var u=$('skUsedStockModal'),l=$('skCreditLedgerPage');
+  if(!(u&&u.classList.contains('active'))&&!(l&&l.classList.contains('active')))return;
   Array.prototype.forEach.call(document.querySelectorAll(FIT_SEL),function(el){
     if(!el.offsetParent)return;
     var key=el.textContent+'|'+el.clientWidth;if(el.__fitKey===key)return;
