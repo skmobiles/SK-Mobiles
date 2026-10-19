@@ -124,6 +124,13 @@ service cloud.firestore {
         allow read: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('restore'));
         allow create, update: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('backup'));
         allow delete: if isAdmin() && shopId == 'SK-MOBILES';
+
+        /* V5.10.2: big data is saved in pieces under items/{itemId}/chunks — same access as items. */
+        match /chunks/{chunkId} {
+          allow read: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('restore'));
+          allow create, update: if shopId == 'SK-MOBILES' && (isAdmin() || isWorker() || managerHasPermission('backup'));
+          allow delete: if isAdmin() && shopId == 'SK-MOBILES';
+        }
       }
     }
 
