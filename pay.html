@@ -13,11 +13,15 @@
 .pay{display:block;margin:18px 0 10px;padding:15px;border-radius:14px;background:var(--green);color:#fff;font-weight:800;font-size:1.05rem;text-decoration:none}
 .upi{margin-top:14px;padding:12px;border:1px dashed var(--line);border-radius:12px;word-break:break-all;font-size:.95rem}
 button.cp{margin-top:8px;border:1px solid var(--line);background:transparent;color:var(--text);border-radius:10px;padding:9px 14px;font-weight:700}
+.exp{margin-top:14px;padding:14px;border-radius:12px;background:#fee2e2;color:#991b1b;font-weight:700}
+#amtIn{width:100%;margin-top:6px;padding:12px;border:1px solid var(--line);border-radius:12px;font-size:1.2rem;font-weight:800;text-align:center;background:transparent;color:var(--text)}
 .note{color:var(--muted);font-size:.78rem;margin-top:12px;line-height:1.4}
 </style></head><body>
 <div class="head"><h1 id="shop">Pay</h1><p>Pending balance</p></div>
 <div class="wrap"><div class="card">
-<div class="lbl">Amount to pay</div><div class="amt" id="amt">—</div>
+<div class="lbl" id="asof">Pending balance</div><div class="amt" id="amt">—</div>
+<div class="lbl">Amount to pay (you can change it if you already paid part)</div><input id="amtIn" type="number" inputmode="decimal" min="1" step="1" aria-label="Amount to pay">
+<div class="exp" id="exp" style="display:none">This payment link has expired. Please contact the shop for the latest balance.</div>
 <a class="pay" id="go" href="#">Pay with UPI app</a>
 <div class="lbl">GPay • PhonePe • Paytm • any UPI app</div>
 <div class="upi">UPI ID: <b id="upi">—</b><br><button class="cp" id="cp" type="button">Copy UPI ID</button></div>
@@ -25,13 +29,18 @@ button.cp{margin-top:8px;border:1px solid var(--line);background:transparent;col
 </div></div>
 <script>
 (function(){
-var q=new URLSearchParams(location.search),pa=(q.get('pa')||'').trim(),pn=q.get('pn')||'',am=parseFloat(q.get('am'))||0,tn=q.get('tn')||'';
-var ok=/^[\w.\-]{2,}@[A-Za-z][\w.\-]{1,}$/.test(pa);
+var q=new URLSearchParams(location.search),pa=(q.get('pa')||'').trim(),pn=q.get('pn')||'',am=parseFloat(q.get('am'))||0,tn=q.get('tn')||'',ts=parseInt(q.get('ts'),10)||0;
+var DAYS=3,ok=/^[\w.\-]{2,}@[A-Za-z][\w.\-]{1,}$/.test(pa);
+var expired=ts>0&&(Date.now()-ts)>DAYS*86400000;
+function p2(n){return String(n).padStart(2,'0')}
 document.getElementById('shop').textContent=pn||'Pay';
 document.getElementById('upi').textContent=ok?pa:'Not available';
-document.getElementById('amt').textContent=am>0?'₹'+Math.round(am).toLocaleString('en-IN'):'—';
-var go=document.getElementById('go');
-if(ok){go.href='upi://pay?pa='+encodeURIComponent(pa).replace(/%40/g,'@')+'&pn='+encodeURIComponent(pn)+(am>0?'&am='+am.toFixed(2):'')+'&cu=INR'+(tn?'&tn='+encodeURIComponent(tn):'')}else{go.style.display='none'}
+if(ts>0){var d=new Date(ts);document.getElementById('asof').textContent='Balance as on '+p2(d.getDate())+'/'+p2(d.getMonth()+1)+'/'+d.getFullYear()}
+var go=document.getElementById('go'),inp=document.getElementById('amtIn'),amt=document.getElementById('amt');
+amt.textContent=am>0?'\u20b9'+Math.round(am).toLocaleString('en-IN'):'\u2014';inp.value=am>0?Math.round(am):'';
+function upd(){var v=parseFloat(inp.value)||0;if(!ok||v<=0){go.style.display='none';return}go.style.display='block';go.href='upi://pay?pa='+encodeURIComponent(pa).replace(/%40/g,'@')+'&pn='+encodeURIComponent(pn)+'&am='+v.toFixed(2)+'&cu=INR'+(tn?'&tn='+encodeURIComponent(tn):'')}
+inp.addEventListener('input',upd);upd();
+if(expired){go.style.display='none';inp.style.display='none';document.getElementById('exp').style.display='block';document.querySelector('.upi').style.display='none';amt.style.opacity='.4'}
 document.getElementById('cp').onclick=function(){try{navigator.clipboard.writeText(pa);this.textContent='Copied'}catch(e){}};
 })();
 </script></body></html>

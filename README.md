@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.7 — pay link safety
+- `pay.html`: shows "Balance as on <date>", the customer can change the amount (part payment), and the link expires after 3 days (then it asks the customer to contact the shop). The reminder message says the balance date and that the link is valid for 3 days.
+
 ## V5.11.6
 - Customer QR removed everywhere (ledger link, ledger menu, bill history button). The file `js/features/customer-qr.js` is kept but no longer loaded; `view.html` stays.
 

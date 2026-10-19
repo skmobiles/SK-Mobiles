@@ -187,8 +187,8 @@ function msgFor(r){
   /* V5.11.5: UPI pay link (opens GPay / PhonePe / Paytm with the amount filled in) when a UPI ID is saved in Shop Profile */
   var upi=String(localStorage.getItem('sk_shop_upi')||'').trim();
   if(/^[\w.\-]{2,}@[A-Za-z][\w.\-]{1,}$/.test(upi)&&num(r.balance)>0){
-    var link=location.origin+'/pay.html?pa='+encodeURIComponent(upi)+'&pn='+encodeURIComponent(shopName())+'&am='+Math.round(num(r.balance))+'&tn='+encodeURIComponent('Credit balance');
-    m+='\n\n*Pay '+money(r.balance)+' now* (GPay / PhonePe / Paytm):\n'+link+'\nUPI ID: '+upi;
+    var link=location.origin+'/pay.html?pa='+encodeURIComponent(upi)+'&pn='+encodeURIComponent(shopName())+'&am='+Math.round(num(r.balance))+'&tn='+encodeURIComponent('Credit balance')+'&ts='+Date.now();
+    m+='\n\n*Pay '+money(r.balance)+' now* (GPay / PhonePe / Paytm):\n'+link+'\nUPI ID: '+upi+'\n(Balance as on '+dmy(today())+'. Link valid for 3 days.)';
   }
   return m;
 }
