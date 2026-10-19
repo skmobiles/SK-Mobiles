@@ -436,6 +436,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 
 ## V5.11.11 — Remove staff
 - People & access: a 🗑 Remove button on every row except the owner and yourself. It deletes the user record (allowed by the existing Firestore rules, no rules change). Their old entries stay; if they sign in again they appear under "Waiting for access".
+- Bottom-sheet popups (Entry details, receipt/return dialogs, repair filter, used-stock filter/detail) now open centered like the Edit popup.
 
 ## V5.11.10 — Reminders in English or Tamil
 - Before a credit reminder or a repair "not collected" reminder opens WhatsApp, a popup asks English or Tamil (the last choice is marked). The Tamil text lives only in `js/features/remind-ta.js` (the one exception to the English-only rule, customer messages only). The app screens stay English.
