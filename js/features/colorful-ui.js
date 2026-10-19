@@ -150,6 +150,8 @@
     var m = String(rgb).match(/[\d.]+/g); if (!m || m.length < 3) return false;
     return (0.299 * m[0] + 0.587 * m[1] + 0.114 * m[2]) > 200;
   }
+  /* V5.9.23: remember per button look (class + inline style) - reading the colour of every new button forced a style pass on each redraw */
+  var LIGHT_BY_CLASS = new Map();
   function replaceEmoji(root){
     var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
     var hits = [], n;
@@ -172,7 +174,7 @@
       var p = node.parentElement;
       var tile = !!p.closest(TILE_SEL) && !p.closest('button');
       var dark = false;
-      if (!tile) { var b = p.closest('button, .submit-btn, a'); if (b) { if (!lightCache.has(b)) lightCache.set(b, isLight(getComputedStyle(b).color)); dark = lightCache.get(b); } }
+      if (!tile) { var b = p.closest('button, .submit-btn, a'); if (b) { var ck = b.tagName + '.' + b.className + '|' + (b.getAttribute('style') || ''); if (!LIGHT_BY_CLASS.has(ck)) LIGHT_BY_CLASS.set(ck, isLight(getComputedStyle(b).color)); dark = LIGHT_BY_CLASS.get(ck); } }
       jobs.push([node, p, m[0].length, def, tile, dark]);
     });
     jobs.forEach(function(j){
@@ -223,12 +225,23 @@
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme', 'data-ui-theme', 'data-ui-palette', 'data-ui-accent'] });
     mo.observe(document.body, { attributes: true, attributeFilter: ['class', 'data-theme'] });
     run();
-    new MutationObserver(function(muts){
+    /* V5.9.23: decorate new content right away (before the screen is drawn) instead of a few frames later -
+       redrawn lists (repair status, ledger tabs) showed the old emoji first and then blinked to the icon. */
+    new (window.__skNativeMO||MutationObserver)(function(muts){
+      var roots = [], whole = false;
       for (var i = 0; i < muts.length; i++){
         var m = muts[i];
-        if (m.type === 'childList' && m.addedNodes.length){ schedule(); return; }
-        if (m.type === 'characterData'){ schedule(); return; }
+        if (m.type === 'childList' && m.addedNodes.length){
+          for (var k = 0; k < m.addedNodes.length; k++){ var n = m.addedNodes[k]; var r = n.nodeType === 1 ? n : n.parentElement; if (r && r.isConnected) roots.push(r); }
+        } else if (m.type === 'characterData'){ var pe = m.target.parentElement; if (pe && pe.isConnected) roots.push(pe); }
       }
+      if (!roots.length) return;
+      if (roots.length > 60) whole = true;
+      try {
+        if (whole) replaceEmoji(document.body);
+        else roots.forEach(function(r){ if (r.isConnected) replaceEmoji(r.parentElement || r); });
+        titleTiles(document); extraTiles();
+      } catch (e) { schedule(); }
     }).observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
