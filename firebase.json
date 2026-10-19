@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "skmobiles",
+    "site": "skmobilesdpi",
     "public": ".",
     "ignore": [
       "firebase.json",
