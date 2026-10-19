@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.4
+- Customer Ledger ⋮ menu: removed "Send history" (the blue link under the buttons stays).
+
 ## V5.11.3 — one Send history
 - Customer Ledger: removed the duplicate big "Send history" box; the blue "Send history" link (next to Customer QR) and the ⋮ menu entry remain.
 
