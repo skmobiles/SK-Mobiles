@@ -186,7 +186,7 @@ function msgFor(r,lang){
   /* V5.11.22: boxed summary — mobile name(s), then Outstanding and Due in bold */
   var L='━━━━━━━━━━━━',box=[L];
   (r.items||[]).forEach(function(i){box.push('📱 Mobile: '+i.model);box.push('🧾 Bill: '+(i.id||'---')+(i.date?' • '+i.date:''));if(i.price>0)box.push('💵 Total: '+money(i.price));if(i.adv>0)box.push('✅ Advance paid: '+money(i.adv))});
-  box.push('⚠️ *Outstanding: '+money(r.balance)+'*');
+  box.push('💰 *Outstanding: '+money(r.balance)+'*');
   if(r.due)box.push('📅 *'+(r.overdue?'Was due on: ':'Due: ')+dmy(r.due)+'*');
   box.push(L);
   var m='Dear '+r.name+', greetings from '+shopName()+' 🙏\n\nThis is a gentle reminder about your credit.\n\n'+box.join('\n')+'\n\nKindly clear it at your convenience. If you have already paid, please ignore this message. Thank you for your support 🙏';
