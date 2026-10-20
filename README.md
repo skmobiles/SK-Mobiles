@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.40
+- Settings > Style profiles: new MORE THEMES section with Dark A, Dark B, iPhone Dark and the extra colour themes Royal, Glacier, Nebula and Magenta (one tap). Removed the 8 themes that had no colours defined (sunset, emerald, rose, graphite, lime, aurora, mint, solar); the Emerald / Cyber Amber / Ruby profiles keep working. In dark modes the pastel profile cards keep readable dark text. No data keys changed.
+
 ## V5.11.39
 - Signature popup: the blurred fade strip at the bottom is hidden while the popup is open, so the Clear / Save Signature buttons and the hint text are fully clear. Display only.
 
