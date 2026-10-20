@@ -4713,6 +4713,52 @@ img{max-width:100%!important;}
     showToast('Repair delivered; discount and payment recorded');
   };
 
+  /* V5.11.24: cancel a payment that was entered by mistake (customer did not actually pay) */
+  window.skRjCancelPay=function(id,pi){
+    const a=load(), i=a.findIndex(x=>String(x.id)===String(id)); if(i<0)return;
+    const job=a[i], hist=Array.isArray(job.paymentHistory)?job.paymentHistory:[], p=hist[pi];
+    if(!p||(p.type!=='Repair advance payment'&&p.type!=='Repair delivery payment')){showToast('This payment cannot be cancelled');return;}
+    const amt=Math.max(0,Number(p.amount)||0);
+    const reason=prompt('Cancel payment of ₹'+amt.toLocaleString('en-IN')+'?\n\nThe customer will owe this amount again.\nEnter the reason (e.g. Customer did not pay – wrong entry):','Wrong entry – customer did not pay');
+    if(reason===null)return;
+    if(!String(reason).trim()){showToast('Reason is required');return;}
+    const now=new Date().toISOString();
+    hist.splice(pi,1);
+    job.paymentHistory=hist;
+    job.cancelledPayments=(Array.isArray(job.cancelledPayments)?job.cancelledPayments:[]).concat([{amount:amt,date:p.date||'',type:p.type,cancelledAt:now,reason:String(reason).trim()}]);
+    job.paidAmount=Math.max(0,(Number(job.paidAmount)||0)-amt);
+    const net=Math.max(0,(Number(job.estimate)||0)-Math.max(0,Number(job.discountAmount)||0));
+    job.outstandingAmount=Math.max(0,net-job.paidAmount);
+    job.updatedAt=now;
+    /* mark the matching receipt as cancelled (kept for history) */
+    try{
+      const rk='sk_receipts_v1',rs=JSON.parse(localStorage.getItem(rk)||'[]');
+      if(Array.isArray(rs)){
+        const cand=rs.filter(r=>r&&String(r.jobId||'')===String(job.id)&&Number(r.amount)===amt&&!r.cancelled);
+        const r=cand[cand.length-1];
+        if(r){r.cancelled=true;r.cancelReason=String(reason).trim();r.cancelledAt=now;if(!/CANCELLED/.test(String(r.kind||'')))r.kind=String(r.kind||'Payment')+' (CANCELLED)';localStorage.setItem(rk,JSON.stringify(rs));}
+      }
+    }catch(e){}
+    /* a delivered job's unpaid balance goes back to the customer's credit ledger */
+    try{
+      if(job.status==='Delivered'){
+        const lk='sk_credit_ledger_v1',rows=JSON.parse(localStorage.getItem(lk)||'[]');
+        const list=Array.isArray(rows)?rows:[];
+        const ix=list.findIndex(e=>String(e.repairJobId||'')===String(job.id)&&String(e.source||'')==='repair-job');
+        if(job.outstandingAmount>0){
+          const ck=String(job.customer||'').trim().toLowerCase()+'|'+String(job.phone||'').replace(/\D/g,'');
+          const entry={id:ix>=0?list[ix].id:('RJ-CREDIT-'+String(job.id)),key:ck,name:String(job.customer||'Walk-in Customer').trim(),phone:String(job.phone||''),type:'credit',amount:job.outstandingAmount,mode:'Credit',date:now.slice(0,10),
+            details:'Repair balance • Job '+String(job.id)+' • Estimate ₹'+(Number(job.estimate)||0).toLocaleString('en-IN')+' • Payable ₹'+net.toLocaleString('en-IN')+' • Payment cancelled',source:'repair-job',repairJobId:String(job.id),billId:'',dueDate:''};
+          if(ix>=0)list[ix]=entry;else list.push(entry);
+          localStorage.setItem(lk,JSON.stringify(list));
+        }
+      }
+    }catch(e){console.error('cancel payment ledger update failed',e);}
+    save(a); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
+    try{skRjShowDetail(job.id)}catch(e){}
+    showToast('Payment cancelled – ₹'+amt.toLocaleString('en-IN')+' added back to outstanding');
+  };
+
   window.skRjRework=function(id){
     const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
     if(a[i].status!=='Delivered' && a[i].status!=='Ready'){ showToast('Rework is available after delivery'); return; }
@@ -4796,7 +4842,7 @@ img{max-width:100%!important;}
           <div class="rjd-card due sk-rj-finance-due"><span>Balance to pay</span><b>₹${_bal.toLocaleString('en-IN')}</b></div>
         </div>
         ${Array.isArray(j.discountHistory)&&j.discountHistory.length?`<div class="sk-rj-payment-summary"><b>Discount history</b>${j.discountHistory.map(d=>`<div><span>${esc(d.date?rjFmtDate(d.date):'Date not recorded')} · ${esc(d.reason||'Discount')}</span><span>− ₹${Number(d.amount||0).toLocaleString('en-IN')}</span></div>`).join('')}</div>`:''}
-        ${Array.isArray(j.paymentHistory)&&j.paymentHistory.length?`<div class="sk-rj-payment-summary"><b>Payments received</b>${j.paymentHistory.map(p=>`<div><span>${esc(p.date?rjFmtDate(p.date):'Date not recorded')}</span><span>₹${Number(p.amount||0).toLocaleString('en-IN')}</span></div>`).join('')}</div>`:''}
+        ${Array.isArray(j.paymentHistory)&&j.paymentHistory.length?`<div class="sk-rj-payment-summary"><b>Payments received</b>${j.paymentHistory.map((p,pi)=>`<div><span>${esc(p.date?rjFmtDate(p.date):'Date not recorded')}</span><span>₹${Number(p.amount||0).toLocaleString('en-IN')}${(p.type==='Repair advance payment'||p.type==='Repair delivery payment')&&j.outcome!=='returned'?` <button type="button" class="sk-rj-cancelpay" onclick="event.stopPropagation();skRjCancelPay('${esc(j.id)}',${pi})">↩ Cancel payment</button>`:''}</span></div>`).join('')}</div>`:''}
         ${j.note?`<div class="rjd-note"><small>NOTE</small><p>${esc(j.note)}</p></div>`:''}
       </div>`;
     document.getElementById('skRepairDetailModal').classList.add('active');
@@ -5822,13 +5868,13 @@ img{max-width:100%!important;}
       saveOrders:'orders',clearAllOrders:'orders',
       saveUsedBill:'billing',deleteSavedBill:'billing',
       saveRepairSparesNote:'toolsNotes',
-      skRjSaveJob:'repair',skRjEdit:'repair',skRjDelete:'repair',skRjNext:'repair',
+      skRjSaveJob:'repair',skRjEdit:'repair',skRjDelete:'repair',skRjCancelPay:'repair',skRjNext:'repair',
       exportAppDataBackup:'backup',importAppDataBackup:'restore',
       saveLowStockThreshold:'inventory'
     };
     const SK_MANAGER_ADMIN_ONLY_FUNCTIONS=new Set([
       'updateStock','setDirectStock','deleteInventoryItem','clearAllOrders','deleteSavedBill',
-      'saveRepairSparesNote','skRjEdit','skRjDelete','skRjNext','triggerEditFromContext','triggerDeleteFromContext'
+      'saveRepairSparesNote','skRjEdit','skRjDelete','skRjCancelPay','skRjNext','triggerEditFromContext','triggerDeleteFromContext'
     ]);
     function guard(name){
       const fn=window[name];if(typeof fn!=='function'||fn.__skRoleGuard)return;
