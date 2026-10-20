@@ -19,9 +19,12 @@ window.skTaRepair=function(j,d,lv,due,shop,upi){
 };
 /* credit: r={name,balance,due,overdue}, due/today as DD/MM/YYYY strings */
 window.skTaCredit=function(r,shop,dueText,upi,todayText){
-  var t='அன்புள்ள '+(r.name||'வாடிக்கையாளர்')+', '+shop+'-இல் இருந்து வணக்கம். உங்கள் கணக்கில் '+rs(r.balance)+' நிலுவையில் உள்ளது.';
-  if(dueText)t+=(r.overdue?' இது '+dueText+' அன்று செலுத்தப்பட வேண்டியது.':' செலுத்த வேண்டிய தேதி '+dueText+'.');
-  t+=' தங்களுக்கு வசதியான நேரத்தில் செலுத்தவும். ஏற்கனவே செலுத்தியிருந்தால் இந்த செய்தியை புறக்கணிக்கவும். உங்கள் ஆதரவுக்கு நன்றி 🙏';
+  var L='━━━━━━━━━━━━',box=[L];
+  (r.items||[]).forEach(function(i){box.push('📱 மொபைல்: '+i.model);box.push('🧾 பில்: '+(i.id||'---')+(i.date?' • '+i.date:''));if(i.price>0)box.push('💵 மொத்தம்: '+rs(i.price));if(i.adv>0)box.push('✅ முன்பணம் செலுத்தியது: '+rs(i.adv))});
+  box.push('💰 *நிலுவை: '+rs(r.balance)+'*');
+  if(dueText)box.push('📅 *'+(r.overdue?'செலுத்த வேண்டிய தேதி (கடந்தது): ':'செலுத்த வேண்டிய தேதி: ')+dueText+'*');
+  box.push(L);
+  var t='அன்புள்ள '+(r.name||'வாடிக்கையாளர்')+', '+shop+'-இல் இருந்து வணக்கம் 🙏\n\nஉங்கள் கணக்கில் நிலுவை பற்றிய நினைவூட்டல்.\n\n'+box.join('\n')+'\n\nதங்களுக்கு வசதியான நேரத்தில் செலுத்தவும். ஏற்கனவே செலுத்தியிருந்தால் இந்த செய்தியை புறக்கணிக்கவும். உங்கள் ஆதரவுக்கு நன்றி 🙏';
   var p=pay(upi,Number(r.balance)||0,shop,'Credit balance');
   return t+(p?p.replace('(இந்த link 3 நாட்களுக்கு மட்டும் செல்லும்.)','('+(todayText||'')+' நிலவரப்படி. இந்த link 3 நாட்களுக்கு மட்டும் செல்லும்.)'):'');
 };
