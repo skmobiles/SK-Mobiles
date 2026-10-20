@@ -434,6 +434,11 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.20 — Spring fix (stuck after release)
+- Fixed a bug from V5.11.19: the spring-back code referenced removed constants (`K`, `C`), threw an error every frame and left the page stuck where it was pulled (worst on High). Verified Low / Medium / High all return to 0 after drag and after a fast scroll, with no errors.
+- Home pull-to-reload now needs a real ~230px finger pull at every strength (before, High reached the old threshold with a short pull and could reload by accident). If the reload does not happen, the page lets go after 2.5 s instead of staying stuck.
+- Smoother on big pages: the moving layer is promoted only while it moves, and the target list is cached.
+
 ## V5.11.19 — Spring settings + same-day buy back
 - Settings -> Spring bounce: On/Off, Strength Low/Medium/High, and Home pull-to-reload On/Off. Saved on this phone only (`skdev_spring`, not synced).
 - Used stock buy back: when a phone is bought and sold on the same day (or sold, bought back and sold again the same day), the newer record counts as the buy-back, decided by the record id timestamp, else list order.
