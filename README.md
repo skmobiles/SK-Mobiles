@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.25
+- Repair Jobs: Edit / Delete / Previous / Next (Pending) and Edit / Delete / Ready message / Mark Delivered / Rework (History) are now icon-on-top tiles with larger, bolder text. "Previous Status" / "Next Status" are shortened to "Previous" / "Next".
+
 ## V5.11.24
 - Repair job detail: every advance / delivery payment now has a **↩ Cancel payment** button (reason required). The amount is added back to the outstanding balance, a delivered job's balance returns to the customer's Credit ledger, and the matching receipt is kept but marked CANCELLED. Admin always; Manager only when Edit/Delete is allowed.
 
