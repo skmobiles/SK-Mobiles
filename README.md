@@ -434,6 +434,14 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.19 — Spring settings + same-day buy back
+- Settings -> Spring bounce: On/Off, Strength Low/Medium/High, and Home pull-to-reload On/Off. Saved on this phone only (`skdev_spring`, not synced).
+- Used stock buy back: when a phone is bought and sold on the same day (or sold, bought back and sold again the same day), the newer record counts as the buy-back, decided by the record id timestamp, else list order.
+
+## V5.11.18 — Staff phone speed + Buy back fix
+- Speed: the role-restriction scan ran on every single DOM change and rewrote every blocked button each time (about 21,000 DOM writes in 4 s while idle on a Staff login, 84,000 on Manager). It now runs once per burst (180 ms) and only writes buttons whose state really changes (Staff: 21,000 -> ~120, Manager: 84,000 -> ~50 per 4 s idle). Same buttons are blocked as before.
+- Used stock: "Already bought back" was wrongly shown on the latest sale of an IMEI when its own purchase date was the same day or later than its sale date (the record compared itself to a copy of itself). Records are now compared by id.
+
 ## V5.11.17 — Repair filters in 2 rows, History spacing, People in Menu
 - Repair Jobs: All / Urgent / Received / Checking / Repairing / Not collected now sit in 2 rows of 3.
 - Repair History: section titles and cards have more inner space so text no longer touches the box border; Mark Delivered is always full width and fully readable.

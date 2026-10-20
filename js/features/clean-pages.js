@@ -164,6 +164,7 @@ var ST_ROWS=[
     ['Buttons','#22c55e','<rect x="3" y="8" width="18" height="8" rx="4"/>',['look:BUTTON STYLE'],'look'],
     ['Header & bottom bar','#0284c7','<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 8h18M8 16h8"/>',['look:NAVIGATION'],'look','nav'],
     ['Text size & scale','#a855f7','<path d="M4 7V5h16v2M9 19h6M12 5v14"/>',['look:INTERFACE SCALE'],'look','scale'],
+    ['Spring bounce','#0d9488','<path d="M12 3v4M12 17v4M8 7l4 3 4-3M8 17l4-3 4 3"/>',['id:skSpringSection'],null,'spring'],
     ['Effects & feedback','#ef4444','<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',['look:VISUAL EFFECTS'],'look'],
     ['Reset look to default','#64748b','<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',['reset'],'action']
   ]],
@@ -196,6 +197,7 @@ function stValue(kind){
     if(kind==='nav')return r.getAttribute('data-ui-nav')==='fixed'?'Fixed dock':'Floating';
     if(kind==='scale'){var s=r.getAttribute('data-ui-scale')||'normal';return s.charAt(0).toUpperCase()+s.slice(1)}
     if(kind==='accent')return '<i class="skst-dot"></i>';
+    if(kind==='spring')return typeof window.skSpringLabel==='function'?window.skSpringLabel():'';
   }catch(e){}
   return '';
 }

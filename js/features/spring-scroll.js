@@ -8,7 +8,15 @@
 'use strict';
 if(window.__skSpring)return;window.__skSpring=1;
 var NO='input,textarea,select,canvas,[data-no-spring],.leaflet-container';
-var K=130,C=14,REFRESH_AT=60;
+var REFRESH_AT=60;
+/* per-phone settings (Settings -> Spring bounce); key is not synced between devices */
+var LV={low:{K:170,C:20,band:.6,gain:.3},medium:{K:130,C:14,band:1,gain:.55},high:{K:105,C:10.5,band:1.5,gain:.85}};
+function cfg(){
+  var c={on:true,level:'medium',refresh:true};
+  try{var j=JSON.parse(localStorage.getItem('skdev_spring')||'null');if(j){if(j.on===false)c.on=false;if(LV[j.level])c.level=j.level;if(j.refresh===false)c.refresh=false}}catch(e){}
+  return c;
+}
+function lv(){return LV[cfg().level]}
 var st=null,phys=new WeakMap(),fl=new WeakMap();
 function docScroller(){return document.scrollingElement||document.documentElement}
 function isDoc(sc){return sc===docScroller()||sc===document.body||sc===document.documentElement}
@@ -29,7 +37,7 @@ function scTop(sc){return isDoc(sc)?(window.pageYOffset||docScroller().scrollTop
 function atTop(sc){return scTop(sc)<=0}
 function atBot(sc){var d=isDoc(sc)?docScroller():sc;return d.scrollTop+d.clientHeight>=d.scrollHeight-1}
 function dimOf(sc){return (isDoc(sc)?window.innerHeight:sc.clientHeight)||600}
-function band(sc,d){var dim=dimOf(sc);return (d<0?-1:1)*dim*(1-1/(Math.abs(d)*.55/dim+1))*.55}
+function band(sc,d){var dim=dimOf(sc);return (d<0?-1:1)*dim*(1-1/(Math.abs(d)*.55/dim+1))*.55*lv().band}
 
 /* ---- spring engine, one per scroller ---- */
 function P(sc){var p=phys.get(sc);if(!p){p={sc:sc,x:0,v:0,raf:0,last:0};phys.set(sc,p)}return p}
@@ -47,11 +55,11 @@ function kick(p,hold){
 
 /* ---- finger drag ---- */
 document.addEventListener('touchstart',function(e){
-  if(e.touches.length!==1){st=null;return}
+  if(!cfg().on||e.touches.length!==1){st=null;return}
   var t=e.target;if(t&&t.closest&&t.closest(NO)){st=null;return}
   var sc=findScroller(t);if(!sc){st=null;return}
   var p=P(sc);stop(p);p.x=0;p.v=0;render(p);
-  st={p:p,sc:sc,home:isDoc(sc)&&!!(t.closest&&t.closest('.app-viewport')),y0:e.touches[0].clientY,x0:e.touches[0].clientX,on:false,dead:false,dir:0,hist:[]};
+  st={p:p,sc:sc,home:cfg().refresh&&isDoc(sc)&&!!(t.closest&&t.closest('.app-viewport')),y0:e.touches[0].clientY,x0:e.touches[0].clientX,on:false,dead:false,dir:0,hist:[]};
 },{passive:true,capture:true});
 
 document.addEventListener('touchmove',function(e){
@@ -83,6 +91,7 @@ document.addEventListener('touchcancel',end,{passive:true,capture:true});
 
 /* ---- fast scroll that runs into the end ---- */
 document.addEventListener('scroll',function(e){
+  if(!cfg().on)return;
   var tg=e.target,sc=(tg===document||tg===window||tg===document.documentElement||tg===document.body)?docScroller():tg;
   if(!sc||sc.nodeType!==1)return;
   var f=fl.get(sc);if(!f){f={t:0,time:0,ve:0};fl.set(sc,f)}
@@ -92,7 +101,7 @@ document.addEventListener('scroll',function(e){
   var p=P(sc);if(p.raf)return;
   var max=sc.scrollHeight-sc.clientHeight,ve=f.ve;
   if((top<=0&&ve<-.5)||(top>=max-1&&ve>.5)){
-    p.x=0;p.v=Math.max(-1100,Math.min(1100,-ve*1000*.55));kick(p);
+    p.x=0;p.v=Math.max(-1100,Math.min(1100,-ve*1000*lv().gain));kick(p);
   }
 },{passive:true,capture:true});
 
