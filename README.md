@@ -434,6 +434,12 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.29
+- Added 3 new dark modes: **Dark A** (pure black, green accent), **Dark B** (warm charcoal, clay accent) and **iPhone Dark** (iOS style, blue accent). Pick them in Settings > Theme > DARK MODES.
+- The home header sun/moon button now switches between Light and Dark B. Dark styles have no background aura glow, and the home banner is dimmed in dark.
+- In the dark styles the app is full width (no side gap): header, home sections, bottom bar and popups run edge to edge. Light mode layout is unchanged.
+- No existing theme was removed; Light mode is unchanged. Display only, no data keys changed (new setting `darkStyle` inside `sk_appearance_settings`).
+
 ## V5.11.27
 - Repair detail: "Payments received" rows are aligned inside the box — date, amount and a compact "↩ Cancel" button in three columns.
 - Button labels never break in the middle of a word anywhere in the app (e.g. "Delivere/d"); Repair Jobs action tiles and the filter chips (e.g. "Not collected") wrap to at most 2 lines, even on narrow phones or large text sizes. In History cards the name / phone lines no longer run under the Outstanding box.
