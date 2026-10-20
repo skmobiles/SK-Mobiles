@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.23
+- Fix: editing a **Delivered** repair job (e.g. clearing the advance) blanked its status, so the job vanished from Repair Jobs, History and the Recycle Bin. The edit form now keeps "Delivered", a blank status can no longer be saved, and any job already hidden this way is restored automatically on the next open.
+
 ## V5.11.22
 - Customer credit reminder (English and Tamil) now shows a boxed summary: mobile name and bill number of the credit bill(s), **Outstanding** amount and **Due** date in bold with icons. Also shows Total and Advance paid. Wording changed from "pending" to "Outstanding".
 

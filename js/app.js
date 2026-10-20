@@ -4251,7 +4251,17 @@ img{max-width:100%!important;}
   function load(){
     try{
       const a=JSON.parse(localStorage.getItem(KEY)||'[]');
-      return Array.isArray(a)?a:[];
+      if(!Array.isArray(a))return [];
+      /* V5.11.23: bring back jobs whose status was blanked by editing a delivered job (they vanished from every list) */
+      let fixed=false;
+      a.forEach(j=>{
+        if(j && !['Received','Checking','Repairing','Ready','Delivered'].includes(String(j.status||''))){
+          j.status=(j.deliveredAt||String(j.deliveryStatus||'').startsWith('Deliver')||String(j.deliveryStatus||'').startsWith('Returned'))?'Delivered':'Received';
+          fixed=true;
+        }
+      });
+      if(fixed){try{localStorage.setItem(KEY,JSON.stringify(a))}catch(e){}}
+      return a;
     }catch(e){return []}
   }
   function save(a){
@@ -4329,6 +4339,7 @@ img{max-width:100%!important;}
     document.getElementById('skRjEditId').value='';
     document.getElementById('skRjCustomer').value='Walk-in Customer';
     document.getElementById('skRjDate').value=rjFmtDate(today());
+    document.getElementById('skRjStatus').querySelectorAll('option[data-dlv]').forEach(o=>o.remove());
     document.getElementById('skRjStatus').value='Received';
     document.getElementById('skRjWorkType').value='Normal';
     document.getElementById('skRjScheduleWrap').style.display='none';
@@ -4431,7 +4442,7 @@ img{max-width:100%!important;}
       paidAmount:Math.max(0,Number(document.getElementById('skRjAdvancePayment').value)||0),
       outstandingAmount:Math.max(0,((Number(document.getElementById('skRjEstimate').value)||0)-Math.max(0,Number(existing?.discountAmount)||0))-Math.max(0,Number(document.getElementById('skRjAdvancePayment').value)||0)),
       paymentHistory:Array.isArray(existing?.paymentHistory)?existing.paymentHistory.slice():[],
-      status:document.getElementById('skRjStatus').value,
+      status:document.getElementById('skRjStatus').value||existing?.status||'Received',
       note:document.getElementById('skRjNote').value.trim(),
       deliveryStatus: document.getElementById('skRjStatus').value==='Delivered' ? 'Delivered' : (document.getElementById('skRjStatus').value==='Ready' ? 'Ready for Delivery' : (existing?.deliveryStatus||'Pending')),
       reworkReason: existing?.reworkReason||'',
@@ -4481,7 +4492,11 @@ img{max-width:100%!important;}
     document.getElementById('skRjDate').value=rjFmtDate(j.date||today());
     document.getElementById('skRjEstimate').value=j.estimate||'';
     document.getElementById('skRjAdvancePayment').value=j.paidAmount||'';
-    document.getElementById('skRjStatus').value=j.status||'Received';
+    { const st=document.getElementById('skRjStatus'), v=j.status||'Received';
+      /* V5.11.23: Delivered is not a normal form option — add it while editing a delivered job so the status is not blanked on save */
+      Array.from(st.querySelectorAll('option[data-dlv]')).forEach(o=>o.remove());
+      if(v==='Delivered'){ const o=document.createElement('option'); o.textContent='Delivered'; o.setAttribute('data-dlv','1'); st.appendChild(o); }
+      st.value=v; }
     document.getElementById('skRjNote').value=j.note||'';
     document.getElementById('skRjScheduleWrap').style.display=j.workType==='Scheduled'?'block':'none';
     document.getElementById('skRjSaveBtn').textContent='✏️ Update Repair Job';
