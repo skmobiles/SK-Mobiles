@@ -1757,9 +1757,9 @@ const MASTER_INVENTORY = [
       }
     };
 
-    const THEME_ICON_PACK = { light:'classic', dark:'classic', ocean:'wave', emerald:'wave', royal:'luxury', obsidian:'luxury', sunset:'soft', rose:'soft', midnight:'orbit', cyber:'neon', graphite:'angular', lime:'angular', aurora:'prism', crimson:'pulse', mint:'leaf', solar:'retro', nebula:'orbit', forest:'leaf', glacier:'wave', magenta:'neon', 'apple-light':'classic', 'apple-dark':'classic' };
+    const THEME_ICON_PACK = { light:'classic', dark:'classic', ocean:'wave', royal:'luxury', obsidian:'luxury', midnight:'orbit', cyber:'neon', crimson:'pulse', nebula:'orbit', forest:'leaf', glacier:'wave', magenta:'neon', 'apple-light':'classic', 'apple-dark':'classic' };
 
-    const SK_THEME_STATUS_COLORS = {light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',sunset:'#ffedd5',emerald:'#d1fae5',rose:'#ffe4e6',midnight:'#111827',graphite:'#111827',lime:'#0f1a05',dark:'#050811',cyber:'#03040a',obsidian:'#000000',aurora:'#cffafe',crimson:'#ffe4e6',mint:'#ccfbf1',solar:'#000000',nebula:'#17102f',forest:'#062e1c',glacier:'#e0f2fe',magenta:'#2b092f','apple-light':'#f5f5f7','apple-dark':'#000000'};
+    const SK_THEME_STATUS_COLORS = {light:'#f8fafc',ocean:'#e0f2fe',royal:'#ede9fe',midnight:'#111827',dark:'#050811',cyber:'#03040a',obsidian:'#000000',crimson:'#ffe4e6',nebula:'#17102f',forest:'#062e1c',glacier:'#e0f2fe',magenta:'#2b092f','apple-light':'#f5f5f7','apple-dark':'#000000'};
     function skUpdateThemeChrome(theme){
       try{
         const meta=document.getElementById('skThemeColorMeta');
@@ -1851,8 +1851,8 @@ const MASTER_INVENTORY = [
       const map={
         classic:{light:'light',dark:'dark'}, liquid:{light:'apple-light',dark:'apple-dark'},
         white:{light:'apple-light',dark:'apple-dark'}, midnight:{light:'light',dark:'obsidian'},
-        emerald:{light:'emerald',dark:'forest'}, amber:{light:'sunset',dark:'cyber'},
-        ruby:{light:'rose',dark:'crimson'}, ocean:{light:'ocean',dark:'dark'}
+        emerald:{light:'light',dark:'forest'}, amber:{light:'light',dark:'cyber'},
+        ruby:{light:'light',dark:'crimson'}, ocean:{light:'ocean',dark:'dark'}
       };
       return (map[settings.preset]||map.classic)[mode];
     }
@@ -1862,6 +1862,19 @@ const MASTER_INVENTORY = [
       ios:{label:'iPhone Dark',bg:'#000000',page:'#000000',card:'#1C1C1E',model:'#2C2C2E',input:'#2C2C2E',pill:'rgba(255,255,255,.08)',border:'#38383A',text:'#FFFFFF',muted:'#8E8E93',accent:'#0A84FF',accent2:'#5AC8FA',nav:'rgba(28,28,30,.94)',header:'rgba(0,0,0,.92)',modal:'#1C1C1E'}
     };
     window.SK_DARK_STYLES=SK_DARK_STYLES;
+    const SK_EXTRA_THEMES={royal:'light',glacier:'light',nebula:'dark',magenta:'dark'};
+    function skThemePick(name){
+      const st=skAppearanceRead();st.themeMode=SK_EXTRA_THEMES[name]||'light';st.darkStyle='';
+      skAppearanceApply(st,{theme:false});
+      window.__skAppearanceApplying=true;try{setTheme(name,true);}catch(e){}window.__skAppearanceApplying=false;
+      try{localStorage.setItem('sk_extra_theme',name);}catch(e){}
+      skThemeCardsSync();
+    }
+    function skThemeCardsSync(){
+      const t=document.documentElement.getAttribute('data-theme');
+      document.querySelectorAll('[data-theme-pick]').forEach(b=>b.classList.toggle('active',b.getAttribute('data-theme-pick')===t&&!document.documentElement.getAttribute('data-dark-style')));
+    }
+    window.skThemePick=skThemePick;window.skThemeCardsSync=skThemeCardsSync;
     function skDarkStyleSet(v){
       const st=skAppearanceRead();st.themeMode='dark';st.darkStyle=SK_DARK_STYLES[v]?v:'a';
       skAppearanceApply(st,{theme:true});
@@ -2162,7 +2175,7 @@ const MASTER_INVENTORY = [
     window.skInitUIAppearanceStudio=skInitUIAppearanceStudio;
 
     function setTheme(theme, silent) {
-      const allowedThemes = ['light','ocean','royal','sunset','emerald','rose','midnight','graphite','lime','dark','cyber','obsidian','aurora','crimson','mint','solar','nebula','forest','glacier','magenta','apple-light','apple-dark'];
+      const allowedThemes = ['light','ocean','royal','midnight','dark','cyber','obsidian','crimson','nebula','forest','glacier','magenta','apple-light','apple-dark'];
       if (!allowedThemes.includes(theme)) theme = 'light';
       document.documentElement.setAttribute('data-theme', theme);
       const iconPack = THEME_ICON_PACK[theme] || 'classic';
@@ -2178,6 +2191,7 @@ const MASTER_INVENTORY = [
       localStorage.setItem('sk_theme', theme);
       localStorage.setItem('sk_icon_pack', iconPack);
       skUpdateThemeChrome(theme);
+      try{skThemeCardsSync();}catch(e){}
       try { skAppearanceSyncFromLegacyTheme(theme); } catch (e) {}
       if(!silent) showToast("Theme applied: " + theme.toUpperCase());
     }

@@ -156,7 +156,7 @@ var ST_ROWS=[
     ['Bill terms & conditions','#0ea5e9','<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/>',['sec:TERMS']]
   ]],
   ['Look',[
-    ['Style profiles','#ec4899','<path d="M12 3a9 9 0 1 0 9 9c0-1-1-1.5-2-1.5h-2a2 2 0 0 1-2-2V7c0-1-.5-2-1.5-2z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/>',['look:1-CLICK'],'look'],
+    ['Style profiles','#ec4899','<path d="M12 3a9 9 0 1 0 9 9c0-1-1-1.5-2-1.5h-2a2 2 0 0 1-2-2V7c0-1-.5-2-1.5-2z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/>',['look:1-CLICK','look:MORE THEMES'],'look'],
     ['Theme','#6366f1','<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',['look:THEME MODE','look:DARK MODES'],'look','theme'],
     ['Accent colour','#2563eb','<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>',['look:ACCENT COLOR'],'look','accent'],
     ['Background','#14b8a6','<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 15l5-4 4 3 3-2 6 4"/>',['look:SHELL BACKGROUND'],'look'],
