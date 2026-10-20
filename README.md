@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.30
+- Light mode now has the same full-width layout (no side gap) as the dark styles: header, home sections, banner, bottom bar and popups run edge to edge. Display only.
+
 ## V5.11.29
 - Added 3 new dark modes: **Dark A** (pure black, green accent), **Dark B** (warm charcoal, clay accent) and **iPhone Dark** (iOS style, blue accent). Pick them in Settings > Theme > DARK MODES.
 - The home header sun/moon button now switches between Light and Dark B. Dark styles have no background aura glow, and the home banner is dimmed in dark.
