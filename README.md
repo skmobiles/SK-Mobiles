@@ -434,6 +434,12 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.37
+- Signature popup: the bottom bar is hidden while it is open so the Clear / Save Signature buttons are never covered; in dark modes the popup is dark with readable text (the signing box stays white). Includes V5.11.36 (Admin Control logout button gap). Display only.
+
+## V5.11.36
+- Admin Control: the Logout button now lines up with the boxes (6px side gap). Display only.
+
 ## V5.11.35
 - Full-screen pages (Used Mobile Stock, Billing, Settings, Repair Jobs, Accessories, Credit Ledger, etc.) had a double side gap (6px page + 16px inner padding). Their content now sits 6px from the screen edge, like the home page. Display only.
 - Page title bars no longer stick out 10px past the screen edge. Dark modes: fixed a white empty-row block in Used Stock, the unreadable "Delete Box" text and a low-contrast history label.
