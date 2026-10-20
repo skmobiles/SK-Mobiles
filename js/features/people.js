@@ -43,12 +43,48 @@ function render(list,me,err){
   var order={admin:0,manager:1,worker:2,none:3};
   var waiting=list.filter(function(p){return p.role==='pending'}).sort(function(a,b){return b.createdAt-a.createdAt});
   var staff=list.filter(function(p){return p.role!=='pending'}).sort(function(a,b){var oa=a.role in order?order[a.role]:9,ob=b.role in order?order[b.role]:9;return oa-ob||String(a.name||a.email).localeCompare(String(b.name||b.email))});
-  var h='';
+  var h='<div id="skMgrCard"></div>';
   if(waiting.length)h+='<div class="skpp-h">Waiting for access</div><div class="skpp-list">'+waiting.map(function(p,i){return row(p,i,me)}).join('')+'</div>';
   h+='<div class="skpp-h">Staff</div><div class="skpp-list">'+staff.map(function(p,i){return row(p,i+waiting.length,me)}).join('')+'</div>';
-  h+='<div class="skpp-note"><b>How to add someone:</b> ask them to open this app on their phone and tap <b>Sign in with Google</b>. They appear above under “Waiting for access” — choose a role and the app opens for them.<br><br><b>Manager</b> — what the Manager permissions allow (Admin Control).<br><b>Worker</b> — bills and repair entries; no Settings.<br><b>No access</b> — sees nothing; their old entries stay.</div>';
-  if(h!==lastHtml){lastHtml=h;body.innerHTML=h}
+  h+='<div class="skpp-note"><b>How to add someone:</b> ask them to open this app on their phone and tap <b>Sign in with Google</b>. They appear above under “Waiting for access” — choose a role and the app opens for them.<br><br><b>Manager</b> — what you allow in <b>Manager access</b> above.<br><b>Worker</b> — bills and repair entries; no Settings.<br><b>No access</b> — sees nothing; their old entries stay.</div>';
+  if(h!==lastHtml){lastHtml=h;body.innerHTML=h;mgRender()}
 }
+/* ---- Manager access (one place; replaces the old section in Admin Control) ---- */
+var MG=[
+  ['Daily work',[['billing','Billing & History','Create bills, see bill history'],['orders','Order List','Add and view orders'],['repair','Repair Jobs','Receive and update repair jobs'],['credit','Customer Credit','Credit ledger, payments, reminders'],['inventory','Inventory & Stock','Add stock, tempered / display items'],['toolsNotes','Tools & Notes','Spares note, others note']]],
+  ['Changes',[['editDelete','Edit & delete records','Edit or delete bills, jobs, stock and entries the Manager can already open']]],
+  ['Admin areas',[['settings','App Settings & Themes','Change look and settings'],['shopSettings','Shop profile & bill settings','Name, address, logo, terms'],['dataFolder','App Data Folder','Folder backup'],['backup','Cloud backup','Back up now'],['restore','Cloud restore','Restore the latest backup'],['recycleBin','Recycle Bin','See and restore deleted items'],['userManagement','User / worker management','Workers list and PINs']]]
+];
+var mgPerms=null,mgBusy=false;
+function mgSw(k,on,l,sub,dis){return '<div class="skpp-mrow"><span class="skpp-mtx"><b>'+l+'</b><small>'+sub+'</small></span><button type="button" class="skspr-sw'+(on?' on':'')+'" data-mk="'+k+'" role="switch" aria-checked="'+(!!on)+'" aria-label="'+l+'"'+(dis?' disabled':'')+'><i></i></button></div>'}
+async function mgLoad(){
+  try{if(typeof window.skFirebaseGetManagerPermissions==='function')mgPerms=await window.skFirebaseGetManagerPermissions()}catch(e){}
+  if(!mgPerms){try{mgPerms=JSON.parse(localStorage.getItem('sk_manager_permissions_v1')||'{}')}catch(e){mgPerms={}}}
+}
+async function mgRender(){
+  var box=$('skMgrCard');if(!box)return;
+  if(!mgPerms)await mgLoad();
+  box=$('skMgrCard');if(!box)return;
+  var p=mgPerms||{},off=p.managerAccess===false;
+  var h='<div class="skpp-h">Manager access</div><div class="skpp-list skpp-mcard">'+
+    mgSw('managerAccess',!off,'Manager can sign in','Turn off to lock every Manager out of the app.')+
+    '<div class="skpp-presets"><button type="button" class="skpp-pre" data-preset="full"'+(off?' disabled':'')+'>Full access</button><button type="button" class="skpp-pre" data-preset="view"'+(off?' disabled':'')+'>Reset to basic</button></div>';
+  MG.forEach(function(g){h+='<div class="skpp-mh">'+g[0]+'</div>'+g[1].map(function(r){return mgSw(r[0],p[r[0]]===true,r[1],r[2],off)}).join('')});
+  h+='</div><div class="skpp-note">Changes reach the Manager’s phone straight away. <b>Full access</b> turns everything on except User / worker management. A Manager never sees Admin Control or this page.</div>';
+  if(box.getAttribute('data-h')!==h){box.setAttribute('data-h',h);box.innerHTML=h}
+}
+document.addEventListener('click',async function(e){
+  var t=e.target&&e.target.closest&&e.target.closest('#skMgrCard button');if(!t||mgBusy)return;
+  var k=t.getAttribute('data-mk'),pre=t.getAttribute('data-preset'),obj=null;
+  var p=mgPerms||{};
+  if(k)obj={[k]:!(k==='managerAccess'?p.managerAccess!==false:p[k]===true)};
+  else if(pre==='full'){obj={};MG.forEach(function(g){g[1].forEach(function(r){obj[r[0]]=r[0]!=='userManagement'})});obj.managerAccess=true}
+  else if(pre==='view'){if(!confirm('Reset Manager to basic access (everything off except My Profile)?'))return;obj={};MG.forEach(function(g){g[1].forEach(function(r){obj[r[0]]=false})})}
+  else return;
+  mgBusy=true;
+  try{var ok=await window.skAdminSetManagerPermissions(obj);if(ok!==false){mgPerms=Object.assign({},p,obj)}}catch(err){toast('❌ Could not save: '+(err&&err.message||err))}
+  mgBusy=false;mgRender();
+});
 function start(){
   if(unsub||typeof window.skPeopleWatch!=='function')return;
   if(typeof window.skCurrentRole==='function'&&window.skCurrentRole()!=='admin')return;

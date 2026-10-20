@@ -5545,7 +5545,8 @@ img{max-width:100%!important;}
       restore:false,
       shopSettings:false,
       userManagement:false,
-      recycleBin:false
+      recycleBin:false,
+      editDelete:false
     };
     function skManagerPerms(){
       let p={...SK_MANAGER_DEFAULTS};
@@ -5609,6 +5610,19 @@ img{max-width:100%!important;}
       if(typeof applyRestrictions==='function')applyRestrictions();
       await skRenderManagerPermissions();
       toast('Manager permission updated');
+    };
+    window.skAdminSetManagerPermissions=async function(obj){
+      if(!admin()){toast('🔒 Admin access only');return;}
+      const p={...skManagerPerms(),...obj};
+      localStorage.setItem(SK_MANAGER_PERM_KEY,JSON.stringify(p));
+      try{
+        if(typeof window.skFirebaseSetManagerPermissions==='function'){
+          await window.skFirebaseSetManagerPermissions(obj);
+          const remote=await window.skFirebaseGetManagerPermissions?.();
+          if(remote&&typeof remote==='object')localStorage.setItem(SK_MANAGER_PERM_KEY,JSON.stringify({...SK_MANAGER_DEFAULTS,...remote}));
+        }
+      }catch(e){console.error('Manager permission update failed:',e);toast('❌ Could not save Manager access');return false;}
+      toast('✅ Manager access updated');return true;
     };
     window.skAdminResetAllData=function(){
       if(!admin()){toast('🔒 Admin access only');return;}
@@ -5690,67 +5704,53 @@ img{max-width:100%!important;}
       const p=skManagerPerms();
       const settings=document.getElementById('settingsModal');
       if(settings){
-        const lockAllSettingsControls=function(){
-          settings.querySelectorAll('button,input,textarea,select').forEach(function(el){
-            if(el.classList.contains('modal-close-btn'))return;
-            skSetCls(el,'sk-manager-locked',true);
-            skSetAttr(el,'aria-disabled','true');
-            skSetAttr(el,'data-sk-lock-reason','Admin permission required');
-          });
-        };
-        const unlockRoot=function(root){
-          if(!root)return;
-          root.querySelectorAll('button,input,textarea,select').forEach(function(el){
-            skSetCls(el,'sk-manager-locked',false);
-            skSetAttr(el,'aria-disabled',null);
-            skSetAttr(el,'data-sk-lock-reason',null);
-          });
-        };
-        const unlockElement=function(el){
-          if(!el)return;
-          el.classList.remove('sk-manager-locked');
-          el.removeAttribute('aria-disabled');
-          el.removeAttribute('data-sk-lock-reason');
-        };
-        const headingRoot=function(text){
-          const node=[...settings.querySelectorAll('div')].find(function(el){return (el.textContent||'').trim().toLowerCase()===text.toLowerCase();});
-          return node ? node.nextElementSibling : null;
-        };
-        // Settings is a permission-gated area. Individual Admin settings remain
-        // independently controllable so App Data Folder/Backup can be granted
-        // without unlocking the entire Appearance/Shop Settings area.
-        lockAllSettingsControls();
-        if(p.settings)unlockRoot(document.getElementById('skUiAppearanceStudio'));
-        if(p.shopSettings){
-          unlockRoot(headingRoot('🏪 SHOP PROFILE & ADDRESS'));
-          unlockRoot(headingRoot('📜 TERMS & CONDITIONS EDITOR'));
-          unlockRoot(headingRoot('SHOP BRAND LOGO'));
-        }
-        if(p.backup || p.restore){
-          const backupBox=settings.querySelector('.sk-backup-ui-heading + .sk-backup-ui-card');
-          if(backupBox){
-            backupBox.querySelectorAll('button,input').forEach(function(el){
-              const txt=(el.textContent||'').toLowerCase();
-              if(txt.includes('backup') && p.backup)unlockElement(el);
-              if(txt.includes('restore') && p.restore)unlockElement(el);
-            });
+        /* V5.11.21: every Settings control is allowed or locked by the permission that belongs to its part,
+           so what Admin switches on in People & access really works here. */
+        const secHead=function(sec){const h=sec.querySelector('h1,h2,h3,h4,.st-title,[class*=title]');return ((h&&h.textContent)||sec.textContent||'').trim().toUpperCase();};
+        const allowedHere=function(el){
+          if(el.classList.contains('modal-close-btn')||el.classList.contains('skst-back')||el.closest('.skst-bar'))return true;
+          if(el.closest('#skSpringSection,#skGeneralPermissionsBox'))return true;
+          const row=el.closest('.skst-row');
+          if(row){
+            const l=((row.querySelector('.skst-l')||{}).textContent||'').trim();
+            if(/^(Shop profile|Shop logo|Bill terms)/.test(l))return !!p.shopSettings;
+            if(l==='Backup & restore')return !!(p.backup||p.restore);
+            if(l==='Cloud backup')return !!p.backup;
+            if(l==='App data folder')return !!p.dataFolder;
+            if(l==='People & access')return false;
+            return !!p.settings||/^(Spring bounce|Camera)/.test(l);
           }
-        }
-        const cloudBox=document.getElementById('skCloudBackupBox');
-        if(cloudBox){
-          cloudBox.querySelectorAll('button').forEach(function(b){
-            const txt=(b.textContent||'').toLowerCase();
-            if(txt.includes('backup now') && p.backup)unlockElement(b);
-            if(txt.includes('restore latest') && p.restore)unlockElement(b);
-          });
-        }
-        const folderBox=document.getElementById('skAppDataFolderBox');
-        if(p.dataFolder)unlockRoot(folderBox);
+          if(el.closest('#skUiAppearanceStudio'))return !!p.settings;
+          if(el.closest('#skAppDataFolderSection,#skAppDataFolderBox'))return !!p.dataFolder;
+          const t=((el.textContent||'')+' '+(el.id||'')).toLowerCase();
+          if(el.closest('#skCloudBackupBox,#skCloudBackupSection,.sk-backup-ui-card')){
+            if(/restore/.test(t))return !!p.restore;
+            if(/backup/.test(t))return !!p.backup;
+            return !!(p.backup||p.restore);
+          }
+          const sec=el.closest('section.st-section');
+          if(sec){
+            const h=secHead(sec);
+            if(/SHOP PROFILE|TERMS|BRAND LOGO|BILL/.test(h))return !!p.shopSettings;
+            if(/APP DATA FOLDER/.test(h))return !!p.dataFolder;
+            if(/DATA BACKUP|FIREBASE|CLOUD/.test(h)){if(/restore/.test(t))return !!p.restore;return !!p.backup;}
+          }
+          if(/^\s*cancel\s*$/.test(t))return true;
+          if(/^\s*save\s*$/.test(t))return !!p.shopSettings;
+          if(/^cfgshop|^cfgbill/.test(el.id||''))return !!p.shopSettings;
+          return false;
+        };
+        settings.querySelectorAll('button,input,textarea,select').forEach(function(el){
+          const ok=allowedHere(el);
+          skSetCls(el,'sk-manager-locked',!ok);
+          skSetAttr(el,'aria-disabled',ok?null:'true');
+          skSetAttr(el,'data-sk-lock-reason',ok?null:'Admin permission required');
+        });
       }
       document.querySelectorAll('button,a,[role="button"]').forEach(function(el){
         if(el.closest('#skRoleGate')||el.closest('#skLoginModal')||el.closest('#skAdminPanelModal'))return;
         if(el.closest('#settingsModal'))return;
-        if(managerEditElement(el)){
+        if(!p.editDelete&&managerEditElement(el)){
           skSetCls(el,'sk-manager-locked',true);
           skSetAttr(el,'aria-disabled','true');
           skSetAttr(el,'data-sk-lock-reason','Admin only: Edit / Modify');
@@ -5821,9 +5821,10 @@ img{max-width:100%!important;}
         const r=role();
         if(r==='worker'){toast('🔒 Admin permission required');return false;}
         if(r==='manager'){
-          if(SK_MANAGER_ADMIN_ONLY_FUNCTIONS.has(name)){toast('🔒 Admin only — Edit / Modify');return false;}
-          if((name==='saveUsedBill'||name==='skRjSaveJob') && (window.__skEditingBillId || document.getElementById('skRjEditId')?.value)){
-            toast('🔒 Admin only — Edit / Modify');return false;
+          const canEdit=skManagerAllowed('editDelete');
+          if(SK_MANAGER_ADMIN_ONLY_FUNCTIONS.has(name)&&!canEdit){toast('🔒 Admin has not allowed Edit / Delete for Manager');return false;}
+          if(!canEdit&&(name==='saveUsedBill'||name==='skRjSaveJob') && (window.__skEditingBillId || document.getElementById('skRjEditId')?.value)){
+            toast('🔒 Admin has not allowed Edit / Delete for Manager');return false;
           }
           const perm=SK_MANAGER_FUNCTION_PERMS[name];
           if(perm && !skManagerAllowed(perm)){toast('🔒 Admin permission required');return false;}
