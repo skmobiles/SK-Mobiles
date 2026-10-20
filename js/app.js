@@ -8340,7 +8340,12 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  window.skUsedClearAll=function(){const rows=read();if(!rows.length){if(typeof showToast==='function')showToast('Inventory is already empty');return;}const sold=rows.filter(r=>r.status==='Sold').length;const message='Delete ALL '+rows.length+' used mobile inventory records?'+(sold?'\nThis also removes '+sold+' sold-device sale/profit records.':'')+'\nThis action cannot be undone.';if(!confirm(message))return;write([]);window.skUsedResetForm();if($('skUsedSearch'))$('skUsedSearch').value='';skUsedRender();if(typeof showToast==='function')showToast('All used mobile inventory records deleted');};
  /* V5.10.6: a sold phone comes back (return / exchange / bought back): open a new purchase with its details filled in */
  /* V5.11.0: Return / Buy back only on the LAST sale of an IMEI. Older sales of the same IMEI are history ("Bought back"). */
- window.skUsedBoughtBack=function(r,rows){rows=rows||read();if(!r||r.status!=='Sold'||!r.imei)return false;const same=(x)=>x===r||(x&&r.id&&x.id===r.id)||(x&&!r.id&&JSON.stringify(x)===JSON.stringify(r));const ri=rows.findIndex(same),sd=(r.sale&&r.sale.date)?skBillDateKey(r.sale.date):'';return rows.some((x,xi)=>{if(same(x)||String(x.imei||'')!==String(r.imei))return false;const xd=x.date?skBillDateKey(x.date):'';return sd&&xd?xd>=sd:xi>ri;});};
+ window.skUsedBoughtBack=function(r,rows){rows=rows||read();if(!r||r.status!=='Sold'||!r.imei)return false;const same=(x)=>x===r||(x&&r.id&&x.id===r.id)||(x&&!r.id&&JSON.stringify(x)===JSON.stringify(r));const ri=rows.findIndex(same),sd=(r.sale&&r.sale.date)?skBillDateKey(r.sale.date):'';return rows.some((x,xi)=>{if(same(x)||String(x.imei||'')!==String(r.imei))return false;const xd=x.date?skBillDateKey(x.date):'';
+  if(sd&&xd){if(xd>sd)return true;if(xd<sd)return false;
+   /* same day: the newer record counts as the buy-back (ids carry a timestamp; otherwise list order, newest first) */
+   const ts=v=>{const m=String(v&&v.id||'').match(/^USED-(?:X-)?(\d{10,})/);return m?+m[1]:0},tx=ts(x),tr=ts(r);
+   return tx&&tr?tx>tr:xi<ri;}
+  return xi>ri;});};
  window.skUsedBuyBack=function(key){const r=findRec(key);if(!r)return;if(window.skUsedBoughtBack(r)){if(typeof showToast==='function')showToast('This sale was already bought back. Use the latest entry of this IMEI.');return;}window.skUsedAddInventory();
   const set=(id,v)=>{const e=$(id);if(e)e.value=v??'';};
   set('skUsedDealer',(r.sale&&r.sale.customer)||'');set('skUsedModel',r.model||'');set('skUsedColour',r.colour||'');set('skUsedStorage',r.storage||'');set('skUsedRam',r.ram||'');set('skUsedBattery',String(r.battery||'').replace(/[^0-9]/g,''));
