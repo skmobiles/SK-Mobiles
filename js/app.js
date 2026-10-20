@@ -1763,6 +1763,8 @@ const MASTER_INVENTORY = [
     function skUpdateThemeChrome(theme){
       try{
         const meta=document.getElementById('skThemeColorMeta');
+        const dsk=document.documentElement.getAttribute('data-dark-style');
+        if(dsk&&window.SK_DARK_STYLES&&SK_DARK_STYLES[dsk]&&document.documentElement.getAttribute('data-ui-mode')==='dark'){SK_THEME_STATUS_COLORS.__ds=SK_DARK_STYLES[dsk].bg;theme='__ds';}
         if(meta) meta.setAttribute('content',SK_THEME_STATUS_COLORS[theme]||SK_THEME_STATUS_COLORS.light);
         document.documentElement.style.setProperty('--app-status-color',SK_THEME_STATUS_COLORS[theme]||SK_THEME_STATUS_COLORS.light);
       }catch(e){}
@@ -1791,7 +1793,7 @@ const MASTER_INVENTORY = [
     const SK_APPEARANCE_DEFAULTS = {
       preset:'classic', themeMode:'light', accent:'blue', customHex:'#2563EB',
       surface:'offwhite', cardRadius:'modern', buttonRadius:'modern', cardSurface:'blur',
-      header:'minimal', nav:'floating', scale:'normal', buttonStyle:'solid', aura:true, haptic:true, sound:false, motion:false
+      header:'minimal', nav:'floating', scale:'normal', buttonStyle:'solid', darkStyle:'', aura:true, haptic:true, sound:false, motion:false
     };
     const SK_APPEARANCE_ACCENTS = {
       blue:'#2563EB', violet:'#7C3AED', green:'#059669', rose:'#E11D48',
@@ -1854,6 +1856,17 @@ const MASTER_INVENTORY = [
       };
       return (map[settings.preset]||map.classic)[mode];
     }
+    const SK_DARK_STYLES={
+      a:{label:'Dark A',bg:'#000000',page:'#000000',card:'#121212',model:'#0d0d0d',input:'#1a1a1a',pill:'rgba(255,255,255,.07)',border:'#262626',text:'#FFFFFF',muted:'#8E8E93',accent:'#30D158',accent2:'#5EE07C',nav:'rgba(0,0,0,.94)',header:'rgba(0,0,0,.92)',modal:'#121212'},
+      b:{label:'Dark B',bg:'#1F1E1D',page:'#1F1E1D',card:'#262624',model:'#2B2A28',input:'#30302E',pill:'rgba(250,249,245,.07)',border:'#3D3D3A',text:'#FAF9F5',muted:'#A6A39A',accent:'#D97757',accent2:'#E8946F',nav:'rgba(31,30,29,.95)',header:'rgba(31,30,29,.93)',modal:'#262624'},
+      ios:{label:'iPhone Dark',bg:'#000000',page:'#000000',card:'#1C1C1E',model:'#2C2C2E',input:'#2C2C2E',pill:'rgba(255,255,255,.08)',border:'#38383A',text:'#FFFFFF',muted:'#8E8E93',accent:'#0A84FF',accent2:'#5AC8FA',nav:'rgba(28,28,30,.94)',header:'rgba(0,0,0,.92)',modal:'#1C1C1E'}
+    };
+    window.SK_DARK_STYLES=SK_DARK_STYLES;
+    function skDarkStyleSet(v){
+      const st=skAppearanceRead();st.themeMode='dark';st.darkStyle=SK_DARK_STYLES[v]?v:'a';
+      skAppearanceApply(st,{theme:true});
+    }
+    window.skDarkStyleSet=skDarkStyleSet;
     function skAppearanceApplyTokens(settings){
       const root=document.documentElement;
       const resolved=skAppearanceResolvedMode(settings);
@@ -1894,6 +1907,17 @@ const MASTER_INVENTORY = [
       root.style.setProperty('--text-muted',muted);
       root.style.setProperty('--glass-shadow',shadow);
       root.style.setProperty('--card-elevation',shadow);
+      const ds=!light&&SK_DARK_STYLES[settings.darkStyle];
+      if(ds){
+        const sv=(k,v)=>root.style.setProperty(k,v);
+        sv('--primary',ds.accent);sv('--primary-gradient',`linear-gradient(135deg,${ds.accent} 0%,${ds.accent2} 100%)`);
+        sv('--glass-btn-bg',ds.accent);sv('--glass-btn-border',ds.accent2);sv('--glass-pill-active',ds.accent);sv('--glass-pill-border',ds.accent2);
+        sv('--badge-bg',skMix(ds.accent,'#000000',.80));sv('--badge-border',skMix(ds.accent,'#000000',.55));
+        sv('--card-border',ds.border);sv('--page-bg',ds.page);sv('--bg',ds.bg);sv('--card-bg',ds.card);sv('--model-bg',ds.model);
+        sv('--input-bg',ds.input);sv('--pill-bg',ds.pill);sv('--chip-bg',ds.border);sv('--bottom-nav-bg',ds.nav);sv('--header-bg',ds.header);
+        sv('--modal-bg',ds.modal);sv('--text',ds.text);sv('--text-muted',ds.muted);sv('--glass-shadow','0 6px 18px rgba(0,0,0,.45)');sv('--card-elevation','0 4px 16px rgba(0,0,0,.45)');
+        root.setAttribute('data-dark-style',settings.darkStyle);
+      }else root.removeAttribute('data-dark-style');
       const cardRadiusMap={sharp:'0px',standard:'8px',modern:'12px',smooth:'16px',pill:'24px'};
       const buttonRadiusMap={sharp:'0px',modern:'8px',smooth:'14px',pill:'999px'};
       const scaleMap={compact:'.94',normal:'1',comfortable:'1.08',large:'1.08'};
@@ -1930,6 +1954,7 @@ const MASTER_INVENTORY = [
       const aura=document.getElementById('skUiAura'),h=document.getElementById('skUiHaptic'),snd=document.getElementById('skUiSound'),m=document.getElementById('skUiMotion');
       if(aura)aura.checked=!!settings.aura;if(h)h.checked=!!settings.haptic;if(snd)snd.checked=!!settings.sound;if(m)m.checked=!!settings.motion;
       root.querySelectorAll('.sk-ui-profile').forEach(btn=>btn.classList.toggle('active',btn.dataset.value===settings.preset));
+      if(settings.darkStyle&&SK_DARK_STYLES[settings.darkStyle]&&settings.themeMode==='dark'){const dk=root.querySelector('[data-setting-group="themeMode"] [data-value="dark"]');if(dk)dk.classList.remove('active');}
     }
     function skAppearanceApply(settings,opts){
       const next={...SK_APPEARANCE_DEFAULTS,...settings};
@@ -1961,7 +1986,7 @@ const MASTER_INVENTORY = [
         skAppearanceApply(settings,{theme:true});
       }else{
         if(key==='accent') settings.accent=value;
-        else if(key==='themeMode') settings.themeMode=value;
+        else if(key==='themeMode'){settings.themeMode=value;if(value==='dark')settings.darkStyle='';}
         else if(['aura','haptic','sound','motion'].includes(key)) settings[key]=!!value;
         else settings[key]=value;
         if(key==='accent' && value!=='custom') settings.customHex=skHex(SK_APPEARANCE_ACCENTS[value]||SK_APPEARANCE_ACCENTS.blue);

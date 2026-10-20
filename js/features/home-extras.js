@@ -72,7 +72,7 @@ var MOON='<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',SUN='<circl
 function isDark(){try{return window.skAppearanceResolvedMode(window.skAppearanceRead())==='dark'}catch(e){return document.documentElement.getAttribute('data-theme')==='dark'}}
 function paintDark(){var b=document.getElementById('skDarkBtn');if(!b)return;var d=isDark();b.querySelector('svg').innerHTML=d?SUN:MOON;b.setAttribute('aria-label',d?'Switch to light mode':'Switch to dark mode');b.title=d?'Light mode':'Dark mode'}
 window.skToggleDark=function(){
-  try{var st=window.skAppearanceRead();st.themeMode=isDark()?'light':'dark';window.skAppearanceApply(st,{theme:true})}catch(e){return}
+  try{var st=window.skAppearanceRead();if(isDark())st.themeMode='light';else{st.themeMode='dark';st.darkStyle='a';}window.skAppearanceApply(st,{theme:true})}catch(e){return}
   paintDark();
 };
 function addDark(){
