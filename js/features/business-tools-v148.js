@@ -172,7 +172,7 @@ function reminderRows(){
   var t=today();
   return cs.filter(function(c){return num(c.balance)>0}).map(function(c){
     var due=dueKeyFor(c);
-    var items=[];try{(c.bills||[]).forEach(function(x){var b=x&&x.b;if(b&&num(b.balance)>0&&String(b.model||'').trim())items.push({model:String(b.model).trim(),id:b.billNo||b.id||'',date:b.date||''})});if(!items.length&&c.lastBill&&String(c.lastBill.model||'').trim())items.push({model:String(c.lastBill.model).trim(),id:c.lastBill.billNo||c.lastBill.id||'',date:c.lastBill.date||''})}catch(e){}
+    var items=[];try{(c.bills||[]).forEach(function(x){var b=x&&x.b;if(b&&num(b.balance)>0&&String(b.model||'').trim())items.push({model:String(b.model).trim(),id:b.billNo||b.id||'',date:b.date||'',price:num(b.price),adv:num(b.advance)})});if(!items.length&&c.lastBill&&String(c.lastBill.model||'').trim())items.push({model:String(c.lastBill.model).trim(),id:c.lastBill.billNo||c.lastBill.id||'',date:c.lastBill.date||'',price:num(c.lastBill.price),adv:num(c.lastBill.advance)})}catch(e){}
     return {key:c.key,name:c.name,phone:c.phone||'',items:items.slice(0,3),manual:!!dueMap()[c.key],balance:num(c.balance),due:due,overdue:!!due&&due<t,soon:!!due&&due>=t,days:daysPending(c,t)}
   }).sort(function(a,b){
     if(a.overdue!==b.overdue)return a.overdue?-1:1;
@@ -185,7 +185,7 @@ function msgFor(r,lang){
   if(lang==='ta'&&typeof window.skTaCredit==='function')return window.skTaCredit(r,shopName(),r.due?dmy(r.due):'',localStorage.getItem('sk_shop_upi'),dmy(today()));
   /* V5.11.22: boxed summary — mobile name(s), then Outstanding and Due in bold */
   var L='━━━━━━━━━━━━',box=[L];
-  (r.items||[]).forEach(function(i){box.push('📱 Mobile: '+i.model);box.push('🧾 Bill: '+(i.id||'---')+(i.date?' • '+i.date:''))});
+  (r.items||[]).forEach(function(i){box.push('📱 Mobile: '+i.model);box.push('🧾 Bill: '+(i.id||'---')+(i.date?' • '+i.date:''));if(i.price>0)box.push('💵 Total: '+money(i.price));if(i.adv>0)box.push('✅ Advance paid: '+money(i.adv))});
   box.push('⚠️ *Outstanding: '+money(r.balance)+'*');
   if(r.due)box.push('📅 *'+(r.overdue?'Was due on: ':'Due: ')+dmy(r.due)+'*');
   box.push(L);

@@ -20,7 +20,7 @@ window.skTaRepair=function(j,d,lv,due,shop,upi){
 /* credit: r={name,balance,due,overdue}, due/today as DD/MM/YYYY strings */
 window.skTaCredit=function(r,shop,dueText,upi,todayText){
   var L='━━━━━━━━━━━━',box=[L];
-  (r.items||[]).forEach(function(i){box.push('📱 மொபைல்: '+i.model);box.push('🧾 பில்: '+(i.id||'---')+(i.date?' • '+i.date:''))});
+  (r.items||[]).forEach(function(i){box.push('📱 மொபைல்: '+i.model);box.push('🧾 பில்: '+(i.id||'---')+(i.date?' • '+i.date:''));if(i.price>0)box.push('💵 மொத்தம்: '+rs(i.price));if(i.adv>0)box.push('✅ முன்பணம் செலுத்தியது: '+rs(i.adv))});
   box.push('⚠️ *நிலுவை: '+rs(r.balance)+'*');
   if(dueText)box.push('📅 *'+(r.overdue?'செலுத்த வேண்டிய தேதி (கடந்தது): ':'செலுத்த வேண்டிய தேதி: ')+dueText+'*');
   box.push(L);
