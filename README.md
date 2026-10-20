@@ -434,6 +434,13 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.21 — Manager access in one place (People & access)
+- Settings -> People & access now starts with a **Manager access** card: Manager can sign in (master switch), Full access / Reset to basic buttons, and one switch per area (Billing, Orders, Repair, Credit, Inventory, Tools & Notes, Edit & delete records, App Settings, Shop profile, App Data Folder, Cloud backup, Cloud restore, Recycle Bin, User management). Changes reach the Manager's phone straight away.
+- The old Manager section in Admin Control is replaced by a button that opens People & access.
+- New permission **Edit & delete records** (`editDelete`, default off = same as before). When on, the Manager's Edit / Delete / Next status buttons and the edit/delete functions work for the areas they are allowed in.
+- Fix: the Manager's Settings page was locked as a whole even when Admin had allowed it. Each Settings part is now locked or open by its own permission (Look -> App Settings, Shop/Terms/Logo -> Shop profile, Backup / Cloud -> backup & restore, App data folder). Spring bounce and Camera & notifications are always open.
+- Firestore rules unchanged (the new key is only used by the app).
+
 ## V5.11.20 — Spring fix (stuck after release)
 - Fixed a bug from V5.11.19: the spring-back code referenced removed constants (`K`, `C`), threw an error every frame and left the page stuck where it was pulled (worst on High). Verified Low / Medium / High all return to 0 after drag and after a fast scroll, with no errors.
 - Home pull-to-reload now needs a real ~230px finger pull at every strength (before, High reached the old threshold with a short pull and could reload by accident). If the reload does not happen, the page lets go after 2.5 s instead of staying stuck.
