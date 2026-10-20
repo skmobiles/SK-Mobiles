@@ -5105,10 +5105,10 @@ img{max-width:100%!important;}
           <div class="sk-rj-status-dealer-row"><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span>${skRjDealerControl(j)}</div>
         </div>
         <div class="sk-rj-actions">
-          <button type="button" class="sk-rj-edit" onclick="event.stopPropagation();skRjEdit('${j.id}')">✏️ Edit</button>
-          <button type="button" class="sk-rj-delete" onclick="event.stopPropagation();skRjDelete('${j.id}')">🗑️ Delete</button>
-          <button type="button" class="sk-rj-prev" onclick="event.stopPropagation();skRjPrevious('${j.id}')">Previous Status</button>
-          <button type="button" class="sk-rj-next" onclick="event.stopPropagation();skRjNext('${j.id}')">Next Status</button>
+          <button type="button" class="sk-rj-edit" onclick="event.stopPropagation();skRjEdit('${j.id}')"><i>✏️</i><span>Edit</span></button>
+          <button type="button" class="sk-rj-delete" onclick="event.stopPropagation();skRjDelete('${j.id}')"><i>🗑️</i><span>Delete</span></button>
+          <button type="button" class="sk-rj-prev" onclick="event.stopPropagation();skRjPrevious('${j.id}')"><i>◀</i><span>Previous</span></button>
+          <button type="button" class="sk-rj-next" onclick="event.stopPropagation();skRjNext('${j.id}')"><i>▶</i><span>Next</span></button>
         </div>
       </div>`).join(''):'<div class="sk-rj-empty">No pending repair jobs.</div>');
   };
@@ -5137,9 +5137,9 @@ img{max-width:100%!important;}
         </div>
         <div class="sk-rj-history-actions" onclick="event.stopPropagation()">
           <span class="sk-rj-status">${esc(j.status)}</span>
-          <button type="button" class="sk-rj-edit" onclick="skRjEdit('${j.id}')">✏️ Edit</button>
-          <button type="button" class="sk-rj-delete" onclick="skRjDelete('${j.id}')">🗑️ Delete</button>
-          ${j.status==='Ready'?`<button type="button" class="sk-rj-wa" onclick="skRjWhatsAppReady('${j.id}')">💬 Ready message</button><button type="button" class="sk-rj-deliver" onclick="skRjDeliver('${j.id}')">🚚 Mark Delivered</button>`:`<button type="button" class="sk-rj-rework" onclick="skRjRework('${j.id}')">↩️ Rework</button>`}
+          <button type="button" class="sk-rj-edit" onclick="skRjEdit('${j.id}')"><i>✏️</i><span>Edit</span></button>
+          <button type="button" class="sk-rj-delete" onclick="skRjDelete('${j.id}')"><i>🗑️</i><span>Delete</span></button>
+          ${j.status==='Ready'?`<button type="button" class="sk-rj-wa" onclick="skRjWhatsAppReady('${j.id}')"><i>💬</i><span>Ready message</span></button><button type="button" class="sk-rj-deliver" onclick="skRjDeliver('${j.id}')"><i>🚚</i><span>Mark Delivered</span></button>`:`<button type="button" class="sk-rj-rework" onclick="skRjRework('${j.id}')"><i>↩️</i><span>Rework</span></button>`}
         </div>
         <div style="margin-top:7px;font-size:.65rem;color:var(--primary);font-weight:800">Tap to open full repair details →</div>
       </div>`;
