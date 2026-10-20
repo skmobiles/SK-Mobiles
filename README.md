@@ -434,6 +434,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.26
+- Repair History cards: tapping anywhere on the card (including the empty space around the buttons) opens the repair details. Edit / Delete / Rework / Ready message are equal-width tiles.
+- Each History card now shows the **Outstanding** amount (and what was Paid), or "Fully paid".
+
 ## V5.11.25
 - Repair Jobs: Edit / Delete / Previous / Next (Pending) and Edit / Delete / Ready message / Mark Delivered / Rework (History) are now icon-on-top tiles with larger, bolder text. "Previous Status" / "Next Status" are shortened to "Previous" / "Next".
 
