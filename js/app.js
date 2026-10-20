@@ -1763,8 +1763,9 @@ const MASTER_INVENTORY = [
     function skUpdateThemeChrome(theme){
       try{
         const meta=document.getElementById('skThemeColorMeta');
-        const dsk=document.documentElement.getAttribute('data-dark-style');
+        const dsk=document.documentElement.getAttribute('data-dark-style'),lsk=document.documentElement.getAttribute('data-light-style');
         if(dsk&&window.SK_DARK_STYLES&&SK_DARK_STYLES[dsk]&&document.documentElement.getAttribute('data-ui-mode')==='dark'){SK_THEME_STATUS_COLORS.__ds=SK_DARK_STYLES[dsk].bg;theme='__ds';}
+        else if(lsk&&window.SK_LIGHT_STYLES&&SK_LIGHT_STYLES[lsk]&&document.documentElement.getAttribute('data-ui-mode')==='light'){SK_THEME_STATUS_COLORS.__ds=SK_LIGHT_STYLES[lsk].bg;theme='__ds';}
         if(meta) meta.setAttribute('content',SK_THEME_STATUS_COLORS[theme]||SK_THEME_STATUS_COLORS.light);
         document.documentElement.style.setProperty('--app-status-color',SK_THEME_STATUS_COLORS[theme]||SK_THEME_STATUS_COLORS.light);
       }catch(e){}
@@ -1793,7 +1794,7 @@ const MASTER_INVENTORY = [
     const SK_APPEARANCE_DEFAULTS = {
       preset:'classic', themeMode:'light', accent:'blue', customHex:'#2563EB',
       surface:'offwhite', cardRadius:'modern', buttonRadius:'modern', cardSurface:'blur',
-      header:'minimal', nav:'floating', scale:'normal', buttonStyle:'solid', darkStyle:'', aura:true, haptic:true, sound:false, motion:false
+      header:'minimal', nav:'floating', scale:'normal', buttonStyle:'solid', darkStyle:'', lightStyle:'', aura:true, haptic:true, sound:false, motion:false
     };
     const SK_APPEARANCE_ACCENTS = {
       blue:'#2563EB', violet:'#7C3AED', green:'#059669', rose:'#E11D48',
@@ -1859,20 +1860,22 @@ const MASTER_INVENTORY = [
     const SK_DARK_STYLES={
       a:{label:'Dark A',bg:'#000000',page:'#000000',card:'#121212',model:'#0d0d0d',input:'#1a1a1a',pill:'rgba(255,255,255,.07)',border:'#262626',text:'#FFFFFF',muted:'#8E8E93',accent:'#30D158',accent2:'#5EE07C',nav:'rgba(0,0,0,.94)',header:'rgba(0,0,0,.92)',modal:'#121212'},
       b:{label:'Dark B',bg:'#1F1E1D',page:'#1F1E1D',card:'#262624',model:'#2B2A28',input:'#30302E',pill:'rgba(250,249,245,.07)',border:'#3D3D3A',text:'#FAF9F5',muted:'#A6A39A',accent:'#D97757',accent2:'#E8946F',nav:'rgba(31,30,29,.95)',header:'rgba(31,30,29,.93)',modal:'#262624'},
+      nebula:{label:'Nebula',bg:'#0F0B1E',page:'#0F0B1E',card:'#1A1333',model:'#211A40',input:'#241C46',pill:'rgba(167,139,250,.10)',border:'#3B2A6B',text:'#F3EEFF',muted:'#A89BC9',accent:'#A78BFA',accent2:'#C4B5FD',nav:'rgba(15,11,30,.95)',header:'rgba(15,11,30,.93)',modal:'#1A1333'},
+      magenta:{label:'Magenta',bg:'#14061A',page:'#14061A',card:'#22102B',model:'#2B1536',input:'#301740',pill:'rgba(232,121,249,.10)',border:'#5B1A63',text:'#FDF2FF',muted:'#C9A3D1',accent:'#E879F9',accent2:'#F0ABFC',nav:'rgba(20,6,26,.95)',header:'rgba(20,6,26,.93)',modal:'#22102B'},
       ios:{label:'iPhone Dark',bg:'#000000',page:'#000000',card:'#1C1C1E',model:'#2C2C2E',input:'#2C2C2E',pill:'rgba(255,255,255,.08)',border:'#38383A',text:'#FFFFFF',muted:'#8E8E93',accent:'#0A84FF',accent2:'#5AC8FA',nav:'rgba(28,28,30,.94)',header:'rgba(0,0,0,.92)',modal:'#1C1C1E'}
     };
-    window.SK_DARK_STYLES=SK_DARK_STYLES;
-    const SK_EXTRA_THEMES={royal:'light',glacier:'light',nebula:'dark',magenta:'dark'};
+    const SK_LIGHT_STYLES={
+      royal:{label:'Royal',bg:'#F5F3FF',page:'#EDE9FE',card:'#FFFFFF',model:'#F5F3FF',input:'#FFFFFF',pill:'rgba(124,58,237,.08)',border:'#DDD6FE',text:'#1E1B4B',muted:'#6D6A8C',accent:'#7C3AED',accent2:'#A78BFA',nav:'rgba(255,255,255,.94)',header:'rgba(255,255,255,.90)',modal:'#FFFFFF'},
+      glacier:{label:'Glacier',bg:'#F0F9FF',page:'#E0F2FE',card:'#FFFFFF',model:'#F0F9FF',input:'#FFFFFF',pill:'rgba(2,132,199,.08)',border:'#BAE6FD',text:'#0C4A6E',muted:'#5B7C99',accent:'#0284C7',accent2:'#38BDF8',nav:'rgba(255,255,255,.94)',header:'rgba(255,255,255,.90)',modal:'#FFFFFF'}
+    };
+    window.SK_DARK_STYLES=SK_DARK_STYLES;window.SK_LIGHT_STYLES=SK_LIGHT_STYLES;
     function skThemePick(name){
-      const st=skAppearanceRead();st.themeMode=SK_EXTRA_THEMES[name]||'light';st.darkStyle='';
-      skAppearanceApply(st,{theme:false});
-      window.__skAppearanceApplying=true;try{setTheme(name,true);}catch(e){}window.__skAppearanceApplying=false;
-      try{localStorage.setItem('sk_extra_theme',name);}catch(e){}
-      skThemeCardsSync();
+      if(SK_DARK_STYLES[name]){skDarkStyleSet(name);return;}
+      if(SK_LIGHT_STYLES[name]){const st=skAppearanceRead();st.themeMode='light';st.lightStyle=name;st.darkStyle='';skAppearanceApply(st,{theme:true});}
     }
     function skThemeCardsSync(){
-      const t=document.documentElement.getAttribute('data-theme');
-      document.querySelectorAll('[data-theme-pick]').forEach(b=>b.classList.toggle('active',b.getAttribute('data-theme-pick')===t&&!document.documentElement.getAttribute('data-dark-style')));
+      const st=skAppearanceRead(),light=skAppearanceResolvedMode(st)==='light';
+      document.querySelectorAll('[data-theme-pick]').forEach(b=>{const n=b.getAttribute('data-theme-pick');b.classList.toggle('active',light?st.lightStyle===n:st.darkStyle===n);});
     }
     window.skThemePick=skThemePick;window.skThemeCardsSync=skThemeCardsSync;
     function skDarkStyleSet(v){
@@ -1920,7 +1923,7 @@ const MASTER_INVENTORY = [
       root.style.setProperty('--text-muted',muted);
       root.style.setProperty('--glass-shadow',shadow);
       root.style.setProperty('--card-elevation',shadow);
-      const ds=!light&&SK_DARK_STYLES[settings.darkStyle];
+      const ds=light?SK_LIGHT_STYLES[settings.lightStyle]:SK_DARK_STYLES[settings.darkStyle];
       if(ds){
         const sv=(k,v)=>root.style.setProperty(k,v);
         sv('--primary',ds.accent);sv('--primary-gradient',`linear-gradient(135deg,${ds.accent} 0%,${ds.accent2} 100%)`);
@@ -1929,9 +1932,10 @@ const MASTER_INVENTORY = [
         sv('--card-border',ds.border);sv('--page-bg',ds.page);sv('--bg',ds.bg);sv('--card-bg',ds.card);sv('--model-bg',ds.model);
         sv('--input-bg',ds.input);sv('--pill-bg',ds.pill);sv('--chip-bg',ds.border);sv('--bottom-nav-bg',ds.nav);sv('--header-bg',ds.header);
         sv('--modal-bg',ds.modal);sv('--text',ds.text);sv('--text-muted',ds.muted);sv('--glass-shadow','0 6px 18px rgba(0,0,0,.45)');sv('--card-elevation','0 4px 16px rgba(0,0,0,.45)');
-        root.setAttribute('data-dark-style',settings.darkStyle);
+        if(light){root.setAttribute('data-light-style',settings.lightStyle);root.removeAttribute('data-dark-style');}
+        else{root.setAttribute('data-dark-style',settings.darkStyle);root.removeAttribute('data-light-style');}
         root.style.setProperty('--ui-aura-opacity',0);root.setAttribute('data-ui-aura','off');
-      }else root.removeAttribute('data-dark-style');
+      }else{root.removeAttribute('data-dark-style');root.removeAttribute('data-light-style');}
       const cardRadiusMap={sharp:'0px',standard:'8px',modern:'12px',smooth:'16px',pill:'24px'};
       const buttonRadiusMap={sharp:'0px',modern:'8px',smooth:'14px',pill:'999px'};
       const scaleMap={compact:'.94',normal:'1',comfortable:'1.08',large:'1.08'};
@@ -1994,13 +1998,14 @@ const MASTER_INVENTORY = [
       if(key==='preset'){
         const p=SK_APPEARANCE_PRESETS[value]||SK_APPEARANCE_PRESETS.classic;
         settings={...settings,preset:value,accent:p.accent||settings.accent,themeMode:p.theme||settings.themeMode,surface:p.surface,cardSurface:p.cardSurface,header:p.header,nav:p.nav,cardRadius:p.cardRadius,buttonRadius:p.buttonRadius,aura:p.aura};
+        settings.lightStyle='';
         if(value==='liquid'||value==='white') settings.themeMode='light';
         if(value==='midnight'||value==='amber') settings.themeMode='dark';
         if(value==='classic'||value==='emerald'||value==='ruby'||value==='ocean') settings.themeMode='light';
         skAppearanceApply(settings,{theme:true});
       }else{
         if(key==='accent') settings.accent=value;
-        else if(key==='themeMode'){settings.themeMode=value;if(value==='dark')settings.darkStyle='';}
+        else if(key==='themeMode'){settings.themeMode=value;if(value==='dark')settings.darkStyle='';if(value==='light')settings.lightStyle='';}
         else if(['aura','haptic','sound','motion'].includes(key)) settings[key]=!!value;
         else settings[key]=value;
         if(key==='accent' && value!=='custom') settings.customHex=skHex(SK_APPEARANCE_ACCENTS[value]||SK_APPEARANCE_ACCENTS.blue);

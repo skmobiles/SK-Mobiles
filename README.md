@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.41
+- Royal, Glacier (light) and Nebula, Magenta (dark) are now full app palettes, like Dark A / B / iPhone: background, cards, inputs, header, bottom bar, text and accent colours all change. They sit in Settings > Style profiles > MORE THEMES. New setting `lightStyle` inside `sk_appearance_settings`; the header sun/moon button returns to the last light theme you picked.
+
 ## V5.11.40
 - Settings > Style profiles: new MORE THEMES section with Dark A, Dark B, iPhone Dark and the extra colour themes Royal, Glacier, Nebula and Magenta (one tap). Removed the 8 themes that had no colours defined (sunset, emerald, rose, graphite, lime, aurora, mint, solar); the Emerald / Cyber Amber / Ruby profiles keep working. In dark modes the pastel profile cards keep readable dark text. No data keys changed.
 
