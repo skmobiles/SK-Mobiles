@@ -5101,8 +5101,7 @@ img{max-width:100%!important;}
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')}<br><span class="sk-rj-problem-highlight">${esc(j.problem)}</span></div>
-          <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''} ${rjAgeLabel(j)}</div></div>
-          <div class="sk-rj-chips" style="display:flex!important;grid-template-columns:none!important;width:max-content!important;gap:6px!important"><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span></div>
+          <div class="sk-rj-delivery-meta sk-rj-chip-row"><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span>${rjAgeLabel(j)}${j.reworkReason?`<span class="sk-rj-rework-note">🔁 Rework: ${esc(j.reworkReason)}</span>`:''}</div></div>
           <div class="sk-rj-status-dealer-row">${skRjDealerControl(j)}</div>
         </div>
         <div class="sk-rj-actions">
@@ -5137,7 +5136,6 @@ img{max-width:100%!important;}
           <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||(j.status==='Delivered'?'Delivered':'Ready for Delivery'))}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div>${(()=>{if(j.outcome==='returned')return '';const net=Math.max(0,(Number(j.estimate)||0)-Math.max(0,Number(j.discountAmount)||0)),paid=Math.max(0,Number(j.paidAmount)||0),out=Math.max(0,net-paid);if(net<=0)return '';return out>0?`<div class="sk-rj-out-line due">💰 Outstanding <b>₹${out.toLocaleString('en-IN')}</b>${paid>0?` · Paid ₹${paid.toLocaleString('en-IN')}`:''}</div>`:`<div class="sk-rj-out-line paid">✅ Fully paid <b>₹${paid.toLocaleString('en-IN')}</b></div>`})()}${j.outcome==='returned'?`<div class="sk-rj-returned-tag">↩ Returned – not repaired${j.returnReason?' · '+esc(j.returnReason):''}${Number(j.returnCharge)>0?' · Charge ₹'+Number(j.returnCharge).toLocaleString('en-IN'):''}${Number(j.refundAmount)>0?' · Refund ₹'+Number(j.refundAmount).toLocaleString('en-IN'):''}</div>`:''}</div>
         </div>
         <div class="sk-rj-history-actions" onclick="event.stopPropagation();if(!event.target.closest('button'))skRjShowDetail('${j.id}')">
-          <span class="sk-rj-status">${esc(j.status)}</span>
           <button type="button" class="sk-rj-edit" onclick="skRjEdit('${j.id}')"><i>✏️</i><span>Edit</span></button>
           <button type="button" class="sk-rj-delete" onclick="skRjDelete('${j.id}')"><i>🗑️</i><span>Delete</span></button>
           ${j.status==='Ready'?`<button type="button" class="sk-rj-wa" onclick="skRjWhatsAppReady('${j.id}')"><i>💬</i><span>Ready message</span></button><button type="button" class="sk-rj-deliver" onclick="skRjDeliver('${j.id}')"><i>🚚</i><span>Mark Delivered</span></button>`:`<button type="button" class="sk-rj-rework" onclick="skRjRework('${j.id}')"><i>↩️</i><span>Rework</span></button>`}
