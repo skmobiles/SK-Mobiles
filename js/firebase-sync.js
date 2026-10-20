@@ -22,7 +22,7 @@
   const MANAGER_PERMISSION_DEFAULTS = {
     managerAccess:true, billing:false, orders:false, inventory:false, credit:false, repair:false,
     toolsNotes:false, dataFolder:false, settings:false, profile:true, backup:false, restore:false,
-    shopSettings:false, userManagement:false, recycleBin:false
+    shopSettings:false, userManagement:false, recycleBin:false, editDelete:false
   };
   const MANAGER_PERMISSION_DOC = "manager";
 
@@ -351,6 +351,14 @@
 
   window.skFirebaseGetManagerPermissions=async function(){ return getManagerPermissions(); };
   window.skFirebaseSetManagerPermission=async function(key,value){ return setManagerPermission(key,value); };
+  window.skFirebaseSetManagerPermissions=async function(obj){
+    if(!auth?.currentUser || currentRole!=="admin") throw new Error("Admin access only");
+    const current=await getManagerPermissions();
+    Object.keys(obj||{}).forEach(k=>{ if(Object.prototype.hasOwnProperty.call(MANAGER_PERMISSION_DEFAULTS,k)) current[k]=!!obj[k]; });
+    const ref=db.collection("shops").doc(SHOP_ID).collection("permissions").doc(MANAGER_PERMISSION_DOC);
+    await ref.set({permissions:current,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:auth.currentUser.uid},{merge:true});
+    return current;
+  };
 
   function billRef(id){
     return db.collection("shops").doc(SHOP_ID).collection("bills").doc(String(id));

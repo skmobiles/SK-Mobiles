@@ -1037,13 +1037,9 @@ Dharmapuri, Tamil Nadu 636705 .</textarea></div></div><div class="st-field"><spa
 <div class="modal-title"><span>👑 Admin Control</span><button class="modal-close-btn" onclick="skCloseAdminPanel()">✕</button></div>
 <div class="sk-admin-box"><div class="sk-admin-title">CURRENT LOGIN</div><div id="skAdminCurrentRole" style="font-size:.88rem;font-weight:900;color:var(--text);">👑 Admin — Full Access</div></div>
 <div class="sk-admin-box" style="margin-top:10px;">
-  <div class="sk-admin-title">MANAGER PROMOTION & ACCESS</div>
-  <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 0;font-size:.75rem;font-weight:800;">
-    <span>👔 Manager Access</span>
-    <input id="skMgrAccessToggle" type="checkbox" onchange="skAdminSetManagerPermission('managerAccess',this.checked)">
-  </label>
-  <div style="font-size:.64rem;color:var(--text-muted);margin-bottom:8px;">Manager Firebase login can be enabled/disabled here.</div>
-  <div id="skManagerPermissionList" style="display:grid;gap:6px;"></div>
+  <div class="sk-admin-title">MANAGER ACCESS</div>
+  <div style="font-size:.7rem;color:var(--text-muted);margin-bottom:8px;">Manager access now lives in one place: Settings &rarr; People &amp; access.</div>
+  <button class="submit-btn" type="button" onclick="skCloseAdminPanel();toggleModal('settingsModal',true);setTimeout(function(){window.skStOpenPart&&window.skStOpenPart('People &amp; access')},150)">Open People &amp; access</button>
 </div>
 <div class="sk-admin-box" style="margin-top:10px;">
   <div class="sk-admin-title">ADMIN ONLY</div>
