@@ -434,6 +434,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.31
+- Boxes are back to the original rounded card style in light and all dark modes; the app now fits the screen with a 6px side gap (header, home cards, banner, bottom bar). Replaces the edge-to-edge flat layout of V5.11.29/V5.11.30. Display only.
+- Settings > Corners and Card surface (blur / iOS / border / shadow) now apply to the home cards and cards on all pages again (a later CSS rule had been overriding them).
+
 ## V5.11.30
 - Light mode now has the same full-width layout (no side gap) as the dark styles: header, home sections, banner, bottom bar and popups run edge to edge. Display only.
 
