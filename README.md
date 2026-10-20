@@ -434,6 +434,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.27
+- Repair detail: "Payments received" rows are aligned inside the box — date, amount and a compact "↩ Cancel" button in three columns.
+- Button labels never break in the middle of a word anywhere in the app (e.g. "Delivere/d"); Repair Jobs action tiles and the filter chips (e.g. "Not collected") wrap to at most 2 lines, even on narrow phones or large text sizes. In History cards the name / phone lines no longer run under the Outstanding box.
+
 ## V5.11.26
 - Repair History cards: tapping anywhere on the card (including the empty space around the buttons) opens the repair details. Edit / Delete / Rework / Ready message are equal-width tiles.
 - In Pending cards the "Delivery Status" line is removed; the status and work-type chips (Received / Normal) and the age label take its place. In History cards the extra blue status chip is removed, the Outstanding / Paid amount sits in the card's top-right corner, and Edit / Delete / Ready message / Mark Delivered are on one line.

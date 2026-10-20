@@ -4842,7 +4842,7 @@ img{max-width:100%!important;}
           <div class="rjd-card due sk-rj-finance-due"><span>Balance to pay</span><b>₹${_bal.toLocaleString('en-IN')}</b></div>
         </div>
         ${Array.isArray(j.discountHistory)&&j.discountHistory.length?`<div class="sk-rj-payment-summary"><b>Discount history</b>${j.discountHistory.map(d=>`<div><span>${esc(d.date?rjFmtDate(d.date):'Date not recorded')} · ${esc(d.reason||'Discount')}</span><span>− ₹${Number(d.amount||0).toLocaleString('en-IN')}</span></div>`).join('')}</div>`:''}
-        ${Array.isArray(j.paymentHistory)&&j.paymentHistory.length?`<div class="sk-rj-payment-summary"><b>Payments received</b>${j.paymentHistory.map((p,pi)=>`<div><span>${esc(p.date?rjFmtDate(p.date):'Date not recorded')}</span><span>₹${Number(p.amount||0).toLocaleString('en-IN')}${(p.type==='Repair advance payment'||p.type==='Repair delivery payment')&&j.outcome!=='returned'?` <button type="button" class="sk-rj-cancelpay" onclick="event.stopPropagation();skRjCancelPay('${esc(j.id)}',${pi})">↩ Cancel payment</button>`:''}</span></div>`).join('')}</div>`:''}
+        ${Array.isArray(j.paymentHistory)&&j.paymentHistory.length?`<div class="sk-rj-payment-summary"><b>Payments received</b>${j.paymentHistory.map((p,pi)=>`<div class="sk-rj-payrow"><span class="sk-rj-paydate">${esc(p.date?rjFmtDate(p.date):'Date not recorded')}</span><span class="sk-rj-payamt">₹${Number(p.amount||0).toLocaleString('en-IN')}</span>${(p.type==='Repair advance payment'||p.type==='Repair delivery payment')&&j.outcome!=='returned'?`<button type="button" class="sk-rj-cancelpay" onclick="event.stopPropagation();skRjCancelPay('${esc(j.id)}',${pi})">↩ Cancel</button>`:'<span></span>'}</div>`).join('')}</div>`:''}
         ${j.note?`<div class="rjd-note"><small>NOTE</small><p>${esc(j.note)}</p></div>`:''}
       </div>`;
     document.getElementById('skRepairDetailModal').classList.add('active');
@@ -5079,7 +5079,7 @@ img{max-width:100%!important;}
     const cnt=f=>f==='uncollected'?rjUncollected().length:f==='urgent'?allPending.filter(rjIsUrgent).length:f==='all'?allPending.length:allPending.filter(j=>j.status===f).length;
     if(window.__skRjFilter!=='all' && !cnt(window.__skRjFilter)) window.__skRjFilter='all';
     skMorphChildren(bar,[['all','All'],['urgent','🚨 Urgent'],['Received','Received'],['Checking','Checking'],['Repairing','Repairing'],['uncollected','⏰ Not collected']]
-      .map(([k,l])=>`<button type="button" class="sk-rj-chip${window.__skRjFilter===k?' active':''}" onclick="skRjSetFilter('${k}')">${l} <b>${cnt(k)}</b></button>`).join(''));
+      .map(([k,l])=>`<button type="button" class="sk-rj-chip${window.__skRjFilter===k?' active':''}" style="white-space:normal!important;line-height:1.15!important;font-size:.74rem!important;padding-left:4px!important;padding-right:4px!important;text-align:center!important" onclick="skRjSetFilter('${k}')">${l} <b>${cnt(k)}</b></button>`).join(''));
     if(window.__skRjFilter==='urgent') a=allPending.filter(rjIsUrgent);
     else if(window.__skRjFilter!=='all') a=allPending.filter(j=>j.status===window.__skRjFilter);
     /* V5.11.0: search box + filter (dealer / date) for pending jobs */
