@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.22
+- Customer credit reminder (English and Tamil) now shows a boxed summary: mobile name and bill number of the credit bill(s), **Outstanding** amount and **Due** date in bold with icons. Wording changed from "pending" to "Outstanding".
+
 ## V5.11.21 — Manager access in one place (People & access)
 - Settings -> People & access now starts with a **Manager access** card: Manager can sign in (master switch), Full access / Reset to basic buttons, and one switch per area (Billing, Orders, Repair, Credit, Inventory, Tools & Notes, Edit & delete records, App Settings, Shop profile, App Data Folder, Cloud backup, Cloud restore, Recycle Bin, User management). Changes reach the Manager's phone straight away.
 - The old Manager section in Admin Control is replaced by a button that opens People & access.

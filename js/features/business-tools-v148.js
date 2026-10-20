@@ -172,7 +172,8 @@ function reminderRows(){
   var t=today();
   return cs.filter(function(c){return num(c.balance)>0}).map(function(c){
     var due=dueKeyFor(c);
-    return {key:c.key,name:c.name,phone:c.phone||'',manual:!!dueMap()[c.key],balance:num(c.balance),due:due,overdue:!!due&&due<t,soon:!!due&&due>=t,days:daysPending(c,t)}
+    var items=[];try{(c.bills||[]).forEach(function(x){var b=x&&x.b;if(b&&num(b.balance)>0&&String(b.model||'').trim())items.push({model:String(b.model).trim(),id:b.billNo||b.id||'',date:b.date||''})});if(!items.length&&c.lastBill&&String(c.lastBill.model||'').trim())items.push({model:String(c.lastBill.model).trim(),id:c.lastBill.billNo||c.lastBill.id||'',date:c.lastBill.date||''})}catch(e){}
+    return {key:c.key,name:c.name,phone:c.phone||'',items:items.slice(0,3),manual:!!dueMap()[c.key],balance:num(c.balance),due:due,overdue:!!due&&due<t,soon:!!due&&due>=t,days:daysPending(c,t)}
   }).sort(function(a,b){
     if(a.overdue!==b.overdue)return a.overdue?-1:1;
     if(a.due&&b.due&&a.due!==b.due)return a.due<b.due?-1:1;
@@ -182,9 +183,13 @@ function reminderRows(){
 }
 function msgFor(r,lang){
   if(lang==='ta'&&typeof window.skTaCredit==='function')return window.skTaCredit(r,shopName(),r.due?dmy(r.due):'',localStorage.getItem('sk_shop_upi'),dmy(today()));
-  var m='Dear '+r.name+', greetings from '+shopName()+'. This is a gentle reminder that '+money(r.balance)+' is pending in your account.';
-  if(r.due)m+=(r.overdue?' It was due on ':' It is due on ')+dmy(r.due)+'.';
-  m+=' Kindly clear it at your convenience. If you have already paid, please ignore this message. Thank you for your support 🙏';
+  /* V5.11.22: boxed summary — mobile name(s), then Outstanding and Due in bold */
+  var L='━━━━━━━━━━━━',box=[L];
+  (r.items||[]).forEach(function(i){box.push('📱 Mobile: '+i.model);box.push('🧾 Bill: '+(i.id||'---')+(i.date?' • '+i.date:''))});
+  box.push('⚠️ *Outstanding: '+money(r.balance)+'*');
+  if(r.due)box.push('📅 *'+(r.overdue?'Was due on: ':'Due: ')+dmy(r.due)+'*');
+  box.push(L);
+  var m='Dear '+r.name+', greetings from '+shopName()+' 🙏\n\nThis is a gentle reminder about your credit.\n\n'+box.join('\n')+'\n\nKindly clear it at your convenience. If you have already paid, please ignore this message. Thank you for your support 🙏';
   /* V5.11.5: UPI pay link (opens GPay / PhonePe / Paytm with the amount filled in) when a UPI ID is saved in Shop Profile */
   var upi=String(localStorage.getItem('sk_shop_upi')||'').trim();
   if(/^[\w.\-]{2,}@[A-Za-z][\w.\-]{1,}$/.test(upi)&&num(r.balance)>0){
