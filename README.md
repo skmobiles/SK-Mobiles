@@ -434,6 +434,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.35
+- Full-screen pages (Used Mobile Stock, Billing, Settings, Repair Jobs, Accessories, Credit Ledger, etc.) had a double side gap (6px page + 16px inner padding). Their content now sits 6px from the screen edge, like the home page. Display only.
+- Page title bars no longer stick out 10px past the screen edge. Dark modes: fixed a white empty-row block in Used Stock, the unreadable "Delete Box" text and a low-contrast history label.
+
 ## V5.11.34
 - All pages and popup windows (billing, repair, settings, credit ledger, recycle bin, etc.) now have the same 6px side gap as the main screens, in light and dark. Display only.
 
