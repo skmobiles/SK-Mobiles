@@ -5,7 +5,7 @@
   "policy": "Approved V5.6.1 Design Studio UI changes are included in this new baseline. Future changes to locked core files must be reviewed and the lock must not be silently regenerated. Preserve business logic, Firebase configuration/rules and existing data keys.",
   "core_files": {
     "index.html": "7bbb0a65bdfa646f8e1ccad0ef33b1196d3d4761b055a8e8b61492bb773f60c5",
-    "js/app.js": "55d9932fed8d23956ab383dcd5fcafaefc4253185a83adc57a583fbcf8a47ae4",
+    "js/app.js": "25932681acf57b21a04fad04eb31c140312069e7fe212101beaac27c79bc7fac",
     "js/firebase-sync.js": "fd66a46d3ec4a76577e58f3780cf0cafe0539b855aa2163fc93634ce8a5a6cad",
     "js/features/pin-security.js": "adde7413b65e7676169be8670d31494abd364f14a263681faa577fa07d08a0db",
     "js/features/colorful-ui.js": "8bd075f669975521a2f78e86b4dd33f05a5699483f5ff4e17b6e1f02a129f4db",
@@ -28,7 +28,7 @@
     "sw.js": "a8b05f184a2bb3e5137d6c46e013432071031da846d19dbcc07d5b2c7d3883fe",
     "css/shop-tools.css": "5d89635d27f47a40fe335e60939be63fef7dd29c47f2be222f4f9dac197dc8c3",
     "js/features/shop-tools-v151.js": "3d52bb37bcb73b00f5b1123ca9bcc951eb9c5b0cd26afe099e21f3e48f1611da",
-    "css/fixes.css": "da7906355d49b802e112e530ac766259a98e7738833c0f95e2282d4b371b6869",
+    "css/fixes.css": "520c1286dc4e318c79043d087e8fa73a25a25d8de33d1aabd7208639e3675d09",
     "js/features/scanner-v152.js": "2f5a44cb6d5e07c2fbc316d79d637a077456f4d5e2c10226d2de60a00dce8dd1",
     "js/features/qr-mini.js": "35cc4db27a1040f2c0c4bbfef6714da5176589fe5790533eee50e9586c13bc02",
     "js/features/invoice-upi.js": "48d6858714d880d98afcef7d121772b249b7f69a74d68557418d2a705d80c434",
@@ -57,6 +57,6 @@
     "view.html": "c97248b57c93ee6f3b2a815a59381ebde058561f19d275d0d65e4b616afeaf32",
     "js/features/review-requests.js": "084b68178ab7f502807a3c37e88494925cb6ca2cf1075b6422e78a1295072135",
     "js/features/no-flicker.js": "498282cd3a2dc869c465b28b93845ee638f4b29acea55988c5bd597db2c33340",
-    "js/features/home-extras.js": "982a0d2910b1765faba283f712d5c2c1493e06a22a4701d99d91584bcb0217dd"
+    "js/features/home-extras.js": "c0a2aa6a3a85269d09f1109e32577415813162e90915e2af9b604411ca75dfd6"
   }
 }

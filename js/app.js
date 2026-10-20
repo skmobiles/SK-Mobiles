@@ -1917,6 +1917,7 @@ const MASTER_INVENTORY = [
         sv('--input-bg',ds.input);sv('--pill-bg',ds.pill);sv('--chip-bg',ds.border);sv('--bottom-nav-bg',ds.nav);sv('--header-bg',ds.header);
         sv('--modal-bg',ds.modal);sv('--text',ds.text);sv('--text-muted',ds.muted);sv('--glass-shadow','0 6px 18px rgba(0,0,0,.45)');sv('--card-elevation','0 4px 16px rgba(0,0,0,.45)');
         root.setAttribute('data-dark-style',settings.darkStyle);
+        root.style.setProperty('--ui-aura-opacity',0);root.setAttribute('data-ui-aura','off');
       }else root.removeAttribute('data-dark-style');
       const cardRadiusMap={sharp:'0px',standard:'8px',modern:'12px',smooth:'16px',pill:'24px'};
       const buttonRadiusMap={sharp:'0px',modern:'8px',smooth:'14px',pill:'999px'};
@@ -1924,14 +1925,14 @@ const MASTER_INVENTORY = [
       root.style.setProperty('--ui-card-radius',cardRadiusMap[settings.cardRadius]||'12px');
       root.style.setProperty('--ui-button-radius',buttonRadiusMap[settings.buttonRadius]||'8px');
       root.style.setProperty('--ui-scale',scaleMap[settings.scale]||'1');
-      root.style.setProperty('--ui-aura-opacity',settings.aura?.8:0);
+      root.style.setProperty('--ui-aura-opacity',(settings.aura&&!ds)?.8:0);
       root.setAttribute('data-ui-mode',resolved);
       root.setAttribute('data-ui-preset',settings.preset);
       root.setAttribute('data-ui-accent',accentName);
       root.setAttribute('data-ui-header',settings.header);
       root.setAttribute('data-ui-nav',settings.nav);
       root.setAttribute('data-ui-scale',settings.scale);
-      root.setAttribute('data-ui-aura',settings.aura?'on':'off');
+      root.setAttribute('data-ui-aura',(settings.aura&&!ds)?'on':'off');
       root.setAttribute('data-ui-haptic',settings.haptic?'on':'off');
       root.setAttribute('data-ui-sound',settings.sound?'on':'off');
       root.setAttribute('data-ui-motion',settings.motion?'on':'off');

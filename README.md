@@ -436,7 +436,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 
 ## V5.11.29
 - Added 3 new dark modes: **Dark A** (pure black, green accent), **Dark B** (warm charcoal, clay accent) and **iPhone Dark** (iOS style, blue accent). Pick them in Settings > Theme > DARK MODES.
-- The home header sun/moon button now switches between Light and Dark A.
+- The home header sun/moon button now switches between Light and Dark B. Dark styles have no background aura glow, and the home banner is dimmed in dark.
 - No existing theme was removed; Light mode is unchanged. Display only, no data keys changed (new setting `darkStyle` inside `sk_appearance_settings`).
 
 ## V5.11.27
