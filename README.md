@@ -436,6 +436,7 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 
 ## V5.11.26
 - Repair History cards: tapping anywhere on the card (including the empty space around the buttons) opens the repair details. Edit / Delete / Rework / Ready message are equal-width tiles.
+- In Pending cards the status and work-type chips (Received / Normal) sit in the top-right corner of the card, giving the dealer / purchase row the full width.
 - Each History card now shows the **Outstanding** amount (and what was Paid), or "Fully paid".
 
 ## V5.11.25

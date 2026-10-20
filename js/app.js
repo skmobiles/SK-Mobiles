@@ -5102,7 +5102,8 @@ img{max-width:100%!important;}
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
           <div class="sk-rj-meta">${rjFmtDate(j.date)} · 📱 Repair Phone: ${esc(j.phone||'—')}<br><span class="sk-rj-problem-highlight">${esc(j.problem)}</span></div>
           <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||'Pending')}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''} ${rjAgeLabel(j)}</div></div>
-          <div class="sk-rj-status-dealer-row"><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span>${skRjDealerControl(j)}</div>
+          <div class="sk-rj-chips" style="display:flex!important;grid-template-columns:none!important;width:max-content!important;gap:6px!important"><span class="sk-rj-status">${esc(j.status)}</span><span class="sk-rj-priority ${String(j.workType||'Normal').toLowerCase()}">${esc(j.workType||'Normal')}</span></div>
+          <div class="sk-rj-status-dealer-row">${skRjDealerControl(j)}</div>
         </div>
         <div class="sk-rj-actions">
           <button type="button" class="sk-rj-edit" onclick="event.stopPropagation();skRjEdit('${j.id}')"><i>✏️</i><span>Edit</span></button>
