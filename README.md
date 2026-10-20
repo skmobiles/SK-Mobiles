@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.28
+- Dark mode polish: the urgent-repair banner is dark (was white), the bottom navigation ring and home banner border are subtle (was bright white), the banner picture is slightly dimmed, pastel icon tiles / calendar buttons / search chips are dark-friendly, "More ›" links are brighter, the page background is dark all the way to the bottom edge (no white strip), and the new Outstanding / Cancel buttons have dark versions. Light mode is unchanged.
+
 ## V5.11.27
 - Repair detail: "Payments received" rows are aligned inside the box — date, amount and a compact "↩ Cancel" button in three columns.
 - Button labels never break in the middle of a word anywhere in the app (e.g. "Delivere/d"); Repair Jobs action tiles and the filter chips (e.g. "Not collected") wrap to at most 2 lines, even on narrow phones or large text sizes. In History cards the name / phone lines no longer run under the Outstanding box.
