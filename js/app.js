@@ -1850,7 +1850,7 @@ const MASTER_INVENTORY = [
       const mode=skAppearanceResolvedMode(settings);
       const map={
         classic:{light:'light',dark:'dark'}, liquid:{light:'apple-light',dark:'apple-dark'},
-        white:{light:'apple-light',dark:'apple-dark'}, midnight:{light:'midnight',dark:'obsidian'},
+        white:{light:'apple-light',dark:'apple-dark'}, midnight:{light:'light',dark:'obsidian'},
         emerald:{light:'emerald',dark:'forest'}, amber:{light:'sunset',dark:'cyber'},
         ruby:{light:'rose',dark:'crimson'}, ocean:{light:'ocean',dark:'dark'}
       };

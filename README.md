@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.38
+- Fixed: switching from dark to light mode with the Midnight style kept the dark theme (dark status bar and a dark band above/below the bottom bar). Light mode now always uses the light theme, and apps stuck in that state repair themselves on open. Display only.
+
 ## V5.11.37
 - Signature popup: the bottom bar is hidden while it is open so the Clear / Save Signature buttons are never covered; in dark modes the popup is dark with readable text (the signing box stays white). Includes V5.11.36 (Admin Control logout button gap). Display only.
 
