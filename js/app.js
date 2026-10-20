@@ -5638,7 +5638,7 @@ img{max-width:100%!important;}
     window.skCloseAdminPanel=function(){document.getElementById('skAdminPanelModal')?.classList.remove('active');};
     window.skChangePin=function(r){if(!admin()){toast('🔒 Admin access only');return;}const id=r==='admin'?'skNewAdminPin':'skNewWorkerPin';const v=(document.getElementById(id)?.value||'').trim();if(!/^\d{4,12}$/.test(v)){toast('PIN must be 4-12 digits');return;}window.skPinSec.setRolePin(r,v);document.getElementById(id).value='';toast((r==='admin'?'Admin':'Worker')+' PIN updated');};
 
-    function mark(el){if(el&&!el.classList.contains('sk-worker-blocked'))el.classList.add('sk-worker-blocked');}
+    let skTouched=null;function mark(el){if(!el)return;if(skTouched)skTouched.add(el);if(!el.classList.contains('sk-worker-blocked'))el.classList.add('sk-worker-blocked');}
     function workerSettingAllowed(el){
       const id=(el.id||'').toLowerCase(), txt=(el.textContent||'').toLowerCase(), oc=(el.getAttribute('onclick')||'').toLowerCase();
       /* Worker Settings = THEME ONLY. Shop profile, address, phone, terms, logo and all data controls are Admin-only. */
@@ -5682,6 +5682,9 @@ img{max-width:100%!important;}
       const id=(el.id||'').toLowerCase();
       return /(^|\s)(edit|modify|delete|next status)(\s|$)/.test(txt) || /\bedit\b|\bmodify\b|\bdelete\b|\bnext status\b/.test(txt) || /triggereditfromcontext|triggerdeletefromcontext|skrjedit|skrjdelete|updateStock|setDirectStock|deleteinventoryitem|deletesavedbill/.test(oc) || id.includes('edit') || id.includes('delete');
     }
+    /* V5.11.18: write to the DOM only when something actually changes */
+    function skSetCls(el,c,on){if(el.classList.contains(c)!==on){if(on)el.classList.add(c);else el.classList.remove(c);}}
+    function skSetAttr(el,n,v){if(v==null){if(el.hasAttribute(n))el.removeAttribute(n);}else if(el.getAttribute(n)!==v)el.setAttribute(n,v);}
     function applyManagerRestrictions(){
       if(role()!=='manager') return;
       const p=skManagerPerms();
@@ -5690,17 +5693,17 @@ img{max-width:100%!important;}
         const lockAllSettingsControls=function(){
           settings.querySelectorAll('button,input,textarea,select').forEach(function(el){
             if(el.classList.contains('modal-close-btn'))return;
-            el.classList.add('sk-manager-locked');
-            el.setAttribute('aria-disabled','true');
-            el.setAttribute('data-sk-lock-reason','Admin permission required');
+            skSetCls(el,'sk-manager-locked',true);
+            skSetAttr(el,'aria-disabled','true');
+            skSetAttr(el,'data-sk-lock-reason','Admin permission required');
           });
         };
         const unlockRoot=function(root){
           if(!root)return;
           root.querySelectorAll('button,input,textarea,select').forEach(function(el){
-            el.classList.remove('sk-manager-locked');
-            el.removeAttribute('aria-disabled');
-            el.removeAttribute('data-sk-lock-reason');
+            skSetCls(el,'sk-manager-locked',false);
+            skSetAttr(el,'aria-disabled',null);
+            skSetAttr(el,'data-sk-lock-reason',null);
           });
         };
         const unlockElement=function(el){
@@ -5747,22 +5750,23 @@ img{max-width:100%!important;}
       document.querySelectorAll('button,a,[role="button"]').forEach(function(el){
         if(el.closest('#skRoleGate')||el.closest('#skLoginModal')||el.closest('#skAdminPanelModal'))return;
         if(el.closest('#settingsModal'))return;
-        el.classList.remove('sk-manager-locked');
-        el.removeAttribute('aria-disabled');
-        el.removeAttribute('data-sk-lock-reason');
         if(managerEditElement(el)){
-          el.classList.add('sk-manager-locked');
-          el.setAttribute('aria-disabled','true');
-          el.setAttribute('data-sk-lock-reason','Admin only: Edit / Modify');
-          el.title='🔒 Admin only — Edit / Modify';
+          skSetCls(el,'sk-manager-locked',true);
+          skSetAttr(el,'aria-disabled','true');
+          skSetAttr(el,'data-sk-lock-reason','Admin only: Edit / Modify');
+          if(el.title!=='🔒 Admin only — Edit / Modify')el.title='🔒 Admin only — Edit / Modify';
           return;
         }
         if(!managerPermissionForElement(el,p)){
-          el.classList.add('sk-manager-locked');
-          el.setAttribute('aria-disabled','true');
-          el.setAttribute('data-sk-lock-reason','Admin permission required');
+          skSetCls(el,'sk-manager-locked',true);
+          skSetAttr(el,'aria-disabled','true');
+          skSetAttr(el,'data-sk-lock-reason','Admin permission required');
           if(!el.getAttribute('title'))el.title='🔒 Admin permission required';
+          return;
         }
+        skSetCls(el,'sk-manager-locked',false);
+        skSetAttr(el,'aria-disabled',null);
+        skSetAttr(el,'data-sk-lock-reason',null);
       });
       const adminBtn=document.getElementById('skAdminControlBtn');if(adminBtn)adminBtn.style.display='none';
       const staticAdminButtons=[...document.querySelectorAll('#leftDrawer button')].filter(el=>/admin control/i.test(el.textContent||''));
@@ -5774,7 +5778,11 @@ img{max-width:100%!important;}
       const currentRole=role();
       document.body.classList.toggle('sk-worker-mode',currentRole==='worker');
       skRefreshRoleBadge();
-      document.querySelectorAll('.sk-worker-blocked,.sk-manager-locked').forEach(el=>{el.classList.remove('sk-worker-blocked','sk-manager-locked');el.removeAttribute('aria-disabled');});
+      /* V5.11.18: for staff, only touch buttons whose state actually changes (was: strip every flag then re-add = hundreds of DOM writes per run) */
+      const skPrev=currentRole==='worker'?Array.prototype.slice.call(document.querySelectorAll('.sk-worker-blocked')):null;
+      if(currentRole==='worker'){skTouched=new Set();document.querySelectorAll('.sk-manager-locked').forEach(el=>{el.classList.remove('sk-manager-locked');el.removeAttribute('aria-disabled');});}
+      else if(currentRole==='manager')document.querySelectorAll('.sk-worker-blocked').forEach(el=>{el.classList.remove('sk-worker-blocked');el.removeAttribute('aria-disabled');});
+      else document.querySelectorAll('.sk-worker-blocked,.sk-manager-locked').forEach(el=>{el.classList.remove('sk-worker-blocked','sk-manager-locked');el.removeAttribute('aria-disabled');});
       if(currentRole==='manager'){
         applyManagerRestrictions();
         return;
@@ -5790,6 +5798,7 @@ img{max-width:100%!important;}
         if(badFn.some(x=>oc.includes(x))||blockedWords.some(x=>txt.includes(x)||title.includes(x))||id.includes('delete')||id.includes('edit'))mark(el);
       });
       settingsRestrict();
+      if(skPrev){const t=skTouched;skTouched=null;skPrev.forEach(el=>{if(!t.has(el)){el.classList.remove('sk-worker-blocked');el.removeAttribute('aria-disabled');}});}
     }
     window.skApplyRoleRestrictions=function(){try{applyRestrictions();}catch(e){console.warn('Role restriction refresh failed:',e);}};
 
@@ -5844,7 +5853,9 @@ img{max-width:100%!important;}
       const r=role();if(r==='admin'||r==='worker'||r==='manager'){setRole(r);gate(false);applyRestrictions();}else gate(true); skRefreshRoleBadge();
       const img=document.getElementById('skLoginLogo');if(img)img.src=logo();
       addAdminButton();refreshAdminButton();guardFunctions();
-      const obs=new MutationObserver(()=>{guardFunctions();addAdminButton();refreshAdminButton();if(role()==='worker'||role()==='manager')applyRestrictions();});
+      let skObsT=0;const skObsRun=()=>{skObsT=0;guardFunctions();addAdminButton();refreshAdminButton();if(role()==='worker'||role()==='manager')applyRestrictions();};
+      /* V5.11.18: run once per burst of DOM changes (was: on every single change, a full-page scan each time = slow on staff phones) */
+      const obs=new MutationObserver(()=>{if(skObsT)return;skObsT=setTimeout(skObsRun,180);});
       obs.observe(document.body,{childList:true,subtree:true});
     }
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
@@ -8329,7 +8340,7 @@ window.addEventListener('load',()=>{if(localStorage.getItem(KEY)==null)localStor
  window.skUsedClearAll=function(){const rows=read();if(!rows.length){if(typeof showToast==='function')showToast('Inventory is already empty');return;}const sold=rows.filter(r=>r.status==='Sold').length;const message='Delete ALL '+rows.length+' used mobile inventory records?'+(sold?'\nThis also removes '+sold+' sold-device sale/profit records.':'')+'\nThis action cannot be undone.';if(!confirm(message))return;write([]);window.skUsedResetForm();if($('skUsedSearch'))$('skUsedSearch').value='';skUsedRender();if(typeof showToast==='function')showToast('All used mobile inventory records deleted');};
  /* V5.10.6: a sold phone comes back (return / exchange / bought back): open a new purchase with its details filled in */
  /* V5.11.0: Return / Buy back only on the LAST sale of an IMEI. Older sales of the same IMEI are history ("Bought back"). */
- window.skUsedBoughtBack=function(r,rows){rows=rows||read();if(!r||r.status!=='Sold'||!r.imei)return false;const ri=rows.indexOf(r),sd=(r.sale&&r.sale.date)?skBillDateKey(r.sale.date):'';return rows.some((x,xi)=>{if(x===r||String(x.imei||'')!==String(r.imei))return false;const xd=x.date?skBillDateKey(x.date):'';return sd&&xd?xd>=sd:xi>ri;});};
+ window.skUsedBoughtBack=function(r,rows){rows=rows||read();if(!r||r.status!=='Sold'||!r.imei)return false;const same=(x)=>x===r||(x&&r.id&&x.id===r.id)||(x&&!r.id&&JSON.stringify(x)===JSON.stringify(r));const ri=rows.findIndex(same),sd=(r.sale&&r.sale.date)?skBillDateKey(r.sale.date):'';return rows.some((x,xi)=>{if(same(x)||String(x.imei||'')!==String(r.imei))return false;const xd=x.date?skBillDateKey(x.date):'';return sd&&xd?xd>=sd:xi>ri;});};
  window.skUsedBuyBack=function(key){const r=findRec(key);if(!r)return;if(window.skUsedBoughtBack(r)){if(typeof showToast==='function')showToast('This sale was already bought back. Use the latest entry of this IMEI.');return;}window.skUsedAddInventory();
   const set=(id,v)=>{const e=$(id);if(e)e.value=v??'';};
   set('skUsedDealer',(r.sale&&r.sale.customer)||'');set('skUsedModel',r.model||'');set('skUsedColour',r.colour||'');set('skUsedStorage',r.storage||'');set('skUsedRam',r.ram||'');set('skUsedBattery',String(r.battery||'').replace(/[^0-9]/g,''));
