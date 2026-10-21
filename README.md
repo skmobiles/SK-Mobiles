@@ -434,6 +434,13 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.45 - Outside repairs
+- Repair Jobs: new Status "Sent outside" (Mobile / Laptop, Sent to, Phone, Expected back). Outside charge is entered later, when the device is back.
+- Pending Jobs: new "Outside" filter = every device that is out, grouped by friend/shop, with days out and Overdue.
+- "Got back": Repaired (outside charge + customer price -> profit, job becomes Ready) or Not repaired (then "Return to customer").
+- "Outside payments": per friend/shop - sent / repaired / not repaired, charges, paid, to pay; Pay and History.
+- Month report cost now includes the outside charge. New data key: skx_outside_pay_v1 (synced like other skx_ keys). Existing jobs are unchanged.
+
 ## V5.11.44 - full-app check
 - Fixed: Used Stock page content was cut 90px above the bottom bar (my V5.11.43 padding hit the wrong element); now scrolls to the bar with the smooth fade.
 - Toast (e.g. Auto Sync) now has a solid background instead of see-through over the page header.

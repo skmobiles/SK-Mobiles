@@ -2144,7 +2144,7 @@ const MASTER_INVENTORY = [
       }catch(e){}
       try{
         const jobs=JSON.parse(localStorage.getItem('skx_repair_jobs_v2')||'[]');
-        const pending=Array.isArray(jobs)?jobs.filter(j=>['Received','Checking','Repairing'].includes(String(j?.status||''))).length:0;
+        const pending=Array.isArray(jobs)?jobs.filter(j=>['Received','Checking','Repairing','Sent outside'].includes(String(j?.status||''))).length:0;
         const el=document.getElementById('skSandboxJobs'); if(el)el.textContent=String(pending);
       }catch(e){}
     }
@@ -2936,7 +2936,7 @@ const MASTER_INVENTORY = [
           : (typeof getCustomers === 'function' ? getCustomers().filter(c => Number(c.balance) > 0).reduce((sum,c) => sum + Number(c.balance || 0), 0) : 0);
         let repairJobsHome = [];
         try { const parsed = JSON.parse(localStorage.getItem('skx_repair_jobs_v2') || '[]'); repairJobsHome = Array.isArray(parsed) ? parsed : []; } catch (e) {}
-        const pendingRepairsHome = repairJobsHome.filter(job => ['Received','Checking','Repairing'].includes(String(job?.status || '')));
+        const pendingRepairsHome = repairJobsHome.filter(job => ['Received','Checking','Repairing','Sent outside'].includes(String(job?.status || '')));
         const metricDataHome = [
           {id:'metric-bills',icon:'file-text',label:'Saved Bills',value:String(savedBills.length),tone:'blue',action:"toggleModal('billingModal',true);switchBillTab('history');"},
           {id:'metric-credit',icon:'credit-card',label:'Outstanding',value:moneyHome(outstandingHome),tone:'amber',action:'window.skOpenCreditLedger?.();'},
@@ -4311,7 +4311,7 @@ img{max-width:100%!important;}
       /* V5.11.23: bring back jobs whose status was blanked by editing a delivered job (they vanished from every list) */
       let fixed=false;
       a.forEach(j=>{
-        if(j && !['Received','Checking','Repairing','Ready','Delivered'].includes(String(j.status||''))){
+        if(j && !['Received','Checking','Repairing','Sent outside','Ready','Delivered'].includes(String(j.status||''))){
           j.status=(j.deliveredAt||String(j.deliveryStatus||'').startsWith('Deliver')||String(j.deliveryStatus||'').startsWith('Returned'))?'Delivered':'Received';
           fixed=true;
         }
@@ -4344,7 +4344,7 @@ img{max-width:100%!important;}
     const d=new Date(value);
     return isNaN(d.getTime())?(s||'---'):String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
   }
-  function isPending(j){ return ['Received','Checking','Repairing'].includes(String(j?.status||'')); }
+  function isPending(j){ return ['Received','Checking','Repairing','Sent outside'].includes(String(j?.status||'')); }
   function statusNext(s){
     const x=['Received','Checking','Repairing','Ready'];
     const i=x.indexOf(s);
@@ -4401,6 +4401,7 @@ img{max-width:100%!important;}
     document.getElementById('skRjScheduleWrap').style.display='none';
     document.getElementById('skRjSaveBtn').textContent='💾 Save Repair Job';
     document.getElementById('skRjCancelEdit').style.display='none';
+    try{window.skOutFormClear&&window.skOutFormClear();}catch(e){}
   }
 
   function openJobs(){
@@ -4505,10 +4506,16 @@ img{max-width:100%!important;}
       reworkCount: Number(existing?.reworkCount)||0,
       deliveredAt:existing?.deliveredAt||'',
       photos:Array.isArray(window.__skRjPhotosNow)?window.__skRjPhotosNow.slice(0,3):(Array.isArray(existing?.photos)?existing.photos:[]),
+      outsideCharge:Number(existing?.outsideCharge)||0,
       createdAt:existing?.createdAt||new Date().toISOString(),
       updatedAt:new Date().toISOString()
     };
     if(!job.customer||!job.model||!job.problem){ showToast('Customer, Model & Problem required'); return false; }
+    if(typeof window.skOutFormRead==='function'){
+      const oo=window.skOutFormRead(existing,job.status);
+      if(oo.error){ showToast(oo.error); return false; }
+      if(oo.outside) job.outside=oo.outside;
+    }
     if(job.paidAmount<0){ showToast('Advance payment cannot be negative'); return false; }
     const previousPaid=Math.max(0,Number(existing?.paidAmount)||0);
     if(job.paidAmount>previousPaid){
@@ -4554,6 +4561,7 @@ img{max-width:100%!important;}
       if(v==='Delivered'){ const o=document.createElement('option'); o.textContent='Delivered'; o.setAttribute('data-dlv','1'); st.appendChild(o); }
       st.value=v; }
     document.getElementById('skRjNote').value=j.note||'';
+    try{window.skOutFormFill&&window.skOutFormFill(j);}catch(e){}
     document.getElementById('skRjScheduleWrap').style.display=j.workType==='Scheduled'?'block':'none';
     document.getElementById('skRjSaveBtn').textContent='✏️ Update Repair Job';
     document.getElementById('skRjCancelEdit').style.display='block';
@@ -4601,6 +4609,7 @@ img{max-width:100%!important;}
   window.skRjNext=function(id){
     const a=load(), i=a.findIndex(x=>x.id===id); if(i<0)return;
     const old=a[i].status;
+    if(old==='Sent outside'&&typeof window.skOutBack==='function'){window.skOutBack(id);return;}
     const next=statusNext(old);
     if(old==='Ready'){
       a[i].status='Delivered';
@@ -4615,6 +4624,7 @@ img{max-width:100%!important;}
   };
   window.skRjPrevious=function(id){
     const a=load(), i=a.findIndex(x=>String(x.id)===String(id)); if(i<0)return;
+    if(a[i].status==='Sent outside'){a[i].status='Repairing';a[i].deliveryStatus='Pending';if(a[i].outside)a[i].outside.result='recalled';a[i].updatedAt=new Date().toISOString();save(a);skRjRenderJobs();skRjRenderHistory();skRjRenderHomeMetric();return;}
     const order=['Received','Checking','Repairing','Ready','Delivered'];
     const current=order.indexOf(a[i].status);
     if(current<=0){showToast('This job is already at the first status');return;}
@@ -5132,9 +5142,9 @@ img{max-width:100%!important;}
     let a=allPending;
     let bar=document.getElementById('skRjFilterBar');
     if(!bar){bar=document.createElement('div');bar.id='skRjFilterBar';bar.className='sk-rj-filter-bar';list.insertAdjacentElement('beforebegin',bar);}
-    const cnt=f=>f==='uncollected'?rjUncollected().length:f==='urgent'?allPending.filter(rjIsUrgent).length:f==='all'?allPending.length:allPending.filter(j=>j.status===f).length;
-    if(window.__skRjFilter!=='all' && !cnt(window.__skRjFilter)) window.__skRjFilter='all';
-    skMorphChildren(bar,[['all','All'],['urgent','🚨 Urgent'],['Received','Received'],['Checking','Checking'],['Repairing','Repairing'],['uncollected','⏰ Not collected']]
+    const cnt=f=>f==='outside'?allPending.filter(j=>j.status==='Sent outside').length:f==='uncollected'?rjUncollected().length:f==='urgent'?allPending.filter(rjIsUrgent).length:f==='all'?allPending.length:allPending.filter(j=>j.status===f).length;
+    if(window.__skRjFilter!=='all' && window.__skRjFilter!=='outside' && !cnt(window.__skRjFilter)) window.__skRjFilter='all';
+    skMorphChildren(bar,[['all','All'],['urgent','🚨 Urgent'],['Received','Received'],['Checking','Checking'],['Repairing','Repairing'],['outside','📤 Outside'],['uncollected','⏰ Not collected']]
       .map(([k,l])=>`<button type="button" class="sk-rj-chip${window.__skRjFilter===k?' active':''}" style="white-space:normal!important;line-height:1.15!important;font-size:.74rem!important;padding-left:4px!important;padding-right:4px!important;text-align:center!important" onclick="skRjSetFilter('${k}')">${l} <b>${cnt(k)}</b></button>`).join(''));
     if(window.__skRjFilter==='urgent') a=allPending.filter(rjIsUrgent);
     else if(window.__skRjFilter!=='all') a=allPending.filter(j=>j.status===window.__skRjFilter);
@@ -5152,7 +5162,8 @@ img{max-width:100%!important;}
     const hc=load().filter(j=>j.status==='Ready'||j.status==='Delivered').length;
     const hEl=document.getElementById('skRjHistoryCount'); if(hEl) hEl.textContent=hc;
     if(window.__skRjFilter==='uncollected'){skMorphChildren(list,rjUncollectedHtml());return;}
-    skMorphChildren(list,a.length? a.map(j=>`
+    if(window.__skRjFilter==='outside'&&typeof window.skOutListHtml==='function'){skMorphChildren(list,window.skOutListHtml(allPending.filter(j=>j.status==='Sent outside')));return;}
+    skMorphChildren(list,a.length? a.map(j=>(typeof window.skOutCardHtml==='function'&&window.skOutCardHtml(j))||`
       <div class="sk-rj-card" data-rj-id="${esc(j.id)}" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
@@ -5221,7 +5232,7 @@ img{max-width:100%!important;}
   window.skRjRenderHomeMetric=function(){
     if(typeof window.skUpdateBellDot==='function')window.skUpdateBellDot();
     const grid=document.getElementById('homeMetricGrid'); if(!grid)return;
-    const jobs=load().filter(j=>['Received','Checking','Repairing'].includes(String(j.status||'')));
+    const jobs=load().filter(j=>['Received','Checking','Repairing','Sent outside'].includes(String(j.status||'')));
     const card=grid.querySelector('[data-card-id="metric-repair"]');
     if(card){
       const value=card.querySelector('strong');if(value)value.textContent=String(jobs.length);
@@ -5269,7 +5280,7 @@ img{max-width:100%!important;}
 
   function load(){try{const a=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
   function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-  function urgentJobs(){return load().filter(j=>['Received','Checking','Repairing'].includes(String(j.status||'')) && String(j.workType||'Normal').toLowerCase()==='urgent')}
+  function urgentJobs(){return load().filter(j=>['Received','Checking','Repairing','Sent outside'].includes(String(j.status||'')) && String(j.workType||'Normal').toLowerCase()==='urgent')}
   function seen(){try{const a=JSON.parse(localStorage.getItem(SEEN)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
   function markSeen(ids){try{localStorage.setItem(SEEN,JSON.stringify(ids.slice(-100)))}catch(e){}}
 
