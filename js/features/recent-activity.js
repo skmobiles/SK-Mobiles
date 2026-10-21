@@ -78,7 +78,7 @@ window.skRaLatest=function(type){
   var all=collect().filter(function(r){return r.t===type});
   if(type==='job'){
     var ids={};read('skx_repair_jobs_v2').forEach(function(j){if(j)ids[j.id]=j});
-    var pend=all.filter(function(r){var j=ids[r.id];return j&&['Received','Checking','Repairing'].indexOf(String(j.status||''))>=0});
+    var pend=all.filter(function(r){var j=ids[r.id];return j&&['Received','Checking','Repairing','Sent outside'].indexOf(String(j.status||''))>=0});
     var r0=pend[0]||all[0];return r0?ids[r0.id]:null;
   }
   var bills={};read('sk_bills').forEach(function(b){if(b)bills[b.id]=b});
