@@ -4369,6 +4369,18 @@ img{max-width:100%!important;}
     /* V5.11.8: remember the day a job became Ready (used by the "not collected" reminders) */
     try{const prev={};load().forEach(j=>{if(j)prev[j.id]=j.status;});const now=new Date().toISOString();
       a.forEach(j=>{if(!j)return;if(j.status==='Ready'&&!j.readyAt&&prev[j.id]!=='Ready')j.readyAt=now;else if(j.status!=='Ready'&&j.status!=='Delivered'&&j.readyAt)delete j.readyAt;});}catch(e){}
+    /* V5.11.50: a repair gets a number like an invoice (RP-DDMM-NNN) when it becomes Ready; older Ready/Delivered jobs get one too */
+    try{
+      const used=new Set(a.filter(j=>j&&j.repairNo).map(j=>String(j.repairNo)));
+      const need=a.filter(j=>j&&!j.repairNo&&(j.status==='Ready'||j.status==='Delivered')&&j.outcome!=='returned');
+      need.sort((x,y)=>String(x.readyAt||x.deliveredAt||x.date||'').localeCompare(String(y.readyAt||y.deliveredAt||y.date||'')));
+      need.forEach(j=>{
+        const dt=new Date(j.readyAt||j.deliveredAt||j.date||Date.now());const d=isNaN(dt)?new Date():dt;
+        const pre='RP-'+String(d.getDate()).padStart(2,'0')+String(d.getMonth()+1).padStart(2,'0')+'-';
+        let seq=0;used.forEach(n=>{if(n.indexOf(pre)===0){const q=parseInt(n.slice(pre.length),10);if(q>seq)seq=q}});
+        j.repairNo=pre+String(seq+1).padStart(3,'0');used.add(j.repairNo);
+      });
+    }catch(e){}
     try{localStorage.setItem(KEY,JSON.stringify(a))}
     catch(err){console.error('Repair save failed',err);try{showToast('Storage is full - repair NOT saved. Free some space and try again.')}catch(e){}return false;}
     return true;
@@ -4711,6 +4723,38 @@ img{max-width:100%!important;}
   };
 
 
+  /* V5.11.50 payment dialog used at delivery */
+  function rjAskPayment(info,cb){
+    const inr=n=>'₹'+(Number(n)||0).toLocaleString('en-IN');
+    if(!(info.outstanding>0)){cb(0);return;}
+    document.getElementById('skRjPayDlg')?.remove();
+    const d=document.createElement('div');d.id='skRjPayDlg';d.className='skrc-dlg skrc-edit';
+    d.innerHTML=`<div class="skrc-sheet"><div class="skrc-bar"><button type="button" class="skrc-x" aria-label="Close">←</button><b>Delivery payment</b></div><div class="skrc-body skrc-form">
+      <div class="skrc-hint">${esc(info.job.customer)} · ${esc(info.job.model)}</div>
+      <div class="sk-pc-sum"><span>Estimate</span><b>${inr(info.total)}</b><span>Discount</span><b>${inr(info.discount)}</b><span>Final payable</span><b>${inr(info.netTotal)}</b><span>Already paid</span><b>${inr(info.alreadyPaid)}</b><span class="o">To pay now</span><b class="o">${inr(info.outstanding)}</b></div>
+      <div class="sk-pc-opts"><button type="button" data-o="full" class="on">✅ Paid in full</button><button type="button" data-o="part">💵 Part payment</button><button type="button" data-o="credit">🧾 Credit</button></div>
+      <label id="skPcAmtWrap" style="display:none">Amount received now (₹)<input id="skPcAmt" type="number" inputmode="decimal" min="0" max="${info.outstanding}" placeholder="0"></label>
+      <div class="skrc-hint" id="skPcHint">Customer pays ${inr(info.outstanding)} now.</div>
+      <div class="skrc-msg" id="skPcMsg"></div></div>
+      <div class="skrc-act"><button type="button" data-a="cancel" class="ed">Cancel</button><button type="button" data-a="ok" class="wa">Deliver</button></div></div>`;
+    document.body.appendChild(d);
+    let mode='full';
+    const hint=d.querySelector('#skPcHint'),wrap=d.querySelector('#skPcAmtWrap'),msg=d.querySelector('#skPcMsg');
+    const setMode=m=>{mode=m;d.querySelectorAll('.sk-pc-opts button').forEach(b=>b.classList.toggle('on',b.dataset.o===m));wrap.style.display=m==='part'?'':'none';msg.textContent='';
+      hint.textContent=m==='full'?'Customer pays '+inr(info.outstanding)+' now.':m==='part'?'The rest stays as credit in the customer\'s Credit Ledger.':'No payment now. '+inr(info.outstanding)+' goes to the customer\'s Credit Ledger (same name + number = same account).';
+      if(m==='part')setTimeout(()=>d.querySelector('#skPcAmt')?.focus(),50)};
+    d.addEventListener('click',e=>{
+      if(e.target===d||e.target.closest('.skrc-x')||e.target.dataset?.a==='cancel'){d.remove();return;}
+      const o=e.target.closest('[data-o]');if(o){setMode(o.dataset.o);return;}
+      if(e.target.dataset?.a!=='ok')return;
+      let amount=0;
+      if(mode==='full')amount=info.outstanding;
+      else if(mode==='part'){amount=Number(d.querySelector('#skPcAmt').value);
+        if(!Number.isFinite(amount)||amount<=0){msg.textContent='Enter the amount received';return;}
+        if(amount>info.outstanding){msg.textContent='More than the outstanding '+inr(info.outstanding);return;}}
+      d.remove();cb(amount);
+    });
+  }
   window.skRjDeliver=function(id){
     const a=load(), i=a.findIndex(x=>String(x.id)===String(id)); if(i<0)return;
     if(a[i].status!=='Ready'){ showToast('Repair job must be Ready before delivery'); return; }
@@ -4769,26 +4813,11 @@ img{max-width:100%!important;}
     /* V5.11.49: advance paid is more than the final amount - the extra is returned to the customer */
     const extraPaid=Math.max(0,alreadyPaid-netTotal);
     if(extraPaid>0&&!confirm('Advance paid ₹'+alreadyPaid.toLocaleString('en-IN')+' is more than the final amount ₹'+netTotal.toLocaleString('en-IN')+'.\n\nReturn ₹'+extraPaid.toLocaleString('en-IN')+' to the customer now?\n\nOK = the extra is recorded as returned.'))return;
-    const entered=prompt(
-      'Customer payment before delivery\nOriginal estimate: ₹'+total.toLocaleString('en-IN')+
-      '\nTotal discount: ₹'+(existingDiscount+discount).toLocaleString('en-IN')+
-      '\nFinal payable: ₹'+netTotal.toLocaleString('en-IN')+
-      '\nAlready paid: ₹'+alreadyPaid.toLocaleString('en-IN')+
-      '\nOutstanding before this payment: ₹'+outstandingBeforePayment.toLocaleString('en-IN')+
-      '\n\nEnter amount received now (enter 0 if no payment):',
-      String(outstandingBeforePayment)
-    );
-    if(entered===null)return;
-    const amount=Number(String(entered).replace(/[,₹\s]/g,''));
-    if(!Number.isFinite(amount)||amount<0){
-      showToast('Enter a valid payment amount');
-      return;
-    }
-    if(amount>outstandingBeforePayment){
-      showToast('Payment cannot be more than the outstanding ₹'+outstandingBeforePayment.toLocaleString('en-IN'));
-      return;
-    }
-
+    /* V5.11.50: Paid in full / Part payment / Credit instead of a number prompt. Credit puts the balance in the customer's Credit Ledger
+       (same name + number = same account, otherwise a new account). */
+    rjAskPayment({job:job,total:total,discount:existingDiscount+discount,netTotal:netTotal,alreadyPaid:alreadyPaid,outstanding:outstandingBeforePayment},function(amount){
+      const curJob=load().find(x=>String(x.id)===String(job.id));
+      if(!curJob||curJob.status!=='Ready'||String(curJob.updatedAt||'')!==String(job.updatedAt||'')){showToast('This job changed meanwhile - open it again');return;}
     const now=new Date().toISOString();
     job.discountAmount=existingDiscount+discount;
     job.discountHistory=Array.isArray(job.discountHistory)?job.discountHistory:[];
@@ -4862,13 +4891,14 @@ img{max-width:100%!important;}
     job.updatedAt=now;
     save(a); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
     showToast('Repair delivered; discount and payment recorded');
+    });
   };
 
   /* V5.11.24: cancel a payment that was entered by mistake (customer did not actually pay) */
   window.skRjCancelPay=function(id,pi){
     const a=load(), i=a.findIndex(x=>String(x.id)===String(id)); if(i<0)return;
     const job=a[i], hist=Array.isArray(job.paymentHistory)?job.paymentHistory:[], p=hist[pi];
-    if(!p||(p.type!=='Repair advance payment'&&p.type!=='Repair delivery payment')){showToast('This payment cannot be cancelled');return;}
+    if(!p||(p.type!=='Repair advance payment'&&p.type!=='Repair delivery payment'&&p.type!=='Credit ledger payment')){showToast('This payment cannot be cancelled');return;}
     const amt=Math.max(0,Number(p.amount)||0);
     const reason=prompt('Cancel payment of ₹'+amt.toLocaleString('en-IN')+'?\n\nThe customer will owe this amount again.\nEnter the reason (e.g. Customer did not pay – wrong entry):','Wrong entry – customer did not pay');
     if(reason===null)return;
@@ -4881,6 +4911,8 @@ img{max-width:100%!important;}
     const net=Math.max(0,(Number(job.estimate)||0)-Math.max(0,Number(job.discountAmount)||0));
     job.outstandingAmount=Math.max(0,net-job.paidAmount);
     job.updatedAt=now;
+    /* V5.11.50: a payment that came through the Credit Ledger also removes its ledger payment row */
+    try{if(p.ledgerId){const lk0='sk_credit_ledger_v1',L0=JSON.parse(localStorage.getItem(lk0)||'[]');if(Array.isArray(L0))localStorage.setItem(lk0,JSON.stringify(L0.filter(e=>String(e&&e.id)!==String(p.ledgerId))))}}catch(e){}
     /* mark the matching receipt as cancelled (kept for history) */
     try{
       const rk='sk_receipts_v1',rs=JSON.parse(localStorage.getItem(rk)||'[]');
@@ -4972,7 +5004,7 @@ img{max-width:100%!important;}
       <div class="rjd">
         <div class="rjd-hero">
           <div class="rjd-device" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="19" y="5" width="26" height="54" rx="6" fill="#1e293b"/><rect x="22" y="11" width="20" height="38" rx="2.5" fill="#93c5fd"/><path d="M22 36l8-9 6 6 6-8v18.5a2.5 2.5 0 0 1-2.5 2.5h-15a2.5 2.5 0 0 1-2.5-2.5z" fill="#3b82f6"/><circle cx="32" cy="54" r="1.8" fill="#64748b"/></svg></div>
-          <div class="rjd-who"><b>${esc(j.customer)}</b><span>${esc(j.model)}</span><small>${_ic.call}${esc(j.phone||'No phone')}</small></div>
+          <div class="rjd-who"><b>${esc(j.customer)}</b><span>${esc(j.model)}</span>${j.repairNo?'<span class="sk-rj-no">'+esc(j.repairNo)+'</span>':''}<small>${_ic.call}${esc(j.phone||'No phone')}</small></div>
         </div>
         <div class="rjd-actions">
           <button type="button" class="rjd-btn call" ${_hasPh?'':'disabled'} onclick="skRjCallPhone('${esc(j.phone||'')}')">${_ic.call}<span>Call Repair Phone</span></button>
@@ -5268,6 +5300,7 @@ img{max-width:100%!important;}
 
   window.skRjRenderHistory=function(){
     const list=document.getElementById('skRjHistoryList'); if(!list)return;
+    try{const _na=load();if(_na.some(j=>j&&!j.repairNo&&(j.status==='Ready'||j.status==='Delivered')&&j.outcome!=='returned'))save(_na)}catch(e){} /* V5.11.50: give older Ready/Delivered jobs their number once */
     const from=skDmyToISO(document.getElementById('skRjFromDate').value||'')||'';
     const to=skDmyToISO(document.getElementById('skRjToDate').value||'')||'';
     const q=(document.getElementById('skRjHistorySearch').value||'').toLowerCase();
@@ -5285,7 +5318,7 @@ img{max-width:100%!important;}
       <div class="sk-rj-card" data-work-type="${esc(String(j.workType||'Normal').trim().toLowerCase())}" style="border-color:${window.skRjWorkTypeBorderColor(j.workType)} !important" onclick="skRjShowDetail('${j.id}')" title="Tap to view repair details">
         <div class="sk-rj-card-top">
           <div><div class="sk-rj-name">${esc(j.customer)} · ${esc(j.model)}</div>
-          <div class="sk-rj-meta">${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')}<br><span class="sk-rj-problem-highlight">${esc(j.problem)}</span></div>
+          <div class="sk-rj-meta">${j.repairNo?'<b class="sk-rj-no">'+esc(j.repairNo)+'</b> · ':''}${rjFmtDate(j.date)} · ${esc(j.status)} · 📱 Repair Phone: ${esc(j.phone||'—')}<br><span class="sk-rj-problem-highlight">${esc(j.problem)}</span></div>
           <div class="sk-rj-delivery-meta">🚚 Delivery Status: <b>${esc(j.deliveryStatus||(j.status==='Delivered'?'Delivered':'Ready for Delivery'))}</b>${j.reworkReason?` · Rework: ${esc(j.reworkReason)}`:''}</div>${(()=>{if(j.outcome==='returned')return '';const net=Math.max(0,(Number(j.estimate)||0)-Math.max(0,Number(j.discountAmount)||0)),paid=Math.max(0,Number(j.paidAmount)||0),out=Math.max(0,net-paid);if(net<=0)return '';const st='position:absolute!important;top:10px!important;right:10px!important;';return out>0?`<div class="sk-rj-out-line due" style="${st}"><span>Outstanding</span><b>₹${out.toLocaleString('en-IN')}</b>${paid>0?`<em>Paid ₹${paid.toLocaleString('en-IN')}</em>`:''}</div>`:`<div class="sk-rj-out-line paid" style="${st}"><span>Fully paid</span><b>₹${paid.toLocaleString('en-IN')}</b></div>`})()}${j.outcome==='returned'?`<div class="sk-rj-returned-tag">↩ Returned – not repaired${j.returnReason?' · '+esc(j.returnReason):''}${Number(j.returnCharge)>0?' · Charge ₹'+Number(j.returnCharge).toLocaleString('en-IN'):''}${Number(j.refundAmount)>0?' · Refund ₹'+Number(j.refundAmount).toLocaleString('en-IN'):''}</div>`:''}</div>
         </div>
         <div class="sk-rj-history-actions" onclick="event.stopPropagation();if(!event.target.closest('button'))skRjShowDetail('${j.id}')">
@@ -7378,7 +7411,7 @@ function getCustomers(){
  const today=new Date();today.setHours(0,0,0,0);
  return Object.values(map).map(c=>{
    c.credits=c.entries.filter(e=>e.type==='credit').reduce((s,e)=>s+Number(e.amount||0),0);
-   c.payments=c.entries.filter(e=>e.type==='payment').reduce((s,e)=>s+Number(e.amount||0),0);
+   c.payments=c.entries.filter(e=>e.type==='payment'&&String(e.source||'')!=='repair-job-payment').reduce((s,e)=>s+Number(e.amount||0),0);
    c.balance=Math.max(0,c.credits-c.payments);
    // Priority is based on the nearest unpaid EMI/credit due date already stored
    // in the ledger. Past-due items come first, then upcoming dates, then no due date.
@@ -7824,7 +7857,8 @@ function cpGetCustomers(){
      return e.type==='credit'||e.type==='emi';
    }).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
    var payments=c.entries.filter(function(e){
-     return e.type==='payment';
+     /* V5.11.50: a payment made against a repair job already reduced that job's credit row - it must not be subtracted again */
+     return e.type==='payment'&&String(e.source||'')!=='repair-job-payment';
    }).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
 
    c.billBalance=billBalance;
@@ -7838,7 +7872,7 @@ function cpGetCustomers(){
    var extraLedger=0;
    if(c.bills.length){
      var plainCredits=manualEntries.filter(function(e){return (e.type==='credit'||e.type==='emi')&&String(e.source||'')!=='repair-job'}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
-     var plainPays=manualEntries.filter(function(e){return e.type==='payment'&&String(e.source||'')!=='repair-job'}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+     var plainPays=manualEntries.filter(function(e){return e.type==='payment'&&String(e.source||'')!=='repair-job'&&String(e.source||'')!=='repair-job-payment'}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
      extraLedger=Math.max(0,plainCredits-plainPays);
    }
    c.extraLedger=extraLedger;
@@ -7921,7 +7955,18 @@ window.skCPRender=function(){
 };
 window.skCPFilter=function(f,btn){skCPFilterMode=f;document.querySelectorAll('#skCreditLedgerPage .skcp-filter').forEach(function(x){x.classList.remove('active')});if(btn)btn.classList.add('active');skCPRender()}
 function cpShowMain(){document.getElementById('skCPMainView').style.display='block';document.getElementById('skCPDetailView').style.display='none';skCPRender()}
-function cpBillOptions(c,selected){
+function cpBillOptions(c,selected,type){
+ /* V5.11.50: a payment can be put on a sales bill, a repair job, the old ledger balance, or spread automatically (smallest outstanding first) */
+ if(type==='payment'&&c){
+   var its=cpOpenItems(c);
+   if(its.length&&(its.length>1||its[0].t!=='bill')&&its.some(function(x){return x.t==='job'||its.length>1})){
+     var tot=its.reduce(function(a,x){return a+x.bal},0),ch=selected;
+     var vals=its.map(function(x){return x.t==='bill'?String(x.idx):x.t==='job'?'job:'+x.id:'old'});
+     if(ch===null||ch===undefined||ch===''||vals.indexOf(String(ch))<0&&String(ch)!=='auto')ch=its.length>1?'auto':vals[0];
+     return (its.length>1?'<option value="auto" '+(String(ch)==='auto'?'selected':'')+'>Auto — closest to closing first • '+cpMoney(tot)+'</option>':'')+
+       its.map(function(x,i){return '<option value="'+vals[i]+'" '+(String(vals[i])===String(ch)?'selected':'')+'>'+cpEsc(x.label)+' • '+cpMoney(x.bal)+'</option>'}).join('');
+   }
+ }
  var bs=c?c.bills:[];
  if(!bs.length)return '<option value="">No sales bill — ledger only</option>';
  var chosen=selected;
@@ -8103,7 +8148,7 @@ function cpResetForm(type,c,idx){
  cpEnsureActionModalAtBodyRoot();
  document.getElementById('skCPActionType').value=type;document.getElementById('skCPActionTitle').textContent=type==='payment'?'💰 Payment':'➕ Credit';var skDueGrp=document.getElementById('skCPDueDateGroup');if(skDueGrp)skDueGrp.style.display=type==='payment'?'none':'';var skDateGrp=document.getElementById('skCPDate')&&document.getElementById('skCPDate').closest('.form-group');if(skDateGrp)skDateGrp.style.gridColumn=type==='payment'?'1 / -1':'';
  document.getElementById('skCPName').value=c?.name||'';document.getElementById('skCPPhone').value=c?.phone||'';
- document.getElementById('skCPBill').innerHTML=cpBillOptions(c,idx);document.getElementById('skCPAmount').value='';
+ document.getElementById('skCPBill').innerHTML=cpBillOptions(c,idx,type);document.getElementById('skCPAmount').value='';
  document.getElementById('skCPAdvance').value='0';document.getElementById('skCPDate').value=cpDate();document.getElementById('skCPDueDate').value='';document.getElementById('skCPCategory').value='Mobile Sale';document.getElementById('skCPNote').value='';
  document.getElementById('skCPPaymentMode').value='Cash';document.getElementById('skCPEmiMode').value='none';document.getElementById('skCPEmiFields').style.display='none';
  document.getElementById('skCPAdvanceGroup').style.display=type==='payment'?'none':'block';
@@ -8128,6 +8173,7 @@ window.skCPRecalcForm=function(){
  var name=(document.getElementById('skCPName').value||'').trim(),phone=(document.getElementById('skCPPhone').value||'').trim(),customer=cpGetCustomers().find(x=>x.key===cpKey(name,phone))||null;
  var sel=document.getElementById('skCPBill'),bill=null;if(sel&&sel.value!==''&&/^\d+$/.test(String(sel.value))){var bs=cpBills();bill=bs[Number(sel.value)]||null;}
  var old=bill?Math.max(0,Number(bill.balance)||0):(customer?Math.max(0,Number(customer.balance)||0):0),next=old;
+ if(type==='payment'&&customer&&sel&&(/^job:/.test(sel.value)||sel.value==='old')){var _it=cpOpenItems(customer).find(function(x){return (x.t==='job'?'job:'+x.id:'old')===sel.value});if(_it){old=_it.bal;next=old}}
  if(type==='credit')next=old+Math.max(0,amt-adv); else if(type==='payment')next=Math.max(0,old-Math.min(old,amt));
  var out=document.getElementById('skCPBalance');if(out)out.value=cpMoney(next);
 };
@@ -8153,6 +8199,90 @@ function cpUpdateBill(idx,type,amount,advance,data,bsOverride){
  b.paymentReceipts.push({id:'RCP-CR-'+Date.now().toString().slice(-8),billId:b.id,date:data.date,amount:net,mode:'Credit',note:data.note||'',type:'credit'});
  return net;
 }
+/* V5.11.50 ---- customer payments against bills / repair jobs / old balance ---- */
+function cpJobs(){var a=cpSafe('skx_repair_jobs_v2',[]);return Array.isArray(a)?a:[]}
+function cpDayKey(v){var d=new Date(v);if(!isNaN(d))return d.getTime();var m=String(v||'').match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);return m?new Date(+m[3],+m[2]-1,+m[1]).getTime():0}
+function cpOpenItems(c){
+ var items=[];if(!c)return items;
+ (c.bills||[]).forEach(function(x){var bal=Math.max(0,Number(x.b.balance)||0);if(bal>0)items.push({t:'bill',idx:x.idx,id:String(x.b.id||''),bal:bal,when:cpDayKey(x.b.date),label:'Bill '+(x.b.billNo||x.b.id||'')+' • '+(x.b.model||'')})});
+ var rows=cpLedger();
+ cpJobs().forEach(function(j){
+   if(!j||cpKey(j.customer,j.phone)!==c.key)return;
+   var row=rows.find(function(e){return e&&String(e.repairJobId||'')===String(j.id)&&String(e.source||'')==='repair-job'&&e.type==='credit'});
+   if(!row)return;var bal=Math.max(0,Number(row.amount)||0);
+   if(bal>0)items.push({t:'job',id:String(j.id),bal:bal,when:cpDayKey(j.deliveredAt||j.date),label:'Repair '+(j.repairNo?j.repairNo+' • ':'')+(j.model||'')});
+ });
+ var ent=c.entries||[];
+ var pc=ent.filter(function(e){return (e.type==='credit'||e.type==='emi')&&String(e.source||'')!=='repair-job'&&String(e.source||'')!=='bill'&&!e.billId}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+ var pp=ent.filter(function(e){return e.type==='payment'&&String(e.source||'')!=='repair-job'&&String(e.source||'')!=='repair-job-payment'&&String(e.source||'')!=='bill'&&!e.billId}).reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+ var old=Math.max(0,pc-pp);
+ if(old>0)items.push({t:'old',id:'old',bal:old,when:0,label:'Old balance (ledger only)'});
+ return items;
+}
+function cpApplyJobPayment(jobId,pay,date,mode,note){
+ var jobs=cpJobs(),i=jobs.findIndex(function(j){return j&&String(j.id)===String(jobId)});if(i<0)return null;
+ var j=jobs[i],now=new Date().toISOString(),rows=cpLedger();
+ var ri=rows.findIndex(function(e){return e&&String(e.repairJobId||'')===String(j.id)&&String(e.source||'')==='repair-job'&&e.type==='credit'});
+ var net=Math.max(0,(Number(j.estimate)||0)-Math.max(0,Number(j.discountAmount)||0));
+ var lid='CP-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+ j.paidAmount=Math.max(0,Number(j.paidAmount)||0)+pay;
+ j.outstandingAmount=Math.max(0,net-j.paidAmount);
+ j.paymentHistory=Array.isArray(j.paymentHistory)?j.paymentHistory:[];
+ j.paymentHistory.push({amount:pay,date:now,type:'Credit ledger payment',viaLedger:true,ledgerId:lid,mode:mode});
+ j.updatedAt=now;
+ var name=ri>=0?rows[ri].name:j.customer,phone=ri>=0?rows[ri].phone:j.phone,key=ri>=0&&rows[ri].key?rows[ri].key:cpKey(j.customer,j.phone);
+ if(ri>=0){if(j.outstandingAmount>0)rows[ri].amount=j.outstandingAmount;else rows.splice(ri,1)}
+ rows.push({id:lid,key:key,name:name,phone:phone||'',type:'payment',amount:pay,mode:mode,date:date,details:(note||'Payment received')+' • Repair '+(j.repairNo||j.id)+' • '+(j.model||''),source:'repair-job-payment',repairJobId:String(j.id),billId:'',dueDate:''});
+ localStorage.setItem('skx_repair_jobs_v2',JSON.stringify(jobs));
+ localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(rows));
+ var rc=null;try{rc=window.skReceiptForRepair&&window.skReceiptForRepair(j,pay,'Repair payment',mode)}catch(e){}
+ return rc;
+}
+function cpPaySelected(c,name,phone,amount,date,target,note,mode){
+ if(!c){showToast?.('Customer not found');return}
+ var items=cpOpenItems(c),total=items.reduce(function(a,x){return a+x.bal},0);
+ if(!items.length){showToast?.('No outstanding balance for this customer');return}
+ var plan=[];
+ if(target==='auto'){
+   if(amount>total+0.001){showToast?.('Payment is more than the outstanding '+cpMoney(total));return}
+   var left=amount;
+   items.slice().sort(function(a,b){return a.bal-b.bal||a.when-b.when}).forEach(function(x){if(left<=0)return;var pay=Math.min(x.bal,left);plan.push({x:x,pay:pay});left-=pay});
+ }else{
+   var t=items.find(function(x){return (x.t==='job'?'job:'+x.id:x.t==='old'?'old':String(x.idx))===String(target)});
+   if(!t){showToast?.('Selected item has no pending balance');return}
+   if(amount>t.bal+0.001){showToast?.('More than this item\'s outstanding '+cpMoney(t.bal)+'. Choose Auto to spread a larger payment.');return}
+   plan.push({x:t,pay:amount});
+ }
+ try{
+   var bills=cpBills(),lastRc=null,billsChanged=false;
+   plan.forEach(function(st){
+     var x=st.x,pay=st.pay;
+     if(x.t==='bill'){
+       var bidx=bills.findIndex(function(b){return String(b&&b.id)===x.id});if(bidx<0)return;
+       var applied=cpUpdateBill(bidx,'payment',pay,0,{date:date,mode:mode,note:note},bills);if(!(applied>0))return;billsChanged=true;
+       cpSaveLedgerEntry({name:name,phone:phone,type:'payment',amount:applied,mode:mode,date:date,details:(note||'Payment received')+' • Bill '+String(bills[bidx].billNo||bills[bidx].id||''),source:'payment-receipt',billId:String(bills[bidx].id||''),dueDate:''});
+       if(window.__skLastReceiptId){lastRc=window.__skLastReceiptId;window.__skLastReceiptId=''}
+       if(billsChanged){localStorage.setItem('sk_bills',JSON.stringify(bills));if(typeof savedBills!=='undefined')savedBills=bills}
+     }else if(x.t==='job'){
+       var rc=cpApplyJobPayment(x.id,pay,date,mode,note);if(rc&&rc.id)lastRc=rc.id;
+     }else{
+       cpSaveLedgerEntry({name:name,phone:phone,type:'payment',amount:pay,mode:mode,date:date,details:(note||'Payment received')+' • Ledger only',source:'manual-payment-page',billId:'',dueDate:''});
+       var rc2=null;try{rc2=window.skReceiptForAccount&&window.skReceiptForAccount(name,phone,pay,{date:date,mode:mode,note:note},Math.max(0,x.bal-pay))}catch(e){}
+       if(rc2&&rc2.id)lastRc=rc2.id;
+     }
+   });
+   if(billsChanged){localStorage.setItem('sk_bills',JSON.stringify(bills));if(typeof savedBills!=='undefined')savedBills=bills}
+   if(typeof skImportFromBills==='function')skImportFromBills(true);
+   if(typeof updateBillHistoryCount==='function')updateBillHistoryCount();
+   if(typeof renderBillHistory==='function')renderBillHistory();
+   if(typeof loadSavedBills==='function')loadSavedBills();
+   try{window.skRjRenderJobs&&window.skRjRenderJobs();window.skRjRenderHistory&&window.skRjRenderHistory();window.skRjRenderHomeMetric&&window.skRjRenderHomeMetric()}catch(e){}
+   skCPCloseAction();skCPRender();
+   var rf=cpGetCustomers().find(function(cc){return cc.key===c.key});if(rf)cpOpenDetail(rf);
+   showToast?.('Payment saved • '+plan.map(function(st){return st.x.label.split(' • ')[0]+' '+cpMoney(st.pay)}).join(', '));
+   if(lastRc&&window.skReceiptOpen)setTimeout(function(){window.skReceiptOpen(lastRc)},350);
+ }catch(err){console.error('Payment save failed',err);showToast?.('❌ Save failed. Please try again.')}
+}
 window.skCPSaveAction=function(){
  var type=(document.getElementById('skCPActionType')?.value||'').trim();
  var name=(document.getElementById('skCPName')?.value||'').trim();
@@ -8170,6 +8300,12 @@ window.skCPSaveAction=function(){
  var bills=cpBills(),billIndex=billValue!==''&&/^\d+$/.test(String(billValue))?Number(billValue):null;
  var bill=billIndex!==null?bills[billIndex]:null;
  var customer=cpGetCustomers().find(function(c){return c.key===cpKey(name,phone)})||null;
+
+ /* V5.11.50: payment on auto / repair job / old balance */
+ if(type==='payment'&&(billValue==='auto'||billValue==='old'||/^job:/.test(billValue))){
+   cpPaySelected(customer,name,phone,amount,date,billValue,(document.getElementById('skCPNote')?.value||'').trim(),(document.getElementById('skCPPaymentMode')?.value||'Cash'));
+   return;
+ }
 
  /* A customer without a selected sales bill is a valid ledger-only entry.
     Keep bill-linked behaviour unchanged; only branch to the manual ledger path

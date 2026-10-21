@@ -57,7 +57,7 @@ window.skReceiptForAccount=function(name,phone,pay,data,balanceAfter){
 window.skReceiptForRepair=function(job,amount,kind,mode){
   try{
     var total=Math.max(0,num(job.estimate)-Math.max(0,num(job.discountAmount)));
-    return window.skReceiptAdd({customer:job.customer,phone:job.phone,kind:kind,ref:'Repair job '+(job.id||''),item:job.model,amount:amount,mode:mode||'Cash',total:total,paidTotal:num(job.paidAmount),balance:Math.max(0,total-num(job.paidAmount)),jobId:job.id});
+    return window.skReceiptAdd({customer:job.customer,phone:job.phone,kind:kind,ref:'Repair job '+(job.repairNo||job.id||''),item:job.model,amount:amount,mode:mode||'Cash',total:total,paidTotal:num(job.paidAmount),balance:Math.max(0,total-num(job.paidAmount)),jobId:job.id});
   }catch(e){return null}
 };
 

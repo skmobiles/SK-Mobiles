@@ -48,7 +48,7 @@ function build(ym){
       R.delivered++;var rev=Math.max(0,num(j.estimate)-num(j.discountAmount)),cost=num(j.dealerPurchaseAmount)+num(j.outsideCharge);
       R.revenue+=rev;R.cost+=cost;R.rows.push({name:j.customer||'',model:j.model||'',revenue:rev,cost:cost});
     }
-    (Array.isArray(j.paymentHistory)?j.paymentHistory:[]).forEach(function(p){if(inM(p.date))R.collected+=num(p.amount)});
+    (Array.isArray(j.paymentHistory)?j.paymentHistory:[]).forEach(function(p){if(p.viaLedger)return;if(inM(p.date))R.collected+=num(p.amount)});
   });
   R.profit=R.revenue-R.cost;
 

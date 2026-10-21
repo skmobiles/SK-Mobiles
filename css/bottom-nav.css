@@ -42,7 +42,6 @@ html body nav.bottom-nav > #navHome:active::before{transform:translate(-50%,-50%
 
 /* above every page; below the side drawer; hidden behind small pop-up forms */
 html body:has(#leftDrawer.active) nav.bottom-nav{z-index:900;pointer-events:none}
-html body:has(#skCreditActionModal.active) nav.bottom-nav,html body:has(#skCreditEntryModal.active) nav.bottom-nav{z-index:900}
 
 /* every full page keeps its last content clear of the bar */
 html body :is(#settingsModal,#billingModal,#skRepairJobsModal,#skCreditLedgerPage,#skAccessoriesPage,#orderModal,#repairSparesModal,#toolsOthersNoteModal,#itemEditorModal,#skAdminPanelModal,#skRecycleBinModal,#skRepairDetailModal) > .modal-sheet{
