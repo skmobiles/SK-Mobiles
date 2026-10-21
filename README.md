@@ -434,6 +434,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.49
+- Repair job photos removed (they made data too large to sync / back up). The photo box is gone and photos already stored in repair jobs and in the Recycle Bin are deleted once.
+- Advance more than the price: on a Credit/EMI bill the app asks to return the extra to the customer; the bill saves advance = price and records advanceRefund. At repair delivery, an advance above the final amount is returned the same way (recorded as a negative payment, job.refundAmount).
+
 ## V5.11.48
 Data-safety fixes from an independent code review:
 - App start no longer deletes "duplicate" bills (two walk-ins buying the same model lost a bill, and the delete spread to every device). Only a repeated bill id counts as a duplicate.

@@ -3415,6 +3415,19 @@ const MASTER_INVENTORY = [
     }
     window.skBillResetForm = skBillResetForm;
 
+    /* V5.11.49: advance more than the price - the extra is returned to the customer (recorded on the bill as advanceRefund) */
+    function skAdvanceRefundCheck(price, mode){
+      if (mode !== 'Credit' && mode !== 'EMI') return 0;
+      const el = document.getElementById('billAdvance');
+      const adv = parseFloat(el && el.value) || 0;
+      if (!(adv > price)) return 0;
+      const extra = Math.round((adv - price) * 100) / 100;
+      if (!confirm('Advance ₹' + adv.toLocaleString('en-IN') + ' is more than the price ₹' + price.toLocaleString('en-IN') + '.\n\nReturn ₹' + extra.toLocaleString('en-IN') + ' to the customer?\n\nOK = advance is saved as ₹' + price.toLocaleString('en-IN') + ' and the extra is recorded as returned.')) return -1;
+      el.value = String(price);
+      try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+      return extra;
+    }
+
     function saveUsedBill() {
       try{const fb=JSON.parse(localStorage.getItem('sk_bills')||'[]');if(Array.isArray(fb))savedBills=fb}catch(e){}
       const editId = String(window.__skEditingBillId || '');
@@ -3422,12 +3435,13 @@ const MASTER_INVENTORY = [
         const bill = savedBills.find(b => b && String(b.id) === editId);
         if (!bill) { window.__skEditingBillId=''; showToast('❌ Bill not found'); return; }
         const price = skBillNetPrice();
+        const _refE = skAdvanceRefundCheck(price, currentPayMode); if (_refE < 0) return;
         const advance = parseFloat(document.getElementById('billAdvance').value) || 0;
         if (!document.getElementById('billCustName').value.trim() || !document.getElementById('billModel').value.trim() || price <= 0) { showToast('❌ Customer, model and sale price are required'); return; }
         const set = (key,id) => { bill[key] = document.getElementById(id)?.value || ''; };
         set('custName','billCustName'); set('phone','billCustPhone'); set('address','billCustAddress'); set('brand','billBrand'); set('model','billModel');
         set('ram','billRam'); set('storage','billStorage'); set('color','billColor'); set('imei1','billImei1'); set('imei2','billImei2'); set('package','billPackage');
-        bill.mobileType=currentMobileType; bill.payMode=currentPayMode; bill.price=price; bill.advance=advance;
+        bill.mobileType=currentMobileType; bill.payMode=currentPayMode; bill.price=price; bill.advance=advance; if (_refE > 0) bill.advanceRefund = _refE; else delete bill.advanceRefund;
         { const ex=skBillExchangeData(); if(ex.value>0){ bill.grossPrice=skBillGrossPrice(); bill.exchange=Object.assign({},bill.exchange||{},ex); } else { delete bill.grossPrice; delete bill.exchange; } }
         bill.emiMonths=parseInt(document.getElementById('billEmiMonths').value,10)||0; bill.emiInterest=parseFloat(document.getElementById('billEmiInterest').value)||0;
         bill.emiStartDate=document.getElementById('billEmiStartDate').value||''; bill.creditDueDate=document.getElementById('billCreditDate').value||'';
@@ -3447,6 +3461,7 @@ const MASTER_INVENTORY = [
       const exch = skBillExchangeData();
       if (!custName || !model || skBillGrossPrice() <= 0) { showToast('❌ Customer, model and sale price are required'); return; }
       const isCreditOrEmi = currentPayMode === 'Credit' || currentPayMode === 'EMI';
+      const _refN = skAdvanceRefundCheck(price, currentPayMode); if (_refN < 0) return;
       const newEntry = {
         id: `SK-B-${Date.now().toString().slice(-8)}`,
         billNo: skNextBillNo(billDate), date: billDate, custName,
@@ -3465,6 +3480,7 @@ const MASTER_INVENTORY = [
         emiStartDate: document.getElementById('billEmiStartDate').value || '', creditDueDate: document.getElementById('billCreditDate').value || '',
         emiHtml: currentPayMode === 'EMI' ? document.getElementById('pvEmiScheduleTbody').innerHTML : ''
       };
+      if (_refN > 0) newEntry.advanceRefund = _refN;
       if (exch.value > 0) { newEntry.grossPrice = skBillGrossPrice(); newEntry.exchange = exch; }
       /* Duplicate guard: the same bill (date, customer, phone, model, IMEI, amount, pay mode) must never be saved twice, e.g. by a double tap. */
       if (savedBills.some(b => b && b.date === billDate && b.custName === custName && String(b.phone||'') === String(newEntry.phone) && b.model === model && String(b.imei1||'') === String(newEntry.imei1) && Number(b.price) === Number(price) && b.payMode === currentPayMode)) {
@@ -4354,7 +4370,7 @@ img{max-width:100%!important;}
     try{const prev={};load().forEach(j=>{if(j)prev[j.id]=j.status;});const now=new Date().toISOString();
       a.forEach(j=>{if(!j)return;if(j.status==='Ready'&&!j.readyAt&&prev[j.id]!=='Ready')j.readyAt=now;else if(j.status!=='Ready'&&j.status!=='Delivered'&&j.readyAt)delete j.readyAt;});}catch(e){}
     try{localStorage.setItem(KEY,JSON.stringify(a))}
-    catch(err){console.error('Repair save failed',err);try{showToast('Storage is full - repair NOT saved. Free some space (delete old photos) and try again.')}catch(e){}return false;}
+    catch(err){console.error('Repair save failed',err);try{showToast('Storage is full - repair NOT saved. Free some space and try again.')}catch(e){}return false;}
     return true;
   }
   function today(){ return new Date().toISOString().slice(0,10); }
@@ -4556,12 +4572,13 @@ img{max-width:100%!important;}
       reworkReason: existing?.reworkReason||'',
       reworkCount: Number(existing?.reworkCount)||0,
       deliveredAt:existing?.deliveredAt||'',
-      photos:Array.isArray(window.__skRjPhotosNow)?window.__skRjPhotosNow.slice(0,3):(Array.isArray(existing?.photos)?existing.photos:[]),
+
       outsideCharge:Number(existing?.outsideCharge)||0,
       createdAt:existing?.createdAt||new Date().toISOString(),
       updatedAt:new Date().toISOString()
     });
     if(existing&&(String(existing.outcome||'')==='returned'||String(existing.deliveryStatus||'').startsWith('Returned')))job.deliveryStatus=existing.deliveryStatus;
+    delete job.photos;
     if(!job.customer||!job.model||!job.problem){ showToast('Customer, Model & Problem required'); return false; }
     if(typeof window.skOutFormRead==='function'){
       const oo=window.skOutFormRead(existing,job.status);
@@ -4749,6 +4766,9 @@ img{max-width:100%!important;}
 
     const netTotal=Math.max(0,total-existingDiscount-discount);
     const outstandingBeforePayment=Math.max(0,netTotal-alreadyPaid);
+    /* V5.11.49: advance paid is more than the final amount - the extra is returned to the customer */
+    const extraPaid=Math.max(0,alreadyPaid-netTotal);
+    if(extraPaid>0&&!confirm('Advance paid ₹'+alreadyPaid.toLocaleString('en-IN')+' is more than the final amount ₹'+netTotal.toLocaleString('en-IN')+'.\n\nReturn ₹'+extraPaid.toLocaleString('en-IN')+' to the customer now?\n\nOK = the extra is recorded as returned.'))return;
     const entered=prompt(
       'Customer payment before delivery\nOriginal estimate: ₹'+total.toLocaleString('en-IN')+
       '\nTotal discount: ₹'+(existingDiscount+discount).toLocaleString('en-IN')+
@@ -4774,8 +4794,13 @@ img{max-width:100%!important;}
     job.discountHistory=Array.isArray(job.discountHistory)?job.discountHistory:[];
     if(discountEvent)job.discountHistory.push(discountEvent);
     job.paidAmount=alreadyPaid+amount;
-    job.outstandingAmount=Math.max(0,netTotal-job.paidAmount);
     job.paymentHistory=Array.isArray(job.paymentHistory)?job.paymentHistory:[];
+    if(extraPaid>0){
+      job.paymentHistory.push({amount:-extraPaid,date:now,type:'Advance returned to customer'});
+      job.refundAmount=(Number(job.refundAmount)||0)+extraPaid;
+      job.paidAmount=Math.max(0,job.paidAmount-extraPaid);
+    }
+    job.outstandingAmount=Math.max(0,netTotal-job.paidAmount);
     if(amount>0){job.paymentHistory.push({amount, date:now, type:'Repair delivery payment'});try{var _rr=window.skReceiptForRepair&&window.skReceiptForRepair(job,amount,'Repair payment');if(_rr&&window.skReceiptOpen)setTimeout(function(){window.skReceiptOpen(_rr.id)},600);}catch(e){}}
 
     /* Discount entries are audit-only and are excluded from credit/payment totals. */
