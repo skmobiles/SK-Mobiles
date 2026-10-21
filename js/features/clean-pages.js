@@ -331,14 +331,14 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 /* V5.11.44: comfortable reading size - nothing in the app UI is smaller than 11.5px (bill/PDF sheets are left as designed). */
 (function(){
   'use strict';
-  var MIN=11.5, SKIP='[id^="pv"],#invoiceMainSheet,#viewBillContent,.invoice-preview,svg,canvas,script,style,#skNavFade,nav.bottom-nav,.drawer-footer-badge,.sk-home-ver,#skAppVersionBadge';
-  var q=[],timer=0;
+  var MIN=11.5, SKIP='[id^="pv"],#invoiceMainSheet,#viewBillContent,.invoice-preview,svg,canvas,script,style,#skNavFade,nav.bottom-nav,.drawer-footer-badge,.sk-home-ver,#skAppVersionBadge,.app-sub,.box-photo-scan-btn,.search-icon-left';
+  var q=[],timer=0,seen=new WeakSet();
   function fixEl(e){
     try{
-      if(e.nodeType!==1||e.closest(SKIP))return;
+      if(e.nodeType!==1)return;
       var has=false,t='';
       for(var n=e.firstChild;n;n=n.nextSibling){if(n.nodeType===3&&n.nodeValue.trim()){has=true;t+=n.nodeValue.trim();}}
-      if(!has||t.length<4)return;
+      if(!has||t.length<4||e.closest(SKIP))return;
       var fs=parseFloat(getComputedStyle(e).fontSize);
       if(fs>0&&fs<MIN-0.05)e.style.setProperty('font-size',MIN+'px','important');
     }catch(x){}
@@ -351,22 +351,22 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   }
   function flush(){
     timer=0;var list=q.splice(0);
-    for(var i=0;i<list.length;i++)scan(list[i]);
+    (window.requestIdleCallback||function(f){setTimeout(f,0);})(function(){for(var i=0;i<list.length;i++)scan(list[i]);},{timeout:1200});
   }
   function enqueue(n){
     if(!n||n.nodeType!==1)return;
     if(n.parentElement===document.body&&!/overlay|modal|dialog|sheet|toast/i.test(String(n.className)+' '+n.id))return;
-    q.push(n);if(!timer)timer=setTimeout(flush,150);
+    q.push(n);if(!timer)timer=setTimeout(flush,450);
   }
   function boot(){
     var run=window.requestIdleCallback?function(f){requestIdleCallback(f,{timeout:1500});}:function(f){setTimeout(f,600);};
     run(function(){q.push(document.querySelector('.app-viewport')||document.body);
-      document.querySelectorAll('.modal-overlay').forEach(function(m){q.push(m);});if(!timer)timer=setTimeout(flush,50);});
+      document.querySelectorAll('.modal-overlay').forEach(function(m){q.push(m);seen.add(m);});if(!timer)timer=setTimeout(flush,50);});
     new MutationObserver(function(ms){
       for(var i=0;i<ms.length;i++){
         var m=ms[i];
         if(m.type==='childList'){for(var j=0;j<m.addedNodes.length;j++)enqueue(m.addedNodes[j]);}
-        else if(m.type==='attributes'&&m.target.classList&&m.target.classList.contains('modal-overlay')&&m.target.classList.contains('active'))enqueue(m.target);
+        else if(m.type==='attributes'&&m.target.classList&&m.target.classList.contains('modal-overlay')&&m.target.classList.contains('active')&&!seen.has(m.target)){seen.add(m.target);enqueue(m.target);}
       }
     }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
   }
