@@ -1337,9 +1337,13 @@ const MASTER_INVENTORY = [
         try {
           let rawBills = JSON.parse(storedBills);
           if (!Array.isArray(rawBills)) rawBills = [];
+          /* V5.11.48: only a repeated bill id is a duplicate. The old name/phone/model/price rule deleted real bills
+             (two walk-ins buying the same model) and the deletion then spread to every device. */
           const seen = new Set();
           savedBills = rawBills.filter(b => {
-            const key = `${b?.custName || ''}_${b?.phone || ''}_${b?.model || ''}_${b?.price || ''}`;
+            if (!b || typeof b !== 'object') return false;
+            const key = String(b.id || '');
+            if (!key) return true;
             if (seen.has(key)) return false;
             seen.add(key);
             return true;
@@ -1475,7 +1479,8 @@ const MASTER_INVENTORY = [
           imei2: document.getElementById('billImei2').value || '', package: document.getElementById('billPackage').value || '',
           payMode: currentPayMode, price,
           advance: parseFloat(document.getElementById('billAdvance').value) || 0,
-          balance: parseFloat((document.getElementById('billBalanceDisplay')?.innerText || '').replace(/\D/g,'')) || 0,
+          /* V5.11.48: same rule as the Save button - only Credit / EMI sales carry a balance (a cash sale auto-saved when leaving the page showed the customer as owing) */
+          balance: (currentPayMode === 'EMI' || currentPayMode === 'Credit') ? Math.max(0, price - (parseFloat(document.getElementById('billAdvance').value) || 0)) : 0,
           emiMonths: parseInt(document.getElementById('billEmiMonths').value,10) || 0,
           emiInterest: parseFloat(document.getElementById('billEmiInterest').value) || 0,
           emiStartDate: document.getElementById('billEmiStartDate').value || '', creditDueDate: document.getElementById('billCreditDate').value || '',
@@ -3411,6 +3416,7 @@ const MASTER_INVENTORY = [
     window.skBillResetForm = skBillResetForm;
 
     function saveUsedBill() {
+      try{const fb=JSON.parse(localStorage.getItem('sk_bills')||'[]');if(Array.isArray(fb))savedBills=fb}catch(e){}
       const editId = String(window.__skEditingBillId || '');
       if (editId) {
         const bill = savedBills.find(b => b && String(b.id) === editId);
@@ -3425,7 +3431,7 @@ const MASTER_INVENTORY = [
         { const ex=skBillExchangeData(); if(ex.value>0){ bill.grossPrice=skBillGrossPrice(); bill.exchange=Object.assign({},bill.exchange||{},ex); } else { delete bill.grossPrice; delete bill.exchange; } }
         bill.emiMonths=parseInt(document.getElementById('billEmiMonths').value,10)||0; bill.emiInterest=parseFloat(document.getElementById('billEmiInterest').value)||0;
         bill.emiStartDate=document.getElementById('billEmiStartDate').value||''; bill.creditDueDate=document.getElementById('billCreditDate').value||'';
-        bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-advance-(window.skPaidAfterSale?window.skPaidAfterSale(bill):0)):0;
+        bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-advance-(window.skPaidAfterSale?window.skPaidAfterSale(bill):0)+(Array.isArray(bill.creditAdjustments)?bill.creditAdjustments.reduce(function(t,c){return t+(Number(c&&c.balance)||0)},0):0)):0; /* V5.11.48: credit added later is kept when the bill is edited */
         bill.emiHtml=currentPayMode==='EMI'?document.getElementById('pvEmiScheduleTbody').innerHTML:'';
         if (typeof window.skUsedCanSell === 'function' && !window.skUsedCanSell(bill)) return;
         localStorage.setItem('sk_bills',JSON.stringify(savedBills)); window.__skEditingBillId='';
@@ -3527,6 +3533,7 @@ const MASTER_INVENTORY = [
 window.deleteBillSafely=async function(billId){
   const id=String(billId||'').trim();
   if(!id){showToast?.('❌ Bill ID not found');return}
+  try{const fb=JSON.parse(localStorage.getItem('sk_bills')||'[]');if(Array.isArray(fb))savedBills=fb}catch(e){}
   const list=Array.isArray(savedBills)?savedBills:[];
   const idx=list.findIndex(function(b){
     return String(b?.id||'')===id || String(b?.billId||'')===id || String(b?.billNo||'')===id;
@@ -3537,7 +3544,21 @@ window.deleteBillSafely=async function(billId){
   const customer=bill.custName||'Customer';
   if(!confirm('Delete this saved bill?\n\nBill: '+displayNo+'\nCustomer: '+customer+'\n\nThis will move it to Recycle Bin for 30 days.'))return;
   try{
-    if(typeof window.moveToTrash==='function') window.moveToTrash(bill,'bill',displayNo);
+    /* V5.11.48: payments / receipts / credit rows of this bill go to the Recycle Bin with it (and come back on restore) so no orphan money is left behind */
+    let trashBill=bill;
+    try{
+      const bid=String(bill.id||'');
+      const rd=function(k){try{const x=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}};
+      const led=rd('sk_credit_ledger_v1'),rec=rd('sk_receipts_v1');
+      const linkedL=led.filter(function(e){return e&&bid&&(String(e.billId||'')===bid||String(e.id||'')==='BILL-'+bid)});
+      const linkedR=rec.filter(function(r){return r&&bid&&String(r.billId||'')===bid});
+      if(linkedL.length||linkedR.length){
+        trashBill=Object.assign({},bill,{__linked:{ledger:linkedL,receipts:linkedR}});
+        if(linkedL.length)localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(led.filter(function(e){return linkedL.indexOf(e)<0})));
+        if(linkedR.length)localStorage.setItem('sk_receipts_v1',JSON.stringify(rec.filter(function(r){return linkedR.indexOf(r)<0})));
+      }
+    }catch(e){console.warn('Linked payments not moved',e)}
+    if(typeof window.moveToTrash==='function') window.moveToTrash(trashBill,'bill',displayNo);
     const next=list.filter(function(_,i){return i!==idx});
     savedBills=next;
     localStorage.setItem('sk_bills',JSON.stringify(next));
@@ -4306,8 +4327,15 @@ img{max-width:100%!important;}
   }
   function load(){
     try{
-      const a=JSON.parse(localStorage.getItem(KEY)||'[]');
-      if(!Array.isArray(a))return [];
+      const rawStored=localStorage.getItem(KEY)||'[]';
+      let a;
+      try{a=JSON.parse(rawStored)}catch(pe){
+        /* V5.11.48: unreadable data - keep a copy and block saving, so one bad value can never overwrite every job (locally and in the cloud) */
+        try{if(!localStorage.getItem(KEY+'_corrupt_backup'))localStorage.setItem(KEY+'_corrupt_backup',rawStored)}catch(e2){}
+        window.__skRjCorrupt=true;return [];
+      }
+      if(!Array.isArray(a)){window.__skRjCorrupt=true;return [];}
+      window.__skRjCorrupt=false;
       /* V5.11.23: bring back jobs whose status was blanked by editing a delivered job (they vanished from every list) */
       let fixed=false;
       a.forEach(j=>{
@@ -4321,12 +4349,33 @@ img{max-width:100%!important;}
     }catch(e){return []}
   }
   function save(a){
+    if(window.__skRjCorrupt){try{showToast('Repair data could not be read - not saved. Please contact support.')}catch(e){}return false;}
     /* V5.11.8: remember the day a job became Ready (used by the "not collected" reminders) */
     try{const prev={};load().forEach(j=>{if(j)prev[j.id]=j.status;});const now=new Date().toISOString();
       a.forEach(j=>{if(!j)return;if(j.status==='Ready'&&!j.readyAt&&prev[j.id]!=='Ready')j.readyAt=now;else if(j.status!=='Ready'&&j.status!=='Delivered'&&j.readyAt)delete j.readyAt;});}catch(e){}
-    localStorage.setItem(KEY,JSON.stringify(a));
+    try{localStorage.setItem(KEY,JSON.stringify(a))}
+    catch(err){console.error('Repair save failed',err);try{showToast('Storage is full - repair NOT saved. Free some space (delete old photos) and try again.')}catch(e){}return false;}
+    return true;
   }
   function today(){ return new Date().toISOString().slice(0,10); }
+  /* V5.11.48: keep the "repair balance" row of the credit ledger equal to the job (used after editing a delivered job) */
+  function rjSyncCreditRow(job){
+    try{
+      if(!job||String(job.status||'')!=='Delivered')return;
+      const ledgerKey='sk_credit_ledger_v1';
+      const rows=JSON.parse(localStorage.getItem(ledgerKey)||'[]');
+      if(!Array.isArray(rows))return;
+      const idx=rows.findIndex(e=>String(e.repairJobId||'')===String(job.id)&&String(e.source||'')==='repair-job');
+      if(idx<0&&!(Number(job.outstandingAmount)>0))return;
+      const customerKey=String(job.customer||'').trim().toLowerCase()+'|'+String(job.phone||'').replace(/\D/g,'');
+      const total=Number(job.estimate)||0,disc=Number(job.discountAmount)||0,paid=Number(job.paidAmount)||0;
+      if(Number(job.outstandingAmount)>0){
+        const row={id:idx>=0?rows[idx].id:('RJ-CREDIT-'+String(job.id)),key:customerKey,name:String(job.customer||'Walk-in Customer').trim(),phone:String(job.phone||''),type:'credit',amount:Number(job.outstandingAmount),mode:'Credit',date:idx>=0?(rows[idx].date||today()):today(),details:'Repair balance • Job '+String(job.id)+' • Estimate ₹'+total.toLocaleString('en-IN')+' • Discount ₹'+disc.toLocaleString('en-IN')+' • Payable ₹'+Math.max(0,total-disc).toLocaleString('en-IN')+' • Paid ₹'+paid.toLocaleString('en-IN'),source:'repair-job',repairJobId:String(job.id),billId:'',dueDate:idx>=0?(rows[idx].dueDate||''):''};
+        if(idx>=0)rows[idx]=Object.assign({},rows[idx],row);else rows.push(row);
+      }else if(idx>=0){rows.splice(idx,1);}
+      localStorage.setItem(ledgerKey,JSON.stringify(rows));
+    }catch(e){console.error('Repair credit ledger sync failed',e)}
+  }
   function rjToISODate(value){
     const s=String(value||'').trim();
     let m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);
@@ -4391,6 +4440,7 @@ img{max-width:100%!important;}
   window.skRjSetFilter=function(f){window.__skRjFilter=f;skRjRenderJobs();};
 
   function clearForm(){
+    try{window.skPhClear&&window.skPhClear()}catch(e){}
     document.getElementById('skRjForm')?.reset();
     document.getElementById('skRjEditId').value='';
     document.getElementById('skRjCustomer').value='Walk-in Customer';
@@ -4483,7 +4533,8 @@ img{max-width:100%!important;}
     if(!normalizedDate){ showToast('Received Date must be DD/MM/YYYY'); return false; }
     const a=load();
     const existing=id?a.find(x=>x.id===id):null;
-    const job={
+    /* V5.11.48: start from the saved job so fields this form does not show (dealer name/amount, return details, readyAt, cancelled payments...) are never lost on edit */
+    const job=Object.assign(existing?Object.assign({},existing):{},{
       id:id||('RJ-'+Date.now()),
       customer:document.getElementById('skRjCustomer').value.trim()||'Walk-in Customer',
       phone:document.getElementById('skRjPhone').value.trim(),
@@ -4509,7 +4560,8 @@ img{max-width:100%!important;}
       outsideCharge:Number(existing?.outsideCharge)||0,
       createdAt:existing?.createdAt||new Date().toISOString(),
       updatedAt:new Date().toISOString()
-    };
+    });
+    if(existing&&(String(existing.outcome||'')==='returned'||String(existing.deliveryStatus||'').startsWith('Returned')))job.deliveryStatus=existing.deliveryStatus;
     if(!job.customer||!job.model||!job.problem){ showToast('Customer, Model & Problem required'); return false; }
     if(typeof window.skOutFormRead==='function'){
       const oo=window.skOutFormRead(existing,job.status);
@@ -4518,16 +4570,20 @@ img{max-width:100%!important;}
     }
     if(job.paidAmount<0){ showToast('Advance payment cannot be negative'); return false; }
     const previousPaid=Math.max(0,Number(existing?.paidAmount)||0);
+    let pendingReceipt=null;
     if(job.paidAmount>previousPaid){
       job.paymentHistory.push({amount:job.paidAmount-previousPaid,date:new Date().toISOString(),type:'Repair advance payment'});
-      try{window.skReceiptForRepair&&window.skReceiptForRepair(job,job.paidAmount-previousPaid,'Repair advance')}catch(e){}
+      pendingReceipt=[job.paidAmount-previousPaid,'Repair advance'];
     } else if(job.paidAmount<previousPaid){
       /* Editing the advance field must not silently erase earlier payment records. */
       job.paidAmount=previousPaid;
       job.outstandingAmount=Math.max(0,job.estimate-Math.max(0,Number(job.discountAmount)||0)-job.paidAmount);
     }
     if(existing) a[a.findIndex(x=>x.id===id)]=job; else a.unshift(job);
-    save(a); skRjResetForm(); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
+    if(save(a)===false)return false;
+    if(pendingReceipt){try{window.skReceiptForRepair&&window.skReceiptForRepair(job,pendingReceipt[0],pendingReceipt[1])}catch(e){}}
+    rjSyncCreditRow(job);
+    skRjResetForm(); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
     if(typeof window.skUrgentRepairInstall==='function')window.skUrgentRepairInstall();
     if(existing && (existing.status==='Ready'||existing.status==='Delivered') && (job.status==='Ready'||job.status==='Delivered')){
       skRjSwitchTab('history');
@@ -4708,6 +4764,10 @@ img{max-width:100%!important;}
       showToast('Enter a valid payment amount');
       return;
     }
+    if(amount>outstandingBeforePayment){
+      showToast('Payment cannot be more than the outstanding ₹'+outstandingBeforePayment.toLocaleString('en-IN'));
+      return;
+    }
 
     const now=new Date().toISOString();
     job.discountAmount=existingDiscount+discount;
@@ -4841,6 +4901,7 @@ img{max-width:100%!important;}
   };
 
   window.skRjDelete=function(id){
+    try{window.skOutSyncCharges&&window.skOutSyncCharges()}catch(e){}
     if(!confirm('Delete this repair job?\n\nThe job will be moved to Recycle Bin for 30 days.'))return;
     const sid=String(id);
     const current=load(), item=current.find(x=>String(x.id)===sid);
@@ -7097,8 +7158,9 @@ img{max-width:100%!important;}
         if(!data || typeof data!=='object' || Array.isArray(data))throw new Error('Invalid backup format');
         var keys=Object.keys(data);
         if(!keys.length)throw new Error('Backup is empty');
-        if(!confirm('Restore '+keys.length+' app data entries? The current values for these entries will be replaced.'))return;
-        keys.forEach(function(k){
+        if(!confirm('Restore '+keys.length+' app data entries? Records from the backup are brought back; newer records on the cloud are kept.'))return;
+        window.__skRestoring=true; /* V5.11.48: a restore must never delete newer bills in the cloud */
+        keys.filter(function(k){return !/^(sk_current_|sk_sync_meta)/.test(k)}).forEach(function(k){
           var v=data[k];
           if(typeof v==='string')localStorage.setItem(k,v);
           else localStorage.setItem(k,JSON.stringify(v));
@@ -8254,7 +8316,7 @@ window.skOpenCreditLedger=cpOpenPage;
     purgeExpiredTrash();const list=readRecycle(),index=list.findIndex(x=>String(x.trashId)===String(trashId));if(index<0){showToast?.('❌ Recycle item not found');return;}const item=list[index];
     try{
       if(item.type==='bill'){
-        const bill=item.data,bills=Array.isArray(savedBills)?savedBills.slice():[];if(!bills.some(b=>String(b?.id||'')===String(bill?.id||'')))bills.push(bill);savedBills=bills;localStorage.setItem('sk_bills',JSON.stringify(bills));try{if(bill&&typeof window.skUsedRecordBillSale==='function')window.skUsedRecordBillSale(bill.grossPrice?Object.assign({},bill,{price:bill.grossPrice}):bill)}catch(e){}await restoreCloudBill(bill?.id);updateBillHistoryCount?.();renderBillHistory?.();loadSavedBills?.();updateBillPreview?.();
+        const bill=item.data,bills=Array.isArray(savedBills)?savedBills.slice():[];try{if(bill&&bill.__linked){const lk=bill.__linked;delete bill.__linked;const rd=function(k){try{const x=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}};const L=rd('sk_credit_ledger_v1');(lk.ledger||[]).forEach(function(e){if(!L.some(function(x){return String(x&&x.id)===String(e&&e.id)}))L.push(e)});localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(L));const R=rd('sk_receipts_v1');(lk.receipts||[]).forEach(function(e){if(!R.some(function(x){return String(x&&x.id)===String(e&&e.id)}))R.push(e)});localStorage.setItem('sk_receipts_v1',JSON.stringify(R));}}catch(e){console.warn('Linked payments not restored',e)}if(!bills.some(b=>String(b?.id||'')===String(bill?.id||'')))bills.push(bill);savedBills=bills;localStorage.setItem('sk_bills',JSON.stringify(bills));try{if(bill&&typeof window.skUsedRecordBillSale==='function')window.skUsedRecordBillSale(bill.grossPrice?Object.assign({},bill,{price:bill.grossPrice}):bill)}catch(e){}await restoreCloudBill(bill?.id);updateBillHistoryCount?.();renderBillHistory?.();loadSavedBills?.();updateBillPreview?.();
       }else if(item.type==='credit'){
         const entry=item.data,a=(()=>{try{const x=JSON.parse(localStorage.getItem('sk_credit_ledger_v1')||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}})();if(!a.some(x=>String(x?.id||'')===String(entry?.id||'')))a.push(entry);localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(a));window.skCPRender?.();
       }else if(item.type==='inventory'||item.type==='inventory-batch'){

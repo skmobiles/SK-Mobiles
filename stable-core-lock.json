@@ -4,9 +4,9 @@
   "source": "User-approved V5.8.2: flicker fix, customer edit/merge, recent activity",
   "policy": "Approved V5.6.1 Design Studio UI changes are included in this new baseline. Future changes to locked core files must be reviewed and the lock must not be silently regenerated. Preserve business logic, Firebase configuration/rules and existing data keys.",
   "core_files": {
-    "index.html": "3c23e71f0b6559c532f8360b491cbc3b8c7c59b3d8f5de4f4d123f9d278be8d5",
-    "js/app.js": "0712b5f357ef54425ffcdb3b911c2cd05dc0d320d89922bdc495828f71700ff6",
-    "js/firebase-sync.js": "fd66a46d3ec4a76577e58f3780cf0cafe0539b855aa2163fc93634ce8a5a6cad",
+    "index.html": "2d9935e9482c051eaf8e539c73c0db03162fe6f5990222ae0a5cb7bf8adcd0aa",
+    "js/app.js": "13f9e15411522cd4a6a555c33fe05bcd146bd390c7b59caa401caf404894ea5d",
+    "js/firebase-sync.js": "37ed4aa93656d204a90e2f6385615d8eabfbde91610234a69a6909e3533c566d",
     "js/features/pin-security.js": "adde7413b65e7676169be8670d31494abd364f14a263681faa577fa07d08a0db",
     "js/features/colorful-ui.js": "8bd075f669975521a2f78e86b4dd33f05a5699483f5ff4e17b6e1f02a129f4db",
     "css/style.css": "51126e9ebbccaf0ee7b14aab82d6d813cd2cb00554f48df31ceb7bc0412052c1",
@@ -25,7 +25,7 @@
     "css/appearance.css": "1883228a39f7b188e2c56656e0217fe6f81a547f303105c8e697f8aa663ad0e4",
     "css/fonts.css": "56d92b67f350ad559b08d3bf1bf3c2321ee6a6dd79a7cb091e9a2c1889888d27",
     "js/features/backup-status.js": "a32466d77c94a42d3f391fda609989dcedce5a4e65bdb909d3f902b346fd854d",
-    "sw.js": "af80b15f789776a86eca60ea73e57cb5a7696907ad4ac7c517a53b7d8a3ab822",
+    "sw.js": "a188615beb0c5b9807f7587f0851010fa5b5e2198ef8e10041946d8bcae73d3f",
     "css/shop-tools.css": "5d89635d27f47a40fe335e60939be63fef7dd29c47f2be222f4f9dac197dc8c3",
     "js/features/shop-tools-v151.js": "3d52bb37bcb73b00f5b1123ca9bcc951eb9c5b0cd26afe099e21f3e48f1611da",
     "css/fixes.css": "4918d16aeeedffd932092af01bac2f238d4fbc9a678a3c8e42c890756e710f91",
@@ -34,7 +34,7 @@
     "js/features/invoice-upi.js": "48d6858714d880d98afcef7d121772b249b7f69a74d68557418d2a705d80c434",
     "js/features/month-report.js": "07b4296d3ec15fef49f015df8a9eca69ec7e4da31dda9568580a9fabdc7bf9eb",
     "js/features/cloud-guard.js": "39e7e434597d33d66bc248e5da92087fa0359eeacdaf8ef9e133702e92f6aa34",
-    "js/features/repair-photos.js": "cb97ca8d500f7f8caec09123d2efb846571427bf177a2516f8010bbc5475dc98",
+    "js/features/repair-photos.js": "f605df516f3dc5759ca86c6ca55ecf602f6e242a8a7336a205e575b05e4cfc29",
     "js/features/dealer-tracker.js": "d99a795ddc5037df83ab5c8b85db98a594f2c90fbcb172a88ec526fe07e9df35",
     "js/features/global-search.js": "bd48682f5ac98cbcef3bb269dd91c52c1c53b7b53512d56a4e28faff17083a3b",
     "js/features/credit-range.js": "b209f59789d567fbd330a54b47deaffd7e2e6e5d5df43f7ddcf8ec756a23d878",
@@ -58,6 +58,6 @@
     "js/features/review-requests.js": "084b68178ab7f502807a3c37e88494925cb6ca2cf1075b6422e78a1295072135",
     "js/features/no-flicker.js": "498282cd3a2dc869c465b28b93845ee638f4b29acea55988c5bd597db2c33340",
     "js/features/home-extras.js": "c0a2aa6a3a85269d09f1109e32577415813162e90915e2af9b604411ca75dfd6",
-    "js/features/outside-repair.js": "dfc4bc09d08cec59bc7b174302fbd997516149b88daf3dc5cdc188cd27988650"
+    "js/features/outside-repair.js": "64a14afa3708193a77eda1867ffab231a7015c293e7bcf6f72ba9af5d8069ab8"
   }
 }
