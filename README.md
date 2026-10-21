@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.46
+- App-wide left/right gap changed from 6px to 8px: all pages, popups, header and cards. Full-width title bars and the bottom navigation bar stay as they were (nav bar keeps 6px).
+
 ## V5.11.45 - Outside repairs
 - Repair Jobs: new Status "Sent outside" (Mobile / Laptop, Sent to, Phone, Expected back). Outside charge is entered later, when the device is back.
 - Pending Jobs: new "Outside" filter = every device that is out, grouped by friend/shop, with days out and Overdue.
