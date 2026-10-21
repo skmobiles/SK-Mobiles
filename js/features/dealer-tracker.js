@@ -65,6 +65,8 @@ function compute(){
   return {list:list,total:total,start:start};
 }
 
+var AV=[['#2563eb','#dbeafe'],['#16a34a','#dcfce7'],['#d97706','#fef3c7'],['#7c3aed','#ede9fe'],['#db2777','#fce7f3'],['#0891b2','#cffafe']];
+function av(name){var h=0,n=String(name||'?');for(var i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%997;var c=AV[h%AV.length];return '<i class="skdl3-av" style="color:'+c[0]+';background:'+c[1]+'">'+esc(n.trim().charAt(0).toUpperCase()||'?')+'</i>'}
 var view=null,mode=''; /* view = dealer key being viewed (null = list); mode = open form: pay | old | ret */
 function qa(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 function tabs(){
@@ -93,14 +95,15 @@ function render(){
   var D=compute(),d=null;
   if(view){d=D.list.filter(function(x){return x.name.toLowerCase()===view})[0];if(!d){view=null}}
   if(d){body.innerHTML=detailHtml(d,D);return}
-  var h='<div class="skdr-hero"><small>TOTAL TO PAY DEALERS</small><b>'+money(D.total)+'</b></div>'+
-   '<div class="skdl-start"><span>Count purchases from</span><input type="date" id="skDlStart" value="'+esc(D.start)+'" onchange="skDlSetStart(this.value)"/></div>'+
+  var dueN=D.list.filter(function(x){return x.balance>0}).length;
+  var h='<div class="skdl3-sum"><small>Total to pay dealers</small><b>'+money(D.total)+'</b><span>'+D.list.length+' dealers · '+dueN+' with balance</span></div>'+
+   '<div class="skdl-start"><span>Count from date</span><input type="date" id="skDlStart" value="'+esc(D.start)+'" onchange="skDlSetStart(this.value)"/></div>'+
    '<div class="skdl2-tabs two"><button type="button" class="'+(mode==='old'?'on':'')+'" onclick="skDlMode(\'old\')">＋ Old balance</button><button type="button" class="'+(mode==='ret'?'on':'')+'" onclick="skDlMode(\'ret\')">↩ Return spare</button></div>'+
    (mode==='old'||mode==='ret'?formHtml(null,D):'');
   if(!D.list.length)h+='<div class="skdr-empty">No dealer purchases yet. Add a dealer name in Used Mobile purchase or Repair spare parts.</div>';
-  else h+='<div class="skdl2-list">'+D.list.map(function(x){
+  else h+=(D.list.length>4?'<input type="search" id="skDlSearch" class="skdl3-search" placeholder="Search dealer…" oninput="skDlFind(this.value)" autocomplete="off"/>':'')+'<div class="skdl2-list">'+D.list.map(function(x){
     var cls=x.balance>0?'skdl-due':(x.balance<0?'skdl-adv':'skdl-ok');
-    return '<div class="skdl2-row" onclick="skDlOpen(\''+esc(qa(x.name.toLowerCase()))+'\')"><span>'+esc(x.name)+'<small>Bought '+money(x.bought)+' • Credit '+money(x.credit)+(x.old?' • Old '+money(x.old):'')+(x.ret?' • Returned '+money(x.ret):'')+' • Paid '+money(x.paid)+'</small></span><b class="'+cls+'">'+(x.balance<0?'Adv ':'')+money(Math.abs(x.balance))+' ›</b></div>';
+    return '<div class="skdl2-row" data-n="'+esc(x.name.toLowerCase())+'" onclick="skDlOpen(\''+esc(qa(x.name.toLowerCase()))+'\')">'+av(x.name)+'<span>'+esc(x.name)+'<small>Bought '+money(x.bought)+(x.old?' · Old '+money(x.old):'')+(x.ret?' · Returned '+money(x.ret):'')+' · Paid '+money(x.paid)+'</small></span><b class="'+cls+'">'+money(Math.abs(x.balance))+'<em>'+(x.balance>0?'due':(x.balance<0?'advance':'settled'))+'</em></b></div>';
   }).join('')+'</div>';
   body.innerHTML=h;
 }
@@ -109,7 +112,7 @@ function detailHtml(d,D){
   var bal=d.balance;
   var xb=function(fn,id){return ' <button type="button" class="skdl-x" aria-label="Delete" onclick="'+fn+'(\''+qa(esc(id))+'\')">✕</button>'};
   var h='<button type="button" class="skdl-back" onclick="skDlOpen(null)">‹ All dealers</button>'+
-   '<div class="skdr-hero"><small>'+esc(d.name.toUpperCase())+' — '+(bal<0?'ADVANCE PAID':'BALANCE TO PAY')+'</small><b>'+money(Math.abs(bal))+'</b></div>'+tabs()+formHtml(d,D);
+   '<div class="skdl3-sum with-av">'+av(d.name)+'<div><small>'+esc(d.name)+' — '+(bal<0?'advance paid':'balance to pay')+'</small><b>'+money(Math.abs(bal))+'</b><span>Bought '+money(d.bought)+' · Paid '+money(d.paid)+(d.ret?' · Returned '+money(d.ret):'')+'</span></div></div>'+tabs()+formHtml(d,D);
   h+='<div class="skdl2-sec"><h4>Purchases <small>(paid by default — tap Pay later only if you owe the dealer)</small></h4>'+(d.buys.length?d.buys.map(function(b){
     var st=b.ret?'<span class="skdl2-ret">Returned '+fmt(b.ret.date)+'</span>':(b.credit?'Pay later (credit)':'Paid');
     return row(esc(b.label),fmt(b.date)+' • '+st,money(b.amount),b.ret?'':' <button type="button" class="skdl-x skdl-tg" onclick="skDlCred(\''+qa(esc(b.id))+'\')">'+(b.credit?'Mark paid':'Pay later')+'</button>',b.ret?'ret':'');
@@ -128,6 +131,7 @@ function ensureModal(){
 }
 window.skOpenDealerTracker=function(){ensureModal();view=null;mode='';render();if(typeof window.toggleModal==='function')window.toggleModal('skDealerModal',true)};
 window.skDlOpen=function(k){view=k;mode='';render();var s=document.querySelector('#skDealerModal .skdr-sheet');if(s)s.scrollTop=0};
+window.skDlFind=function(v){v=String(v||'').toLowerCase().trim();document.querySelectorAll('#skDlBody .skdl2-row[data-n]').forEach(function(r){r.style.display=!v||r.getAttribute('data-n').indexOf(v)>=0?'':'none'})};
 window.skDlMode=function(m){mode=mode===m?'':m;render()};
 window.skDlPickDealer=function(k){if(k){view=k;mode='ret';render()}};
 window.skDlCred=function(id){var c=credSet();if(c[id])delete c[id];else c[id]=1;try{localStorage.setItem(CRED_KEY,JSON.stringify(c))}catch(e){}render()};
