@@ -116,6 +116,11 @@
 
   // Refresh all UI sections as soon as data changes
   /* V5.11.48: keep the in-memory lists of the app equal to what was just synced, so the next save never writes an old copy back */
+  function isProtectedDataKey(key){
+    key = String(key||"");
+    return /^(sk_inventory|sk_orders|sk_credit_ledger_v1|sk_receipts_v1|sk_used_mobile_stock_v1|skx_outside_pay_v1|sk_recycle_bin_v1)$/.test(key) || universalBase.has(key);
+  }
+
   function syncAppGlobals(key){
     try{
       if(key==="sk_inventory"||key===null){ const v=JSON.parse(localStorage.getItem("sk_inventory")||"null"); if(Array.isArray(v)&&typeof inventory!=="undefined"){ inventory=v; window.inventory=v; } }
@@ -376,8 +381,18 @@
     return db.collection("shops").doc(SHOP_ID).collection("bills").doc(String(id));
   }
 
+  /* V5.11.48: per-bill fingerprint of the last synced content, so only changed bills are uploaded and a local edit is not overwritten by an old cloud copy */
+  const billHashes = new Map();
+  let billUploadPending = false;
+  function billFingerprint(b){
+    const c = Object.assign({}, b);
+    delete c._syncUpdatedAt; delete c._syncUpdatedBy; delete c._deleted; delete c.isDeleted;
+    return syncHash(JSON.stringify(c));
+  }
+
   async function uploadBills(){
-    if(!auth?.currentUser || !db || applyingRemote || !remoteReady || syncingLocal) return;
+    if(!auth?.currentUser || !db || applyingRemote || !remoteReady || window.__skRestoring) return;
+    if(syncingLocal){ billUploadPending = true; return; }
     // Billing feature permissions control UI actions; they must not block
     // realtime replication of already-authorised shop data.
     syncingLocal = true;
@@ -385,7 +400,13 @@
       const local = localBills().map(normalizeBill).filter(Boolean);
       const localIds = new Set(local.map(b => b.id));
       const batch = db.batch();
+      const pendingHashes = new Map();
+      let billWrites = 0;
       local.forEach(b => {
+        const fp = billFingerprint(b);
+        if(billHashes.get(b.id) === fp) return;
+        pendingHashes.set(b.id, fp);
+        billWrites++;
         const copy = Object.assign({}, b, {
           _syncUpdatedAt: Date.now(),
           _syncUpdatedBy: auth.currentUser.uid
@@ -403,12 +424,16 @@
           }, {merge:true});
         }
       }
-      if(local.length || lastKnownBillIds.size) await batch.commit();
+      let tombs = 0;
+      for(const id of lastKnownBillIds){ if(!localIds.has(id)) tombs++; }
+      if(billWrites || tombs) await batch.commit();
+      pendingHashes.forEach((fp,id)=>billHashes.set(id,fp));
       lastKnownBillIds = localIds;
     } catch(e){
       console.error("Bill upload failed", e);
     } finally {
       syncingLocal = false;
+      if(billUploadPending){ billUploadPending = false; setTimeout(()=>{ uploadBills().catch(()=>{}); }, 200); }
     }
   }
 
@@ -438,6 +463,17 @@
 
         const localNow = localBills();
         const merged = new Map(remoteMap);
+        /* V5.11.48: a bill edited on this phone and not uploaded yet must not be replaced by the older cloud copy */
+        const keepLocalIds = new Set();
+        localBills().forEach(lb => {
+          const id = String(lb?.id || lb?.billId || lb?.billNo || "");
+          const rb = remoteMap.get(id);
+          if(!id || !rb) return;
+          const known = billHashes.get(id);
+          if(known && billFingerprint(normalizeBill(lb)) !== known && billFingerprint(rb) === known) keepLocalIds.add(id);
+        });
+        keepLocalIds.forEach(id => { const lb = localBills().find(x => String(x?.id || x?.billId || x?.billNo || "") === id); if(lb) merged.set(id, normalizeBill(lb)); });
+        remoteMap.forEach((rb,id) => { if(!keepLocalIds.has(id)) billHashes.set(id, billFingerprint(rb)); });
         // Preserve local bills that have not reached Firebase yet; remote
         // tombstones still win because their IDs remain in remoteIdsNow.
         localNow.forEach(b => {
@@ -451,7 +487,7 @@
           initialized = true;
           remoteReady = true;
           await uploadBills();
-        } else if([...merged.keys()].some(id => !remoteIdsNow.has(id))){
+        } else if(keepLocalIds.size || [...merged.keys()].some(id => !remoteIdsNow.has(id))){
           uploadBills().catch(()=>{});
         }
       } catch(e) {
@@ -649,6 +685,69 @@
     return (h >>> 0).toString(16);
   }
 
+  /* V5.11.48: lists (ledger, receipts, used stock, outside payments, recycle bin, ...) are merged item by item (by id) with the last
+     synced copy as the base, so two phones adding records at the same time keep both, and a delete on one phone is not undone by the other. */
+  const universalBase = new Map();
+  function parseList(str){
+    try{
+      const a = JSON.parse(str);
+      if(!Array.isArray(a)) return null;
+      for(const x of a){ if(!x || typeof x !== "object" || x.id === undefined || x.id === null || x.id === "") return null; }
+      return a;
+    }catch(e){ return null; }
+  }
+  function setUniversalBase(key, str){
+    const a = parseList(str);
+    if(a) universalBase.set(String(key), a); else universalBase.delete(String(key));
+  }
+  function itemTime(x){
+    for(const k of ["_syncUpdatedAt","updatedAtMs","updatedAt","editedAt","createdAt","date"]){
+      const v = x && x[k];
+      if(typeof v === "number" && isFinite(v)) return v;
+      const n = Date.parse(String(v || ""));
+      if(!isNaN(n)) return n;
+    }
+    return 0;
+  }
+  function mergeLists(base, local, remote){
+    const key = x => String(x.id);
+    const B = new Map((base||[]).map(x => [key(x), JSON.stringify(x)]));
+    const L = new Map(local.map(x => [key(x), x]));
+    const R = new Map(remote.map(x => [key(x), x]));
+    const out = [];
+    const used = new Set();
+    const hasBase = !!base;
+    for(const [id, r] of R){
+      used.add(id);
+      const l = L.get(id);
+      const rs = JSON.stringify(r);
+      if(!l){
+        if(hasBase && B.has(id) && B.get(id) === rs) continue;   // deleted here, unchanged there
+        out.push(r); continue;                                   // added there (or edited there)
+      }
+      const ls = JSON.stringify(l);
+      if(ls === rs){ out.push(r); continue; }
+      if(hasBase && B.has(id)){
+        if(B.get(id) === ls){ out.push(r); continue; }            // only changed there
+        if(B.get(id) === rs){ out.push(l); continue; }            // only changed here
+      }
+      out.push(itemTime(l) > itemTime(r) ? l : r);               // both changed: newer wins
+    }
+    for(const [id, l] of L){
+      if(used.has(id)) continue;
+      if(hasBase && B.has(id) && B.get(id) === JSON.stringify(l)) continue; // deleted there, unchanged here
+      out.push(l);                                                // added here (or edited here)
+    }
+    return out;
+  }
+  /* returns the merged JSON text, or null when this key is not a list of records */
+  function tryMergeKey(key, localVal, cloudVal){
+    const l = parseList(localVal), r = parseList(cloudVal);
+    if(!l || !r) return null;
+    const merged = mergeLists(universalBase.get(String(key)) || null, l, r);
+    return JSON.stringify(merged);
+  }
+
   async function syncKeyToCloud(key, force=false) {
     if (!auth?.currentUser || !db || applyingRemote || !remoteReady || !isSyncableKey(key)) return;
     if (!managerCanSyncKey(key)) return;
@@ -666,6 +765,7 @@
         updatedBy: auth.currentUser.uid
       }, { merge: true });
       universalLastSyncedHash.set(key, hash);
+      setUniversalBase(key, rawData);
       universalDirtyKeys.delete(String(key));
       markRemoteBaseline(key, updatedAtMs);
     } catch(e) {
@@ -719,6 +819,21 @@
             const localVal = localStorage.getItem(key);
             const localTime = localChangeTime(key);
 
+            if(localVal !== null && localVal !== cloudVal){
+              const mergedVal = tryMergeKey(key, localVal, cloudVal);
+              if(mergedVal !== null){
+                if(mergedVal !== localVal){
+                  applyingRemote = true;
+                  try { localStorage.setItem(key, mergedVal); hasChanges = true; syncAppGlobals(key); }
+                  finally { applyingRemote = false; }
+                }
+                setUniversalBase(key, cloudVal);
+                if(mergedVal !== cloudVal){ localWins.add(key); universalLastSyncedHash.set(key, syncHash(cloudVal)); }
+                else universalLastSyncedHash.set(key, syncHash(cloudVal));
+                markRemoteBaseline(key, remoteTime || Date.now());
+                return;
+              }
+            }
             if(localVal !== null && localVal !== cloudVal && localTime > remoteTime){
               localWins.add(key);
               universalLastSyncedHash.set(key, syncHash(localVal));
@@ -729,6 +844,7 @@
               try { localStorage.setItem(key, cloudVal); hasChanges = true; syncAppGlobals(key); }
               finally { applyingRemote = false; }
             }
+            setUniversalBase(key, cloudVal);
             universalLastSyncedHash.set(key, syncHash(cloudVal));
             markRemoteBaseline(key, remoteTime || Date.now());
           });
@@ -751,6 +867,7 @@
           const key = String(change.doc.id);
           if(!isSyncableKey(key)) return;
           if(change.type === "removed"){
+            if(isProtectedDataKey(key)) return;
             if(localStorage.getItem(key) !== null){
               applyingRemote = true;
               try { localStorage.removeItem(key); changed = true; }
@@ -765,10 +882,26 @@
           const localVal = localStorage.getItem(key);
           const remoteTime = Number(data.updatedAtMs || 0);
           const localTime = localChangeTime(key);
+          if(localVal !== null && localVal !== cloudVal){
+            const mergedVal = tryMergeKey(key, localVal, cloudVal);
+            if(mergedVal !== null){
+              if(mergedVal !== localVal){
+                applyingRemote = true;
+                try { localStorage.setItem(key, mergedVal); changed = true; syncAppGlobals(key); }
+                finally { applyingRemote = false; }
+              }
+              setUniversalBase(key, cloudVal);
+              universalLastSyncedHash.set(key, syncHash(cloudVal));
+              markRemoteBaseline(key, remoteTime || Date.now());
+              if(mergedVal !== cloudVal) setTimeout(()=>{ syncKeyToCloud(key, true); }, 0);
+              return;
+            }
+          }
           if(localVal !== null && localVal !== cloudVal && localTime > remoteTime){
             syncKeyToCloud(key, true);
             return;
           }
+          setUniversalBase(key, cloudVal);
           universalLastSyncedHash.set(key, syncHash(cloudVal));
           if(cloudVal !== localVal){
             applyingRemote = true;
@@ -820,6 +953,7 @@
       }
       if(this === localStorage && !applyingRemote && auth?.currentUser && remoteReady){
         if(key === BILL_KEY){
+          if(window.__skRestoring) return result;
           clearTimeout(syncTimer);
           syncTimer = setTimeout(() => { uploadBills().catch?.(()=>{}); }, 50);
         } else if(key === REPAIR_KEY){
@@ -842,6 +976,8 @@
         if(key === REPAIR_KEY){
           clearTimeout(repairSyncTimer);
           repairSyncTimer = setTimeout(() => { uploadRepairJobs(false); }, 80);
+        } else if(isSyncableKey(key) && isProtectedDataKey(key)){
+          /* V5.11.48: removing a shop data list on one phone (e.g. clearing a damaged copy) must not delete it on every phone */
         } else if(isSyncableKey(key)){
           const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
           ref.delete().then(() => {
@@ -1064,7 +1200,8 @@
       }
       const keys = Object.keys(restored);
       if(!keys.length) throw new Error("Cloud backup empty");
-      keys.forEach(key => localStorage.setItem(key, restored[key]));
+      window.__skRestoring = true; /* V5.11.48: a restore must never delete newer bills in the cloud */
+      keys.filter(k => !/^(sk_current_|sk_sync_meta)/.test(k)).forEach(key => localStorage.setItem(key, restored[key]));
       cloudBackupStatus("✅ Latest cloud backup restored • " + keys.length + " data items");
       toast("☁️ Cloud Restore completed. App is reloading...");
       setTimeout(() => location.reload(), 700);

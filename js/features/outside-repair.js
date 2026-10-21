@@ -1,10 +1,11 @@
 /* V5.11.45 Outside repairs: a job can be sent to a friend / another shop (mobile or laptop), tracked until it is back,
    and what we owe each shop is kept in one place.
    Job fields added (all optional, old jobs are untouched):  job.status='Sent outside', job.outside={type,to,phone,sentDate,expectedBack,result,charge,backAt,note}, job.outsideCharge
-   New key: skx_outside_pay_v1  [{id,shop,amount,date,note}]  (syncs like every skx_ key) */
+   New key: skx_outside_pay_v1  [{id,shop,amount,date,note}]  (syncs like every skx_ key)
+   V5.11.48 New key: skx_outside_charges_v1  [{id:jobId,shop,amount,date}]  what we owe a shop per job; it stays even if the job is deleted */
 (function(){
 'use strict';
-var KEY='skx_repair_jobs_v2',PAY='skx_outside_pay_v1';
+var KEY='skx_repair_jobs_v2',PAY='skx_outside_pay_v1',CHG='skx_outside_charges_v1';
 function arr(k){try{var a=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
 function put(k,v){localStorage.setItem(k,JSON.stringify(v))}
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
@@ -92,11 +93,23 @@ window.skOutCardHtml=function(j){
 };
 
 /* ---------- Outside filter view: payments summary + devices grouped by shop ---------- */
+function syncCharges(){
+  var jobs=arr(KEY),book=arr(CHG),byId={};book.forEach(function(c){if(c&&c.id!=null)byId[String(c.id)]=c});
+  var ids={},changed=false;
+  jobs.forEach(function(j){if(!j)return;ids[String(j.id)]=1;var o=j.outside,id=String(j.id),amt=o&&o.to?num(o.charge):0,c=byId[id];
+    if(amt>0){var e={id:id,shop:o.to,amount:amt,date:o.backAt||o.sentDate||''};
+      if(!c){book.push(e);byId[id]=e;changed=true}else if(c.shop!==e.shop||num(c.amount)!==amt){c.shop=e.shop;c.amount=amt;changed=true}}
+    else if(c){book=book.filter(function(x){return String(x.id)!==id});delete byId[id];changed=true}});
+  if(changed)try{put(CHG,book)}catch(e){}
+  return book;
+}
+window.skOutSyncCharges=syncCharges;
 function shopTable(){
-  var map={},pays=arr(PAY);
+  var map={},pays=arr(PAY),chg=syncCharges();
   arr(KEY).forEach(function(j){var o=j&&j.outside;if(!o||!o.to)return;var k=shopKey(o.to);var s=map[k]||(map[k]={key:k,name:o.to,sent:0,repaired:0,failed:0,out:0,charges:0,paid:0,jobs:[],last:''});
     s.name=o.to;s.sent++;s.jobs.push(j);if(o.result==='repaired')s.repaired++;else if(o.result==='failed')s.failed++;else if(o.result==='out')s.out++;
-    s.charges+=num(o.charge);s.last=(o.sentDate||s.last)>s.last?(o.sentDate||s.last):s.last;});
+    s.last=(o.sentDate||s.last)>s.last?(o.sentDate||s.last):s.last;});
+  chg.forEach(function(c){var k=shopKey(c.shop);if(!map[k])map[k]={key:k,name:c.shop,sent:0,repaired:0,failed:0,out:0,charges:0,paid:0,jobs:[],last:''};map[k].charges+=num(c.amount)});
   pays.forEach(function(p){var k=shopKey(p.shop);if(!map[k])map[k]={key:k,name:p.shop,sent:0,repaired:0,failed:0,out:0,charges:0,paid:0,jobs:[],last:''};map[k].paid+=num(p.amount)});
   return Object.keys(map).map(function(k){var s=map[k];s.due=s.charges-s.paid;return s}).sort(function(a,b){return b.due-a.due||String(b.last).localeCompare(String(a.last))});
 }

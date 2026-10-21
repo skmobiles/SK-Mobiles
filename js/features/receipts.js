@@ -29,7 +29,7 @@ window.skPaidAfterSale=function(b){
 window.skReceiptAdd=function(r){
   var a=all(),now=new Date(),day=now.getFullYear()+pad(now.getMonth()+1)+pad(now.getDate());
   var date=r.date?dmy(r.date):pad(now.getDate())+'/'+pad(now.getMonth()+1)+'/'+now.getFullYear();
-  var seq=a.filter(function(x){return String(x.no||'').indexOf('RC-'+day)===0}).length+1;
+  var seq=a.reduce(function(m,x){var n=String(x.no||'');if(n.indexOf('RC-'+day)!==0)return m;var q=parseInt(n.slice(n.lastIndexOf('-')+1),10);return Math.max(m,isNaN(q)?0:q)},a.filter(function(x){return String(x.no||'').indexOf('RC-'+day)===0}).length)+1; /* V5.11.48: highest number + 1, so a deleted receipt's number is never reused */
   var rec={id:'RC'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),no:r.no||('RC-'+day+'-'+pad(seq,3)),date:date,createdAt:now.toISOString(),
     customer:r.customer||'',phone:r.phone||'',kind:r.kind||'Payment',ref:r.ref||'',item:r.item||'',amount:num(r.amount),mode:r.mode||'Cash',
     total:num(r.total),paidTotal:num(r.paidTotal),balance:Math.max(0,num(r.balance)),billId:r.billId||'',jobId:r.jobId||'',note:r.note||''};
