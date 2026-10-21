@@ -434,6 +434,16 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.48
+Data-safety fixes from an independent code review:
+- App start no longer deletes "duplicate" bills (two walk-ins buying the same model lost a bill, and the delete spread to every device). Only a repeated bill id counts as a duplicate.
+- sk_bills is synced bill-by-bill only (it was also synced as one whole list, so one device could overwrite another device's new bills).
+- The app's in-memory bills, stock and orders lists are refreshed right after a cloud sync, so the next save cannot write an old copy back.
+- Editing a repair job keeps every field (dealer name / amount, return details, ready date, cancelled payments).
+- Unreadable repair data is backed up and saving is blocked, and the cloud never deletes most repair jobs in one go.
+- A new repair job no longer inherits the photos of the job edited before it.
+- Auto-saved bills (when leaving the billing page) no longer record a balance for cash sales.
+
 ## V5.11.47
 - Tool popups (Reviews & Offers, Monthly/Daily Report, Price List, Dealer, Aging, Backup, Customers, Recycle Bin, Repair Detail, Orders, Credit pages and more) now use the same 8px side gap as every other page; content was sitting 20-24px from the edge. Full-width titles unchanged.
 

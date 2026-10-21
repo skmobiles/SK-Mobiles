@@ -81,7 +81,8 @@
   function isSyncableKey(key) {
     if (!key) return false;
     // Skip only device-specific settings such as login/theme
-    if (key === SYNC_META_KEY || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_appearance_settings" || key === "sk_bill_draft" || key === REPAIR_KEY) {
+    if (key === SYNC_META_KEY || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_appearance_settings" || key === "sk_bill_draft" || key === REPAIR_KEY || key === BILL_KEY) {
+      /* V5.11.48: bills sync one by one (uploadBills); syncing the whole list too let one device overwrite the other's new bills. */
       return false;
     }
     return key.startsWith("sk_") || key.startsWith("skx_");
@@ -109,10 +110,19 @@
   function setLocalBills(a){
     applyingRemote = true;
     try { localStorage.setItem(BILL_KEY, JSON.stringify(a)); } finally { applyingRemote = false; }
+    try{ if(typeof savedBills !== "undefined") savedBills = a; }catch(e){}
     refreshAllUI();
   }
 
   // Refresh all UI sections as soon as data changes
+  /* V5.11.48: keep the in-memory lists of the app equal to what was just synced, so the next save never writes an old copy back */
+  function syncAppGlobals(key){
+    try{
+      if(key==="sk_inventory"||key===null){ const v=JSON.parse(localStorage.getItem("sk_inventory")||"null"); if(Array.isArray(v)&&typeof inventory!=="undefined"){ inventory=v; window.inventory=v; } }
+      if(key==="sk_orders"||key===null){ const v=JSON.parse(localStorage.getItem("sk_orders")||"null"); if(Array.isArray(v)&&typeof ordersList!=="undefined"){ ordersList=v; } }
+    }catch(e){}
+  }
+
   function refreshAllUI(){
     /* During the three-part login bootstrap, wait until bills/repairs/data have
        all reached their baseline. Rendering each intermediate state causes a
@@ -131,6 +141,7 @@
       if(window.__skTouchBusy && window.__skTouchBusy()){ refreshUiFrame=setTimeout(run,350); return; }
       try {
         if(typeof savedBills !== "undefined") savedBills = localBills();
+        syncAppGlobals(null);
         if(typeof updateBillHistoryCount === "function") updateBillHistoryCount();
         if(typeof renderBillHistory === "function") renderBillHistory();
         if(typeof loadSavedBills === "function") loadSavedBills();
@@ -152,8 +163,9 @@
   }
 
   function normalizeBill(b){
-    if(!b || !b.id) return null;
-    return Object.assign({}, b, { id: String(b.id) });
+    const bid=b&&(b.id||b.billId||b.billNo);
+    if(!bid) return null;
+    return Object.assign({}, b, { id: String(bid) });
   }
 
   function emailRole(email){
@@ -529,7 +541,13 @@
       // resurrect them from its older local array.  Do not update
       // repairKnownRemote until the Firestore batch actually commits; otherwise
       // a transient write failure can permanently suppress the retry.
+      /* V5.11.48: never delete most of the cloud list in one go (e.g. after a bad local read) */
+      let tombCandidates=0, knownLive=0;
+      for(const [id, meta] of repairKnownRemote.entries()){ if(meta?.deleted) continue; knownLive++; if(!localIds.has(id)) tombCandidates++; }
+      const skipTombstones = window.__skRjCorrupt || (knownLive>=5 && tombCandidates>Math.max(3,Math.floor(knownLive*0.5)));
+      if(skipTombstones && tombCandidates) console.warn("Repair sync: skipped deleting "+tombCandidates+" cloud jobs (safety guard)");
       for(const [id, meta] of repairKnownRemote.entries()){
+        if(skipTombstones) break;
         if(localIds.has(id) || meta?.deleted) continue;
         batch.set(repairRef(id), {
           id,
@@ -708,7 +726,7 @@
             }
             if(cloudVal !== localVal){
               applyingRemote = true;
-              try { localStorage.setItem(key, cloudVal); hasChanges = true; }
+              try { localStorage.setItem(key, cloudVal); hasChanges = true; syncAppGlobals(key); }
               finally { applyingRemote = false; }
             }
             universalLastSyncedHash.set(key, syncHash(cloudVal));
@@ -754,7 +772,7 @@
           universalLastSyncedHash.set(key, syncHash(cloudVal));
           if(cloudVal !== localVal){
             applyingRemote = true;
-            try { localStorage.setItem(key, cloudVal); changed = true; }
+            try { localStorage.setItem(key, cloudVal); changed = true; syncAppGlobals(key); }
             finally { applyingRemote = false; }
           }
           markRemoteBaseline(key, remoteTime || Date.now());

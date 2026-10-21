@@ -1337,9 +1337,13 @@ const MASTER_INVENTORY = [
         try {
           let rawBills = JSON.parse(storedBills);
           if (!Array.isArray(rawBills)) rawBills = [];
+          /* V5.11.48: only a repeated bill id is a duplicate. The old name/phone/model/price rule deleted real bills
+             (two walk-ins buying the same model) and the deletion then spread to every device. */
           const seen = new Set();
           savedBills = rawBills.filter(b => {
-            const key = `${b?.custName || ''}_${b?.phone || ''}_${b?.model || ''}_${b?.price || ''}`;
+            if (!b || typeof b !== 'object') return false;
+            const key = String(b.id || '');
+            if (!key) return true;
             if (seen.has(key)) return false;
             seen.add(key);
             return true;
@@ -1475,7 +1479,8 @@ const MASTER_INVENTORY = [
           imei2: document.getElementById('billImei2').value || '', package: document.getElementById('billPackage').value || '',
           payMode: currentPayMode, price,
           advance: parseFloat(document.getElementById('billAdvance').value) || 0,
-          balance: parseFloat((document.getElementById('billBalanceDisplay')?.innerText || '').replace(/\D/g,'')) || 0,
+          /* V5.11.48: same rule as the Save button - only Credit / EMI sales carry a balance (a cash sale auto-saved when leaving the page showed the customer as owing) */
+          balance: (currentPayMode === 'EMI' || currentPayMode === 'Credit') ? Math.max(0, price - (parseFloat(document.getElementById('billAdvance').value) || 0)) : 0,
           emiMonths: parseInt(document.getElementById('billEmiMonths').value,10) || 0,
           emiInterest: parseFloat(document.getElementById('billEmiInterest').value) || 0,
           emiStartDate: document.getElementById('billEmiStartDate').value || '', creditDueDate: document.getElementById('billCreditDate').value || '',
@@ -3411,6 +3416,7 @@ const MASTER_INVENTORY = [
     window.skBillResetForm = skBillResetForm;
 
     function saveUsedBill() {
+      try{const fb=JSON.parse(localStorage.getItem('sk_bills')||'[]');if(Array.isArray(fb))savedBills=fb}catch(e){}
       const editId = String(window.__skEditingBillId || '');
       if (editId) {
         const bill = savedBills.find(b => b && String(b.id) === editId);
@@ -3527,6 +3533,7 @@ const MASTER_INVENTORY = [
 window.deleteBillSafely=async function(billId){
   const id=String(billId||'').trim();
   if(!id){showToast?.('❌ Bill ID not found');return}
+  try{const fb=JSON.parse(localStorage.getItem('sk_bills')||'[]');if(Array.isArray(fb))savedBills=fb}catch(e){}
   const list=Array.isArray(savedBills)?savedBills:[];
   const idx=list.findIndex(function(b){
     return String(b?.id||'')===id || String(b?.billId||'')===id || String(b?.billNo||'')===id;
@@ -4306,8 +4313,15 @@ img{max-width:100%!important;}
   }
   function load(){
     try{
-      const a=JSON.parse(localStorage.getItem(KEY)||'[]');
-      if(!Array.isArray(a))return [];
+      const rawStored=localStorage.getItem(KEY)||'[]';
+      let a;
+      try{a=JSON.parse(rawStored)}catch(pe){
+        /* V5.11.48: unreadable data - keep a copy and block saving, so one bad value can never overwrite every job (locally and in the cloud) */
+        try{if(!localStorage.getItem(KEY+'_corrupt_backup'))localStorage.setItem(KEY+'_corrupt_backup',rawStored)}catch(e2){}
+        window.__skRjCorrupt=true;return [];
+      }
+      if(!Array.isArray(a)){window.__skRjCorrupt=true;return [];}
+      window.__skRjCorrupt=false;
       /* V5.11.23: bring back jobs whose status was blanked by editing a delivered job (they vanished from every list) */
       let fixed=false;
       a.forEach(j=>{
@@ -4321,6 +4335,7 @@ img{max-width:100%!important;}
     }catch(e){return []}
   }
   function save(a){
+    if(window.__skRjCorrupt){try{showToast('Repair data could not be read - not saved. Please contact support.')}catch(e){}return false;}
     /* V5.11.8: remember the day a job became Ready (used by the "not collected" reminders) */
     try{const prev={};load().forEach(j=>{if(j)prev[j.id]=j.status;});const now=new Date().toISOString();
       a.forEach(j=>{if(!j)return;if(j.status==='Ready'&&!j.readyAt&&prev[j.id]!=='Ready')j.readyAt=now;else if(j.status!=='Ready'&&j.status!=='Delivered'&&j.readyAt)delete j.readyAt;});}catch(e){}
@@ -4391,6 +4406,7 @@ img{max-width:100%!important;}
   window.skRjSetFilter=function(f){window.__skRjFilter=f;skRjRenderJobs();};
 
   function clearForm(){
+    try{window.skPhClear&&window.skPhClear()}catch(e){}
     document.getElementById('skRjForm')?.reset();
     document.getElementById('skRjEditId').value='';
     document.getElementById('skRjCustomer').value='Walk-in Customer';
@@ -4483,7 +4499,8 @@ img{max-width:100%!important;}
     if(!normalizedDate){ showToast('Received Date must be DD/MM/YYYY'); return false; }
     const a=load();
     const existing=id?a.find(x=>x.id===id):null;
-    const job={
+    /* V5.11.48: start from the saved job so fields this form does not show (dealer name/amount, return details, readyAt, cancelled payments...) are never lost on edit */
+    const job=Object.assign(existing?Object.assign({},existing):{},{
       id:id||('RJ-'+Date.now()),
       customer:document.getElementById('skRjCustomer').value.trim()||'Walk-in Customer',
       phone:document.getElementById('skRjPhone').value.trim(),
@@ -4509,7 +4526,8 @@ img{max-width:100%!important;}
       outsideCharge:Number(existing?.outsideCharge)||0,
       createdAt:existing?.createdAt||new Date().toISOString(),
       updatedAt:new Date().toISOString()
-    };
+    });
+    if(existing&&(String(existing.outcome||'')==='returned'||String(existing.deliveryStatus||'').startsWith('Returned')))job.deliveryStatus=existing.deliveryStatus;
     if(!job.customer||!job.model||!job.problem){ showToast('Customer, Model & Problem required'); return false; }
     if(typeof window.skOutFormRead==='function'){
       const oo=window.skOutFormRead(existing,job.status);

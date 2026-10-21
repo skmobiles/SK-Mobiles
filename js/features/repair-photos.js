@@ -33,6 +33,7 @@ function drawThumbs(){
   var add=document.getElementById('skRjPhotoAdd');if(add)add.style.display=cur.length>=MAX?'none':'';
   var c=document.getElementById('skRjPhotoCount');if(c)c.textContent=cur.length+'/'+MAX;
 }
+window.skPhClear=function(){cur=[];try{drawThumbs()}catch(e){}};
 window.skPhDel=function(i){cur.splice(i,1);drawThumbs()};
 window.skPhView=function(i,list){
   var arr=list||cur,src=arr[i];if(!src)return;
