@@ -434,6 +434,12 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.51
+- **Delivery payment:** the discount is now typed inside the Delivery payment dialog (amount + reason); Final payable and To pay now update live. The separate browser prompts are gone. Summary box text no longer touches the border.
+- **Dealer Payments:** add an old balance manually; return a spare to the dealer (pick dealer, pick the purchase, outstanding drops, return date is kept; delete a return to undo); spare purchases of repairs delivered more than 10 days ago are hidden (still shown if marked Pay later); plain text rows instead of boxes inside boxes. New data key `skx_dealer_entries_v1`.
+- **Month Report:** a spare returned to the dealer is subtracted from that repair's spare cost, so profit is correct.
+- **Menu:** the left menu no longer blinks when it opens (solid panel, only the dark backdrop fades).
+
 ## V5.11.50
 Credit / payment flow:
 - Repair delivery asks Paid in full / Part payment / Credit (instead of a number prompt). Credit (or the unpaid rest) goes to the customer's Credit Ledger: same name + number = same account, otherwise a new account.

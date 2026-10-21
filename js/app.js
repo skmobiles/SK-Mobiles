@@ -4726,33 +4726,55 @@ img{max-width:100%!important;}
   /* V5.11.50 payment dialog used at delivery */
   function rjAskPayment(info,cb){
     const inr=n=>'₹'+(Number(n)||0).toLocaleString('en-IN');
-    if(!(info.outstanding>0)){cb(0);return;}
+    if(!(info.outstanding>0)&&!(info.maxDiscount>0)){cb(0,0,'');return;}
     document.getElementById('skRjPayDlg')?.remove();
     const d=document.createElement('div');d.id='skRjPayDlg';d.className='skrc-dlg skrc-edit';
+    const canDisc=info.maxDiscount>0;
     d.innerHTML=`<div class="skrc-sheet"><div class="skrc-bar"><button type="button" class="skrc-x" aria-label="Close">←</button><b>Delivery payment</b></div><div class="skrc-body skrc-form">
       <div class="skrc-hint">${esc(info.job.customer)} · ${esc(info.job.model)}</div>
-      <div class="sk-pc-sum"><span>Estimate</span><b>${inr(info.total)}</b><span>Discount</span><b>${inr(info.discount)}</b><span>Final payable</span><b>${inr(info.netTotal)}</b><span>Already paid</span><b>${inr(info.alreadyPaid)}</b><span class="o">To pay now</span><b class="o">${inr(info.outstanding)}</b></div>
+      <div class="sk-pc-sum"><span>Estimate</span><b>${inr(info.total)}</b><span>Discount</span><b id="skPcDisc">${inr(info.existingDiscount)}</b><span>Final payable</span><b id="skPcNet">${inr(info.total-info.existingDiscount)}</b><span>Already paid</span><b>${inr(info.alreadyPaid)}</b><span class="o">To pay now</span><b class="o" id="skPcOut">${inr(info.outstanding)}</b></div>
+      ${canDisc?`<label>Discount at delivery (₹, 0 if none · max ${inr(info.maxDiscount)})<input id="skPcDiscIn" type="number" inputmode="decimal" min="0" max="${info.maxDiscount}" placeholder="0" value="0"></label>
+      <label id="skPcReasonWrap" style="display:none">Discount reason<select id="skPcReason"><option>Customer bargain</option><option>Special offer</option><option>Service discount</option><option value="Other">Other</option></select></label>
+      <label id="skPcOtherWrap" style="display:none">Enter reason<input id="skPcOther" type="text" placeholder="Reason"></label>`:''}
       <div class="sk-pc-opts"><button type="button" data-o="full" class="on">✅ Paid in full</button><button type="button" data-o="part">💵 Part payment</button><button type="button" data-o="credit">🧾 Credit</button></div>
-      <label id="skPcAmtWrap" style="display:none">Amount received now (₹)<input id="skPcAmt" type="number" inputmode="decimal" min="0" max="${info.outstanding}" placeholder="0"></label>
-      <div class="skrc-hint" id="skPcHint">Customer pays ${inr(info.outstanding)} now.</div>
+      <label id="skPcAmtWrap" style="display:none">Amount received now (₹)<input id="skPcAmt" type="number" inputmode="decimal" min="0" placeholder="0"></label>
+      <div class="skrc-hint" id="skPcHint"></div>
       <div class="skrc-msg" id="skPcMsg"></div></div>
       <div class="skrc-act"><button type="button" data-a="cancel" class="ed">Cancel</button><button type="button" data-a="ok" class="wa">Deliver</button></div></div>`;
     document.body.appendChild(d);
     let mode='full';
-    const hint=d.querySelector('#skPcHint'),wrap=d.querySelector('#skPcAmtWrap'),msg=d.querySelector('#skPcMsg');
-    const setMode=m=>{mode=m;d.querySelectorAll('.sk-pc-opts button').forEach(b=>b.classList.toggle('on',b.dataset.o===m));wrap.style.display=m==='part'?'':'none';msg.textContent='';
-      hint.textContent=m==='full'?'Customer pays '+inr(info.outstanding)+' now.':m==='part'?'The rest stays as credit in the customer\'s Credit Ledger.':'No payment now. '+inr(info.outstanding)+' goes to the customer\'s Credit Ledger (same name + number = same account).';
-      if(m==='part')setTimeout(()=>d.querySelector('#skPcAmt')?.focus(),50)};
+    const hint=d.querySelector('#skPcHint'),wrap=d.querySelector('#skPcAmtWrap'),msg=d.querySelector('#skPcMsg'),opts=d.querySelector('.sk-pc-opts');
+    const q=s=>d.querySelector(s);
+    const curDisc=()=>{if(!canDisc)return 0;const v=Number(String(q('#skPcDiscIn').value||'0').replace(/[,₹\s]/g,''));return Number.isFinite(v)?v:NaN;};
+    const curOut=()=>{const v=curDisc();const dv=Number.isFinite(v)&&v>=0&&v<=info.maxDiscount?v:0;return Math.max(0,info.total-info.existingDiscount-dv-info.alreadyPaid);};
+    const refresh=()=>{const v=curDisc();const ok=Number.isFinite(v)&&v>=0&&v<=info.maxDiscount;const dv=ok?v:0,out=curOut();
+      q('#skPcDisc').textContent=inr(info.existingDiscount+dv);q('#skPcNet').textContent=inr(info.total-info.existingDiscount-dv);q('#skPcOut').textContent=inr(out);
+      if(canDisc){q('#skPcReasonWrap').style.display=dv>0?'':'none';q('#skPcOtherWrap').style.display=dv>0&&q('#skPcReason').value==='Other'?'':'none';}
+      opts.style.display=out>0?'':'none';if(!(out>0)&&mode!=='full')mode='full';
+      wrap.style.display=out>0&&mode==='part'?'':'none';
+      opts.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.o===mode));
+      hint.textContent=!(out>0)?'Nothing to collect. The job will be marked Delivered.':mode==='full'?'Customer pays '+inr(out)+' now.':mode==='part'?'The rest stays as credit in the customer\'s Credit Ledger.':'No payment now. '+inr(out)+' goes to the customer\'s Credit Ledger (same name + number = same account).';
+    };
+    const setMode=m=>{mode=m;msg.textContent='';refresh();if(m==='part')setTimeout(()=>q('#skPcAmt')?.focus(),50)};
+    d.addEventListener('input',e=>{if(e.target.id==='skPcDiscIn'||e.target.id==='skPcReason'){msg.textContent='';refresh();}});
+    d.addEventListener('change',e=>{if(e.target.id==='skPcReason')refresh();});
+    refresh();
     d.addEventListener('click',e=>{
       if(e.target===d||e.target.closest('.skrc-x')||e.target.dataset?.a==='cancel'){d.remove();return;}
       const o=e.target.closest('[data-o]');if(o){setMode(o.dataset.o);return;}
       if(e.target.dataset?.a!=='ok')return;
-      let amount=0;
-      if(mode==='full')amount=info.outstanding;
-      else if(mode==='part'){amount=Number(d.querySelector('#skPcAmt').value);
-        if(!Number.isFinite(amount)||amount<=0){msg.textContent='Enter the amount received';return;}
-        if(amount>info.outstanding){msg.textContent='More than the outstanding '+inr(info.outstanding);return;}}
-      d.remove();cb(amount);
+      const disc=curDisc();
+      if(!Number.isFinite(disc)||disc<0||disc>info.maxDiscount){msg.textContent='Enter a valid discount not greater than '+inr(info.maxDiscount);return;}
+      let reason='';
+      if(disc>0){reason=q('#skPcReason').value;if(reason==='Other'){reason=String(q('#skPcOther').value||'').trim();if(!reason){msg.textContent='Discount reason is required';return;}}}
+      const out=curOut();let amount=0;
+      if(out>0){
+        if(mode==='full')amount=out;
+        else if(mode==='part'){amount=Number(q('#skPcAmt').value);
+          if(!Number.isFinite(amount)||amount<=0){msg.textContent='Enter the amount received';return;}
+          if(amount>out){msg.textContent='More than the outstanding '+inr(out);return;}}
+      }
+      d.remove();cb(amount,disc,reason);
     });
   }
   window.skRjDeliver=function(id){
@@ -4763,59 +4785,16 @@ img{max-width:100%!important;}
     const alreadyPaid=Math.max(0,Number(job.paidAmount)||0);
     const existingDiscount=Math.min(total,Math.max(0,Number(job.discountAmount)||0));
     const maxAdditionalDiscount=Math.max(0,total-alreadyPaid-existingDiscount);
-    const discountInput=prompt(
-      'Discount at delivery (enter 0 if none)\nOriginal estimate: ₹'+total.toLocaleString('en-IN')+
-      '\nPreviously recorded discount: ₹'+existingDiscount.toLocaleString('en-IN')+
-      '\nAlready paid: ₹'+alreadyPaid.toLocaleString('en-IN')+
-      '\nMaximum additional discount: ₹'+maxAdditionalDiscount.toLocaleString('en-IN')+
-      '\n\nEnter additional discount amount:',
-      '0'
-    );
-    if(discountInput===null)return;
-    const discount=Number(String(discountInput).replace(/[,₹\s]/g,''));
-    if(!Number.isFinite(discount)||discount<0||discount>maxAdditionalDiscount){
-      showToast('Enter a valid discount not greater than ₹'+maxAdditionalDiscount.toLocaleString('en-IN'));
-      return;
-    }
-
-    let discountReason='';
-    let discountEvent=null;
-    if(discount>0){
-      const reasonChoice=prompt(
-        'Select discount reason by number:\n1. Customer bargain\n2. Special offer\n3. Service discount\n4. Other',
-        '1'
-      );
-      if(reasonChoice===null)return;
-      const reasons={'1':'Customer bargain','2':'Special offer','3':'Service discount','4':'Other'};
-      const choice=String(reasonChoice).trim();
-      if(!reasons[choice]){
-        showToast('Choose discount reason 1, 2, 3 or 4');
-        return;
+    /* V5.11.51: the discount is entered inside the Delivery payment dialog (no separate prompts) */
+    rjAskPayment({job:job,total:total,existingDiscount:existingDiscount,alreadyPaid:alreadyPaid,maxDiscount:maxAdditionalDiscount,outstanding:Math.max(0,total-existingDiscount-alreadyPaid)},function(amount,discount,discountReason){
+      let discountEvent=null;
+      if(discount>0){
+        discountEvent={id:'RJ-DISCOUNT-'+String(job.id)+'-'+Date.now(),amount:discount,reason:discountReason,date:new Date().toISOString(),type:'Repair discount'};
       }
-      discountReason=reasons[choice];
-      if(choice==='4'){
-        const customReason=prompt('Enter discount reason:');
-        if(customReason===null)return;
-        discountReason=String(customReason).trim();
-        if(!discountReason){showToast('Discount reason is required');return;}
-      }
-      discountEvent={
-        id:'RJ-DISCOUNT-'+String(job.id)+'-'+Date.now(),
-        amount:discount,
-        reason:discountReason,
-        date:new Date().toISOString(),
-        type:'Repair discount'
-      };
-    }
-
-    const netTotal=Math.max(0,total-existingDiscount-discount);
-    const outstandingBeforePayment=Math.max(0,netTotal-alreadyPaid);
-    /* V5.11.49: advance paid is more than the final amount - the extra is returned to the customer */
-    const extraPaid=Math.max(0,alreadyPaid-netTotal);
-    if(extraPaid>0&&!confirm('Advance paid ₹'+alreadyPaid.toLocaleString('en-IN')+' is more than the final amount ₹'+netTotal.toLocaleString('en-IN')+'.\n\nReturn ₹'+extraPaid.toLocaleString('en-IN')+' to the customer now?\n\nOK = the extra is recorded as returned.'))return;
-    /* V5.11.50: Paid in full / Part payment / Credit instead of a number prompt. Credit puts the balance in the customer's Credit Ledger
-       (same name + number = same account, otherwise a new account). */
-    rjAskPayment({job:job,total:total,discount:existingDiscount+discount,netTotal:netTotal,alreadyPaid:alreadyPaid,outstanding:outstandingBeforePayment},function(amount){
+      const netTotal=Math.max(0,total-existingDiscount-discount);
+      const extraPaid=Math.max(0,alreadyPaid-netTotal);
+      /* V5.11.49: advance paid is more than the final amount - the extra is returned to the customer */
+      if(extraPaid>0&&!confirm('Advance paid ₹'+alreadyPaid.toLocaleString('en-IN')+' is more than the final amount ₹'+netTotal.toLocaleString('en-IN')+'.\n\nReturn ₹'+extraPaid.toLocaleString('en-IN')+' to the customer now?\n\nOK = the extra is recorded as returned.'))return;
       const curJob=load().find(x=>String(x.id)===String(job.id));
       if(!curJob||curJob.status!=='Ready'||String(curJob.updatedAt||'')!==String(job.updatedAt||'')){showToast('This job changed meanwhile - open it again');return;}
     const now=new Date().toISOString();

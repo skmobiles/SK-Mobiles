@@ -1359,3 +1359,44 @@ html body #skRjPayDlg .sk-pc-sum{background:var(--card-bg,#fff)!important;color:
 html body #skRjPayDlg .sk-pc-sum span{color:var(--text)!important;opacity:.82}
 html body #skRjPayDlg .sk-pc-sum .o,html body #skRjPayDlg .sk-pc-sum b.o{color:#ef4444!important;opacity:1}
 html body #skRjPayDlg label,html body #skRjPayDlg .skrc-hint{color:var(--text)!important;opacity:.9}
+
+/* V5.11.51: Menu opens without blinking. The whole drawer (including its see-through panel) used to fade from 0 opacity, so the page behind showed through for a moment. Now the panel is solid and only slides; the dark backdrop fades on its own. */
+html body #leftDrawer.active{opacity:1!important;transition:none!important;animation:skDrBg .2s ease-out both}
+html body #leftDrawer.active .left-drawer-content{opacity:1!important;transition:none!important;background:var(--modal-bg,#fff)!important;transform:none!important;animation:skDrSlide .2s ease-out both;will-change:transform}
+@keyframes skDrBg{from{background-color:rgba(8,12,28,0)}to{background-color:rgba(8,12,28,.45)}}
+@keyframes skDrSlide{from{transform:translateX(-24px)}to{transform:translateX(0)}}
+
+/* V5.11.51: Delivery dialog summary - text must not touch the box border */
+html body #skRjPayDlg .sk-pc-sum{box-sizing:border-box!important;padding:14px 16px!important;gap:8px 16px!important;margin:0!important}
+html body #skRjPayDlg .sk-pc-sum>span,html body #skRjPayDlg .sk-pc-sum>b{margin:0!important;padding:0!important}
+
+/* V5.11.51: Dealer Payments - plain text rows (no boxes inside boxes) */
+html body #skDealerModal .skdl2-list{border:1px solid var(--card-border,#dbe4f5);border-radius:16px;background:var(--card-bg,#fff);padding:4px 14px;margin-top:8px}
+html body #skDealerModal .skdl2-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--card-border,#e5eaf5);background:none;border-left:0;border-right:0;border-bottom:0;border-radius:0;box-shadow:none;color:var(--text);font-weight:700;font-size:.88rem;cursor:pointer}
+html body #skDealerModal .skdl2-row:first-child{border-top:0}
+html body #skDealerModal .skdl2-row.plain{cursor:default;padding:9px 0}
+html body #skDealerModal .skdl2-row small{display:block;margin-top:2px;font-weight:600;font-size:.72rem;color:var(--text-muted,#64748b)}
+html body #skDealerModal .skdl2-row b{white-space:nowrap;font-weight:800}
+html body #skDealerModal .skdl2-row.ret>span,html body #skDealerModal .skdl2-row.ret>b{text-decoration:line-through;opacity:.6}
+html body #skDealerModal .skdl2-ret{color:#b45309;font-weight:800;text-decoration:none;display:inline-block}
+html body #skDealerModal .skdl2-sec{margin-top:14px;padding:0 2px}
+html body #skDealerModal .skdl2-sec>h4{margin:0 0 2px;font-size:.82rem;font-weight:800;color:var(--text);padding-bottom:6px;border-bottom:2px solid var(--card-border,#dbe4f5)}
+html body #skDealerModal .skdl2-sec>h4 small{font-weight:500;opacity:.7;font-size:.68rem}
+html body #skDealerModal .skdl2-sec .skdl2-row.plain+.skdl2-row.plain{border-top:1px solid var(--card-border,#e5eaf5)}
+html body #skDealerModal .skdl2-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 4px}
+html body #skDealerModal .skdl2-tabs.two{grid-template-columns:repeat(2,1fr)}
+html body #skDealerModal .skdl2-tabs button{min-height:38px!important;border-radius:12px;border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);font-weight:700;font-size:.76rem;padding:6px 4px;cursor:pointer}
+html body #skDealerModal .skdl2-tabs button.on{background:var(--primary,#2563eb);border-color:var(--primary,#2563eb);color:#fff}
+html body #skDealerModal .skdl2-form{display:grid;gap:8px;margin:8px 0 4px;padding:6px 2px 2px}
+html body #skDealerModal .skdl2-form h4{margin:0;font-size:.86rem;font-weight:800;color:var(--text)}
+html body #skDealerModal .skdl2-form input:not([type=radio]),html body #skDealerModal .skdl2-form select{width:100%;box-sizing:border-box;height:44px;border:1px solid var(--card-border,#dbe4f5)!important;border-radius:12px!important}
+html body #skDealerModal .skdl2-hint{font-size:.74rem;font-weight:600;color:var(--text-muted,#64748b)}
+html body #skDealerModal .skdl2-pick{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--card-border,#e5eaf5);font-size:.84rem;font-weight:700;color:var(--text)}
+html body #skDealerModal .skdl2-pick>span{flex:1;min-width:0}
+html body #skDealerModal .skdl2-pick small{display:block;font-weight:600;font-size:.7rem;color:var(--text-muted,#64748b)}
+html body #skDealerModal .skdl2-pick input{width:20px!important;height:20px!important;flex:0 0 20px}
+html body #skDealerModal .skdl-tg{color:var(--primary,#2563eb)!important;font-weight:700;font-size:.7rem!important;border:1px solid var(--card-border,#dbe4f5)!important;border-radius:8px;padding:3px 7px!important;margin-left:6px}
+html body #skDealerModal .skdl2-sec{margin-top:18px!important}
+html body #skDealerModal .skdl2-sec>h4{margin-bottom:4px!important;padding-bottom:7px!important}
+html body #skDealerModal .skdl2-tabs button{white-space:nowrap;font-size:.72rem!important}
+html body #skDealerModal .skdl2-form{margin-bottom:10px!important}
