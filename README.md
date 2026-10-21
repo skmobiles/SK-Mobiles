@@ -434,6 +434,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.42
+- Every Appearance Studio setting now works on every theme (Dark A/B/iPhone, Royal, Glacier, Nebula, Magenta): Surface (flat/accent/glow/classic/slate) and Accent colour no longer get overridden by the palette.
+- Each theme remembers its own settings (corners, card surface, button style, surface, accent). Switch A -> B -> A and A keeps what you set; the Home sun/moon button no longer resets to theme defaults.
+
 ## V5.11.41
 - Royal, Glacier (light) and Nebula, Magenta (dark) are now full app palettes, like Dark A / B / iPhone: background, cards, inputs, header, bottom bar, text and accent colours all change. They sit in Settings > Style profiles > MORE THEMES. New setting `lightStyle` inside `sk_appearance_settings`; the header sun/moon button returns to the last light theme you picked.
 

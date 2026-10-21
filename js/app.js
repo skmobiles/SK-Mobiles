@@ -1794,7 +1794,7 @@ const MASTER_INVENTORY = [
     const SK_APPEARANCE_DEFAULTS = {
       preset:'classic', themeMode:'light', accent:'blue', customHex:'#2563EB',
       surface:'offwhite', cardRadius:'modern', buttonRadius:'modern', cardSurface:'blur',
-      header:'minimal', nav:'floating', scale:'normal', buttonStyle:'solid', darkStyle:'', lightStyle:'', aura:true, haptic:true, sound:false, motion:false
+      header:'minimal', nav:'floating', scale:'normal', buttonStyle:'solid', darkStyle:'', lightStyle:'', accentOwn:false, aura:true, haptic:true, sound:false, motion:false
     };
     const SK_APPEARANCE_ACCENTS = {
       blue:'#2563EB', violet:'#7C3AED', green:'#059669', rose:'#E11D48',
@@ -1871,7 +1871,7 @@ const MASTER_INVENTORY = [
     window.SK_DARK_STYLES=SK_DARK_STYLES;window.SK_LIGHT_STYLES=SK_LIGHT_STYLES;
     function skThemePick(name){
       if(SK_DARK_STYLES[name]){skDarkStyleSet(name);return;}
-      if(SK_LIGHT_STYLES[name]){const st=skAppearanceRead();st.themeMode='light';st.lightStyle=name;st.darkStyle='';skAppearanceApply(st,{theme:true});}
+      if(SK_LIGHT_STYLES[name]){const st=skAppearanceRead();st.themeMode='light';st.lightStyle=name;st.darkStyle='';st.accentOwn=false;skAppearanceApply(st,{theme:true});}
     }
     function skThemeCardsSync(){
       const st=skAppearanceRead(),light=skAppearanceResolvedMode(st)==='light';
@@ -1879,7 +1879,7 @@ const MASTER_INVENTORY = [
     }
     window.skThemePick=skThemePick;window.skThemeCardsSync=skThemeCardsSync;
     function skDarkStyleSet(v){
-      const st=skAppearanceRead();st.themeMode='dark';st.darkStyle=SK_DARK_STYLES[v]?v:'a';
+      const st=skAppearanceRead();st.themeMode='dark';st.darkStyle=SK_DARK_STYLES[v]?v:'a';st.accentOwn=false;
       skAppearanceApply(st,{theme:true});
     }
     window.skDarkStyleSet=skDarkStyleSet;
@@ -1926,9 +1926,10 @@ const MASTER_INVENTORY = [
       const ds=light?SK_LIGHT_STYLES[settings.lightStyle]:SK_DARK_STYLES[settings.darkStyle];
       if(ds){
         const sv=(k,v)=>root.style.setProperty(k,v);
-        sv('--primary',ds.accent);sv('--primary-gradient',`linear-gradient(135deg,${ds.accent} 0%,${ds.accent2} 100%)`);
-        sv('--glass-btn-bg',ds.accent);sv('--glass-btn-border',ds.accent2);sv('--glass-pill-active',ds.accent);sv('--glass-pill-border',ds.accent2);
-        sv('--badge-bg',skMix(ds.accent,'#000000',.80));sv('--badge-border',skMix(ds.accent,'#000000',.55));
+        const pa=settings.accentOwn?accent:ds.accent,pb=settings.accentOwn?primary2:ds.accent2;
+        sv('--primary',pa);sv('--primary-gradient',`linear-gradient(135deg,${pa} 0%,${pb} 100%)`);
+        sv('--glass-btn-bg',pa);sv('--glass-btn-border',pb);sv('--glass-pill-active',pa);sv('--glass-pill-border',pb);
+        sv('--badge-bg',skMix(pa,light?'#FFFFFF':'#000000',light?.88:.80));sv('--badge-border',skMix(pa,light?'#FFFFFF':'#000000',light?.65:.55));
         sv('--card-border',ds.border);sv('--page-bg',ds.page);sv('--bg',ds.bg);sv('--card-bg',ds.card);sv('--model-bg',ds.model);
         sv('--input-bg',ds.input);sv('--pill-bg',ds.pill);sv('--chip-bg',ds.border);sv('--bottom-nav-bg',ds.nav);sv('--header-bg',ds.header);
         sv('--modal-bg',ds.modal);sv('--text',ds.text);sv('--text-muted',ds.muted);sv('--glass-shadow','0 6px 18px rgba(0,0,0,.45)');sv('--card-elevation','0 4px 16px rgba(0,0,0,.45)');
@@ -1976,6 +1977,16 @@ const MASTER_INVENTORY = [
     }
     function skAppearanceApply(settings,opts){
       const next={...SK_APPEARANCE_DEFAULTS,...settings};
+      try{
+        const F=['surface','cardRadius','buttonRadius','cardSurface','header','nav','buttonStyle','accent','accentOwn','customHex','aura'];
+        const mode=skAppearanceResolvedMode(next);
+        const key=(mode==='light'?next.lightStyle:next.darkStyle)||mode;
+        const pt=(next.perTheme&&typeof next.perTheme==='object')?{...next.perTheme}:{};
+        if(!opts?.fresh&&next.activeKey&&next.activeKey!==key&&pt[key]){F.forEach(f=>{if(pt[key][f]!==undefined)next[f]=pt[key][f];});}
+        next.activeKey=key;
+        pt[key]={};F.forEach(f=>{pt[key][f]=next[f];});
+        next.perTheme=pt;
+      }catch(e){}
       skAppearanceSave(next);skAppearanceApplyTokens(next);skAppearanceSyncControls(next);
       try{skLivePreviewSync();}catch(e){}
       if(opts?.theme){
@@ -2002,9 +2013,9 @@ const MASTER_INVENTORY = [
         if(value==='liquid'||value==='white') settings.themeMode='light';
         if(value==='midnight'||value==='amber') settings.themeMode='dark';
         if(value==='classic'||value==='emerald'||value==='ruby'||value==='ocean') settings.themeMode='light';
-        skAppearanceApply(settings,{theme:true});
+        skAppearanceApply(settings,{theme:true,fresh:true});
       }else{
-        if(key==='accent') settings.accent=value;
+        if(key==='accent'){settings.accent=value;settings.accentOwn=true;}
         else if(key==='themeMode'){settings.themeMode=value;if(value==='dark')settings.darkStyle='';if(value==='light')settings.lightStyle='';}
         else if(['aura','haptic','sound','motion'].includes(key)) settings[key]=!!value;
         else settings[key]=value;
@@ -2025,7 +2036,7 @@ const MASTER_INVENTORY = [
       if(key==='sound'&&value)skAppearanceSoftClick();
     }
     function skAppearanceSetCustomAccent(value){
-      const hex=skHex(value),settings=skAppearanceRead();settings.accent='custom';settings.customHex=hex;settings.preset='classic';skAppearanceApply(settings,{theme:false});
+      const hex=skHex(value),settings=skAppearanceRead();settings.accent='custom';settings.accentOwn=true;settings.customHex=hex;settings.preset='classic';skAppearanceApply(settings,{theme:false});
     }
     function skResetAppearanceStudio(){
       const next={...SK_APPEARANCE_DEFAULTS};
