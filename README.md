@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.47
+- Tool popups (Reviews & Offers, Monthly/Daily Report, Price List, Dealer, Aging, Backup, Customers, Recycle Bin, Repair Detail, Orders, Credit pages and more) now use the same 8px side gap as every other page; content was sitting 20-24px from the edge. Full-width titles unchanged.
+
 ## V5.11.46
 - App-wide left/right gap changed from 6px to 8px: all pages, popups, header and cards. Full-width title bars and the bottom navigation bar stay as they were (nav bar keeps 6px).
 
