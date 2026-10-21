@@ -1370,33 +1370,51 @@ html body #leftDrawer.active .left-drawer-content{opacity:1!important;transition
 html body #skRjPayDlg .sk-pc-sum{box-sizing:border-box!important;padding:14px 16px!important;gap:8px 16px!important;margin:0!important}
 html body #skRjPayDlg .sk-pc-sum>span,html body #skRjPayDlg .sk-pc-sum>b{margin:0!important;padding:0!important}
 
-/* V5.11.51: Dealer Payments - plain text rows (no boxes inside boxes) */
-html body #skDealerModal .skdl2-list{border:1px solid var(--card-border,#dbe4f5);border-radius:16px;background:var(--card-bg,#fff);padding:4px 14px;margin-top:8px}
-html body #skDealerModal .skdl2-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--card-border,#e5eaf5);background:none;border-left:0;border-right:0;border-bottom:0;border-radius:0;box-shadow:none;color:var(--text);font-weight:700;font-size:.88rem;cursor:pointer}
-html body #skDealerModal .skdl2-row:first-child{border-top:0}
-html body #skDealerModal .skdl2-row.plain{cursor:default;padding:9px 0}
-html body #skDealerModal .skdl2-row small{display:block;margin-top:2px;font-weight:600;font-size:.72rem;color:var(--text-muted,#64748b)}
-html body #skDealerModal .skdl2-row b{white-space:nowrap;font-weight:800}
-html body #skDealerModal .skdl2-row.ret>span,html body #skDealerModal .skdl2-row.ret>b{text-decoration:line-through;opacity:.6}
-html body #skDealerModal .skdl2-ret{color:#b45309;font-weight:800;text-decoration:none;display:inline-block}
-html body #skDealerModal .skdl2-sec{margin-top:14px;padding:0 2px}
-html body #skDealerModal .skdl2-sec>h4{margin:0 0 2px;font-size:.82rem;font-weight:800;color:var(--text);padding-bottom:6px;border-bottom:2px solid var(--card-border,#dbe4f5)}
-html body #skDealerModal .skdl2-sec>h4 small{font-weight:500;opacity:.7;font-size:.68rem}
-html body #skDealerModal .skdl2-sec .skdl2-row.plain+.skdl2-row.plain{border-top:1px solid var(--card-border,#e5eaf5)}
-html body #skDealerModal .skdl2-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 4px}
+/* V5.11.52: Dealer Payments looks like the Customer Credit Ledger (cards, avatars, lines between dealers, same font sizes).
+   The global reset (* {margin:0;padding:0}) has very high specificity, so padding/margin here use !important. */
+html body #skDealerModal .skdl3-sum{display:block;box-sizing:border-box;background:var(--card-bg,#fff);border-radius:16px;padding:16px 18px!important;margin:0 0 12px!important;box-shadow:0 1px 3px rgba(15,23,42,.06);border:1px solid var(--card-border,#e5eaf5);text-align:left}
+html body #skDealerModal .skdl3-sum small{display:block;font-size:.86rem;font-weight:500;color:var(--text-muted,#64748b)}
+html body #skDealerModal .skdl3-sum b{display:block;margin:2px 0!important;font-size:1.9rem;line-height:1.15;font-weight:800;color:var(--text,#0f172a)}
+html body #skDealerModal .skdl3-sum span{display:block;font-size:.82rem;color:var(--text-muted,#64748b)}
+html body #skDealerModal .skdl3-sum.with-av{display:flex;align-items:center;gap:14px}
+html body #skDealerModal .skdl3-av{flex:0 0 44px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;font-size:1.05rem}
+html body #skDealerModal .skdl-start{background:var(--card-bg,#fff);border:1px solid var(--card-border,#e5eaf5);border-radius:14px;padding:10px 14px!important;margin:0 0 12px!important;font-size:.9rem!important;font-weight:500!important;color:var(--text,#0f172a)}
+html body #skDealerModal .skdl-start input{height:40px!important;font-size:.9rem!important;border-radius:12px}
+html body #skDealerModal .skdl2-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 12px!important}
 html body #skDealerModal .skdl2-tabs.two{grid-template-columns:repeat(2,1fr)}
-html body #skDealerModal .skdl2-tabs button{min-height:38px!important;border-radius:12px;border:1px solid var(--card-border,#dbe4f5);background:var(--card-bg,#fff);color:var(--text);font-weight:700;font-size:.76rem;padding:6px 4px;cursor:pointer}
-html body #skDealerModal .skdl2-tabs button.on{background:var(--primary,#2563eb);border-color:var(--primary,#2563eb);color:#fff}
-html body #skDealerModal .skdl2-form{display:grid;gap:8px;margin:8px 0 4px;padding:6px 2px 2px}
-html body #skDealerModal .skdl2-form h4{margin:0;font-size:.86rem;font-weight:800;color:var(--text)}
-html body #skDealerModal .skdl2-form input:not([type=radio]),html body #skDealerModal .skdl2-form select{width:100%;box-sizing:border-box;height:44px;border:1px solid var(--card-border,#dbe4f5)!important;border-radius:12px!important}
-html body #skDealerModal .skdl2-hint{font-size:.74rem;font-weight:600;color:var(--text-muted,#64748b)}
-html body #skDealerModal .skdl2-pick{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--card-border,#e5eaf5);font-size:.84rem;font-weight:700;color:var(--text)}
+html body #skDealerModal .skdl2-tabs button{min-height:44px!important;border-radius:12px;border:1px solid var(--card-border,#c7d6f2);background:var(--card-bg,#fff);color:var(--text,#0f172a);font-weight:600;font-size:.88rem!important;padding:8px 6px!important;white-space:nowrap;cursor:pointer}
+html body #skDealerModal .skdl2-tabs button:nth-child(1){color:#16a34a}
+html body #skDealerModal .skdl2-tabs button:nth-child(2){color:#2563eb}
+html body #skDealerModal .skdl2-tabs button:nth-child(3){color:#d97706}
+html body #skDealerModal .skdl2-tabs.two button:nth-child(1){color:#2563eb}
+html body #skDealerModal .skdl2-tabs.two button:nth-child(2){color:#d97706}
+html body #skDealerModal .skdl2-tabs button.on{background:var(--primary,#2563eb);border-color:var(--primary,#2563eb);color:#fff!important}
+html body #skDealerModal .skdl2-list,html body #skDealerModal .skdl2-sec,html body #skDealerModal .skdl2-form{box-sizing:border-box;background:var(--card-bg,#fff);border:1px solid var(--card-border,#e5eaf5);border-radius:16px;box-shadow:0 1px 3px rgba(15,23,42,.05);margin:0 0 12px!important;padding:6px 16px!important}
+html body #skDealerModal .skdl2-form{display:grid;gap:10px;padding:14px 16px 16px!important}
+html body #skDealerModal .skdl2-sec{padding:12px 16px 6px!important}
+html body #skDealerModal .skdl2-sec>h4,html body #skDealerModal .skdl2-form>h4{margin:0 0 4px!important;padding:0!important;border:0;font-size:1rem;font-weight:700;color:var(--text,#0f172a)}
+html body #skDealerModal .skdl2-sec>h4 small{display:block;margin-top:2px;font-size:.76rem;font-weight:400;color:var(--text-muted,#64748b)}
+html body #skDealerModal .skdl2-row{display:flex;align-items:center;gap:12px;padding:13px 0!important;margin:0!important;border:0;border-top:1px solid var(--card-border,#e5eaf5);background:none;border-radius:0;box-shadow:none;color:var(--text,#0f172a);font-size:1rem;font-weight:500;cursor:pointer}
+html body #skDealerModal .skdl2-row:first-child,html body #skDealerModal .skdl2-sec>h4+.skdl2-row{border-top:0}
+html body #skDealerModal .skdl2-row.plain{cursor:default;justify-content:space-between}
+html body #skDealerModal .skdl2-row>span{flex:1;min-width:0}
+html body #skDealerModal .skdl2-row small{display:block;margin-top:2px;font-size:.8rem;font-weight:400;color:var(--text-muted,#64748b)}
+html body #skDealerModal .skdl2-row>b{flex:0 0 auto;text-align:right;white-space:nowrap;font-size:1rem;font-weight:600}
+html body #skDealerModal .skdl2-row>b em{display:block;font-style:normal;font-size:.76rem;font-weight:400}
+html body #skDealerModal .skdl-due,html body #skDealerModal .skdl-due em{color:#dc2626}
+html body #skDealerModal .skdl-ok,html body #skDealerModal .skdl-ok em{color:#16a34a}
+html body #skDealerModal .skdl-adv,html body #skDealerModal .skdl-adv em{color:#2563eb}
+html body #skDealerModal .skdl2-row.ret>span,html body #skDealerModal .skdl2-row.ret>b{text-decoration:line-through;opacity:.6}
+html body #skDealerModal .skdl2-ret{color:#b45309;font-weight:600;text-decoration:none;display:inline-block}
+html body #skDealerModal .skdl2-form input:not([type=radio]),html body #skDealerModal .skdl2-form select{width:100%;box-sizing:border-box;height:46px;font-size:.95rem;padding:0 14px!important;border:1px solid var(--card-border,#dbe4f5)!important;border-radius:12px!important}
+html body #skDealerModal .skdl2-hint{font-size:.8rem;color:var(--text-muted,#64748b)}
+html body #skDealerModal .skdl2-pick{display:flex;align-items:center;gap:12px;padding:10px 0!important;border-top:1px solid var(--card-border,#e5eaf5);font-size:1rem;font-weight:500;color:var(--text,#0f172a)}
 html body #skDealerModal .skdl2-pick>span{flex:1;min-width:0}
-html body #skDealerModal .skdl2-pick small{display:block;font-weight:600;font-size:.7rem;color:var(--text-muted,#64748b)}
-html body #skDealerModal .skdl2-pick input{width:20px!important;height:20px!important;flex:0 0 20px}
-html body #skDealerModal .skdl-tg{color:var(--primary,#2563eb)!important;font-weight:700;font-size:.7rem!important;border:1px solid var(--card-border,#dbe4f5)!important;border-radius:8px;padding:3px 7px!important;margin-left:6px}
-html body #skDealerModal .skdl2-sec{margin-top:18px!important}
-html body #skDealerModal .skdl2-sec>h4{margin-bottom:4px!important;padding-bottom:7px!important}
-html body #skDealerModal .skdl2-tabs button{white-space:nowrap;font-size:.72rem!important}
-html body #skDealerModal .skdl2-form{margin-bottom:10px!important}
+html body #skDealerModal .skdl2-pick small{display:block;font-size:.8rem;font-weight:400;color:var(--text-muted,#64748b)}
+html body #skDealerModal .skdl2-pick input{width:20px!important;height:20px!important;flex:0 0 20px;padding:0!important}
+html body #skDealerModal .skdl-back{padding:2px 0 10px!important;font-size:.95rem}
+html body #skDealerModal .skdl-x{font-size:.95rem!important;padding:4px 8px!important}
+html body #skDealerModal .skdl-tg{color:var(--primary,#2563eb)!important;font-weight:600;font-size:.78rem!important;border:1px solid var(--card-border,#dbe4f5)!important;border-radius:8px;padding:4px 9px!important;margin-left:6px}
+html body #skDealerModal .skdr-empty{padding:14px 0!important;font-size:.9rem}
+html body #skDealerModal .skdr-actions{margin-top:4px!important}
+html body #skDealerModal .skdl3-search{width:100%;box-sizing:border-box;height:46px;margin:0 0 12px!important;padding:0 14px!important;font-size:.95rem;border:1px solid var(--card-border,#dbe4f5)!important;border-radius:12px!important;background:var(--card-bg,#fff)}

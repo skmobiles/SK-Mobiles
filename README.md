@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.52
+- **Dealer Payments restyled** like the Customer Credit Ledger: summary card, coloured avatars, one card with a line between dealers, section cards, same font sizes, text no longer touches borders (the global padding reset was overriding it). Added a dealer search box (when more than 4 dealers) and a summary line (dealers / with balance).
+
 ## V5.11.51
 - **Delivery payment:** the discount is now typed inside the Delivery payment dialog (amount + reason); Final payable and To pay now update live. The separate browser prompts are gone. Summary box text no longer touches the border.
 - **Dealer Payments:** add an old balance manually; return a spare to the dealer (pick dealer, pick the purchase, outstanding drops, return date is kept; delete a return to undo); spare purchases of repairs delivered more than 10 days ago are hidden (still shown if marked Pay later); plain text rows instead of boxes inside boxes. New data key `skx_dealer_entries_v1`.
