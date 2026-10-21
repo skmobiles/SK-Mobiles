@@ -434,6 +434,15 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.50
+Credit / payment flow:
+- Repair delivery asks Paid in full / Part payment / Credit (instead of a number prompt). Credit (or the unpaid rest) goes to the customer's Credit Ledger: same name + number = same account, otherwise a new account.
+- Credit Ledger > Payment: the "Sales Bill" list now also shows the customer's repair jobs and old balance, plus Auto (the item closest to closing - smallest outstanding - is paid first, then the next). A payment on a repair job updates the job (paid / outstanding, history shows Paid or the outstanding amount), its credit row and a receipt. A payment cannot be more than the outstanding.
+- Repair payments made through the ledger are counted once in the Daily / Monthly collection (payment history entries marked viaLedger are skipped there). Cancelling such a payment from the job also removes its ledger row.
+- New category "Recharge" in the Credit / Payment forms.
+- Ready repairs get an invoice-style number RP-DDMM-NNN (older Ready / Delivered jobs get one once); shown on job cards, repair details, receipts and the ledger.
+- Payment / Credit popups: the navigation bar stays visible and the Save button scrolls above the bottom fade.
+
 ## V5.11.49
 - Repair job photos removed (they made data too large to sync / back up). The photo box is gone and photos already stored in repair jobs and in the Recycle Bin are deleted once.
 - Advance more than the price: on a Credit/EMI bill the app asks to return the extra to the customer; the bill saves advance = price and records advanceRefund. At repair delivery, an advance above the final amount is returned the same way (recorded as a negative payment, job.refundAmount).

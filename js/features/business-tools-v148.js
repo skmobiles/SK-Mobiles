@@ -56,6 +56,7 @@ function buildReport(day){
     if(toKey(j.createdAt||j.date)===day)rep.received++;
     if(j.status==='Delivered'&&toKey(j.deliveredAt)===day)rep.delivered++;
     (Array.isArray(j.paymentHistory)?j.paymentHistory:[]).forEach(function(p){
+      if(p.viaLedger)return; /* counted through the credit-ledger payment row */
       if(toKey(p.date)===day){rep.collected+=num(p.amount);rep.rows.push({name:j.customer||'Customer',model:j.model||'',amount:num(p.amount)})}
     });
   });
