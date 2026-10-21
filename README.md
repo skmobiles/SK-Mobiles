@@ -434,6 +434,13 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.44 - full-app check
+- Fixed: Used Stock page content was cut 90px above the bottom bar (my V5.11.43 padding hit the wrong element); now scrolls to the bar with the smooth fade.
+- Toast (e.g. Auto Sync) now has a solid background instead of see-through over the page header.
+- Minimum text size 11.5px for app screens (bill / PDF sheets untouched); tab buttons got a larger tap area.
+- Logout / Reset / Close / Clear buttons keep their own colour (red / neutral) instead of being repainted blue by the Button style setting.
+- Repair photo "Add photo" box no longer cramped.
+
 ## V5.11.43
 - Smoother fade above the bottom bar (eased, longer ramp) on all pages.
 - Every page and popup now scrolls their last item clear of the fade, so buttons like WhatsApp PDF are no longer faded under the bar.
