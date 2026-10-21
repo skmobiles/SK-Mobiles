@@ -41,11 +41,12 @@ function build(ym){
   var U={count:used.length,sale:0,profit:0};
   used.forEach(function(r){U.sale+=num(r.sale.price);U.profit+=num(r.sale.profit)});
 
+  var retBy={};arr('skx_dealer_entries_v1').forEach(function(e){if(e&&e.type==='return'&&e.refId)retBy[e.refId]=(retBy[e.refId]||0)+num(e.amount)});
   var jobs=arr('skx_repair_jobs_v2'),R={received:0,delivered:0,revenue:0,cost:0,profit:0,collected:0,rows:[]};
   jobs.forEach(function(j){
     if(inM(j.createdAt||j.date))R.received++;
     if(j.status==='Delivered'&&inM(j.deliveredAt)){
-      R.delivered++;var rev=Math.max(0,num(j.estimate)-num(j.discountAmount)),cost=num(j.dealerPurchaseAmount)+num(j.outsideCharge);
+      R.delivered++;var rev=Math.max(0,num(j.estimate)-num(j.discountAmount)),cost=Math.max(0,num(j.dealerPurchaseAmount)-num(retBy['r:'+j.id]))+num(j.outsideCharge);
       R.revenue+=rev;R.cost+=cost;R.rows.push({name:j.customer||'',model:j.model||'',revenue:rev,cost:cost});
     }
     (Array.isArray(j.paymentHistory)?j.paymentHistory:[]).forEach(function(p){if(p.viaLedger)return;if(inM(p.date))R.collected+=num(p.amount)});
