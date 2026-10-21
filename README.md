@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.43
+- Smoother fade above the bottom bar (eased, longer ramp) on all pages.
+- Every page and popup now scrolls their last item clear of the fade, so buttons like WhatsApp PDF are no longer faded under the bar.
 ## V5.11.42
 - Every Appearance Studio setting now works on every theme (Dark A/B/iPhone, Royal, Glacier, Nebula, Magenta): Surface (flat/accent/glow/classic/slate) and Accent colour no longer get overridden by the palette.
 - Each theme remembers its own settings (corners, card surface, button style, surface, accent). Switch A -> B -> A and A keeps what you set; the Home sun/moon button no longer resets to theme defaults.
