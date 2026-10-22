@@ -1469,7 +1469,7 @@ const MASTER_INVENTORY = [
       if (custName && model && price > 0) {
         const billDate = `${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
         const newEntry = {
-          id: `SK-B-${Date.now().toString().slice(-6)}`,
+          id: `SK-B-${(window.skUid?window.skUid():Date.now()+'-'+Math.random().toString(36).slice(2,6))}`,
           billNo: skNextBillNo(billDate), date: billDate, mobileType: currentMobileType, custName,
           phone: document.getElementById('billCustPhone').value || '9876543210',
           address: document.getElementById('billCustAddress').value || '',
@@ -3463,7 +3463,7 @@ const MASTER_INVENTORY = [
       const isCreditOrEmi = currentPayMode === 'Credit' || currentPayMode === 'EMI';
       const _refN = skAdvanceRefundCheck(price, currentPayMode); if (_refN < 0) return;
       const newEntry = {
-        id: `SK-B-${Date.now().toString().slice(-8)}`,
+        id: `SK-B-${(window.skUid?window.skUid():Date.now()+'-'+Math.random().toString(36).slice(2,6))}`,
         billNo: skNextBillNo(billDate), date: billDate, custName,
         phone: document.getElementById('billCustPhone').value || '',
         address: document.getElementById('billCustAddress').value || '',
@@ -8178,8 +8178,8 @@ function cpUpdateBill(idx,type,amount,advance,data,bsOverride){
  var net=Math.max(0,amount-advance);
  b.balance=Math.max(0,(Number(b.balance)||0)+net);b.advance=(Number(b.advance)||0)+Math.max(0,advance);
  b.creditAdjustments=Array.isArray(b.creditAdjustments)?b.creditAdjustments:[];
- b.creditAdjustments.push({id:'CR-'+Date.now(),date:data.date,dueDate:data.dueDate||'',amount:amount,advance:advance,balance:net,category:data.category,note:data.note||''});
- b.paymentReceipts.push({id:'RCP-CR-'+Date.now().toString().slice(-8),billId:b.id,date:data.date,amount:net,mode:'Credit',note:data.note||'',type:'credit'});
+ b.creditAdjustments.push({id:'CR-'+(window.skUid?window.skUid():Date.now()+'-'+Math.random().toString(36).slice(2,4)),date:data.date,dueDate:data.dueDate||'',amount:amount,advance:advance,balance:net,category:data.category,note:data.note||''});
+ b.paymentReceipts.push({id:'RCP-CR-'+(window.skUid?window.skUid():Date.now()+'-'+Math.random().toString(36).slice(2,4)),billId:b.id,date:data.date,amount:net,mode:'Credit',note:data.note||'',type:'credit'});
  return net;
 }
 /* V5.11.50 ---- customer payments against bills / repair jobs / old balance ---- */

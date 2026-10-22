@@ -720,13 +720,16 @@
       return a;
     }catch(e){ return null; }
   }
+  /* V5.11.55: every record in a list carries a hidden "_u" = the time (ms, server time when online) it was added / last changed.
+     Records are compared WITHOUT "_u", so only a real change counts as a change. */
+  function recHash(x){ const c = Object.assign({}, x); delete c._u; return syncHash(JSON.stringify(c)); }
   function setUniversalBase(key, str){
     const a = parseList(str);
-    if(a) universalBase.set(String(key), new Map(a.map(x => [String(x.id), syncHash(JSON.stringify(x))]))); else universalBase.delete(String(key));
+    if(a) universalBase.set(String(key), new Map(a.map(x => [String(x.id), recHash(x) + "|" + (x._u === undefined ? "" : x._u)]))); else universalBase.delete(String(key));
     persistBase();
   }
   function itemTime(x){
-    for(const k of ["_syncUpdatedAt","updatedAtMs","updatedAt","editedAt","createdAt","date"]){
+    for(const k of ["_u","_syncUpdatedAt","updatedAtMs","updatedAt","editedAt","createdAt","date"]){
       const v = x && x[k];
       if(typeof v === "number" && isFinite(v)) return v;
       const n = Date.parse(String(v || ""));
@@ -734,9 +737,28 @@
     }
     return 0;
   }
+  /* give new / changed records their time stamp (needs the last synced copy to know what changed) */
+  function stampList(key, raw){
+    const a = parseList(raw), base = universalBase.get(String(key));
+    if(!a || !base) return raw;
+    const now = (typeof window.skNow === "function") ? window.skNow() : Date.now();
+    let changed = false;
+    a.forEach(x => {
+      const b = base.get(String(x.id));
+      if(b === undefined){ if(x._u === undefined){ x._u = now; changed = true; } return; }
+      const parts = String(b).split("|");
+      if(parts[0] === recHash(x)){
+        if(x._u === undefined && parts[1] !== undefined && parts[1] !== ""){ x._u = Number(parts[1]); changed = true; }   // the app saved it without the hidden time: put it back
+      }else{
+        x._u = now; changed = true;
+      }
+    });
+    return changed ? JSON.stringify(a) : raw;
+  }
   function mergeLists(base, local, remote){
     const key = x => String(x.id);
     const B = base || new Map();
+    const bh = id => String(B.get(id)).split("|")[0];
     const L = new Map(local.map(x => [key(x), x]));
     const R = new Map(remote.map(x => [key(x), x]));
     const out = [];
@@ -745,22 +767,22 @@
     for(const [id, r] of R){
       used.add(id);
       const l = L.get(id);
-      const rs = JSON.stringify(r);
+      const rh = recHash(r);
       if(!l){
-        if(hasBase && B.has(id) && B.get(id) === syncHash(rs)) continue;   // deleted here, unchanged there
+        if(hasBase && B.has(id) && bh(id) === rh) continue;      // deleted here, unchanged there
         out.push(r); continue;                                   // added there (or edited there)
       }
-      const ls = JSON.stringify(l);
-      if(ls === rs){ out.push(r); continue; }
+      const lh = recHash(l);
+      if(lh === rh){ out.push(itemTime(l) >= itemTime(r) ? l : r); continue; }
       if(hasBase && B.has(id)){
-        if(B.get(id) === syncHash(ls)){ out.push(r); continue; }            // only changed there
-        if(B.get(id) === syncHash(rs)){ out.push(l); continue; }            // only changed here
+        if(bh(id) === lh){ out.push(r); continue; }              // only changed there
+        if(bh(id) === rh){ out.push(l); continue; }              // only changed here
       }
       out.push(itemTime(l) > itemTime(r) ? l : r);               // both changed: newer wins
     }
     for(const [id, l] of L){
       if(used.has(id)) continue;
-      if(hasBase && B.has(id) && B.get(id) === syncHash(JSON.stringify(l))) continue; // deleted there, unchanged here
+      if(hasBase && B.has(id) && bh(id) === recHash(l)) continue; // deleted there, unchanged here
       out.push(l);                                                // added here (or edited here)
     }
     return out;
@@ -777,8 +799,15 @@
     if (!auth?.currentUser || !db || applyingRemote || !remoteReady || !isSyncableKey(key)) return;
     if (!managerCanSyncKey(key)) return;
     try {
-      const rawData = localStorage.getItem(key);
+      let rawData = localStorage.getItem(key);
       if (rawData === null) return;
+      /* V5.11.55: stamp new / changed records with the time before anything goes to the cloud */
+      const stamped = stampList(key, rawData);
+      if(stamped !== rawData){
+        applyingRemote = true;
+        try { localStorage.setItem(key, stamped); syncAppGlobals(key); } finally { applyingRemote = false; }
+        rawData = stamped;
+      }
       const hash = syncHash(rawData);
       if (!force && universalLastSyncedHash.get(key) === hash) return;
       const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
