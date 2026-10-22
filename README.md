@@ -703,3 +703,7 @@ Data-safety fixes from an independent code review:
 
 ## V5.11.62 – Back button closes the Outstanding details popup
 - Android Back now closes the "Outstanding details" popup (and the Add-penalty box on top of it) first; the customer page stays, the next Back goes to the customer list. Before, Back moved the page behind while the popup stayed on screen.
+
+## V5.11.63 – Outstanding details: cards open their page, popup in the centre
+- Each card in "Outstanding details" opens its own page: repair job → Repair Job details, sales bill → the bill, single credit entry → Edit credit (EMI and penalty cards keep their own buttons). Cards that open show "Open ›".
+- The popup now opens in the centre of the screen (was a bottom sheet).
