@@ -434,6 +434,9 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.54
+- **Dealer Payments:** edit a dealer (name, phone, place, note; old repair jobs / purchases are not changed, renames use an alias list); **Exchange / price change** (wrong model: pick the purchase, enter the new part + price, the difference becomes "dealer owes you" or "you owe more", also adjusted in Month Report spare cost); **Dealer gave cash back**; a dealer's credit balance is adjusted automatically when the next purchase is marked Pay later. New keys: `skx_dealer_profiles_v1`, `skx_dealer_alias_v1`.
+
 ## V5.11.53
 - **Storage Health → "Check data on the server":** compares what is saved on the Firebase server with what is on this phone (bills, repair jobs, credit ledger, used mobiles, receipts, dealer payments, dealer old balance/returns) with ✓ / differs, plus "last change confirmed by the server". Read-only; uses a few reads each press.
 - Test screenshots removed from the repo and dev files excluded from Firebase Hosting uploads (PR #104) so each deployed version is much smaller.
@@ -663,3 +666,10 @@ Data-safety fixes from an independent code review:
 - **Edit on a sold phone** shows Sale details (Sold To, Phone, Sale Date, Sale Price); profit is recalculated.
 - After an Excel import the list is stored newest first; future dates (e.g. 02/07/2027) are listed under "Please check".
 - Active filters show under the search box with **✕ Clear**; the filter button shows a red dot while a filter is on.
+
+### V5.11.54 – extra safety fixes (found by the credit audit)
+- Deleting a repair job now also removes its unpaid "repair balance" credit row, so the customer is not left with a balance that cannot be paid or deleted.
+- Deleting a bill payment now puts back the exact amount on the bill balance (before it was capped at the sale price, which lost money when credit had been added to the bill).
+- Dealer "Count from date" is saved the first time, so dealer balances no longer change on the 1st of each month.
+- Sync (3 phones + PC): the list merge now remembers on each phone what it last synced (key `sk_sync_meta_base_v1`, not synced, not restored), so a delete on one phone is no longer undone when another phone opens later. Uploading a list (ledger, receipts, recycle bin, used stock...) first reads the cloud copy and merges inside a transaction, so two phones adding entries at the same time keep both. Restoring a backup forgets that memory and never deletes newer cloud entries, and no longer uploads repair jobs mid-restore. Bill "last synced" fingerprints are kept on the phone too (`sk_sync_meta_bills_v1`) so an unsent bill change is not replaced by an older cloud copy after reopening.
+- Credit/payment: the payment form checks that the chosen bill is still the same bill after a sync; a ledger-only payment uses the same "old balance" the form shows; editing a bill that had credit added keeps the credit's advance (full credit amount added back); a repair returned with a refund now records the refund so reports do not count it as collected.

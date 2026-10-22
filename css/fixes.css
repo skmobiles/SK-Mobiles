@@ -1428,3 +1428,8 @@ html body #skStorageHealthModal#skStorageHealthModal .sksh-tr b{font-weight:600}
 html body #skStorageHealthModal#skStorageHealthModal .sksh-tr i{font-style:normal;text-align:center;font-size:.72rem;font-weight:700;border-radius:999px;padding:3px 6px}
 html body #skStorageHealthModal#skStorageHealthModal .sksh-tr i.ok{background:#dcfce7;color:#16a34a}
 html body #skStorageHealthModal#skStorageHealthModal .sksh-tr i.diff{background:#fef3c7;color:#b45309}
+
+/* V5.11.54: Dealer edit / exchange */
+html body #skDealerModal .skdl2-tabs button{white-space:normal!important;line-height:1.2}
+html body #skDealerModal .skdl3-pl{font-weight:400;color:var(--text-muted,#64748b)}
+html body #skDealerModal .skdl3-adv{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:10px 12px!important;margin:0 0 12px!important;color:#1d4ed8}

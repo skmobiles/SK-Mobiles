@@ -3445,7 +3445,7 @@ const MASTER_INVENTORY = [
         { const ex=skBillExchangeData(); if(ex.value>0){ bill.grossPrice=skBillGrossPrice(); bill.exchange=Object.assign({},bill.exchange||{},ex); } else { delete bill.grossPrice; delete bill.exchange; } }
         bill.emiMonths=parseInt(document.getElementById('billEmiMonths').value,10)||0; bill.emiInterest=parseFloat(document.getElementById('billEmiInterest').value)||0;
         bill.emiStartDate=document.getElementById('billEmiStartDate').value||''; bill.creditDueDate=document.getElementById('billCreditDate').value||'';
-        bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-advance-(window.skPaidAfterSale?window.skPaidAfterSale(bill):0)+(Array.isArray(bill.creditAdjustments)?bill.creditAdjustments.reduce(function(t,c){return t+(Number(c&&c.balance)||0)},0):0)):0; /* V5.11.48: credit added later is kept when the bill is edited */
+        bill.balance=(currentPayMode==='EMI'||currentPayMode==='Credit')?Math.max(0,price-advance-(window.skPaidAfterSale?window.skPaidAfterSale(bill):0)+(Array.isArray(bill.creditAdjustments)?bill.creditAdjustments.reduce(function(t,c){return t+(c&&c.amount!==undefined&&c.amount!==null&&c.amount!==''?(Number(c.amount)||0):(Number(c&&c.balance)||0)+(Number(c&&c.advance)||0))},0):0)):0; /* V5.11.54: credit added later is kept when the bill is edited. The credit's own advance is already inside bill.advance, so the FULL credit amount is added (adding only the net amount lost the advance) */
         bill.emiHtml=currentPayMode==='EMI'?document.getElementById('pvEmiScheduleTbody').innerHTML:'';
         if (typeof window.skUsedCanSell === 'function' && !window.skUsedCanSell(bill)) return;
         localStorage.setItem('sk_bills',JSON.stringify(savedBills)); window.__skEditingBillId='';
@@ -4681,6 +4681,7 @@ img{max-width:100%!important;}
       job.originalEstimate=job.originalEstimate!=null?job.originalEstimate:(Number(job.estimate)||0);
       job.estimate=charge;job.discountAmount=0;job.paidAmount=Math.max(charge,Math.min(paid,charge));job.outstandingAmount=0;
       job.refundAmount=Math.max(0,paid-charge);job.returnCharge=charge;
+      if(job.refundAmount>0)job.paymentHistory.push({amount:-job.refundAmount,date:now,type:'Advance returned to customer'}); /* V5.11.54: reports must not count the refunded advance as collected */
       job.outcome='returned';job.returnReason=reason;job.returnNote=note;job.returnedAt=now;
       job.status='Delivered';job.deliveryStatus='Returned – not repaired';job.deliveredAt=now;job.updatedAt=now;
       try{if(extra>0&&window.skReceiptForRepair)window.skReceiptForRepair(job,extra,'Checking charge',mode);}catch(err){}
@@ -4951,6 +4952,8 @@ img{max-width:100%!important;}
       markers[sid]=Date.now();
       localStorage.setItem(markerKey,JSON.stringify(markers));
     }catch(e){}
+    /* V5.11.54: the job's unpaid "repair balance" credit row is removed with the job, otherwise the customer keeps an unpayable balance */
+    try{const L=JSON.parse(localStorage.getItem('sk_credit_ledger_v1')||'[]');if(Array.isArray(L)){const keep=L.filter(e=>!(e&&e.type==='credit'&&(String(e.id||'')==='RJ-CREDIT-'+sid||String(e.repairJobId||'')===sid)));if(keep.length!==L.length)localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(keep));}}catch(err){}
     save(current.filter(x=>String(x.id)!==sid));
     skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
     showToast?.('🗑️ Repair job moved to Recycle Bin');
@@ -7197,6 +7200,7 @@ img{max-width:100%!important;}
         if(!keys.length)throw new Error('Backup is empty');
         if(!confirm('Restore '+keys.length+' app data entries? Records from the backup are brought back; newer records on the cloud are kept.'))return;
         window.__skRestoring=true; /* V5.11.48: a restore must never delete newer bills in the cloud */
+        try{window.__skSyncResetBase&&window.__skSyncResetBase()}catch(e){}
         keys.filter(function(k){return !/^(sk_current_|sk_sync_meta)/.test(k)}).forEach(function(k){
           var v=data[k];
           if(typeof v==='string')localStorage.setItem(k,v);
@@ -7943,7 +7947,7 @@ function cpBillOptions(c,selected,type){
      var vals=its.map(function(x){return x.t==='bill'?String(x.idx):x.t==='job'?'job:'+x.id:'old'});
      if(ch===null||ch===undefined||ch===''||vals.indexOf(String(ch))<0&&String(ch)!=='auto')ch=its.length>1?'auto':vals[0];
      return (its.length>1?'<option value="auto" '+(String(ch)==='auto'?'selected':'')+'>Auto — closest to closing first • '+cpMoney(tot)+'</option>':'')+
-       its.map(function(x,i){return '<option value="'+vals[i]+'" '+(String(vals[i])===String(ch)?'selected':'')+'>'+cpEsc(x.label)+' • '+cpMoney(x.bal)+'</option>'}).join('');
+       its.map(function(x,i){return '<option value="'+vals[i]+'"'+(x.t==='bill'?' data-bid="'+cpEsc(x.id)+'"':'')+' '+(String(vals[i])===String(ch)?'selected':'')+'>'+cpEsc(x.label)+' • '+cpMoney(x.bal)+'</option>'}).join('');
    }
  }
  var bs=c?c.bills:[];
@@ -7953,7 +7957,7 @@ function cpBillOptions(c,selected,type){
    var pending=bs.find(function(x){return Number(x.b.balance||0)>0;});
    chosen=pending?pending.idx:bs[0].idx;
  }
- return '<option value="">Select sales bill</option>'+bs.map(function(x){var b=x.b;return '<option value="'+x.idx+'" '+(String(x.idx)===String(chosen)?'selected':'')+'>'+cpEsc(b.billNo||skBillNumberFromDateSeq(b.date,skExistingBillSeq(b)||1,false))+' • '+cpEsc(b.model||'')+' • '+cpMoney(b.balance||0)+'</option>'}).join('');
+ return '<option value="">Select sales bill</option>'+bs.map(function(x){var b=x.b;return '<option value="'+x.idx+'" data-bid="'+cpEsc(String(b.id||''))+'" '+(String(x.idx)===String(chosen)?'selected':'')+'>'+cpEsc(b.billNo||skBillNumberFromDateSeq(b.date,skExistingBillSeq(b)||1,false))+' • '+cpEsc(b.model||'')+' • '+cpMoney(b.balance||0)+'</option>'}).join('');
 }
 function skCPRepairJobIdFromCredit(e){
   if(!e||typeof e!=='object')return '';
@@ -8280,6 +8284,12 @@ window.skCPSaveAction=function(){
  var bill=billIndex!==null?bills[billIndex]:null;
  var customer=cpGetCustomers().find(function(c){return c.key===cpKey(name,phone)})||null;
 
+ /* V5.11.54: the bill list is rebuilt when another phone syncs; make sure the selected position still points to the same bill of this customer */
+ if(bill){
+   var _so=document.getElementById('skCPBill'),_op=_so&&_so.options[_so.selectedIndex],_bid=_op&&_op.getAttribute('data-bid');
+   if((_bid&&String(bill.id||'')!==_bid)||!customer||!(customer.bills||[]).some(function(x){return x.idx===billIndex})){showToast?.('Bills were updated. Please close and open the payment form again.');return;}
+ }
+
  /* V5.11.50: payment on auto / repair job / old balance */
  if(type==='payment'&&(billValue==='auto'||billValue==='old'||/^job:/.test(billValue))){
    cpPaySelected(customer,name,phone,amount,date,billValue,(document.getElementById('skCPNote')?.value||'').trim(),(document.getElementById('skCPPaymentMode')?.value||'Cash'));
@@ -8318,6 +8328,8 @@ window.skCPSaveAction=function(){
        return e.type==='payment';
      }).reduce(function(sum,e){return sum+(Number(e.amount)||0)},0);
      var manualBalance=Math.max(0,manualCredits-manualPayments);
+     /* V5.11.54: use the same "old balance" figure the form shows (repair-job rows are paid through the job, not counted twice) */
+     if(customer){var _oi=cpOpenItems(customer).find(function(x){return x.t==='old'});if(_oi)manualBalance=_oi.bal}
 
      if(type==='payment'){
        if(manualBalance<=0){
