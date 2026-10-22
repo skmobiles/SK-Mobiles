@@ -1418,3 +1418,13 @@ html body #skDealerModal .skdl-tg{color:var(--primary,#2563eb)!important;font-we
 html body #skDealerModal .skdr-empty{padding:14px 0!important;font-size:.9rem}
 html body #skDealerModal .skdr-actions{margin-top:4px!important}
 html body #skDealerModal .skdl3-search{width:100%;box-sizing:border-box;height:46px;margin:0 0 12px!important;padding:0 14px!important;font-size:.95rem;border:1px solid var(--card-border,#dbe4f5)!important;border-radius:12px!important;background:var(--card-bg,#fff)}
+
+/* V5.11.53: Storage Health - server check table */
+html body #skStorageHealthModal#skStorageHealthModal .sksh-tbl{margin-top:8px;border-top:1px solid var(--card-border,#e5eaf5)}
+html body #skStorageHealthModal#skStorageHealthModal .sksh-th,html body #skStorageHealthModal#skStorageHealthModal .sksh-tr{display:grid;grid-template-columns:1.5fr .9fr .9fr 64px;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid var(--card-border,#e5eaf5);font-size:.84rem;color:var(--text)}
+html body #skStorageHealthModal#skStorageHealthModal .sksh-th{font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted,#64748b)}
+html body #skStorageHealthModal#skStorageHealthModal .sksh-th span:nth-child(2),html body #skStorageHealthModal#skStorageHealthModal .sksh-th span:nth-child(3),html body #skStorageHealthModal#skStorageHealthModal .sksh-tr b{text-align:right}
+html body #skStorageHealthModal#skStorageHealthModal .sksh-tr b{font-weight:600}
+html body #skStorageHealthModal#skStorageHealthModal .sksh-tr i{font-style:normal;text-align:center;font-size:.72rem;font-weight:700;border-radius:999px;padding:3px 6px}
+html body #skStorageHealthModal#skStorageHealthModal .sksh-tr i.ok{background:#dcfce7;color:#16a34a}
+html body #skStorageHealthModal#skStorageHealthModal .sksh-tr i.diff{background:#fef3c7;color:#b45309}

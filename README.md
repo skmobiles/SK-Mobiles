@@ -434,6 +434,10 @@ V5.6.122: Appearance Studio option-to-style coverage fix. Presentation CSS only;
 - Stock summary button (top right) opens Stock aging.
 - Includes V5.10.3 Install app button.
 
+## V5.11.53
+- **Storage Health → "Check data on the server":** compares what is saved on the Firebase server with what is on this phone (bills, repair jobs, credit ledger, used mobiles, receipts, dealer payments, dealer old balance/returns) with ✓ / differs, plus "last change confirmed by the server". Read-only; uses a few reads each press.
+- Test screenshots removed from the repo and dev files excluded from Firebase Hosting uploads (PR #104) so each deployed version is much smaller.
+
 ## V5.11.52
 - **Dealer Payments restyled** like the Customer Credit Ledger: summary card, coloured avatars, one card with a line between dealers, section cards, same font sizes, text no longer touches borders (the global padding reset was overriding it). Added a dealer search box (when more than 4 dealers) and a summary line (dealers / with balance).
 
