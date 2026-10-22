@@ -2,7 +2,7 @@
    The three pages keep their own design; the same tab strip is shown on top of each and a tap switches to that page. */
 (function(){
 'use strict';
-var TABS=[['orderModal','📦','Orders'],['repairSparesModal','🧰','Repair Spares'],['toolsOthersNoteModal','🛠️','Tools & Others']];
+var TABS=[['repairSparesModal','🧰','Repair Spares'],['orderModal','📦','Orders'],['toolsOthersNoteModal','🛠️','Tools & Others']];
 function $(id){return document.getElementById(id)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
 function go(from,to){

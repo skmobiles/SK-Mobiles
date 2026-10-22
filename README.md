@@ -691,4 +691,4 @@ Data-safety fixes from an independent code review:
 
 ## V5.11.58 – Orders tabs + dark-mode order names
 - Fix: item names in the Order List were dark on the dark background (colour inherited from the popup). A scan of every page / popup in Dark A, Dark B and Dark iPhone with sample data found no other dark-on-dark text.
-- New `js/features/orders-tabs.js`: Orders | Repair Spares | Tools & Others tab strip on the three pages (each keeps its own design; a tap switches page). The Orders tab has "Add an order note manually" (name + qty, saved in `sk_orders` as `{id:'M-…', reason:'Manual note', manual:true}`), included in the WhatsApp order message.
+- New `js/features/orders-tabs.js`: Repair Spares | Orders | Tools & Others tab strip on the three pages (each keeps its own design; a tap switches page). The Orders tab has "Add an order note manually" (name + qty, saved in `sk_orders` as `{id:'M-…', reason:'Manual note', manual:true}`), included in the WhatsApp order message.
