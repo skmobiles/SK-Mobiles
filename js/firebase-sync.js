@@ -51,6 +51,9 @@
   let repairKnownRemote = new Map();
   let repairSyncTimer = null;
   const SYNC_META_KEY = "sk_sync_meta_v1";
+  /* V5.11.54: what each phone last synced is remembered on the phone itself (names start with sk_sync_meta so a restore never touches them) */
+  const SYNC_BASE_KEY = "sk_sync_meta_base_v1";
+  const BILL_HASH_KEY = "sk_sync_meta_bills_v1";
 
   function readSyncMeta(){
     try { const x = JSON.parse(localStorage.getItem(SYNC_META_KEY) || "{}"); return x && typeof x === "object" ? x : {}; }
@@ -81,7 +84,7 @@
   function isSyncableKey(key) {
     if (!key) return false;
     // Skip only device-specific settings such as login/theme
-    if (key === SYNC_META_KEY || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_appearance_settings" || key === "sk_bill_draft" || key === REPAIR_KEY || key === BILL_KEY) {
+    if (key === SYNC_META_KEY || key === SYNC_BASE_KEY || key === BILL_HASH_KEY || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_appearance_settings" || key === "sk_bill_draft" || key === REPAIR_KEY || key === BILL_KEY) {
       /* V5.11.48: bills sync one by one (uploadBills); syncing the whole list too let one device overwrite the other's new bills. */
       return false;
     }
@@ -383,6 +386,12 @@
 
   /* V5.11.48: per-bill fingerprint of the last synced content, so only changed bills are uploaded and a local edit is not overwritten by an old cloud copy */
   const billHashes = new Map();
+  try{ const o = JSON.parse(localStorage.getItem("sk_sync_meta_bills_v1") || "{}"); if(o && typeof o === "object") Object.keys(o).forEach(k => billHashes.set(k, o[k])); }catch(e){}
+  let billHashTimer = null;
+  function persistBillHashes(){
+    clearTimeout(billHashTimer);
+    billHashTimer = setTimeout(function(){ try{ const o = {}; billHashes.forEach((v,k) => { o[k] = v; }); localStorage.setItem("sk_sync_meta_bills_v1", JSON.stringify(o)); }catch(e){} }, 400);
+  }
   let billUploadPending = false;
   function billFingerprint(b){
     const c = Object.assign({}, b);
@@ -428,6 +437,7 @@
       for(const id of lastKnownBillIds){ if(!localIds.has(id)) tombs++; }
       if(billWrites || tombs) await batch.commit();
       pendingHashes.forEach((fp,id)=>billHashes.set(id,fp));
+      persistBillHashes();
       lastKnownBillIds = localIds;
     } catch(e){
       console.error("Bill upload failed", e);
@@ -474,6 +484,7 @@
         });
         keepLocalIds.forEach(id => { const lb = localBills().find(x => String(x?.id || x?.billId || x?.billNo || "") === id); if(lb) merged.set(id, normalizeBill(lb)); });
         remoteMap.forEach((rb,id) => { if(!keepLocalIds.has(id)) billHashes.set(id, billFingerprint(rb)); });
+        persistBillHashes();
         // Preserve local bills that have not reached Firebase yet; remote
         // tombstones still win because their IDs remain in remoteIdsNow.
         localNow.forEach(b => {
@@ -542,7 +553,7 @@
   }
 
   async function uploadRepairJobs(force){
-    if(!auth?.currentUser || !db || !repairSyncReady || repairApplyingRemote || applyingRemote) return;
+    if(!auth?.currentUser || !db || !repairSyncReady || repairApplyingRemote || applyingRemote || window.__skRestoring) return;
     // Repair Jobs cloud synchronization is independent of the Manager UI permission.
     // The permission controls access to the Repair feature; it must not leave this
     // device's existing repair data stranded locally. Firestore rules remain the
@@ -687,7 +698,20 @@
 
   /* V5.11.48: lists (ledger, receipts, used stock, outside payments, recycle bin, ...) are merged item by item (by id) with the last
      synced copy as the base, so two phones adding records at the same time keep both, and a delete on one phone is not undone by the other. */
-  const universalBase = new Map();
+  const universalBase = new Map();   /* key -> Map(id -> hash of the record as last synced) */
+  let baseTimer = null;
+  function persistBase(){
+    clearTimeout(baseTimer);
+    baseTimer = setTimeout(function(){
+      try{ const o = {}; universalBase.forEach((m,k) => { const r = {}; m.forEach((h,id) => { r[id] = h; }); o[k] = r; }); localStorage.setItem(SYNC_BASE_KEY, JSON.stringify(o)); }catch(e){}
+    }, 400);
+  }
+  try{
+    const o = JSON.parse(localStorage.getItem(SYNC_BASE_KEY) || "{}");
+    if(o && typeof o === "object") Object.keys(o).forEach(k => { const m = new Map(); Object.keys(o[k] || {}).forEach(id => m.set(id, o[k][id])); universalBase.set(k, m); });
+  }catch(e){}
+  /* a restore replaces the lists with an older copy: forget the synced state so nothing newer in the cloud is treated as "deleted here" */
+  window.__skSyncResetBase = function(){ universalBase.clear(); clearTimeout(baseTimer); try{ localStorage.removeItem(SYNC_BASE_KEY); }catch(e){} };
   function parseList(str){
     try{
       const a = JSON.parse(str);
@@ -698,7 +722,8 @@
   }
   function setUniversalBase(key, str){
     const a = parseList(str);
-    if(a) universalBase.set(String(key), a); else universalBase.delete(String(key));
+    if(a) universalBase.set(String(key), new Map(a.map(x => [String(x.id), syncHash(JSON.stringify(x))]))); else universalBase.delete(String(key));
+    persistBase();
   }
   function itemTime(x){
     for(const k of ["_syncUpdatedAt","updatedAtMs","updatedAt","editedAt","createdAt","date"]){
@@ -711,7 +736,7 @@
   }
   function mergeLists(base, local, remote){
     const key = x => String(x.id);
-    const B = new Map((base||[]).map(x => [key(x), JSON.stringify(x)]));
+    const B = base || new Map();
     const L = new Map(local.map(x => [key(x), x]));
     const R = new Map(remote.map(x => [key(x), x]));
     const out = [];
@@ -722,20 +747,20 @@
       const l = L.get(id);
       const rs = JSON.stringify(r);
       if(!l){
-        if(hasBase && B.has(id) && B.get(id) === rs) continue;   // deleted here, unchanged there
+        if(hasBase && B.has(id) && B.get(id) === syncHash(rs)) continue;   // deleted here, unchanged there
         out.push(r); continue;                                   // added there (or edited there)
       }
       const ls = JSON.stringify(l);
       if(ls === rs){ out.push(r); continue; }
       if(hasBase && B.has(id)){
-        if(B.get(id) === ls){ out.push(r); continue; }            // only changed there
-        if(B.get(id) === rs){ out.push(l); continue; }            // only changed here
+        if(B.get(id) === syncHash(ls)){ out.push(r); continue; }            // only changed there
+        if(B.get(id) === syncHash(rs)){ out.push(l); continue; }            // only changed here
       }
       out.push(itemTime(l) > itemTime(r) ? l : r);               // both changed: newer wins
     }
     for(const [id, l] of L){
       if(used.has(id)) continue;
-      if(hasBase && B.has(id) && B.get(id) === JSON.stringify(l)) continue; // deleted there, unchanged here
+      if(hasBase && B.has(id) && B.get(id) === syncHash(JSON.stringify(l))) continue; // deleted there, unchanged here
       out.push(l);                                                // added here (or edited here)
     }
     return out;
@@ -758,6 +783,34 @@
       if (!force && universalLastSyncedHash.get(key) === hash) return;
       const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
       const updatedAtMs = Math.max(Date.now(), localChangeTime(key));
+      /* V5.11.54: for lists of records, read what is in the cloud first and merge, in one safe step (transaction), so another phone's new entries are never overwritten */
+      if(parseList(rawData)){
+        let outStr = rawData;
+        await db.runTransaction(async tx => {
+          const snap = await tx.get(ref);
+          outStr = rawData;
+          if(snap.exists){
+            const cv = (snap.data() || {}).data;
+            if(typeof cv === "string" && cv !== rawData){
+              const m = tryMergeKey(key, rawData, cv);
+              if(m !== null) outStr = m;
+            }
+          }
+          tx.set(ref, { data: outStr, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedAtMs, updatedBy: auth.currentUser.uid }, { merge: true });
+        });
+        const nowLocal = localStorage.getItem(key);
+        if(outStr !== rawData && nowLocal === rawData){
+          applyingRemote = true;
+          try { localStorage.setItem(key, outStr); syncAppGlobals(key); }
+          finally { applyingRemote = false; }
+          try { refreshAllUI(); } catch(e){}
+        }
+        universalLastSyncedHash.set(key, syncHash(outStr));
+        setUniversalBase(key, outStr);
+        if(nowLocal === rawData || nowLocal === outStr) universalDirtyKeys.delete(String(key));
+        markRemoteBaseline(key, updatedAtMs);
+        return;
+      }
       await ref.set({
         data: rawData,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1201,6 +1254,7 @@
       const keys = Object.keys(restored);
       if(!keys.length) throw new Error("Cloud backup empty");
       window.__skRestoring = true; /* V5.11.48: a restore must never delete newer bills in the cloud */
+      try{ window.__skSyncResetBase && window.__skSyncResetBase(); }catch(e){}
       keys.filter(k => !/^(sk_current_|sk_sync_meta)/.test(k)).forEach(key => localStorage.setItem(key, restored[key]));
       cloudBackupStatus("✅ Latest cloud backup restored • " + keys.length + " data items");
       toast("☁️ Cloud Restore completed. App is reloading...");

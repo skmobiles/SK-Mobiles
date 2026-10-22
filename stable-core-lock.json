@@ -5,8 +5,8 @@
   "policy": "Approved V5.6.1 Design Studio UI changes are included in this new baseline. Future changes to locked core files must be reviewed and the lock must not be silently regenerated. Preserve business logic, Firebase configuration/rules and existing data keys.",
   "core_files": {
     "index.html": "894807e0ef6db8d84542b30b31f766c82ab8d93012017222d9779654b5b5e449",
-    "js/app.js": "0ef8f76217d0428885e1f649bbf53e26c9e5f0bab596d441f98e653ddbaea586",
-    "js/firebase-sync.js": "37ed4aa93656d204a90e2f6385615d8eabfbde91610234a69a6909e3533c566d",
+    "js/app.js": "95d3b39a020d7447935091fa1b203de0efc0c8dab04e18c7d9757543580c381c",
+    "js/firebase-sync.js": "7fa8474f358c0b51c99c71245319689a26cbf6f7fe76fde9deba421adbfdd9af",
     "js/features/pin-security.js": "adde7413b65e7676169be8670d31494abd364f14a263681faa577fa07d08a0db",
     "js/features/colorful-ui.js": "8bd075f669975521a2f78e86b4dd33f05a5699483f5ff4e17b6e1f02a129f4db",
     "css/style.css": "51126e9ebbccaf0ee7b14aab82d6d813cd2cb00554f48df31ceb7bc0412052c1",
