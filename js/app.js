@@ -4951,6 +4951,8 @@ img{max-width:100%!important;}
       markers[sid]=Date.now();
       localStorage.setItem(markerKey,JSON.stringify(markers));
     }catch(e){}
+    /* V5.11.54: the job's unpaid "repair balance" credit row is removed with the job, otherwise the customer keeps an unpayable balance */
+    try{const L=JSON.parse(localStorage.getItem('sk_credit_ledger_v1')||'[]');if(Array.isArray(L)){const keep=L.filter(e=>!(e&&e.type==='credit'&&(String(e.id||'')==='RJ-CREDIT-'+sid||String(e.repairJobId||'')===sid)));if(keep.length!==L.length)localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(keep));}}catch(err){}
     save(current.filter(x=>String(x.id)!==sid));
     skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
     showToast?.('🗑️ Repair job moved to Recycle Bin');

@@ -38,7 +38,7 @@ window.skLedgerDelete=function(id){
       var pr=Array.isArray(b.paymentReceipts)?b.paymentReceipts:[],pi=pr.findIndex(function(x){return x&&x.type==='payment'&&((rc&&x.rcId===rc.id)||(num(x.amount)===num(e.amount)&&dmy(x.date)===d))});
       fix={billId:e.billId,amount:num(e.amount),pr:pi>=0?pr[pi]:null,rc:rc||null};
       if(pi>=0)pr.splice(pi,1);
-      b.balance=Math.min(num(b.price),num(b.balance)+num(e.amount));
+      b.balance=num(b.balance)+num(e.amount);
       localStorage.setItem(BILLS,JSON.stringify(bills));
       try{if(typeof savedBills!=='undefined')savedBills=bills}catch(x){}
     }

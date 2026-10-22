@@ -21,7 +21,8 @@ function toKey(s){
 function today(){var d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
 function fmt(k){var a=String(k).split('-');return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:String(k||'')}
 function toast(t){if(typeof window.showToast==='function')window.showToast(t)}
-function startKey(){var s=localStorage.getItem(START_KEY);return s||(today().slice(0,8)+'01')}
+/* V5.11.54: the default "count from" date is saved the first time, so it does not move to the 1st of every new month */
+function startKey(){var s=localStorage.getItem(START_KEY);if(s)return s;s=today().slice(0,8)+'01';try{localStorage.setItem(START_KEY,s)}catch(e){}return s}
 function shopName(){return localStorage.getItem('sk_shop_name')||'SK MOBILES'}
 
 function credSet(){var v=read(CRED_KEY,{});return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}

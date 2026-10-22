@@ -666,3 +666,8 @@ Data-safety fixes from an independent code review:
 - **Edit on a sold phone** shows Sale details (Sold To, Phone, Sale Date, Sale Price); profit is recalculated.
 - After an Excel import the list is stored newest first; future dates (e.g. 02/07/2027) are listed under "Please check".
 - Active filters show under the search box with **✕ Clear**; the filter button shows a red dot while a filter is on.
+
+### V5.11.54 – extra safety fixes (found by the credit audit)
+- Deleting a repair job now also removes its unpaid "repair balance" credit row, so the customer is not left with a balance that cannot be paid or deleted.
+- Deleting a bill payment now puts back the exact amount on the bill balance (before it was capped at the sale price, which lost money when credit had been added to the bill).
+- Dealer "Count from date" is saved the first time, so dealer balances no longer change on the 1st of each month.
