@@ -54,6 +54,10 @@
   /* V5.11.54: what each phone last synced is remembered on the phone itself (names start with sk_sync_meta so a restore never touches them) */
   const SYNC_BASE_KEY = "sk_sync_meta_base_v1";
   const BILL_HASH_KEY = "sk_sync_meta_bills_v1";
+  const DEVICE_KEY = "sk_sync_meta_device_v1";
+  const LETTER_KEY = "sk_sync_meta_letter_v1";
+  const LETTER_DOC = "skx_device_letters_v1";   /* only read / written by registerDeviceLetter, never synced like other data */
+  window.skDeviceLetter = function(){ try{ return localStorage.getItem(LETTER_KEY) || ""; }catch(e){ return ""; } };
 
   function readSyncMeta(){
     try { const x = JSON.parse(localStorage.getItem(SYNC_META_KEY) || "{}"); return x && typeof x === "object" ? x : {}; }
@@ -84,7 +88,7 @@
   function isSyncableKey(key) {
     if (!key) return false;
     // Skip only device-specific settings such as login/theme
-    if (key === SYNC_META_KEY || key === SYNC_BASE_KEY || key === BILL_HASH_KEY || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_appearance_settings" || key === "sk_bill_draft" || key === REPAIR_KEY || key === BILL_KEY) {
+    if (key === SYNC_META_KEY || key === SYNC_BASE_KEY || key === BILL_HASH_KEY || key === DEVICE_KEY || key === LETTER_KEY || key === LETTER_DOC || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_appearance_settings" || key === "sk_bill_draft" || key === REPAIR_KEY || key === BILL_KEY) {
       /* V5.11.48: bills sync one by one (uploadBills); syncing the whole list too let one device overwrite the other's new bills. */
       return false;
     }
@@ -720,13 +724,16 @@
       return a;
     }catch(e){ return null; }
   }
+  /* V5.11.55: every record in a list carries a hidden "_u" = the time (ms, server time when online) it was added / last changed.
+     Records are compared WITHOUT "_u", so only a real change counts as a change. */
+  function recHash(x){ const c = Object.assign({}, x); delete c._u; return syncHash(JSON.stringify(c)); }
   function setUniversalBase(key, str){
     const a = parseList(str);
-    if(a) universalBase.set(String(key), new Map(a.map(x => [String(x.id), syncHash(JSON.stringify(x))]))); else universalBase.delete(String(key));
+    if(a) universalBase.set(String(key), new Map(a.map(x => [String(x.id), recHash(x) + "|" + (x._u === undefined ? "" : x._u)]))); else universalBase.delete(String(key));
     persistBase();
   }
   function itemTime(x){
-    for(const k of ["_syncUpdatedAt","updatedAtMs","updatedAt","editedAt","createdAt","date"]){
+    for(const k of ["_u","_syncUpdatedAt","updatedAtMs","updatedAt","editedAt","createdAt","date"]){
       const v = x && x[k];
       if(typeof v === "number" && isFinite(v)) return v;
       const n = Date.parse(String(v || ""));
@@ -734,9 +741,28 @@
     }
     return 0;
   }
+  /* give new / changed records their time stamp (needs the last synced copy to know what changed) */
+  function stampList(key, raw){
+    const a = parseList(raw), base = universalBase.get(String(key));
+    if(!a || !base) return raw;
+    const now = (typeof window.skNow === "function") ? window.skNow() : Date.now();
+    let changed = false;
+    a.forEach(x => {
+      const b = base.get(String(x.id));
+      if(b === undefined){ if(x._u === undefined){ x._u = now; changed = true; } return; }
+      const parts = String(b).split("|");
+      if(parts[0] === recHash(x)){
+        if(x._u === undefined && parts[1] !== undefined && parts[1] !== ""){ x._u = Number(parts[1]); changed = true; }   // the app saved it without the hidden time: put it back
+      }else{
+        x._u = now; changed = true;
+      }
+    });
+    return changed ? JSON.stringify(a) : raw;
+  }
   function mergeLists(base, local, remote){
     const key = x => String(x.id);
     const B = base || new Map();
+    const bh = id => String(B.get(id)).split("|")[0];
     const L = new Map(local.map(x => [key(x), x]));
     const R = new Map(remote.map(x => [key(x), x]));
     const out = [];
@@ -745,22 +771,22 @@
     for(const [id, r] of R){
       used.add(id);
       const l = L.get(id);
-      const rs = JSON.stringify(r);
+      const rh = recHash(r);
       if(!l){
-        if(hasBase && B.has(id) && B.get(id) === syncHash(rs)) continue;   // deleted here, unchanged there
+        if(hasBase && B.has(id) && bh(id) === rh) continue;      // deleted here, unchanged there
         out.push(r); continue;                                   // added there (or edited there)
       }
-      const ls = JSON.stringify(l);
-      if(ls === rs){ out.push(r); continue; }
+      const lh = recHash(l);
+      if(lh === rh){ out.push(itemTime(l) >= itemTime(r) ? l : r); continue; }
       if(hasBase && B.has(id)){
-        if(B.get(id) === syncHash(ls)){ out.push(r); continue; }            // only changed there
-        if(B.get(id) === syncHash(rs)){ out.push(l); continue; }            // only changed here
+        if(bh(id) === lh){ out.push(r); continue; }              // only changed there
+        if(bh(id) === rh){ out.push(l); continue; }              // only changed here
       }
       out.push(itemTime(l) > itemTime(r) ? l : r);               // both changed: newer wins
     }
     for(const [id, l] of L){
       if(used.has(id)) continue;
-      if(hasBase && B.has(id) && B.get(id) === syncHash(JSON.stringify(l))) continue; // deleted there, unchanged here
+      if(hasBase && B.has(id) && bh(id) === recHash(l)) continue; // deleted there, unchanged here
       out.push(l);                                                // added here (or edited here)
     }
     return out;
@@ -777,8 +803,15 @@
     if (!auth?.currentUser || !db || applyingRemote || !remoteReady || !isSyncableKey(key)) return;
     if (!managerCanSyncKey(key)) return;
     try {
-      const rawData = localStorage.getItem(key);
+      let rawData = localStorage.getItem(key);
       if (rawData === null) return;
+      /* V5.11.55: stamp new / changed records with the time before anything goes to the cloud */
+      const stamped = stampList(key, rawData);
+      if(stamped !== rawData){
+        applyingRemote = true;
+        try { localStorage.setItem(key, stamped); syncAppGlobals(key); } finally { applyingRemote = false; }
+        rawData = stamped;
+      }
       const hash = syncHash(rawData);
       if (!force && universalLastSyncedHash.get(key) === hash) return;
       const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(key);
@@ -824,6 +857,30 @@
     } catch(e) {
       console.error(key + " cloud sync failed", e);
     }
+  }
+
+  /* V5.11.55: every phone / PC gets its own bill-number letter once (first device: none, then B, C, D ...) */
+  async function registerDeviceLetter(){
+    try{
+      if(!auth?.currentUser || !db || localStorage.getItem(LETTER_KEY)) return;
+      let id = localStorage.getItem(DEVICE_KEY);
+      if(!id){ id = (typeof window.skUid === "function" ? window.skUid() : Date.now() + "-" + Math.random().toString(36).slice(2,6)); localStorage.setItem(DEVICE_KEY, id); }
+      const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(LETTER_DOC);
+      let letter = "";
+      await db.runTransaction(async tx => {
+        const snap = await tx.get(ref);
+        let m = {};
+        if(snap.exists){ try{ m = JSON.parse((snap.data() || {}).data || "{}") || {}; }catch(e){ m = {}; } }
+        if(m[id]){ letter = m[id]; return; }
+        const used = new Set(Object.keys(m).map(k => m[k]));
+        letter = "";
+        for(const c of "ABCDEFGHIJKLMNOPQRSTUVWXYZ"){ if(!used.has(c)){ letter = c; break; } }
+        if(!letter) return;
+        m[id] = letter;
+        tx.set(ref, { data: JSON.stringify(m), updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedAtMs: Date.now(), updatedBy: auth.currentUser.uid }, { merge: true });
+      });
+      if(letter) localStorage.setItem(LETTER_KEY, letter);
+    }catch(e){ console.warn("Device letter not set yet", e); }
   }
 
   async function syncMissingLocalDataToCloud(snapshot) {
@@ -909,6 +966,7 @@
           for(const key of localWins) await syncKeyToCloud(key, true);
           await syncMissingLocalDataToCloud(snapshot);
           universalSyncStarted = true;
+          registerDeviceLetter();
           realtimeSyncStatus("🟢 Realtime Auto Sync: ON • All app data connected");
           if(hasChanges) refreshAllUI();
           return;

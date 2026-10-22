@@ -1213,15 +1213,23 @@ const MASTER_INVENTORY = [
       return key.slice(6, 8) + key.slice(4, 6);
     }
 
-    function skBillNumberFromDateSeq(dateValue, seq, details) {
+    function skBillNumberFromDateSeq(dateValue, seq, details, suffix) {
       const prefix = details ? SK_BILL_DETAILS_PREFIX : SK_BILL_PREFIX;
-      return `${prefix}-${skBillDDMM(dateValue)}-${String(Math.max(1, Number(seq) || 1)).padStart(3, '0')}`;
+      return `${prefix}-${skBillDDMM(dateValue)}-${String(Math.max(1, Number(seq) || 1)).padStart(3, '0')}${suffix || ''}`;
+    }
+    /* V5.11.55: each phone/PC has its own letter (the first one none, then B, C, D...), so two devices never give the same bill number and a number given to a customer never changes */
+    function skBillSuffix(bill) {
+      const m = String(bill?.billNo || '').match(/\d{3}([A-Z])$/);
+      return m ? m[1] : '';
+    }
+    function skDeviceSuffix() {
+      try { const l = (typeof window.skDeviceLetter === 'function') ? window.skDeviceLetter() : ''; return /^[B-Z]$/.test(l) ? l : ''; } catch (e) { return ''; }
     }
 
     function skExistingBillSeq(bill) {
       // Accept both the previous CURRENT format and the locked current format
       // so old synced/local bills keep their sequence without changing internal IDs.
-      const n = String(bill?.billNo || '').match(/^(?:SK(?:-B)?(?:-CURRENT)?)[\s-]+\d{4}-(\d{3})$/i);
+      const n = String(bill?.billNo || '').match(/^(?:SK(?:-B)?(?:-CURRENT)?)[\s-]+\d{4}-(\d{3})[A-Z]?$/i);
       return n ? Number(n[1]) : 0;
     }
 
@@ -1244,7 +1252,7 @@ const MASTER_INVENTORY = [
     }
 
     function skNextBillNo(dateValue) {
-      return skBillNumberFromDateSeq(dateValue || new Date(), skNextBillSequence(dateValue || new Date(), savedBills), false);
+      return skBillNumberFromDateSeq(dateValue || new Date(), skNextBillSequence(dateValue || new Date(), savedBills), false, skDeviceSuffix());
     }
 
     function skEnsureBillNumbers(list) {
@@ -1263,7 +1271,7 @@ const MASTER_INVENTORY = [
         if (!b) return;
         const seq = skExistingBillSeq(b);
         if (seq) {
-          const normalized = skBillNumberFromDateSeq(b.date, seq, false);
+          const normalized = skBillNumberFromDateSeq(b.date, seq, false, skBillSuffix(b));
           if (b.billNo !== normalized) { b.billNo = normalized; changed = true; }
           return;
         }
@@ -1469,7 +1477,7 @@ const MASTER_INVENTORY = [
       if (custName && model && price > 0) {
         const billDate = `${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
         const newEntry = {
-          id: `SK-B-${Date.now().toString().slice(-6)}`,
+          id: `SK-B-${(window.skUid?window.skUid():Date.now()+'-'+Math.random().toString(36).slice(2,6))}`,
           billNo: skNextBillNo(billDate), date: billDate, mobileType: currentMobileType, custName,
           phone: document.getElementById('billCustPhone').value || '9876543210',
           address: document.getElementById('billCustAddress').value || '',
@@ -3463,7 +3471,7 @@ const MASTER_INVENTORY = [
       const isCreditOrEmi = currentPayMode === 'Credit' || currentPayMode === 'EMI';
       const _refN = skAdvanceRefundCheck(price, currentPayMode); if (_refN < 0) return;
       const newEntry = {
-        id: `SK-B-${Date.now().toString().slice(-8)}`,
+        id: `SK-B-${(window.skUid?window.skUid():Date.now()+'-'+Math.random().toString(36).slice(2,6))}`,
         billNo: skNextBillNo(billDate), date: billDate, custName,
         phone: document.getElementById('billCustPhone').value || '',
         address: document.getElementById('billCustAddress').value || '',
@@ -3513,7 +3521,7 @@ const MASTER_INVENTORY = [
     // Do not remove the Delete action or change the locked bill-number formats.
     // Core Bill History renderer: View / Edit / Delete are implemented directly here.
     /* V5.11.1: same-day bills — higher bill number (made later) first, whatever order the list came back in */
-    function skBillSeqNo(b){const m=String(b&&b.billNo||'').match(/(\d+)\s*$/);return m?Number(m[1]):0;}
+    function skBillSeqNo(b){const m=String(b&&b.billNo||'').match(/(\d+)[A-Z]?\s*$/);return m?Number(m[1]):0;}
     function renderBillHistory() {
       const container=document.getElementById('billHistoryContainer'); if(!container)return;
       const q=(document.getElementById('billHistorySearch')?.value||'').trim().toLowerCase();
@@ -8178,8 +8186,8 @@ function cpUpdateBill(idx,type,amount,advance,data,bsOverride){
  var net=Math.max(0,amount-advance);
  b.balance=Math.max(0,(Number(b.balance)||0)+net);b.advance=(Number(b.advance)||0)+Math.max(0,advance);
  b.creditAdjustments=Array.isArray(b.creditAdjustments)?b.creditAdjustments:[];
- b.creditAdjustments.push({id:'CR-'+Date.now(),date:data.date,dueDate:data.dueDate||'',amount:amount,advance:advance,balance:net,category:data.category,note:data.note||''});
- b.paymentReceipts.push({id:'RCP-CR-'+Date.now().toString().slice(-8),billId:b.id,date:data.date,amount:net,mode:'Credit',note:data.note||'',type:'credit'});
+ b.creditAdjustments.push({id:'CR-'+(window.skUid?window.skUid():Date.now()+'-'+Math.random().toString(36).slice(2,4)),date:data.date,dueDate:data.dueDate||'',amount:amount,advance:advance,balance:net,category:data.category,note:data.note||''});
+ b.paymentReceipts.push({id:'RCP-CR-'+(window.skUid?window.skUid():Date.now()+'-'+Math.random().toString(36).slice(2,4)),billId:b.id,date:data.date,amount:net,mode:'Credit',note:data.note||'',type:'credit'});
  return net;
 }
 /* V5.11.50 ---- customer payments against bills / repair jobs / old balance ---- */
