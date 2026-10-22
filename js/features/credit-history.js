@@ -55,7 +55,7 @@ function statement(c){
   if(pays.length){var lp=pays[pays.length-1];L.push('Last payment: '+money(lp.amount)+' on '+dmy(lp.date));}
   var items=[];
   r.bills.forEach(function(x){var b=x.b;items.push({k:sortKey(b.date),d:b.date,t:(b.model||'Bill'),a:num(b.balance)||num(b.price)})});
-  r.ents.forEach(function(e){if(e.type!=='payment'&&e.type!=='discount')items.push({k:sortKey(e.date),d:e.date,t:clean(e.note||e.details)||'Credit',a:num(e.amount)})});
+  r.ents.forEach(function(e){if(e.type!=='payment'&&e.type!=='discount')var ed=e.type==='emi'&&e.dueDate?e.dueDate:e.date;items.push({k:sortKey(ed),d:ed,t:clean(e.note||e.details)||'Credit',a:num(e.amount)})});
   items.sort(function(a,b){return a.k<b.k?1:a.k>b.k?-1:0});
   if(items.length){
     L.push('','*Recent items*');
