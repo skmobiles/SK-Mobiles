@@ -67,3 +67,8 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# test screenshots must never be committed/deployed
+undefined/
+cf*.png
+full_*.png
