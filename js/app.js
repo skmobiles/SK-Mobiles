@@ -4599,6 +4599,8 @@ img{max-width:100%!important;}
     });
     if(existing&&(String(existing.outcome||'')==='returned'||String(existing.deliveryStatus||'').startsWith('Returned')))job.deliveryStatus=existing.deliveryStatus;
     delete job.photos;
+    if(existing&&existing.status==='Delivered'&&job.status!=='Delivered')job.revertedAt=new Date().toISOString(); /* V5.11.57: a real undo of delivery (edit form) */
+    else if(existing&&existing.revertedAt)job.revertedAt=existing.revertedAt;
     if(!job.customer||!job.model||!job.problem){ showToast('Customer, Model & Problem required'); return false; }
     if(typeof window.skOutFormRead==='function'){
       const oo=window.skOutFormRead(existing,job.status);
@@ -4726,6 +4728,7 @@ img{max-width:100%!important;}
     a[i].status=previous;
     if(previous==='Ready') a[i].deliveryStatus='Ready for Delivery';
     else if(previous!=='Delivered') a[i].deliveryStatus='Pending';
+    if(current===4) a[i].revertedAt=new Date().toISOString(); /* V5.11.57: a real undo of delivery */
     if(previous!=='Delivered') delete a[i].deliveredAt;
     a[i].updatedAt=new Date().toISOString();
     save(a); skRjRenderJobs(); skRjRenderHistory(); skRjRenderHomeMetric();
@@ -8145,7 +8148,7 @@ function cpResetForm(type,c,idx){
  document.getElementById('skCPAdvanceGroup').style.display=type==='payment'?'none':'block';
  document.getElementById('skCPPaymentModeGroup').style.display=type==='payment'?'block':'none';
  document.getElementById('skCPEmiGroup').style.display=type==='payment'?'none':'block';
- skCPRecalcForm();document.getElementById('skCreditActionModal').classList.add('active');
+ skCPRecalcForm();try{cpEmiUi();skCPEmiPreview()}catch(e){}document.getElementById('skCreditActionModal').classList.add('active');
 }
 window.skCPOpenAction=function(type){cpResetForm(type,null,'')}
 window.skCPOpenActionFor=function(k,type,idx){
@@ -8167,9 +8170,37 @@ window.skCPRecalcForm=function(){
  if(type==='payment'&&customer&&sel&&(/^job:/.test(sel.value)||sel.value==='old')){var _it=cpOpenItems(customer).find(function(x){return (x.t==='job'?'job:'+x.id:'old')===sel.value});if(_it){old=_it.bal;next=old}}
  if(type==='credit')next=old+Math.max(0,amt-adv); else if(type==='payment')next=Math.max(0,old-Math.min(old,amt));
  var out=document.getElementById('skCPBalance');if(out)out.value=cpMoney(next);
+ try{cpEmiUi();skCPEmiPreview()}catch(e){}
 };
 
-window.skCPToggleEmi=function(){document.getElementById('skCPEmiFields').style.display=document.getElementById('skCPEmiMode').value==='emi'?'grid':'none'}
+/* V5.11.57: the EMI option of the Credit form now really creates an EMI schedule (before, the months / interest were ignored and a plain credit was saved).
+   With EMI the single Due Date is not needed - every EMI has its own due date. */
+function cpEmiPlan(){
+ var type=document.getElementById('skCPActionType').value,mode=document.getElementById('skCPEmiMode').value;
+ if(type!=='credit'||mode!=='emi')return null;
+ var amt=Math.max(0,Number(document.getElementById('skCPAmount').value)||0),adv=Math.max(0,Number(document.getElementById('skCPAdvance').value)||0);
+ var principal=Math.max(0,amt-Math.min(adv,amt)),months=Math.min(60,Math.max(0,parseInt(document.getElementById('skCPEmiMonths').value,10)||0)),rate=Math.max(0,Number(document.getElementById('skCPEmiInterest').value)||0);
+ if(!months||principal<=0)return {months:months,principal:principal,rows:[]};
+ var total=Math.round(principal+principal*(rate/100)*(months/12)),monthly=Math.ceil(total/months),rows=[],left=total;
+ for(var i=1;i<=months;i++){var a=i===months?left:Math.min(monthly,left);left-=a;rows.push(a)}
+ return {months:months,principal:principal,rate:rate,total:total,monthly:monthly,rows:rows};
+}
+window.skCPEmiPreview=function(){
+ var el=document.getElementById('skCPEmiPreview');if(!el)return;var p=cpEmiPlan();
+ el.textContent=p&&p.rows.length?('Monthly EMI '+cpMoney(p.monthly)+' × '+p.months+' months • Total payable '+cpMoney(p.total)):'';
+};
+function cpEmiUi(){
+ var type=document.getElementById('skCPActionType').value,emi=document.getElementById('skCPEmiMode').value==='emi'&&type==='credit';
+ var dg=document.getElementById('skCPDueDateGroup');if(dg)dg.style.display=(type==='payment'||emi)?'none':'';
+ var sel=document.getElementById('skCPBill'),bill=sel&&sel.value!==''&&/^\d+$/.test(String(sel.value));
+ var g=document.getElementById('skCPEmiGroup');if(g)g.style.display=(type==='payment'||bill)?'none':'block';
+}
+window.skCPToggleEmi=function(){
+ var on=document.getElementById('skCPEmiMode').value==='emi';
+ document.getElementById('skCPEmiFields').style.display=on?'grid':'none';
+ if(on){var st=document.getElementById('skCPEmiStart');if(st&&!st.value){var d=new Date();d.setMonth(d.getMonth()+1);st.value=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()}}
+ cpEmiUi();skCPEmiPreview();
+}
 function cpSaveLedgerEntry(e){var a=cpLedger();e.id=e.id||'CP-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);e.key=cpKey(e.name,e.phone);a.push(e);localStorage.setItem('sk_credit_ledger_v1',JSON.stringify(a))}
 /* 🔒 SK V4.4 LOCKED: Payment must reduce the selected purchase bill balance and create/retain its receipt attachment. Fully paid bills must not open the Payment form. */
 function cpUpdateBill(idx,type,amount,advance,data,bsOverride){
@@ -8315,6 +8346,7 @@ window.skCPSaveAction=function(){
    }
  }
 
+ if(type==='credit'&&bill&&cpEmiPlan()){showToast?.('EMI is for ledger-only credit. Choose "No sales bill" or set EMI in the bill.');return;}
  var note=(document.getElementById('skCPNote')?.value||'').trim();
  var category=document.getElementById('skCPCategory')?.value||'Mobile Sale';
  var mode=type==='payment'?(document.getElementById('skCPPaymentMode')?.value||'Cash'):'Credit';
@@ -8367,6 +8399,27 @@ window.skCPSaveAction=function(){
      var netCredit=Math.max(0,amount-advance);
      if(netCredit<=0){
        showToast?.('Credit amount after advance must be greater than zero');
+       return;
+     }
+     /* V5.11.57: EMI credit = one ledger row per EMI (type emi, own due date); no extra plain credit row, so nothing is counted twice */
+     var _plan=cpEmiPlan();
+     if(_plan){
+       if(!_plan.rows.length){showToast?.('Enter the number of EMI months (1 to 60)');return;}
+       var _sd=(document.getElementById('skCPEmiStart')?.value||'').trim(),_s0=skDmyToISO(_sd)||_sd,_dt=_s0&&/^\d{4}-\d{2}-\d{2}$/.test(_s0)?new Date(_s0+'T00:00:00'):new Date();
+       if(isNaN(_dt)){showToast?.('First EMI date is not valid');return;}
+       var _grp=(window.skUid?window.skUid():Date.now()+'-'+Math.random().toString(36).slice(2,6));
+       _plan.rows.forEach(function(a,i){
+         var d=new Date(_dt);d.setMonth(_dt.getMonth()+i);
+         var iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+         cpSaveLedgerEntry({id:'EMI-'+_grp+'-'+(i+1),name:name,phone:phone,type:'emi',amount:a,mode:'EMI',date:date,
+           details:'EMI '+(i+1)+'/'+_plan.months+' • '+(note||'Credit entry')+' • Ledger only'+(advance>0?' • Advance '+cpMoney(advance):''),
+           source:'manual-credit-page',billId:'',dueDate:iso,category:category,originalAmount:amount,advance:advance});
+       });
+       if(typeof skImportFromBills==='function')skImportFromBills(true);
+       skCPCloseAction();skCPRender();
+       var refreshedEmi=cpGetCustomers().find(function(c){return c.key===cpKey(name,phone)});
+       if(refreshedEmi)cpOpenDetail(refreshedEmi);
+       showToast?.('EMI saved • '+_plan.months+' × '+cpMoney(_plan.monthly));
        return;
      }
      cpSaveLedgerEntry({

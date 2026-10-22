@@ -1436,3 +1436,7 @@ html body #skDealerModal .skdl3-adv{background:#eff6ff;border:1px solid #bfdbfe;
 
 /* V5.11.56: space between the phone number and the Alt number in the Credit page top bar */
 html body .skcl-who small .skcl-alt{margin-left:12px!important;white-space:nowrap}
+
+/* V5.11.57: last-backup details in Storage Health */
+html body #skStorageHealthModal#skStorageHealthModal .sksh-bkset{margin-top:10px!important;padding-top:8px!important;border-top:1px solid var(--border,rgba(148,163,184,.3))!important}
+html body #skStorageHealthModal#skStorageHealthModal .sksh-ent{margin-top:4px!important;padding:6px 9px!important;font-size:.72rem!important;line-height:1.35!important;border-radius:9px!important;background:var(--surface-2,rgba(148,163,184,.12))!important;overflow-wrap:anywhere}

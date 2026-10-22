@@ -620,6 +620,10 @@
     }
   }
 
+  function repairDeliveredGuard(del, other){
+    return !!(del && other && del.status === "Delivered" && other.status !== "Delivered" && !(other.revertedAt && String(other.revertedAt) >= String(del.deliveredAt || "")));
+  }
+
   async function startRepairJobSync(){
     if(unsubscribeRepairJobs) unsubscribeRepairJobs();
     repairSyncReady = false;
@@ -659,6 +663,12 @@
             const localTime=repairTime(job);
             const rm=remoteMetaNow.get(id);
             const remoteTime=Number(rm?.updatedAt||0);
+            /* V5.11.57: a delivered job never goes back to "Ready" because of an older copy on another phone; only a real "undo delivery" (revertedAt) can do that */
+            const rj=remoteMapNow.get(id);
+            if(rj){
+              if(repairDeliveredGuard(rj, job)) return;                                   // cloud copy is delivered, this phone's copy is older -> keep cloud
+              if(repairDeliveredGuard(job, rj)){ merged.set(id,repairNormalize(job)); localWins=true; return; }   // this phone is delivered, cloud copy is older -> keep this phone
+            }
             if(!rm || localTime>remoteTime){
               merged.set(id,repairNormalize(job));
               localWins=true;
@@ -1277,6 +1287,25 @@
       cloudBackupStatus("❌ Cloud backup failed: " + why);
       cloudBackupEvent(false, null, why);
     }
+  };
+
+  /* V5.11.57: read (only) the newest complete cloud backup - used by Storage Health to show what the backup really contains */
+  window.skCloudBackupPeek = async function(keys){
+    if(!auth?.currentUser || !db) throw new Error("Login / internet needed");
+    const base = db.collection("shops").doc(SHOP_ID).collection(CLOUD_BACKUP_ROOT);
+    const snaps = await base.orderBy("createdAtMs","desc").limit(5).get();
+    const docs = snaps.docs.filter(d => ((d.data()||{}).status||"complete") === "complete");
+    if(!docs.length) return null;
+    const latest = docs[0], out = { id: latest.id, meta: latest.data() || {}, data: {} };
+    for(const key of keys){
+      try{
+        const it = await latest.ref.collection("items").doc(cloudDocId(key)).get();
+        if(!it.exists){ out.data[key] = null; continue; }
+        const ch = await it.ref.collection("chunks").orderBy(firebase.firestore.FieldPath.documentId()).get();
+        out.data[key] = ch.docs.map(d => String((d.data()||{}).value||"")).join("");
+      }catch(e){ out.data[key] = null; }
+    }
+    return out;
   };
 
   window.skCloudRestoreLatest = async function(){

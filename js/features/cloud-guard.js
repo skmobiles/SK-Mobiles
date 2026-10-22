@@ -152,6 +152,58 @@ function srvHtml(){
   h+='<div class="sksh-actions"><button type="button" class="submit-btn" onclick="skShCheck()">✓ Check data on the server</button></div></div>';
   return h;
 }
+/* ---------- V5.11.57: what the last cloud backup really contains ---------- */
+var bkd=null; /* {busy} | {err} | {meta, sets:[{title,inBackup,inApp,last:[..],missing:[..],missingCount}], at} */
+function anyTime(x){
+  if(!x)return 0;var v=x._u;if(typeof v==='number')return v;
+  var s=x.createdAt||x.updatedAt||x.date||'';var n=Date.parse(s);if(!isNaN(n))return n;
+  var m=String(s).match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);return m?new Date(+m[3],+m[2]-1,+m[1]).getTime():0;
+}
+function money(n){return '₹'+(Number(n)||0).toLocaleString('en-IN')}
+var FMT={
+  sk_credit_ledger_v1:function(e){return (e.name||'Customer')+' — '+(e.type==='payment'?'Payment ':e.type==='emi'?'EMI ':'Credit ')+money(e.amount)+' • '+(e.date||'')+(e.details?' • '+String(e.details).slice(0,40):'')},
+  sk_bills:function(b){return (b.custName||'Customer')+' — Bill '+(b.billNo||b.id||'')+' • '+money(b.price)+' • '+(b.date||'')+(b.model?' • '+b.model:'')},
+  skx_repair_jobs_v2:function(j){return (j.customer||'Customer')+' — '+(j.model||'Repair')+' • '+(j.status||'')+' • '+money(j.estimate)}
+};
+function idOf(x){return String(x&&(x.id||x.billId||''))}
+window.skShBackupPeek=async function(){
+  if(!window.skCloudBackupPeek||navigator.onLine===false){bkd={err:'Cannot reach the cloud right now (login / internet).'};renderHealth();return}
+  bkd={busy:true};renderHealth();
+  try{
+    var keys=['sk_credit_ledger_v1','sk_bills','skx_repair_jobs_v2'],r=await window.skCloudBackupPeek(keys);
+    if(!r){bkd={err:'No cloud backup found yet. Tap “Backup now”.'};renderHealth();return}
+    var titles={sk_credit_ledger_v1:'Credit ledger entries',sk_bills:'Bills',skx_repair_jobs_v2:'Repair jobs'},sets=[];
+    keys.forEach(function(k){
+      var bk=[],loc=[];try{bk=JSON.parse(r.data[k]||'[]')}catch(e){bk=[]}try{loc=JSON.parse(localStorage.getItem(k)||'[]')}catch(e){loc=[]}
+      if(!Array.isArray(bk))bk=[];if(!Array.isArray(loc))loc=[];
+      var ids={};bk.forEach(function(x){ids[idOf(x)]=1});
+      var miss=loc.filter(function(x){return !ids[idOf(x)]});
+      var last=bk.map(function(x,i){return {x:x,t:anyTime(x),i:i}}).sort(function(a,b){return b.t-a.t||b.i-a.i}).slice(0,5).map(function(o){return FMT[k](o.x)});
+      sets.push({title:titles[k],missingData:r.data[k]===null,inBackup:bk.length,inApp:loc.length,last:last,missing:miss.slice(0,5).map(FMT[k]),missingCount:miss.length});
+    });
+    bkd={meta:r.meta,sets:sets,at:Date.now()};
+  }catch(e){bkd={err:'Could not read the backup: '+String(e&&e.message||e).slice(0,90)}}
+  renderHealth();
+};
+function bkdHtml(){
+  if(!bkd)return '<div class="sksh-note">See when the last backup was made and which entries are inside it.</div>';
+  if(bkd.busy)return '<div class="sksh-note">⏳ Reading the last backup…</div>';
+  if(bkd.err)return '<div class="sksh-note bad">'+esc(bkd.err)+'</div>';
+  var m=bkd.meta||{},t=Number(m.createdAtMs)||0,h='<div class="sksh-row"><span>Backup made</span><b>'+(t?esc(window.skStamp?window.skStamp(t):new Date(t).toLocaleString())+' ('+esc(agoText(t))+')':'—')+'</b></div>';
+  if(m.createdByEmail)h+='<div class="sksh-row"><span>By</span><b>'+esc(m.createdByEmail)+'</b></div>';
+  h+='<div class="sksh-row"><span>Data items in backup</span><b>'+(m.itemCount||'—')+'</b></div>';
+  bkd.sets.forEach(function(s){
+    h+='<div class="sksh-bkset"><div class="sksh-row"><span><b>'+esc(s.title)+'</b></span><b>'+s.inBackup+' in backup / '+s.inApp+' in app</b></div>';
+    if(s.missingData&&!s.inApp)h+='<div class="sksh-note">No entries yet.</div>';
+    else if(s.missingData)h+='<div class="sksh-note bad">This list is not in the backup.</div>';
+    else{
+      h+='<div class="sksh-note">Latest entries inside the backup:</div>'+(s.last.length?s.last.map(function(l){return '<div class="sksh-ent">'+esc(l)+'</div>'}).join(''):'<div class="sksh-ent">— none —</div>');
+      h+=s.missingCount?'<div class="sksh-note bad">⚠️ '+s.missingCount+' newer entr'+(s.missingCount>1?'ies are':'y is')+' not in this backup yet:</div>'+s.missing.map(function(l){return '<div class="sksh-ent">'+esc(l)+'</div>'}).join('')+(s.missingCount>s.missing.length?'<div class="sksh-ent">… and '+(s.missingCount-s.missing.length)+' more</div>':''):'<div class="sksh-note">✅ Every entry in the app is in this backup.</div>';
+    }
+    h+='</div>';
+  });
+  return h+'<div class="sksh-note">Checked '+esc(agoText(bkd.at))+'. Tap “Backup now” to include the newest entries.</div>';
+}
 function renderHealth(extra){
   var box=document.getElementById('skShBody');if(!box)return;
   var s=sizes(),m=meta(),bills=countOf('sk_bills'),jobs=countOf('skx_repair_jobs_v2');
@@ -159,13 +211,17 @@ function renderHealth(extra){
   var risky=s.rows.filter(function(r){return /^(sk_|skx_)/.test(r.key)&&!SKIP.test(r.key)&&r.chars>=DOC_WARN});
   var lim=5*1024*1024,pct=Math.min(100,Math.round(s.total/lim*100));
   var h=srvHtml();
+  try{
+    var cs=window.skCPGetCustomers?window.skCPGetCustomers():[],due=cs.filter(function(c){return Number(c.balance)>0}),sum=due.reduce(function(t,c){return t+Number(c.balance)},0),home=window.skOutstandingTotalForHome?window.skOutstandingTotalForHome():sum;
+    h+='<div class="sksh-card"><h4>💳 Credit check</h4><div class="sksh-row"><span>Sum of all customers owing</span><b>'+money(sum)+'</b></div><div class="sksh-row"><span>Customers with balance</span><b>'+due.length+' of '+cs.length+'</b></div><div class="sksh-row"><span>Home screen outstanding</span><b>'+money(home)+' '+(Math.round(home)===Math.round(sum)?'✓':'⚠️ differs')+'</b></div></div>';
+  }catch(e){}
   h+='<div class="sksh-card"><h4>📦 Phone storage</h4><div class="sksh-bar"><i style="width:'+pct+'%" class="'+(pct>80?'bad':pct>60?'warn':'ok')+'"></i></div>'+
      '<div class="sksh-row"><span>Used (approx.)</span><b>'+kb(s.total)+' / ~5 MB</b></div></div>';
   h+='<div class="sksh-card"><h4>☁️ Cloud backup</h4>'+
      '<div class="sksh-row"><span>Last backup</span><b>'+(m.lastBackupMs?esc(window.skStamp(m.lastBackupMs)):'Never')+'</b></div>'+
      '<div class="sksh-row"><span>Auto backup</span><b>First open + after '+CLOSE_HOUR+':00</b></div>'+
-     '<div class="sksh-row"><span>History kept</span><b>Last '+KEEP_DAYS+' days</b></div>'+(extra?'<div class="sksh-note">'+esc(extra)+'</div>':'')+
-     '<div class="sksh-actions"><button type="button" class="submit-btn" onclick="skShBackup()">☁️ Backup now</button><button type="button" class="submit-btn" onclick="skShPrune()">🧹 Clean old backups</button></div></div>';
+     '<div class="sksh-row"><span>History kept</span><b>Last '+KEEP_DAYS+' days</b></div>'+(extra?'<div class="sksh-note">'+esc(extra)+'</div>':'')+bkdHtml()+
+     '<div class="sksh-actions"><button type="button" class="submit-btn" onclick="skShBackup()">☁️ Backup now</button><button type="button" class="submit-btn" onclick="skShBackupPeek()">🔎 What is in the last backup?</button><button type="button" class="submit-btn" onclick="skShPrune()">🧹 Clean old backups</button></div></div>';
   h+='<div class="sksh-card"><h4>📊 Firebase free plan</h4>'+
      '<div class="sksh-row"><span>Bills / repair jobs</span><b>'+bills+' / '+jobs+'</b></div>'+
      '<div class="sksh-row"><span>Reads per app open (approx.)</span><b>'+reads+'</b></div>'+
@@ -186,6 +242,7 @@ window.skOpenStorageHealth=function(){
 };
 window.skShBackup=async function(){
   if(!canBackup()){toast('Cloud backup is not possible right now (login / internet / permission)');return}
+  bkd=null;
   renderHealth('⏳ Backing up…');
   await new Promise(function(res){
     function on(){window.removeEventListener('sk-cloud-backup',on);res()}

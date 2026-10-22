@@ -683,3 +683,8 @@ Data-safety fixes from an independent code review:
 
 ## V5.11.56 – Credit page top bar blink
 - Fix: when a customer has an Alt number / address, the top bar of the Credit page blinked all the time. The app read the Alt line as part of the phone number, so the customer key kept changing and the line was removed and added again (144 changes in 3 s; now 3). The phone is now read without the Alt line, and the Alt number is shown after the phone with a space ("9385948418   Alt: 9441695965").
+
+## V5.11.57 – EMI in the Credit form, delivered jobs, backup details
+- Credit form: the EMI option was ignored before (months / interest were never read; a plain credit was saved and "0 on EMI" showed). Now EMI creates one ledger row per EMI (type emi, own due date, flat interest like the bill EMI, last EMI takes the rounding) with no extra plain credit row, so nothing is counted twice. With EMI the single Due Date is hidden; with a sales bill selected the EMI box is hidden. A live "Monthly EMI × months • Total payable" line is shown.
+- Repair sync: a Delivered job is never turned back to Ready by an older copy on another phone. Only a real undo (Previous status / edit form) writes `revertedAt`, which is allowed to win.
+- Storage Health: new "What is in the last backup?" (time, who, counts, latest 5 entries of Credit ledger / Bills / Repair jobs, and entries not yet in the backup) and a "Credit check" card (sum of customers owing = Home outstanding).
