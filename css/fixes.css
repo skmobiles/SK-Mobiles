@@ -1433,3 +1433,6 @@ html body #skStorageHealthModal#skStorageHealthModal .sksh-tr i.diff{background:
 html body #skDealerModal .skdl2-tabs button{white-space:normal!important;line-height:1.2}
 html body #skDealerModal .skdl3-pl{font-weight:400;color:var(--text-muted,#64748b)}
 html body #skDealerModal .skdl3-adv{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:10px 12px!important;margin:0 0 12px!important;color:#1d4ed8}
+
+/* V5.11.56: space between the phone number and the Alt number in the Credit page top bar */
+html body .skcl-who small .skcl-alt{margin-left:12px!important;white-space:nowrap}
