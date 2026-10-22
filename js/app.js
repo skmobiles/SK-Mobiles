@@ -7522,7 +7522,7 @@ window.skOpenCustomer=function(encoded){
    const details=e.details?'<br>Details: '+esc(e.details):'';
    const bill=e.source==='bill'?'<br>Bill: '+esc(e.billId||''):'';
    const canEdit=e.source!=='bill'&&e.source!=='repair-job'&&!skCPRepairJobIdFromCredit(e);
-  return '<div class="sk-credit-entry"><div class="sk-credit-entry-top"><span class="'+cls+'">'+title+' • '+money(e.amount)+'</span><span>'+fmtDate(e.type==='emi'&&e.dueDate?e.dueDate:e.date)+'</span></div><div class="sk-credit-entry-sub">Mode: <b>'+esc(e.mode||'—')+'</b>'+due+details+bill+'</div>'+(canEdit?'<button type="button" class="sk-credit-entry-edit" onclick="skCPEditLedgerEntry(\''+encodeURIComponent(String(e.id||''))+ '\')">✏️ Edit credit/payment</button>':'')+'</div>';
+  return '<div class="sk-credit-entry"><div class="sk-credit-entry-top"><span class="'+cls+'">'+title+' • '+money(e.amount)+'</span><span>'+fmtDate(e.type==='emi'?skEmiDue(e):e.date)+'</span></div><div class="sk-credit-entry-sub">Mode: <b>'+esc(e.mode||'—')+'</b>'+due+details+bill+'</div>'+(canEdit?'<button type="button" class="sk-credit-entry-edit" onclick="skCPEditLedgerEntry(\''+encodeURIComponent(String(e.id||''))+ '\')">✏️ Edit credit/payment</button>':'')+'</div>';
  }).join('');
  document.getElementById('skCreditCustomerModal')?.classList.add('active');
 };
@@ -7820,7 +7820,27 @@ function cpKey(n,p){return String(n||'').trim().toLowerCase()+'|'+cpDigits(p)}
 function cpEsc(v){return String(v==null?'':v).replace(/[&<>'"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]})}
 function cpDate(){var d=new Date();return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()}
 /* V5.11.59: an EMI row shows the date that EMI has to be paid (its due date), not the day it was entered */
-function cpEntryDate(e){return e&&e.type==='emi'&&e.dueDate?e.dueDate:(e&&e.date)}
+/* V5.11.60: an EMI row's pay date is always checked against its own schedule (same group, one month apart), so one row can never show the entry date */
+var _skEmiMemo={raw:null,map:null};
+function skEmiDue(e){
+  if(!e||e.type!=='emi')return e&&e.date;
+  var own=e.dueDate&&/^\d{4}-\d{2}-\d{2}$/.test(String(e.dueDate))?String(e.dueDate):'';
+  var m=String(e.id||'').match(/^(EMI-.+)-(\d+)$/);
+  if(!m||String(e.source||'')!=='manual-credit-page')return own||e.dueDate||e.date;
+  try{
+    var raw=localStorage.getItem('sk_credit_ledger_v1')||'[]';
+    if(_skEmiMemo.raw!==raw){var mp={};JSON.parse(raw).forEach(function(r){var q=String(r&&r.id||'').match(/^(EMI-.+)-(\d+)$/);if(q&&r.type==='emi'&&/^\d{4}-\d{2}-\d{2}$/.test(String(r.dueDate||''))){(mp[q[1]]=mp[q[1]]||[]).push({n:Number(q[2]),d:r.dueDate,id:r.id})}});_skEmiMemo={raw:raw,map:mp}}
+    var sib=(_skEmiMemo.map[m[1]]||[]).filter(function(x){return x.id!==e.id});
+    if(!sib.length)return own||e.date;
+    /* use the majority start date of the group */
+    var cnt={};sib.forEach(function(x){var b=addMonthsISO(x.d,-(x.n-1));cnt[b]=(cnt[b]||0)+1});
+    var best=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]})[0];
+    return addMonthsISO(best,Number(m[2])-1);
+  }catch(err){return own||e.date}
+}
+function addMonthsISO(iso,k){var p=String(iso).split('-'),y=+p[0],mo=+p[1]-1+k,d=+p[2];var t=new Date(y,mo,1);var last=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(Math.min(d,last)).padStart(2,'0')}
+window.skEmiDue=skEmiDue;
+function cpEntryDate(e){return e&&e.type==='emi'?skEmiDue(e):(e&&e.date)}
 function cpDateText(v){if(!v)return '';var d=new Date(v);if(!isNaN(d))return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;var s=String(v);var m=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);return m?`${String(Number(m[1])).padStart(2,'0')}/${String(Number(m[2])).padStart(2,'0')}/${m[3]}`:s}
 function cpBillLast3(id){var x=String(id||'').replace(/\D/g,'');return x.slice(-3)||String(id||'').slice(-3)}
 function cpGetCustomers(){

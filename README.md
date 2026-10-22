@@ -695,3 +695,6 @@ Data-safety fixes from an independent code review:
 
 ## V5.11.59 – EMI rows show their pay date
 - An EMI row in the customer's credit history (and in the old credit history list and "Send history" message) now shows the date that EMI has to be paid (its due date: 22/11, 22/12, ...) instead of the day it was entered. Stored data is unchanged.
+
+## V5.11.60 – EMI pay date always follows the schedule
+- An EMI row's pay date is now worked out from its own schedule (same EMI group, one month apart), so a row can never show the entry date (22/10) instead of its pay date (22/11). Applies to the customer history, the old history list and "Send history". Stored data is unchanged.
