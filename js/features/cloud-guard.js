@@ -112,13 +112,53 @@ function sizes(){
   return {rows:rows,total:total};
 }
 function countOf(k){try{var v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v.length:0}catch(e){return 0}}
+
+/* ---------- V5.11.53: Server check - counts on the server vs on this phone ---------- */
+var srv=null; /* {busy:true} | {err:'..'} | {rows:[..],last:ms,at:ms} */
+function localCount(k){try{var v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v.length:(v&&typeof v==='object'?Object.keys(v).length:0)}catch(e){return 0}}
+function agoText(ms){
+  if(!ms)return '';var m=Math.max(0,Math.round((Date.now()-ms)/60000));
+  return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' days ago';
+}
+window.skShCheck=async function(){
+  var d=db();
+  if(!d||!window.firebase||!firebase.auth||!firebase.auth().currentUser||navigator.onLine===false){srv={err:'Cannot reach the server right now (login / internet).'};renderHealth();return}
+  srv={busy:true};renderHealth();
+  try{
+    var base=d.collection('shops').doc(SHOP),opt={source:'server'},last=0;
+    var res=await Promise.all([base.collection('bills').get(opt),base.collection('repairJobs').get(opt),base.collection('data').get(opt)]);
+    var live=function(q){return q.docs.filter(function(x){var r=x.data()||{};return r.isDeleted!==true&&r._deleted!==true}).length};
+    var dataMap={};res[2].docs.forEach(function(x){var r=x.data()||{};dataMap[x.id]=r;var t=Number(r.updatedAtMs)||0;if(t>last)last=t});
+    res[1].docs.forEach(function(x){var t=Number((x.data()||{})._syncUpdatedAt)||0;if(t>last)last=t});
+    function srvCount(k){var r=dataMap[k];if(!r)return 0;try{var v=JSON.parse(r.data||'[]');return Array.isArray(v)?v.length:(v&&typeof v==='object'?Object.keys(v).length:0)}catch(e){return 0}}
+    var rows=[['Bills',live(res[0]),localCount('sk_bills')],['Repair jobs',live(res[1]),localCount('skx_repair_jobs_v2')],
+      ['Credit ledger entries',srvCount('sk_credit_ledger_v1'),localCount('sk_credit_ledger_v1')],['Used mobiles',srvCount('sk_used_mobile_stock_v1'),localCount('sk_used_mobile_stock_v1')],
+      ['Receipts',srvCount('sk_receipts_v1'),localCount('sk_receipts_v1')],
+      ['Dealer payments',srvCount('skx_dealer_payments_v1'),localCount('skx_dealer_payments_v1')],['Dealer old balance / returns',srvCount('skx_dealer_entries_v1'),localCount('skx_dealer_entries_v1')]];
+    srv={rows:rows,last:last,at:Date.now()};
+  }catch(e){srv={err:'Could not read the server: '+String(e&&e.message||e).slice(0,90)}}
+  renderHealth();
+};
+function srvHtml(){
+  var h='<div class="sksh-card"><h4>☁️ Cloud (Firebase) — server check</h4>';
+  if(srv&&srv.rows){
+    h+='<div class="sksh-row"><span>Last change confirmed by the server</span><b>'+(srv.last?esc(agoText(srv.last)):'—')+'</b></div>';
+    h+='<div class="sksh-tbl"><div class="sksh-th"><span></span><span>On the server</span><span>In this app</span><span></span></div>'+srv.rows.map(function(r){
+      var ok=r[1]===r[2];return '<div class="sksh-tr"><span>'+esc(r[0])+'</span><b>'+r[1].toLocaleString('en-IN')+'</b><b>'+r[2].toLocaleString('en-IN')+'</b><i class="'+(ok?'ok':'diff')+'">'+(ok?'✓':'differs')+'</i></div>'}).join('')+'</div>';
+    h+='<div class="sksh-note">A difference right after saving is normal while it uploads — check again in a minute. If it stays, tell me. · Checked '+esc(agoText(srv.at))+'</div>';
+  }else if(srv&&srv.busy)h+='<div class="sksh-note">⏳ Checking the server…</div>';
+  else if(srv&&srv.err)h+='<div class="sksh-note bad">'+esc(srv.err)+'</div>';
+  else h+='<div class="sksh-note">Compare what is saved on the server with what is on this phone. Uses a few reads of the free quota each time.</div>';
+  h+='<div class="sksh-actions"><button type="button" class="submit-btn" onclick="skShCheck()">✓ Check data on the server</button></div></div>';
+  return h;
+}
 function renderHealth(extra){
   var box=document.getElementById('skShBody');if(!box)return;
   var s=sizes(),m=meta(),bills=countOf('sk_bills'),jobs=countOf('skx_repair_jobs_v2');
   var reads=bills+jobs+dataKeys().length;
   var risky=s.rows.filter(function(r){return /^(sk_|skx_)/.test(r.key)&&!SKIP.test(r.key)&&r.chars>=DOC_WARN});
   var lim=5*1024*1024,pct=Math.min(100,Math.round(s.total/lim*100));
-  var h='';
+  var h=srvHtml();
   h+='<div class="sksh-card"><h4>📦 Phone storage</h4><div class="sksh-bar"><i style="width:'+pct+'%" class="'+(pct>80?'bad':pct>60?'warn':'ok')+'"></i></div>'+
      '<div class="sksh-row"><span>Used (approx.)</span><b>'+kb(s.total)+' / ~5 MB</b></div></div>';
   h+='<div class="sksh-card"><h4>☁️ Cloud backup</h4>'+
