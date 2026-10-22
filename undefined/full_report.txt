@@ -1,4 +1,0 @@
-light errors: none
-a errors: none
-b errors: none
-ios errors: none
