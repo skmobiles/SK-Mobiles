@@ -5,7 +5,7 @@
    purchases do not show up as pending. */
 (function(){
 'use strict';
-var CRED_KEY='skx_dealer_credit_v1',PAY_KEY='skx_dealer_payments_v1',START_KEY='skx_dealer_start_v1',ENT_KEY='skx_dealer_entries_v1',PROF_KEY='skx_dealer_profiles_v1',ALIAS_KEY='skx_dealer_alias_v1',USED_KEY='sk_used_mobile_stock_v1',REP_KEY='skx_repair_jobs_v2';
+var CRED_KEY='skx_dealer_credit_v1',PAY_KEY='skx_dealer_payments_v1',START_KEY='skx_dealer_start_v1',ENT_KEY='skx_dealer_entries_v1',PROF_KEY='skx_dealer_profiles_v1',ALIAS_KEY='skx_dealer_alias_v1',HIDE_KEY='skx_dealer_hidden_v1',USED_KEY='sk_used_mobile_stock_v1',REP_KEY='skx_repair_jobs_v2';
 function read(k,f){try{var v=JSON.parse(localStorage.getItem(k)||'');return v==null?f:v}catch(e){return f}}
 function arr(k){var v=read(k,[]);return Array.isArray(v)?v:[]}
 function num(v){v=Number(v);return isFinite(v)?v:0}
@@ -36,6 +36,7 @@ function oldDelivered(j){
   var t=Date.parse(j.deliveredAt||j.updatedAt||j.date||'');if(isNaN(t))return false;
   return (Date.now()-t)/86400000>10;
 }
+function sig(d){return [d.buys.length,d.pays.length,d.olds.length,d.rets.length,d.refs.length,Math.round(d.bought),Math.round(d.paid),Math.round(d.balance)].join('/')}
 function compute(){
   var start=startKey(),map={},cs=credSet(),ents=arr(ENT_KEY),alias=obj(ALIAS_KEY),prof=obj(PROF_KEY);
   function get(name){
@@ -72,12 +73,16 @@ function compute(){
   var list=Object.keys(map).filter(function(k){var d=map[k];return d.buys.length||d.pays.length||d.olds.length||d.rets.length||d.refs.length||prof[k]}).map(function(k){var d=map[k];d.balance=d.credit+d.old+d.refund-d.paid-d.ret;
     [d.buys,d.pays,d.olds,d.rets,d.refs].forEach(function(a){a.sort(function(x,y){return x.date<y.date?1:-1})});return d})
     .sort(function(a,b){return b.balance-a.balance||a.name.localeCompare(b.name)});
+  /* V5.11.61: a removed dealer is hidden (nothing is deleted). It comes back by itself if any new purchase / payment / entry is added for it. */
+  var hid=obj(HIDE_KEY),hidden=[];
+  list=list.filter(function(d){if(hid[d.key]&&hid[d.key]===sig(d)){hidden.push(d);return false}return true});
   var total=0;list.forEach(function(d){if(d.balance>0)total+=d.balance});
-  return {list:list,total:total,start:start};
+  return {list:list,hidden:hidden,total:total,start:start};
 }
 
 var AV=[['#2563eb','#dbeafe'],['#16a34a','#dcfce7'],['#d97706','#fef3c7'],['#7c3aed','#ede9fe'],['#db2777','#fce7f3'],['#0891b2','#cffafe']];
 function av(name){var h=0,n=String(name||'?');for(var i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%997;var c=AV[h%AV.length];return '<i class="skdl3-av" style="color:'+c[0]+';background:'+c[1]+'">'+esc(n.trim().charAt(0).toUpperCase()||'?')+'</i>'}
+var showHid=false;
 var view=null,mode=''; /* view = dealer key being viewed (null = list); mode = open form: pay | old | ret | exch | refund | edit */
 function qa(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 function tabs(d){
@@ -119,7 +124,7 @@ function formHtml(d,D){
   }
   if(mode==='refund')return '<div class="skdl2-form"><h4>Dealer gave cash back</h4><div class="skdl2-hint">Use this when '+esc(d.name)+' pays you the amount they owe you. It reduces what the dealer owes you.</div><input type="number" id="skDlAmt" min="0" step="0.01" inputmode="decimal" placeholder="Amount received ₹"/>'+dt+note+'<button type="button" class="submit-btn" onclick="skDlAddRefund()">Save</button></div>';
   if(mode==='edit')return '<div class="skdl2-form"><h4>Edit dealer</h4><input type="text" id="skDlEName" value="'+esc(d.name)+'" placeholder="Dealer name"/><input type="tel" id="skDlEPhone" value="'+esc(d.phone)+'" placeholder="Phone number" inputmode="tel"/><input type="text" id="skDlEPlace" value="'+esc(d.place)+'" placeholder="Place / city"/><input type="text" id="skDlENote" value="'+esc(d.note)+'" placeholder="Note (optional)"/>'+
-    '<div class="skdl2-hint">Changing the name updates it everywhere in Dealer Payments (old repair jobs and purchases are not changed).</div><button type="button" class="submit-btn" onclick="skDlSaveEdit()">Save dealer</button></div>';
+    '<div class="skdl2-hint">Changing the name updates it everywhere in Dealer Payments (old repair jobs and purchases are not changed).</div><button type="button" class="submit-btn" onclick="skDlSaveEdit()">Save dealer</button><button type="button" class="skdl-del-full" onclick="skDlRemove(\''+esc(qa(d.key))+'\')">🗑 Remove dealer</button></div>';
   return '';
 }
 function render(){
@@ -135,8 +140,9 @@ function render(){
   if(!D.list.length)h+='<div class="skdr-empty">No dealer purchases yet. Add a dealer name in Used Mobile purchase or Repair spare parts.</div>';
   else h+=(D.list.length>4?'<input type="search" id="skDlSearch" class="skdl3-search" placeholder="Search dealer…" oninput="skDlFind(this.value)" autocomplete="off"/>':'')+'<div class="skdl2-list">'+D.list.map(function(x){
     var cls=x.balance>0?'skdl-due':(x.balance<0?'skdl-adv':'skdl-ok');
-    return '<div class="skdl2-row" data-n="'+esc((x.name+' '+x.place+' '+x.phone).toLowerCase())+'" onclick="skDlOpen(\''+esc(qa(x.key))+'\')">'+av(x.name)+'<span>'+dealerLine(x)+'<small>Bought '+money(x.bought)+(x.old?' · Old '+money(x.old):'')+(x.ret?' · Returned '+money(x.ret):'')+' · Paid '+money(x.paid)+'</small></span><b class="'+cls+'">'+money(Math.abs(x.balance))+'<em>'+(x.balance>0?'due':(x.balance<0?'dealer owes you':'settled'))+'</em></b></div>';
+    return '<div class="skdl2-row" data-n="'+esc((x.name+' '+x.place+' '+x.phone).toLowerCase())+'" onclick="skDlOpen(\''+esc(qa(x.key))+'\')">'+av(x.name)+'<span>'+dealerLine(x)+'<small>Bought '+money(x.bought)+(x.old?' · Old '+money(x.old):'')+(x.ret?' · Returned '+money(x.ret):'')+' · Paid '+money(x.paid)+'</small></span><b class="'+cls+'">'+money(Math.abs(x.balance))+'<em>'+(x.balance>0?'due':(x.balance<0?'dealer owes you':'settled'))+'</em></b><button type="button" class="skdl-del" aria-label="Remove dealer" onclick="event.stopPropagation();skDlRemove(\''+esc(qa(x.key))+'\')">🗑</button></div>';
   }).join('')+'</div>';
+  if(D.hidden.length)h+='<button type="button" class="skdl-hidlink" onclick="skDlToggleHid()">'+(showHid?'Hide':'Show')+' '+D.hidden.length+' removed dealer'+(D.hidden.length>1?'s':'')+'</button>'+(showHid?'<div class="skdl2-list">'+D.hidden.map(function(x){return '<div class="skdl2-row plain">'+av(x.name)+'<span>'+dealerLine(x)+'<small>Bought '+money(x.bought)+' · Paid '+money(x.paid)+'</small></span><button type="button" class="skdl-restore" onclick="skDlRestore(\''+esc(qa(x.key))+'\')">Restore</button></div>'}).join('')+'</div>':'');
   body.innerHTML=h;
 }
 function row(l,sub,amt,x,cls){return '<div class="skdl2-row plain'+(cls?' '+cls:'')+'"><span>'+l+'<small>'+sub+'</small></span><b>'+amt+(x||'')+'</b></div>'}
@@ -229,6 +235,16 @@ window.skDlAddRefund=function(){
   var amt=num(val('skDlAmt'));if(!(amt>0)){toast('Enter a valid amount');return}
   if(addEnt({type:'refund',dealer:d.name,amount:amt,date:val('skDlDate')||today(),note:val('skDlNote').trim()||'Cash back from dealer'})){toast('✅ Saved');mode='';render()}
 };
+window.skDlRemove=function(key){
+  var D=compute(),d=D.list.filter(function(x){return x.key===key})[0];if(!d)return;
+  var msg='Remove dealer "'+d.name+'" from Dealer Payments?\n\n'+(d.balance>0?'⚠ You still owe this dealer '+money(d.balance)+'. It will no longer count in "Total to pay dealers".\n\n':d.balance<0?'⚠ This dealer owes you '+money(-d.balance)+'.\n\n':'')+'Nothing is deleted: purchases, payments and old balances stay saved. The dealer comes back automatically when a new purchase or payment is added, or tap "Show removed dealers" → Restore.';
+  if(!confirm(msg))return;
+  var h=obj(HIDE_KEY);h[key]=sig(d);
+  try{localStorage.setItem(HIDE_KEY,JSON.stringify(h))}catch(e){toast('Could not save');return}
+  if(view===key)view=null;toast('Dealer removed from the list');render();
+};
+window.skDlRestore=function(key){var h=obj(HIDE_KEY);delete h[key];try{localStorage.setItem(HIDE_KEY,JSON.stringify(h))}catch(e){}toast('Dealer restored');render()};
+window.skDlToggleHid=function(){showHid=!showHid;render()};
 window.skDlSaveEdit=function(){
   var d=curDealer();if(!d)return;
   var name=val('skDlEName').trim();if(!name){toast('Enter the dealer name');return}
