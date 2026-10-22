@@ -8251,7 +8251,7 @@ function skCPOutstandingOpen(){
  var M=cpMoney,E=cpEsc,D=function(v){return cpDateText(v)||'—'};
  var muted='color:var(--text-muted,#64748b)';
  function row(l,v,col){return '<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-size:.78rem"><span style="'+muted+'">'+l+'</span><b'+(col?' style="color:'+col+'"':'')+'>'+v+'</b></div>'}
- function card(tag,title,sub,body,bal){return '<div style="border:1px solid var(--card-border,#e2e8f0);border-radius:14px;padding:12px;margin-bottom:10px;background:var(--card-bg,#fff)"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><span style="display:inline-block;font-size:.62rem;font-weight:800;padding:2px 8px;border-radius:99px;background:rgba(217,119,87,.16);color:#c2410c">'+E(tag)+'</span><div style="font-weight:800;font-size:.86rem;margin-top:5px">'+E(title)+'</div><div style="font-size:.68rem;'+muted+'">'+E(sub||'')+'</div></div><div style="text-align:right"><div style="font-size:.6rem;'+muted+'">BALANCE</div><b style="font-size:1.05rem;color:#dc2626">'+M(bal)+'</b></div></div><div style="margin-top:8px;border-top:1px dashed var(--card-border,#e2e8f0);padding-top:6px">'+body+'</div></div>'}
+ function card(tag,title,sub,body,bal,nav){return '<div '+(nav||'')+' style="'+(nav?'cursor:pointer;':'')+'border:1px solid var(--card-border,#e2e8f0);border-radius:14px;padding:12px;margin-bottom:10px;background:var(--card-bg,#fff)"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><span style="display:inline-block;font-size:.62rem;font-weight:800;padding:2px 8px;border-radius:99px;background:rgba(217,119,87,.16);color:#c2410c">'+E(tag)+'</span>'+(nav?'<span style="float:right;font-size:.62rem;font-weight:800;color:#c2410c;margin-left:6px">Open ›</span>':'')+'<div style="font-weight:800;font-size:.86rem;margin-top:5px">'+E(title)+'</div><div style="font-size:.68rem;'+muted+'">'+E(sub||'')+'</div></div><div style="text-align:right"><div style="font-size:.6rem;'+muted+'">BALANCE</div><b style="font-size:1.05rem;color:#dc2626">'+M(bal)+'</b></div></div><div style="margin-top:8px;border-top:1px dashed var(--card-border,#e2e8f0);padding-top:6px">'+body+'</div></div>'}
  var cards=[],sumItems=0,ents=c.entries||[],paysHtml='',hidden=0;
  /* 1. sales bills */
  (c.bills||[]).forEach(function(x){
@@ -8265,7 +8265,7 @@ function skCPOutstandingOpen(){
      if(er.length)body+='<div style="font-size:.68rem;font-weight:800;margin:6px 0 2px">EMI schedule</div>'+er.map(function(e){return row(E((String(e.details||'').match(/EMI \d+\/\d+/)||['EMI'])[0])+' • '+D(e.dueDate),M(e.amount))}).join('')}
    else if(b.creditDueDate)body+=row('Due date',D(b.creditDueDate));
    if(rc.length)body+='<div style="font-size:.68rem;font-weight:800;margin:6px 0 2px">Payments</div>'+rc.map(function(r){return row(D(r.date)+' • '+E(r.mode||''),M(r.amount),'#16a34a')}).join('');
-   cards.push({k:cpDayKey(b.date),h:card(isEmi?'EMI sale':(paid>0?'Credit sale • part paid':'Credit sale'),'Bill '+(b.billNo||b.id||'')+' • '+(b.model||''),'Sold on '+D(b.date),body,bal)});sumItems+=bal;
+   cards.push({k:cpDayKey(b.date),h:card(isEmi?'EMI sale':(paid>0?'Credit sale • part paid':'Credit sale'),'Bill '+(b.billNo||b.id||'')+' • '+(b.model||''),'Sold on '+D(b.date),body,bal,'data-bill="'+x.idx+'"')});sumItems+=bal;
  });
  /* 2. ledger-only credit / EMI, oldest first, payments clear the oldest first */
  var man=ents.filter(function(e){return String(e.source||'')!=='bill'&&!e.billId&&String(e.source||'')!=='repair-job'&&!cpRjCreditId(e)});
@@ -8285,7 +8285,7 @@ function skCPOutstandingOpen(){
    if(g.emi){var mo=Number((String(f.details||'').match(/EMI \d+\/(\d+)/)||[])[1])||g.rows.length;
      body+=row('EMI plan',mo+' months × '+M(f.amount))+row('Total with interest',M(tot))+row('Paid so far',M(paidAmt),'#16a34a')+'<div style="font-size:.68rem;font-weight:800;margin:6px 0 2px">EMI schedule</div>'+g.rows.map(function(e){var a=Number(e.amount)||0,od=e._paid<a&&cpDayKey(cpEntryDate(e))<new Date().setHours(0,0,0,0),st=e._paid>=a?'✔ Paid':(e._paid>0?'Part paid ('+M(e._paid)+')':'Pending')+(od?' • OVERDUE':'');return row(E((String(e.details||'').match(/EMI \d+\/\d+/)||['EMI'])[0])+' • '+D(cpEntryDate(e)),M(a)+' • '+st,e._paid>=a?'#16a34a':(od?'#dc2626':''))+(od?'<div style="text-align:right;margin:2px 0 4px"><button type="button" data-pen="'+E(e.id)+'" style="border:1px solid #fca5a5;background:#fee2e2;color:#b91c1c;border-radius:99px;padding:4px 10px;font-size:.66rem;font-weight:800">+ Add penalty</button></div>':'')}).join('')}
    else{body+=row('Paid so far',M(paidAmt),'#16a34a')+(f.dueDate?row('Due date',D(f.dueDate)):'')+(f.category?row('Category',E(f.category)):'')}
-   cards.push({k:cpDayKey(f.date),h:card(g.emi?'EMI':(paidAmt>0?'Credit • part paid':'Credit'),note||'Credit entry','Entered on '+D(f.date)+(f.mode&&!g.emi?' • '+E(f.mode):''),body,bal)});sumItems+=bal;
+   cards.push({k:cpDayKey(f.date),h:card(g.emi?'EMI':(paidAmt>0?'Credit • part paid':'Credit'),note||'Credit entry','Entered on '+D(f.date)+(f.mode&&!g.emi?' • '+E(f.mode):''),body,bal,(!g.emi&&g.rows.length===1?'data-entry="'+E(f.id)+'"':''))});sumItems+=bal;
  });
  pens.forEach(function(e){
    var a=Number(e.amount)||0,use=Math.min(a,pool);pool-=use;e._paid=use;
@@ -8301,7 +8301,7 @@ function skCPOutstandingOpen(){
    var j=cpJobs().find(function(x){return String(x.id)===i.id});if(!j)return;
    var est=Number(j.estimate)||0,dis=Math.max(0,Number(j.discountAmount)||0),paid=Math.max(0,Number(j.paidAmount)||0);
    var body=row('Repair charge',M(est))+(dis?row('Discount',M(dis),'#16a34a'):'')+row('Paid',M(paid),'#16a34a')+(j.status?row('Status',E(j.status)):'')+(j.problem||j.issue?row('Problem',E(String(j.problem||j.issue).slice(0,40))):'');
-   cards.push({k:cpDayKey(j.deliveredAt||j.date),h:card('Repair job','Job '+(j.repairNo||j.id)+' • '+(j.model||''),'Delivered '+D(j.deliveredAt||j.date),body,i.bal)});sumItems+=i.bal;
+   cards.push({k:cpDayKey(j.deliveredAt||j.date),h:card('Repair job','Job '+(j.repairNo||j.id)+' • '+(j.model||''),'Delivered '+D(j.deliveredAt||j.date),body,i.bal,'data-job="'+E(j.id)+'"')});sumItems+=i.bal;
  });
  cards.sort(function(a,b){return a.k-b.k});
  var diff=(Number(c.balance)||0)-sumItems;
@@ -8315,12 +8315,20 @@ function skCPOutstandingOpen(){
   (hidden?'<div style="font-size:.66rem;'+muted+';margin-top:4px">'+hidden+' fully paid credit entr'+(hidden>1?'ies':'y')+' not shown (see history).</div>':'')+paysHtml;
  var old=document.getElementById('skcpOutModal');if(old)old.remove();
  var modal=document.createElement('div');modal.id='skcpOutModal';
- modal.style.cssText='position:fixed;inset:0;z-index:2147483646;display:flex;align-items:flex-end;justify-content:center;background:rgba(15,23,42,.5)';
- modal.innerHTML='<div role="dialog" aria-modal="true" style="width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--modal-bg,var(--card-bg,#fff));color:var(--text,#172033);border-radius:20px 20px 0 0;padding:16px 16px 28px;box-shadow:0 -10px 40px rgba(15,23,42,.3)"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px"><div><b style="font-size:1rem">'+E(c.name)+' — Outstanding details</b><div style="font-size:.7rem;'+muted+'">'+E(c.phone||'')+'</div></div><button type="button" id="skcpOutClose" aria-label="Close" style="border:0;border-radius:50%;width:34px;height:34px;background:#fee2e2;color:#b91c1c;font-size:1.1rem;font-weight:800">✕</button></div>'+html+'</div>';
+ modal.style.cssText='position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;background:rgba(15,23,42,.5)';
+ modal.innerHTML='<div role="dialog" aria-modal="true" style="width:min(560px,100%);max-height:86vh;overflow:auto;background:var(--modal-bg,var(--card-bg,#fff));color:var(--text,#172033);border-radius:20px;padding:16px;box-shadow:0 18px 50px rgba(15,23,42,.3)"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px"><div><b style="font-size:1rem">'+E(c.name)+' — Outstanding details</b><div style="font-size:.7rem;'+muted+'">'+E(c.phone||'')+'</div></div><button type="button" id="skcpOutClose" aria-label="Close" style="border:0;border-radius:50%;width:34px;height:34px;background:#fee2e2;color:#b91c1c;font-size:1.1rem;font-weight:800">✕</button></div>'+html+'</div>';
  document.body.appendChild(modal);
  modal.addEventListener('click',function(ev){
    if(ev.target===modal||ev.target.id==='skcpOutClose'){modal.remove();return}
-   var t=ev.target.closest&&ev.target.closest('[data-pen],[data-waive],[data-delpen]');if(!t)return;
+   var t=ev.target.closest&&ev.target.closest('[data-pen],[data-waive],[data-delpen]');
+   if(!t){
+     var nv=ev.target.closest&&ev.target.closest('[data-bill],[data-job],[data-entry]');if(!nv)return;
+     modal.remove();
+     if(nv.hasAttribute('data-job'))setTimeout(function(){skCPOpenRepairJob(nv.getAttribute('data-job'))},60);
+     else if(nv.hasAttribute('data-bill'))setTimeout(function(){skCPViewBill(Number(nv.getAttribute('data-bill')))},60);
+     else setTimeout(function(){skCPEditLedgerEntry(encodeURIComponent(nv.getAttribute('data-entry')))},60);
+     return;
+   }
    if(t.hasAttribute('data-pen'))skCPPenaltyForm(t.getAttribute('data-pen'));
    else if(t.hasAttribute('data-waive'))skCPPenaltyWaive(t.getAttribute('data-waive'));
    else if(window.skLedgerDelete){modal.remove();window.skLedgerDelete(t.getAttribute('data-delpen'));setTimeout(function(){var c2=cpGetCustomers().find(function(x){return x.key===key});if(c2){cpOpenDetail(c2);skCPOutstandingOpen()}},300)}
