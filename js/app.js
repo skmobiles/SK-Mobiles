@@ -8263,6 +8263,76 @@ function cpOpenItems(c){
  if(old>0)items.push({t:'old',id:'old',bal:old,when:0,label:'Old balance (ledger only)'});
  return items;
 }
+/* V5.11.61: tap the Outstanding box -> full details of everything that is owed (bills, EMI, part payments, ledger credit, repair jobs) */
+function skCPOutstandingOpen(){
+ var key=(typeof skCPSelectedKey!=='undefined')?skCPSelectedKey:'';
+ var c=cpGetCustomers().find(function(x){return x.key===key});
+ if(!c){showToast?.('Open a customer first');return}
+ var M=cpMoney,E=cpEsc,D=function(v){return cpDateText(v)||'—'};
+ var muted='color:var(--text-muted,#64748b)';
+ function row(l,v,col){return '<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-size:.78rem"><span style="'+muted+'">'+l+'</span><b'+(col?' style="color:'+col+'"':'')+'>'+v+'</b></div>'}
+ function card(tag,title,sub,body,bal){return '<div style="border:1px solid var(--card-border,#e2e8f0);border-radius:14px;padding:12px;margin-bottom:10px;background:var(--card-bg,#fff)"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><span style="display:inline-block;font-size:.62rem;font-weight:800;padding:2px 8px;border-radius:99px;background:rgba(217,119,87,.16);color:#c2410c">'+E(tag)+'</span><div style="font-weight:800;font-size:.86rem;margin-top:5px">'+E(title)+'</div><div style="font-size:.68rem;'+muted+'">'+E(sub||'')+'</div></div><div style="text-align:right"><div style="font-size:.6rem;'+muted+'">BALANCE</div><b style="font-size:1.05rem;color:#dc2626">'+M(bal)+'</b></div></div><div style="margin-top:8px;border-top:1px dashed var(--card-border,#e2e8f0);padding-top:6px">'+body+'</div></div>'}
+ var cards=[],sumItems=0,ents=c.entries||[],paysHtml='',hidden=0;
+ /* 1. sales bills */
+ (c.bills||[]).forEach(function(x){
+   var b=x.b,bal=Math.max(0,Number(b.balance)||0);if(bal<=0)return;
+   var isEmi=b.payMode==='EMI',price=Number(b.price)||0,adv=Number(b.advance)||0;
+   var rc=(Array.isArray(b.paymentReceipts)?b.paymentReceipts:[]).filter(function(r){return r&&r.type==='payment'});
+   var paid=rc.reduce(function(a,r){return a+(Number(r.amount)||0)},0);
+   var body=row('Purchase (bill total)',M(price))+row('Advance paid',M(adv),'#16a34a')+row('Paid after sale',M(paid),'#16a34a');
+   if(isEmi){body+=row('EMI plan',(Number(b.emiMonths)||'—')+' months × '+M(b.monthlyEmi||0));
+     var er=ents.filter(function(e){return e.type==='emi'&&e.billId===b.id&&e.source==='bill'});
+     if(er.length)body+='<div style="font-size:.68rem;font-weight:800;margin:6px 0 2px">EMI schedule</div>'+er.map(function(e){return row(E((String(e.details||'').match(/EMI \d+\/\d+/)||['EMI'])[0])+' • '+D(e.dueDate),M(e.amount))}).join('')}
+   else if(b.creditDueDate)body+=row('Due date',D(b.creditDueDate));
+   if(rc.length)body+='<div style="font-size:.68rem;font-weight:800;margin:6px 0 2px">Payments</div>'+rc.map(function(r){return row(D(r.date)+' • '+E(r.mode||''),M(r.amount),'#16a34a')}).join('');
+   cards.push({k:cpDayKey(b.date),h:card(isEmi?'EMI sale':(paid>0?'Credit sale • part paid':'Credit sale'),'Bill '+(b.billNo||b.id||'')+' • '+(b.model||''),'Sold on '+D(b.date),body,bal)});sumItems+=bal;
+ });
+ /* 2. ledger-only credit / EMI, oldest first, payments clear the oldest first */
+ var man=ents.filter(function(e){return String(e.source||'')!=='bill'&&!e.billId&&String(e.source||'')!=='repair-job'&&!cpRjCreditId(e)});
+ function cpRjCreditId(e){return skCPRepairJobIdFromCredit?skCPRepairJobIdFromCredit(e):''}
+ var credits=man.filter(function(e){return e.type==='credit'||e.type==='emi'}).sort(function(a,b){var x=cpDayKey(cpEntryDate(a)),y=cpDayKey(cpEntryDate(b));return x-y});
+ var pays=man.filter(function(e){return e.type==='payment'&&String(e.source||'')!=='repair-job-payment'});
+ var pool=pays.reduce(function(a,e){return a+(Number(e.amount)||0)},0);
+ var groups=[],gm={};
+ credits.forEach(function(e){var m=String(e.id||'').match(/^(EMI-.+)-\d+$/),g=e.type==='emi'&&m?m[1]:('S-'+e.id);if(!gm[g]){gm[g]={id:g,emi:!!m&&e.type==='emi',rows:[]};groups.push(gm[g])}gm[g].rows.push(e)});
+ groups.forEach(function(g){
+   var tot=0,paidAmt=0;
+   g.rows.forEach(function(e){var a=Number(e.amount)||0,use=Math.min(a,pool);pool-=use;e._paid=use;tot+=a;paidAmt+=use});
+   var bal=tot-paidAmt;if(bal<=0){hidden++;return}
+   var f=g.rows[0],purchase=Number(f.originalAmount)||tot,adv=Number(f.advance)||0,note=String(f.details||'').replace(/^EMI \d+\/\d+ • /,'').replace(/ • (Ledger only|Advance .*)$/g,'').replace(/ • Ledger only/,'');
+   var body=row('Purchase / credit amount',M(purchase))+row('Advance paid',M(adv),'#16a34a');
+   if(g.emi){var mo=Number((String(f.details||'').match(/EMI \d+\/(\d+)/)||[])[1])||g.rows.length;
+     body+=row('EMI plan',mo+' months × '+M(f.amount))+row('Total with interest',M(tot))+row('Paid so far',M(paidAmt),'#16a34a')+'<div style="font-size:.68rem;font-weight:800;margin:6px 0 2px">EMI schedule</div>'+g.rows.map(function(e){var a=Number(e.amount)||0,st=e._paid>=a?'✔ Paid':(e._paid>0?'Part paid ('+M(e._paid)+')':'Pending');return row(E((String(e.details||'').match(/EMI \d+\/\d+/)||['EMI'])[0])+' • '+D(cpEntryDate(e)),M(a)+' • '+st,e._paid>=a?'#16a34a':'')}).join('')}
+   else{body+=row('Paid so far',M(paidAmt),'#16a34a')+(f.dueDate?row('Due date',D(f.dueDate)):'')+(f.category?row('Category',E(f.category)):'')}
+   cards.push({k:cpDayKey(f.date),h:card(g.emi?'EMI':(paidAmt>0?'Credit • part paid':'Credit'),note||'Credit entry','Entered on '+D(f.date)+(f.mode&&!g.emi?' • '+E(f.mode):''),body,bal)});sumItems+=bal;
+ });
+ if(pays.length)paysHtml='<div style="font-size:.7rem;font-weight:900;margin:12px 0 5px">PAYMENTS RECEIVED (ledger)</div>'+pays.map(function(e){return row(D(e.date)+' • '+E(e.mode||'')+(e.details?' • '+E(String(e.details).replace(/ • Ledger only/,'').slice(0,30)):''),M(e.amount),'#16a34a')}).join('');
+ /* 3. repair jobs */
+ cpOpenItems(c).filter(function(i){return i.t==='job'}).forEach(function(i){
+   var j=cpJobs().find(function(x){return String(x.id)===i.id});if(!j)return;
+   var est=Number(j.estimate)||0,dis=Math.max(0,Number(j.discountAmount)||0),paid=Math.max(0,Number(j.paidAmount)||0);
+   var body=row('Repair charge',M(est))+(dis?row('Discount',M(dis),'#16a34a'):'')+row('Paid',M(paid),'#16a34a')+(j.status?row('Status',E(j.status)):'')+(j.problem||j.issue?row('Problem',E(String(j.problem||j.issue).slice(0,40))):'');
+   cards.push({k:cpDayKey(j.deliveredAt||j.date),h:card('Repair job','Job '+(j.repairNo||j.id)+' • '+(j.model||''),'Delivered '+D(j.deliveredAt||j.date),body,i.bal)});sumItems+=i.bal;
+ });
+ cards.sort(function(a,b){return a.k-b.k});
+ var diff=(Number(c.balance)||0)-sumItems;
+ var html='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;text-align:center">'+
+  '<div style="background:rgba(220,38,38,.1);border-radius:12px;padding:8px 4px"><b style="color:#dc2626">'+M(c.balance)+'</b><div style="font-size:.58rem;'+muted+'">OUTSTANDING</div></div>'+
+  '<div style="background:rgba(100,116,139,.12);border-radius:12px;padding:8px 4px"><b>'+M(c.credits)+'</b><div style="font-size:.58rem;'+muted+'">CREDIT / EMI</div></div>'+
+  '<div style="background:rgba(22,163,74,.12);border-radius:12px;padding:8px 4px"><b style="color:#16a34a">'+M(c.payments)+'</b><div style="font-size:.58rem;'+muted+'">PAID</div></div></div>'+
+  '<div style="font-size:.7rem;font-weight:900;margin:4px 0 6px">WHAT IS OWED ('+cards.length+')</div>'+
+  (cards.length?cards.map(function(x){return x.h}).join(''):'<div style="padding:14px;text-align:center;'+muted+'">Nothing is owed.</div>')+
+  (Math.abs(diff)>=1?row('Other adjustments (discount etc.)',(diff>0?'':'− ')+M(Math.abs(diff))):'')+
+  (hidden?'<div style="font-size:.66rem;'+muted+';margin-top:4px">'+hidden+' fully paid credit entr'+(hidden>1?'ies':'y')+' not shown (see history).</div>':'')+paysHtml;
+ var old=document.getElementById('skcpOutModal');if(old)old.remove();
+ var modal=document.createElement('div');modal.id='skcpOutModal';
+ modal.style.cssText='position:fixed;inset:0;z-index:2147483646;display:flex;align-items:flex-end;justify-content:center;background:rgba(15,23,42,.5)';
+ modal.innerHTML='<div role="dialog" aria-modal="true" style="width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--modal-bg,var(--card-bg,#fff));color:var(--text,#172033);border-radius:20px 20px 0 0;padding:16px 16px 28px;box-shadow:0 -10px 40px rgba(15,23,42,.3)"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px"><div><b style="font-size:1rem">'+E(c.name)+' — Outstanding details</b><div style="font-size:.7rem;'+muted+'">'+E(c.phone||'')+'</div></div><button type="button" id="skcpOutClose" aria-label="Close" style="border:0;border-radius:50%;width:34px;height:34px;background:#fee2e2;color:#b91c1c;font-size:1.1rem;font-weight:800">✕</button></div>'+html+'</div>';
+ document.body.appendChild(modal);
+ modal.addEventListener('click',function(ev){if(ev.target===modal||ev.target.id==='skcpOutClose')modal.remove()});
+}
+window.skCPOutstandingOpen=skCPOutstandingOpen;
+document.addEventListener('click',function(ev){var t=ev.target&&ev.target.closest&&ev.target.closest('#skCPDetailView .skcl-sum, #skCPDetailView .skcp-detail-box > .skcp-detail-grid');if(t)skCPOutstandingOpen()});
 function cpApplyJobPayment(jobId,pay,date,mode,note){
  var jobs=cpJobs(),i=jobs.findIndex(function(j){return j&&String(j.id)===String(jobId)});if(i<0)return null;
  var j=jobs[i],now=new Date().toISOString(),rows=cpLedger();

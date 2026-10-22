@@ -78,7 +78,7 @@ function cleanLedger(){
     var v=Array.prototype.map.call(box.querySelectorAll('.skcp-mini b'),function(b){return b.textContent.trim()});
     var sum=box.querySelector('.skcl-sum'),txt=v.join('|');
     if(!sum){sum=document.createElement('div');sum.className='skcl-sum';box.insertBefore(sum,box.firstChild)}
-    if(sum.getAttribute('data-v')!==txt){sum.setAttribute('data-v',txt);sum.innerHTML='<small>Outstanding</small><b>'+esc(v[0]||'₹0')+'</b><span>Credit '+esc(v[1]||'₹0')+' · Paid '+esc(v[2]||'₹0')+'</span>'}
+    if(sum.getAttribute('data-v')!==txt){sum.setAttribute('data-v',txt);sum.innerHTML='<small>Outstanding</small><b>'+esc(v[0]||'₹0')+'</b><span>Credit '+esc(v[1]||'₹0')+' · Paid '+esc(v[2]||'₹0')+'</span><em class="skcl-tap">Tap for full details ›</em>'}
   }
   /* Customer QR + Send history as one row of links under the buttons.
      Our own two links call the same functions; the original buttons stay where their modules put them (hidden),

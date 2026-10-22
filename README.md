@@ -698,3 +698,6 @@ Data-safety fixes from an independent code review:
 
 ## V5.11.60 – EMI pay date always follows the schedule
 - An EMI row's pay date is now worked out from its own schedule (same EMI group, one month apart), so a row can never show the entry date (22/10) instead of its pay date (22/11). Applies to the customer history, the old history list and "Send history". Stored data is unchanged.
+
+## V5.11.61 – Outstanding box shows full details
+- On a customer's Credit page, tapping the Outstanding box opens "Outstanding details": totals (outstanding / credit / paid) and one card for everything still owed – credit or EMI sale bills (purchase total, advance, payments after sale, balance, EMI schedule), ledger-only credit / EMI (purchase amount, advance, months × monthly, each EMI Paid / Part paid / Pending, oldest cleared first), repair jobs (charge, discount, paid, balance) – plus the ledger payments received. Display only; no data changed.
