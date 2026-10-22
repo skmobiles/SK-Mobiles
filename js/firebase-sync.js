@@ -54,6 +54,10 @@
   /* V5.11.54: what each phone last synced is remembered on the phone itself (names start with sk_sync_meta so a restore never touches them) */
   const SYNC_BASE_KEY = "sk_sync_meta_base_v1";
   const BILL_HASH_KEY = "sk_sync_meta_bills_v1";
+  const DEVICE_KEY = "sk_sync_meta_device_v1";
+  const LETTER_KEY = "sk_sync_meta_letter_v1";
+  const LETTER_DOC = "skx_device_letters_v1";   /* only read / written by registerDeviceLetter, never synced like other data */
+  window.skDeviceLetter = function(){ try{ return localStorage.getItem(LETTER_KEY) || ""; }catch(e){ return ""; } };
 
   function readSyncMeta(){
     try { const x = JSON.parse(localStorage.getItem(SYNC_META_KEY) || "{}"); return x && typeof x === "object" ? x : {}; }
@@ -84,7 +88,7 @@
   function isSyncableKey(key) {
     if (!key) return false;
     // Skip only device-specific settings such as login/theme
-    if (key === SYNC_META_KEY || key === SYNC_BASE_KEY || key === BILL_HASH_KEY || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_appearance_settings" || key === "sk_bill_draft" || key === REPAIR_KEY || key === BILL_KEY) {
+    if (key === SYNC_META_KEY || key === SYNC_BASE_KEY || key === BILL_HASH_KEY || key === DEVICE_KEY || key === LETTER_KEY || key === LETTER_DOC || key === "sk_current_role_v1" || key === "sk_current_worker_id_v1" || key === "sk_theme" || key === "sk_appearance_settings" || key === "sk_bill_draft" || key === REPAIR_KEY || key === BILL_KEY) {
       /* V5.11.48: bills sync one by one (uploadBills); syncing the whole list too let one device overwrite the other's new bills. */
       return false;
     }
@@ -855,6 +859,30 @@
     }
   }
 
+  /* V5.11.55: every phone / PC gets its own bill-number letter once (first device: none, then B, C, D ...) */
+  async function registerDeviceLetter(){
+    try{
+      if(!auth?.currentUser || !db || localStorage.getItem(LETTER_KEY)) return;
+      let id = localStorage.getItem(DEVICE_KEY);
+      if(!id){ id = (typeof window.skUid === "function" ? window.skUid() : Date.now() + "-" + Math.random().toString(36).slice(2,6)); localStorage.setItem(DEVICE_KEY, id); }
+      const ref = db.collection("shops").doc(SHOP_ID).collection("data").doc(LETTER_DOC);
+      let letter = "";
+      await db.runTransaction(async tx => {
+        const snap = await tx.get(ref);
+        let m = {};
+        if(snap.exists){ try{ m = JSON.parse((snap.data() || {}).data || "{}") || {}; }catch(e){ m = {}; } }
+        if(m[id]){ letter = m[id]; return; }
+        const used = new Set(Object.keys(m).map(k => m[k]));
+        letter = "";
+        for(const c of "ABCDEFGHIJKLMNOPQRSTUVWXYZ"){ if(!used.has(c)){ letter = c; break; } }
+        if(!letter) return;
+        m[id] = letter;
+        tx.set(ref, { data: JSON.stringify(m), updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedAtMs: Date.now(), updatedBy: auth.currentUser.uid }, { merge: true });
+      });
+      if(letter) localStorage.setItem(LETTER_KEY, letter);
+    }catch(e){ console.warn("Device letter not set yet", e); }
+  }
+
   async function syncMissingLocalDataToCloud(snapshot) {
     if (!auth?.currentUser || !db || !remoteReady || applyingRemote) return;
     const remoteKeys = new Set(snapshot.docs.map(d => String(d.id)));
@@ -938,6 +966,7 @@
           for(const key of localWins) await syncKeyToCloud(key, true);
           await syncMissingLocalDataToCloud(snapshot);
           universalSyncStarted = true;
+          registerDeviceLetter();
           realtimeSyncStatus("🟢 Realtime Auto Sync: ON • All app data connected");
           if(hasChanges) refreshAllUI();
           return;
