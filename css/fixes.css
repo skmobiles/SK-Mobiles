@@ -1440,3 +1440,20 @@ html body .skcl-who small .skcl-alt{margin-left:12px!important;white-space:nowra
 /* V5.11.57: last-backup details in Storage Health */
 html body #skStorageHealthModal#skStorageHealthModal .sksh-bkset{margin-top:10px!important;padding-top:8px!important;border-top:1px solid var(--border,rgba(148,163,184,.3))!important}
 html body #skStorageHealthModal#skStorageHealthModal .sksh-ent{margin-top:4px!important;padding:6px 9px!important;font-size:.72rem!important;line-height:1.35!important;border-radius:9px!important;background:var(--surface-2,rgba(148,163,184,.12))!important;overflow-wrap:anywhere}
+
+/* V5.11.58: order names were dark on the dark background (the colour was inherited from the popup) */
+html body .sk-order-item-v39 .sk-order-title{color:var(--text,#1e293b)!important}
+html body .sk-order-item-v39 .sk-order-meta{color:var(--text-muted,#64748b)!important}
+
+/* V5.11.58: Orders | Repair Spares | Tools & Others tabs + manual order note */
+html body .skot-tabs{display:flex!important;gap:6px!important;margin:10px 0 12px!important;padding:4px!important;border-radius:16px!important;background:var(--pill-bg,rgba(148,163,184,.14))!important;border:1px solid var(--card-border,rgba(148,163,184,.3))!important}
+html body .skot-tab{flex:1 1 0!important;min-width:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;padding:8px 4px!important;border:0!important;border-radius:12px!important;background:transparent!important;color:var(--text-muted,#64748b)!important;font:inherit!important;cursor:pointer}
+html body .skot-tab span{font-size:1.05rem!important;line-height:1!important}
+html body .skot-tab b{font-size:.68rem!important;font-weight:800!important;line-height:1.15!important;text-align:center!important;white-space:normal!important}
+html body .skot-tab.active{background:var(--primary,#2563eb)!important;color:#fff!important;box-shadow:0 4px 12px rgba(37,99,235,.28)!important}
+html body .skot-manual{margin:0 0 12px!important;padding:10px!important;border-radius:16px!important;border:1px dashed var(--card-border,rgba(148,163,184,.5))!important;background:var(--pill-bg,rgba(148,163,184,.1))!important}
+html body .skot-mlabel{font-size:.74rem!important;font-weight:800!important;margin:0 0 8px!important;color:var(--text,#1e293b)!important}
+html body .skot-mrow{display:flex!important;gap:6px!important;align-items:stretch!important}
+html body .skot-mrow #skOtName{flex:1 1 auto!important;min-width:0!important}
+html body .skot-mrow #skOtQty{flex:0 0 60px!important;width:60px!important;text-align:center!important;padding-left:4px!important;padding-right:4px!important}
+html body .skot-add{flex:0 0 auto!important;padding:0 14px!important;border:0!important;border-radius:12px!important;background:var(--primary,#2563eb)!important;color:#fff!important;font-weight:800!important;font-size:.8rem!important;cursor:pointer}
