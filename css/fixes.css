@@ -1457,3 +1457,13 @@ html body .skot-mrow{display:flex!important;gap:6px!important;align-items:stretc
 html body .skot-mrow #skOtName{flex:1 1 auto!important;min-width:0!important}
 html body .skot-mrow #skOtQty{flex:0 0 60px!important;width:60px!important;text-align:center!important;padding-left:4px!important;padding-right:4px!important}
 html body .skot-add{flex:0 0 auto!important;padding:0 14px!important;border:0!important;border-radius:12px!important;background:var(--primary,#2563eb)!important;color:#fff!important;font-weight:800!important;font-size:.8rem!important;cursor:pointer}
+
+/* V5.11.61: tappable Outstanding box */
+#skCPDetailView .skcl-sum{cursor:pointer!important;position:relative}
+#skCPDetailView .skcl-sum .skcl-tap{display:block!important;font-style:normal!important;font-size:12px!important;font-weight:700!important;margin-top:6px!important;color:#c2410c!important}
+
+/* V5.11.61: remove dealer */
+.skdl2-row .skdl-del{flex:0 0 auto!important;margin-left:6px!important;border:0!important;background:rgba(220,38,38,.1)!important;color:#b91c1c!important;border-radius:10px!important;width:34px!important;height:34px!important;font-size:15px!important;padding:0!important}
+.skdl-del-full{width:100%!important;margin-top:8px!important;padding:10px!important;border:1px solid #fca5a5!important;border-radius:12px!important;background:#fee2e2!important;color:#b91c1c!important;font-weight:800!important}
+.skdl-hidlink{display:block!important;margin:12px auto 6px!important;border:0!important;background:none!important;color:#c2410c!important;font-weight:700!important;font-size:13px!important}
+.skdl-restore{flex:0 0 auto!important;border:1px solid #86efac!important;background:#dcfce7!important;color:#166534!important;border-radius:99px!important;padding:6px 12px!important;font-weight:800!important;font-size:12px!important}
