@@ -228,7 +228,9 @@ function wrapOpen(){
 function ledgerWho(){
   var w=document.querySelector('#skCreditLedgerPage.active .skcp-det-who');if(!w)return null;
   var b=w.querySelector('b');if(!b)return null;
-  var ph=(w.textContent||'').replace(b.textContent||'','');
+  /* V5.11.56: the address / Alt line added below the phone is not part of the phone (it made the customer key change every time -> the line was removed and added again = blinking) */
+  var cl=w.cloneNode(true),ad=cl.querySelectorAll('.skcm-addr');for(var i=0;i<ad.length;i++)ad[i].remove();
+  var ph=(cl.textContent||'').replace(b.textContent||'','');
   return {el:w,name:cleanName(b.textContent),phone:ph};
 }
 function decorate(){

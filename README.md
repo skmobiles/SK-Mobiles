@@ -680,3 +680,6 @@ Data-safety fixes from an independent code review:
 - New bills get ids `SK-B-<time>-<random>` (was the last 6-8 digits of the time, which could repeat); credit receipts/adjustments likewise.
 - Not done yet (part 2): a 30-day "deleted at" note for deletions and a time-based restore rule.
 - Bill numbers: each phone / PC gets its own letter once, when it first syncs online (the first device none, then B, C, D ... kept in a cloud note `skx_device_letters_v1` and on the device as `sk_sync_meta_letter_v1`). New bills on device B are numbered like SK-2210-005B, so two devices can never give the same number and a number given to a customer never changes. The daily sequence still counts the highest number of all devices. The letter is kept when numbers are normalised.
+
+## V5.11.56 – Credit page top bar blink
+- Fix: when a customer has an Alt number / address, the top bar of the Credit page blinked all the time. The app read the Alt line as part of the phone number, so the customer key kept changing and the line was removed and added again (144 changes in 3 s; now 3). The phone is now read without the Alt line, and the Alt number is shown after the phone with a space ("9385948418   Alt: 9441695965").

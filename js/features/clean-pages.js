@@ -57,13 +57,17 @@ function cleanLedger(){
   /* top bar: ← name / phone ⋮ */
   var who=view.querySelector('.skcp-det-who'),nb=who&&who.querySelector('b');
   var name=nb?nb.textContent.trim():'';
-  var phone=who?(who.textContent||'').replace(name,'').replace(/📞/g,'').trim().split(/\s{2,}|\n/)[0]:'';
-  var sig=name+'|'+phone;
+  /* V5.11.56: the address / Alt line (added by the customer page) is not part of the phone; the Alt number is shown after the phone with a space (before, they were glued: "9385948418Alt: 9441695965", and the bar blinked) */
+  var cl=who?who.cloneNode(true):null,addrEl=who&&who.querySelector('.skcm-addr'),alt='';
+  if(addrEl){var am=String(addrEl.getAttribute('data-t')||'').match(/Alt:\s*([^•]+)/);if(am)alt=am[1].trim()}
+  if(cl){var ad=cl.querySelectorAll('.skcm-addr');for(var i=0;i<ad.length;i++)ad[i].remove()}
+  var phone=cl?(cl.textContent||'').replace(name,'').replace(/📞/g,'').trim().split(/\s{2,}|\n/)[0]:'';
+  var sig=name+'|'+phone+'|'+alt;
   if(!bar){bar=document.createElement('div');bar.className='skcl-bar';title.appendChild(bar)}
   if(bar.getAttribute('data-sig')!==sig){
     bar.setAttribute('data-sig',sig);
     bar.innerHTML='<button type="button" class="skcl-ib skcl-back" aria-label="Back to customers">'+IC.back+'</button>'+
-      '<div class="skcl-who"><b>'+esc(name)+'</b><small>'+esc(phone)+'</small></div>'+
+      '<div class="skcl-who"><b>'+esc(name)+'</b><small>'+esc(phone)+(alt?'<span class="skcl-alt">Alt: '+esc(alt)+'</span>':'')+'</small></div>'+
       '<button type="button" class="skcl-ib skcl-more" aria-label="More options">'+IC.more+'</button>';
     bar.querySelector('.skcl-back').onclick=function(){closeMenu();if(window.skCPBackToList)window.skCPBackToList()};
     bar.querySelector('.skcl-more').onclick=function(e){e.stopPropagation();if(menuEl)closeMenu();else openMenu(this,view)};
