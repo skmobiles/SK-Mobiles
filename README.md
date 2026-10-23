@@ -722,3 +722,6 @@ Data-safety fixes from an independent code review:
 - Old entries: when a Worker edits or deletes a credit / payment entry older than 7 days, the Admin PIN is asked (Admin login is not asked). Wrong PINs use the same lockout as login.
 - Outstanding details page: "Next due date / Promised date" strip with 📅 Set / Change (uses the existing due-date override `skx_credit_due_override_v1`, so reminders and OVERDUE follow it).
 - Recycle Bin, Compatible Models and Warranty Tracker: info chip + content inside a card (same look as the other pages).
+
+## V5.11.66 – "Updated" dot
+- New `js/features/whats-new.js`: after the app updates, a soft glowing blue dot sits on the version badge (home header). It stays until the badge is tapped and "What's new" is read once, then it goes away until the next update. The seen version is stored per phone in `dv_seen_version` (not synced). For each release add its notes to `NOTES` in that file.

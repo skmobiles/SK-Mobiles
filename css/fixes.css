@@ -1533,3 +1533,18 @@ html body #skRecycleBinModal#skRecycleBinModal > .modal-sheet > p,html body #mod
 html body #skRecycleBinModal#skRecycleBinModal #recycleBinItemsContainer,html body #modelsModal#modelsModal #modalModelsContainer,html body #skWarrantyModal#skWarrantyModal #skWarBody{background:var(--card-bg,#fff)!important;border:1px solid var(--card-border,#e2e8f0)!important;border-radius:16px!important;padding:12px!important;box-sizing:border-box!important;min-height:90px!important}
 html body #skRecycleBinModal#skRecycleBinModal #recycleBinItemsContainer:empty::before{content:"🗑️  Trash is empty";display:block;text-align:center;padding:22px 0;color:var(--text-muted,#64748b);font-weight:700}
 html body #skWarrantyModal#skWarrantyModal #skWarBody{margin-top:10px!important}
+
+/* V5.11.66: "updated" dot on the version badge + What's new popup */
+html body .sk-home-ver{position:relative!important;cursor:pointer!important}
+html body .sk-home-ver.sk-has-update::after{content:""!important;position:absolute!important;top:-4px!important;right:-5px!important;width:10px!important;height:10px!important;border-radius:50%!important;background:#2563eb!important;box-shadow:0 0 0 2px rgba(37,99,235,.25),0 0 9px 3px rgba(37,99,235,.75)!important;animation:skwnPulse 1.8s ease-in-out infinite!important}
+@keyframes skwnPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.7}}
+html body #skWhatsNew#skWhatsNew{position:fixed!important;inset:0!important;z-index:2147483646!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:16px!important;background:rgba(15,23,42,.5)!important;box-sizing:border-box!important}
+html body #skWhatsNew#skWhatsNew .skwn-card{width:min(420px,100%)!important;max-height:80vh!important;overflow:auto!important;background:var(--card-bg,#fff)!important;color:var(--text,#172033)!important;border:1px solid var(--card-border,#e2e8f0)!important;border-radius:20px!important;padding:16px!important;box-shadow:0 18px 50px rgba(15,23,42,.3)!important;box-sizing:border-box!important}
+html body #skWhatsNew#skWhatsNew .skwn-h{display:flex!important;gap:10px!important;align-items:center!important;margin-bottom:10px!important}
+html body #skWhatsNew#skWhatsNew .skwn-ic{width:38px!important;height:38px!important;border-radius:12px!important;display:flex!important;align-items:center!important;justify-content:center!important;background:rgba(37,99,235,.14)!important;font-size:1.2rem!important}
+html body #skWhatsNew#skWhatsNew .skwn-h b{display:block!important;font-size:1.05rem!important}
+html body #skWhatsNew#skWhatsNew .skwn-h small{display:block!important;font-size:.72rem!important;color:var(--text-muted,#64748b)!important}
+html body #skWhatsNew#skWhatsNew .skwn-v{font-weight:800!important;font-size:.82rem!important;margin:10px 0 4px!important}
+html body #skWhatsNew#skWhatsNew .skwn-v i{font-style:normal!important;font-size:.6rem!important;padding:2px 8px!important;border-radius:99px!important;background:rgba(37,99,235,.14)!important;color:#2563eb!important;margin-left:6px!important}
+html body #skWhatsNew#skWhatsNew ul{margin:0 0 0 18px!important;padding:0!important;font-size:.78rem!important;line-height:1.5!important}
+html body #skWhatsNew#skWhatsNew .skwn-ok{width:100%!important;margin-top:14px!important;border:0!important;border-radius:99px!important;padding:12px!important;background:#2563eb!important;color:#fff!important;font-weight:800!important;font-size:.95rem!important}
