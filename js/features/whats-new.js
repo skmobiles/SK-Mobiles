@@ -7,6 +7,7 @@
 'use strict';
 var SEEN='dv_seen_version';
 var NOTES={
+ '5.11.69':['Update dot is now a small dot inside the version box (no glow).'],
  '5.11.68':['Credit with no due date now becomes OVERDUE after 30 days. Change the days in Credit Reminders → EMI Reminder Settings (0 = off).'],
  '5.11.67':['Admin PIN can now be set / changed: crown icon → My Admin Profile → Admin PIN.'],
  '5.11.66':['Blue glowing dot on the version badge shows when the app has updated — tap it to read what changed.'],
