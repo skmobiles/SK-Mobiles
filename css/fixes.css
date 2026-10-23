@@ -1467,3 +1467,37 @@ html body .skot-add{flex:0 0 auto!important;padding:0 14px!important;border:0!im
 .skdl-del-full{width:100%!important;margin-top:8px!important;padding:10px!important;border:1px solid #fca5a5!important;border-radius:12px!important;background:#fee2e2!important;color:#b91c1c!important;font-weight:800!important}
 .skdl-hidlink{display:block!important;margin:12px auto 6px!important;border:0!important;background:none!important;color:#c2410c!important;font-weight:700!important;font-size:13px!important}
 .skdl-restore{flex:0 0 auto!important;border:1px solid #86efac!important;background:#dcfce7!important;color:#166534!important;border-radius:99px!important;padding:6px 12px!important;font-weight:800!important;font-size:12px!important}
+
+/* V5.11.64: Send history page */
+html body #skcpHistPage#skcpHistPage{position:fixed!important;inset:0!important;z-index:2147483645!important;display:flex!important;flex-direction:column!important;background:var(--page-bg,var(--bg,#f4f6fb))!important;color:var(--text,#172033)!important}
+html body #skcpHistPage#skcpHistPage .skcph-bar{flex:0 0 auto!important;display:flex!important;align-items:center!important;gap:12px!important;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px!important;background:var(--header-bg,var(--card-bg,#fff))!important;border-bottom:1px solid var(--card-border,#e2e8f0)!important}
+html body #skcpHistPage#skcpHistPage .skcph-bar b{display:block!important;font-size:1.05rem!important}
+html body #skcpHistPage#skcpHistPage .skcph-bar small{display:block!important;font-size:.74rem!important;color:var(--text-muted,#64748b)!important}
+html body #skcpHistPage#skcpHistPage .skcph-back{border:0!important;background:transparent!important;color:inherit!important;width:38px!important;height:38px!important;border-radius:50%!important;font-size:1.5rem!important;line-height:1!important}
+html body #skcpHistPage#skcpHistPage .skcph-body{flex:1 1 auto!important;overflow:auto!important;padding:14px!important;max-width:620px!important;width:100%!important;margin:0 auto!important;box-sizing:border-box!important}
+html body #skcpHistPage#skcpHistPage .skcph-card{background:var(--card-bg,#fff)!important;border:1px solid var(--card-border,#e2e8f0)!important;border-radius:16px!important;padding:12px!important;margin-bottom:12px!important}
+html body #skcpHistPage#skcpHistPage .skcph-h{font-weight:800!important;font-size:.8rem!important;margin:6px 2px 8px!important}
+html body #skcpHistPage#skcpHistPage .skcph-h small{font-weight:600!important;color:var(--text-muted,#64748b)!important}
+html body #skcpHistPage#skcpHistPage .skcph-list{display:grid!important;gap:8px!important}
+html body #skcpHistPage#skcpHistPage .skcph-row{display:flex!important;justify-content:space-between!important;gap:10px!important;align-items:center!important;background:var(--card-bg,#fff)!important;border:1px solid var(--card-border,#e2e8f0)!important;border-radius:14px!important;padding:10px 12px!important}
+html body #skcpHistPage#skcpHistPage .skcph-l{min-width:0!important}
+html body #skcpHistPage#skcpHistPage .skcph-l b{display:block!important;font-size:.84rem!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+html body #skcpHistPage#skcpHistPage .skcph-l small{display:block!important;font-size:.68rem!important;color:var(--text-muted,#64748b)!important}
+html body #skcpHistPage#skcpHistPage .skcph-tag{display:inline-block!important;font-size:.58rem!important;font-weight:800!important;padding:2px 8px!important;border-radius:99px!important;background:rgba(217,119,87,.16)!important;color:#c2410c!important;margin-bottom:3px!important}
+html body #skcpHistPage#skcpHistPage .skcph-tag.pay{background:rgba(22,163,74,.15)!important;color:#16a34a!important}
+html body #skcpHistPage#skcpHistPage .skcph-r{text-align:right!important;flex:0 0 auto!important;display:grid!important;gap:5px!important;justify-items:end!important}
+html body #skcpHistPage#skcpHistPage .skcph-r b{font-size:.92rem!important}
+html body #skcpHistPage#skcpHistPage .skcph-r b.pay{color:#16a34a!important}
+html body #skcpHistPage#skcpHistPage .skcph-ed{border:1px solid var(--card-border,#cbd5e1)!important;background:transparent!important;color:#c2410c!important;border-radius:99px!important;padding:4px 10px!important;font-size:.66rem!important;font-weight:800!important}
+html body #skcpHistPage#skcpHistPage .skcph-empty{padding:18px!important;text-align:center!important;color:var(--text-muted,#64748b)!important}
+html body #skcpHistPage#skcpHistPage .skcph-foot{flex:0 0 auto!important;padding:10px 14px calc(12px + env(safe-area-inset-bottom,0px))!important;background:var(--header-bg,var(--card-bg,#fff))!important;border-top:1px solid var(--card-border,#e2e8f0)!important}
+html body #skcpHistPage#skcpHistPage .skcph-send{width:100%!important;max-width:620px!important;display:block!important;margin:0 auto!important;border:0!important;border-radius:99px!important;padding:14px!important;background:#16a34a!important;color:#fff!important;font-weight:800!important;font-size:1rem!important}
+html body #skcpHistPage#skcpHistPage .skcph-sums{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px!important;margin-top:10px!important}
+html body #skcpHistPage#skcpHistPage .skcph-sum{text-align:center!important;border:1px solid var(--card-border,#e2e8f0)!important;border-radius:12px!important;padding:8px 4px!important}
+html body #skcpHistPage#skcpHistPage .skcph-sum b{display:block!important;font-size:1rem!important}
+html body #skcpHistPage#skcpHistPage .skcph-sum small{font-size:.62rem!important;color:var(--text-muted,#64748b)!important}
+html body #skcpHistPage#skcpHistPage .skcrg-dates{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+html body #skcpHistPage#skcpHistPage .skcrg-dates label{font-size:.7rem!important;font-weight:700!important;display:grid!important;gap:3px!important}
+html body #skcpHistPage#skcpHistPage .skcrg-dates input{width:100%!important;box-sizing:border-box!important;padding:9px!important;border:1px solid var(--card-border,#cbd5e1)!important;border-radius:10px!important;background:var(--input-bg,#fff)!important;color:inherit!important;font-size:.85rem!important}
+html body #skcpHistPage#skcpHistPage .skcrg-chips{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin-top:8px!important}
+html body #skcpHistPage#skcpHistPage .skcrg-chips button{border:1px solid var(--card-border,#cbd5e1)!important;background:transparent!important;color:inherit!important;border-radius:99px!important;padding:6px 12px!important;font-size:.74rem!important;font-weight:700!important}
