@@ -1517,3 +1517,13 @@ html body #skcpLogPage#skcpLogPage .sklg-m{min-width:0!important}
 html body #skcpLogPage#skcpLogPage .sklg-m b{display:block!important;font-size:.84rem!important}
 html body #skcpLogPage#skcpLogPage .sklg-m small{display:block!important;font-size:.68rem!important;color:var(--text-muted,#64748b)!important;overflow-wrap:anywhere!important}
 html body #skcpLogPage#skcpLogPage .sklg-empty{padding:24px 12px!important;text-align:center!important;color:var(--text-muted,#64748b)!important}
+
+/* V5.11.64: old-style pages brought into the app style (batch 1) */
+html body #skWorkerEditModal#skWorkerEditModal > .modal-sheet{background:var(--card-bg,#fff)!important;border:1px solid var(--card-border,#e2e8f0)!important;border-radius:20px!important;padding:16px!important;box-sizing:border-box!important}
+html body #skWorkerEditModal#skWorkerEditModal #skWorkerEditPhotoPreview{width:84px!important;height:84px!important;border-radius:50%!important;object-fit:cover!important;border:3px solid var(--primary,#2563eb)!important;margin:0 auto 8px!important;display:block!important}
+html body #skWorkerEditModal#skWorkerEditModal #skWorkerEditPhotoPreview:not([src]),html body #skWorkerEditModal#skWorkerEditModal #skWorkerEditPhotoPreview[src=""]{display:none!important}
+html body #skWorkerEditModal#skWorkerEditModal .skwk-ph{display:none!important;width:84px!important;height:84px!important;border-radius:50%!important;margin:0 auto 8px!important;align-items:center!important;justify-content:center!important;font-size:38px!important;background:rgba(37,99,235,.12)!important;border:3px solid var(--primary,#2563eb)!important}
+html body #skWorkerEditModal#skWorkerEditModal #skWorkerEditPhotoPreview:not([src])~.skwk-ph,html body #skWorkerEditModal#skWorkerEditModal #skWorkerEditPhotoPreview[src=""]~.skwk-ph{display:flex!important}
+html body #skWorkerEditModal#skWorkerEditModal #skWorkerEditPhoto{border:1px dashed var(--card-border,#cbd5e1)!important;background:transparent!important;border-radius:12px!important;padding:8px!important;font-size:.78rem!important;width:100%!important;box-sizing:border-box!important}
+html body #skWorkerEditModal#skWorkerEditModal #skWorkerEditPhoto::file-selector-button{border:0;background:var(--primary,#2563eb);color:#fff;border-radius:99px;padding:7px 14px;font-weight:700;margin-right:10px}
+html body #skRjForm#skRjForm{background:var(--card-bg,#fff)!important;border:1px solid var(--card-border,#e2e8f0)!important;border-radius:18px!important;padding:14px!important;margin:4px 0 14px!important;box-sizing:border-box!important}
