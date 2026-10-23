@@ -7,6 +7,7 @@
 'use strict';
 var SEEN='dv_seen_version';
 var NOTES={
+ '5.11.67':['Admin PIN can now be set / changed: crown icon → My Admin Profile → Admin PIN.'],
  '5.11.66':['Blue glowing dot on the version badge shows when the app has updated — tap it to read what changed.'],
  '5.11.65':['Credit limit / overdue warning when adding credit (limit in EMI Reminder Settings).','Workers need the Admin PIN to change or delete credit entries older than 7 days.','Promised date on the Outstanding details page.'],
  '5.11.64':['Outstanding details and Send history are now pages; edit entries before sending history.','Change log for credit / payment entries (customer ⋮ menu, Storage Health).','Duplicate credit / payment warning.'],
