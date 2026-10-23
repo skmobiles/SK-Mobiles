@@ -149,8 +149,10 @@ var LOG_KEY='sk_credit_reminder_log_v1';
 function remindLog(){var v=read(LOG_KEY,{});return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
 var DUE_KEY='skx_credit_due_override_v1';
 function dueMap(){var v=read(DUE_KEY,{});return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
+function autoDays(){var v=localStorage.getItem('skx_credit_autodue_days_v1');return v===null||v===''?30:Math.max(0,Math.round(num(v)))}
+function addDaysKey(k,n){var a=k.split('-'),d=new Date(Date.UTC(+a[0],+a[1]-1,+a[2]+n));return d.getUTCFullYear()+'-'+('0'+(d.getUTCMonth()+1)).slice(-2)+'-'+('0'+d.getUTCDate()).slice(-2)}
 function dueKeyFor(c){
-  var best='';
+  var best='',undated='';
   var man=dueMap()[c.key];if(man&&toKey(man))return toKey(man);
   /* V5.11.64: only EMI / credit rows that are still unpaid count (payments clear the oldest first), so a paid EMI never shows as overdue */
   var man=(c.entries||[]).filter(function(e){return String(e.source||'')!=='bill'&&!e.billId&&String(e.source||'')!=='repair-job'});
@@ -158,10 +160,15 @@ function dueKeyFor(c){
   man.filter(function(e){return (e.type==='emi'||e.type==='credit')&&String(e.source||'')!=='penalty'}).sort(function(a,b){var x=toKey(a.type==='emi'&&a.dueDate?a.dueDate:a.date)||'',y=toKey(b.type==='emi'&&b.dueDate?b.dueDate:b.date)||'';return x<y?-1:x>y?1:0}).forEach(function(e){
     var a=num(e.amount),use=Math.min(a,pool);pool-=use;
     if(a-use>0&&e.dueDate){var k=toKey(e.dueDate);if(k&&(!best||k<best))best=k}
+    else if(a-use>0){var k2=toKey(e.date);if(k2&&(!undated||k2<undated))undated=k2}
   });
   (c.bills||[]).forEach(function(x){
     if(num(x.b.balance)>0&&x.b.creditDueDate){var k=toKey(x.b.creditDueDate);if(k&&(!best||k<best))best=k}
+    else if(num(x.b.balance)>0){var k3=toKey(x.b.date);if(k3&&(!undated||k3<undated))undated=k3}
   });
+  /* V5.11.68: credit with no due date becomes due after N days (default 30; 0 = off) */
+  var n=autoDays();
+  if(!best&&undated&&n>0)best=addDaysKey(undated,n);
   return best;
 }
 function daysPending(c,t){
