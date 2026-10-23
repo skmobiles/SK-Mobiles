@@ -28,6 +28,7 @@ function openMenu(btn,view){
   var k=ledgerKey(view);
   var items=[
     ['Edit customer',IC.user,'#2563eb',function(){var w=view.querySelector('.skcp-det-who');if(w)w.click()}],
+    ['Change log',IC.more,'#7c3aed',function(){if(window.skCreditLogOpen)window.skCreditLogOpen(k,(view.querySelector('.skcl-who b')||{}).textContent||'')}],
     ['Close ledger',IC.close,'#64748b',function(){if(window.skCPBackToHome)window.skCPBackToHome()}],
     ['Delete customer',IC.trash,'#dc2626',function(){if(k&&window.skCPDeleteCustomer)window.skCPDeleteCustomer(k)}]
   ];

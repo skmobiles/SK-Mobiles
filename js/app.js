@@ -8454,6 +8454,7 @@ window.skCPSaveAction=function(){
  if(!name||amount<=0){showToast?.('Customer name and amount required');return;}
  if(type!=='payment'&&type!=='credit'){showToast?.('Invalid credit/payment action');return;}
  if(type==='credit'&&advance>amount){showToast?.('Advance cannot be more than amount');return;}
+ if(window.skCreditDupCheck&&!window.skCreditDupCheck(name,phone,type,amount))return;
 
  var bills=cpBills(),billIndex=billValue!==''&&/^\d+$/.test(String(billValue))?Number(billValue):null;
  var bill=billIndex!==null?bills[billIndex]:null;

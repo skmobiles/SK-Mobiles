@@ -221,7 +221,7 @@ function renderHealth(extra){
      '<div class="sksh-row"><span>Last backup</span><b>'+(m.lastBackupMs?esc(window.skStamp(m.lastBackupMs)):'Never')+'</b></div>'+
      '<div class="sksh-row"><span>Auto backup</span><b>First open + after '+CLOSE_HOUR+':00</b></div>'+
      '<div class="sksh-row"><span>History kept</span><b>Last '+KEEP_DAYS+' days</b></div>'+(extra?'<div class="sksh-note">'+esc(extra)+'</div>':'')+bkdHtml()+
-     '<div class="sksh-actions"><button type="button" class="submit-btn" onclick="skShBackup()">☁️ Backup now</button><button type="button" class="submit-btn" onclick="skShBackupPeek()">🔎 What is in the last backup?</button><button type="button" class="submit-btn" onclick="skShPrune()">🧹 Clean old backups</button></div></div>';
+     '<div class="sksh-actions"><button type="button" class="submit-btn" onclick="skShBackup()">☁️ Backup now</button><button type="button" class="submit-btn" onclick="skShBackupPeek()">🔎 What is in the last backup?</button><button type="button" class="submit-btn" onclick="skShPrune()">🧹 Clean old backups</button><button type="button" class="submit-btn" onclick="skCreditLogOpen()">📜 Credit change log</button></div></div>';
   h+='<div class="sksh-card"><h4>📊 Firebase free plan</h4>'+
      '<div class="sksh-row"><span>Bills / repair jobs</span><b>'+bills+' / '+jobs+'</b></div>'+
      '<div class="sksh-row"><span>Reads per app open (approx.)</span><b>'+reads+'</b></div>'+
