@@ -121,6 +121,15 @@ function askAdminPin(done){
     else{var l2=S.recordFail();msg.textContent=l2>0?'Too many attempts. Try again in '+l2+'s':'Wrong PIN';f.elements.pin.value=''}
   });
 }
+window.skSaveAdminPin=function(){
+  var a=document.getElementById('skNewAdminPin'),b=document.getElementById('skNewAdminPin2'),t=function(m){if(typeof window.showToast==='function')window.showToast(m)};
+  if(localStorage.getItem('sk_current_role_v1')!=='admin'){t('🔒 Admin access only');return}
+  var v=(a&&a.value||'').trim();
+  if(!/^\d{4,12}$/.test(v)){t('PIN must be 4-12 digits');return}
+  if(v!==(b&&b.value||'').trim()){t('The two PINs do not match');return}
+  if(!window.skPinSec){t('PIN module not ready');return}
+  window.skPinSec.setRolePin('admin',v);a.value='';b.value='';t('✅ Admin PIN saved');
+};
 /* ---- viewer ---- */
 function fmtT(t){var d=new Date(t);if(isNaN(d))return '';var p=function(n){return String(n).padStart(2,'0')};return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes())}
 window.skCreditLogOpen=function(key,title){
