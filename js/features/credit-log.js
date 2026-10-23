@@ -58,6 +58,69 @@ window.skCreditDupCheck=function(name,phone,type,amount){
     return confirm('Same '+kind.toLowerCase()+' of '+money(amount)+' for '+name+' was added a few minutes ago.\n\nAdd it again?');
   }catch(e){return true}
 };
+
+/* ---- V5.11.65: risk warning when adding credit (overdue / above limit) ---- */
+var LIM='skx_credit_limit_v1';
+function digits(v){return String(v||'').replace(/\D/g,'')}
+function dmyIso(k){var a=String(k||'').split('-');return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:String(k||'')}
+window.skCreditLimit=function(){return Math.max(0,num(localStorage.getItem(LIM)))};
+window.skCreditRiskCheck=function(name,phone,type,amount){
+  if(type!=='credit')return true;
+  try{
+    var nm=String(name||'').trim().toLowerCase(),ph=digits(phone),list=typeof window.skCPGetCustomers==='function'?window.skCPGetCustomers():[];
+    var c=list.filter(function(x){return String(x.name||'').trim().toLowerCase()===nm&&digits(x.phone)===ph})[0];
+    if(!c||!(num(c.balance)>0))return true;
+    var msgs=[],info=window.skCreditOverdueInfo&&window.skCreditOverdueInfo(c.key);
+    if(info&&info.overdue)msgs.push(c.name+' already has an OVERDUE payment (was due '+dmyIso(info.due)+'). Outstanding now '+money(c.balance)+'.');
+    var L=window.skCreditLimit();
+    if(L>0&&num(c.balance)+num(amount)>L)msgs.push('With this credit the outstanding becomes '+money(num(c.balance)+num(amount))+', above your limit of '+money(L)+'.');
+    if(!msgs.length)return true;
+    return confirm('⚠ '+msgs.join('\n\n')+'\n\nAdd this credit anyway?');
+  }catch(e){return true}
+};
+/* limit field in EMI Reminder Settings */
+(function(){
+  function wire(){
+    var m=document.getElementById('skEmiReminderModal');if(!m||document.getElementById('skCreditLimitInput'))return;
+    var box=m.querySelector('.sk-v42-profile-box');if(!box)return;
+    var g=document.createElement('div');g.className='form-group';
+    g.innerHTML='<label class="form-label">Credit limit warning (₹) — 0 = off</label><input class="form-input" id="skCreditLimitInput" type="number" min="0" step="500" inputmode="numeric" placeholder="e.g. 10000"/><div style="font-size:.65rem;color:var(--text-muted);margin-top:4px;line-height:1.4">When a new credit would take a customer above this amount (or the customer already has an overdue payment) the app asks before adding.</div>';
+    box.insertBefore(g,box.querySelector('.submit-btn'));
+    var i=g.querySelector('input');i.value=window.skCreditLimit()||'';
+    i.addEventListener('change',function(){var v=Math.max(0,Math.round(num(i.value)));try{localStorage.setItem(LIM,String(v))}catch(e){}if(typeof window.showToast==='function')window.showToast(v?'Credit limit warning set to '+money(v):'Credit limit warning off')});
+  }
+  document.addEventListener('click',function(){setTimeout(wire,50)},true);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire();
+})();
+/* ---- V5.11.65: old credit / payment entries (older than 7 days) need the Admin PIN when a worker edits or deletes them ---- */
+var OLD_DAYS=7;
+function entryAgeDays(e){var d=new Date(String(e.date||'').length===10?e.date+'T00:00:00':e.date);if(isNaN(d)){var m=String(e.date||'').match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);if(m)d=new Date(+m[3],+m[2]-1,+m[1]);}if(isNaN(d))return 0;return Math.floor((Date.now()-d.getTime())/86400000)}
+window.skOldEntryGuard=function(id,go){
+  try{
+    if(window.__skOkId===String(id)){window.__skOkId=null;return true}
+    if(localStorage.getItem('sk_current_role_v1')!=='worker')return true;
+    var e=arr(LEDGER).filter(function(x){return String(x.id)===String(id)})[0];
+    if(!e||entryAgeDays(e)<=OLD_DAYS)return true;
+    askAdminPin(function(){window.__skOkId=String(id);if(go)go()});return false;
+  }catch(x){return true}
+};
+function askAdminPin(done){
+  var old=document.getElementById('skcpPinModal');if(old)old.remove();
+  var m=document.createElement('div');m.id='skcpPinModal';
+  m.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(15,23,42,.5)';
+  var inp='box-sizing:border-box;width:100%;padding:12px;border:1px solid var(--card-border,#cbd5e1);border-radius:12px;background:var(--input-bg,#fff);color:inherit;font-size:1rem;text-align:center;letter-spacing:.3em';
+  m.innerHTML='<form style="width:min(380px,100%);background:var(--card-bg,#fff);color:var(--text,#172033);border:1px solid var(--card-border,#cbd5e1);border-radius:18px;padding:16px;display:grid;gap:10px"><b>🔒 Admin PIN needed</b><div style="font-size:.76rem;color:var(--text-muted,#64748b)">This entry is older than '+OLD_DAYS+' days. Enter the Admin PIN to change or delete it.</div><input type="password" inputmode="numeric" autocomplete="off" name="pin" style="'+inp+'"/><div data-msg style="font-size:.74rem;color:#dc2626;min-height:1em"></div><div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" data-x style="padding:10px 16px;border:1px solid var(--card-border,#cbd5e1);border-radius:99px;background:transparent;color:inherit;font-weight:700">Cancel</button><button type="submit" style="padding:10px 18px;border:0;border-radius:99px;background:#2563eb;color:#fff;font-weight:800">Unlock</button></div></form>';
+  document.body.appendChild(m);
+  var f=m.querySelector('form'),msg=m.querySelector('[data-msg]');
+  setTimeout(function(){try{f.elements.pin.focus()}catch(e){}},80);
+  m.addEventListener('click',function(ev){if(ev.target===m||ev.target.hasAttribute('data-x'))m.remove()});
+  f.addEventListener('submit',function(ev){
+    ev.preventDefault();var S=window.skPinSec;if(!S){m.remove();done();return}
+    var lk=S.lockedSeconds?S.lockedSeconds():0;if(lk>0){msg.textContent='Too many attempts. Try again in '+lk+'s';return}
+    if(S.matchesRole('admin',f.elements.pin.value.trim())){S.recordSuccess();m.remove();done()}
+    else{var l2=S.recordFail();msg.textContent=l2>0?'Too many attempts. Try again in '+l2+'s':'Wrong PIN';f.elements.pin.value=''}
+  });
+}
 /* ---- viewer ---- */
 function fmtT(t){var d=new Date(t);if(isNaN(d))return '';var p=function(n){return String(n).padStart(2,'0')};return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes())}
 window.skCreditLogOpen=function(key,title){

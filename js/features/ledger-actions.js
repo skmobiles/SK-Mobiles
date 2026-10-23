@@ -24,6 +24,7 @@ function edit(id){close('skLaDetail');close('skLaMenu');if(typeof window.skCPEdi
 
 /* ---------- delete (through the Recycle Bin) ---------- */
 window.skLedgerDelete=function(id){
+  if(window.skOldEntryGuard&&!window.skOldEntryGuard(id,function(){window.skLedgerDelete(id)}))return;
   var L=arr(LEDGER),i=L.findIndex(function(e){return e&&String(e.id)===String(id)});
   if(i<0){toast('Entry not found');return}
   var e=L[i];

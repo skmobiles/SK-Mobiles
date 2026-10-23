@@ -7986,6 +7986,7 @@ function skCPRepairJobIdFromCredit(e){
 }
 window.skCPEditLedgerEntry=function(encodedId){
   var id=decodeURIComponent(String(encodedId||''));
+  if(window.skOldEntryGuard&&!window.skOldEntryGuard(id,function(){window.skCPEditLedgerEntry(encodedId)}))return;
   var ledger=cpLedger();
   var entry=ledger.find(function(e){return String(e.id||'')===id;});
   if(!entry){if(typeof showToast==='function')showToast('Credit/payment entry not found');return;}
@@ -8309,6 +8310,7 @@ function skCPOutstandingOpen(){
   '<div style="background:rgba(220,38,38,.1);border-radius:12px;padding:8px 4px"><b style="color:#dc2626">'+M(c.balance)+'</b><div style="font-size:.58rem;'+muted+'">OUTSTANDING</div></div>'+
   '<div style="background:rgba(100,116,139,.12);border-radius:12px;padding:8px 4px"><b>'+M(c.credits)+'</b><div style="font-size:.58rem;'+muted+'">CREDIT / EMI</div></div>'+
   '<div style="background:rgba(22,163,74,.12);border-radius:12px;padding:8px 4px"><b style="color:#16a34a">'+M(c.payments)+'</b><div style="font-size:.58rem;'+muted+'">PAID</div></div></div>'+
+  (function(){var inf=window.skCreditOverdueInfo&&window.skCreditOverdueInfo(c.key);if(!inf||!(Number(c.balance)>0))return '';var dd=inf.due?cpDateText(inf.due):'';return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--card-border,#e2e8f0);background:var(--card-bg,#fff);border-radius:14px;padding:10px 12px;margin-bottom:10px"><div><div style="font-size:.6rem;'+muted+'">'+(inf.manual?'PROMISED / DUE DATE':'NEXT DUE DATE')+'</div><b style="font-size:.9rem;color:'+(inf.overdue?'#dc2626':'inherit')+'">'+(dd||'Not set')+(inf.overdue?' • OVERDUE':'')+'</b></div><button type="button" data-promise="1" style="border:1px solid var(--card-border,#cbd5e1);background:transparent;color:#c2410c;border-radius:99px;padding:6px 12px;font-size:.7rem;font-weight:800">📅 '+(dd?'Change':'Set date')+'</button></div>'})()+
   '<div style="font-size:.7rem;font-weight:900;margin:4px 0 6px">WHAT IS OWED ('+cards.length+')</div>'+
   (cards.length?cards.map(function(x){return x.h}).join(''):'<div style="padding:14px;text-align:center;'+muted+'">Nothing is owed.</div>')+
   (Math.abs(diff)>=1?row('Other adjustments (discount etc.)',(diff>0?'':'− ')+M(Math.abs(diff))):'')+
@@ -8320,7 +8322,7 @@ function skCPOutstandingOpen(){
  document.body.appendChild(modal);
  modal.addEventListener('click',function(ev){
    if(ev.target===modal||ev.target.id==='skcpOutClose'){modal.remove();return}
-   var t=ev.target.closest&&ev.target.closest('[data-pen],[data-waive],[data-delpen]');
+   var t=ev.target.closest&&ev.target.closest('[data-pen],[data-waive],[data-delpen],[data-promise]');
    if(!t){
      var nv=ev.target.closest&&ev.target.closest('[data-bill],[data-job],[data-entry]');if(!nv)return;
      modal.remove();
@@ -8329,12 +8331,25 @@ function skCPOutstandingOpen(){
      else setTimeout(function(){skCPEditLedgerEntry(encodeURIComponent(nv.getAttribute('data-entry')))},60);
      return;
    }
-   if(t.hasAttribute('data-pen'))skCPPenaltyForm(t.getAttribute('data-pen'));
+   if(t.hasAttribute('data-promise'))skCPPromiseForm(c.key,c.name);
+   else if(t.hasAttribute('data-pen'))skCPPenaltyForm(t.getAttribute('data-pen'));
    else if(t.hasAttribute('data-waive'))skCPPenaltyWaive(t.getAttribute('data-waive'));
    else if(window.skLedgerDelete){modal.remove();window.skLedgerDelete(t.getAttribute('data-delpen'));setTimeout(function(){var c2=cpGetCustomers().find(function(x){return x.key===key});if(c2){cpOpenDetail(c2);skCPOutstandingOpen()}},300)}
  });
 }
 
+function skCPPromiseForm(key,name){
+ var info=window.skCreditOverdueInfo&&window.skCreditOverdueInfo(key),cur=info&&info.manual&&info.due?info.due:'';
+ var old=document.getElementById('skcpPromiseModal');if(old)old.remove();
+ var m=document.createElement('div');m.id='skcpPromiseModal';
+ m.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(15,23,42,.5)';
+ var inp='box-sizing:border-box;width:100%;padding:10px;border:1px solid var(--card-border,#cbd5e1);border-radius:10px;background:var(--input-bg,#fff);color:inherit;font-size:.9rem';
+ m.innerHTML='<form style="width:min(400px,100%);background:var(--card-bg,#fff);color:var(--text,#172033);border:1px solid var(--card-border,#cbd5e1);border-radius:18px;padding:16px;display:grid;gap:10px"><b>📅 Promised date • '+cpEsc(name)+'</b><div style="font-size:.74rem;color:var(--text-muted,#64748b)">The date the customer promised to pay. Reminders and the OVERDUE tag follow this date.</div><input type="date" name="d" value="'+cpEsc(cur)+'" style="'+inp+'"/><div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" data-x style="padding:10px 14px;border:1px solid var(--card-border,#cbd5e1);border-radius:99px;background:transparent;color:inherit;font-weight:700">Cancel</button>'+(cur?'<button type="button" data-clear style="padding:10px 14px;border:1px solid #fca5a5;border-radius:99px;background:#fee2e2;color:#b91c1c;font-weight:700">Remove</button>':'')+'<button type="submit" style="padding:10px 18px;border:0;border-radius:99px;background:#2563eb;color:#fff;font-weight:800">Save</button></div></form>';
+ document.body.appendChild(m);
+ function done(v){m.remove();if(window.skCrSetDue)window.skCrSetDue(encodeURIComponent(key),v);skCPOutstandingOpen()}
+ m.addEventListener('click',function(ev){if(ev.target===m||ev.target.hasAttribute('data-x'))m.remove();else if(ev.target.hasAttribute('data-clear'))done('')});
+ m.querySelector('form').addEventListener('submit',function(ev){ev.preventDefault();var v=ev.currentTarget.elements.d.value;if(!v){showToast?.('Choose a date');return}done(v)});
+}
 function skCPPenaltyRefresh(){
  var key=(typeof skCPSelectedKey!=='undefined')?skCPSelectedKey:'';
  try{skCPRender()}catch(e){}
@@ -8455,6 +8470,7 @@ window.skCPSaveAction=function(){
  if(type!=='payment'&&type!=='credit'){showToast?.('Invalid credit/payment action');return;}
  if(type==='credit'&&advance>amount){showToast?.('Advance cannot be more than amount');return;}
  if(window.skCreditDupCheck&&!window.skCreditDupCheck(name,phone,type,amount))return;
+ if(window.skCreditRiskCheck&&!window.skCreditRiskCheck(name,phone,type,amount))return;
 
  var bills=cpBills(),billIndex=billValue!==''&&/^\d+$/.test(String(billValue))?Number(billValue):null;
  var bill=billIndex!==null?bills[billIndex]:null;

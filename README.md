@@ -716,3 +716,9 @@ Data-safety fixes from an independent code review:
 - Credit Reminders: a customer's overdue date now ignores EMIs that are already paid (payments clear the oldest EMI first).
 - Phone navigation-bar colour: manifest `theme_color` / `background_color` changed from blue to the app's light colour (installed app picks it up after its next update / reinstall).
 - Old-style pages: Repair job form sits in a card; Add / Edit Worker has a photo placeholder and a styled photo button.
+
+## V5.11.65 – Credit guards + style batch 2
+- Adding a credit now asks first when the customer already has an OVERDUE payment, or when the new credit takes the outstanding above the shop's "Credit limit warning" (EMI Reminder Settings → Credit limit warning (₹), `skx_credit_limit_v1`, 0 = off). It only asks; the entry can still be added.
+- Old entries: when a Worker edits or deletes a credit / payment entry older than 7 days, the Admin PIN is asked (Admin login is not asked). Wrong PINs use the same lockout as login.
+- Outstanding details page: "Next due date / Promised date" strip with 📅 Set / Change (uses the existing due-date override `skx_credit_due_override_v1`, so reminders and OVERDUE follow it).
+- Recycle Bin, Compatible Models and Warranty Tracker: info chip + content inside a card (same look as the other pages).
