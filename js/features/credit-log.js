@@ -85,7 +85,12 @@ window.skCreditRiskCheck=function(name,phone,type,amount){
     var box=m.querySelector('.sk-v42-profile-box');if(!box)return;
     var g=document.createElement('div');g.className='form-group';
     g.innerHTML='<label class="form-label">Credit limit warning (₹) — 0 = off</label><input class="form-input" id="skCreditLimitInput" type="number" min="0" step="500" inputmode="numeric" placeholder="e.g. 10000"/><div style="font-size:.65rem;color:var(--text-muted);margin-top:4px;line-height:1.4">When a new credit would take a customer above this amount (or the customer already has an overdue payment) the app asks before adding.</div>';
-    box.insertBefore(g,box.querySelector('.submit-btn'));
+    var g2=document.createElement('div');g2.className='form-group';
+    g2.innerHTML='<label class="form-label">Auto overdue after (days) — 0 = off</label><input class="form-input" id="skAutoDueInput" type="number" min="0" step="1" inputmode="numeric" placeholder="30"/><div style="font-size:.65rem;color:var(--text-muted);margin-top:4px;line-height:1.4">Credit with no due date is treated as due this many days after it was given. Credit with a due date is not affected.</div>';
+    box.insertBefore(g2,box.querySelector('.submit-btn'));
+    var j=g2.querySelector('input'),sv=localStorage.getItem('skx_credit_autodue_days_v1');j.value=sv===null||sv===''?30:sv;
+    j.addEventListener('change',function(){var v=Math.max(0,Math.round(num(j.value)));try{localStorage.setItem('skx_credit_autodue_days_v1',String(v))}catch(e){}if(typeof window.showToast==='function')window.showToast(v?'Auto overdue after '+v+' days':'Auto overdue off')});
+    box.insertBefore(g,g2);
     var i=g.querySelector('input');i.value=window.skCreditLimit()||'';
     i.addEventListener('change',function(){var v=Math.max(0,Math.round(num(i.value)));try{localStorage.setItem(LIM,String(v))}catch(e){}if(typeof window.showToast==='function')window.showToast(v?'Credit limit warning set to '+money(v):'Credit limit warning off')});
   }

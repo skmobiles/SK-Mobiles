@@ -726,5 +726,8 @@ Data-safety fixes from an independent code review:
 ## V5.11.66 – "Updated" dot
 - New `js/features/whats-new.js`: after the app updates, a soft glowing blue dot sits on the version badge (home header). It stays until the badge is tapped and "What's new" is read once, then it goes away until the next update. The seen version is stored per phone in `dv_seen_version` (not synced). For each release add its notes to `NOTES` in that file.
 
+## V5.11.68 – Auto overdue
+- Credit with no due date is treated as due 30 days after it was given (setting `skx_credit_autodue_days_v1`, 0 = off; Credit Reminders → EMI Reminder Settings).
+
 ## V5.11.67 – Admin PIN setting
 - My Admin Profile (crown icon on Home) has an "Admin PIN" box: new PIN + repeat, 4-12 digits, saved hashed through `skPinSec.setRolePin('admin', …)`. Admin login only. (`skChangePin` existed but no screen used it.)
