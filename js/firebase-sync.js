@@ -34,6 +34,7 @@
   let auth, db, unsubscribeBills = null, unsubscribeAllData = null, unsubscribeRepairJobs = null, unsubscribeManagerPermissions = null;
   let remoteReady = false;
   let applyingRemote = false;
+  try{Object.defineProperty(window,'__skApplyingRemote',{get:function(){return applyingRemote},configurable:true})}catch(e){}
   let syncingLocal = false;
   let lastKnownBillIds = new Set();
   let syncTimer = null;

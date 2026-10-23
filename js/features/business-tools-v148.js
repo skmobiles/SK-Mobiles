@@ -152,8 +152,12 @@ function dueMap(){var v=read(DUE_KEY,{});return v&&typeof v==='object'&&!Array.i
 function dueKeyFor(c){
   var best='';
   var man=dueMap()[c.key];if(man&&toKey(man))return toKey(man);
-  (c.entries||[]).forEach(function(e){
-    if((e.type==='emi'||e.type==='credit')&&e.dueDate&&num(e.amount)>0){var k=toKey(e.dueDate);if(k&&(!best||k<best))best=k}
+  /* V5.11.64: only EMI / credit rows that are still unpaid count (payments clear the oldest first), so a paid EMI never shows as overdue */
+  var man=(c.entries||[]).filter(function(e){return String(e.source||'')!=='bill'&&!e.billId&&String(e.source||'')!=='repair-job'});
+  var pool=man.filter(function(e){return e.type==='payment'&&String(e.source||'')!=='repair-job-payment'}).reduce(function(a,e){return a+num(e.amount)},0);
+  man.filter(function(e){return (e.type==='emi'||e.type==='credit')&&String(e.source||'')!=='penalty'}).sort(function(a,b){var x=toKey(a.type==='emi'&&a.dueDate?a.dueDate:a.date)||'',y=toKey(b.type==='emi'&&b.dueDate?b.dueDate:b.date)||'';return x<y?-1:x>y?1:0}).forEach(function(e){
+    var a=num(e.amount),use=Math.min(a,pool);pool-=use;
+    if(a-use>0&&e.dueDate){var k=toKey(e.dueDate);if(k&&(!best||k<best))best=k}
   });
   (c.bills||[]).forEach(function(x){
     if(num(x.b.balance)>0&&x.b.creditDueDate){var k=toKey(x.b.creditDueDate);if(k&&(!best||k<best))best=k}

@@ -64,10 +64,26 @@ function statement(c){
   L.push('','Thank you 🙏');
   return L.join('\n');
 }
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
+function fresh(){
+  if(!cust)return null;
+  try{var f=window.skCPGetCustomers().filter(function(c){return c.key===cust.key})[0];if(f)cust=f}catch(e){}
+  return cust;
+}
 function renderSummary(){
-  var box=document.getElementById('skCPHistSummary');if(!box||!cust)return;
+  var box=document.getElementById('skCPHistSummary');if(!box||!fresh())return;
   var r=pick(cust),paid=r.ents.filter(function(e){return e.type==='payment'}).reduce(function(a,e){return a+num(e.amount)},0);
   box.innerHTML='<div class="skcph-sum"><b>'+r.bills.length+'</b><small>credit bills</small></div><div class="skcph-sum"><b>'+r.ents.length+'</b><small>entries</small></div><div class="skcph-sum"><b>'+money(paid)+'</b><small>payments</small></div>';
+  var L=document.getElementById('skCPHistList');if(!L)return;
+  var rows=[];
+  r.bills.forEach(function(x){var b=x.b;rows.push({k:sortKey(b.date),h:'<div class="skcph-row"><div class="skcph-l"><span class="skcph-tag">'+(b.payMode==='EMI'?'EMI bill':'Credit bill')+'</span><b>'+esc(b.model||'Bill')+'</b><small>'+esc(dmy(b.date))+' • Bill '+esc(b.billNo||b.id||'')+' • Balance '+money(b.balance)+'</small></div><div class="skcph-r"><b>'+money(b.price)+'</b><button type="button" class="skcph-ed" onclick="skCPHistOpenBill('+x.idx+')">Open ›</button></div></div>'})});
+  r.ents.forEach(function(e){
+    var pay=e.type==='payment',emi=e.type==='emi',dt=emi&&e.dueDate?e.dueDate:e.date,src=String(e.source||''),rj=src.indexOf('repair-job')===0;
+    var btn=rj&&e.repairJobId?'<button type="button" class="skcph-ed" onclick="skCPHistOpenJob(\''+esc(String(e.repairJobId))+'\')">Open ›</button>':(!rj?'<button type="button" class="skcph-ed" aria-label="Edit" onclick="skCPHistEdit(\''+encodeURIComponent(String(e.id||''))+'\')">✏️ Edit</button>':'');
+    rows.push({k:sortKey(dt),h:'<div class="skcph-row"><div class="skcph-l"><span class="skcph-tag'+(pay?' pay':'')+'">'+(pay?'Payment':(emi?'EMI':(e.source==='penalty'?'Penalty':'Credit')))+'</span><b>'+esc(String(e.note||e.details||(pay?'Payment':'Credit')).replace(/\s*•\s*Ledger only/ig,'').slice(0,60))+'</b><small>'+esc(dmy(dt))+(e.mode?' • '+esc(e.mode):'')+'</small></div><div class="skcph-r"><b class="'+(pay?'pay':'')+'">'+(pay?'− ':'')+money(e.amount)+'</b>'+btn+'</div></div>'});
+  });
+  rows.sort(function(a,b){return a.k<b.k?1:a.k>b.k?-1:0});
+  L.innerHTML=rows.length?rows.map(function(x){return x.h}).join(''):'<div class="skcph-empty">Nothing in this date range.</div>';
 }
 window.skCPHistSet=function(which,v){if(which==='from')from=v||'';else to=v||'';renderSummary()};
 window.skCPHistPreset=function(n){
@@ -75,30 +91,42 @@ window.skCPHistPreset=function(n){
   if(n==='all'){from='';to=''}else if(n==='month'){var s=new Date();s.setMonth(s.getMonth()-1);from=keyOf(s)}else if(n===0){from=to}else{var t=new Date();t.setDate(t.getDate()-n);from=keyOf(t)}
   var f=document.getElementById('skCPHistFrom'),t2=document.getElementById('skCPHistTo');if(f)f.value=from;if(t2)t2.value=to;renderSummary();
 };
+var watch=0,lastSig='';
+function closePage(){var m=document.getElementById('skcpHistPage');if(m)m.remove();if(watch){clearInterval(watch);watch=0}}
+window.skCPHistClose=closePage;
+window.skCPHistEdit=function(id){if(typeof window.skCPEditLedgerEntry==='function')window.skCPEditLedgerEntry(id)};
+window.skCPHistOpenBill=function(idx){closePage();setTimeout(function(){if(window.skCPViewBill)window.skCPViewBill(idx)},60)};
+window.skCPHistOpenJob=function(id){closePage();setTimeout(function(){if(window.skCPOpenRepairJob)window.skCPOpenRepairJob(id)},60)};
 function ensureModal(){
-  if(document.getElementById('skCPHistModal'))return;
-  var el=document.createElement('div');el.className='modal-overlay';el.id='skCPHistModal';
-  el.innerHTML='<div class="modal-sheet skpop skcph-sheet"><div class="modal-title"><span>📤 Send history</span><button class="modal-close-btn" onclick="toggleModal(\'skCPHistModal\',false)">✕</button></div>'+
-   '<div id="skCPHistWho" class="skcph-who"></div>'+
-   '<div class="skcrg-dates"><label>From<input type="date" id="skCPHistFrom" onchange="skCPHistSet(\'from\',this.value)"/></label><label>To<input type="date" id="skCPHistTo" onchange="skCPHistSet(\'to\',this.value)"/></label></div>'+
+  closePage();
+  var el=document.createElement('div');el.id='skcpHistPage';
+  el.innerHTML='<div class="skcph-bar"><button type="button" class="skcph-back" aria-label="Back" onclick="skCPHistClose()">‹</button><div><b>Send history</b><small id="skCPHistWho"></small></div></div>'+
+   '<div class="skcph-body"><div class="skcph-card"><div class="skcrg-dates"><label>From<input type="date" id="skCPHistFrom" onchange="skCPHistSet(\'from\',this.value)"/></label><label>To<input type="date" id="skCPHistTo" onchange="skCPHistSet(\'to\',this.value)"/></label></div>'+
    '<div class="skcrg-chips"><button type="button" onclick="skCPHistPreset(0)">Today</button><button type="button" onclick="skCPHistPreset(7)">7 days</button><button type="button" onclick="skCPHistPreset(\'month\')">1 month</button><button type="button" onclick="skCPHistPreset(\'all\')">All</button></div>'+
-   '<div id="skCPHistSummary" class="skcph-sums"></div>'+
-   '<div class="skcph-actions"><button type="button" class="submit-btn whatsapp-green" onclick="skCPHistSend()">📤 Send on WhatsApp</button></div></div>';
+   '<div id="skCPHistSummary" class="skcph-sums"></div></div>'+
+   '<div class="skcph-h">Entries in this period <small>(tap Edit to correct, then send)</small></div><div id="skCPHistList" class="skcph-list"></div></div>'+
+   '<div class="skcph-foot"><button type="button" class="skcph-send" onclick="skCPHistSend()">📤 Send on WhatsApp</button></div>';
   document.body.appendChild(el);
+  lastSig=localStorage.getItem('sk_credit_ledger_v1')+'|'+localStorage.getItem('sk_bills');
+  watch=setInterval(function(){
+    if(!document.getElementById('skcpHistPage')){clearInterval(watch);watch=0;return}
+    var sg=localStorage.getItem('sk_credit_ledger_v1')+'|'+localStorage.getItem('sk_bills');
+    if(sg!==lastSig){lastSig=sg;renderSummary()}
+  },600);
 }
 window.skCPHistSend=function(){
   if(!cust){toast('Customer not found');return}
   var d=digits(cust.phone);if(d.length>10)d=d.slice(-10);
   if(d.length!==10){toast('No phone number — opening WhatsApp without a number');d=''}
-  window.open('https://wa.me/'+(d?'91'+d:'')+'?text='+encodeURIComponent(statement(cust)),'_blank','noopener');
-  if(typeof window.toggleModal==='function')window.toggleModal('skCPHistModal',false);
+  fresh();window.open('https://wa.me/'+(d?'91'+d:'')+'?text='+encodeURIComponent(statement(cust)),'_blank','noopener');
+  closePage();
 };
 window.skCPSendHistory=function(){
   var c=currentCustomer();if(!c){toast('Customer not found');return}
   cust=c;ensureModal();
   var w=document.getElementById('skCPHistWho');if(w)w.textContent=c.name+(c.phone?' • '+c.phone:'');
   skCPHistPreset('all');
-  if(typeof window.toggleModal==='function')window.toggleModal('skCPHistModal',true);
+  renderSummary();
 };
 function inject(){
   var view=document.getElementById('skCPDetailView');if(!view||view.style.display==='none')return;

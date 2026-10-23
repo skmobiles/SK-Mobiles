@@ -707,3 +707,12 @@ Data-safety fixes from an independent code review:
 ## V5.11.63 – Outstanding details: cards open their page, popup in the centre
 - Each card in "Outstanding details" opens its own page: repair job → Repair Job details, sales bill → the bill, single credit entry → Edit credit (EMI and penalty cards keep their own buttons). Cards that open show "Open ›".
 - The popup now opens in the centre of the screen (was a bottom sheet).
+
+## V5.11.64 – Pages, change log, safer credit
+- Outstanding details is now a full page (‹ back, customer name, cards that open bill / repair job / entry). Send history is now a page too: pick From/To, the customer's bills and entries of that period are listed with ✏️ Edit (or Open for bills / jobs); the list refreshes after an edit and "Send on WhatsApp" sends the corrected data.
+- Fix: editing an EMI row no longer turns it into a plain Credit (the Edit form keeps type EMI).
+- New `js/features/credit-log.js`: every Credit-ledger entry added / edited / deleted on a phone is written to `skx_credit_log_v1` (synced). Viewer: customer ⋮ menu → Change log, and Storage Health → Credit change log. Changes arriving from the cloud / restore are not logged as local actions (`window.__skApplyingRemote` getter added in firebase-sync.js).
+- Duplicate warning: adding the same credit / payment amount for the same customer within 3 minutes asks "Add it again?".
+- Credit Reminders: a customer's overdue date now ignores EMIs that are already paid (payments clear the oldest EMI first).
+- Phone navigation-bar colour: manifest `theme_color` / `background_color` changed from blue to the app's light colour (installed app picks it up after its next update / reinstall).
+- Old-style pages: Repair job form sits in a card; Add / Edit Worker has a photo placeholder and a styled photo button.
