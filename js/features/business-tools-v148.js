@@ -203,6 +203,7 @@ function msgFor(r,lang){
   }
   return m;
 }
+window.skCreditOverdueInfo=function(key){try{var r=reminderRows().find(function(x){return x.key===key});return r?{due:r.due,overdue:r.overdue,balance:r.balance,manual:r.manual}:null}catch(e){return null}};
 window.skCreditRemind=function(encKey){
   var k=decodeURIComponent(encKey),r=reminderRows().find(function(x){return x.key===k});
   if(!r){toast('No pending balance');return}
